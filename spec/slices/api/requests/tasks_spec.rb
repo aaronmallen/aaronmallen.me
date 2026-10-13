@@ -556,6 +556,10 @@ RSpec.describe "API tasks", type: :request do
         .to match([include("title" => "Email the accountant", "list" => "next", "tags" => %w[admin money]), 201])
     end
 
+    it "starts the new task in backlog" do
+      expect(capture(title: "Email the accountant").fetch("stage")).to eq("backlog")
+    end
+
     it "stores the note it names on the new task" do
       expect(capture(title: "Email the accountant", note: "Ask about **Q3**")).to include("note" => "Ask about **Q3**")
     end
@@ -925,6 +929,43 @@ RSpec.describe "API tasks", type: :request do
     end
   end
 
+  describe "POST /api/v1/tasks/:id/stage" do
+    it "sets the stage of an open task" do
+      expect(act(create(:task).id, "stage", stage: "ready").fetch("stage")).to eq("ready")
+    end
+
+    it "sets the stage of a task in progress" do
+      staged = act(create(:task, :in_progress).id, "stage", stage: "ready")
+
+      expect(staged).to include("stage" => "ready", "status" => "in_progress")
+    end
+
+    it "lists and reads the stage" do
+      id = create(:task).id
+      act(id, "stage", stage: "ready")
+
+      expect([list.fetch("tasks").map { it.fetch("stage") }, read(id).fetch("stage")]).to eq([%w[ready], "ready"])
+    end
+
+    it "refuses a stage it does not know with a 422" do
+      expect([act(create(:task).id, "stage", stage: "doing").fetch("errors").keys, status]).to eq([%w[stage], 422])
+    end
+
+    %i[done canceled].each do |closed|
+      it "refuses to stage a #{closed} task with a 422 and leaves it in backlog", :aggregate_failures do
+        task = create(:task, closed)
+
+        expect([act(task.id, "stage", stage: "ready").fetch("errors"), status])
+          .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
+        expect(tasks.by_id(task.id).stage).to eq("backlog")
+      end
+    end
+
+    it "answers an unknown ID with a 404" do
+      expect([act(999_999, "stage", stage: "ready").fetch("message"), status]).to eq(["no task has the ID 999999", 404])
+    end
+  end
+
   describe "POST /api/v1/tasks/:id/reorder" do
     let!(:first) { create(:task, title: "first", position: 1) }
     let!(:second) { create(:task, title: "second", position: 2) }
@@ -1120,6 +1161,13 @@ RSpec.describe "API tasks", type: :request do
       moved = act(task.id, "move", list: "external")
 
       expect(unstamped(trusted(mcp_answer("move_task", id: task.id, list: "external")))).to eq(unstamped(moved))
+    end
+
+    it "stage as stage_task does" do
+      task = create(:task)
+      staged = act(task.id, "stage", stage: "ready")
+
+      expect(unstamped(trusted(mcp_answer("stage_task", id: task.id, stage: "ready")))).to eq(unstamped(staged))
     end
 
     it "reorder as reorder_task does" do

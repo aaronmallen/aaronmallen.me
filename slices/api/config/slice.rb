@@ -75,7 +75,8 @@ module API
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
       operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
       operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
-      operations.schedule_task operations.set_task_total operations.snooze_tasks operations.start_task
+      operations.schedule_task operations.set_task_total operations.snooze_tasks operations.stage_task
+      operations.start_task
       operations.unlink_task operations.wake_task
       repos.sprint_queries repos.task_comment_queries repos.task_queries repos.task_rule_queries
       repos.task_source_queries repos.time_report_queries
@@ -115,6 +116,7 @@ module API
       endpoints.snooze_inbox
       endpoints.snooze_inbox_row
       endpoints.snooze_mail_threads
+      endpoints.stage_task
       endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.tag_mail_threads

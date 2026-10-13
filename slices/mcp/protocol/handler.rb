@@ -201,6 +201,7 @@ module MCP
         Tools::SnoozeInbox,
         Tools::SnoozeInboxRow,
         Tools::SnoozeMailThreads,
+        Tools::StageTask,
         Tools::StartTask,
         Tools::SuggestEdits,
         Tools::SummarizeActivity,

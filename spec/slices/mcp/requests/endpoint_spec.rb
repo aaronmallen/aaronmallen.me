@@ -2373,6 +2373,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "snooze_inbox" => { messages: [1], snoozed_until: "2026-01-01T09:00" },
         "snooze_inbox_row" => { kind: "message", id: 1, snoozed_until: "2026-01-01T09:00" },
         "snooze_mail_threads" => { ids: [1], snoozed_until: "2026-01-01T09:00" },
+        "stage_task" => { id: 1, stage: "ready" },
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },

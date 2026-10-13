@@ -500,6 +500,16 @@ CREATE TYPE public.task_source_state AS ENUM (
 
 
 --
+-- Name: task_stage; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.task_stage AS ENUM (
+    'backlog',
+    'ready'
+);
+
+
+--
 -- Name: task_status; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -1055,6 +1065,7 @@ CREATE TABLE public.tasks (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     worked_seconds integer DEFAULT 0 NOT NULL,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(note, ''::text)), 'B'::"char"))) STORED,
+    stage public.task_stage DEFAULT 'backlog'::public.task_stage NOT NULL,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
@@ -7451,4 +7462,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261012050100_add_work_to_service_connections.rb'),
 ('20261013020000_create_mail_attachments.rb'),
 ('20261013030000_match_owner_identities_on_email.rb'),
-('20261013030100_name_the_provider_on_sign_ins.rb');
+('20261013030100_name_the_provider_on_sign_ins.rb'),
+('20261013041000_add_stage_to_tasks.rb');

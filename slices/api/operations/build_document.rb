@@ -39,6 +39,7 @@ module API
         ["move_task", "post", "/tasks/{id}/move", OK],
         ["reopen_task", "post", "/tasks/{id}/reopen", OK],
         ["mark_task_seen", "post", "/tasks/{id}/seen", OK],
+        ["stage_task", "post", "/tasks/{id}/stage", OK],
         ["reorder_task", "post", "/tasks/{id}/reorder", OK],
         ["schedule_task", "post", "/tasks/{id}/schedule", OK],
         ["pause_task", "post", "/tasks/{id}/pause", OK],

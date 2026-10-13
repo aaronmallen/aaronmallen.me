@@ -396,6 +396,7 @@ RSpec.describe "MCP untrusted text", type: :request do
         "save_task" => -> { { id: task.id, title: "Renamed" } },
         "schedule_task" => -> { { id: task.id, sprint_on: "" } },
         "set_task_total" => -> { { id: task.id, hours: 2 } },
+        "stage_task" => -> { { id: task.id, stage: "ready" } },
         "start_task" => -> { { id: task.id } },
         "tag_tasks" => -> { { ids:, tag: "ruby" } },
         "unlink_task" => -> { { id: task.id, other_id: linked_task.id } },

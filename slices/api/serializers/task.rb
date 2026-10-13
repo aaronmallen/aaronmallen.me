@@ -42,6 +42,7 @@ module API
           note: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
           list: Helpers::Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
+          stage: { type: "string", enum: Blog::Types::TaskStage.values, description: "an open task's board column" },
           sprint_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           position: Helpers::Schema::INTEGER.merge(
             description: "the task's place in the order the owner set; lower comes first, ties go to the lower id",

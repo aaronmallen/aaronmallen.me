@@ -208,6 +208,7 @@ module Blog
     TaskMove = Types::String.enum("up", "down")
     TaskOrigin = Types::String.enum("tasks", "today", "inbox")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
+    TaskStage = Types::String.enum("backlog", "ready")
     TaskSourceProvider = Types::String.enum("github", "linear")
     TaskSourceState = Types::String.enum(
       *ReachableTaskSourceState.values | ClosedTaskSourceState.values | GoneTaskSourceState.values,
