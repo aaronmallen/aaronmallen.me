@@ -24,7 +24,7 @@ module Admin
       private
 
       def body_html(body)
-        ::Tasks::RemoteImages.to_links(::Posts::Markdown.to_html(body)) unless body.strip.empty?
+        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body)) unless body.strip.empty?
       end
     end
   end

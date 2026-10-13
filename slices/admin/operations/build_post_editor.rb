@@ -45,7 +45,7 @@ module Admin
       private
 
       def counts(values, preview)
-        { read_time: preview[:read_time], words: ::Posts::Markdown.word_count(values[:body]) }
+        { read_time: preview[:read_time], words: ::Markdown.word_count(values[:body]) }
       end
 
       def edits(post)

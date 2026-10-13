@@ -19,7 +19,7 @@ module Admin
       def body_html(commit)
         body = Helpers::CommitMessage.body(commit.message)
 
-        ::Tasks::RemoteImages.to_links(::Posts::Markdown.to_html(body)) if body
+        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body)) if body
       end
     end
   end

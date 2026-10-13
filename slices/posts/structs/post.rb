@@ -51,7 +51,7 @@ module Posts
 
       private
 
-      def document = @document ||= Markdown::Document.new(body)
+      def document = @document ||= ::Markdown::Document.new(body)
 
       def publish_at = published_at ? Blog::TimeZone.input_value(published_at) : Blog::Constants::EMPTY_STRING
 

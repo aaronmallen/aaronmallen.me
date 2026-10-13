@@ -210,7 +210,7 @@ RSpec.describe "Feeds", type: :request do
 
       other = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/other']/content")
 
-      expect(other.text).to eq(Posts::Markdown.to_html("the other"))
+      expect(other.text).to eq(Markdown.to_html("the other"))
     end
 
     it "loads the notes for the whole page in one query" do
@@ -235,7 +235,7 @@ RSpec.describe "Feeds", type: :request do
     publish("hello", 1, body: "the *start*")
     get "/writing.atom"
 
-    expect(feed.at_xpath("/feed/entry/content").text).to eq(Posts::Markdown.to_html("the *start*"))
+    expect(feed.at_xpath("/feed/entry/content").text).to eq(Markdown.to_html("the *start*"))
   end
 
   it "has the summary the post carries" do
@@ -250,7 +250,7 @@ RSpec.describe "Feeds", type: :request do
     get "/writing.atom"
 
     expect(%w[title content].map { feed.at_xpath("/feed/entry/#{it}").text })
-      .to eq(["<b>bold</b> & more", Posts::Markdown.to_html("a <script>alert(1)</script> & b")])
+      .to eq(["<b>bold</b> & more", Markdown.to_html("a <script>alert(1)</script> & b")])
   end
 
   it "leaves out the summary when the body has no paragraph" do

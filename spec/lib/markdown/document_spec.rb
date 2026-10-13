@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Posts::Markdown::Document do
+RSpec.describe Markdown::Document do
   describe "#html" do
     it "renders a heading with its id and no anchor link" do
       expect(described_class.new("## Setup").html.strip).to eq(%(<h2 id="setup">Setup</h2>))

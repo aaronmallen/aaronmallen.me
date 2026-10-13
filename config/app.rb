@@ -16,11 +16,13 @@ require "blog/params_guard"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
 require "google"
+require "markdown"
 require "object_store"
 
 module Blog
   class App < Hanami::App
     autoloader.push_dir(root.join("lib/google"), namespace: Google)
+    autoloader.push_dir(root.join("lib/markdown"), namespace: Markdown)
     autoloader.push_dir(root.join("lib/object_store"), namespace: ObjectStore)
 
     config.inflections do |inflections|

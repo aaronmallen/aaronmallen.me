@@ -3,8 +3,8 @@
 require "commonmarker"
 require "sanitize"
 
-module Tasks
-  module Markdown
+module Markdown
+  module Note
     ARIA_LABEL = "aria-label"
     BOX = "input[type='checkbox']"
     CHECKBOX = "checkbox"

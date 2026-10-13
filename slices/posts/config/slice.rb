@@ -2,8 +2,6 @@
 
 module Posts
   class Slice < Hanami::Slice
-    autoloader.push_dir(Hanami.app.root.join("lib/posts"), namespace: Posts)
-
     config.no_auto_register_paths += %w[helpers]
 
     config.shared_app_component_keys += %w[honeybadger.agent]

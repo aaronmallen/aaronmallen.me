@@ -28,7 +28,7 @@ module Public
         private
 
         def expose_body(response, post)
-          response[:body_html] = ::Posts::Markdown.size_images(post.body_html) { photo_queries.sizes(it) }
+          response[:body_html] = ::Markdown.size_images(post.body_html) { photo_queries.sizes(it) }
           response[:headings] = post.headings
           response[:edits] = post_queries.edits_for_post(post.id)
         end

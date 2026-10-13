@@ -96,7 +96,7 @@ module Admin
           def read_time = @counts[:read_time]
 
           def read_time_attributes
-            { data: { editor_read_time: t(".read_time"), words_per_minute: ::Posts::Markdown::WORDS_PER_MINUTE } }
+            { data: { editor_read_time: t(".read_time"), words_per_minute: ::Markdown::WORDS_PER_MINUTE } }
           end
 
           def scheduling? = @preview[:time] > @now

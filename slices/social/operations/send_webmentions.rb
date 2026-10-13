@@ -101,7 +101,7 @@ module Social
       def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
 
       def links_in(post, source)
-        html = ::Posts::Markdown.to_html(post.body)
+        html = ::Markdown.to_html(post.body)
 
         Nokogiri::HTML5.parse(html).css(LINK_SELECTOR).filter_map { elsewhere(source, it["href"]) }.uniq
       end

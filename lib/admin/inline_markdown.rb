@@ -18,7 +18,7 @@ module Admin
 
     class << self
       def to_html(markdown, keep:)
-        runs = squish(collect(Commonmarker.parse(markdown.to_s, options: ::Posts::Markdown::OPTIONS), []))
+        runs = squish(collect(Commonmarker.parse(markdown.to_s, options: ::Markdown::Document::OPTIONS), []))
         return render(runs) if length(runs) <= keep
 
         "#{render(rstrip(take(runs, keep)))}#{Blog::Helpers::Truncation::MARK}"

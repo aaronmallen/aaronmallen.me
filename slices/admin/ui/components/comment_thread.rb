@@ -75,7 +75,7 @@ module Admin
 
           li(class: "comment", id: "#{@scope}-comment-#{id}", data: { "#{@scope}_comment": id, menu: menu(id) }) do
             head(comment)
-            MarkdownBody(source: comment.body, markdown: ::Tasks::Markdown, class: "markdown-body comment-body")
+            MarkdownBody(source: comment.body, markdown: ::Markdown::Note, class: "markdown-body comment-body")
           end
         end
 

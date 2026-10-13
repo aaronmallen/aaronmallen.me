@@ -34,7 +34,7 @@ module Public
             end
           end
 
-          def markdown(edit) = raw(safe(::Posts::Markdown.to_html(edit.note)))
+          def markdown(edit) = raw(safe(::Markdown.to_html(edit.note)))
 
           def note(edit) = div(class: "post-edit-note") { markdown(edit) }
 

@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Markdown
       class Preview < Action
-        RENDERERS = { "posts" => ::Posts::Markdown, "tasks" => ::Tasks::Markdown }.freeze
+        RENDERERS = { "posts" => ::Markdown, "tasks" => ::Markdown::Note }.freeze
 
         def handle(request, response)
           renderer = RENDERERS.fetch(request.params[:renderer]) { halt 404 }

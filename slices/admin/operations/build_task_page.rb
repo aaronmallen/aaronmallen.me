@@ -34,7 +34,7 @@ module Admin
       end
 
       def note_html(note)
-        html = ::Tasks::Markdown.to_html(note).strip
+        html = ::Markdown::Note.to_html(note).strip
 
         html unless html.empty?
       end

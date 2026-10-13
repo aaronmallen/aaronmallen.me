@@ -71,7 +71,7 @@ module Admin
 
           def problem
             Card(title: t(".problem")) do
-              MarkdownBody(source: @decision.problem, markdown: ::Tasks::Markdown, class: "markdown-body")
+              MarkdownBody(source: @decision.problem, markdown: ::Markdown::Note, class: "markdown-body")
             end
           end
 

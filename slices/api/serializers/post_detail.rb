@@ -41,7 +41,7 @@ module API
 
       def syndication_targets(post) = post.syndication_targets.to_a
 
-      def word_count(post) = ::Posts::Markdown.word_count(post.body)
+      def word_count(post) = ::Markdown.word_count(post.body)
     end
   end
 end

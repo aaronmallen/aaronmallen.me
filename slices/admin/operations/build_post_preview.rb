@@ -7,8 +7,8 @@ module Admin
         body = Blog::Types::Text[values[:body]]
 
         {
-          body_html: ::Posts::Markdown.to_html(body),
-          read_time: ::Posts::Markdown.read_time(body),
+          body_html: ::Markdown.to_html(body),
+          read_time: ::Markdown.read_time(body),
           tags: Blog::Types::TagList[Blog::Types::Text[values[:tags]]],
           time: publish_at(values) || now,
           title: Blog::Types::Text[values[:title]].strip,

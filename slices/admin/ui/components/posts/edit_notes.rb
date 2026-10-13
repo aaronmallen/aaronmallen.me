@@ -51,7 +51,7 @@ module Admin
           def item(edit)
             li(class: "edit-note", id: self.class.scope(edit.id)) do
               Moment(at: edit.created_at, class: "edit-note-time")
-              MarkdownBody(source: edit.note, markdown: ::Posts::Markdown)
+              MarkdownBody(source: edit.note, markdown: ::Markdown)
               edit_form(edit)
             end
           end

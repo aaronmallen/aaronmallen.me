@@ -89,7 +89,7 @@ module Public
         end
       end
 
-      def markdown(edit) = ::Posts::Markdown.to_html(edit.note)
+      def markdown(edit) = ::Markdown.to_html(edit.note)
 
       def notes(edits)
         return Blog::Constants::EMPTY_STRING if edits.empty?
