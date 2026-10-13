@@ -7,7 +7,7 @@ require "socket"
 module Social
   module Webmentions
     class Client
-      class Error < StandardError; end
+      class Error < Blog::ServiceError; end
       class Refused < Error; end
       class Unreachable < Error; end
 

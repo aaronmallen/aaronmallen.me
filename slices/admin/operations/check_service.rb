@@ -20,7 +20,7 @@ module Admin
 
       def account(client, credentials)
         Success(client.account(**credentials))
-      rescue Bluesky::Error, GitHub::Error, Google::Error, Linear::Error, Mastodon::Error => e
+      rescue Blog::ServiceError => e
         Failure[:refused, e.message]
       end
 

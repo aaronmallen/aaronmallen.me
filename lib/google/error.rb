@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Google
-  class Error < StandardError; end
+  class Error < Blog::ServiceError; end
 end

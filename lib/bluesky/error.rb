@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Bluesky
-  class Error < StandardError; end
+  class Error < Blog::ServiceError; end
 end
