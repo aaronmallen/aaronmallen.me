@@ -159,6 +159,7 @@ one.
 | [0152][0152] | Mirror Google events in a calendar slice and write every change back to Google | ![Active][active] | 2026-10-11 |
 | [0153][0153] | Update admin row actions and filters in place by fetch and morph, and let them need scripts | ![Active][active] | 2026-10-11 |
 | [0154][0154] | Draw admin row menus on the server when they open, and submit them by fetch and morph | ![Active][active] | 2026-10-11 |
+| [0155][0155] | Show mail HTML inline with its remote images, and clean it once at sync | ![Active][active] | 2026-10-12 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -314,6 +315,7 @@ one.
 [0152]: 0152-mirror-google-events-in-a-calendar-slice-and-write-every-change-back-to-google.md
 [0153]: 0153-update-admin-row-actions-and-filters-in-place-by-fetch-and-morph-and-let-them-need-scripts.md
 [0154]: 0154-draw-admin-row-menus-on-the-server-when-they-open-and-submit-them-by-fetch-and-morph.md
+[0155]: 0155-show-mail-html-inline-with-its-remote-images-and-clean-it-once-at-sync.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
