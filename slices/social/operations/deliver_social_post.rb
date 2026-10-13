@@ -98,7 +98,7 @@ module Social
         end
 
         Success(settle(social_post.id))
-      rescue Social::Error => e
+      rescue Social::Error, Bluesky::Error, Mastodon::Error => e
         social_post_mutations.record_delivery(social_post.id, account, error: e.message)
         Failure(SEND_FAILED)
       end

@@ -5,7 +5,7 @@ module Admin
     class CheckService < Blog::Operation
       include Deps[
         github: "github.client", google: "google.client", linear: "linear.client",
-        networks: "social.networks.all",
+        networks: "networks.all",
       ]
 
       def call(provider, credentials)
@@ -20,7 +20,7 @@ module Admin
 
       def account(client, credentials)
         Success(client.account(**credentials))
-      rescue GitHub::Error, Google::Error, Linear::Error, Social::Error => e
+      rescue Bluesky::Error, GitHub::Error, Google::Error, Linear::Error, Mastodon::Error => e
         Failure[:refused, e.message]
       end
 

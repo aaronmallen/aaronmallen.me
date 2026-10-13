@@ -9,7 +9,7 @@ module Social
     import keys: %w[operations.tag_ref], from: :analytics
 
     import keys: %w[
-      operations.claim_photo_keys operations.process_photo operations.read_photo operations.release_photos
+      operations.claim_photo_keys operations.read_photo operations.release_photos
       repos.photo_queries
     ], from: :media
 
@@ -22,7 +22,7 @@ module Social
     import keys: %w[operations.shorten_link repos.short_link_queries], from: :shares
 
     export %w[
-      networks.all operations.act_on_webmentions operations.check_link operations.check_network_fit
+      operations.act_on_webmentions operations.check_link operations.check_network_fit
       operations.compose_social_post operations.delete_person operations.delete_social_post
       operations.expand_for_network operations.list_target_accounts operations.lock_editable_social_post
       operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention

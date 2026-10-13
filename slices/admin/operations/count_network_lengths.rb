@@ -5,7 +5,7 @@ module Admin
     class CountNetworkLengths
       include Deps[
         expand_for_network: "social.operations.expand_for_network",
-        networks: "social.networks.all",
+        networks: "networks.all",
         resolve_mentions: "social.operations.resolve_mentions",
       ]
 

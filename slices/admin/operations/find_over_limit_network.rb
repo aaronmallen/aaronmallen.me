@@ -6,7 +6,7 @@ module Admin
       include Deps[
         expand_for_network: "social.operations.expand_for_network",
         list_networks: "operations.list_networks",
-        networks: "social.networks.all",
+        networks: "networks.all",
       ]
 
       def call(social_post, edit)

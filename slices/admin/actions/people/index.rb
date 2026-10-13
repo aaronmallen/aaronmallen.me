@@ -6,7 +6,7 @@ module Admin
       class Index < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
-          networks: "social.networks.all",
+          networks: "networks.all",
           person_queries: "social.repos.person_queries",
         ]
 

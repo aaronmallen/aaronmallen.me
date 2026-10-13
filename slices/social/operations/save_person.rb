@@ -36,7 +36,7 @@ module Social
         did = networks.fetch(BLUESKY).resolve(handle)
 
         did ? Success(did) : refused(UNRESOLVED)
-      rescue Social::Error
+      rescue Social::Error, Bluesky::Error, Mastodon::Error
         refused(UNREACHABLE)
       end
 

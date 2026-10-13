@@ -29,7 +29,7 @@ Hanami/ProviderTopLevelRequire:
 
 Hanami/SliceExports:
   ForbiddenExports:
-    - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader|networks\.all)\z)/
+    - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader)\z)/
 
 Hanami/SliceNamespace:
   Inflections:

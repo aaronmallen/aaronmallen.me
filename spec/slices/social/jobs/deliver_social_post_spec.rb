@@ -48,7 +48,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   def rkey(social_post, position)
     part = social_post.parts.find { it.position == position }
 
-    Social::Bluesky::Tid.for(part.id, part.created_at)
+    Bluesky::Tid.for(part.id, part.created_at)
   end
 
   def short_code(url) = Shares::Slice["repos.short_link_queries"].by_destination(url).code

@@ -113,6 +113,27 @@ RSpec.describe "Admin Bluesky connection", type: :request do
       expect(bluesky).to be_configured
     end
 
+    describe "posting as a new account with no restart" do
+      let(:written) { bluesky_writes.first }
+
+      before do
+        connect_bluesky
+        stub_bluesky
+        part = Data.define(:created_at, :id).new(created_at: Time.now, id: 1)
+        key = Social::Structs::PartKey.new(connection_id: 1, part:)
+        bluesky.post("See https://example.com #ruby", idempotency_key: key)
+      end
+
+      it "writes to the account" do
+        expect(written).to include("repo" => SocialNetworks::BLUESKY_DID)
+      end
+
+      it "marks the links and tags it finds" do
+        expect(written.dig("record", "facets").map { it.dig("features", 0, "$type") })
+          .to eq(%w[app.bsky.richtext.facet#link app.bsky.richtext.facet#tag])
+      end
+    end
+
     it "stops posting once the account disconnects" do
       connection = connect_bluesky
       post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token

@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class ListNetworks
-      include Deps["i18n", "settings", networks: "social.networks.all"]
+      include Deps["i18n", "settings", networks: "networks.all"]
 
       def call(selected: nil)
         Blog::Types::NetworkName.values.map { network(it, selected) }

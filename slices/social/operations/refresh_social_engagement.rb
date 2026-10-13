@@ -30,7 +30,7 @@ module Social
         return nil unless remote_id
 
         client(delivery).engagement(remote_id)
-      rescue Social::Error
+      rescue Social::Error, Bluesky::Error, Mastodon::Error
         nil
       end
 
