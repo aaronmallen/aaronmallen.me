@@ -9,6 +9,7 @@ module Admin
         THREAD = Blog::Types::RecordKind["mail_thread"]
 
         include Deps[
+          message_queries: "mail.repos.message_queries",
           person_queries: "social.repos.person_queries",
           record_link_queries: "links.repos.record_link_queries",
           save_draft: "mail.operations.save_draft",
@@ -32,13 +33,19 @@ module Admin
           show_open(request, response)
           show_compose(response, draft)
           show_sources(response, list[:account])
-          show_tasks(response)
+          show_marks(response)
         end
 
         def show_compose(response, draft)
           response[:senders] = send_mail.senders
           drafted = save_draft.values(response[:open]) unless draft
           response[:draft] = drafted ? { values: drafted, errors: Blog::Constants::EMPTY_HASH } : draft
+        end
+
+        def show_marks(response)
+          ids = [*response[:threads].rows.map(&:id), response[:open]&.id].compact.uniq
+          response[:reasons] = message_queries.reasons(ids)
+          response[:tasks] = record_link_queries.partner_ids(THREAD, ids, TASK)
         end
 
         def show_open(request, response)
@@ -54,11 +61,6 @@ module Admin
           response[:counts] = thread_queries.folder_counts(account:)
           response[:labels] = thread_queries.labels
           response[:unread] = thread_queries.unread_by_account
-        end
-
-        def show_tasks(response)
-          ids = [*response[:threads].rows.map(&:id), response[:open]&.id].compact.uniq
-          response[:tasks] = record_link_queries.partner_ids(THREAD, ids, TASK)
         end
       end
     end

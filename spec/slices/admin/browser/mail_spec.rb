@@ -53,4 +53,12 @@ RSpec.describe "Admin mail", type: :feature do
     expect(page).to have_css(".toast", text: "Marked 2 threads read")
     expect(read).to contain_exactly("Newer", "Older")
   end
+
+  it "moves the ticked rows as soon as a folder is picked from the bar", :aggregate_failures do
+    pick_all
+    expect(page).to have_no_css("#mail-bulk button[value='move']")
+    find("#mail-bulk select[name='to']").select("Spam")
+
+    expect(page).to have_css(".toast", text: "Moved 2 threads to Spam")
+  end
 end

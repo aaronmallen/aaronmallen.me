@@ -313,6 +313,31 @@ RSpec.describe "Admin mail", type: :request do
       end
     end
 
+    describe "the why chips" do
+      it "marks a row that waits in Waiting", :aggregate_failures do
+        create(:message, subject: "Hi there")
+        gmail(subject: "Quiet", status: "read")
+        get "/admin/mail"
+
+        expect(page.find(".mail-row", text: "Hi there")).to have_css(".mail-why", exact_text: "in waiting")
+        expect(page.find(".mail-row", text: "Quiet")).to have_no_css(".mail-why")
+      end
+
+      it "leaves the chip off a snoozed row" do
+        create(:message, subject: "Later", snoozed_until: Time.now + 86_400)
+        get "/admin/mail", folder: "snoozed"
+
+        expect(page.find(".mail-row", text: "Later")).to have_no_css(".mail-why")
+      end
+
+      it "names why the open thread waits" do
+        thread = create(:message, subject: "Hi there")
+        get "/admin/mail", thread: thread.id
+
+        expect(page.find(".mail-reader > .inbox-meta")).to have_css(".mail-why", exact_text: "contact form")
+      end
+    end
+
     describe "opening a thread" do
       let(:thread) { gmail(subject: "Hello", from_name: "Ada Lovelace", received_at: Time.now - 120) }
 
@@ -702,9 +727,9 @@ RSpec.describe "Admin mail", type: :request do
           create(:mail_label, mail_account_id: work.id, name: "Receipts")
           get "/admin/mail"
 
-          expect(page.all("form#mail-bulk select[name='to'] option").map(&:value)).to eq(%w[star spam])
+          expect(page.all("form#mail-bulk select[name='to'] option").map(&:value)).to eq(["", "star", "spam"])
           expect(page.all("form#mail-bulk select[name='label'] option").map(&:text))
-            .to eq(["#Receipts · aaron@work.example"])
+            .to eq(["Label…", "#Receipts · aaron@work.example"])
         end
       end
 

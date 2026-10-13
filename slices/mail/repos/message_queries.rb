@@ -24,6 +24,8 @@ module Mail
 
       def exist?(id) = mail_threads.by_pk(id).exist?
 
+      def reasons(ids) = waiting.where(id: ids).to_a.to_h { [it.id, it.reason] }
+
       def received_between(from:, to:, page:, status: nil)
         found = in_days(from, to)
         found = found.with_status(status) if status

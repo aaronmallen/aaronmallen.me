@@ -11,9 +11,9 @@ module Admin
             "label" => [ACT["label"], ".label_pick", ".label_as", "fa-solid fa-tag"],
           }.freeze
           FILED = [
-            [ACT["archive"], "fa-solid fa-box-archive", ".archive"],
-            [ACT["read"], "fa-regular fa-envelope-open", ".read"],
-            [ACT["unread"], "fa-regular fa-envelope", ".unread"],
+            [ACT["archive"], "fa-solid fa-box-archive", ".archive", nil],
+            [ACT["read"], nil, ".read", :gh],
+            [ACT["unread"], nil, ".unread", :gh],
           ].freeze
           ID = "mail-bulk"
           INBOX = Blog::Types::MailMove["inbox"]
@@ -24,10 +24,13 @@ module Admin
           prop :page, Blog::Types::Integer
           prop :labels, Blog::Types::Hash
           prop :chips, Blog::Types::Hash
+          prop :count, Blog::Types::Integer
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_mail), label: t(".label"), fields:,
-                    menu: path(:admin_mail_bulk_menu, **fields)) do |bar|
+            BulkBar(
+              id: ID, action: path(:admin_bulk_mail), label: t(".label"), fields:,
+              menu: path(:admin_mail_bulk_menu, **fields), all: t(".all", count: @count), hint: t(".hint"),
+            ) do |bar|
               @list[:folder] == TRASH ? trash(bar) : filed(bar)
             end
           end
@@ -35,11 +38,8 @@ module Admin
           private
 
           def choose(bar, name, options)
-            act, pick, label, icon = CHOICES.fetch(name)
-            div(class: "bulk-group") do
-              Select(name:, class: "bulk-field", aria: { label: t(pick) }, options:, selected: nil)
-              bar.act(act, icon:, label: t(label))
-            end
+            act, prompt, label, icon = CHOICES.fetch(name)
+            bar.choose(name, act, prompt: t(prompt), options:, icon:, label: t(label))
           end
 
           def data = { confirm: t(".confirm_delete_forever") }
@@ -47,7 +47,7 @@ module Admin
           def fields = { **@list, **Blog::Structs::Page.query(@page) }
 
           def filed(bar)
-            FILED.each { |act, icon, label| bar.act(act, icon:, label: t(label)) }
+            FILED.each { |act, icon, label, variant| bar.act(act, icon:, label: t(label), variant:) }
             choose(bar, "to", moves)
             labels = label_options
             choose(bar, "label", labels) if labels.any?

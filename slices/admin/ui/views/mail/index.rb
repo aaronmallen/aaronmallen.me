@@ -20,6 +20,7 @@ module Admin
           prop :list, Blog::Types::Hash
           prop :open, Blog::Types::Instance(ROM::Struct).optional
           prop :person, Blog::Types::Instance(ROM::Struct).optional
+          prop :reasons, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
           prop :senders, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :threads, Blog::Types::Instance(Blog::Structs::Paged)
@@ -81,7 +82,7 @@ module Admin
           def panes
             div(class: "mail-panes") do
               Card(class: "mail-list") do
-                Bulk(list: @list, page: @threads.number, labels: shown_labels, chips:)
+                Bulk(list: @list, page: @threads.number, labels: shown_labels, chips:, count: @threads.rows.size)
                 @threads.rows.empty? ? empty : rows
               end
               Card(class: "mail-pane") { reader }
@@ -95,7 +96,7 @@ module Admin
             form = account.provider == FORM
             Reader(
               thread: @open, person: @person, list: @list, chip: chips.fetch(account.id), form:, own: account.address,
-              task: @tasks[@open.id],
+              task: @tasks[@open.id], reason: @reasons[@open.id],
             ) { Reply(thread: @open, senders: @senders, list: @list, form:, account: account.name, draft: @draft) }
           end
 
@@ -105,7 +106,7 @@ module Admin
                 chip = chips.fetch(thread.mail_account_id) unless @list[:account]
                 Row(
                   thread:, list: @list, page: @threads.number, chip:, open: thread.id == @open&.id,
-                  task: @tasks[thread.id],
+                  task: @tasks[thread.id], waiting: @reasons.key?(thread.id),
                 )
               end
             end

@@ -14,6 +14,7 @@ module Admin
           prop :chip, Blog::Types::Array.optional
           prop :open, Blog::Types::Bool
           prop :task, Blog::Types::Integer.optional, default: nil
+          prop :waiting, Blog::Types::Bool, default: false
 
           def view_template
             div(id: "thread-#{@thread.id}", class: ["mail-row", ("unread" if unread?), ("snoozed" if snoozed?),
@@ -57,15 +58,20 @@ module Admin
             [*@thread.mail_labels, *@thread.tags].map(&:name).uniq - [Helpers::MailList.label(@list[:folder])]
           end
 
+          def marks
+            Mark(icon: "fa-regular fa-clock", text: t(".wakes", date: wake_day)) if snoozed?
+            span { t(".archived") } if @thread.archived
+            Mark(icon: "fa-solid fa-check", text: t(".task", id: @task), tone: "mail-task") if @task
+            Mark(icon: "fa-solid fa-inbox", text: t(".waiting"), tone: "mail-why") if @waiting && !snoozed?
+          end
+
           def menu_path = path(:admin_mail_menu, id: @thread.id, **@list, **Blog::Structs::Page.query(@page))
 
           def meta
             span(class: "mail-row-meta") do
               Account(chip: @chip) if @chip
-              span(class: "mail-task") { t(".task", id: @task) } if @task
               labels.each { |name| span(class: "mail-label") { "##{name}" } }
-              span { t(".wakes", date: l(Blog::TimeZone.today(@thread.snoozed_until), format: :medium)) } if snoozed?
-              span { t(".archived") } if @thread.archived
+              marks
             end
           end
 
@@ -82,6 +88,8 @@ module Admin
           end
 
           def unread? = @thread.status == UNREAD
+
+          def wake_day = l(Blog::TimeZone.today(@thread.snoozed_until), format: :medium)
         end
       end
     end

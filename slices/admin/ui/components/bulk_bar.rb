@@ -12,9 +12,21 @@ module Admin
         prop :label, Blog::Types::String
         prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :menu, Blog::Types::String.optional, default: nil
+        prop :all, Blog::Types::String.optional, default: nil
+        prop :hint, Blog::Types::String.optional, default: nil
 
         def act(value, icon:, label:, variant: nil, data: nil)
           Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) { label }
+        end
+
+        def choose(name, act, prompt:, options:, icon:, label:)
+          div(class: "bulk-group") do
+            Select(
+              name:, class: "bulk-field", aria: { label: prompt }, options: { "" => prompt, **options }, selected: "",
+              data: { bulk_choose: true },
+            )
+            act(act, icon:, label:)
+          end
         end
 
         def tagging(tag:, untag: nil)
@@ -46,7 +58,8 @@ module Admin
         def all
           label(class: "choice", hidden: true, data: { bulk_all: true }) do
             input(type: "checkbox", class: "check")
-            span { t(".all") }
+            span { @all || t(".all") }
+            span(class: "bulk-hint") { @hint } if @hint
           end
         end
 

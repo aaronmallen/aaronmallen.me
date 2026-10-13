@@ -3929,6 +3929,24 @@
       @apply hidden;
     }
   }
+
+  & .bulk-bar:not(:has([data-bulk-acts]:not([hidden]))) {
+    @apply mb-1 border-b border-line px-3 pt-2 pb-2.5 font-mono text-badge;
+
+    & > .choice {
+      @apply flex-1;
+    }
+  }
+
+  & .bulk-bar:has([data-bulk-acts]:not([hidden])) {
+    & .bulk-count {
+      @apply -order-1;
+    }
+
+    & .bulk-hint {
+      @apply hidden;
+    }
+  }
 }
 
 @utility mail-pane {
@@ -4098,6 +4116,14 @@
 
 @utility mail-task {
   @apply text-mk-green-text;
+}
+
+@utility mail-mark {
+  @apply inline-flex items-center gap-1.5;
+}
+
+@utility mail-why {
+  @apply text-mk-orange-text;
 }
 
 @utility mail-row {
@@ -6489,6 +6515,10 @@
 
 @utility bulk-acts {
   @apply ml-auto flex flex-wrap items-center gap-2;
+}
+
+@utility bulk-hint {
+  @apply ml-auto text-ink-muted;
 }
 
 @utility bulk-group {

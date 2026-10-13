@@ -1053,14 +1053,16 @@ en:
         attachments:
           label: "Attachments"
         bulk:
+          all: "Select all %{count}"
           archive: "Archive"
           confirm_delete_forever: "Delete the ticked threads forever? This cannot be undone."
           delete_forever: "Delete forever"
+          hint: "drag to a folder or label"
           label: "Ticked mail"
           label_as: "Label"
-          label_pick: "Label to add"
+          label_pick: "Label…"
           move: "Move"
-          move_to: "Move to"
+          move_to: "Move to…"
           moves:
             inbox: "Inbox"
             spam: "Spam"
@@ -1145,14 +1147,16 @@ en:
           spam: "Spam"
           trash: "Trash"
         reader:
+          earlier:
+            one: "%{count} earlier message · %{names}"
+            other: "%{count} earlier messages · %{names}"
+          you: "you"
+        reader_acts:
+          archive: "Archive"
           confirm_delete: "Delete this thread? This cannot be undone."
           confirm_delete_forever: "Delete forever?"
           delete: "Delete"
           delete_forever: "Delete forever"
-          earlier:
-            one: "%{count} earlier message · %{names}"
-            other: "%{count} earlier messages · %{names}"
-          archive: "Archive"
           gmail: "Gmail"
           mark_read: "Mark read"
           mark_unread: "Mark unread"
@@ -1162,7 +1166,6 @@ en:
           star: "Star"
           unstar: "Unstar"
           wake: "Wake"
-          you: "you"
         reply:
           body: "Write a reply…"
           by_email: "sent from the contact form · the reply goes out by email"
@@ -1182,6 +1185,7 @@ en:
           task: "task #%{id}"
           to: " to %{address}"
           unread_mark: "Unread: "
+          waiting: "in waiting"
           wakes: "wakes %{date}"
         send_button:
           key: "⌘↵"

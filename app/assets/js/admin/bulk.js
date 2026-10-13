@@ -2,6 +2,7 @@ import { fresh } from "./fresh.js";
 
 const ACTS = "[data-bulk-acts]";
 const ALL = "[data-bulk-all]";
+const CHOOSE = "[data-bulk-choose]";
 const COUNT = "[data-bulk-count]";
 const FORM = "form[data-bulk]";
 const TOGGLE = "[data-bulk-toggle]";
@@ -12,6 +13,7 @@ let bound = false;
 export function setupBulk(root = document) {
   for (const form of root.querySelectorAll(FORM)) {
     form.querySelector(ALL).hidden = false;
+    for (const choose of form.querySelectorAll(CHOOSE)) choose.nextElementSibling.hidden = true;
     show(form);
   }
 
@@ -38,9 +40,13 @@ export function setupBulk(root = document) {
   bound = true;
   document.addEventListener("change", (event) => {
     const form = event.target.form;
-    if (form?.matches(FORM) && event.target !== all(form)) show(form);
+    if (!form?.matches(FORM) || event.target === all(form)) return;
+
+    show(form);
+    if (event.target.matches(CHOOSE) && event.target.value) form.requestSubmit(event.target.nextElementSibling);
   });
   window.addEventListener("pageshow", () => {
+    for (const choose of document.querySelectorAll(CHOOSE)) choose.value = "";
     for (const form of document.querySelectorAll(FORM)) show(form);
   });
 }

@@ -5,11 +5,9 @@ module Admin
     module Components
       module Mail
         class Reader < Component
-          ACT = Blog::Types::MessageBulkAction
-          GMAIL = "https://mail.google.com"
-          READ = Blog::Types::MessageStatus["read"]
+          REASON = "ui.components.inbox.message_item.reasons"
+          REASONS = Blog::Types::MailWaitReason.values.to_h { [it, "#{REASON}.#{it}"] }.freeze
           SPAM = Blog::Types::MessageStatus["spam"]
-          UNREAD = Blog::Types::MessageStatus["unread"]
 
           prop :thread, Blog::Types::Instance(ROM::Struct)
           prop :person, Blog::Types::Instance(ROM::Struct).optional
@@ -18,6 +16,7 @@ module Admin
           prop :form, Blog::Types::Bool
           prop :own, Blog::Types::String.optional
           prop :task, Blog::Types::Integer.optional, default: nil
+          prop :reason, Blog::Types::MailWaitReason.optional, default: nil
 
           def view_template
             article(id: Helpers::MailList.anchor(@thread.id), class: "mail-reader") do
@@ -27,36 +26,11 @@ module Admin
               earlier
               letter(messages.last)
               yield
-              div(class: "mail-acts") { actions }
+              ReaderActs(thread: @thread, list: @list, form: @form, task: @task)
             end
           end
 
           private
-
-          def actions = gone? ? gone_acts : acts
-
-          def acts
-            change(ACT["archive"], ".archive") unless @thread.archived
-            snoozed? ? wake : snooze
-            TaskButton(thread: @thread, task: @task, list: @list)
-            star
-            read
-            div(class: "mail-acts-far") { @form ? form_acts : gmail }
-          end
-
-          def change(act, label_key, variant: nil)
-            Form(action: path(:admin_change_mail, id: @thread.id, act:), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", variant:, small: true) { t(label_key) }
-            end
-          end
-
-          def delete(label_key, confirm_key)
-            Form(action: path(:admin_delete_mail, id: @thread.id), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", variant: :warn, small: true, data: { confirm: t(confirm_key) }) { t(label_key) }
-            end
-          end
 
           def earlier
             rest = messages[...-1]
@@ -68,21 +42,7 @@ module Admin
             end
           end
 
-          def form_acts
-            change(SPAM, ".spam", variant: :warn)
-            delete(".delete", ".confirm_delete")
-          end
-
           def from(message) = mine?(message) ? t(".you") : (message.from_name || message.reply_to)
-
-          def gmail = Button(variant: :gh, small: true, href: GMAIL, target: "_blank", rel: "noopener") { t(".gmail") }
-
-          def gone? = spam? || @thread.trashed
-
-          def gone_acts
-            spam? ? change(READ, ".not_spam") : change(ACT["inbox"], ".restore")
-            div(class: "mail-acts-far") { delete(".delete_forever", ".confirm_delete_forever") }
-          end
 
           def labels = [*@thread.mail_labels, *@thread.tags].map(&:name).uniq
 
@@ -104,32 +64,14 @@ module Admin
               Account(chip: @chip)
               span { @thread.reply_to }
               labels.each { |name| span(class: "mail-label") { "##{name}" } }
+              Mark(icon: "fa-solid fa-filter", text: t(REASONS.fetch(@reason)), tone: "mail-why") if @reason
               StatusPill(status: :spam) if spam?
             end
           end
 
           def mine?(message) = !@own.nil? && @own.casecmp?(message.reply_to.to_s)
 
-          def read = @thread.status == UNREAD ? change(READ, ".mark_read") : change(UNREAD, ".mark_unread")
-
-          def snooze
-            Inbox::Snooze(kind: "message", id: @thread.id, action: path(:admin_snooze_mail, id: @thread.id)) do
-              HiddenFields(values: @list)
-            end
-          end
-
-          def snoozed? = @thread.snoozed_until&.>(Time.now)
-
           def spam? = @thread.status == SPAM
-
-          def star = @thread.starred ? change(ACT["unstar"], ".unstar") : change(ACT["star"], ".star")
-
-          def wake
-            Form(action: path(:admin_wake_mail, id: @thread.id), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", small: true) { t(".wake") }
-            end
-          end
         end
       end
     end
