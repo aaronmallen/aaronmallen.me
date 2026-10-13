@@ -665,6 +665,14 @@ RSpec.describe "Admin mail", type: :request do
           expect(stored(form).tags.map(&:name)).to eq(%w[billing])
         end
 
+        it "tags a Gmail thread here alone with a new tag", :aggregate_failures do
+          thread = gmail(gmail_id: "t4")
+          bulk("tag", [thread], tag: "later")
+
+          expect(stored(thread).tags.map(&:name)).to eq(%w[later])
+          expect(a_request(:post, %r{\A#{threads}/}o)).not_to have_been_made
+        end
+
         it "deletes every ticked thread forever in Gmail and here", :aggregate_failures do
           bulk("delete", picked)
           follow_redirect!

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-11
 area: [db, admin, api, contact]
 issue: "#1122"
+amended: ["#1159"]
 tags: [mail, gmail, google, contact, messages, slices, sync, polling, inbox, snooze]
 ---
 
@@ -39,12 +40,13 @@ A migration moves every row of `messages` into a thread, with its tags, snooze a
 within five minutes. It never retries and catches up on its next run ([ADR 0012][0012]), and its outcome goes to
 `sync_states` ([ADR 0047][0047]).
 
-**Gmail holds a thread's state, and snooze stays here.**
+**Gmail holds a thread's state, and snooze and site tags stay here.**
 
 | State | Lives in |
 | --- | --- |
 | Read, starred, labels, spam, trash, archive | Gmail. An action here writes to Gmail, then to the mirror. |
 | Snooze | `snoozed_until` on the thread, as [ADR 0121][0121] keeps it on each record's table. |
+| Site tags | `mail_thread_tags`. A new tag on a Gmail thread is a private site tag and never reaches Gmail. |
 | Every state of a contact form thread | Our tables, since no Gmail stands behind it. |
 
 ## Alternatives
@@ -65,7 +67,8 @@ Mail reads as fast as any other admin page, and works when Google is down.
 The site polls Gmail around the clock whether or not mail came in. A change made in Gmail shows here only after the
 next poll, so for a few minutes the two can disagree.
 
-A snooze lives only here. Gmail and its apps show a snoozed thread in the inbox.
+A snooze lives only here. Gmail and its apps show a snoozed thread in the inbox. A site tag on a Gmail thread lives
+only here too, and Gmail never sees it.
 
 The contact form keeps its guards ([ADR 0043][0043]) and its page ([ADR 0044][0044]), and now writes a thread.
 

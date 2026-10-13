@@ -172,6 +172,14 @@ RSpec.describe "Admin mail menus", type: :request do
       expect(submenu("Label")).to have_field("tag", type: "text", visible: :all)
     end
 
+    it "offers a new tag for a Gmail thread on an account with no labels" do
+      thread = create(:message, mail_account_id: work.id)
+      get "/admin/mail/#{thread.id}/menu"
+
+      expect(fields(submenu("Label").find_field("tag", visible: :all).ancestor("form", visible: :all)))
+        .to include("act" => "tag")
+    end
+
     describe "from the inbox" do
       let(:thread) { create(:message, subject: "Ping") }
 

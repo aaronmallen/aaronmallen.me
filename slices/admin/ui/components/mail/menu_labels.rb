@@ -6,7 +6,6 @@ module Admin
       module Mail
         class MenuLabels < Component
           ACT = Blog::Types::MessageBulkAction
-          FORM = Blog::Types::MailProvider["contact_form"]
 
           prop :menu, Blog::Types::Instance(ContextMenu)
           prop :thread, Blog::Types::Instance(ROM::Struct)
@@ -15,11 +14,9 @@ module Admin
           prop :fields, Blog::Types::Hash
 
           def view_template
-            return if @labels.empty? && !form?
-
             @menu.sub(t(".label"), icon: "fa-solid fa-tag", hint: (held.size.to_s unless held.empty?)) do
               @labels.each { check(it) }
-              new_label if form?
+              new_label
             end
           end
 
@@ -34,8 +31,6 @@ module Admin
 
             @menu.check("#{Tag::PREFIX}#{name}", on:, action:, fields: { **@fields, **fields }, disabled: on && !tag)
           end
-
-          def form? = @account.provider == FORM
 
           def held = [*@thread.mail_labels, *@thread.tags].map(&:name).uniq
 
