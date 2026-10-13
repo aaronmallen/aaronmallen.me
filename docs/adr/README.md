@@ -160,6 +160,8 @@ one.
 | [0153][0153] | Update admin row actions and filters in place by fetch and morph, and let them need scripts | ![Active][active] | 2026-10-11 |
 | [0154][0154] | Draw admin row menus on the server when they open, and submit them by fetch and morph | ![Active][active] | 2026-10-11 |
 | [0155][0155] | Show mail HTML inline with its remote images, and clean it once at sync | ![Active][active] | 2026-10-12 |
+| [0156][0156] | Keep a board stage on tasks beside their status | ![Active][active] | 2026-10-12 |
+| [0157][0157] | Publish a project's tasks through its board flag | ![Active][active] | 2026-10-12 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -316,6 +318,8 @@ one.
 [0153]: 0153-update-admin-row-actions-and-filters-in-place-by-fetch-and-morph-and-let-them-need-scripts.md
 [0154]: 0154-draw-admin-row-menus-on-the-server-when-they-open-and-submit-them-by-fetch-and-morph.md
 [0155]: 0155-show-mail-html-inline-with-its-remote-images-and-clean-it-once-at-sync.md
+[0156]: 0156-keep-a-board-stage-on-tasks-beside-their-status.md
+[0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
