@@ -10,9 +10,9 @@ module Google
       TOKEN_URL = "https://oauth2.googleapis.com/token"
 
       class << self
-        def client(settings, connection_queries, change_connection)
-          Client.new(oauth: oauth(settings), connection_queries:, change_connection:)
-        end
+        def auth(settings) = Auth.new(client: oauth(settings))
+
+        def client(settings) = Client.new(oauth: oauth(settings))
 
         def oauth(settings)
           credentials = settings.google.values_at(:client_id, :client_secret)

@@ -10,7 +10,7 @@ module Mail
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
       USER_LABEL = "user"
 
-      include Deps[google: "google.google.client", gmail_mutations: "repos.gmail_mutations"]
+      include Deps[google: "google.client", gmail_mutations: "repos.gmail_mutations"]
 
       def backfill(address, page_token = nil)
         account = gmail_mutations.account(address)

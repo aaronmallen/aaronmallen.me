@@ -25,7 +25,7 @@ module Mail
       }.freeze
 
       include Deps[
-        google: "google.google.client",
+        google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
         message_mutations: "repos.message_mutations",
         message_queries: "repos.message_queries",

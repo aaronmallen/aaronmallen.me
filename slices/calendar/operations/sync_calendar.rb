@@ -15,7 +15,7 @@ module Calendar
       ].freeze
       WRITERS = %w[owner writer].freeze
 
-      include Deps[google: "google.google.client", calendar_mutations: "repos.calendar_mutations"]
+      include Deps[google: "google.client", calendar_mutations: "repos.calendar_mutations"]
 
       def call(today = Blog::TimeZone.today) = step synced(today - BEHIND_DAYS, today + AHEAD_DAYS)
 

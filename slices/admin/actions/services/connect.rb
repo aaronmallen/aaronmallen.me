@@ -10,7 +10,7 @@ module Admin
         include Deps[
           definition_queries: "services.repos.definition_queries",
           github: "github.auth",
-          google: "google.google.client",
+          google: "google.client",
           mastodon: "mastodon.auth",
           register_mastodon_app: "operations.register_mastodon_app",
         ]

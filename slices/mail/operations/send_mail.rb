@@ -10,7 +10,7 @@ module Mail
       SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
       include Deps[
-        google: "google.google.client",
+        google: "google.client",
         change_thread: "operations.change_thread",
         contract: "contracts.send_contract",
         gmail_mutations: "repos.gmail_mutations",

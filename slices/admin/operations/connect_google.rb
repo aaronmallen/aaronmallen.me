@@ -10,7 +10,7 @@ module Admin
         add_connection: "services.operations.add_connection",
         change_connection: "services.operations.change_connection",
         connection_queries: "services.repos.connection_queries",
-        google: "google.google.client",
+        google: "google.client",
         queue_backfill: "health.operations.queue_backfill",
       ]
 

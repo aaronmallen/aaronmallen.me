@@ -13,7 +13,7 @@ module Health
       READERS = %i[nights resting_heart_rates hrvs step_counts zone_minutes].freeze
       ZONES = %w[sumInFatBurnHeartZone sumInCardioHeartZone sumInPeakHeartZone].freeze
 
-      include Deps[google: "google.google.client", health_mutations: "repos.health_mutations"]
+      include Deps[google: "google.client", health_mutations: "repos.health_mutations"]
 
       def call(first, last) = step synced(first, last)
 

@@ -6,7 +6,7 @@ module Calendar
       include EventWrites
       include Deps[
         calendar_queries: "repos.calendar_queries", contract: "contracts.event_contract",
-        google: "google.google.client",
+        google: "google.client",
       ]
 
       def call(id, params, scope: nil)

@@ -21,7 +21,7 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def callback(**) = get("/admin/auth/google/callback", **)
 
-  def client = Google::Slice["google.client"]
+  def client = Hanami.app["google.client"]
 
   def connect_account(account_id: "me", expires_at: Time.now.to_i + 3600, revoked_at: nil, scopes: [sleep_scope])
     Services::Slice["repos.connection_mutations"].add(

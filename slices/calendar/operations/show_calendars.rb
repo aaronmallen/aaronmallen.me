@@ -5,7 +5,7 @@ module Calendar
     class ShowCalendars
       PRESETS = %w[all work].freeze
 
-      include Deps["repos.calendar_mutations", "repos.calendar_queries", google: "google.google.client"]
+      include Deps["repos.calendar_mutations", "repos.calendar_queries", google: "google.client"]
 
       def call(shown, preset: nil)
         ids = PRESETS.include?(preset) ? calendar_queries.listed.select { shown?(it, preset) }.map(&:id) : Array(shown)

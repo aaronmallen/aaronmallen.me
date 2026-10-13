@@ -10,7 +10,7 @@ module Admin
       include Deps[
         connection_queries: "services.repos.connection_queries",
         github: "github.auth",
-        google: "google.google.client",
+        google: "google.client",
         honeybadger: "honeybadger.agent",
         mastodon: "mastodon.auth",
         remove_connection: "services.operations.remove_connection",

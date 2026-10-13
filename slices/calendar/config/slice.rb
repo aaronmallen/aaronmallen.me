@@ -6,8 +6,6 @@ module Calendar
 
     import keys: %w[operations.record_sync_outcome], from: :record
 
-    import keys: %w[google.client], from: :google
-
     export %w[
       operations.create_event operations.delete_event operations.edit_event operations.move_event
       operations.show_calendars

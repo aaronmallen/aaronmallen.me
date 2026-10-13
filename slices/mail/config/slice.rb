@@ -6,8 +6,6 @@ module Mail
 
     import keys: %w[operations.record_sync_outcome], from: :record
 
-    import keys: %w[google.client], from: :google
-
     export %w[
       operations.act_on_messages operations.change_thread operations.create_message operations.delete_message
       operations.download_attachment operations.label_message operations.mark_message operations.save_draft

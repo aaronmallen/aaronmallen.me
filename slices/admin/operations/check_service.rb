@@ -4,7 +4,7 @@ module Admin
   module Operations
     class CheckService < Blog::Operation
       include Deps[
-        github: "record.github.client", google: "google.google.client", linear: "record.linear.client",
+        github: "record.github.client", google: "google.client", linear: "record.linear.client",
         networks: "social.networks.all",
       ]
 

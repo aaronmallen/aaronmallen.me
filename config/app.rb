@@ -15,9 +15,12 @@ require "blog/extensions/rom/sql/postgres/type_builder/extension"
 require "blog/params_guard"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
+require "google"
 
 module Blog
   class App < Hanami::App
+    autoloader.push_dir(root.join("lib/google"), namespace: Google)
+
     config.inflections do |inflections|
       inflections.acronym "CLI", "GitHub", "MCP", "OAuth", "PKCE", "UI", "URI"
     end
@@ -32,7 +35,7 @@ module Blog
     config.no_auto_register_paths += %w[helpers]
     config.shared_app_component_keys += %w[
       contracts.contributor_terms_contract contracts.review_range_contract contracts.search_query_contract
-      operations.read_visitor_address
+      google.auth google.client operations.read_visitor_address
     ]
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier

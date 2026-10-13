@@ -6,7 +6,7 @@ module Mail
   module Operations
     class DownloadAttachment < Blog::Operation
       include Deps[
-        google: "google.google.client",
+        google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
         thread_queries: "repos.thread_queries",
       ]

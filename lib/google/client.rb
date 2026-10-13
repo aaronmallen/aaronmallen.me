@@ -23,10 +23,9 @@ module Google
     UNAUTHORIZED = 401
     USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
-    def initialize(oauth:, connection_queries:, change_connection:)
+    def initialize(oauth:)
       @oauth = oauth
-      @connection_queries = connection_queries
-      @tokens = Tokens.new(oauth:, change_connection:)
+      @tokens = Tokens.new(oauth:, change_connection: method(:change_connection))
     end
 
     def account(**credentials)
@@ -87,6 +86,8 @@ module Google
 
     attr_reader :oauth
 
+    def change_connection(...) = services["operations.change_connection"].call(...)
+
     def connection(account)
       connection = connections.find { it.account_id == account }
       raise Error, format(NOT_CONNECTED, account) if connection.nil?
@@ -95,7 +96,7 @@ module Google
       connection
     end
 
-    def connections = @connection_queries.for(PROVIDER)
+    def connections = services["repos.connection_queries"].for(PROVIDER)
 
     def covers?(granted, wanted)
       granted.start_with?(wanted) || (FULL_SCOPES.key?(granted) && wanted.start_with?(FULL_SCOPES[granted]))
@@ -141,5 +142,7 @@ module Google
       token = narrow ? narrowed(connection, narrow) : @tokens.current(connection)
       fetch(connection, token, verb, url, options, narrow:)
     end
+
+    def services = Hanami.app.slices[:services]
   end
 end

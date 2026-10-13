@@ -99,8 +99,6 @@ module Admin
       repos.sign_in_queries
     ], from: :security
 
-    import keys: %w[google.client], from: :google
-
     import keys: %w[operations.queue_backfill repos.health_queries], from: :health
 
     import keys: %w[

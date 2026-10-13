@@ -8,7 +8,7 @@ module Mail
       LISTED = 500
 
       include Deps[
-        google: "google.google.client",
+        google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
         send_mail: "operations.send_mail",
       ]

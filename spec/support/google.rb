@@ -48,14 +48,8 @@ module Spec
 
     def set_up_google_client(credentials = { client_id: "google-id", client_secret: "google-secret" })
       allow(Hanami.app.settings).to receive(:google).and_return(credentials)
-      ::Google::Slice.start(:google)
-      client = ::Google::Providers::ClientProvider.client(
-        Hanami.app.settings, ::Google::Slice["services.repos.connection_queries"],
-        ::Google::Slice["services.operations.change_connection"],
-      )
-      %w[google.client google.google.client].each { replace_component(it, client) }
-      Admin::Slice.start(:google)
-      replace_component("google.auth", Admin::Auth::Google.new(client: ::Google::Providers::ClientProvider.oauth(Hanami.app.settings)))
+      replace_component("google.auth", ::Google::Providers::ClientProvider.auth(Hanami.app.settings))
+      replace_component("google.client", ::Google::Providers::ClientProvider.client(Hanami.app.settings))
     end
 
     def stub_gmail(history: [], history_id: "200", labels: [], profile: "100", signature: "", threads: {})

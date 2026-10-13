@@ -6,8 +6,6 @@ module Health
 
     import keys: %w[operations.record_sync_outcome repos.sync_state_queries], from: :record
 
-    import keys: %w[google.client], from: :google
-
     export %w[operations.queue_backfill repos.health_queries]
   end
 end
