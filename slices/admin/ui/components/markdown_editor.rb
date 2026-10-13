@@ -115,7 +115,7 @@ module Admin
         def uploads?
           return @uploads if defined?(@uploads)
 
-          @uploads = slice["media.store.client"].configured?
+          @uploads = slice["media_store.client"].configured?
         end
 
         def view_name = @view_name || "#{control_id}-view"

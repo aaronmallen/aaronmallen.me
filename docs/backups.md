@@ -109,6 +109,7 @@ Production reads every value from the environment. Set these where the worker ru
 | `BACKUP_STORE_SECRET_KEY` | Its secret key. |
 | `BACKUP_STORE_PATH_STYLE` | `true` for RustFS, which wants the bucket in the path rather than the host name. It defaults to `false`. |
 | `BACKUP_STORE_REGION` | The store's region. RustFS takes any, and it defaults to `us-east-1`. |
+| `BACKUP_STORE_READ_TIMEOUT` | How many seconds to wait for the store to answer. It defaults to `300`. |
 
 Restart the worker. It reads the settings once, at boot.
 

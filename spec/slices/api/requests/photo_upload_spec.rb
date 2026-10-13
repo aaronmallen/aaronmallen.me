@@ -98,7 +98,13 @@ RSpec.describe "API photo upload", type: :request do
     end
 
     it "waits 30 seconds for the store to answer" do
-      expect(Media::Slice["store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(30)
+      expect(Media::Slice["media_store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(30)
+    end
+
+    it "waits as long as its settings say" do
+      connect_media_store(read_timeout: 45)
+
+      expect(Media::Slice["media_store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(45)
     end
 
     it "takes base64 broken across lines" do

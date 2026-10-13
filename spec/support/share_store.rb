@@ -13,9 +13,8 @@ module ShareStore
   }.freeze
 
   def connect_share_store(**settings)
-    Shares::Slice.start(:share_store)
-    allow(Hanami.app.settings).to receive(:share_store).and_return(SETTINGS.merge(settings))
-    replace_component("share_store.client", Shares::Providers::StoreProvider.client(Hanami.app["settings"]))
+    store = Hanami.app.settings.share_store.merge(SETTINGS, settings)
+    replace_component("share_store.client", ObjectStore::Provider.build(store))
   end
 
   def share_store_url(key = nil) = [SETTINGS[:endpoint], SETTINGS[:bucket], key].compact.join("/")

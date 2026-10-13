@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module MediaStore
-  CLIENT_KEYS = %w[store.client media.store.client].freeze
   SETTINGS = {
     access_key: "access-key",
     bucket: "photos",
@@ -12,11 +11,8 @@ module MediaStore
   }.freeze
 
   def connect_media_store(**settings)
-    Media::Slice.start(:store)
-    allow(Hanami.app.settings).to receive(:media_store).and_return(SETTINGS.merge(settings))
-    client = Media::Providers::StoreProvider.client(Hanami.app["settings"])
-
-    CLIENT_KEYS.each { replace_component(it, client) }
+    store = Hanami.app.settings.media_store.merge(SETTINGS, settings)
+    replace_component("media_store.client", ObjectStore::Provider.build(store))
   end
 
   def media_store_url(key) = "#{SETTINGS[:endpoint]}/#{SETTINGS[:bucket]}/#{key}"

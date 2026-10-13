@@ -53,7 +53,7 @@ module Shares
         fields[:file].rewind
         client.put(share.key, fields[:file], content_type: share.content_type)
         Success(share)
-      rescue Store::Client::Error
+      rescue ObjectStore::Client::Error
         Failure([:unavailable])
       end
 

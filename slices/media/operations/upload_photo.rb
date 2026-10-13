@@ -7,7 +7,7 @@ module Media
     class UploadPhoto < Blog::Operation
       include Deps[
         "operations.detect_photo_type",
-        "store.client",
+        client: "media_store.client",
         contract: "contracts.photo_contract",
         photo_mutations: "repos.photo_mutations",
         processor: "operations.process_photo",
@@ -54,7 +54,7 @@ module Media
       def store(key, body, type)
         client.put(key, body, content_type: Blog::Types::PhotoType.mapping.fetch(type))
         Success(key)
-      rescue Store::Client::Error
+      rescue ObjectStore::Client::Error
         Failure([:unavailable])
       end
 

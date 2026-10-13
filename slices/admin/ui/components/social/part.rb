@@ -110,7 +110,7 @@ module Admin
             Button(variant: :gh, small: true, hidden: !@removable, data: { social_remove: "" }) { t(".remove") }
           end
 
-          def uploads? = slice["media.store.client"].configured?
+          def uploads? = slice["media_store.client"].configured?
         end
       end
     end

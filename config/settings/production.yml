@@ -24,6 +24,7 @@ share_store:
   bucket: aa.cool
   endpoint: <%= ENV["SHARE_STORE_ENDPOINT"].to_json %>
   path_style: <%= ENV["SHARE_STORE_PATH_STYLE"].to_json %>
+  read_timeout: <%= ENV["SHARE_STORE_READ_TIMEOUT"].to_json %>
   region: <%= ENV["SHARE_STORE_REGION"].to_json %>
   secret_key: <%= ENV["SHARE_STORE_SECRET_KEY"].to_json %>
 site:

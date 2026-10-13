@@ -46,6 +46,10 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  it "waits 300 seconds for the store to answer" do
+    expect(Shares::Slice["share_store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(300)
+  end
+
   it "answers a head request with no body", :aggregate_failures do
     file = share
     head "/#{file.code}", {}, "HTTP_HOST" => "shares.localhost"

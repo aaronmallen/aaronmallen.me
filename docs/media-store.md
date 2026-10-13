@@ -97,6 +97,7 @@ Production reads every value from the environment. Set these where the site runs
 | `MEDIA_STORE_SECRET_KEY` | Its secret key. |
 | `MEDIA_STORE_PATH_STYLE` | `true` for RustFS, which wants the bucket in the path rather than the host name. It defaults to `false`. |
 | `MEDIA_STORE_REGION` | The store's region. RustFS takes any, and it defaults to `us-east-1`. |
+| `MEDIA_STORE_READ_TIMEOUT` | How many seconds to wait for the store to answer. It defaults to `30`. |
 
 Restart the web process and the worker. Each reads the settings once, at boot.
 

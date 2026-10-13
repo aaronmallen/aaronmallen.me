@@ -13,9 +13,8 @@ module BackupStore
   def backup_store_url(key = nil) = [SETTINGS[:endpoint], SETTINGS[:bucket], key].compact.join("/")
 
   def connect_backup_store(**settings)
-    Backups::Slice.start(:backup_store)
-    allow(Hanami.app.settings).to receive(:backup_store).and_return(SETTINGS.merge(settings))
-    replace_component("backup_store.client", Backups::Providers::StoreProvider.client(Hanami.app["settings"]))
+    store = Hanami.app.settings.backup_store.merge(SETTINGS, settings)
+    replace_component("backup_store.client", ObjectStore::Provider.build(store))
   end
 
   def stub_backup_listing(*keys)

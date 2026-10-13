@@ -24,7 +24,7 @@ module Shares
           client.delete(share.key)
         end
         Success(share)
-      rescue Store::Client::Error
+      rescue ObjectStore::Client::Error
         Failure([:unavailable])
       end
     end

@@ -16,6 +16,7 @@ backup_store:
   bucket: <%= ENV["BACKUP_STORE_BUCKET"].to_json %>
   endpoint: <%= ENV["BACKUP_STORE_ENDPOINT"].to_json %>
   path_style: <%= ENV["BACKUP_STORE_PATH_STYLE"].to_json %>
+  read_timeout: <%= ENV["BACKUP_STORE_READ_TIMEOUT"].to_json %>
   region: <%= ENV["BACKUP_STORE_REGION"].to_json %>
   secret_key: <%= ENV["BACKUP_STORE_SECRET_KEY"].to_json %>
 bluesky:
@@ -52,6 +53,7 @@ media_store:
   bucket: <%= ENV["MEDIA_STORE_BUCKET"].to_json %>
   endpoint: <%= ENV["MEDIA_STORE_ENDPOINT"].to_json %>
   path_style: <%= ENV["MEDIA_STORE_PATH_STYLE"].to_json %>
+  read_timeout: <%= ENV["MEDIA_STORE_READ_TIMEOUT"].to_json %>
   region: <%= ENV["MEDIA_STORE_REGION"].to_json %>
   secret_key: <%= ENV["MEDIA_STORE_SECRET_KEY"].to_json %>
 owner:
@@ -65,6 +67,7 @@ share_store:
   bucket: <%= ENV["SHARE_STORE_BUCKET"].to_json %>
   endpoint: <%= ENV["SHARE_STORE_ENDPOINT"].to_json %>
   path_style: <%= ENV["SHARE_STORE_PATH_STYLE"].to_json %>
+  read_timeout: <%= ENV["SHARE_STORE_READ_TIMEOUT"].to_json %>
   region: <%= ENV["SHARE_STORE_REGION"].to_json %>
   secret_key: <%= ENV["SHARE_STORE_SECRET_KEY"].to_json %>
 web_threads: <%= ENV["HANAMI_MAX_THREADS"].to_json %>

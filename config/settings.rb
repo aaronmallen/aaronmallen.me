@@ -41,12 +41,15 @@ module Blog
 
   class Settings < Hanami::Settings
     DEFAULT_ANALYTICS_THROTTLE_LIMIT = 120
+    DEFAULT_BACKUP_STORE_READ_TIMEOUT = 300
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
     DEFAULT_CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT = 30
     DEFAULT_CONTACT_MINIMUM_SUBMIT_SECONDS = 3
     DEFAULT_CONTACT_STAMP_EXPIRY_HOURS = 24
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
     DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
+    DEFAULT_MEDIA_STORE_READ_TIMEOUT = 30
+    DEFAULT_SHARE_STORE_READ_TIMEOUT = 300
     DEFAULT_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
@@ -59,6 +62,7 @@ module Blog
     MinimumSubmitSeconds = Types::Coercible::Integer.constrained(gteq: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
+    ReadTimeout = Types::Coercible::Integer.constrained(gt: 0)
     RedisCount = Types::Coercible::Integer.constrained(gteq: 0)
     RedisWaits = Types::Array.of(Types::Coercible::Float.constrained(gteq: 0)).constrained(min_size: 1)
 
@@ -89,12 +93,13 @@ module Blog
       trimmed unless trimmed.empty?
     end
 
-    def self.object_store
+    def self.object_store(read_timeout)
       Schema.schema(
         access_key?: Value,
         bucket?: Value,
         endpoint?: Value,
         path_style?: unless_set(Types::Params::Bool, false),
+        read_timeout?: unless_set(ReadTimeout, read_timeout),
         region?: unless_set(Types::String, DEFAULT_STORE_REGION),
         secret_key?: Value,
       )
@@ -138,7 +143,7 @@ module Blog
       someday_days: AttentionLimit,
     )
 
-    setting :backup_store, default: {}, constructor: object_store
+    setting :backup_store, default: {}, constructor: object_store(DEFAULT_BACKUP_STORE_READ_TIMEOUT)
 
     setting :bluesky, default: {}, constructor: Schema.schema(profile_url?: Value)
 
@@ -181,7 +186,7 @@ module Blog
 
     setting :maxmind, default: {}, constructor: Schema.schema(account_id?: Value, license_key?: Value)
 
-    setting :media_store, default: {}, constructor: object_store
+    setting :media_store, default: {}, constructor: object_store(DEFAULT_MEDIA_STORE_READ_TIMEOUT)
 
     setting :owner, default: {}, constructor: Schema.schema(name: OwnerName)
 
@@ -205,7 +210,7 @@ module Blog
 
     setting :share_site, default: {}, constructor: Schema.schema(url: SiteUrl)
 
-    setting :share_store, default: {}, constructor: object_store
+    setting :share_store, default: {}, constructor: object_store(DEFAULT_SHARE_STORE_READ_TIMEOUT)
 
     setting :site, default: {}, constructor: Schema.schema(
       auth_callback_path: Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}),

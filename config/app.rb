@@ -16,10 +16,12 @@ require "blog/params_guard"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
 require "google"
+require "object_store"
 
 module Blog
   class App < Hanami::App
     autoloader.push_dir(root.join("lib/google"), namespace: Google)
+    autoloader.push_dir(root.join("lib/object_store"), namespace: ObjectStore)
 
     config.inflections do |inflections|
       inflections.acronym "CLI", "GitHub", "MCP", "OAuth", "PKCE", "UI", "URI"
@@ -34,8 +36,9 @@ module Blog
 
     config.no_auto_register_paths += %w[helpers]
     config.shared_app_component_keys += %w[
-      contracts.contributor_terms_contract contracts.review_range_contract contracts.search_query_contract
-      google.auth google.client operations.read_visitor_address
+      backup_store.client contracts.contributor_terms_contract contracts.review_range_contract
+      contracts.search_query_contract google.auth google.client media_store.client operations.read_visitor_address
+      share_store.client
     ]
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier

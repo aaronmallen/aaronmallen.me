@@ -9,7 +9,7 @@ module Public
         CACHE_NEVER = "private, no-store"
         NOT_FOUND = 404
 
-        include Deps[photo_queries: "media.repos.photo_queries", store: "media.store.client"]
+        include Deps[photo_queries: "media.repos.photo_queries", store: "media_store.client"]
 
         config.formats.clear
 
@@ -27,7 +27,7 @@ module Public
 
         def fetch(key)
           store.get(key) if photo_key?(key)
-        rescue ::Media::Store::Client::Error
+        rescue ObjectStore::Client::Error
           nil
         end
 

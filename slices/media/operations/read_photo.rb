@@ -7,7 +7,7 @@ module Media
 
       Read = Data.define(:photo, :stored)
 
-      include Deps["store.client", photo_queries: "repos.photo_queries"]
+      include Deps[client: "media_store.client", photo_queries: "repos.photo_queries"]
 
       def call(reference)
         key = reference.strip[KEY, 1] || reference
@@ -22,7 +22,7 @@ module Media
       def fetch(key)
         stored = client.get(key) if client.configured?
         stored ? Success(stored) : Failure([:unavailable])
-      rescue Store::Client::Error
+      rescue ObjectStore::Client::Error
         Failure([:unavailable])
       end
 

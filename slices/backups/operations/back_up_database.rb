@@ -38,13 +38,13 @@ module Backups
       def prune
         client.keys(prefix: PREFIX).sort.reverse.drop(KEEP).each { client.delete(it) }
         Success(nil)
-      rescue Backups::Error => e
+      rescue ObjectStore::Client::Error => e
         Failure([:prune_backups_failed, e.message])
       end
 
       def upload(key, path)
         Success(client.upload(key, path))
-      rescue Backups::Error => e
+      rescue ObjectStore::Client::Error => e
         Failure([:upload_failed, e.message])
       end
     end

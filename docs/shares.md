@@ -117,6 +117,7 @@ comes from the environment. Set the rest in the shared `.env` on the Pi:
 | `SHARE_STORE_SECRET_KEY` | Its secret key. |
 | `SHARE_STORE_PATH_STYLE` | `true` for RustFS, which wants the bucket in the path rather than the host name. It defaults to `false`. |
 | `SHARE_STORE_REGION` | The store's region. RustFS takes any, and it defaults to `us-east-1`. |
+| `SHARE_STORE_READ_TIMEOUT` | How many seconds to wait for the store to answer. It defaults to `300`. |
 
 Restart the web process. It reads the settings once, at boot. Without both halves of the key, the site boots and
 takes no shares.

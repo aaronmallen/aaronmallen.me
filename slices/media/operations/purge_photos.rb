@@ -3,7 +3,7 @@
 module Media
   module Operations
     class PurgePhotos
-      include Deps["store.client", photo_mutations: "repos.photo_mutations"]
+      include Deps[client: "media_store.client", photo_mutations: "repos.photo_mutations"]
 
       def call(photos) = photos.count { purge(it) }
 
@@ -15,7 +15,7 @@ module Media
           client.delete(photo.key) if deleted
           deleted
         end
-      rescue Store::Client::Error
+      rescue ObjectStore::Client::Error
         false
       end
     end

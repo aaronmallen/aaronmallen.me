@@ -66,7 +66,7 @@ module Admin
       operations.link_records operations.unlink_records repos.record_link_queries
     ], from: :links
 
-    import keys: %w[operations.upload_photo store.client], from: :media
+    import keys: %w[operations.upload_photo], from: :media
 
     import keys: %w[
       operations.add_work_entry operations.archive_project operations.delete_work_entry

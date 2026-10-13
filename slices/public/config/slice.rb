@@ -17,7 +17,7 @@ module Public
 
     import keys: %w[operations.create_message], from: :mail
 
-    import keys: %w[repos.photo_queries store.client], from: :media
+    import keys: %w[repos.photo_queries], from: :media
 
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
