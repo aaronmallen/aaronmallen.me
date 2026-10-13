@@ -40,6 +40,11 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
         expect(page).to have_css(".screen-tab[aria-current='page']", text: "calendar")
       end
 
+      it "links tasks, calendar and projects in the group tabs" do
+        expect(page.all(".page-head + .screen-tabs a.screen-tab").map { it[:href] })
+          .to eq(%w[/admin/tasks /admin/calendar /admin/projects])
+      end
+
       it "lists the calendar in the palette with its icon" do
         expect(page).to have_css("#command-palette-calendar i.fa-calendar-days", visible: :all)
       end

@@ -31,11 +31,11 @@ RSpec.describe "Admin files", type: :request do
       stub_request(:put, %r{\A#{share_store_url}/})
     end
 
-    it "lists the tab under Publish beside Projects" do
+    it "lists the tab under Publish beside Links" do
       get "/admin/files"
 
       expect(page.all(".screen-tabs a.screen-tab").map { it[:href] })
-        .to eq(%w[/admin/posts /admin/social /admin/projects /admin/files /admin/links])
+        .to eq(%w[/admin/posts /admin/social /admin/files /admin/links])
     end
 
     it "says when nothing is shared yet" do

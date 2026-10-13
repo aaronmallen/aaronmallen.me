@@ -82,6 +82,19 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".screen-tab[aria-current='page']", text: "projects")
       end
 
+      it "links tasks, calendar and projects in the group tabs" do
+        get "/admin/projects"
+
+        expect(page.all(".page-head + .screen-tabs a.screen-tab").map { it[:href] })
+          .to eq(%w[/admin/tasks /admin/calendar /admin/projects])
+      end
+
+      it "lights the Tasks pill" do
+        get "/admin/projects"
+
+        expect(page).to have_css("a.pill-nav-link[aria-current='page']", count: 1, text: "Tasks")
+      end
+
       def expected_sub
         stars = Blog::Helpers::Figures.count((repo.live + repo.archived).sum(&:stars))
 

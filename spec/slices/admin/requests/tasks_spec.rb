@@ -71,6 +71,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_title("Tasks | Admin | #{Hanami.app.settings.owner_name}")
       end
 
+      it "links tasks, calendar and projects in the group tabs" do
+        get "/admin/tasks"
+
+        expect(page.all(".page-head + .screen-tabs a.screen-tab").map { it[:href] })
+          .to eq(%w[/admin/tasks /admin/calendar /admin/projects])
+      end
+
       it "shows today without a filter" do
         get "/admin/tasks"
 

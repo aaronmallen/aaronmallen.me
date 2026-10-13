@@ -6,8 +6,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/tasks /admin/calendar /admin/journal /admin/decisions /admin/review /admin/posts /admin/social
-      /admin/projects /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
+      /admin /admin/tasks /admin/calendar /admin/projects /admin/journal /admin/decisions /admin/review /admin/posts
+      /admin/social /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
       /admin/activity /admin/health /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules
       /admin/webmentions/settings /admin/tokens /admin/services /admin/clients /admin/security
     ]

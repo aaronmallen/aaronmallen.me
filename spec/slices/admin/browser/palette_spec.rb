@@ -194,7 +194,7 @@ RSpec.describe "Admin command palette", type: :feature do
       within("[aria-labelledby='command-palette-group-publish']") do
         expect(page).to have_css("#command-palette-posts")
         expect(page).to have_css("#command-palette-social")
-        expect(page).to have_css("#command-palette-projects")
+        expect(page).to have_css("#command-palette-files")
       end
     end
   end

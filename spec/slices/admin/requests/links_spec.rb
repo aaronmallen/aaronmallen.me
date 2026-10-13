@@ -33,7 +33,7 @@ RSpec.describe "Admin links", type: :request do
     get "/admin/links"
 
     expect(page.all(".screen-tabs a.screen-tab").map { it[:href] })
-      .to eq(%w[/admin/posts /admin/social /admin/projects /admin/files /admin/links])
+      .to eq(%w[/admin/posts /admin/social /admin/files /admin/links])
   end
 
   it "says when nothing is shortened yet" do
