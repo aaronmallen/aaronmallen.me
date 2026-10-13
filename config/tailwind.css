@@ -4228,6 +4228,43 @@
   @apply mt-2.5 max-w-[68ch] text-[1.15rem] leading-[1.7] text-ink;
 }
 
+@utility mail-rich {
+  @apply break-words;
+
+  & p {
+    @apply mb-[.6em];
+  }
+
+  & ul,
+  & ol {
+    @apply my-[.3em] pl-[1.4em];
+  }
+
+  & ul {
+    @apply list-disc;
+  }
+
+  & ol {
+    @apply list-decimal;
+  }
+
+  & blockquote {
+    @apply my-[.6em] border-l-2 border-line pl-3.5 text-ink-muted;
+  }
+
+  & code {
+    @apply rounded-[5px] bg-wash px-1.25 py-px font-mono text-[.82em];
+  }
+
+  & a {
+    @apply text-accent underline underline-offset-2;
+  }
+
+  & img {
+    @apply h-auto max-w-full;
+  }
+}
+
 @utility mail-acts {
   @apply mt-7 flex flex-wrap items-center gap-2 border-t border-line pt-4.5;
 }
@@ -4384,34 +4421,7 @@
     @apply pointer-events-none absolute text-ink-muted content-[attr(data-placeholder)];
   }
 
-  & p {
-    @apply mb-[.6em];
-  }
-
-  & ul,
-  & ol {
-    @apply my-[.3em] pl-[1.4em];
-  }
-
-  & ul {
-    @apply list-disc;
-  }
-
-  & ol {
-    @apply list-decimal;
-  }
-
-  & blockquote {
-    @apply my-[.6em] border-l-2 border-line pl-3.5 text-ink-muted;
-  }
-
-  & code {
-    @apply rounded-[5px] bg-wash px-1.25 py-px font-mono text-[.82em];
-  }
-
-  & a {
-    @apply text-accent underline underline-offset-2;
-  }
+  @apply mail-rich;
 }
 
 @utility mail-sig {

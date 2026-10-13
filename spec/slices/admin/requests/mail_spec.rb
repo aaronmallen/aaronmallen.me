@@ -353,6 +353,10 @@ RSpec.describe "Admin mail", type: :request do
           expect(page).to have_css(".mail-reader > .mail-message .mail-message-body", text: "Her answer")
         end
 
+        it "shows a plain message as text" do
+          expect(page).to have_css(".mail-reader > .mail-message p.msg-body.mail-message-body", text: "Her answer")
+        end
+
         it "folds the earlier messages and names who wrote them", :aggregate_failures do
           earlier = page.find(".mail-reader details.mail-earlier")
           expect(earlier).to have_css("summary", text: "2 earlier messages · Ada Lovelace, you")
@@ -370,6 +374,29 @@ RSpec.describe "Admin mail", type: :request do
 
         it "links a Gmail thread out to Gmail and keeps spam and delete for the contact form" do
           expect(acts).to eq(["Archive", "Snooze", "Make a task", "Star", "Mark read", "Gmail"])
+        end
+      end
+
+      describe "a message with HTML" do
+        let(:body) { page.find(".mail-reader > .mail-message div.mail-message-body.mail-rich") }
+
+        before do
+          html = %(<p><a href="https://example.com/n">notes</a></p><ul><li>One</li></ul><img src="https://example.com/a.png">)
+          create(:mail_message, mail_thread_id: thread.id, subject: "Re", body: "notes", html_body: html,
+                                received_at: Time.now + 60)
+          get "/admin/mail", thread: thread.id
+        end
+
+        it "shows its links inline" do
+          expect(body).to have_link("notes", href: "https://example.com/n")
+        end
+
+        it "shows its lists" do
+          expect(body).to have_css("ul > li", text: "One")
+        end
+
+        it "loads its remote images" do
+          expect(body).to have_css("img[src='https://example.com/a.png']")
         end
       end
 
