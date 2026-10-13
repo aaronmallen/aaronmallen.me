@@ -4027,22 +4027,8 @@
   outline-offset: -2px;
 }
 
-@utility mail-grip {
-  @apply cursor-grab touch-none self-center border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
-
-  @media (width < 1180px) {
-    &.bt {
-      @apply hidden;
-    }
-  }
-}
-
 @utility mail-dragging {
-  @apply opacity-45;
-
-  & .mail-grip {
-    @apply cursor-grabbing;
-  }
+  @apply cursor-grabbing opacity-45;
 }
 
 @utility mail-ghost {
@@ -4115,7 +4101,7 @@
 }
 
 @utility mail-row {
-  @apply relative flex items-start gap-1.5 border-b border-line py-3 pl-3 last:border-b-0;
+  @apply relative flex items-start gap-1.5 border-b border-line py-3 pl-3 select-none last:border-b-0;
 
   &.unread::before {
     @apply absolute top-[21px] left-0 size-1.5 rounded-full bg-mk-pink content-[''];

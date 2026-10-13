@@ -11,7 +11,7 @@ RSpec.describe "Admin mail drag", type: :feature do
   end
 
   def drag(subject, onto, release: true)
-    from = box(grip(subject))
+    from = box(row(subject))
     mouse = page.driver.browser.mouse
 
     mouse.move(x: from["x"], y: from["y"]).down
@@ -21,12 +21,17 @@ RSpec.describe "Admin mail drag", type: :feature do
 
   def folder(name) = find(".mail-folders a", text: name)
 
-  def grip(subject) = find(".mail-row", text: subject).find("[data-mail-grip]")
-
   def open_mail
     visit "/admin/mail"
     execute_script("window.mailLoaded = true")
   end
+
+  def press(subject)
+    from = box(row(subject))
+    touch("touchStart", { x: from["x"], y: from["y"] })
+  end
+
+  def row(subject) = find(".mail-row", text: subject)
 
   def stored(thread) = Mail::Slice["repos.thread_queries"].by_id(thread.id)
 
@@ -36,17 +41,24 @@ RSpec.describe "Admin mail drag", type: :feature do
     end
   end
 
+  def swipe_up
+    x = box(row("Older"))["x"]
+    (0..6).each { touch(it.zero? ? "touchStart" : "touchMove", { x:, y: 450 - (it * 50) }) }
+    touch("touchEnd", nil)
+  end
+
   def touch(type, point)
     page.driver.browser.page.command("Input.dispatchTouchEvent", type:, touchPoints: point ? [point] : [])
   end
 
-  def touch_drag(subject, onto)
-    from = box(grip(subject))
+  def touch_drag(subject, onto, hold: true, release: true)
+    from = box(row(subject))
     path = stroke(from, box(onto))
 
     touch("touchStart", { x: from["x"], y: from["y"] })
+    sleep 0.4 if hold
     path.each { touch("touchMove", it) }
-    touch("touchEnd", nil)
+    touch("touchEnd", nil) if release
   end
 
   before do
@@ -68,6 +80,39 @@ RSpec.describe "Admin mail drag", type: :feature do
 
     expect(page).to have_css(".toast", text: "Archived 1 thread")
     expect(stored(older).archived).to be(true)
+  end
+
+  it "opens the thread on a tap" do
+    press("Older")
+    touch("touchEnd", nil)
+
+    expect(page).to have_css(".mail-row.on", text: "Older")
+  end
+
+  describe "on a swipe that does not hold first" do
+    before { touch_drag("Older", folder("All mail"), hold: false, release: false) }
+
+    after { touch("touchCancel", nil) }
+
+    it "starts no drag" do
+      expect(page).to have_no_css(".mail-row.mail-dragging")
+    end
+  end
+
+  describe "with a list taller than the window" do
+    before do
+      30.times { create(:message, received_at: Time.now - 120) }
+      page.current_window.resize_to(1280, 500)
+      open_mail
+    end
+
+    after { page.current_window.resize_to(1280, 800) }
+
+    it "scrolls the list on a swipe" do
+      swipe_up
+
+      expect(evaluate_script("window.scrollY")).to be_positive
+    end
   end
 
   describe "with every row picked" do
@@ -93,13 +138,20 @@ RSpec.describe "Admin mail drag", type: :feature do
     end
   end
 
-  it "hides the grips below 1180px", :aggregate_failures do
-    page.current_window.resize_to(1179, 800)
+  describe "below 1180px" do
+    before { page.current_window.resize_to(1179, 800) }
 
-    expect(page).to have_css("[data-mail-grip]", visible: :all, count: 2)
-    expect(page).to have_no_css("[data-mail-grip]")
-  ensure
-    page.current_window.resize_to(1280, 800)
+    after do
+      touch("touchCancel", nil)
+      page.current_window.resize_to(1280, 800)
+    end
+
+    it "starts no drag, since no folder shows" do
+      press("Older")
+      sleep 0.4
+
+      expect(page).to have_no_css(".mail-row.mail-dragging")
+    end
   end
 
   it "says a label from another account labels nothing" do

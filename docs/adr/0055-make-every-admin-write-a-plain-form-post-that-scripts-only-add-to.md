@@ -70,8 +70,8 @@ move form, and in mail drag, where #1136 lets a script send the mail bulk form.
   the page that comes back. With scripts off the grips stay hidden, and the move form's date field and Move button
   post as before.
   #1136 added a sixth: `mail_drag.js` sends the mail bulk form with the threads dragged onto a folder or label in
-  the sidebar, and morphs in the page that comes back. With scripts off the grips stay hidden, and the bulk bar's
-  Move and Label post as before.
+  the sidebar, and morphs in the page that comes back. #1160 starts that drag from anywhere on the row. With
+  scripts off a row does not drag, and the bulk bar's Move and Label post as before.
   #201 added a read that swaps in no HTML: the command palette fetches the open tasks as JSON from
   `/admin/tasks/palette` when it first opens, as [ADR 0091][0091] records.
 

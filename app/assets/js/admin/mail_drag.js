@@ -9,9 +9,11 @@ const DROP = "a[data-mail-drop]";
 const FAILED = "[data-morph-failed]";
 const FIELD = "ids[]";
 const FOLDERS = "[data-mail-many]";
-const GRIP = "[data-mail-grip]";
+const HOLD = 300;
 const OVER = "mail-over";
-const ROW = ".mail-row";
+const PICK = "input, label";
+const ROW = "[data-mail-drag]";
+const SLOP = 6;
 const TARGET = "mail-drop";
 const TOAST = "[data-toast]";
 
@@ -19,19 +21,49 @@ let bound = false;
 let busy = false;
 
 export function setupMailDrag() {
-  for (const grip of document.querySelectorAll(GRIP)) grip.hidden = false;
   if (bound) return;
 
   bound = true;
   document.addEventListener("pointerdown", (event) => {
-    const grip = event.target.closest(GRIP);
-    if (grip && !busy) drag(grip, event);
+    const row = event.target.closest(ROW);
+    if (row && !busy && !event.target.closest(PICK) && droppable()) wait(row, event);
   });
 }
 
-function drag(grip, press) {
+function wait(row, press) {
+  const touch = press.pointerType === "touch";
+  let latest = press;
+
+  const stop = () => {
+    clearTimeout(timer);
+    document.removeEventListener("pointermove", moved);
+    document.removeEventListener("pointerup", stop);
+    document.removeEventListener("pointercancel", stop);
+  };
+
+  const start = () => {
+    stop();
+    drag(row, press, latest);
+  };
+
+  const moved = (event) => {
+    if (event.pointerId !== press.pointerId) return;
+
+    latest = event;
+    if (Math.hypot(event.clientX - press.clientX, event.clientY - press.clientY) <= SLOP) return;
+    if (touch) return stop();
+
+    start();
+  };
+
+  const timer = touch ? setTimeout(start, HOLD) : null;
+  document.addEventListener("pointermove", moved);
+  document.addEventListener("pointerup", stop);
+  document.addEventListener("pointercancel", stop);
+}
+
+function drag(row, press, at) {
   const form = document.querySelector(BULK);
-  const row = grip.closest(ROW);
   const ids = dragged(form, row);
   const rows = ids.map((id) => document.getElementById(`thread-${id}`)).filter(Boolean);
   const targets = document.querySelectorAll(DROP);
@@ -46,6 +78,9 @@ function drag(grip, press) {
   };
 
   const end = async (done, cancelled) => {
+    document.removeEventListener("touchmove", still);
+    document.removeEventListener("contextmenu", menu, true);
+    swallowClick();
     ghost.remove();
     for (const target of targets) target.classList.remove(TARGET, OVER);
     for (const each of rows) each.classList.remove(DRAGGING);
@@ -63,9 +98,11 @@ function drag(grip, press) {
 
   if (!followPointer(press, { element: row, dragging: DRAGGING, move, end })) return;
 
+  document.addEventListener("touchmove", still, { passive: false });
+  document.addEventListener("contextmenu", menu, true);
   for (const target of targets) target.classList.add(TARGET);
   for (const each of rows) each.classList.add(DRAGGING);
-  ghost = floating(ids.length === 1 ? grip.dataset.mailGrip : many(ids.length), press);
+  ghost = floating(ids.length === 1 ? row.dataset.mailDrag : many(ids.length), at);
 }
 
 function dragged(form, row) {
@@ -73,6 +110,10 @@ function dragged(form, row) {
   if (form.hasAttribute("data-bulk-off") || !own.checked) return [own.value];
 
   return [...form.elements].filter((box) => box.name === FIELD && box.checked).map((box) => box.value);
+}
+
+function droppable() {
+  return [...document.querySelectorAll(DROP)].some((target) => target.checkVisibility());
 }
 
 function dropAt(event) {
@@ -94,6 +135,25 @@ function floating(text, start) {
 
 function many(count) {
   return document.querySelector(FOLDERS).dataset.mailMany.replace("%{count}", count);
+}
+
+function menu(event) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function still(event) {
+  if (event.cancelable) event.preventDefault();
+}
+
+function swallowClick() {
+  const swallow = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  document.addEventListener("click", swallow, true);
+  setTimeout(() => document.removeEventListener("click", swallow, true));
 }
 
 async function send(form, ids, target) {

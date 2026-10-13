@@ -1175,7 +1175,6 @@ en:
           to: "to %{address}"
         row:
           archived: "archived"
-          drag: "Drag %{subject} to a folder or label"
           draft: "Draft"
           pick: "Select %{subject}"
           read_key: "Open the highlighted thread and mark it read"
