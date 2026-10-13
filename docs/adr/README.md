@@ -153,7 +153,7 @@ one.
 | [0146][0146] | Keep health data in a health slice as daily summaries and workouts polled from Google | ![Active][active] | 2026-10-11 |
 | [0147][0147] | Gate health data behind a health scope that read does not cover | ![Active][active] | 2026-10-11 |
 | [0148][0148] | Edit a task in the task drawer, and keep the task modal for new tasks | ![Active][active] | 2026-10-11 |
-| [0149][0149] | Keep Google accounts in a google slice with one connection each | ![Active][active] | 2026-10-11 |
+| [0149][0149] | Keep Google accounts in a google slice with one connection each | ![Superseded][superseded-0159] | 2026-10-11 |
 | [0150][0150] | Mirror Gmail and contact messages in a mail slice | ![Active][active] | 2026-10-11 |
 | [0151][0151] | Gate mail behind a mail scope that read does not cover | ![Active][active] | 2026-10-11 |
 | [0152][0152] | Mirror Google events in a calendar slice and write every change back to Google | ![Active][active] | 2026-10-11 |
@@ -163,6 +163,7 @@ one.
 | [0156][0156] | Keep a board stage on tasks beside their status | ![Active][active] | 2026-10-12 |
 | [0157][0157] | Publish a project's tasks through its board flag | ![Active][active] | 2026-10-12 |
 | [0158][0158] | Match the owner on a verified email from GitHub or Google | ![Active][active] | 2026-10-12 |
+| [0159][0159] | Group shared lib code by service and register service clients at app level | ![Active][active] | 2026-10-12 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -322,6 +323,7 @@ one.
 [0156]: 0156-keep-a-board-stage-on-tasks-beside-their-status.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0158]: 0158-match-the-owner-on-a-verified-email-from-github-or-google.md
+[0159]: 0159-group-shared-lib-code-by-service-and-register-service-clients-at-app-level.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -337,4 +339,5 @@ one.
 [superseded-0140]: https://img.shields.io/badge/0140-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0153]: https://img.shields.io/badge/0153-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0158]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0159]: https://img.shields.io/badge/0159-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

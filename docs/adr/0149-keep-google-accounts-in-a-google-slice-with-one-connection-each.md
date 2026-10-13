@@ -1,16 +1,18 @@
 ---
 id: "0149"
 title: Keep Google accounts in a google slice with one connection each
-status: active
+status: superseded
 created: 2026-10-11
 area: [admin, config, db, health, lib, services]
+superseded-by: "0159"
 issue: "#1121"
+amended: ["#1171"]
 tags: [google, gmail, calendar, health, slices, services, oauth, scopes, accounts]
 ---
 
 # ADR 0149: Keep Google accounts in a google slice with one connection each
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -59,4 +61,4 @@ Disconnecting one account revokes its token and leaves the others alone.
 [0003]: 0003-reach-another-slice-only-through-its-exports.md
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [0146]: 0146-keep-health-data-in-a-health-slice-as-daily-summaries-and-workouts-polled-from-google.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0159-black?style=for-the-badge&label=Superseded&labelColor=orange

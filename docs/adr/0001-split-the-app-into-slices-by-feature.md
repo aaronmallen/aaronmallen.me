@@ -6,7 +6,8 @@ created: 2026-09-28
 area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
   projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 issue: AA-587
-amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957"]
+amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957",
+  "#1171"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -57,7 +58,9 @@ Privacy rides on those exports, not on where a file sits. `record` exports its j
 `geo.geo_lite2.client`, `media` registers `store.client` (#137), `backups` registers `backup_store.client` and
 `dumper`, and `admin` registers `github.auth`, `mastodon.auth` and `live.hub` (#957), each under its own
 `config/providers`. A slice
-that calls another's client imports its key, as `projects` and `admin` import `github.client` from `record`.
+that calls another's client imports its key, as `projects` and `admin` import `github.client` from `record`. #1171
+changed this for clients of an outside service: they register at app level, and slices take them as shared keys
+([ADR 0159][0159]).
 
 **The app shares only what no slice owns, and a slice names each piece it takes** in
 `config.shared_app_component_keys`: `assets`, the one compiled bundle, for `public`, `admin` and `mcp`; `http`, the
@@ -107,4 +110,5 @@ feature costs a directory tree and a `slice.rb` before it holds a line of code.
 `app/` holds the asset sources and the few pieces no slice owns, as ADR 0002 lists them (#950). A reader who opens
 it finds little of the code, and has to know that the rest is in `lib` and `slices/`.
 
+[0159]: 0159-group-shared-lib-code-by-service-and-register-service-clients-at-app-level.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

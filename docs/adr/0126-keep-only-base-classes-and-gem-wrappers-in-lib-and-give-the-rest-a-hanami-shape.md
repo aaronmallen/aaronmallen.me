@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
   projects, public, record, saved_views, search, security, social, suggestions, tags, tasks]
 issue: "#718"
-amended: ["#957"]
+amended: ["#957", "#1171"]
 tags: [layout, hanami, lib, app, rom, plugins, operations, contracts, structs, enums, helpers, markdown]
 ---
 
@@ -50,7 +50,8 @@ them, and a Phlex component takes no `Deps`.
 
 **Markdown.** `Posts::Markdown` and `Tasks::Markdown` wrap Commonmarker, so they are library code and stay in
 `lib/posts` and `lib/tasks`. Other slices keep naming them by constant, since ADR 0002 lets a caller name a constant
-of the slice that owns it, and the admin and public components that render Markdown take no `Deps`.
+of the slice that owns it, and the admin and public components that render Markdown take no `Deps`. #1171 merges
+them into one wrapper in `lib/markdown` that every caller names ([ADR 0159][0159]).
 
 **`Analytics::Device`.** Nothing crosses. `lib/security` names its own `Security::Device`, which reads the browser
 and system, and `Analytics::Device`, which sorts a visit into a device class, is named only from the development
@@ -89,9 +90,10 @@ the result instead.
 The helpers under `app/helpers` stay modules reached by constant, much as the old `lib/blog` helpers were. The rule
 gives them a home, not a new shape.
 
-The two Markdown wrappers stay apart and stay named across slices. Merging them is out of scope.
+The two Markdown wrappers stay apart and stay named across slices. Merging them is out of scope. #1171 merges them.
 
 No spec checks the layout, so a new file in `lib/<slice>/` that is neither a base class nor a gem wrapper passes
 until someone reads it.
 
+[0159]: 0159-group-shared-lib-code-by-service-and-register-service-clients-at-app-level.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

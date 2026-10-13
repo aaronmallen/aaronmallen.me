@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917", "#994", "#911"]
+amended: ["#917", "#994", "#911", "#1171"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -49,9 +49,9 @@ Four other kinds of key may cross, since none of them holds a write repo:
 - **`networks.all`**, the provider `social` exports so `admin` can list each network and measure text against it.
   ADR 0003 names this edge too. Since #994, `posts` and `suggestions` ask `operations.check_network_fit` whether
   text fits a network instead of importing the provider.
-- **A client provider**: `github.client` and `linear.client` from `record`, `google.client` from `health`, and
-  `store.client` from `media`. ADR 0001 makes each client a provider in the slice that owns it, and a slice that
-  calls one imports its key.
+- **A client provider**: `github.client` and `linear.client` from `record`, and `store.client` from `media`. ADR
+  0001 makes each client a provider in the slice that owns it, and a slice that calls one imports its key. #1171
+  moves the service clients, `google.client` among them, to app level, where no export carries them (ADR 0159).
 
 **The `Hanami/SliceExports` cop holds the rule.** It comes from `rubocop-hanami`, runs under `mise run lint`, and
 fails on any export that is not a read repo key, an `operations.*` key or one of the keys above. A new kind of key

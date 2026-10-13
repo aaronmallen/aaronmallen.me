@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809, "#665", "#718", "#952", "#950"]
+amended: [AA-809, "#665", "#718", "#952", "#950", "#1171"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -60,6 +60,8 @@ Code lives with what owns it (AA-421, AA-563).
   one line in its own `config/slice.rb`, `autoloader.push_dir(Hanami.app.root.join("lib/admin"), namespace: Admin)`,
   which loads the code without registering it in the slice's container. A provider moves into the slice that owns
   its concept, and its key crosses by export and import.
+- **`lib/<service>/`** holds what several slices share about one outside service or one job, such as `lib/google`
+  or `lib/markdown`, and the app loads it, since #1171 ([ADR 0159][0159]).
 - **An export** carries what another slice reaches on purpose: a read repo for a read, an operation for a write
   (#665).
 - **`lib/blog`** keeps only what no slice owns: the base classes every slice inherits, the shared providers and
@@ -116,4 +118,5 @@ The rule has exceptions: `auth` in admin, `endpoints` and `serializers` in api, 
 No spec checks the layout or who owns a kernel constant. A kernel constant that drops to one slice naming it stays
 in `lib/blog` until someone moves it to `lib/<slice>/`.
 
+[0159]: 0159-group-shared-lib-code-by-service-and-register-service-clients-at-app-level.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
