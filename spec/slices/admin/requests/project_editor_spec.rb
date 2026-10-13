@@ -84,6 +84,13 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("select[name='project[visibility]'][required]")
       end
 
+      it "offers Publish Kanban switched off in the Kanban board card", :aggregate_failures do
+        card = page.find(".card-title", text: "Kanban board").ancestor(".card")
+
+        expect(card).to have_unchecked_field("Publish Kanban")
+        expect(card).to have_css("input.toggle[role='switch'][name='project[board_published]']")
+      end
+
       it "offers no featured toggle" do
         expect(page).to have_no_field("project[featured]", visible: :all)
       end
@@ -146,6 +153,13 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
       it "joins the tags with a comma" do
         expect(page).to have_css("input[name='project[tags]'][value='cli, ruby']")
+      end
+
+      it "switches Publish Kanban on for a project whose board is published" do
+        published = create(:project, board_published: true)
+        get "/admin/projects/#{published.id}/edit"
+
+        expect(page).to have_checked_field("Publish Kanban")
       end
 
       it "selects the project's visibility" do
@@ -514,6 +528,25 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(project, visibility: "private")
 
         expect(repo.by_id(project.id).visibility).to eq("private")
+      end
+
+      it "publishes the board" do
+        save(project, board_published: "1")
+
+        expect(repo.by_id(project.id).board_published).to be(true)
+      end
+
+      it "unpublishes the board" do
+        published = create(:project, board_published: true)
+        save(published, board_published: "0")
+
+        expect(repo.by_id(published.id).board_published).to be(false)
+      end
+
+      it "keeps Publish Kanban as it was switched when it refuses" do
+        save(project, name: "", board_published: "1")
+
+        expect(page).to have_checked_field("Publish Kanban")
       end
 
       it "refuses a visibility it doesn't know", :aggregate_failures do

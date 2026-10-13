@@ -3,8 +3,9 @@
 module MCP
   module Tools
     class SaveProject < Base
-      FIELDS = %i[name og_image_url repo started_on tagline tags url visibility].freeze
+      FIELDS = %i[board_published name og_image_url repo started_on tagline tags url visibility].freeze
       MONTH = "%Y-%m"
+      UNCHECKED = "0"
       UNSAVED = "could not save the project"
 
       MESSAGES = {
@@ -28,6 +29,7 @@ module MCP
         additionalProperties: false,
         properties: {
           id: API::Helpers::Schema::ID.merge(description: "the project to change; leave it out to add a new one"),
+          board_published: { type: "boolean", description: "whether a public project shows its task board" },
           name: { type: "string" },
           og_image_url: { type: "string", description: "a link to the social card image" },
           repo: { type: "string", description: "the GitHub repository, as owner/repo" },
@@ -44,8 +46,8 @@ module MCP
 
       description "Add a project, or change one when you give its id. On a change, a field you leave out keeps " \
                   "what it has and an empty string clears it; tags replaces the whole list. A new project needs " \
-                  "a name and a visibility, and starts active. Archive and restore it with archive_project and " \
-                  "restore_project"
+                  "a name and a visibility, and starts active with its board unpublished. Archive and restore " \
+                  "it with archive_project and restore_project"
       input_schema(SCHEMA)
       scope Blog::Types::OAuthScope["write"]
 
@@ -63,13 +65,17 @@ module MCP
         def form(current, fields)
           given = kept(current).merge(fields.slice(*FIELDS))
 
-          given.merge(tags: Array(given[:tags]).join(","))
+          given.merge(
+            board_published: given[:board_published] ? Blog::Constants::CHECKED : UNCHECKED,
+            tags: Array(given[:tags]).join(","),
+          )
         end
 
         def kept(project)
           return Blog::Constants::EMPTY_HASH unless project
 
           {
+            board_published: project.board_published,
             name: project.name,
             og_image_url: project.og_image_url,
             repo: project.repo,

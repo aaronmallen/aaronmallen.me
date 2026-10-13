@@ -1616,6 +1616,10 @@ en:
           visibility:
             blank: "Pick who can see it."
             format: "Pick who can see it from the list."
+        board:
+          heading: "Kanban board"
+          hint: "A public project's card on /projects opens this board."
+          publish: "Publish Kanban"
         placement:
           heading: "Placement"
           restore_note: "Restore puts it back on /projects."

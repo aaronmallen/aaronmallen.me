@@ -16,7 +16,8 @@ RSpec.describe "API reading a project", type: :request do
   def shown(project)
     {
       "id" => project.id, "name" => "blog", "tagline" => "my site", "status" => "archived", "visibility" => "private",
-      "started_on" => "2024-06-01", "archived_on" => "2026-03-02", "tags" => %w[ruby], "repo" => "aaronmallen/blog",
+      "board_published" => true, "started_on" => "2024-06-01", "archived_on" => "2026-03-02", "tags" => %w[ruby],
+      "repo" => "aaronmallen/blog",
       "url" => "https://aaronmallen.me", "og_image_url" => nil, "stars" => 12, "release" => "v2.0.0",
       "created_at" => project.created_at.utc.iso8601, "updated_at" => project.updated_at.utc.iso8601,
       "record_links" => {},
@@ -30,6 +31,7 @@ RSpec.describe "API reading a project", type: :request do
       :project, :archived, :private,
       name: "blog", tagline: "my site", repo: "aaronmallen/blog", url: "https://aaronmallen.me", stars: 12,
       release: "v2.0.0", started_on: Date.new(2024, 6, 1), archived_on: Date.new(2026, 3, 2), tags: %w[ruby],
+      board_published: true,
     )
   end
 

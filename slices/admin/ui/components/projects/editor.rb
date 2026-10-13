@@ -31,6 +31,7 @@ module Admin
             aside(class: "project-side") do
               Repository(values: @values, errors: @errors, release:, stars:)
               Placement(values: @values, errors: @errors, archived: archived?)
+              Board(published: @values[:board_published] == Blog::Constants::CHECKED)
               Preview(values: @values, release:, stars:)
             end
           end

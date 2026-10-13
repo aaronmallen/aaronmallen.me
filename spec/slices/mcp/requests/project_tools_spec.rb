@@ -34,7 +34,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
     def archived(name, on) = create(:project, :archived, name:, archived_on: on, started_on: on)
 
     before do
-      create(:project, name: "first", started_on: Date.new(2024, 6, 1))
+      create(:project, name: "first", started_on: Date.new(2024, 6, 1), board_published: true)
       create(:project, :private, name: "second", tags: %w[ruby])
       archived("older", Date.new(2025, 1, 2))
       archived("newer", Date.new(2025, 3, 4))
@@ -59,6 +59,10 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
     it "gives each project its visibility" do
       expect([named("first"), named("second")].map { it.fetch("visibility") }).to eq(%w[public private])
+    end
+
+    it "gives each project whether its board is published" do
+      expect([named("first"), named("second")].map { it.fetch("board_published") }).to eq([true, false])
     end
 
     it "gives each project its tags" do
@@ -152,6 +156,33 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("save_project", name: "fresh", visibility: "secret")
 
       expect(error?).to be(true)
+    end
+
+    it "adds a project with its board unpublished" do
+      call_tool("save_project", name: "fresh", visibility: "public")
+
+      expect(content).to include("board_published" => false)
+    end
+
+    it "publishes a project's board" do
+      project = create(:project)
+      call_tool("save_project", id: project.id, board_published: true)
+
+      expect(project_queries.by_id(project.id).board_published).to be(true)
+    end
+
+    it "unpublishes a project's board" do
+      project = create(:project, board_published: true)
+      call_tool("save_project", id: project.id, board_published: false)
+
+      expect(project_queries.by_id(project.id).board_published).to be(false)
+    end
+
+    it "keeps the board published when a change leaves it out" do
+      project = create(:project, board_published: true)
+      call_tool("save_project", id: project.id, name: "renamed")
+
+      expect(project_queries.by_id(project.id).board_published).to be(true)
     end
 
     it "makes a public project private" do

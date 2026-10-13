@@ -10,6 +10,7 @@ module API
           tagline: Helpers::Schema.nullable(Helpers::Schema::STRING),
           status: { type: "string", enum: %w[active archived], description: "archived once it has an archive date" },
           visibility: { type: "string", enum: Blog::Types::ProjectVisibility.values },
+          board_published: { type: "boolean", description: "whether a public project shows its task board" },
           started_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           archived_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           tags: Helpers::Schema::TAGS,

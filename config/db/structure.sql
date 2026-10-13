@@ -922,6 +922,7 @@ CREATE TABLE public.projects (
     og_image_url text,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((name)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(tagline, ''::text) || ' '::text) || COALESCE((repo)::text, ''::text))), 'B'::"char"))) STORED,
     visibility public.project_visibility NOT NULL,
+    board_published boolean DEFAULT false NOT NULL,
     CONSTRAINT projects_archived_order_check CHECK ((archived_on >= started_on)),
     CONSTRAINT projects_stars_check CHECK ((stars >= 0))
 );
@@ -7463,4 +7464,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261013020000_create_mail_attachments.rb'),
 ('20261013030000_match_owner_identities_on_email.rb'),
 ('20261013030100_name_the_provider_on_sign_ins.rb'),
-('20261013041000_add_stage_to_tasks.rb');
+('20261013041000_add_stage_to_tasks.rb'),
+('20261013041100_add_board_published_to_projects.rb');

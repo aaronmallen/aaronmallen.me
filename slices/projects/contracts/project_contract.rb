@@ -21,6 +21,7 @@ module Projects
         required(:started_on).maybe(STARTED_ON)
         required(:tags).value(Blog::Types::TagList)
         required(:og_image_url).maybe(Blog::Types::Nullable::Url)
+        required(:board_published).value(Blog::Types::Checkbox)
       end
 
       rule(:name).validate(:without_controls, :visible)

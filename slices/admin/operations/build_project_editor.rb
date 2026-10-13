@@ -3,10 +3,11 @@
 module Admin
   module Operations
     class BuildProjectEditor
-      FIELDS = %i[name og_image_url repo started_on tagline url visibility].freeze
+      FIELDS = %i[board_published name og_image_url repo started_on tagline url visibility].freeze
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       TAG_SEPARATOR = ", "
+      UNCHECKED = "0"
 
       def call(project: nil, params: nil, errors: Blog::Constants::EMPTY_HASH)
         values = params ? from_params(params) : from_project(project)
@@ -24,6 +25,7 @@ module Admin
         return blank_values unless project
 
         {
+          board_published: project.board_published ? Blog::Constants::CHECKED : UNCHECKED,
           name: project.name,
           visibility: project.visibility,
           started_on: started_on(project),
