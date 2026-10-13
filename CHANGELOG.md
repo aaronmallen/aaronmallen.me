@@ -5,10 +5,26 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.18] - 2026-10-13
+
 ### Added
 
 - The admin sign-in page has a GitHub button and a Google button. Google sign-in uses the OAuth client that already
   connects Google accounts, asks only for `openid email` and keeps no token.
+- Each project has a board in the admin, opened from the project list, with backlog, ready, in progress, done and
+  canceled columns. A card moves by its arrows, by the Board column item in its task menu, or by drag, with a mouse
+  or after a short hold on a touch screen. Moving a card starts, completes, cancels or reopens its task, and moving
+  between backlog and ready sets only its stage.
+- Tasks carry a stage, backlog or ready, which every API and MCP task read shows. The `stage_task` MCP tool and
+  `POST /api/v1/tasks/{id}/stage` set it on any task that is not done or canceled.
+- A Publish Kanban switch in the project editor puts a public project's board at `/projects/:slug`, read only, and
+  its card on the projects page links there. `read_project`, `list_projects` and the API show the flag. Any other
+  slug answers "That board isn't public." with a 404.
+- The mail reader shows a message's HTML, with its links, lists and images, and falls back to the plain body when a
+  message has none.
+- A mail thread in Waiting shows an "in waiting" chip on its row, and the reader names the rule that put it there.
+- `MEDIA_STORE_READ_TIMEOUT`, `SHARE_STORE_READ_TIMEOUT` and `BACKUP_STORE_READ_TIMEOUT` set how long each store
+  waits on a read, 30 seconds for media and 300 for the others by default. Store errors now name the bucket.
 
 ### Changed
 
@@ -17,6 +33,13 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - GitHub, Google and Mastodon share one callback route for signing in and connecting alike. `AUTH_CALLBACK_PATH` sets
   it, under `/admin` and with a `:provider` part, and it defaults to `/admin/auth/:provider/callback`, the path each
   of them already uses.
+- A mail row drags from anywhere on it, and the grip is gone. A mouse drag starts after 6px, and a finger has to hold
+  still for 300ms, so a swipe still scrolls and a tap still opens the thread. Below 1180px, where no folder shows,
+  rows don't drag.
+- Every mail account's Label menu has the new-tag field. A new tag on a Gmail thread stays on the site and never
+  reaches Gmail, while picking an existing Gmail label still writes through.
+- The mail bulk bar's Move and Label selects act as soon as you pick, and Select all reads "Select all N".
+- Projects sit in the tasks group beside Tasks and Calendar, with their tabs, not under Publish.
 - Before you deploy, add your email to `owner_identities` on the live database. The migration drops the GitHub id
   rows and every session ends, so with no email row nobody can sign in.
 
@@ -931,7 +954,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...HEAD
+[26.10.18]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...26.10.18
 [26.10.17]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...26.10.17
 [26.10.16]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...26.10.16
 [26.10.15]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.14...26.10.15
