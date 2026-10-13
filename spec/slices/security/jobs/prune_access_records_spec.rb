@@ -18,8 +18,8 @@ RSpec.describe Security::Jobs::PruneAccessRecords, type: :request do
 
   def sign_in_row(created_at:, city: "London")
     database[:sign_ins].insert(
-      outcome: "signed_in", address: "81.2.69.160", user_agent: "Chrome/141", browser: "Chrome", os: "macOS", city:,
-      country: "GB", created_at:,
+      outcome: "signed_in", provider: "github", address: "81.2.69.160", user_agent: "Chrome/141", browser: "Chrome",
+      os: "macOS", city:, country: "GB", created_at:,
     )
   end
 

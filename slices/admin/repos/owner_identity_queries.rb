@@ -3,9 +3,9 @@
 module Admin
   module Repos
     class OwnerIdentityQueries < Blog::DB::Repo
-      GITHUB = Blog::Types::ServiceProvider["github"]
-
-      def github?(id) = owner_identities.where(provider: GITHUB, external_id: id.to_s).exist?
+      def email?(email)
+        email.is_a?(String) && owner_identities.where(Sequel.cast(:email, String) => email.downcase).exist?
+      end
     end
   end
 end

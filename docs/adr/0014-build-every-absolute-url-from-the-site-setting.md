@@ -37,7 +37,7 @@ run the whole sign-in against a host somebody else chose.
 - `config/app.rb` sets `config.base_url` from `settings.site[:url]`, so Hanami's `routes.url` and phlex-hanami's
   `url` build on the setting. A caller that needs an absolute URL for a route calls `routes.url`, as
   `Posts::Operations::ComposeAnnouncement`, `Social::Operations::SendWebmentions`,
-  `Public::Operations::RenderAtomFeed`, the feed actions, `Admin::Action#github_callback_url` and
+  `Public::Operations::RenderAtomFeed`, the feed actions, `Admin::Action#auth_callback_url` and
   `MCP::OAuth::Metadata` do.
 - `Blog::Settings#site_url` and `#site_origin` build on the same setting for what is not a route: the canonical
   link in `Public::UI::Layouts::Application`, the MCP issuer in `MCP::Action#issuer`, and the origin

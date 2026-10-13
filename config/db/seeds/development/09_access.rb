@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-Admin::Slice["repos.owner_identity_mutations"].add_github(931_094)
+Admin::Slice["repos.owner_identity_mutations"].add("hello@aaronmallen.me")
 
 api = API::Slice
 

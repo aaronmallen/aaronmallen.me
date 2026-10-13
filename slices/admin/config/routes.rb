@@ -10,6 +10,7 @@ module Admin
     MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     OAUTH_SERVICE = /github|google|mastodon/
+    SIGN_IN_PROVIDER = /github|google/
     PART = /[\d.]+/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
@@ -312,9 +313,11 @@ module Admin
       to: "webmentions.moderate", as: :moderate_webmention, id: ID, verdict: WEBMENTION_VERDICT,
     )
     get "/sign-in", to: "sessions.new", as: :sign_in
-    get "/auth/github/callback", to: "sessions.create", as: :github_callback
-    get "/auth/google/callback", to: "services.google_callback", as: :google_service_callback
-    get "/auth/mastodon/callback", to: "services.mastodon_callback", as: :mastodon_service_callback
+    post "/sign-in/:provider", to: "sessions.start", as: :start_sign_in, provider: SIGN_IN_PROVIDER
+    get(
+      Hanami.app["settings"].site[:auth_callback_path].delete_prefix("/admin"),
+      to: "sessions.create", as: :auth_callback, provider: OAUTH_SERVICE,
+    )
     post "/sign-out", to: "sessions.destroy", as: :sign_out
     get "/*path", to: "not_found"
   end

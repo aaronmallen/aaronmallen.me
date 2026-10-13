@@ -5,6 +5,21 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+### Added
+
+- The admin sign-in page has a GitHub button and a Google button. Google sign-in uses the OAuth client that already
+  connects Google accounts, asks only for `openid email` and keeps no token.
+
+### Changed
+
+- Sign-in matches a verified email, not a GitHub id. GitHub sign-in asks for `user:email` and takes the primary
+  verified address, and Google takes the address Google has verified. Each row in the sign-in log names the provider.
+- GitHub, Google and Mastodon share one callback route for signing in and connecting alike. `AUTH_CALLBACK_PATH` sets
+  it, under `/admin` and with a `:provider` part, and it defaults to `/admin/auth/:provider/callback`, the path each
+  of them already uses.
+- Before you deploy, add your email to `owner_identities` on the live database. The migration drops the GitHub id
+  rows and every session ends, so with no email row nobody can sign in.
+
 ## [26.10.17] - 2026-10-12
 
 ### Fixed

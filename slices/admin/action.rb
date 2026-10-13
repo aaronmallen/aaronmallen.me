@@ -15,6 +15,14 @@ module Admin
 
     private
 
+    def allow_oauth_redirects(_request, response)
+      policy = Slice.config.actions.content_security_policy.dup
+      policy[:form_action] = "'self' https:"
+      response.headers["Content-Security-Policy"] = policy.to_s
+    end
+
+    def auth_callback_url(provider) = routes.url(:admin_auth_callback, provider:).to_s
+
     def auth_session(request) = Auth::Session.for(request)
 
     def back_here(request) = auth_session(request).admin_return_path(request.params[:return_to])
@@ -25,15 +33,9 @@ module Admin
       path
     end
 
-    def github_callback_url = routes.url(:admin_github_callback).to_s
-
-    def google_service_callback_url = routes.url(:admin_google_service_callback).to_s
-
     def handle_invalid_csrf_token(_request, response)
       halt 403, response.render(rejected_view)
     end
-
-    def mastodon_service_callback_url = routes.url(:admin_mastodon_service_callback).to_s
 
     def not_found(response)
       response.format = :html

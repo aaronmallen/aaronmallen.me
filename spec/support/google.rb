@@ -54,6 +54,8 @@ module Spec
         ::Google::Slice["services.operations.change_connection"],
       )
       %w[google.client google.google.client].each { replace_component(it, client) }
+      Admin::Slice.start(:google)
+      replace_component("google.auth", Admin::Auth::Google.new(client: ::Google::Providers::ClientProvider.oauth(Hanami.app.settings)))
     end
 
     def stub_gmail(history: [], history_id: "200", labels: [], profile: "100", signature: "", threads: {})

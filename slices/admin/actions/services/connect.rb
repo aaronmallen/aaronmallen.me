@@ -30,14 +30,11 @@ module Admin
           scope = definition.wanted(Array(request.params[:scopes])).map { it[:id] }.join(" ")
           return mastodon_url(request, definition, scope) if definition.host
 
-          client, redirect_uri = oauth_client(definition)
-          return Failure(:not_configured) unless client.configured?
-
-          Success(client.connect_url(redirect_uri:, scope:, **started(request, definition)))
+          oauth_url(request, definition, scope)
         end
 
         def mastodon_url(request, definition, scope)
-          redirect_uri = mastodon_service_callback_url
+          redirect_uri = auth_callback_url(definition.id)
 
           register_mastodon_app.call(request.params[:server], redirect_uri:, scope:).fmap do |registered|
             host, app = registered.values_at(:host, :app)
@@ -46,10 +43,12 @@ module Admin
           end
         end
 
-        def oauth_client(definition)
-          return [google, google_service_callback_url] if definition.id == GOOGLE
+        def oauth_url(request, definition, scope)
+          client = definition.id == GOOGLE ? google : github
+          return Failure(:not_configured) unless client.configured?
 
-          [github, github_callback_url]
+          Success(client.connect_url(redirect_uri: auth_callback_url(definition.id), scope:,
+                                     **started(request, definition)))
         end
 
         def refuse(response, reason, name)

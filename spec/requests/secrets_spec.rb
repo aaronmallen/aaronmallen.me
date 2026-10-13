@@ -47,10 +47,7 @@ RSpec.describe "Secrets a request carries", type: :request do
 
   describe "GitHub calling the admin back" do
     let(:code) { secret }
-    let(:state) do
-      get "/admin/sign-in"
-      Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
-    end
+    let(:state) { start_admin_sign_in("github") }
 
     def call_back = get("/admin/auth/github/callback", code:, state:)
 

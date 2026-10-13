@@ -11,11 +11,11 @@ module Security
         sign_in_mutations: "repos.sign_in_mutations",
       ]
 
-      def call(request, outcome)
+      def call(request, outcome, provider:)
         access = read_access.call(request)
 
         known_device_mutations.know(**access.slice(*ReadAccess::DEVICE)) if outcome == SIGNED_IN
-        sign_in_mutations.create(outcome: outcome.to_s, **access)
+        sign_in_mutations.create(outcome: outcome.to_s, provider: provider.to_s, **access)
       end
     end
   end

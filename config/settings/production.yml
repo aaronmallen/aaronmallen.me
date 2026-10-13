@@ -27,4 +27,5 @@ share_store:
   region: <%= ENV["SHARE_STORE_REGION"].to_json %>
   secret_key: <%= ENV["SHARE_STORE_SECRET_KEY"].to_json %>
 site:
+  auth_callback_path: <%= ENV.fetch("AUTH_CALLBACK_PATH", "/admin/auth/:provider/callback").to_json %>
   url: https://aaronmallen.me

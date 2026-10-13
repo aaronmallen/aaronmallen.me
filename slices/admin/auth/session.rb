@@ -39,11 +39,11 @@ module Admin
         @session["return_to"] = path
       end
 
-      def sign_in(github_user_id)
+      def sign_in(email)
         path = return_to
         @session.clear
         @session.options[:renew] = true
-        @session["github_user_id"] = github_user_id
+        @session["email"] = email
         @session["signed_in_at"] = @now
         path
       end
@@ -56,7 +56,7 @@ module Admin
       end
 
       def signed_in?
-        !expired? && !ended? && owner_identity_queries.github?(@session["github_user_id"])
+        !expired? && !ended? && owner_identity_queries.email?(@session["email"])
       end
 
       def start_sign_in

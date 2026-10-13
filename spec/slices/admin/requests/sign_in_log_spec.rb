@@ -3,7 +3,7 @@
 RSpec.describe "Admin sign-in log", type: :request do
   let(:address) { "81.2.69.160" }
   let(:agent) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
-  let(:github_user_id) { 931_094 }
+  let(:email) { Spec::AdminSession::EMAIL }
   let(:sign_ins) { Security::Slice["db.rom"].gateways[:default].connection[:sign_ins] }
   let(:token_response) { { access_token: "gho_token" } }
 
@@ -16,8 +16,7 @@ RSpec.describe "Admin sign-in log", type: :request do
 
     stub_request(:post, "https://github.com/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
-    stub_request(:get, "https://api.github.com/user")
-      .to_return(headers: { "Content-Type" => "application/json" }, body: { id: github_user_id }.to_json)
+    stub_github_emails(email)
   end
 
   def callback(user_agent: agent, **params)
@@ -28,17 +27,14 @@ RSpec.describe "Admin sign-in log", type: :request do
 
   def recorded
     {
-      outcome: "signed_in", address:, user_agent: agent, browser: "Chrome", os: "macOS", city: "London", country: "GB",
-      country_name: "United Kingdom",
+      outcome: "signed_in", provider: "github", address:, user_agent: agent, browser: "Chrome", os: "macOS",
+      city: "London", country: "GB", country_name: "United Kingdom",
     }
   end
 
   def sign_in(user_agent: agent) = callback(code: "code", state: start_sign_in, user_agent:)
 
-  def start_sign_in
-    get "/admin/sign-in"
-    Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
-  end
+  def start_sign_in = start_admin_sign_in("github")
 
   describe "signing in as the operator" do
     it "records the sign-in with its address, device and place" do
@@ -88,7 +84,7 @@ RSpec.describe "Admin sign-in log", type: :request do
   end
 
   describe "signing in as another GitHub account" do
-    let(:github_user_id) { 1 }
+    let(:email) { "stranger@example.com" }
 
     it "records a wrong account" do
       sign_in
@@ -108,10 +104,40 @@ RSpec.describe "Admin sign-in log", type: :request do
   describe "a callback GitHub fails" do
     let(:token_response) { { error: "bad_verification_code" } }
 
-    it "records a GitHub failure with the address it came from" do
+    it "records a provider failure from GitHub with the address it came from" do
       sign_in
 
-      expect(sign_ins.select(:outcome, :address).all).to eq([{ outcome: "github_failed", address: }])
+      expect(sign_ins.select(:outcome, :provider, :address).all)
+        .to eq([{ outcome: "provider_failed", provider: "github", address: }])
+    end
+  end
+
+  describe "signing in with Google" do
+    before do
+      set_up_google_client
+      stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+        headers: { "Content-Type" => "application/json" },
+        body: { access_token: "ya29.sign-in", expires_in: 3599, token_type: "Bearer" }.to_json,
+      )
+    end
+
+    def google_sign_in(google_email)
+      stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo").to_return(
+        headers: { "Content-Type" => "application/json" }, body: { email: google_email, email_verified: true }.to_json,
+      )
+      get "/admin/auth/google/callback", { code: "code", state: start_admin_sign_in("google") }, headers(agent)
+    end
+
+    it "records the sign-in as Google's" do
+      google_sign_in(email)
+
+      expect(sign_ins.select(:outcome, :provider).all).to eq([{ outcome: "signed_in", provider: "google" }])
+    end
+
+    it "records a wrong account from Google" do
+      google_sign_in("stranger@example.com")
+
+      expect(sign_ins.select(:outcome, :provider).all).to eq([{ outcome: "wrong_account", provider: "google" }])
     end
   end
 

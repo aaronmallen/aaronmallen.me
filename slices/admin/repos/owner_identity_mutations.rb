@@ -3,11 +3,9 @@
 module Admin
   module Repos
     class OwnerIdentityMutations < Blog::DB::Repo
-      GITHUB = Blog::Types::ServiceProvider["github"]
-
       root :owner_identities
 
-      def add_github(id) = owner_identities.dataset.insert_conflict.insert(provider: GITHUB, external_id: id.to_s)
+      def add(email) = owner_identities.dataset.insert_conflict.insert(email: email.downcase)
     end
   end
 end

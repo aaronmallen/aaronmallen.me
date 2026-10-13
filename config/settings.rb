@@ -207,7 +207,10 @@ module Blog
 
     setting :share_store, default: {}, constructor: object_store
 
-    setting :site, default: {}, constructor: Schema.schema(url: SiteUrl)
+    setting :site, default: {}, constructor: Schema.schema(
+      auth_callback_path: Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}),
+      url: SiteUrl,
+    )
 
     setting :web_threads, default: DEFAULT_WEB_THREADS, constructor: unless_set(Threads, DEFAULT_WEB_THREADS)
 

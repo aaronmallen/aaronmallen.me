@@ -35,9 +35,7 @@ RSpec.describe "An unknown failure reason", type: :request do
     before do
       stub_github_sign_in
       refuse("operations.sign_in", Admin::Operations::SignIn)
-      get "/admin/sign-in"
-      state = Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
-      get "/admin/auth/github/callback", code: "code", state:
+      get "/admin/auth/github/callback", code: "code", state: start_admin_sign_in("github")
     end
 
     it "answers 500 rather than raising" do

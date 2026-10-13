@@ -377,7 +377,7 @@ RSpec.describe "Admin screens", type: :feature do
     database = Security::Slice["db.rom"].gateways[:default].connection
     place = { browser: "Firefox", os: "Linux", city: "Rio de Janeiro", country: "BR" }
     address = "2001:db8::1234:5678"
-    database[:sign_ins].insert(outcome: "wrong_account", address:, user_agent: "Firefox", **place)
+    database[:sign_ins].insert(outcome: "wrong_account", provider: "github", address:, user_agent: "Firefox", **place)
     database[:sightings].insert(
       oauth_client_id: client_id, calls: 1_204, last_address: address, last_user_agent: "Firefox", **place,
     )

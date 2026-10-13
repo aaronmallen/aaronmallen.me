@@ -1865,7 +1865,7 @@ en:
         sign_in_row:
           outcomes:
             denied: "denied"
-            github_failed: "GitHub failed"
+            provider_failed: "%{name} failed"
             signed_in: "signed in"
             unexpected: "unexpected error"
             wrong_account: "wrong account"
@@ -3176,12 +3176,17 @@ en:
           test: "Test"
       sessions:
         failed:
-          denied: "GitHub sign-in did not finish. Try again."
-          github_failed: "GitHub could not confirm who you are. Try again in a moment."
+          denied: "%{name} sign-in did not finish. Try again."
           heading: "Sign-in failed"
-          not_configured: "GitHub sign-in is not set up yet."
+          not_configured: "%{name} sign-in is not set up yet."
+          provider_failed: "%{name} could not confirm who you are. Try again in a moment."
           unexpected: "Sign-in did not finish. Try again."
-          wrong_account: "This GitHub account can't sign in here."
+          wrong_account: "This %{name} account can't sign in here."
+        new:
+          github: "Sign in with GitHub"
+          google: "Sign in with Google"
+          heading: "Sign in"
+          sub: "Sign in with an account whose verified email is on the owner list."
       social:
         index:
           cross_posting: "Cross-posting to %{accounts}"

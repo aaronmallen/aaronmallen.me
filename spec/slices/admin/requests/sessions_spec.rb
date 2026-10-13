@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin sessions", type: :request do
-  let(:github_user_id) { 931_094 }
+  let(:email) { Spec::AdminSession::EMAIL }
   let(:page) { Capybara.string(last_response.body) }
   let(:thirty_days) { 30 * 24 * 60 * 60 }
   let(:token_response) { { access_token: "gho_token", scope: "", token_type: "bearer" } }
@@ -12,9 +12,13 @@ RSpec.describe "Admin sessions", type: :request do
     stub_request(:post, "https://github.com/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
 
-    stub_request(:get, "https://api.github.com/user")
+    stub_request(:get, "https://api.github.com/user/emails")
       .with(headers: { "Authorization" => "Bearer gho_token" })
-      .to_return(headers: { "Content-Type" => "application/json" }, body: { id: github_user_id }.to_json)
+      .to_return(
+        headers: { "Content-Type" => "application/json" },
+        body: [{ email: "old@example.com", primary: false, verified: true }, { email:, primary: true, verified: true }]
+          .to_json,
+      )
   end
 
   def authorize_query
@@ -24,6 +28,8 @@ RSpec.describe "Admin sessions", type: :request do
   def callback(**params)
     get "/admin/auth/github/callback", params
   end
+
+  def cookie_session = Spec::AdminSession.encryptor.decrypt(session_cookie.value)
 
   def live_session_cookie?
     !session_cookie.nil? && !session_cookie.expired?
@@ -50,8 +56,7 @@ RSpec.describe "Admin sessions", type: :request do
 
   def start_sign_in(path = "/admin")
     get path
-    follow_redirect! if last_response.location.end_with?("/admin/sign-in")
-    authorize_query.fetch("state")
+    start_admin_sign_in("github")
   end
 
   def token_request
@@ -65,34 +70,57 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response.location).to end_with("/admin/sign-in")
     end
 
-    it "sends sign-in on to GitHub" do
+    it "renders a page with a GitHub button and a Google button", :aggregate_failures do
       follow_redirect!
+
+      expect(page.find("form[action='/admin/sign-in/github'] button")).to have_text("Sign in with GitHub")
+      expect(page.find("form[action='/admin/sign-in/google'] button")).to have_text("Sign in with Google")
+    end
+
+    it "lets the sign-in forms follow their redirect to an authorize page on any https origin" do
+      follow_redirect!
+
+      expect(last_response.headers["Content-Security-Policy"][/form-action [^;]*/]).to eq("form-action 'self' https:")
+    end
+
+    it "sends the GitHub button on to GitHub" do
+      start_admin_sign_in("github")
 
       expect(last_response.location).to start_with("https://github.com/login/oauth/authorize?")
     end
 
     it "asks GitHub for a code for the operator's OAuth app" do
-      follow_redirect!
+      start_admin_sign_in("github")
 
       expect(authorize_query).to include("client_id" => "client-id", "response_type" => "code")
     end
 
+    it "asks GitHub to read the account's email addresses and nothing more" do
+      start_admin_sign_in("github")
+
+      expect(authorize_query).to include("scope" => "user:email")
+    end
+
     it "asks GitHub to come back to the callback on the site the settings name" do
-      follow_redirect!
+      start_admin_sign_in("github")
 
       expect(authorize_query).to include("redirect_uri" => "https://aaronmallen.me/admin/auth/github/callback")
     end
 
     it "asks GitHub not to offer sign-up" do
-      follow_redirect!
+      start_admin_sign_in("github")
 
       expect(authorize_query).to include("allow_signup" => "false")
     end
 
     it "sends GitHub a state to check on the way back" do
-      follow_redirect!
+      expect(start_admin_sign_in("github").length).to be >= 32
+    end
 
-      expect(authorize_query.fetch("state").length).to be >= 32
+    it "refuses to start a sign-in without a CSRF token" do
+      post "/admin/sign-in/github"
+
+      expect(last_response.status).to eq(403)
     end
 
     it "tells search engines not to index the redirect" do
@@ -104,7 +132,7 @@ RSpec.describe "Admin sessions", type: :request do
     let(:paths) do
       Admin::Slice.routes
       Admin::Routes.definitions.filter_map do |(verb, (path))|
-        next if verb != :get || %w[/auth/github/callback /sign-in].include?(path)
+        next if verb != :get || %w[/auth/:provider/callback /sign-in].include?(path)
 
         "/admin#{path.gsub(/:\w+/) { it == ':network' ? 'mastodon' : '1' }}".chomp("/")
       end
@@ -171,6 +199,13 @@ RSpec.describe "Admin sessions", type: :request do
       expect(token.value).to match(/\A\h{64}\z/)
     end
 
+    it "keeps the email in the session cookie in place of a GitHub id", :aggregate_failures do
+      sign_in
+
+      expect(cookie_session).to include("email" => email)
+      expect(cookie_session).not_to have_key("github_user_id")
+    end
+
     it "sets a session cookie that expires in 30 days" do
       now = Time.at(Time.now.to_i)
       allow(Time).to receive(:now).and_return(now)
@@ -180,8 +215,18 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "signing in with an owner email in another case" do
+    let(:email) { Spec::AdminSession::EMAIL.upcase }
+
+    it "opens the admin" do
+      sign_in
+
+      expect(last_response.location).to end_with("/admin")
+    end
+  end
+
   describe "signing in as another GitHub account" do
-    let(:github_user_id) { 1 }
+    let(:email) { "stranger@example.com" }
 
     before { sign_in }
 
@@ -199,11 +244,51 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "signing in as a GitHub account whose owner email is not its primary" do
+    before do
+      stub_request(:get, "https://api.github.com/user/emails").to_return(
+        headers: { "Content-Type" => "application/json" },
+        body: [
+          { email: "stranger@example.com", primary: true, verified: true }, { email:, primary: false, verified: true },
+        ].to_json,
+      )
+      sign_in
+    end
+
+    it "turns the account away" do
+      expect(last_response.status).to eq(403)
+    end
+  end
+
+  describe "signing in as a GitHub account whose primary email is not verified" do
+    before do
+      stub_github_emails(email, verified: false)
+      sign_in
+    end
+
+    it "turns the account away", :aggregate_failures do
+      expect(last_response.status).to eq(403)
+      expect(signed_out?).to be(true)
+    end
+  end
+
+  describe "signing in as a GitHub account with no emails" do
+    before do
+      stub_request(:get, "https://api.github.com/user/emails")
+        .to_return(headers: { "Content-Type" => "application/json" }, body: "[]")
+      sign_in
+    end
+
+    it "turns the account away" do
+      expect(last_response.status).to eq(403)
+    end
+  end
+
   describe "signing in as a second owner" do
-    let(:github_user_id) { 42 }
+    let(:email) { "second@example.com" }
 
     before do
-      Admin::Slice["repos.owner_identity_mutations"].add_github(github_user_id)
+      Admin::Slice["repos.owner_identity_mutations"].add(email)
       sign_in
     end
 
@@ -396,8 +481,7 @@ RSpec.describe "Admin sessions", type: :request do
   describe "a callback for another GitHub account while signed in" do
     before do
       sign_in
-      stub_request(:get, "https://api.github.com/user")
-        .to_return(headers: { "Content-Type" => "application/json" }, body: { id: 1 }.to_json)
+      stub_github_emails("stranger@example.com")
       sign_in("/admin/sign-in")
     end
 
@@ -455,9 +539,9 @@ RSpec.describe "Admin sessions", type: :request do
       end
     end
 
-    context "when GitHub fails to return the user" do
+    context "when GitHub fails to return the emails" do
       before do
-        stub_request(:get, "https://api.github.com/user").to_return(status: 503)
+        stub_request(:get, "https://api.github.com/user/emails").to_return(status: 503)
         sign_in
       end
 
@@ -466,9 +550,9 @@ RSpec.describe "Admin sessions", type: :request do
       end
     end
 
-    context "when GitHub answers the user with a page instead of JSON" do
+    context "when GitHub answers the emails with a page instead of JSON" do
       before do
-        stub_request(:get, "https://api.github.com/user")
+        stub_request(:get, "https://api.github.com/user/emails")
           .to_return(headers: { "Content-Type" => "text/html" }, body: "<html>Our proxy is down</html>")
         sign_in
       end
@@ -483,9 +567,9 @@ RSpec.describe "Admin sessions", type: :request do
       end
     end
 
-    context "when GitHub calls the user JSON and sends something else" do
+    context "when GitHub calls the emails JSON and sends something else" do
       before do
-        stub_request(:get, "https://api.github.com/user")
+        stub_request(:get, "https://api.github.com/user/emails")
           .to_return(headers: { "Content-Type" => "application/json" }, body: "<html>Our proxy is down</html>")
         sign_in
       end
@@ -656,11 +740,156 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response.headers["set-cookie"]).to be_nil
     end
 
-    it "renders an error page instead of sending anyone to GitHub", :aggregate_failures do
+    it "still renders the sign-in page" do
       get "/admin/sign-in"
 
+      expect(last_response).to be_ok
+    end
+
+    it "renders an error page instead of sending anyone to GitHub", :aggregate_failures do
+      get "/admin/sign-in"
+      post "/admin/sign-in/github", _csrf_token: admin_csrf_token
+
       expect(last_response.status).to eq(503)
-      expect(last_response.body).to include("not set up yet")
+      expect(last_response.body).to include("GitHub sign-in is not set up yet")
+    end
+  end
+
+  describe "signing in with Google" do
+    before do
+      set_up_google_client
+      stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+        headers: { "Content-Type" => "application/json" },
+        body: { access_token: "ya29.sign-in", expires_in: 3599, token_type: "Bearer" }.to_json,
+      )
+      stub_userinfo(email:, email_verified: true)
+    end
+
+    def connections = Services::Slice["db.rom"].gateways[:default].connection[:service_connections]
+
+    def google_callback(**params) = get("/admin/auth/google/callback", params)
+
+    def google_sign_in(path = "/admin")
+      get path
+      google_callback(code: "code", state: start_admin_sign_in("google"))
+    end
+
+    def stub_userinfo(**userinfo)
+      stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo")
+        .with(headers: { "Authorization" => "Bearer ya29.sign-in" })
+        .to_return(headers: { "Content-Type" => "application/json" }, body: userinfo.to_json)
+    end
+
+    it "sends the Google button on to Google" do
+      start_admin_sign_in("google")
+
+      expect(last_response.location).to start_with("https://accounts.google.com/o/oauth2/v2/auth?")
+    end
+
+    it "asks Google for openid and email and nothing more" do
+      start_admin_sign_in("google")
+
+      expect(authorize_query.fetch("scope")).to eq("openid email")
+    end
+
+    it "asks Google to come back to its own sign-in callback" do
+      start_admin_sign_in("google")
+
+      expect(authorize_query).to include("redirect_uri" => "https://aaronmallen.me/admin/auth/google/callback")
+    end
+
+    it "opens the admin URL first asked for" do
+      google_sign_in("/admin?tab=today")
+
+      expect(last_response.location).to end_with("/admin?tab=today")
+    end
+
+    it "keeps the email in the session cookie" do
+      google_sign_in
+
+      expect(cookie_session).to include("email" => email)
+    end
+
+    it "stays signed in" do
+      google_sign_in
+
+      expect(signed_out?).to be(false)
+    end
+
+    it "writes no connected service" do
+      google_sign_in
+
+      expect(connections.count).to eq(0)
+    end
+
+    context "when Google has not verified the email" do
+      before do
+        stub_userinfo(email:, email_verified: false)
+        google_sign_in
+      end
+
+      it "renders an error page", :aggregate_failures do
+        expect(last_response.status).to eq(403)
+        expect(last_response.body).to include("This Google account can")
+      end
+
+      it "stays signed out" do
+        expect(signed_out?).to be(true)
+      end
+    end
+
+    context "when the email is not an owner's" do
+      it "renders an error page" do
+        stub_userinfo(email: "stranger@example.com", email_verified: true)
+        google_sign_in
+
+        expect(last_response.status).to eq(403)
+      end
+    end
+
+    context "when Google rejects the code" do
+      before do
+        stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+          status: 400, headers: { "Content-Type" => "application/json" }, body: { error: "invalid_grant" }.to_json,
+        )
+        google_sign_in
+      end
+
+      it "renders an error page", :aggregate_failures do
+        expect(last_response.status).to eq(502)
+        expect(last_response.body).to include("Google could not confirm who you are")
+      end
+    end
+
+    context "when Google answers the user with a page instead of JSON" do
+      it "renders an error page" do
+        stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo")
+          .to_return(headers: { "Content-Type" => "text/html" }, body: "<html>down</html>")
+        google_sign_in
+
+        expect(last_response.status).to eq(502)
+      end
+    end
+
+    context "when the state was minted for no sign-in" do
+      it "renders an error page" do
+        get "/admin"
+        google_callback(code: "code", state: "forged")
+
+        expect(last_response.status).to eq(401)
+      end
+    end
+
+    context "when Google is not set up" do
+      before { set_up_google_client({ client_id: nil, client_secret: nil }) }
+
+      it "renders an error page instead of sending anyone to Google", :aggregate_failures do
+        get "/admin/sign-in"
+        post "/admin/sign-in/google", _csrf_token: admin_csrf_token
+
+        expect(last_response.status).to eq(503)
+        expect(last_response.body).to include("Google sign-in is not set up yet")
+      end
     end
   end
 end

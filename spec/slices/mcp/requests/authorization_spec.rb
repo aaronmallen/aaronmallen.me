@@ -46,16 +46,14 @@ RSpec.describe "OAuth authorization", type: :request do
 
   def redirect_uri = client.redirect_uris.first
 
-  def sign_in_as(github_user_id)
+  def sign_in_as(email)
     stub_github_sign_in
-    stub_request(:get, "https://api.github.com/user")
-      .to_return(headers: { "Content-Type" => "application/json" }, body: { id: github_user_id }.to_json)
-    get "/admin/sign-in"
-    get "/admin/auth/github/callback", code: "code", state: callback.fetch("state")
+    stub_github_emails(email)
+    get "/admin/auth/github/callback", code: "code", state: start_admin_sign_in("github")
   end
 
   describe "when I am signed out" do
-    it "sends me to GitHub sign-in" do
+    it "sends me to sign-in" do
       authorize
 
       expect(last_response.location).to eq("/admin/sign-in")
@@ -98,17 +96,17 @@ RSpec.describe "OAuth authorization", type: :request do
       set_cookie cookie
     end
 
-    it "sends me to GitHub sign-in" do
+    it "sends me to sign-in" do
       authorize
 
       expect(last_response.location).to eq("/admin/sign-in")
     end
   end
 
-  describe "when another GitHub account signs in" do
+  describe "when another account signs in" do
     before do
       authorize
-      sign_in_as(12_345)
+      sign_in_as("stranger@example.com")
     end
 
     it "refuses the sign-in" do
@@ -656,7 +654,7 @@ RSpec.describe "OAuth authorization", type: :request do
       context "when #{description} and I am signed out" do
         before { authorize(**overrides) }
 
-        it "sends me to GitHub sign-in" do
+        it "sends me to sign-in" do
           expect(last_response.location).to eq("/admin/sign-in")
         end
 

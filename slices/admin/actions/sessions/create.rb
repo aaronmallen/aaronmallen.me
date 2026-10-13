@@ -7,29 +7,31 @@ module Admin
         ENDS_SESSION = :wrong_account
         STATUSES = {
           denied: 401,
-          github_failed: 502,
+          provider_failed: 502,
           wrong_account: 403,
         }.freeze
         UNEXPECTED = 500
 
         include Deps[
-          connect_callback: "actions.services.github_callback",
           failed_view: "ui.views.sessions.failed",
+          github: "github.auth",
+          github_connect: "actions.services.github_callback",
+          google: "google.auth",
+          google_connect: "actions.services.google_callback",
+          mastodon_connect: "actions.services.mastodon_callback",
           record_sign_in: "security.operations.record_sign_in",
           sign_in: "operations.sign_in",
         ]
 
         def handle(request, response)
-          return connect_callback.handle(request, response) if connecting?(request)
+          provider = request.params[:provider]
+          return connect_callback(provider).handle(request, response) if connecting?(request, provider)
 
+          client = sign_in_client(provider) || not_found(response)
           code = Blog::Types::Text[request.params[:code]]
           return fail_sign_in(request, response, :denied) unless callback_valid?(request, code)
 
-          case sign_in.call(code:, redirect_uri: github_callback_url)
-            in Success(github_user_id) then signed_in(request, response, github_user_id)
-            in Failure(reason) then fail_sign_in(request, response, reason)
-            else halt 500
-          end
+          finish_sign_in(request, response, sign_in.call(client:, code:, redirect_uri: auth_callback_url(provider)))
         end
 
         private
@@ -38,23 +40,40 @@ module Admin
           auth_session(request).state?(request.params[:state]) && request.params[:error].nil? && !code.empty?
         end
 
-        def connecting?(request)
+        def connect_callback(provider)
+          { "github" => github_connect, "google" => google_connect, "mastodon" => mastodon_connect }.fetch(provider)
+        end
+
+        def connecting?(request, provider)
           auth_session(request).signed_in? &&
-            Auth::ConnectState.new(request.session).held?(Services::GitHubCallback::PROVIDER, request.params[:state])
+            (sign_in_client(provider).nil? || Auth::ConnectState.new(request.session).held?(provider,
+                                                                                            request.params[:state]))
         end
 
         def fail_sign_in(request, response, reason)
-          record_sign_in.call(request, STATUSES.key?(reason) ? reason : :unexpected)
+          record(request, STATUSES.key?(reason) ? reason : :unexpected)
           end_session(request, response) if reason == ENDS_SESSION
           response.status = STATUSES.fetch(reason, UNEXPECTED)
-          response.render(failed_view, reason:)
+          response.render(failed_view, reason:, provider: request.params[:provider].to_sym)
         end
+
+        def finish_sign_in(request, response, result)
+          case result
+            in Success(email) then signed_in(request, response, email)
+            in Failure(reason) then fail_sign_in(request, response, reason)
+            else halt 500
+          end
+        end
+
+        def record(request, outcome) = record_sign_in.call(request, outcome, provider: request.params[:provider].to_sym)
+
+        def sign_in_client(provider) = { "github" => github, "google" => google }[provider]
 
         def sign_in_required? = false
 
-        def signed_in(request, response, github_user_id)
-          record_sign_in.call(request, :signed_in)
-          path = auth_session(request).sign_in(github_user_id)
+        def signed_in(request, response, email)
+          record(request, :signed_in)
+          path = auth_session(request).sign_in(email)
           response.redirect_to(path || routes.path(:admin_root))
         end
       end

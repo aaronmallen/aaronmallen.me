@@ -16,19 +16,26 @@ module AdminSignIn
 
   def sign_in_to_admin_with_github
     stub_github_sign_in
+    get "/admin/auth/github/callback", code: "code", state: start_admin_sign_in("github")
+  end
+
+  def start_admin_sign_in(provider)
     get "/admin/sign-in"
-    state = Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
-    get "/admin/auth/github/callback", code: "code", state:
+    form = Capybara.string(last_response.body).find("form[action='/admin/sign-in/#{provider}']")
+    post "/admin/sign-in/#{provider}", _csrf_token: form.find("input[name='_csrf_token']", visible: :all).value
+    Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
+  end
+
+  def stub_github_emails(email, primary: true, verified: true)
+    stub_request(:get, "https://api.github.com/user/emails")
+      .to_return(headers: { "Content-Type" => "application/json" }, body: [{ email:, primary:, verified: }].to_json)
   end
 
   def stub_github_sign_in
     connect_oauth_app
     stub_request(:post, "https://github.com/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: { access_token: "gho_token" }.to_json)
-    stub_request(:get, "https://api.github.com/user")
-      .to_return(
-        headers: { "Content-Type" => "application/json" }, body: { id: Spec::AdminSession::GITHUB_USER_ID }.to_json,
-      )
+    stub_github_emails(Spec::AdminSession::EMAIL)
   end
 
   private

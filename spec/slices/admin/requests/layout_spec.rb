@@ -212,6 +212,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     before do
       connect_github(client_id: nil, client_secret: nil)
       get "/admin/sign-in"
+      post "/admin/sign-in/github", _csrf_token: admin_csrf_token
     end
 
     it "renders the site header and page head", :aggregate_failures do

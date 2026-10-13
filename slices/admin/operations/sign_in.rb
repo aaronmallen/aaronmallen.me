@@ -3,23 +3,23 @@
 module Admin
   module Operations
     class SignIn < Blog::Operation
-      include Deps["repos.owner_identity_queries", github: "github.auth"]
+      include Deps["repos.owner_identity_queries"]
 
-      def call(code:, redirect_uri:)
-        github_user_id = step fetch_github_user_id(code:, redirect_uri:)
-        step check_operator(github_user_id)
+      def call(client:, code:, redirect_uri:)
+        email = step fetch_email(client:, code:, redirect_uri:)
+        step check_operator(email)
       end
 
       private
 
-      def check_operator(github_user_id)
-        owner_identity_queries.github?(github_user_id) ? Success(github_user_id) : Failure(:wrong_account)
+      def check_operator(email)
+        owner_identity_queries.email?(email) ? Success(email.downcase) : Failure(:wrong_account)
       end
 
-      def fetch_github_user_id(code:, redirect_uri:)
-        Success(github.user_id(code:, redirect_uri:))
-      rescue OAuth2::Error, Faraday::Error, KeyError
-        Failure(:github_failed)
+      def fetch_email(client:, code:, redirect_uri:)
+        Success(client.verified_email(code:, redirect_uri:))
+      rescue OAuth2::Error, Faraday::Error, KeyError, JSON::ParserError
+        Failure(:provider_failed)
       end
     end
   end

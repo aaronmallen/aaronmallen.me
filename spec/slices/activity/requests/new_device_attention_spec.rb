@@ -150,9 +150,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
 
   describe "a sign-in" do
     def callback(user_agent)
-      get "/admin/sign-in"
-      state = Rack::Utils.parse_query(URI(last_response.location).query).fetch("state")
-      get "/admin/auth/github/callback", { code: "code", state: }, access_headers(user_agent)
+      get "/admin/auth/github/callback", { code: "code", state: start_admin_sign_in("github") },
+          access_headers(user_agent)
     end
 
     def card_row = Capybara.string(last_response.body).find("section.card[data-attention] .li")
@@ -168,8 +167,7 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     end
 
     def wrong_account(user_agent)
-      stub_request(:get, "https://api.github.com/user")
-        .to_return(headers: { "Content-Type" => "application/json" }, body: { id: 1 }.to_json)
+      stub_github_emails("stranger@example.com")
       callback(user_agent)
     end
 

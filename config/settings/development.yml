@@ -33,4 +33,5 @@ share_store:
   path_style: true
   secret_key: <%= ENV["MEDIA_STORE_SECRET_KEY"].to_json %>
 site:
+  auth_callback_path: <%= ENV.fetch("AUTH_CALLBACK_PATH", "/admin/auth/:provider/callback").to_json %>
   url: http://localhost:2300

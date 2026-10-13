@@ -9,15 +9,13 @@ module Admin
     class GitHub
       ACCEPT = { "Accept" => "application/vnd.github+json" }.freeze
       CHALLENGE_METHOD = "S256"
+      EMAILS_URL = "https://api.github.com/user/emails"
+      SIGN_IN_SCOPE = "user:email"
       TOKEN_URL = "https://api.github.com/applications/%<client_id>s/token"
       USER_URL = "https://api.github.com/user"
 
       def initialize(client:)
         @client = client
-      end
-
-      def authorize_url(redirect_uri:, state:)
-        client.auth_code.authorize_url(allow_signup: "false", redirect_uri:, state:)
       end
 
       def configured? = !client.nil?
@@ -45,9 +43,15 @@ module Admin
         )
       end
 
-      def user_id(code:, redirect_uri:)
-        token = exchange(code:, redirect_uri:)
-        profile(token.get(USER_URL, headers: ACCEPT.dup)).fetch("id")
+      def sign_in_url(redirect_uri:, state:)
+        client.auth_code.authorize_url(allow_signup: "false", redirect_uri:, scope: SIGN_IN_SCOPE, state:)
+      end
+
+      def verified_email(code:, redirect_uri:)
+        emails = parse(exchange(code:, redirect_uri:).get(EMAILS_URL, headers: ACCEPT.dup))
+        raise KeyError, "GitHub answered the emails with no JSON list" unless emails.is_a?(Array)
+
+        emails.find { it.is_a?(Hash) && it["primary"] == true && it["verified"] == true }&.fetch("email")
       end
 
       private

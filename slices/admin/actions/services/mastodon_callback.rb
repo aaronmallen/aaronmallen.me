@@ -28,7 +28,7 @@ module Admin
         def connect(started, code)
           connect_mastodon.call(
             host: started.fetch("host"), code:, code_verifier: started.fetch("verifier"),
-            redirect_uri: mastodon_service_callback_url,
+            redirect_uri: auth_callback_url(PROVIDER),
           )
         end
 

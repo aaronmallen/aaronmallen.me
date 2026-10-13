@@ -14,8 +14,6 @@ module Google
           Client.new(oauth: oauth(settings), connection_queries:, change_connection:)
         end
 
-        private
-
         def oauth(settings)
           credentials = settings.google.values_at(:client_id, :client_secret)
           return unless credentials.all?

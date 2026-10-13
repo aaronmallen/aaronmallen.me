@@ -27,7 +27,7 @@ module Admin
 
         def connect(started, code)
           connect_google.call(
-            code:, code_verifier: started.fetch("verifier"), redirect_uri: google_service_callback_url,
+            code:, code_verifier: started.fetch("verifier"), redirect_uri: auth_callback_url(PROVIDER),
             connection: started["connection"],
           )
         end

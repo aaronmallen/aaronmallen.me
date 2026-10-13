@@ -21,8 +21,8 @@ RSpec.describe "Admin security", type: :request do
 
   def sign_in_row(**row)
     database[:sign_ins].insert(
-      outcome: "signed_in", address: "81.2.69.160", user_agent: "Chrome/141", browser: "Chrome", os: "macOS",
-      city: "London", country: "GB", **row,
+      outcome: "signed_in", provider: "github", address: "81.2.69.160", user_agent: "Chrome/141", browser: "Chrome",
+      os: "macOS", city: "London", country: "GB", **row,
     )
   end
 
@@ -51,6 +51,20 @@ RSpec.describe "Admin security", type: :request do
 
       expect(card("Sign-ins").find(".li")).to have_text("wrong account").and have_text("Paris · FR · 203.0.113.9")
         .and have_css("time")
+    end
+
+    it "names the provider each sign-in went through" do
+      sign_in_row(provider: "google")
+      get "/admin/security"
+
+      expect(card("Sign-ins").find(".li")).to have_text("Google · London · GB · 81.2.69.160")
+    end
+
+    it "names the provider that failed" do
+      sign_in_row(provider: "google", outcome: "provider_failed")
+      get "/admin/security"
+
+      expect(card("Sign-ins").find(".li")).to have_css(".pill.pink", exact_text: "Google failed")
     end
 
     it "pills a sign-in green when it went through and pink when it did not", :aggregate_failures do

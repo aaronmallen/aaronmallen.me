@@ -52,4 +52,5 @@ share_store:
   endpoint: null
   secret_key: null
 site:
+  auth_callback_path: <%= ENV.fetch("AUTH_CALLBACK_PATH", "/admin/auth/:provider/callback").to_json %>
   url: https://aaronmallen.me

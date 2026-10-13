@@ -4,21 +4,11 @@ module Admin
   module Actions
     module Sessions
       class New < Action
-        include Deps[github: "github.auth", failed_view: "ui.views.sessions.failed"]
+        before :allow_oauth_redirects
 
-        def handle(request, response)
-          return not_configured(response) unless github.configured?
-
-          state = auth_session(request).start_sign_in
-          response.redirect_to(github.authorize_url(redirect_uri: github_callback_url, state:))
-        end
+        def handle(_request, response) = response.render(view)
 
         private
-
-        def not_configured(response)
-          response.status = 503
-          response.render(failed_view, reason: :not_configured)
-        end
 
         def sign_in_required? = false
       end
