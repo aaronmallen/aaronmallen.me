@@ -135,7 +135,7 @@ one.
 | [0128][0128] | Lay out the admin as a full-width pill-nav shell with right-side drawers | ![Active][active] | 2026-10-07 |
 | [0129][0129] | Store MaxMind's country name beside each country code | ![Active][active] | 2026-10-08 |
 | [0130][0130] | Keep service credentials encrypted in a services slice and define each service in code | ![Active][active] | 2026-10-08 |
-| [0131][0131] | Keep owner identities in the database and add the first by hand | ![Active][active] | 2026-10-08 |
+| [0131][0131] | Keep owner identities in the database and add the first by hand | ![Superseded][superseded-0158] | 2026-10-08 |
 | [0132][0132] | Send a social post to each connected account the owner ticks | ![Active][active] | 2026-10-08 |
 | [0133][0133] | Count overlapping work sessions once in rollups by merging them in SQL at read time | ![Active][active] | 2026-10-08 |
 | [0134][0134] | Store each pull request once and read it twice in the activity view | ![Active][active] | 2026-10-09 |
@@ -162,6 +162,7 @@ one.
 | [0155][0155] | Show mail HTML inline with its remote images, and clean it once at sync | ![Active][active] | 2026-10-12 |
 | [0156][0156] | Keep a board stage on tasks beside their status | ![Active][active] | 2026-10-12 |
 | [0157][0157] | Publish a project's tasks through its board flag | ![Active][active] | 2026-10-12 |
+| [0158][0158] | Match the owner on a verified email from GitHub or Google | ![Active][active] | 2026-10-12 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -320,6 +321,7 @@ one.
 [0155]: 0155-show-mail-html-inline-with-its-remote-images-and-clean-it-once-at-sync.md
 [0156]: 0156-keep-a-board-stage-on-tasks-beside-their-status.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
+[0158]: 0158-match-the-owner-on-a-verified-email-from-github-or-google.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -334,4 +336,5 @@ one.
 [superseded-0139]: https://img.shields.io/badge/0139-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0140]: https://img.shields.io/badge/0140-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0153]: https://img.shields.io/badge/0153-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0158]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

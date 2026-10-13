@@ -1,17 +1,19 @@
 ---
 id: "0131"
 title: Keep owner identities in the database and add the first by hand
-status: active
+status: superseded
 created: 2026-10-08
 area: [admin, config, db]
+superseded-by: "0158"
 supersedes: ["0023"]
 issue: "#792"
+amended: ["#1155"]
 tags: [auth, oauth, github, owner, identities, sign-in, settings]
 ---
 
 # ADR 0131: Keep owner identities in the database and add the first by hand
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -66,4 +68,4 @@ A sign-in that asks for no scopes gets a token that reads only public profile da
 
 The MCP consent screen (ADR 0056) builds on this sign-in, so it inherits these costs too.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange
