@@ -59,6 +59,7 @@ module Blog
     SECRETS = %i[reader_salt analytics_salt app_secret data_key].freeze
 
     AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
+    BoardDays = Types::Coercible::Integer.constrained(gt: 0)
     MinimumSubmitSeconds = Types::Coercible::Integer.constrained(gteq: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
@@ -142,6 +143,8 @@ module Blog
     )
 
     setting :backup_store, default: {}, constructor: object_store(DEFAULT_BACKUP_STORE_READ_TIMEOUT)
+
+    setting :board, constructor: Schema.schema(closed_days: BoardDays)
 
     setting :bluesky, default: {}, constructor: Schema.schema(profile_url?: Value)
 

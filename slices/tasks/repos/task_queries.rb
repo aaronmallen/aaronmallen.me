@@ -7,7 +7,9 @@ module Tasks
       LINK_LIMIT = 6
       TODAY = Blog::Types::TaskFilter["today"]
 
-      include Deps[project_queries: "projects.repos.project_queries"]
+      DAY = 86_400
+
+      include Deps["settings", project_queries: "projects.repos.project_queries"]
 
       def all_open = tasks.open.in_order.to_a
 
@@ -59,10 +61,10 @@ module Tasks
         page.fill(found.open.searched(**by_project(**search)).in_order.paged(page).to_a)
       end
 
-      def on_board(project_id) = with_details.searched(project_ids: [project_id]).in_order.to_a
+      def on_board(project_id) = recent(with_details.searched(project_ids: [project_id])).in_order.to_a
 
       def on_public_board(project_id)
-        tasks.searched(project_ids: project_id).order(Sequel.desc(:completed_at), :position, :id).to_a
+        recent(tasks.searched(project_ids: project_id)).order(Sequel.desc(:completed_at), :position, :id).to_a
       end
 
       def on_public_board_by_id(project_id, id)
@@ -98,6 +100,11 @@ module Tasks
 
       def by_project(projects: [], **search)
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
+      end
+
+      def recent(found)
+        since = Time.now - (settings.board[:closed_days] * DAY)
+        found.where(Sequel.|({ completed_at: nil }, Sequel[:completed_at] > since))
       end
 
       def with_details = tasks.detailed

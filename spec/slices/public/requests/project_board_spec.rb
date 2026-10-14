@@ -123,13 +123,36 @@ RSpec.describe "Project board", type: :request do
       expect(page).to have_no_text("secret note")
     end
 
-    it "shows the day a task was done or canceled", :aggregate_failures do
-      link(create(:task, :done, completed_at: Time.utc(2026, 10, 3, 18)), project)
-      link(create(:task, :canceled, completed_at: Time.utc(2026, 10, 4, 18)), project)
-      get "/projects/doing-it"
+    describe "on a fixed day" do
+      before { allow(Time).to receive(:now).and_return(Time.utc(2026, 10, 5, 12)) }
 
-      expect(column("done")).to have_css(".board-meta", exact_text: "done Oct 3, 2026")
-      expect(column("canceled")).to have_css(".board-meta", exact_text: "canceled Oct 4, 2026")
+      it "shows the day a task was done or canceled", :aggregate_failures do
+        link(create(:task, :done, completed_at: Time.utc(2026, 10, 3, 18)), project)
+        link(create(:task, :canceled, completed_at: Time.utc(2026, 10, 4, 18)), project)
+        get "/projects/doing-it"
+
+        expect(column("done")).to have_css(".board-meta", exact_text: "done Oct 3, 2026")
+        expect(column("canceled")).to have_css(".board-meta", exact_text: "canceled Oct 4, 2026")
+      end
+    end
+
+    describe "a closed task's age" do
+      let(:cutoff) { Time.now - (14 * 86_400) }
+
+      it "drops a task closed 14 days ago or more and keeps one closed since" do
+        link(create(:task, :done, title: "Shipped", completed_at: cutoff), project)
+        link(create(:task, :canceled, title: "Dropped", completed_at: cutoff + 60), project)
+        get "/projects/doing-it"
+
+        expect(page.all(".board-title").map(&:text)).to eq(["Dropped"])
+      end
+
+      it "keeps the page of a task off the board" do
+        task = link(create(:task, :done, title: "Shipped", completed_at: cutoff - 60), project)
+        get "/projects/doing-it/tasks/#{task.id}"
+
+        expect(page).to have_css("h1", exact_text: "Shipped")
+      end
     end
 
     it "keeps the board once the project is archived" do

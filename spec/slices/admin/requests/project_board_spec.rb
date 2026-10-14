@@ -301,5 +301,55 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(last_response.status).to eq(404)
       end
     end
+
+    describe "a closed task's age" do
+      def board = Blog::Types::TaskColumn.values.flat_map { titles(it) }
+
+      def days_ago(days) = now - (days * 86_400)
+
+      it "drops a task closed 14 days ago or more", :aggregate_failures do
+        linked(:done, title: "Shipped", completed_at: days_ago(14))
+        linked(:canceled, title: "Dropped", completed_at: days_ago(30))
+        get "/admin/projects/#{project.id}"
+
+        expect(board).to be_empty
+        expect(page).to have_css(".kb-meta", text: "0 open · 0 total")
+      end
+
+      it "keeps a task closed less than 14 days ago", :aggregate_failures do
+        linked(:done, title: "Shipped", completed_at: days_ago(14) + 60)
+        linked(:canceled, title: "Dropped", completed_at: days_ago(1))
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("done")).to eq(["Shipped"])
+        expect(titles("canceled")).to eq(["Dropped"])
+      end
+
+      it "counts the days from the last close" do
+        task = linked(:done, title: "Shipped again", completed_at: days_ago(30))
+        move(task, "backlog")
+        move(task, "done")
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("done")).to eq(["Shipped again"])
+      end
+
+      it "reads the days from settings" do
+        change_board_setting(:closed_days, to: 1)
+        linked(:done, title: "Shipped", completed_at: days_ago(2))
+        get "/admin/projects/#{project.id}"
+
+        expect(board).to be_empty
+      end
+
+      it "keeps a task off the board in the task list and MCP", :aggregate_failures do
+        linked(:done, title: "Shipped", completed_at: days_ago(30))
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.all(".task-title").map(&:text)).to eq(["Shipped"])
+        expect(mcp_answer("list_tasks", statuses: %w[done]).fetch("tasks").map { trusted(it.fetch("title")) })
+          .to eq(["Shipped"])
+      end
+    end
   end
 end

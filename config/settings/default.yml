@@ -20,6 +20,8 @@ backup_store:
   read_timeout: <%= ENV["BACKUP_STORE_READ_TIMEOUT"].to_json %>
   region: <%= ENV["BACKUP_STORE_REGION"].to_json %>
   secret_key: <%= ENV["BACKUP_STORE_SECRET_KEY"].to_json %>
+board:
+  closed_days: 14
 bluesky:
   profile_url: https://bsky.app/profile/aaronmallen.dev
 client_registration:

@@ -6,6 +6,11 @@ module SettingsOverrides
     allow(settings).to receive(:attention).and_return(settings.attention.merge(limit => to))
   end
 
+  def change_board_setting(key, to:)
+    settings = Hanami.app["settings"]
+    allow(settings).to receive(:board).and_return(settings.board.merge(key => to))
+  end
+
   def change_contact_setting(key, to:)
     settings = Hanami.app["settings"]
     allow(settings).to receive(:contact).and_return(settings.contact.merge(key => to))
