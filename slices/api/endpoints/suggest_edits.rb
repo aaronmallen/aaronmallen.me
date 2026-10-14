@@ -91,13 +91,16 @@ module API
 
       def for_social_post(id, edits)
         social_post = social_post_queries.editable(id)
-        return not_found(Helpers::Wording.missing("unsent social post", id)) if social_post.nil?
+        return unsent_missing(id) if social_post.nil?
 
         numbered = edits.map { it.merge(part: it.fetch(:part, FIRST_PART)) }
         missing = missing_part(numbered, social_post.parts.length)
         return invalid(edits: ["social post #{id} has no part #{missing}"]) if missing
 
-        stored(replace_social_post_edits.call(id, edits: numbered), Suggestions::SOCIAL_POST)
+        case replace_social_post_edits.call(id, edits: numbered)
+          in Failure(:already_posted) then unsent_missing(id)
+          in result then stored(result, Suggestions::SOCIAL_POST)
+        end
       end
 
       def missing_part(edits, count) = edits.map { it.fetch(:part) }.grep_v(FIRST_PART..count).first
@@ -110,6 +113,8 @@ module API
           else failed("could not store the edits")
         end
       end
+
+      def unsent_missing(id) = not_found(Helpers::Wording.missing("unsent social post", id))
     end
   end
 end

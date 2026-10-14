@@ -77,6 +77,55 @@ RSpec.describe "API suggestions", type: :request do
 
       expect(status).to eq(403)
     end
+
+    describe "on a social post" do
+      let(:lock_key) { "social.operations.lock_editable_social_post" }
+      let(:social_post) { compose("teh cat sat") }
+
+      def around_lock(&)
+        inner = Suggestions::Slice[lock_key]
+        replace_component(lock_key, ->(id) { yield(id, -> { inner.call(id) }) })
+      end
+
+      def compose(*parts)
+        social_post_mutations.create_with_parts(parts:, posted_at: nil, status: "draft", targets: %w[mastodon])
+      end
+
+      def nowait(id)
+        database = Suggestions::Slice["db.rom"].gateways[:default].connection
+        Thread.new do
+          Thread.current.report_on_exception = false
+          database[:social_posts].where(id:).for_update.nowait.to_a
+        end.join
+        :free
+      rescue Sequel::DatabaseError
+        :held
+      end
+
+      def social_post_mutations = Social::Slice["repos.social_post_mutations"]
+
+      def suggest_social
+        call_api(:post, "", JSON.generate(target: "social_post", id: social_post.id, edits: [edit("teh", "the")]))
+      end
+
+      before { connect_social_networks }
+
+      it "refuses with a 404 and stores nothing when the post sends before the lock", :aggregate_failures do
+        around_lock { |id, lock| social_post_mutations.mark_posted(id).then { lock.call } }
+        suggest_social
+
+        expect(status).to eq(404)
+        expect(Suggestions::Slice["repos.suggestion_queries"].for_social_post(social_post.id)).to be_nil
+      end
+
+      it "holds the social post while it replaces the edits", :commits do
+        held = []
+        around_lock { |id, lock| lock.call.tap { held << nowait(id) } }
+        suggest_social
+
+        expect(held).to eq([:held])
+      end
+    end
   end
 
   describe "POST /api/v1/suggestions/:suggestion_id/accept" do
