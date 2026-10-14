@@ -66,6 +66,12 @@ module Admin
             )
           end
 
+          def submit
+            Button(type: "submit", small: true, variant: :pri, icon: "fa-solid fa-arrow-up-from-bracket") do
+              t(".upload")
+            end
+          end
+
           def upload_form
             Form(
               action: path(:admin_create_files), enctype: "multipart/form-data", class: "file-drop",
@@ -77,11 +83,8 @@ module Admin
               Icon("fa-solid fa-cloud-arrow-up")
               label(for: FILES_ID, data: { file_drop_status: true }) { t(".drop") }
               input(id: FILES_ID, class: "file-drop-input", type: "file", name: "files[]", multiple: true)
-              noscript do
-                Button(type: "submit", small: true, variant: :pri, icon: "fa-solid fa-arrow-up-from-bracket") do
-                  t(".upload")
-                end
-              end
+              Checkbox(label: t(".group"), name: "group")
+              noscript { submit }
             end
           end
         end

@@ -151,6 +151,7 @@ RSpec.describe "MCP reach", type: :app do
       "shares.operations.set_share_alt_text" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.set_short_link_title" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.upload_share" => "spec #1053 keeps MCP tools out of shares",
+      "shares.operations.upload_share_group" => "#1265 adds the share group tools",
       "social.operations.check_author_scope" => "verify_webmention and the webmention repos check an author owns pages",
       "social.operations.check_link" => "the weekly post link check fetches a link through the webmention guard",
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",

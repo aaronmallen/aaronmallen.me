@@ -20,8 +20,8 @@ RSpec.describe "Admin files", type: :request do
 
   def shares = Shares::Slice["relations.shares"].to_a
 
-  def upload(*files, accept: "text/html", **env)
-    post "/admin/files", { files: }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token, "HTTP_ACCEPT" => accept, **env }
+  def upload(*files, accept: "text/html", group: "0", **env)
+    post "/admin/files", { files:, group: }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token, "HTTP_ACCEPT" => accept, **env }
   end
 
   describe "signed in with a store" do
@@ -162,6 +162,7 @@ RSpec.describe "Admin files", type: :request do
         form = page.find("form.file-drop[action='/admin/files'][method='post'][enctype='multipart/form-data']")
 
         expect(form).to have_field("files[]", type: "file")
+        expect(form).to have_unchecked_field("Share as one link")
         expect(form).to have_css("noscript", visible: :all)
       end
     end
@@ -202,6 +203,59 @@ RSpec.describe "Admin files", type: :request do
 
         expect(last_response.status).to eq(201)
         expect(json).to eq("links" => ["http://shares.localhost/#{code('a.txt')}"], "message" => "Uploaded")
+      end
+
+      describe "as one link" do
+        let(:groups) { Shares::Slice["relations.share_groups"].with_code.to_a }
+
+        let(:group_files) { Shares::Slice["relations.share_group_files"].to_a }
+
+        def upload_group(**)
+          upload(file("a", "a.txt", "text/plain"), file("%PDF", "b.pdf", "application/pdf"), group: "1", **)
+        end
+
+        it "makes one group with one code and no single shares", :aggregate_failures do
+          upload_group
+
+          expect(groups.size).to eq(1)
+          expect(group_files.map { it[:filename] }).to contain_exactly("a.txt", "b.pdf")
+          expect(shares).to be_empty
+        end
+
+        it "stores each file in the share bucket" do
+          upload_group
+
+          group_files.each { expect(a_request(:put, share_store_url(it[:key]))).to have_been_made }
+        end
+
+        it "says so" do
+          upload_group
+          follow_redirect!
+
+          expect(page).to have_css("[data-toast]", text: "2 files uploaded as one link")
+        end
+
+        it "answers a script with the group's link", :aggregate_failures do
+          upload_group(accept: "application/json")
+
+          expect(last_response.status).to eq(201)
+          expect(json["links"]).to eq(["http://shares.localhost/#{groups.first[:code]}"])
+        end
+
+        it "refuses a post with no file" do
+          upload(group: "1", accept: "application/json")
+
+          expect(last_response.status).to eq(422)
+        end
+      end
+
+      it "makes one share per file when the box is left unticked", :aggregate_failures do
+        upload(file("a", "a.txt", "text/plain"), file("b", "b.txt", "text/plain"), accept: "application/json")
+
+        expect(json["links"]).to contain_exactly(
+          "http://shares.localhost/#{code('a.txt')}", "http://shares.localhost/#{code('b.txt')}",
+        )
+        expect(Shares::Slice["relations.share_groups"].count).to eq(0)
       end
 
       it "refuses a post with no file", :aggregate_failures do

@@ -82,6 +82,9 @@ en:
           zero: "Nothing uploaded · the share store isn't answering"
         delete: "Nothing deleted · the share store isn't answering"
       deleted: "File deleted"
+      grouped:
+        one: "Uploaded as one link"
+        other: "%{count} files uploaded as one link"
       saved: "File saved"
       uploaded:
         one: "Uploaded"
@@ -2808,6 +2811,7 @@ en:
           drop: "Drop files here to share them, or choose them"
           empty: "Nothing shared yet. Drop a file above."
           filter: "Show"
+          group: "Share as one link"
           heading: "Files"
           images: "images"
           lede:

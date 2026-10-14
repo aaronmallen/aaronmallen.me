@@ -36,7 +36,8 @@ function setup(form) {
     form.setAttribute("aria-busy", "true");
 
     const sent = upload(files).catch(() => ({ ok: false, links: [], message: fileDropFailed }));
-    const copied = files.length === 1 ? copyLater(sent.then(only)) : Promise.resolve(false);
+    const single = files.length === 1 || form.querySelector("input[type=checkbox][name=group]")?.checked;
+    const copied = single ? copyLater(sent.then(only)) : Promise.resolve(false);
     const { ok, links, message } = await sent;
 
     status.textContent = idle;

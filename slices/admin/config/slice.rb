@@ -92,7 +92,8 @@ module Admin
 
     import keys: %w[
       operations.create_short_link operations.delete_share operations.delete_short_link operations.save_share
-      operations.save_short_link operations.upload_share repos.share_queries repos.short_link_queries
+      operations.save_short_link operations.upload_share operations.upload_share_group repos.share_queries
+      repos.short_link_queries
     ], from: :shares
 
     import keys: %w[
