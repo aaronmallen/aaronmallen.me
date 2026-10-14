@@ -21,6 +21,7 @@ module Blog
     SUGGESTION_EDITS_MAX = 50
     SUGGESTION_REASON_MAX = 200
     SUGGESTION_TEXT_MAX = 1000
+    TOUCH_EVERY = 5 * 60
     WRITING_PATH = "/writing"
   end
 end

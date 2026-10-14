@@ -11,7 +11,9 @@ module API
 
       def revoke(id, at: Time.now) = (update(id, revoked_at: at) if api_tokens.live.by_pk(id).exist?)
 
-      def touch_last_used(id, at: Time.now) = update(id, last_used_at: at)
+      def touch_last_used(id, at: Time.now, unless_since: at)
+        api_tokens.by_pk(id).last_used_before(unless_since).command(:update, result: :one).call(last_used_at: at)
+      end
     end
   end
 end

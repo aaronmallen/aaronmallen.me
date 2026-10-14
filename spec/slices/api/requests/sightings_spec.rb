@@ -3,6 +3,7 @@
 RSpec.describe "API token sightings", type: :request do
   let(:agent) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
   let(:minted) { API::Slice["operations.mint_token"].call(name: "Terminal").value! }
+  let(:known_devices) { Security::Slice["db.rom"].gateways[:default].connection[:known_devices] }
   let(:sightings) { Security::Slice["db.rom"].gateways[:default].connection[:sightings] }
 
   before do
@@ -79,6 +80,27 @@ RSpec.describe "API token sightings", type: :request do
     2.times { call_api(user_agent: "curl/8.7.1") }
 
     expect(sightings.select_map(:calls)).to eq([2])
+  end
+
+  it "knows the device it saw" do
+    call_api
+
+    device = recorded.except(:calls)
+
+    expect(known_devices.select(*device.keys).all).to eq([device])
+  end
+
+  it "knows a device once however often it calls" do
+    3.times { call_api }
+
+    expect(known_devices.count).to eq(1)
+  end
+
+  it "records a sighting in one statement" do
+    minted
+    found = counting { call_api }
+
+    expect(found.grep(/known_devices|sightings/).size).to eq(1)
   end
 
   it "records nothing for a token it refuses" do

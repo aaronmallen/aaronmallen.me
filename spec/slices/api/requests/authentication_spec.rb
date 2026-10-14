@@ -132,6 +132,31 @@ RSpec.describe "API authentication", type: :request do
       expect(stored.one[:last_used_at]).to be >= before.floor
     end
 
+    it "stamps the last use again once five minutes have passed" do
+      token = minted("Laptop")
+      stored.where(id: token[:token].id).update(last_used_at: Time.now - (6 * 60))
+      read_token("Bearer #{token[:value]}")
+
+      expect(stored.one[:last_used_at]).to be_within(60).of(Time.now)
+    end
+
+    it "leaves the last use alone within five minutes" do
+      token = minted("Laptop")
+      used = Time.now.floor - (4 * 60)
+      stored.where(id: token[:token].id).update(last_used_at: used)
+      read_token("Bearer #{token[:value]}")
+
+      expect(stored.one[:last_used_at]).to eq(used)
+    end
+
+    it "answers with the last use it kept" do
+      token = minted("Laptop")
+      stored.where(id: token[:token].id).update(last_used_at: Time.now.floor - 60)
+      read_token("Bearer #{token[:value]}")
+
+      expect(document["last_used_at"]).to eq(stored.one[:last_used_at].utc.iso8601)
+    end
+
     it "answers with the last use it stamped" do
       read_token("Bearer #{value}")
 

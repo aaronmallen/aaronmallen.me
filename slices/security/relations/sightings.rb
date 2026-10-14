@@ -12,9 +12,13 @@ module Security
       def newest_first = order(self[:last_seen_at].desc, self[:id].desc)
 
       def sight(row, at:)
+        device = row.except(:last_address, :last_user_agent).merge(created_at: at)
+        known = dataset.db[:known_devices].insert_conflict(target: KEY).with_sql(:insert_sql, device)
         update = excluded(%i[last_address last_user_agent last_seen_at]).merge(calls: Sequel[:sightings][:calls] + 1)
 
-        upsert(row.merge(first_seen_at: at, last_seen_at: at), target: KEY, update:)
+        sightings = dataset.with(:known, known).insert_conflict(target: KEY, update:)
+
+        sightings.insert(row.merge(first_seen_at: at, last_seen_at: at))
       end
     end
   end

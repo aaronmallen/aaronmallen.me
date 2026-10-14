@@ -8,7 +8,7 @@ module MCP
       NO_RESOURCE = "the access token names no resource"
       NO_TOKEN = "this endpoint takes a bearer access token"
       REJECT = :reject
-      TOUCH_EVERY = 5 * 60
+      TOUCH_EVERY = Blog::Constants::TOUCH_EVERY
       UNKNOWN_CLIENT = "the client this token belongs to is no longer connected"
       UNUSABLE_TOKEN = "the access token is unknown, expired or revoked"
       WRONG_RESOURCE = "the access token was issued for another resource"

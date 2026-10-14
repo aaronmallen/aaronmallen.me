@@ -9,10 +9,11 @@ module Spec
 
       def initialize
         @queries = []
+        @thread = Thread.current
       end
 
       def on_sql(event)
-        queries << event[:query]
+        queries << event[:query] if Thread.current.equal?(@thread)
       end
     end
 

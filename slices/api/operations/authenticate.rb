@@ -6,6 +6,7 @@ module API
       BEARER = /\ABearer +(?<token>\S+)\z/i
       INVALID_TOKEN = "invalid_token"
       NO_TOKEN = "this endpoint takes a bearer API token"
+      TOUCH_EVERY = Blog::Constants::TOUCH_EVERY
       UNUSABLE_TOKEN = "the API token is unknown, revoked or expired"
 
       include Deps["repos.api_token_mutations", "repos.api_token_queries"]
@@ -13,7 +14,7 @@ module API
       def call(authorization)
         value = step read(authorization)
         token = step find(value)
-        api_token_mutations.touch_last_used(token.id)
+        touch(token) || token
       end
 
       private
@@ -26,6 +27,11 @@ module API
       def read(authorization)
         match = BEARER.match(authorization.to_s)
         match ? Success(match[:token]) : Failure({ error_description: NO_TOKEN })
+      end
+
+      def touch(token)
+        at = Time.now
+        api_token_mutations.touch_last_used(token.id, at:, unless_since: at - TOUCH_EVERY)
       end
     end
   end
