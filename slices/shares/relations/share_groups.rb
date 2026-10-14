@@ -10,6 +10,8 @@ module Shares
         end
       end
 
+      def newest_first = order(self[:created_at].desc, self[:id].desc)
+
       def with_code = qualified.join(:short_codes).select_append { |short_codes:| short_codes[:code] }
     end
   end

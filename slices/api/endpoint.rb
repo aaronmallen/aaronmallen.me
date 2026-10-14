@@ -71,6 +71,8 @@ module API
 
     def serialized(serializer, object, **params) = serializer.new(object, params:).serializable_hash
 
+    def share_origin = settings.share_site[:url].chomp("/")
+
     def suggested(suggestion)
       edits = suggestion&.open_edits || Blog::Constants::EMPTY_ARRAY
 
