@@ -167,6 +167,7 @@ RSpec.describe "MCP reach", type: :app do
       "tasks.operations.order_task_positions" => "task repos run it to place a task among its list",
       "tasks.operations.reach_issues" => "the issue sync runs it to import the other end of a relation",
       "tasks.operations.set_task_column" => "the admin board moves cards; stage_task and the status tools cover it",
+      "tasks.operations.set_tasks_column" => "the admin board moves ticked cards; the status tools cover it",
       "tasks.operations.settle_task" => "the issue sync runs it to replay and settle each issue's state",
       "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",

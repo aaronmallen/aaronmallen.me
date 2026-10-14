@@ -241,6 +241,18 @@ en:
   projects_page:
     toasts:
       archived: "Archived · removed from /projects"
+      bulk:
+        failed:
+          not_found: "Nothing changed · %{task} is gone"
+          other: "Nothing changed · %{task} would not change"
+        invalid:
+          blank: "Tick a card first"
+          format: "Nothing changed · pick a column from the bar"
+          long: "Tick 100 cards or fewer"
+          to_blank: "Pick a column first"
+        moved:
+          one: "Moved %{count} task to %{column}"
+          other: "Moved %{count} tasks to %{column}"
       created: "Project created"
       moved: "Moved %{key} to %{column}"
       not_started: "Not archived · its start month has not come yet"
@@ -1630,6 +1642,11 @@ en:
           publish: "Publish Kanban"
         board_card:
           move: "Move to %{column}"
+          pick: "Select %{task}"
+        bulk:
+          label: "Ticked cards"
+          move: "Move"
+          pick_column: "Move to…"
         placement:
           heading: "Placement"
           restore_note: "Restore puts it back on /projects."
@@ -3112,7 +3129,7 @@ en:
           counts: "%{open} open · %{total} total"
           edit: "Edit Project"
           empty: "No tasks"
-          hint: "Drag a card to another column, or move it with its arrows or its menu. In progress starts the task in today's sprint; done and canceled close it."
+          hint: "Drag a card to another column, or move it with its arrows or its menu. Select moves several at once. In progress starts the task in today's sprint; done and canceled close it."
           no_tagline: "No description yet."
           private: "board is private"
           published: "board published"

@@ -189,6 +189,7 @@ module Admin
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID
     post "/projects/:id/tags/delete", to: "projects.untag", as: :untag_project, id: ID
+    post "/projects/:id/tasks/bulk", to: "projects.bulk", as: :bulk_project_tasks, id: ID
     post "/projects/:id/tasks/:task_id/move", to: "projects.move_task", as: :move_project_task, id: ID, task_id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID

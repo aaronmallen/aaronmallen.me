@@ -6,7 +6,7 @@ const DRAGGING = "kc-dragging";
 const HOLD = 300;
 const MOVE = "form[data-morph]";
 const OVER = "kcol-over";
-const PRESS = "button, form, input";
+const PRESS = "button, form, input, label";
 const SLOP = 6;
 const TITLE = ".kc-title";
 

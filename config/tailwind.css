@@ -4737,6 +4737,15 @@
   }
 }
 
+@utility kb-bulk {
+  &:has(form[data-bulk-off]) {
+    & .bulk-pick,
+    & .bulk-bar {
+      @apply hidden;
+    }
+  }
+}
+
 @utility kb {
   @apply grid auto-cols-[minmax(17rem,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2;
   scroll-snap-type: x proximity;

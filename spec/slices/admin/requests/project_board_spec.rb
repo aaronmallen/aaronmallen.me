@@ -9,6 +9,10 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def arrows(name) = column(name).all(".hov form[data-morph] input[name=to]", visible: :all).map(&:value)
 
+  def bulk(ids, to)
+    post("/admin/projects/#{project.id}/tasks/bulk", { _csrf_token: admin_csrf_token, act: "move", ids:, to: })
+  end
+
   def column(name) = page.find("section.kcol.k-#{name}")
 
   def link(task) = Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", project.id])
@@ -119,6 +123,20 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(arrows("canceled")).to eq(%w[done])
       end
 
+      it "offers a Select button for the board's bulk bar" do
+        expect(page).to have_css("button[data-bulk-toggle='board-bulk']", visible: :all)
+      end
+
+      it "gives each card a box that joins the bar" do
+        expect(page.all(".kc input[type='checkbox'][name='ids[]'][form='board-bulk']").size).to eq(5)
+      end
+
+      it "offers each column as a target in the bar", :aggregate_failures do
+        expect(page).to have_css("form#board-bulk[action='/admin/projects/#{project.id}/tasks/bulk']")
+        expect(page.all("form#board-bulk select[name='to'] option").map(&:value))
+          .to eq(["", "backlog", "ready", "in_progress", "done", "canceled"])
+      end
+
       it "fetches the card menu with the board's project" do
         expect(column("backlog")).to have_css(".kc[data-menu$='/menu?project=#{project.id}']")
       end
@@ -148,6 +166,49 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       get "/admin/tasks/#{create(:task).id}/menu"
 
       expect(page).to have_no_css(".ctx-label", text: "Board column", visible: :all)
+    end
+
+    describe "moving ticked cards" do
+      let(:open) { linked }
+      let(:done) { linked(:done) }
+
+      before { bulk([open.id, done.id], "in_progress") }
+
+      it "moves every ticked task to the column" do
+        expect([open, done].map { tasks.by_id(it.id).status }).to eq(%w[in_progress in_progress])
+      end
+
+      it "returns to the board with a toast", :aggregate_failures do
+        expect(last_response.location).to end_with("/admin/projects/#{project.id}")
+        follow_redirect!
+        expect(toast).to eq("Moved 2 tasks to in progress")
+      end
+    end
+
+    describe "moving ticked cards with one that is gone" do
+      let(:task) { linked }
+      let(:missing) { create(:task).id.tap { Tasks::Slice["repos.task_mutations"].delete(it) } }
+
+      before { bulk([task.id, missing], "done") }
+
+      it "changes nothing" do
+        expect(tasks.by_id(task.id).status).to eq("open")
+      end
+
+      it "names the task that is gone" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · ##{missing} is gone")
+      end
+    end
+
+    it "asks for a column before it moves ticked cards", :aggregate_failures do
+      task = linked
+      bulk([task.id], "")
+
+      expect(tasks.by_id(task.id).status).to eq("open")
+      follow_redirect!
+      expect(toast).to eq("Pick a column first")
     end
 
     describe "moving a card" do

@@ -32,8 +32,11 @@ module Admin
           def board
             columns = @tasks.group_by(&:board_column)
 
-            div(class: "kb", aria: { label: t(".board", name: @project.name) }) do
-              COLUMNS.each { column(it, sorted(it, columns.fetch(it, Blog::Constants::EMPTY_ARRAY))) }
+            div(class: "kb-bulk") do
+              Bulk(project_id: @project.id)
+              div(class: "kb", aria: { label: t(".board", name: @project.name) }) do
+                COLUMNS.each { column(it, sorted(it, columns.fetch(it, Blog::Constants::EMPTY_ARRAY))) }
+              end
             end
           end
 
@@ -75,6 +78,7 @@ module Admin
 
           def head
             PageHead(title: @project.name, sub: tagline) do
+              BulkToggle(form: Bulk::ID)
               Button(href: path(:admin_edit_project, id: @project.id), icon: "fa-regular fa-pen-to-square") do
                 t(".edit")
               end
