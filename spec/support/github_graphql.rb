@@ -3,6 +3,7 @@
 module GitHubGraphQL
   URL = "https://api.github.com/graphql"
   ASSIGNED_QUERY = "search(query:"
+  HISTORY_QUERY = "ref(qualifiedName:"
   ISSUES_QUERY = "nodes(ids:"
   PULL_REQUESTS_QUERY = "viewerDidAuthor"
   REFS_QUERY = "refs(refPrefix:"
@@ -31,6 +32,12 @@ module GitHubGraphQL
 
   def github_errors(type, message = "GitHub said no", data: nil)
     github_json(data:, errors: [{ message:, type: }])
+  end
+
+  def github_history_page(*commits, more: false)
+    history = { pageInfo: github_page_info(more, "history-page-3"), nodes: commits }
+
+    github_json(data: { rateLimit: github_rate_limit, repository: { ref: { target: { history: } } } })
   end
 
   def github_issue(id, number: 1, repo: "aaronmallen/aaronmallen.me", assignees: [VIEWER_ID], **fields)

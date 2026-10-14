@@ -62,7 +62,9 @@ stops for the rate limit, and a reset is at most an hour off, so a going walk ne
 died, from an exception past its retries or a worker killed mid-chunk, stops touching the row. Once it has sat two
 hours, the finder starts the walk again at a new clock, pushed or not.
 
-A chunk reads one page per branch, stores what it found, moves the back edge, and queues itself again. Under 1,000
+A chunk reads one page per branch, stores what it found, moves the back edge, and queues itself again. A full page
+whose commits all share one second is the exception: the edge cannot move below that second without skipping the
+rest of it, so the client follows the branch's history cursor until a page moves past it (#1235). Under 1,000
 points left it stops and queues itself for the reset. A chunk that read nothing steps back an hour
 (`Record::CommitEdge::EMPTY_STEP`). A walk that ends at the creation date with a branch never read to the end
 records a failure for the `commits` sync with the reason `repository_start` that names the branches. A chunk GitHub

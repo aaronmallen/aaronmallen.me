@@ -326,6 +326,39 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     end
   end
 
+  describe "a full page of commits that all share one second" do
+    let(:page_size) { 100 }
+
+    before do
+      stub_refs(github_branch("main", *tied(0...page_size), more: true))
+      stub_github(GitHubGraphQL::HISTORY_QUERY, github_history_page(*tied(page_size...150)))
+    end
+
+    def tied(range) = range.map { commit(format("%040x", it), at: edge) }
+
+    it "follows the branch's history past the page, so every commit at that second is stored" do
+      walk
+
+      expect(Record::Slice["relations.commits"].count).to eq(150)
+    end
+
+    it "asks for the rest of the branch with the cursor GitHub sent" do
+      walk
+
+      expect(github_request(GitHubGraphQL::HISTORY_QUERY, cursor: "main-page-2", ref: "refs/heads/main",
+                                                          until: edge.utc.iso8601)).to have_been_made
+    end
+
+    it "stops following once a page moves past that second", :aggregate_failures do
+      older = commit(old_sha, at: edge - day)
+      stub_github(GitHubGraphQL::HISTORY_QUERY, github_history_page(*tied(page_size...150), older, more: true))
+      walk
+
+      expect(github_request(GitHubGraphQL::HISTORY_QUERY)).to have_been_made.once
+      expect(commit_queries.backfilled_to(repo)).to eq(edge - day)
+    end
+  end
+
   describe "a rebased commit last on a cut page" do
     let(:committed) { "2026-08-12T14:30:00Z" }
 

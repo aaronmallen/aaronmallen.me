@@ -43,6 +43,25 @@ module GitHub
         }
       GRAPHQL
 
+      HISTORY = <<~GRAPHQL.freeze
+        query($owner: String!, $name: String!, $ref: String!, $author: ID!, $since: GitTimestamp,
+              $until: GitTimestamp, $cursor: String) {
+          repository(owner: $owner, name: $name) {
+            ref(qualifiedName: $ref) {
+              target {
+                ... on Commit {
+                  history(first: #{COMMIT_PAGE_SIZE}, after: $cursor, author: {id: $author}, since: $since,
+                          until: $until) {
+                    #{COMMIT_FIELDS}
+                  }
+                }
+              }
+            }
+          }
+          rateLimit { limit remaining resetAt }
+        }
+      GRAPHQL
+
       REPOSITORIES = <<~GRAPHQL.freeze
         query($cursor: String) {
           viewer {
@@ -138,9 +157,10 @@ module GitHub
       transport.query(document, author: viewer_id, since: stamp(since), until: stamp(before), **variables)
     end
 
-    def branch(node, repository)
+    def branch(node, repository, scope)
       page = node.dig("target", "history")
       found = page ? page.fetch("nodes").map { commit_attributes(it) } : Blog::Constants::EMPTY_ARRAY
+      page, found = follow(page, found, node.fetch("name"), scope) if tied?(page, found)
       made = repository["createdAt"]
 
       { commits: found, complete: read_to_end?(page), created_at: made && Time.iso8601(made),
@@ -151,7 +171,7 @@ module GitHub
       walk do |cursor, found|
         repository = authored(Queries::COMMITS, cursor:, **scope)&.dig("repository")
         refs = repository&.dig("refs")
-        refs&.fetch("nodes")&.each { found << branch(it, repository) }
+        refs&.fetch("nodes")&.each { found << branch(it, repository, scope) }
         refs
       end
     end
@@ -165,6 +185,23 @@ module GitHub
         message: commit["message"].to_s.strip,
         sha: commit.fetch("oid"),
       }
+    end
+
+    def follow(page, found, name, scope)
+      moment = found.first[:committed_at]
+      listing = walk(page.dig("pageInfo", "endCursor")) do |cursor, more|
+        page = history_page(name, cursor, scope)
+        more.concat(page ? page.fetch("nodes").map { commit_attributes(it) } : Blog::Constants::EMPTY_ARRAY)
+        page if more.all? { it[:committed_at] == moment }
+      end
+
+      [page, found + listing.items]
+    end
+
+    def history_page(name, cursor, scope)
+      repository = authored(Queries::HISTORY, cursor:, ref: "refs/heads/#{name}", **scope)&.dig("repository")
+
+      repository&.dig("ref", "target", "history")
     end
 
     def pushable?(repo) = PUSH_PERMISSIONS.include?(repo["viewerPermission"])
@@ -181,6 +218,10 @@ module GitHub
     def repository_page(cursor) = transport.query(Queries::REPOSITORIES, cursor:)&.dig("viewer", "repositories")
 
     def stamp(time) = time&.utc&.iso8601
+
+    def tied?(page, found)
+      more?(page) && found.size >= Queries::COMMIT_PAGE_SIZE && found.map { it[:committed_at] }.uniq.one?
+    end
 
     def viewer_id
       token = transport.token
