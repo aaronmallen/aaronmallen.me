@@ -192,6 +192,8 @@ RSpec.describe "Admin screens", type: :feature do
       "new task" => "/admin/tasks/new",
       "not found" => "/admin/nothing-here",
       "post editor" => "/admin/posts/#{draft.id}/edit",
+      "performance" => "/admin/performance",
+      "performance requests" => "/admin/performance/requests?route=/writing/:slug&verb=GET",
       "posts" => "/admin/posts",
       "project board" => "/admin/projects/#{project.id}",
       "project editor" => "/admin/projects/#{project.id}/edit",
@@ -345,6 +347,7 @@ RSpec.describe "Admin screens", type: :feature do
     create(:analytics_rollup_path, day: today, path: "/writing/a-very-long-slug-for-a-post", views: 120)
     create(:analytics_rollup_referrer, day: today, host: "news.ycombinator.com", views: 60)
     create(:analytics_rollup_country, day: today, country_code: "US", views: 90)
+    seed_performance
   end
 
   def seed_calendar
@@ -367,6 +370,22 @@ RSpec.describe "Admin screens", type: :feature do
     link.call("journal_entry", journal_entry.id, { other_kind: "post", other_id: draft.id })
     link.call("work_entry", work_entry.id, { other_kind: "project", other_id: project.id })
     link.call("social_post", social_post.id, { other_kind: "commit", other_id: commit.id })
+  end
+
+  def seed_performance
+    timing = Performance::Slice["db.rom"].relations
+    [
+      [200, 120.0, "/writing/:slug", "GET"], [503, 900.0, "/writing/:slug", "GET"],
+      [204, 15.0, "/beacon", "POST"], [404, 4.0, nil, "GET"],
+    ].each do |status, duration, route, verb|
+      timing[:performance_requests].insert(
+        route:, verb:, status:, duration:, query_count: 2, query_time: 3.0, occurred_at: at(0, 30),
+      )
+    end
+    timing[:performance_jobs].insert(
+      job: "Analytics::RollUpJob", outcome: "succeeded", duration: 1_800.0, query_count: 40, query_time: 90.0,
+      occurred_at: at(0, 30),
+    )
   end
 
   def seed_saved_views

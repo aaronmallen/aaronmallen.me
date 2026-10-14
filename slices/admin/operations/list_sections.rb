@@ -22,6 +22,7 @@ module Admin
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[health insights fa-heart-pulse admin_health].freeze,
+        %i[performance insights fa-gauge-high admin_performance].freeze,
         %i[time insights fa-clock admin_time].freeze,
         %i[search insights fa-magnifying-glass admin_search].freeze,
         %i[tags settings fa-tag admin_tags].freeze,

@@ -6356,15 +6356,15 @@
   @apply pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2;
   @apply rounded-btn border border-line bg-ground px-2 py-1 font-mono text-meta whitespace-nowrap text-ink;
 
-  :where(.chart-bar:hover) > & {
+  :where(.chart-bar, .perf-col):hover > & {
     @apply block;
   }
 
-  :where(.chart-bar:first-child) > & {
+  :where(.chart-bar, .perf-col):first-child > & {
     @apply left-0 translate-x-0;
   }
 
-  :where(.chart-bar:last-child) > & {
+  :where(.chart-bar, .perf-col):last-child > & {
     @apply left-auto right-0 translate-x-0;
   }
 }
@@ -6482,6 +6482,206 @@
 
 @utility tbl-path {
   @apply truncate meta;
+}
+
+@utility perf-tabs {
+  @apply mb-[clamp(18px,2vw,28px)] flex flex-wrap items-end justify-between gap-x-4 gap-y-2.5 border-b border-line;
+
+  & .seg {
+    @apply mb-2;
+  }
+}
+
+@utility perf-tabs-list {
+  @apply flex gap-[clamp(14px,2vw,28px)];
+}
+
+@utility perf-tab {
+  @apply -mb-px flex min-h-tap items-center border-b-2 border-transparent py-3 font-display text-[1.05rem];
+  @apply font-semibold tracking-[-0.01em] text-ink-muted no-underline hover:text-ink admin-focus;
+
+  &[aria-current] {
+    @apply border-ink text-ink;
+  }
+}
+
+@utility perf-fill-95 {
+  background-color: color-mix(in oklab, var(--color-mk-blue) 38%, var(--color-ground-sunk));
+}
+
+@utility perf-fill-50 {
+  @apply bg-mk-blue;
+}
+
+@utility perf-key {
+  @apply inline-flex items-center gap-1.5 meta;
+
+  &::before {
+    @apply inline-block size-2.5 rounded-xs;
+    content: "";
+  }
+}
+
+@utility perf-key-50 {
+  &::before {
+    @apply bg-mk-blue;
+  }
+}
+
+@utility perf-key-95 {
+  &::before {
+    background-color: color-mix(in oklab, var(--color-mk-blue) 38%, var(--color-ground-sunk));
+  }
+}
+
+@utility perf-key-note {
+  @apply meta;
+}
+
+@utility perf-chart {
+  @apply mt-1 grid grid-cols-[auto_minmax(0,1fr)] gap-2.5;
+  height: clamp(200px, 22vw, 300px);
+}
+
+@utility perf-chart-y {
+  @apply flex w-16 flex-col justify-between text-right whitespace-nowrap meta;
+}
+
+@utility perf-chart-plot {
+  @apply relative flex items-end gap-chart-bar border-b border-line;
+  background: linear-gradient(var(--color-line), var(--color-line)) 0 50% / 100% 1px no-repeat;
+}
+
+@utility perf-col {
+  @apply relative flex h-full min-w-0.5 flex-1 items-end;
+
+  &:hover > .perf-bar {
+    background-color: color-mix(in oklab, var(--color-mk-blue) 60%, var(--color-ground-sunk));
+  }
+}
+
+@utility perf-bar {
+  @apply flex w-full items-end overflow-hidden rounded-t-xs;
+}
+
+@utility perf-median {
+  @apply pointer-events-none absolute inset-x-0 z-2 border-t border-dashed border-ink-muted;
+
+  & em {
+    @apply absolute right-0 bottom-1 rounded-sm border border-line bg-ground-sunk px-1 not-italic whitespace-nowrap;
+    @apply font-mono text-meta text-ink;
+  }
+}
+
+@utility perf-chart-dates {
+  @apply mt-2 flex justify-between pl-[74px] meta;
+}
+
+@utility perf-table {
+  min-width: max-content;
+
+  & :is(.tbl-h, .tbl-c) {
+    @apply pl-[22px] whitespace-nowrap;
+  }
+
+  & :is(.tbl-h, .tbl-c):first-child {
+    @apply pr-2 pl-0;
+  }
+
+  & .perf-group {
+    @apply pb-1.5;
+  }
+
+  & tr:has(.perf-group) + tr .tbl-h {
+    @apply pt-2.5;
+  }
+
+  & .perf-browser {
+    @apply border-l border-line pl-[18px];
+  }
+
+  & .perf-key-col {
+    @apply text-ink;
+  }
+
+  & .tbl-h.perf-key-col::after {
+    content: " \2193" / "";
+  }
+}
+
+@utility perf-na {
+  @apply relative;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 6px,
+    color-mix(in oklab, var(--color-ink) 8%, transparent) 6px 7px
+  );
+}
+
+@utility perf-spread {
+  @apply relative block h-2 w-[clamp(90px,12vw,160px)] rounded-full;
+  background-color: color-mix(in oklab, var(--color-ink) 6%, transparent);
+
+  & i {
+    @apply absolute inset-y-0 left-0 rounded-full;
+  }
+}
+
+@utility perf-time-bar {
+  @apply mr-3 inline-block h-1.5 w-[clamp(60px,10vw,140px)] overflow-hidden rounded-full align-middle;
+  background-color: color-mix(in oklab, var(--color-ink) 6%, transparent);
+
+  & i {
+    @apply block h-full bg-mk-blue;
+  }
+}
+
+@utility perf-route {
+  @apply inline-flex items-baseline gap-2 text-ink no-underline admin-focus;
+
+  &:hover .perf-path {
+    @apply text-accent-text underline underline-offset-3;
+  }
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap max-w-[58vw] items-center overflow-hidden;
+
+    & .perf-path {
+      @apply truncate;
+    }
+  }
+}
+
+@utility perf-verb {
+  @apply font-mono text-label tracking-[0.04em] text-ink-muted;
+}
+
+@utility perf-path {
+  @apply font-mono text-ink;
+
+  &.none {
+    @apply text-ink-muted italic;
+  }
+}
+
+@utility perf-title {
+  @apply inline-flex flex-wrap items-baseline gap-[0.4em];
+
+  & .perf-verb {
+    @apply text-[0.45em] tracking-[0.06em];
+  }
+
+  & .perf-path {
+    @apply font-medium tracking-[-0.02em];
+  }
+}
+
+@utility perf-status {
+  @apply text-ink-muted;
+
+  &.bad {
+    @apply text-mk-pink-text;
+  }
 }
 
 @utility meter-row {

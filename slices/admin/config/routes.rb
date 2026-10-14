@@ -151,6 +151,8 @@ module Admin
     get "/people/:id/menu", to: "people.menu", as: :person_menu, id: ID
     post "/people/:id", to: "people.update", as: :update_person, id: ID
     post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID
+    get "/performance", to: "performance.show", as: :performance
+    get "/performance/requests", to: "performance.requests", as: :performance_requests
     post "/photos", to: "photos.create", as: :create_photo
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post

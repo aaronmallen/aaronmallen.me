@@ -557,6 +557,10 @@ en:
           empty: "No scroll depth yet."
           share: "%{percent}%"
           title: "Scroll depth"
+        tabs:
+          label: "Analytics"
+          performance: "Performance"
+          traffic: "Traffic"
       attention_card:
         cancel: "Cancel"
         carried:
@@ -1382,6 +1386,7 @@ en:
           links: "links"
           mail: "mail"
           people: "people"
+          performance: "performance"
           posts: "posts"
           projects: "projects"
           review: "review"
@@ -1470,6 +1475,38 @@ en:
             other: "%{count} accounts found"
           none: "No accounts match."
           rate_limited: "%{network} has had too many searches. Wait a minute, or type the handle."
+      performance:
+        daily_chart:
+          empty: "No requests in this range."
+          label: "%{title}: p95 peaked at %{peak} on %{day}"
+          median: "median day %{value}"
+          ms: "%{value} ms"
+          p50: "p50"
+          p50_value: "p50 %{value}"
+          p95: "p95"
+          p95_value: "p95 %{value}"
+          requests:
+            one: "%{formatted} request"
+            other: "%{formatted} requests"
+        route_label:
+          no_route: "no route"
+        timing_table:
+          browser: "Browser · GET only"
+          columns:
+            count: "Count"
+            lcp_p50: "LCP p50"
+            lcp_p95: "LCP p95"
+            load_p50: "Load p50"
+            load_p95: "Load p95"
+            p50: "p50"
+            p95: "p95"
+            query_count: "Avg. queries"
+            query_time: "Avg. query time"
+          get_only: "GET only"
+          ms: "%{value} ms"
+          none: "none"
+          server: "Server"
+          spread: "p50 → p95"
       posts:
         bulk:
           confirm_delete: "Delete the ticked drafts? This cannot be undone."
@@ -3036,6 +3073,45 @@ en:
           copy_mention: "Copy mention"
           edit: "Edit"
           remove: "Remove"
+      performance:
+        requests:
+          back: "All routes"
+          duration: "Time"
+          empty: "No requests to this route in the range."
+          lede:
+            one: "The slowest requests in the last %{count} day."
+            other: "The slowest requests in the last %{count} days."
+          ms: "%{value} ms"
+          no_route: "no route"
+          per_day: "This route per day"
+          query_count: "Queries"
+          query_time: "Query time"
+          requests:
+            one: "%{formatted} request"
+            other: "%{formatted} requests"
+          shown: "%{shown} of %{total}"
+          slowest: "Slowest requests"
+          status: "Status"
+          when: "When"
+        show:
+          all_routes: "all routes"
+          heading: "Performance"
+          job: "Job"
+          job_count:
+            one: "Sidekiq · %{count} class"
+            other: "Sidekiq · %{count} classes"
+          jobs: "Jobs"
+          lede:
+            one: "Routes and jobs by p95 over the last %{count} day, from rows kept on this server."
+            other: "Routes and jobs by p95 over the last %{count} days, from rows kept on this server."
+          no_jobs: "No jobs ran in this range."
+          no_routes: "No requests in this range."
+          per_day: "Server time per day"
+          route: "Route"
+          route_count:
+            one: "%{count} route · slowest p95 first"
+            other: "%{count} routes · slowest p95 first"
+          routes: "Routes"
       posts:
         analytics:
           back: "All posts"

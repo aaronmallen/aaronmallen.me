@@ -69,6 +69,8 @@ module Admin
 
     import keys: %w[operations.upload_photo], from: :media
 
+    import keys: %w[repos.timing_queries], from: :performance
+
     import keys: %w[
       operations.add_work_entry operations.archive_project operations.delete_work_entry
       operations.restore_project operations.save_project operations.tag_project operations.untag_project

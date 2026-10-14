@@ -24,7 +24,7 @@ module Blog
         def render_heading
           div do
             span(class: "page-head-kicker") { @kicker } if @kicker
-            h1(class: "page-head-title") { @title }
+            h1(class: "page-head-title") { render_title }
             render_sub
           end
         end
@@ -37,6 +37,8 @@ module Blog
             plain @sub
           end
         end
+
+        def render_title = plain(@title)
       end
     end
   end

@@ -13,10 +13,18 @@ module Admin
 
           prop :action, Blog::Types::String
           prop :range, Blog::Types::AnalyticsRange
+          prop :keep, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
           def view_template
-            FilterSwitch(action: @action, name: "range", options: RANGES, selected: @range.to_s, label: t(".label"))
+            AutoForm(action: @action) do
+              @keep.each { |name, value| input(type: "hidden", name:, value:) }
+              SegmentedControl(label: t(".label"), name: "range", options:, selected: @range.to_s)
+            end
           end
+
+          private
+
+          def options = RANGES.transform_values { t(it) }
         end
       end
     end

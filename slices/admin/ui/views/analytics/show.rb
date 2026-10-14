@@ -22,7 +22,8 @@ module Admin
           prop :weekday_hours, Blog::Types::Hash
 
           def view_template
-            PageHead(title: t(".heading"), sub:) { range_form }
+            PageHead(title: t(".heading"), sub:)
+            Tabs(current: :traffic, range: @range, action: path(:admin_analytics))
 
             div(class: "insights") do
               ChartCard(series: @series)
@@ -62,8 +63,6 @@ module Admin
               side: dotted(t(".received", count: received, formatted: count(received)), t(".pending", count: pending)),
             )
           end
-
-          def range_form = RangeSwitch(action: path(:admin_analytics), range: @range)
 
           def sub
             t(
