@@ -22,6 +22,8 @@ module ObjectStore
       nil
     end
 
+    def exists?(key) = configured? && !request { connection.head_object(bucket:, key:) }.nil?
+
     def get(key)
       return unless configured?
 
@@ -59,7 +61,7 @@ module ObjectStore
 
     def request
       yield
-    rescue Aws::S3::Errors::NoSuchKey
+    rescue Aws::S3::Errors::NoSuchKey, Aws::S3::Errors::NotFound
       nil
     rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
       raise Error, "The #{bucket} store failed: #{e.message}"

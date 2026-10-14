@@ -8,6 +8,7 @@ RSpec.describe "The share host", type: :request do
     allow(Hanami).to receive(:boot)
     connect_share_store
     stub_request(:put, %r{\A#{share_store_url}/})
+    stub_request(:head, %r{\A#{share_store_url}/})
   end
 
   def disposition = last_response.headers["Content-Disposition"]
@@ -186,6 +187,24 @@ RSpec.describe "The share host", type: :request do
 
     expect(last_response.status).to eq(416)
     expect(last_response.headers["Content-Range"]).to eq("bytes */10")
+  end
+
+  describe "a share whose object is missing" do
+    let(:file) { share }
+
+    before do
+      stub_request(:head, share_store_url(file.key)).to_return(status: 404)
+      fetch("/#{file.code}", "HTTP_USER_AGENT" => "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15")
+    end
+
+    it "answers 404 and asks the store for no body", :aggregate_failures do
+      expect(last_response.status).to eq(404)
+      expect(a_request(:get, share_store_url(file.key))).not_to have_been_made
+    end
+
+    it "counts no download" do
+      expect(Shares::Slice["relations.shares"].by_pk(file.id).one[:download_count]).to eq(0)
+    end
   end
 
   it "answers 503 when the share store is not configured" do

@@ -113,7 +113,11 @@ module Shares
       }
     end
 
-    def stream(request, file, &) = client.configured? ? serve(request, file, &) : [503, {}, []]
+    def stream(request, file, &)
+      return [503, {}, []] unless client.configured?
+
+      client.exists?(file.key) ? serve(request, file, &) : [404, {}, []]
+    end
 
     def zip(request, code)
       group = share_group_queries.by_code(code)

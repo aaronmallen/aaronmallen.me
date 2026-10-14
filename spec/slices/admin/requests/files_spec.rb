@@ -29,6 +29,7 @@ RSpec.describe "Admin files", type: :request do
       sign_in_to_admin
       connect_share_store
       stub_request(:put, %r{\A#{share_store_url}/})
+      stub_request(:head, %r{\A#{share_store_url}/})
     end
 
     it "lists the tab under Publish beside Links" do
