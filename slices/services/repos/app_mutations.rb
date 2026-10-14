@@ -5,13 +5,10 @@ module Services
     class AppMutations < Blog::DB::Repo
       root :service_apps
 
-      stamped_commands :create
+      def replace(credentials:, **columns)
+        sealed = Services::Encryptor.new.seal(JSON.generate(credentials))
 
-      def replace(provider:, host:, credentials:, **columns)
-        transaction do
-          service_apps.where(provider:, host:).delete
-          create(provider:, host:, credentials: Services::Encryptor.new.seal(JSON.generate(credentials)), **columns)
-        end
+        service_apps.store(columns.merge(credentials: sealed), Time.now)
       end
     end
   end
