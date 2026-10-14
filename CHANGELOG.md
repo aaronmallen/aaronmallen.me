@@ -623,7 +623,7 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - A privacy page at `/privacy`, linked from the footer, says what the site records and how long it keeps it.
 - The database dumps to a backups bucket at 00:30 Chicago time each night, keeping the 7 newest dumps. The
   `BACKUP_STORE_*` settings name the bucket, and a failed dump shows on Today.
-- `mise run release:next` prints the next CalVer version.
+- `mise run release --dry-run` prints the next CalVer version.
 - New MCP tools, each with an API route that answers the same JSON: `read_commit`, `read_project`,
   `read_work_entry`, `read_webmention`, `read_social_post` for a social post in any status, `list_people`,
   `read_person`, `save_person`, `delete_person`, `search_accounts`, `edit_task_comment`, `delete_task_comment`,

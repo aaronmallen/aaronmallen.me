@@ -1,0 +1,75 @@
+#!/usr/bin/env sh
+#MISE description="Give the newest commit that is not empty an annotated tag named for the next CalVer version"
+#USAGE flag "--dry-run" help="Print the version and the commit, and make no tag"
+#USAGE arg "[date]" help="The date that names the version, as YYYY-MM-DD. Defaults to today in UTC."
+
+set -e
+
+dry_run=""
+on=""
+for arg; do
+  case "$arg" in
+  --dry-run) dry_run=1 ;;
+  *) on="$arg" ;;
+  esac
+done
+on="${on:-$(date -u +%Y-%m-%d)}"
+
+case "$on" in
+[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+*)
+  echo "Give the date as YYYY-MM-DD, not $on." >&2
+  exit 1
+  ;;
+esac
+
+if command -v jj >/dev/null 2>&1 && jj root >/dev/null 2>&1; then
+  cd "$(jj root)"
+  GIT_DIR="$(jj git root)"
+  export GIT_DIR
+  target=$(jj log --no-graph --no-pager -r 'heads(::@ ~ empty())' -T commit_id)
+else
+  cd "$(git rev-parse --show-toplevel)"
+  target=$(git rev-list --max-count=1 HEAD -- :/)
+fi
+
+if [ -z "$target" ]; then
+  echo "No commit with changes to tag." >&2
+  exit 1
+fi
+
+year=$(echo "$on" | cut -c3-4)
+month=$(echo "$on" | cut -d- -f2 | sed 's/^0//')
+last=$(git tag --list | grep -E "^$year\.$month\.[0-9]+$" | cut -d. -f3 | sort -n | tail -n 1)
+
+if [ -z "$last" ]; then
+  version="$year.$month.0"
+else
+  version="$year.$month.$((last + 1))"
+fi
+
+if [ -n "$dry_run" ]; then
+  echo "$version"
+  echo "$target"
+  exit 0
+fi
+
+tagged=$(git tag --points-at "$target" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)
+if [ -n "$tagged" ]; then
+  echo "$target already carries $tagged." >&2
+  exit 1
+fi
+
+if awk '/^## \[/ { open = ($0 ~ /^## \[Unreleased\]/); next } open && NF { found = 1 } END { exit !found }' CHANGELOG.md; then
+  echo "CHANGELOG.md still has entries under [Unreleased]. Move them under $version first." >&2
+  exit 1
+fi
+
+if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+  echo "CHANGELOG.md has no section for $version." >&2
+  exit 1
+fi
+
+git -c tag.gpgSign=false tag --annotate --message "$version" "$version" "$target"
+echo "Tagged $target as $version. Push it with:"
+echo "git push origin $version"

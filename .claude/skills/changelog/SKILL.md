@@ -12,8 +12,8 @@ bump a version and never run a tag command, in `git` or `jj`.
 
 Versions follow [CalVer](https://calver.org) as `YY.M.MICRO`: the two digit year, the month with no zero padding, and
 a counter that starts at 0 each month. The UTC day of the tag sets the date. When the user asks what the next release
-is called, run `mise run release:next` and give its answer. It reads the tags and changes none. Never count tags by
-hand.
+is called, run `mise run release --dry-run` and give the first line it prints. It reads the tags and changes none.
+Never run `mise run release` without `--dry-run`, since that makes the tag. Never count tags by hand.
 
 ## 1. Read the rules
 
