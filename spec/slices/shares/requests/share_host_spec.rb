@@ -213,6 +213,157 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  describe "a group's code" do
+    let(:browser) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Safari/605.1.15" }
+    let(:page) { Capybara.string(last_response.body) }
+    let(:group) do
+      uploads = [
+        share_upload(bytes, "beach.jpg", "image/jpeg"), share_upload(bytes, "dunes.png", "image/png"),
+        share_upload(bytes, "notes.txt", "text/plain"), share_upload(bytes, "paper.pdf", "application/pdf"),
+      ]
+      Shares::Slice["operations.upload_share_group"].call(uploads).value!
+    end
+
+    def file(name) = group.share_group_files.find { it.filename == name }
+
+    def file_downloads(name) = Shares::Slice["relations.share_group_files"].by_pk(file(name).id).one[:download_count]
+
+    def views = Shares::Slice["relations.share_groups"].by_pk(group.id).one[:view_count]
+
+    describe "the page" do
+      before do
+        Shares::Slice["relations.share_group_files"].by_pk(file("beach.jpg").id).update(alt_text: "A wide beach")
+        fetch("/#{group.code}")
+      end
+
+      it "answers with an HTML page no cache keeps", :aggregate_failures do
+        expect(last_response.status).to eq(200)
+        expect(last_response.headers["Content-Type"]).to eq("text/html; charset=utf-8")
+        expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+      end
+
+      it "loads nothing from another host" do
+        expect(last_response.headers["Content-Security-Policy"]).to start_with("default-src 'none'")
+      end
+
+      it "shows the images in a carousel" do
+        expect(page.all(".carousel img").map { it[:src] })
+          .to eq(%w[beach.jpg dunes.png].map { "/#{group.code}/#{file(it).id}?preview" })
+      end
+
+      it "names each image by its alt text, or its filename when it has none" do
+        expect(page.all(".carousel img").map { it[:alt] }).to eq(["A wide beach", "dunes.png"])
+      end
+
+      it "links each image to its file" do
+        expect(page.all(".carousel a").map { it[:href] })
+          .to eq(%w[beach.jpg dunes.png].map { "/#{group.code}/#{file(it).id}" })
+      end
+
+      it "lists the other files with a link to each" do
+        expect(page.all(".files a").map { [it.text, it[:href]] }).to eq(
+          %w[notes.txt paper.pdf].map { [it, "/#{group.code}/#{file(it).id}"] },
+        )
+      end
+    end
+
+    it "answers a head request for the page with no body", :aggregate_failures do
+      head "/#{group.code}", {}, "HTTP_HOST" => "shares.localhost"
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to be_empty
+    end
+
+    describe "a file's link" do
+      before { stub_request(:get, share_store_url(file("paper.pdf").key)).to_return(body: bytes) }
+
+      it "returns the file's bytes inline by its type", :aggregate_failures do
+        fetch("/#{group.code}/#{file('paper.pdf').id}")
+
+        expect(last_response.body).to eq(bytes)
+        expect(last_response.headers["Content-Type"]).to eq("application/pdf")
+        expect(disposition).to eq(%(inline; filename="paper.pdf"; filename*=UTF-8''paper.pdf))
+      end
+
+      it "forbids every cache to keep the file" do
+        fetch("/#{group.code}/#{file('paper.pdf').id}")
+
+        expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+      end
+
+      it "returns 206 for a range" do
+        stub_request(:get, share_store_url(file("paper.pdf").key))
+          .with(headers: { "Range" => "bytes=2-5" }).to_return(body: "2345")
+        fetch("/#{group.code}/#{file('paper.pdf').id}", "HTTP_RANGE" => "bytes=2-5")
+
+        expect(last_response.status).to eq(206)
+      end
+
+      it "counts a download against that file alone", :aggregate_failures do
+        expect { fetch("/#{group.code}/#{file('paper.pdf').id}", "HTTP_USER_AGENT" => browser) }
+          .to change { file_downloads("paper.pdf") }.by(1)
+        expect(file_downloads("notes.txt")).to eq(0)
+        expect(views).to eq(0)
+      end
+
+      it "skips a range probe" do
+        expect do
+          fetch("/#{group.code}/#{file('paper.pdf').id}", "HTTP_USER_AGENT" => browser, "HTTP_RANGE" => "bytes=0-1")
+        end
+          .not_to(change { file_downloads("paper.pdf") })
+      end
+
+      it "skips the page's preview" do
+        expect { fetch("/#{group.code}/#{file('paper.pdf').id}?preview", "HTTP_USER_AGENT" => browser) }
+          .not_to(change { file_downloads("paper.pdf") })
+      end
+
+      it "skips a bot" do
+        expect { fetch("/#{group.code}/#{file('paper.pdf').id}", "HTTP_USER_AGENT" => "curl/8.4.0") }
+          .not_to(change { file_downloads("paper.pdf") })
+      end
+    end
+
+    describe "the view count" do
+      it "rises by one for a browser" do
+        expect { fetch("/#{group.code}", "HTTP_USER_AGENT" => browser) }.to change { views }.from(0).to(1)
+      end
+
+      it "stays put for a bot" do
+        expect { fetch("/#{group.code}", "HTTP_USER_AGENT" => "Slackbot-LinkExpanding 1.0") }.not_to(change { views })
+      end
+
+      it "stays put for a head request" do
+        expect { head "/#{group.code}", {}, "HTTP_HOST" => "shares.localhost", "HTTP_USER_AGENT" => browser }
+          .not_to(change { views })
+      end
+
+      it "stays put for a preview" do
+        expect { fetch("/#{group.code}?preview", "HTTP_USER_AGENT" => browser) }.not_to(change { views })
+      end
+    end
+
+    it "answers 404 for an id outside the group" do
+      fetch("/#{group.code}/#{group.share_group_files.map(&:id).max + 1}")
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "answers 404 for a group's file under a single share's code" do
+      fetch("/#{upload_share.value!.code}/#{file('notes.txt').id}")
+
+      expect(last_response.status).to eq(404)
+    end
+
+    %w[/0 /01 /x /1/2].each do |suffix|
+      it "answers 404 for #{suffix} under the code" do
+        fetch("/#{group.code}#{suffix}")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+  end
+
   it "answers 404 for a deleted share" do
     file = share
     stub_request(:delete, share_store_url(file.key))

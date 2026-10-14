@@ -7,6 +7,10 @@ module Shares
 
       def add_file(share_group_id, **fields) = share_group_files.command(:create).call(share_group_id:, **fields)
 
+      def count_file_download(id) = share_group_files.by_pk(id).update(download_count: Sequel[:download_count] + 1)
+
+      def count_view(id) = share_groups.by_pk(id).update(view_count: Sequel[:view_count] + 1)
+
       def create(code:)
         transaction do
           short_code = short_codes.command(:create).call(code:)
