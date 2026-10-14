@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
-  let(:task) { create(:task, title: "Water the plants", note: "the ferns too") }
+  let(:project) { create(:project) }
+  let(:task) { create(:task, title: "Water the plants", note: "the ferns too", project_id: project.id) }
   let(:today) { Blog::TimeZone.today }
 
   def cadence(on = task, **fields) = slice("operations.set_task_cadence").call(on.id, fields).value!
@@ -12,7 +13,7 @@ RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
 
   def current(series) = slice("repos.task_series_queries").by_id(series.id)
 
-  def linked_kinds(id) = slice("relations.record_links").where(left_kind: "task", left_id: id).pluck(:right_kind)
+  def linked_kinds(id) = Links::Slice["relations.record_links"].where(left_kind: "task", left_id: id).pluck(:right_kind)
 
   def slice(key) = Tasks::Slice[key]
 
@@ -53,9 +54,7 @@ RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
 
     before do
       slice("repos.task_mutations").replace_tags(task.id, %w[home money])
-      links = slice("relations.record_links")
-      links.link_projects([task.id], [create(:project).id])
-      links.insert(left_kind: "task", left_id: task.id, right_kind: "post", right_id: create(:post).id)
+      Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "post", other_id: create(:post).id })
       create(:task_comment, task_id: task.id)
       create(:work_session, :closed, task_id: task.id)
       create(:task_contributor, task_id: task.id)
@@ -68,8 +67,9 @@ RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
         .to eq(["Water the plants", "the ferns too", %w[home money]])
     end
 
-    it "links the copy to the project and nothing else" do
-      expect(linked_kinds(copy.id)).to eq(["project"])
+    it "keeps the project and links the copy to nothing else", :aggregate_failures do
+      expect(copy.project_id).to eq(project.id)
+      expect(linked_kinds(copy.id)).to eq([])
     end
 
     it "starts the copy with no comments, time, contributors or task links" do

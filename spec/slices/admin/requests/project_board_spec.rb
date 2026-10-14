@@ -15,7 +15,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def column(name) = page.find("section.kcol.k-#{name}")
 
-  def link(task) = Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", project.id])
+  def link(task) = Tasks::Slice["operations.set_task_project"].call(task.id, project.id)
 
   def linked(*traits, **attributes) = create(:task, *traits, **attributes).tap { link(it) }
 

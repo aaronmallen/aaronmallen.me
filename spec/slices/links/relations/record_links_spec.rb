@@ -59,4 +59,64 @@ RSpec.describe Links::Relations::RecordLinks do
 
     expect { db[:record_links].insert(row) }.to raise_error(Sequel::ForeignKeyConstraintViolation, /record_links/)
   end
+
+  describe "a task and a project" do
+    let(:task) { create(:task) }
+    let(:project) { create(:project) }
+
+    def project_id = db[:tasks].where(id: task.id).get(:project_id)
+
+    def unlink(project_id) = Links::Slice["operations.unlink_records"].call("project", project_id, "task", task.id)
+
+    it "keeps the pair on the task, not as a row" do
+      link("project", project.id, "task", task.id)
+
+      expect([project_id, links_naming("task", task.id)]).to eq([project.id, 0])
+    end
+
+    it "refuses a row that pairs them, whoever writes it" do
+      row = { left_kind: "task", left_id: task.id, right_kind: "project", right_id: project.id }
+
+      expect { db[:record_links].insert(row) }
+        .to raise_error(Sequel::CheckConstraintViolation, /record_links_task_project_check/)
+    end
+
+    it "lists the pair from either side" do
+      link("task", task.id, "project", project.id)
+      queries = Links::Slice["repos.record_link_queries"]
+
+      expect([queries.partners("task", task.id), queries.partners("project", project.id)])
+        .to eq([[["project", project.id]], [["task", task.id]]])
+    end
+
+    it "refuses a project that is gone" do
+      result = Links::Slice["operations.link_records"].call("task", task.id,
+                                                            { other_kind: "project", other_id: 999_999 })
+
+      expect(result).to eq(Dry::Monads::Failure([:invalid, { other_id: ["missing"] }]))
+    end
+
+    it "moves the task to the next project it links" do
+      link("task", task.id, "project", project.id)
+      link("task", task.id, "project", create(:project).id)
+
+      expect(project_id).not_to eq(project.id)
+    end
+
+    it "clears the project on unlink, and refuses a project the task is not in", :aggregate_failures do
+      link("task", task.id, "project", project.id)
+
+      expect(unlink(create(:project).id)).to eq(Dry::Monads::Failure(:not_found))
+      expect(unlink(project.id)).to be_success
+      expect(project_id).to be_nil
+    end
+
+    it "clears the project when the project is deleted" do
+      link("task", task.id, "project", project.id)
+
+      db[:projects].where(id: project.id).delete
+
+      expect(project_id).to be_nil
+    end
+  end
 end

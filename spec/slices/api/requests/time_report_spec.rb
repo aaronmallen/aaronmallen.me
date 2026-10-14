@@ -45,7 +45,7 @@ RSpec.describe "API time report", type: :request do
   describe "grouped by project" do
     let!(:tasks) do
       {
-        both: link(worked("Ship the shared work", at(2, 9), at(2, 10)), site, gem),
+        gem: link(worked("Ship the gem", at(2, 9), at(2, 10)), gem),
         alone: link(worked("Polish the site", at(3, 9), at(3, 9, 30)), site),
         loose: worked("Answer email", at(4, 9), at(4, 9, 15)),
       }
@@ -60,20 +60,22 @@ RSpec.describe "API time report", type: :request do
 
     it "sums each project, with the tasks that have no project last" do
       expect(groups(**range, by: "project").map { it.values_at("key", "name", "seconds") })
-        .to eq([[gem.id, "gem", 3600], [site.id, "site", 5400], [nil, nil, 900]])
+        .to eq([[gem.id, "gem", 3600], [site.id, "site", 1800], [nil, nil, 900]])
     end
 
-    it "flags the projects that share time with another" do
+    it "flags no project as sharing time, since a task counts in one project" do
       expect(groups(**range, by: "project").map { it.values_at("name", "shared") })
-        .to eq([["gem", true], ["site", true], [nil, false]])
+        .to eq([["gem", false], ["site", false], [nil, false]])
     end
 
-    it "lists each group's tasks with their time and whether that time is shared" do
-      site_tasks = groups(**range, by: "project").find { it.fetch("name") == "site" }.fetch("tasks")
+    def tasks_in(name)
+      group = groups(**range, by: "project").find { it.fetch("name") == name }
+      group.fetch("tasks").map { it.values_at("id", "title", "seconds", "shared") }
+    end
 
-      expect(site_tasks.map { it.values_at("id", "title", "seconds", "shared") })
-        .to eq([[tasks[:both].id, "Ship the shared work", 3600, true],
-                [tasks[:alone].id, "Polish the site", 1800, false]])
+    it "lists each group's tasks with their time and whether that time is shared", :aggregate_failures do
+      expect(tasks_in("gem")).to eq([[tasks[:gem].id, "Ship the gem", 3600, false]])
+      expect(tasks_in("site")).to eq([[tasks[:alone].id, "Polish the site", 1800, false]])
     end
 
     it "gives the sums the time screen shows" do

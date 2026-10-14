@@ -23,7 +23,7 @@ RSpec.describe "Admin record links", type: :request do
     Links::Slice["repos.record_link_queries"].for_record(kind, record.id).fetch(other_kind, []).map(&:id)
   end
 
-  def links = Links::Slice["relations.record_links"]
+  def links = Links::Slice["repos.record_link_queries"].partners(kind, record.id)
 
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
 
@@ -150,7 +150,7 @@ RSpec.describe "Admin record links", type: :request do
         end
 
         it "writes nothing" do
-          expect(links.to_a.size).to eq(1)
+          expect(links.size).to eq(1)
         end
       end
     end
@@ -164,7 +164,7 @@ RSpec.describe "Admin record links", type: :request do
       it "clears it and comes back to the record", :aggregate_failures do
         unlink
 
-        expect(links.to_a).to be_empty
+        expect(links).to be_empty
         expect(last_response).to be_redirect.and have_attributes(location: end_with(back_path))
       end
 
@@ -192,14 +192,14 @@ RSpec.describe "Admin record links", type: :request do
       it "adds no link" do
         post records_path, record: { other_kind: "task", other_id: task.id.to_s }
 
-        expect(links.to_a).to be_empty
+        expect(links).to be_empty
       end
 
       it "removes no link" do
         link_records("task", task.id)
         post "#{records_path}/task/#{task.id}/delete"
 
-        expect(links.to_a.size).to eq(1)
+        expect(links.size).to eq(1)
       end
     end
   end

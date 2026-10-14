@@ -135,14 +135,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
       before { call_tool("save_project", id: project.id, repo: "aaronmallen/fresh") }
 
-      def linked = Tasks::Slice["relations.record_links"].project_ids_by_task([task]).fetch(task, [])
+      def linked = Tasks::Slice["relations.tasks"].by_pk(task).pluck(:project_id).compact
 
       it "links them to the project" do
         expect(linked).to eq([project.id])
       end
 
       it "leaves a link I removed off when a later change keeps the repo" do
-        Links::Slice["repos.record_link_mutations"].unlink(["task", task], ["project", project.id])
+        Links::Slice["operations.unlink_records"].call("task", task, "project", project.id)
         call_tool("save_project", id: project.id, name: "renamed")
 
         expect(linked).to be_empty

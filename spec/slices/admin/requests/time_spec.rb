@@ -77,7 +77,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
     describe "a range grouped by project" do
       let!(:tasks) do
         {
-          both: link(worked("Ship the shared work", at(2, 9), at(2, 10)), site, gem),
+          gem: link(worked("Ship the gem", at(2, 9), at(2, 10)), gem),
           alone: link(worked("Polish the site", at(3, 9), at(3, 9, 30)), site),
           loose: worked("Answer email", at(4, 9), at(4, 9, 15)),
         }
@@ -89,34 +89,22 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
 
       it "sums each project's time, with the tasks that have no project last" do
-        expect(rows).to eq([["gem", "1h 00m"], ["site", "1h 30m"], ["No project", "15m"]])
+        expect(rows).to eq([["gem", "1h 00m"], ["site", "30m"], ["No project", "15m"]])
       end
 
-      it "totals the range once, however many projects a task counts in" do
+      it "totals the range" do
         expect(page).to have_css(".page-head-sub", text: "Mar 2, 2026 → Mar 8, 2026 · 1h 45m")
       end
 
-      it "flags the projects that share time with another" do
-        flagged = page.all(".time-group").select { it.has_css?(".time-row .pill", text: "shared") }
-
-        expect(flagged.map { it.find(".meter-name").text }).to eq(%w[gem site])
-      end
-
-      it "explains why the rows add up to more than the total" do
-        expect(page).to have_css(".hint", text: "counts in each of its projects")
+      it "flags no project as sharing time, since a task counts in one project" do
+        expect(page).to have_no_css(".time-row .pill", text: "shared")
       end
 
       it "lists the tasks behind a row with their time, each linked to its page" do
-        both, alone = tasks.values_at(:both, :alone).map { "/admin/tasks/#{it.id}" }
+        gem, alone = tasks.values_at(:gem, :alone).map { "/admin/tasks/#{it.id}" }
 
-        expect(tasks_in("site").map { task_row(it) })
-          .to eq([["Ship the shared work", both, "1h 00m"], ["Polish the site", alone, "30m"]])
-      end
-
-      it "flags only the shared task inside a row" do
-        flagged = tasks_in("site").select { it.has_css?(".pill", text: "shared", visible: :all) }
-
-        expect(flagged.map { it.find_link(visible: :all).text(:all) }).to eq(["Ship the shared work"])
+        expect([tasks_in("gem"), tasks_in("site")].map { it.map { task_row(it) } })
+          .to eq([[["Ship the gem", gem, "1h 00m"]], [["Polish the site", alone, "30m"]]])
       end
 
       it "lists the tasks with no project under their own row" do

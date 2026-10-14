@@ -76,13 +76,12 @@ RSpec.describe "Admin task rules", type: :feature do
       expect(chips).to be_empty
     end
 
-    it "saves the projects picked" do
+    it "saves the project picked" do
       fill_in "rule-pattern", with: "octocat/*"
       search ["blog", :down, :enter]
-      search ["atl", :down, :enter]
       click_button "Add rule"
 
-      expect(find(".rule-row", text: "octocat/*").all(".rule-project").map(&:text)).to eq(%w[Atlas Blog])
+      expect(find(".rule-row", text: "octocat/*").all(".rule-project").map(&:text)).to eq(%w[Blog])
     end
 
     it "keeps the chips picked when the save fails" do

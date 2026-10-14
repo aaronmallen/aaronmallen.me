@@ -82,11 +82,11 @@ RSpec.describe "Admin task rules", type: :request do
         expect(form.find("select[name='rule[provider]'] option[selected]").value).to eq("linear")
       end
 
-      it "shows each rule's projects by name" do
-        rule("octocat/*", "", projects: [create(:project, name: "Blog").id, create(:project, name: "Atlas").id])
+      it "shows each rule's project by name" do
+        rule("octocat/*", "", projects: [create(:project, name: "Blog").id])
         get "/admin/tasks/rules"
 
-        expect(page.find(".rule-row", text: "octocat/*").all(".rule-project").map(&:text)).to eq(%w[Atlas Blog])
+        expect(page.find(".rule-row", text: "octocat/*").all(".rule-project").map(&:text)).to eq(%w[Blog])
       end
 
       it "ticks each rule's projects in its editor" do
@@ -120,7 +120,7 @@ RSpec.describe "Admin task rules", type: :request do
       rule("aaronmallen/*", "projects")
       get "/admin/tasks/rules"
 
-      expect(page.find(".rule-capture")).to have_text("also tags and links every task already imported")
+      expect(page.find(".rule-capture")).to have_text("also tags every task already imported")
       expect(page.find(".rule-editor")).to have_text("Tasks already imported keep the tags and projects they have")
     end
 
@@ -148,13 +148,13 @@ RSpec.describe "Admin task rules", type: :request do
         expect(rules.map { [it.tags, it.projects.map(&:id)] }).to eq([[[], [blog.id]]])
       end
 
-      it "links the tasks already imported that it matches to its projects" do
+      it "puts the tasks already imported that it matches in its project" do
         blog = create(:project)
         task = create(:task, :external)
         create(:task_source, task:, url: "https://github.com/aaronmallen/blog/issues/1")
         add("aaronmallen/*", "", projects: [blog.id.to_s])
 
-        expect(Tasks::Slice["relations.record_links"].project_ids_by_task([task.id])).to eq(task.id => [blog.id])
+        expect(Tasks::Slice["relations.tasks"].by_pk(task.id).pluck(:project_id)).to eq([blog.id])
       end
 
       it "stores the provider it is given" do
@@ -215,6 +215,13 @@ RSpec.describe "Admin task rules", type: :request do
         add("aaronmallen/*", "", projects: ["999999"])
 
         expect(page).to have_css("#rule-projects-error", text: message(:projects, "missing"))
+      end
+
+      it "says why it refused a second project and saves nothing", :aggregate_failures do
+        add("aaronmallen/*", "", projects: [create(:project), create(:project)].map { it.id.to_s })
+
+        expect(page).to have_css("#rule-projects-error", text: message(:projects, "one"))
+        expect(rules).to be_empty
       end
 
       it "says why it refused a tag that is not a slug" do

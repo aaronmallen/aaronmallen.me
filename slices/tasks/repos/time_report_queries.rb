@@ -63,10 +63,10 @@ module Tasks
       end
 
       def project_keys(ids)
-        project_ids = record_links.project_ids_by_task(ids)
-        names = project_queries.linkable(:projects, ids: project_ids.values.flatten.uniq).to_h { [it.id, it.title] }
+        project_ids = tasks.where(id: ids).exclude(project_id: nil).pluck(:id, :project_id).to_h
+        names = project_queries.linkable(:projects, ids: project_ids.values.uniq).to_h { [it.id, it.title] }
 
-        ->(id, _) { project_ids.fetch(id, NONE).map { [it, names[it]] } }
+        ->(id, _) { [[project_ids[id], names[project_ids[id]]]] }
       end
 
       def shared_ids(sums)

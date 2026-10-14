@@ -230,33 +230,31 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     let(:site) { create(:project, :archived) }
 
     before do
-      rule("aaronmallen/aaronmallen.me", projects: [blog.id, site.id])
+      rule("aaronmallen/aaronmallen.me", projects: [site.id])
       rule("aaronmallen/*", tags: "ruby", projects: [blog.id])
     end
 
-    def links = Links::Slice["repos.record_link_mutations"]
-
-    def partners = Links::Slice["repos.record_link_queries"].partners("task", imported.id)
-
-    def project_ids = partners.filter_map { |kind, id| id if kind == "project" }
+    def project_ids = Tasks::Slice["relations.tasks"].where(id: imported.id).exclude(project_id: nil).pluck(:project_id)
 
     def rule(pattern, tags: "", projects: [])
       Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags:, projects: }).value!
     end
 
-    it "links to the projects of every rule it matches, private or archived, once each" do
+    def unlink(project_id) = Links::Slice["operations.unlink_records"].call("task", imported.id, "project", project_id)
+
+    it "takes the project of the first rule it matches, private or archived" do
       stub_assigned(issue)
       sync
 
-      expect(project_ids).to contain_exactly(blog.id, site.id)
+      expect(project_ids).to eq([site.id])
     end
 
-    it "links once to a project its repo and a rule both name" do
-      Projects::Slice["repos.project_mutations"].update(blog.id, repo: "aaronmallen/aaronmallen.me")
+    it "takes a project its repo and a rule both name" do
+      Projects::Slice["repos.project_mutations"].update(site.id, repo: "aaronmallen/aaronmallen.me")
       stub_assigned(issue)
       sync
 
-      expect(project_ids).to contain_exactly(blog.id, site.id)
+      expect(project_ids).to eq([site.id])
     end
 
     describe "and a project that owns its repo" do
@@ -264,37 +262,37 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       def owner_id = Projects::Slice["relations.projects"].where(repo: "aaronmallen/aaronmallen.me").pluck(:id).first
 
-      it "links to that project beside the rule projects" do
+      it "takes that project over the rule projects" do
         stub_assigned(issue(repo: "AaronMallen/AaronMallen.me"))
         sync
 
-        expect(project_ids).to contain_exactly(blog.id, site.id, owner_id)
+        expect(project_ids).to eq([owner_id])
       end
 
-      it "keeps a link to that project I removed off on the next sync" do
+      it "keeps that project off on the next sync when I removed it" do
         stub_assigned(issue)
         sync
-        links.unlink(["task", imported.id], ["project", owner_id])
+        unlink(owner_id)
         sync
 
-        expect(project_ids).to contain_exactly(blog.id, site.id)
+        expect(project_ids).to be_empty
       end
     end
 
-    it "links to no project when the issue comes from another owner" do
+    it "takes no project when the issue comes from another owner" do
       stub_assigned(issue(repo: "octocat/aaronmallen.me"))
       sync
 
       expect(project_ids).to be_empty
     end
 
-    it "keeps a project link I removed off on the next sync" do
+    it "keeps a rule's project off on the next sync when I removed it" do
       stub_assigned(issue)
       sync
-      links.unlink(["task", imported.id], ["project", site.id])
+      unlink(site.id)
       sync
 
-      expect(project_ids).to eq([blog.id])
+      expect(project_ids).to be_empty
     end
   end
 

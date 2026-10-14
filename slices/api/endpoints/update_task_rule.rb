@@ -10,7 +10,7 @@ module API
           pattern: TaskRules::PATTERN,
           provider: TaskRules::PROVIDER,
           tags: TaskRules::TAGS.merge(description: "the whole set of tags, which replaces the old one"),
-          projects: TaskRules::PROJECTS.merge(description: "the whole set of project IDs, which replaces the old one"),
+          projects: TaskRules::PROJECTS.merge(description: "the project ID, or none, which replaces the old one"),
         },
         required: ["id"],
       }.freeze

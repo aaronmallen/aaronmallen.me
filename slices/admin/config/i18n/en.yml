@@ -2321,7 +2321,7 @@ en:
       task_rules:
         capture:
           add: "Add rule"
-          note: "Adding a rule also tags and links every task already imported that it matches."
+          note: "Adding a rule also tags every task already imported that it matches, and gives its project to each with none."
         field_error:
           pattern:
             blank: "Name a repo or team first."
@@ -2330,6 +2330,7 @@ en:
           projects:
             format: "Pick projects from the list."
             missing: "One of those projects is gone."
+            one: "Pick one project at most."
           tags:
             blank: "Name a tag or a project first."
             format: "A tag is lowercase words joined by hyphens."

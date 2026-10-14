@@ -29,7 +29,7 @@ RSpec.describe "Admin project board", type: :feature do
 
   def kept_page? = evaluate_script("window.kept === true")
 
-  def link(task) = Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", project.id])
+  def link(task) = Tasks::Slice["operations.set_task_project"].call(task.id, project.id)
 
   def stroke(from, to)
     (1..6).map do |step|

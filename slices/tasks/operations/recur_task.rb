@@ -28,12 +28,12 @@ module Tasks
 
       def carry(task, id, at)
         task_event_mutations.track(id, at) { task_mutations.replace_tags(id, task.tags.map(&:name)) }
-        task_mutations.copy_projects(task.id, id)
         claim_photos.call(PHOTO_OWNER, id, task.note)
       end
 
       def clone(task, day, at)
-        copy = task_mutations.append(title: task.title, note: task.note, sprint_id: sprint_mutations.claim(day).id)
+        sprint_id = sprint_mutations.claim(day).id
+        copy = task_mutations.append(title: task.title, note: task.note, project_id: task.project_id, sprint_id:)
         task_event_mutations.recur(copy.id, at)
         carry(task, copy.id, at)
         copy

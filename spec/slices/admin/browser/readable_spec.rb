@@ -427,7 +427,7 @@ RSpec.describe "Admin screens", type: :feature do
   def seed_time
     timed = create(:task, :done, title: "Draw the time screen for a phone", worked_seconds: 3600, tags: %w[site])
     create(:work_session, task_id: timed.id, started_at: Time.now - 3660, ended_at: Time.now - 60)
-    [project, create(:project, name: "a-second-project-with-a-long-name")].each do |linked|
+    [create(:project, name: "a-second-project-with-a-long-name"), project].each do |linked|
       Links::Slice["operations.link_records"].call("task", timed.id, { other_kind: "project", other_id: linked.id })
     end
   end

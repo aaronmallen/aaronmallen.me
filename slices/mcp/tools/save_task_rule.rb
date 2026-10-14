@@ -11,12 +11,13 @@ module MCP
         },
       }.freeze
 
-      description "Add a task rule, or edit one when you give its id. A new rule needs a pattern and tags, projects " \
-                  "or both, and is a GitHub rule unless you name Linear as its provider. A rule matches only issues " \
-                  "from its own provider. Each issue imported later takes the rule's tags and links to its projects. " \
-                  "Adding a rule also tags and links every task already imported that it matches. Editing one " \
-                  "changes only what later imports take: it tags or links no task already imported. On an edit, a " \
-                  "field you leave out keeps what it has, and tags or projects replace the whole set"
+      description "Add a task rule, or edit one when you give its id. A new rule needs a pattern and tags, a project " \
+                  "or both, and is a GitHub rule unless you name Linear as its provider. A rule names one project at " \
+                  "most, and matches only issues from its own provider. Each issue imported later takes the rule's " \
+                  "tags and its project. Adding a rule also tags every task already imported that it matches, and " \
+                  "puts each one with no project in its project. Editing one changes only what later imports take: " \
+                  "it touches no task already imported. On an edit, a field you leave out keeps what it has, and " \
+                  "tags or projects replace the whole set"
       input_schema(SCHEMA)
       scope Blog::Types::OAuthScope["write"]
 

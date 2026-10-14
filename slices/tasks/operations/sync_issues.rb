@@ -97,7 +97,7 @@ module Tasks
         names, project_ids = task_rule_queries.targets(provider, issue[:origin])
         labeled = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
         task_event_mutations.track(task.id, now) { task_mutations.add_tags(task.id, [*labeled, *names].uniq) }
-        task_rule_mutations.link_projects([task.id], project_ids)
+        task_rule_mutations.fill_project([task.id], project_ids.first)
       end
 
       def observed(task, source, state, reached)

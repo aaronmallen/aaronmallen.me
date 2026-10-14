@@ -16,6 +16,7 @@ module API
         projects: {
           Blog::Contract::FORMAT => "a project is named by its ID",
           "missing" => "no project has one of those IDs",
+          "one" => "a rule names one project at most",
         },
         tags: {
           Blog::Contract::BLANK => "name a tag or a project first",
@@ -41,7 +42,7 @@ module API
       PROJECTS = {
         type: "array",
         items: ID,
-        description: "the IDs of the projects the rule links each issue to; a private or archived one is fine",
+        description: "the ID of the one project the rule puts each issue in, if any; a private or archived one is fine",
       }.freeze
 
       TAGS = {

@@ -15,9 +15,9 @@ module Tasks
       operations.edit_work_session operations.link_repo_tasks operations.link_tasks operations.mark_task_seen
       operations.move_task operations.pause_task operations.place_task operations.plan_sprint
       operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.save_task
-      operations.save_task_rule operations.schedule_task operations.set_task_column operations.set_task_total
-      operations.set_tasks_column operations.snooze_tasks operations.stage_task operations.start_task
-      operations.unlink_task operations.wake_task
+      operations.save_task_rule operations.schedule_task operations.set_task_column operations.set_task_project
+      operations.set_task_total operations.set_tasks_column operations.snooze_tasks operations.stage_task
+      operations.start_task operations.unlink_task operations.wake_task
       repos.sprint_queries repos.task_comment_queries repos.task_queries
       repos.task_rule_queries repos.task_source_queries repos.time_report_queries
     ]

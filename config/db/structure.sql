@@ -1157,6 +1157,7 @@ CREATE TABLE public.tasks (
     worked_seconds integer DEFAULT 0 NOT NULL,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(note, ''::text)), 'B'::"char"))) STORED,
     stage public.task_stage DEFAULT 'backlog'::public.task_stage NOT NULL,
+    project_id integer,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
@@ -3299,7 +3300,8 @@ CREATE TABLE public.record_links (
     right_id integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT record_links_order_check CHECK ((ROW(left_kind, left_id) < ROW(right_kind, right_id))),
-    CONSTRAINT record_links_task_pair_check CHECK ((NOT ((left_kind = 'task'::public.record_kind) AND (right_kind = 'task'::public.record_kind))))
+    CONSTRAINT record_links_task_pair_check CHECK ((NOT ((left_kind = 'task'::public.record_kind) AND (right_kind = 'task'::public.record_kind)))),
+    CONSTRAINT record_links_task_project_check CHECK ((NOT ((left_kind = 'task'::public.record_kind) AND (right_kind = 'project'::public.record_kind))))
 );
 
 
@@ -6477,6 +6479,13 @@ CREATE INDEX task_rule_projects_project_id_index ON public.task_rule_projects US
 
 
 --
+-- Name: task_rule_projects_task_rule_id_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX task_rule_projects_task_rule_id_key ON public.task_rule_projects USING btree (task_rule_id);
+
+
+--
 -- Name: task_rule_tags_tag_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6537,6 +6546,13 @@ CREATE INDEX tasks_list_position_index ON public.tasks USING btree (list, "posit
 --
 
 CREATE INDEX tasks_newest_first_index ON public.tasks USING btree (COALESCE(completed_at, created_at), id);
+
+
+--
+-- Name: tasks_project_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tasks_project_id_index ON public.tasks USING btree (project_id);
 
 
 --
@@ -7950,6 +7966,14 @@ ALTER TABLE ONLY public.task_tags
 
 
 --
+-- Name: tasks tasks_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE SET NULL;
+
+
+--
 -- Name: tasks tasks_sprint_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8164,4 +8188,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261014233000_create_performance_rollups.rb'),
 ('20261014234500_add_recurred_to_task_event_kind.rb'),
 ('20261014235100_ignore_bookkeeping_in_notify_admin_change.rb'),
-('20261015000100_add_key_to_projects.rb');
+('20261015000100_add_key_to_projects.rb'),
+('20261015000200_move_task_projects_onto_tasks.rb');

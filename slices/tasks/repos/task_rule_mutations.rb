@@ -8,7 +8,11 @@ module Tasks
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def link_projects(task_ids, project_ids) = record_links.link_projects(task_ids, project_ids)
+      def fill_project(task_ids, project_id)
+        return if project_id.nil? || task_ids.empty?
+
+        tasks.where(id: task_ids, project_id: nil).stamped(:update, result: :many).call(project_id:)
+      end
 
       def replace_projects(id, project_ids) = task_rule_projects.replace(id, project_ids)
 

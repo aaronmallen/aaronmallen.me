@@ -5,6 +5,7 @@ module Tasks
     class SaveTaskRule < Blog::Operation
       CONSTRAINTS = {
         "task_rule_projects_project_id_fkey" => [:projects, "missing"],
+        "task_rule_projects_task_rule_id_key" => [:projects, "one"],
         "task_rules_provider_pattern_index" => [:pattern, "taken"],
       }.freeze
       GITHUB = Blog::Types::TaskSourceProvider["github"]
@@ -61,7 +62,7 @@ module Tasks
       def reach(rule, tag_ids, project_ids, now)
         task_ids = task_rule_queries.matching_task_ids(rule)
         task_event_mutations.track(task_ids, now, seen: false) { task_rule_mutations.tag_tasks(task_ids, tag_ids) }
-        task_rule_mutations.link_projects(task_ids, project_ids)
+        task_rule_mutations.fill_project(task_ids, project_ids.first)
       end
 
       def validate(params) = validated(contract.call(every_field(params)))

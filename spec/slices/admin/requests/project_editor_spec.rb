@@ -11,7 +11,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
   def imported(repo) = create(:task_source, url: "https://github.com/#{repo}/issues/1").task_id
 
-  def linked(task_id) = Tasks::Slice["relations.record_links"].project_ids_by_task([task_id]).fetch(task_id, [])
+  def linked(task_id) = Tasks::Slice["relations.tasks"].by_pk(task_id).pluck(:project_id).compact
 
   def save(project = nil, **overrides)
     path = project ? "/admin/projects/#{project.id}" : "/admin/projects"

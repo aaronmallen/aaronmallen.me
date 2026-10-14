@@ -101,10 +101,10 @@ module Tasks
       end
 
       def public_board_slugs(task_ids)
-        by_task = record_links.project_ids_by_task(task_ids)
-        slugs = project_queries.public_boards(by_task.values.flatten).to_h { [it.id, it.slug] }
+        by_task = tasks.where(id: task_ids).exclude(project_id: nil).pluck(:id, :project_id).to_h
+        slugs = project_queries.public_boards(by_task.values).to_h { [it.id, it.slug] }
 
-        by_task.transform_values { slugs.values_at(*it).compact }.reject { |_, found| found.empty? }
+        by_task.filter_map { |id, project_id| [id, [slugs[project_id]]] if slugs.key?(project_id) }.to_h
       end
 
       def timeline(task_id) = task_timeline.for_task(task_id).oldest_first.to_a

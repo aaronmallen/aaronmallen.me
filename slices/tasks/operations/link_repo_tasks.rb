@@ -9,7 +9,7 @@ module Tasks
         repo = project.repo
         return project if repo.nil? || repo == was
 
-        task_rule_mutations.link_projects(task_rule_queries.repo_task_ids(repo), [project.id])
+        task_rule_mutations.fill_project(task_rule_queries.repo_task_ids(repo), project.id)
 
         project
       end

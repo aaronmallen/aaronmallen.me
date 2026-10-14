@@ -7,10 +7,8 @@ module Activity
 
       DONE = Blog::Types::TaskStatus["done"]
       OWNER = Sequel[:review_tasks][:task_id]
-      PROJECT = Blog::Types::RecordKind["project"]
       PROJECT_NAME = Sequel.cast(Sequel[:projects][:name], :text)
       TAG_NAME = Sequel.cast(Sequel[:tags][:name], :text)
-      TASK = Blog::Types::RecordKind["task"]
 
       schema :review_tasks, infer: true
 
@@ -27,8 +25,7 @@ module Activity
       def names(rows, column) = rows.select(Sequel.function(:array_agg, column).order(column))
 
       def project_names
-        links = dataset.db[:record_links].join(:projects, id: :right_id)
-        names(links.where(left_kind: TASK, right_kind: PROJECT, left_id: OWNER), PROJECT_NAME)
+        names(dataset.db[:tasks].join(:projects, id: :project_id).where(Sequel[:tasks][:id] => OWNER), PROJECT_NAME)
       end
 
       def tag_names

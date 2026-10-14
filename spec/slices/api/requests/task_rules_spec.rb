@@ -20,7 +20,7 @@ RSpec.describe "API task rules", type: :request do
 
   def list = call_api(:get, "")
 
-  def project_ids(task) = Tasks::Slice["relations.record_links"].project_ids_by_task([task.id]).fetch(task.id, [])
+  def project_ids(task) = Tasks::Slice["relations.tasks"].by_pk(task.id).pluck(:project_id).compact
 
   def rule(pattern, tags, provider: nil)
     Tasks::Slice["operations.save_task_rule"].call({ pattern:, provider:, tags: }).value!
@@ -78,12 +78,22 @@ RSpec.describe "API task rules", type: :request do
 
     it "takes a private or archived project" do
       projects = [create(:project, :private), create(:project, :archived)]
-      created = create_rule(pattern: "aaronmallen/*", projects: projects.map(&:id))
+      created = projects.zip(%w[aaronmallen/* octocat/*]).map do |project, pattern|
+        create_rule(pattern:, projects: [project.id])
+      end
 
-      expect(created.fetch("projects").map { it.fetch("id") }).to match_array(projects.map(&:id))
+      expect(created.flat_map { it.fetch("projects").map { it.fetch("id") } }).to eq(projects.map(&:id))
     end
 
-    it "links every task already imported that it matches to its projects, and no other", :aggregate_failures do
+    it "refuses a second project and saves nothing", :aggregate_failures do
+      projects = [create(:project), create(:project)].map(&:id)
+
+      expect(create_rule(pattern: "aaronmallen/*", projects:).fetch("errors"))
+        .to eq("projects" => ["a rule names one project at most"])
+      expect(rules).to be_empty
+    end
+
+    it "puts every task already imported that it matches in its project, and no other", :aggregate_failures do
       blog = create(:project)
       tasks = [sourced("aaronmallen/aaronmallen.me"), sourced("octocat/hello-world")]
       create_rule(pattern: "aaronmallen/*", projects: [blog.id])
@@ -91,13 +101,13 @@ RSpec.describe "API task rules", type: :request do
       expect(tasks.map { project_ids(it) }).to eq([[blog.id], []])
     end
 
-    it "keeps a project link a task already has once" do
-      blog = create(:project)
+    it "keeps the project a task already has" do
+      held = create(:project)
       task = sourced("aaronmallen/aaronmallen.me")
-      Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", blog.id])
-      create_rule(pattern: "aaronmallen/*", projects: [blog.id])
+      Tasks::Slice["operations.set_task_project"].call(task.id, held.id)
+      create_rule(pattern: "aaronmallen/*", projects: [create(:project).id])
 
-      expect(project_ids(task)).to eq([blog.id])
+      expect(project_ids(task)).to eq([held.id])
     end
 
     it "refuses a project that is not there and saves nothing", :aggregate_failures do
@@ -320,7 +330,7 @@ RSpec.describe "API task rules", type: :request do
       expect([rules, tag_names(task)]).to eq([[], %w[projects]])
     end
 
-    it "leaves the project links it made" do
+    it "leaves the project it gave" do
       blog = create(:project)
       task = sourced("aaronmallen/aaronmallen.me")
       delete_rule(create_rule(pattern: "aaronmallen/*", projects: [blog.id]).fetch("id"))

@@ -14,13 +14,15 @@ module Links
         records: "repos.record_link_queries",
         contract: "contracts.record_link_contract",
         record_link_mutations: "repos.record_link_mutations",
+        set_task_project: "tasks.operations.set_task_project",
       ]
 
       def call(kind, id, params)
         side = step find(kind, id)
         fields = step validate(params)
+        other = fields.values_at(:other_kind, :other_id)
 
-        step persist(side, fields.values_at(:other_kind, :other_id))
+        step(record_link_mutations.task_project?(side, other) ? place(side, other) : persist(side, other))
       end
 
       private
@@ -39,6 +41,14 @@ module Links
         raise unless field
 
         Failure([:invalid, { field => [code] }])
+      end
+
+      def place(*sides)
+        task_id, project_id = record_link_mutations.sorted(*sides).map(&:last)
+
+        set_task_project.call(task_id, project_id).or do |code|
+          Failure([:invalid, { other_id: [code == :taken ? "taken" : "missing"] }])
+        end
       end
 
       def validate(params) = validated(contract.call(every_field(params)))
