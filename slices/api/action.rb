@@ -10,6 +10,9 @@ module API
     CHALLENGE = "WWW-Authenticate"
     CREATED = 201
     FORBIDDEN = 403
+    GONE_TOKEN = {
+      error: Operations::Authenticate::INVALID_TOKEN, error_description: Operations::Authenticate::UNUSABLE_TOKEN,
+    }.freeze
     INSUFFICIENT_SCOPE = "insufficient_scope"
     MISSING_SCOPE = "this endpoint needs a token with the %s scope"
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
@@ -36,6 +39,12 @@ module API
 
     def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: BAD_REQUEST)
 
+    def refuse_token(response, error)
+      response.format = :json
+      response.headers[CHALLENGE] = bearer(error)
+      halt UNAUTHORIZED, JSON.generate(error)
+    end
+
     def render_json(response, payload, status: OK)
       response.status = status
       response.format = :json
@@ -54,13 +63,11 @@ module API
     def require_token(request, response)
       case authenticate.call(request.env[AUTHORIZATION])
         in Success(token)
-          record_sighting.call(request, api_token_id: token.id)
+          refuse_token(response, GONE_TOKEN) unless record_sighting.call(request, api_token_id: token.id)
           require_scope(request, response, token)
           response[:token] = token
         in Failure(error)
-          response.format = :json
-          response.headers[CHALLENGE] = bearer(error)
-          halt UNAUTHORIZED, JSON.generate(error)
+          refuse_token(response, error)
       end
     end
 

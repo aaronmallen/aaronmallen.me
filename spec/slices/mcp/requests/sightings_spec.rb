@@ -64,4 +64,26 @@ RSpec.describe "MCP client sightings", type: :request do
 
     expect(sightings.count).to eq(0)
   end
+
+  describe "a client deleted after it authenticates" do
+    before do
+      authenticate = MCP::Slice["operations.authenticate"]
+      allow(authenticate).to(receive(:call).and_wrap_original do |read, *args, **options|
+        read.call(*args, **options).tap { MCP::Slice["db.rom"].gateways[:default].connection[:oauth_clients].delete }
+      end)
+      replace_component("operations.authenticate", authenticate)
+    end
+
+    it "answers 401" do
+      call_mcp
+
+      expect([last_response.status, JSON.parse(last_response.body)["error"]]).to eq([401, "invalid_token"])
+    end
+
+    it "records nothing" do
+      call_mcp
+
+      expect(sightings.count).to eq(0)
+    end
+  end
 end

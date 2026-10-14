@@ -108,4 +108,26 @@ RSpec.describe "API token sightings", type: :request do
 
     expect(sightings.count).to eq(0)
   end
+
+  describe "a token deleted after it authenticates" do
+    before do
+      authenticate = API::Slice["operations.authenticate"]
+      allow(authenticate).to(receive(:call).and_wrap_original do |read, *args|
+        read.call(*args).tap { API::Slice["db.rom"].gateways[:default].connection[:api_tokens].delete }
+      end)
+      replace_component("operations.authenticate", authenticate)
+    end
+
+    it "answers 401" do
+      call_api
+
+      expect([last_response.status, JSON.parse(last_response.body)["error"]]).to eq([401, "invalid_token"])
+    end
+
+    it "records nothing" do
+      call_api
+
+      expect([sightings.count, known_devices.count]).to eq([0, 0])
+    end
+  end
 end

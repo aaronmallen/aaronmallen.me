@@ -8,6 +8,9 @@ module MCP
         AUTHORIZATION = "HTTP_AUTHORIZATION"
         CHALLENGE = "WWW-Authenticate"
         EXPOSED_HEADERS = "Access-Control-Expose-Headers"
+        GONE_CLIENT = {
+          error: Operations::Authenticate::INVALID_TOKEN, error_description: Operations::Authenticate::UNKNOWN_CLIENT,
+        }.freeze
         MAX_BYTES = Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT
         NO_BODY = ""
         UNAUTHORIZED = 401
@@ -30,7 +33,9 @@ module MCP
         private
 
         def answer(request, response, token)
-          record_sighting.call(request, oauth_client_id: token.oauth_client_id)
+          sighted = record_sighting.call(request, oauth_client_id: token.oauth_client_id)
+          return challenge(response, GONE_CLIENT) unless sighted
+
           payload = request.body.read(MAX_BYTES).to_s
           reply = handler.call(payload, scopes: token.scopes, oauth_client_id: token.oauth_client_id)
           return render_body(response, NO_BODY, status: ACCEPTED) if reply.nil?
