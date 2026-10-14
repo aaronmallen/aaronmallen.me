@@ -12,11 +12,13 @@ module Social
 
       sidekiq_options retry: RETRIES
 
-      sidekiq_retries_exhausted do |job, _exception|
-        new.give_up(*job["args"])
+      sidekiq_retries_exhausted do |job, exception|
+        new.give_up(*job["args"], exception&.message)
       end
 
-      def give_up(social_post_id, connection_id) = deliver_social_post.give_up(social_post_id, connection_id)
+      def give_up(social_post_id, connection_id, error = nil)
+        deliver_social_post.give_up(social_post_id, connection_id, error)
+      end
 
       def perform(social_post_id, connection_id)
         return unless deliver_social_post.call(social_post_id, connection_id) in Failure(RETRYABLE)

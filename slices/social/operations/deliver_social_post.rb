@@ -30,12 +30,13 @@ module Social
         step send_parts(social_post, account, client, delivery, bodies)
       end
 
-      def give_up(social_post_id, connection_id)
+      def give_up(social_post_id, connection_id, error = nil)
         social_post = step found(social_post_queries.by_id(social_post_id))
         account = list_target_accounts.call(social_post).find { it.id == connection_id }
+        error = delivery_for(social_post, connection_id)&.error || error
 
         transaction do
-          social_post_mutations.record_delivery(social_post_id, account, failed: true) if account
+          social_post_mutations.record_delivery(social_post_id, account, error:, failed: true) if account
           settle(social_post_id)
         end
       end
@@ -49,9 +50,10 @@ module Social
         retrying && client.respond_to?(:retrying) ? client.retrying : client
       end
 
+      def delivery_for(social_post, connection_id) = social_post.deliveries.find { it.connection_id == connection_id }
+
       def done?(social_post, account)
-        delivery = social_post.deliveries.find { it.connection_id == account.id }
-        return false unless delivery
+        return false unless (delivery = delivery_for(social_post, account.id))
 
         delivery.failed || delivery.remote_ids.to_a.size >= sends(account, social_post)
       end

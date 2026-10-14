@@ -12,10 +12,10 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
   def delivery(social_post, network) = reloaded(social_post).deliveries.find { it.network == network }
 
-  def exhaust(social_post, network)
+  def exhaust(social_post, network, exception = nil)
     job = { "args" => [social_post.id, social_account(network).id] }
 
-    described_class.sidekiq_retries_exhausted_block.call(job, nil)
+    described_class.sidekiq_retries_exhausted_block.call(job, exception)
   end
 
   def facet(url, start, finish)
@@ -29,6 +29,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     deliver(queued(targets: %w[bluesky], parts: [text]), "bluesky")
 
     bluesky_writes.first.dig("record", "facets")
+  end
+
+  def failing(social_post, network)
+    deliver(social_post, network)
+  rescue StandardError => e
+    e
   end
 
   def key(social_post, network, position) = "social-post-#{social_post.id}-#{social_account(network).id}-#{position}"
@@ -630,6 +636,15 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
       expect([delivery(social_post, "bluesky").error, bluesky_writes])
         .to eq(["Bluesky returned no blob for an uploaded image", []])
+    end
+
+    it "fails with the error once the retries run out on a photo it can't read", :aggregate_failures do
+      store(photos[0], "x" * 1_000_001, type: "image/png")
+      social_post = with_photos(held(nil))
+      error = failing(social_post, "bluesky").tap { exhaust(social_post, "bluesky", it) }
+
+      expect(error).to be_a(Vips::Error)
+      expect(delivery(social_post, "bluesky")).to have_attributes(failed: true, error: error.message)
     end
   end
 
@@ -1290,8 +1305,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     before do
       stub_request(:post, statuses).to_return(status: 429)
-      refused(social_post, "mastodon")
-      exhaust(social_post, "mastodon")
+      exhaust(social_post, "mastodon", failing(social_post, "mastodon"))
     end
 
     it "marks the delivery failed and keeps the error Mastodon gave" do
