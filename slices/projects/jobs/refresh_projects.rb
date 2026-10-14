@@ -10,7 +10,7 @@ module Projects
         refresh_projects: "operations.refresh_projects",
       ]
 
-      def perform = record_sync_outcome.call(SYNC, refresh_projects.call)
+      def perform = record_crash(SYNC) { record_sync_outcome.call(SYNC, refresh_projects.call) }
     end
   end
 end

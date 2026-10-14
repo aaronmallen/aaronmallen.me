@@ -15,7 +15,7 @@ module Health
       def perform
         today = Blog::TimeZone.today
 
-        record_sync_outcome.call(SYNC, sync_health.call(first_day(today), today))
+        record_crash(SYNC) { record_sync_outcome.call(SYNC, sync_health.call(first_day(today), today)) }
       end
 
       private

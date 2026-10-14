@@ -202,4 +202,24 @@ RSpec.describe Projects::Jobs::RefreshProjects do
       expect(stored(project).stars).to eq(42)
     end
   end
+
+  describe "a run that crashes" do
+    before { replace_component("operations.refresh_projects", ->(*) { raise KeyError, "key not found: :id" }) }
+
+    def run_crashing
+      refresh
+    rescue KeyError
+      nil
+    end
+
+    it "records the crash where the admin reads it" do
+      run_crashing
+
+      expect(failure).to include(reason: "crashed", message: "key not found: :id")
+    end
+
+    it "still raises, so the error reaches error tracking" do
+      expect { refresh }.to raise_error(KeyError, /key not found/)
+    end
+  end
 end

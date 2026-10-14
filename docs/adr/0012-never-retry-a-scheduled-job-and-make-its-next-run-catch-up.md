@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114"]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -38,7 +38,8 @@ anyone finding out.
 **A scheduled job never retries.** Since #990 each subclasses `Blog::ScheduledJob` (`lib/blog/scheduled_job.rb`),
 which sets `sidekiq_options retry: false` once, and the worker's schedule spec holds every entry to it: the next run
 picks up what this one missed. A job that records a failure in `sync_states` and then raises does both through the
-base's `record_and_raise`. Each scheduled operation finds its work again on every run.
+base's `record_and_raise`, and one that records an exception its operation raised wraps the work in the base's
+`record_crash`, which records it as `crashed` (#1219). Each scheduled operation finds its work again on every run.
 `PostRepo#due_scheduled` and `SocialPostRepo#due_scheduled` take every row due by now, the commit finder starts from the
 newest stored commit and every failure recorded against a repository, the rollup walks every day since its newest
 rollup, the health sync reads again from two days before its failure began (#1114), and the reapers delete everything
@@ -60,8 +61,9 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | Scheduled job | On failure |
 | --- | --- |
 | `BackUpDatabase`, `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
+| `RefreshProjects`, `SyncCalendar`, `SyncGmail`, `SyncHealth`, `SyncIssues` | Record a `Failure`; record an exception, then raise |
 | `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks` | Raise |
-| `ImportCommits`, `ImportPullRequests`, `RefreshProjects`, `SyncHealth`, `SyncIssues` | Record in `sync_states` |
+| `ImportCommits`, `ImportPullRequests` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos`, `PruneAccessRecords`, `ReapSpamMessages` | Drop it |
 
 The table took in the jobs that came after it in #957. `SyncIssues` runs twice on the schedule, as `sync_issues`

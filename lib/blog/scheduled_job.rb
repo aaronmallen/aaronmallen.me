@@ -10,5 +10,11 @@ module Blog
       record_sync_outcome.call(sync, failure)
       raise error
     end
+
+    def record_crash(sync, reason = :crashed)
+      yield
+    rescue StandardError => e
+      record_and_raise(sync, Failure([reason, e.message]), e)
+    end
   end
 end

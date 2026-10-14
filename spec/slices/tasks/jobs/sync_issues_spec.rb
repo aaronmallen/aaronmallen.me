@@ -1194,4 +1194,24 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(failure).to be_nil
     end
   end
+
+  describe "a run that crashes" do
+    before { replace_component("operations.sync_issues", ->(*) { raise KeyError, "key not found: :id" }) }
+
+    def run_crashing
+      sync
+    rescue KeyError
+      nil
+    end
+
+    it "records the crash where the admin reads it" do
+      run_crashing
+
+      expect(failure).to include(reason: "crashed", message: "key not found: :id")
+    end
+
+    it "still raises, so the error reaches error tracking" do
+      expect { sync }.to raise_error(KeyError, /key not found/)
+    end
+  end
 end

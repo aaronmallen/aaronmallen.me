@@ -358,4 +358,24 @@ RSpec.describe Mail::Jobs::SyncGmail do
     expect(a_request(:any, /gmail\.googleapis\.com/)).not_to have_been_made
     expect(failure).to be_nil
   end
+
+  describe "a run that crashes" do
+    before { replace_component("operations.sync_gmail", ->(*) { raise KeyError, "key not found: :id" }) }
+
+    def run_crashing
+      run
+    rescue KeyError
+      nil
+    end
+
+    it "records the crash where the admin reads it" do
+      run_crashing
+
+      expect(failure).to include(reason: "crashed", message: "key not found: :id")
+    end
+
+    it "still raises, so the error reaches error tracking" do
+      expect { run }.to raise_error(KeyError, /key not found/)
+    end
+  end
 end

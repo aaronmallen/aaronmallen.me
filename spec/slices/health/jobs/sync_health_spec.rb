@@ -254,4 +254,41 @@ RSpec.describe Health::Jobs::SyncHealth do
     expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
     expect(failure).to be_nil
   end
+
+  describe "a run that crashes" do
+    before { replace_component("operations.sync_health", ->(*) { raise KeyError, "key not found: :id" }) }
+
+    def run_crashing
+      run
+    rescue KeyError
+      nil
+    end
+
+    it "records the crash where the admin reads it" do
+      run_crashing
+
+      expect(failure).to include(reason: "crashed", message: "key not found: :id")
+    end
+
+    it "still raises, so the error reaches error tracking" do
+      expect { run }.to raise_error(KeyError, /key not found/)
+    end
+
+    describe "ten days ago" do
+      before do
+        connect_google
+        allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(today - 10))
+        run_crashing
+        allow(Time).to receive(:now).and_call_original
+        restore_components
+        set_up_google_client
+        stub_google_health
+        run
+      end
+
+      it "rereads from the day it crashed on the next run" do
+        expect(asked_for_workouts_from(today - 12)).to have_been_made
+      end
+    end
+  end
 end

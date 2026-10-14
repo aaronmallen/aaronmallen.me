@@ -18,7 +18,9 @@ module Tasks
         client = { "github" => github, "linear" => linear }.fetch(provider)
         return unless client.configured?
 
-        result = task_source_mutations.with_sync_lock(provider) { sync_issues.call(provider:, client:) }
+        result = record_crash(SYNCS.fetch(provider)) do
+          task_source_mutations.with_sync_lock(provider) { sync_issues.call(provider:, client:) }
+        end
 
         case result
           in Failure(:lock_busy) then nil

@@ -2227,6 +2227,7 @@ en:
         line: "%{sync} failed at %{at} · %{reason}"
         message_line: "%{line} · %{message}"
         reasons:
+          crashed: "It crashed"
           download_failed: "The download failed"
           dump_failed: "pg_dump failed"
           github_failed: "GitHub didn't answer"

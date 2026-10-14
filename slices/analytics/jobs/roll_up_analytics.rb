@@ -13,18 +13,10 @@ module Analytics
       ]
 
       def perform
-        attempt(:rollup_failed) { roll_up_analytics.call }
-        attempt(:prune_failed) { prune_analytics_events.call }
-        attempt(:readers_failed) { save_reader_counts.call }
+        record_crash(SYNC, :rollup_failed) { roll_up_analytics.call }
+        record_crash(SYNC, :prune_failed) { prune_analytics_events.call }
+        record_crash(SYNC, :readers_failed) { save_reader_counts.call }
         record_sync_outcome.call(SYNC, Success(nil))
-      end
-
-      private
-
-      def attempt(reason)
-        yield
-      rescue StandardError => e
-        record_and_raise(SYNC, Failure([reason, e.message]), e)
       end
     end
   end
