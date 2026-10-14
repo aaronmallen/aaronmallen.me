@@ -63,11 +63,12 @@ module LinkedIn
 
     def max_bytes = nil
 
-    def post(text, **)
+    def post(text, photos: [], **)
       found = @retrying && find_post(text)
       return found if found
 
-      response = request("POST #{POSTS_PATH}") { connection.post(POSTS_PATH, payload(text)) }
+      content = Images.content(photos, account.author, connection) { |route, run| request(route, timeout: Error, &run) }
+      response = request("POST #{POSTS_PATH}") { connection.post(POSTS_PATH, payload(text, content)) }
       id = response.headers[POST_ID_HEADER].to_s
       raise Error, "LinkedIn answered #{POSTS_PATH} without a post ID" if id.empty?
 
@@ -119,12 +120,12 @@ module LinkedIn
 
     def headers = HEADERS.merge("Authorization" => "Bearer #{account.token}", "LinkedIn-Version" => VERSION)
 
-    def payload(text)
+    def payload(text, content)
       {
-        author: account.author, commentary: escape(text), isReshareDisabledByAuthor: false,
+        author: account.author, commentary: escape(text), content:, isReshareDisabledByAuthor: false,
         distribution: { feedDistribution: "MAIN_FEED", targetEntities: [], thirdPartyDistributionChannels: [] },
         lifecycleState: "PUBLISHED", visibility: "PUBLIC",
-      }
+      }.compact
     end
 
     def plain(commentary) = commentary.to_s.gsub(HASHTAG, "#\\1").gsub(/\\(.)/m, "\\1")
@@ -142,10 +143,10 @@ module LinkedIn
 
     def remote(id) = Social::Structs::RemotePost.new(id:, url: format(POST_URL, id))
 
-    def request(route)
+    def request(route, timeout: account.reads_posts ? Error : Unsure)
       answered(route, yield)
     rescue Faraday::TimeoutError => e
-      raise(account.reads_posts ? Error : Unsure, "LinkedIn request #{route} timed out: #{e.message}")
+      raise timeout, "LinkedIn request #{route} timed out: #{e.message}"
     rescue Faraday::Error, URI::Error => e
       raise Error, "LinkedIn request #{route} failed: #{e.message}"
     end

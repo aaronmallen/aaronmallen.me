@@ -3,6 +3,7 @@
 module Spec
   module LinkedInAccounts
     ANALYTICS = "https://api.linkedin.com/rest/memberCreatorPostAnalytics"
+    IMAGES = "https://api.linkedin.com/rest/images?action=initializeUpload"
     POSTS = "https://api.linkedin.com/rest/posts"
     SCOPES = %w[openid profile w_member_social].freeze
 
@@ -18,7 +19,11 @@ module Spec
 
     def linkedin_analytics = ANALYTICS
 
+    def linkedin_images = IMAGES
+
     def linkedin_posts = POSTS
+
+    def linkedin_upload_url(index) = "https://www.linkedin.com/dms-uploads/img-#{index}/uploaded-image/0?ut=up"
 
     def set_up_linkedin_client(credentials = { client_id: "li-id", client_secret: "li-secret" })
       allow(Hanami.app.settings).to receive(:linkedin).and_return(credentials)
@@ -37,6 +42,15 @@ module Spec
         response = json_response(elements: [{ count:, metricType: type }])
         stub_request(:get, ANALYTICS).with(query: hash_including("queryType" => type)).to_return(**response)
       end
+    end
+
+    def stub_linkedin_images
+      count = 0
+      stub_request(:post, IMAGES).to_return do
+        count += 1
+        json_response(value: { image: "urn:li:image:#{count}", uploadUrl: linkedin_upload_url(count) })
+      end
+      stub_request(:put, %r{\Ahttps://www\.linkedin\.com/dms-uploads/}).to_return(status: 201)
     end
 
     def stub_linkedin_recent(*commentaries)

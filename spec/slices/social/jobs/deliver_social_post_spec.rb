@@ -1381,6 +1381,130 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "photos to LinkedIn" do
+    let(:photos) { Array.new(5) { create(:photo) } }
+    let(:posts) { [] }
+
+    def content = posts.first["content"]
+
+    def held(*alts, part: 1, from: 0)
+      alts.each_with_index.map { |alt, index| { part:, key: photos[from + index].key, alt: } }
+    end
+
+    def image(index, alt = nil) = { "altText" => alt, "id" => "urn:li:image:#{index}" }.compact
+
+    def scopes = Spec::LinkedInAccounts::SCOPES
+
+    def store(photo, body = "photo-#{photo.key}", type: "image/jpeg")
+      stub_request(:get, media_store_url(photo.key)).to_return(body:, headers: { "Content-Type" => type })
+    end
+
+    def with_photos(photos, parts: %w[one])
+      social_post_mutations.create_with_parts(targets: %w[linkedin], parts:, photos:, status: "scheduled",
+                                              posted_at: Time.now - 60)
+    end
+
+    before do
+      connect_media_store
+      connect_linkedin(scopes:)
+      stub_linkedin_images
+      photos.each { store(it) }
+      stub_request(:post, linkedin_posts).to_return do |request|
+        posts << JSON.parse(request.body)
+        { status: 201, headers: { "x-restli-id" => "urn:li:share:7" } }
+      end
+    end
+
+    it "shows one photo as the post's image, with its alt text" do
+      deliver(with_photos(held("A cat")), "linkedin")
+
+      expect(content).to eq("media" => image(1, "A cat"))
+    end
+
+    it "shows several photos in order, each with its alt text" do
+      deliver(with_photos(held("A cat", "A dog")), "linkedin")
+
+      expect(content).to eq("multiImage" => { "images" => [image(1, "A cat"), image(2, "A dog")] })
+    end
+
+    it "leaves the alt text out for a photo with none" do
+      deliver(with_photos(held(nil)), "linkedin")
+
+      expect(content).to eq("media" => image(1))
+    end
+
+    it "starts each upload for the member" do
+      deliver(with_photos(held(nil)), "linkedin")
+
+      body = { initializeUploadRequest: { owner: "urn:li:person:member-ada" } }
+
+      expect(a_request(:post, linkedin_images).with(body:, headers: { "Authorization" => "Bearer li-token" }))
+        .to have_been_made
+    end
+
+    it "puts the stored bytes to the upload URL under their type" do
+      deliver(with_photos(held(nil)), "linkedin")
+
+      headers = { "Authorization" => "Bearer li-token", "Content-Type" => "image/jpeg" }
+
+      expect(a_request(:put, linkedin_upload_url(1)).with(body: "photo-#{photos[0].key}", headers:))
+        .to have_been_made
+    end
+
+    it "sends a thread's photos on its one post, up to four" do
+      deliver(with_photos(held(nil, nil, nil) + held(nil, nil, part: 2, from: 3), parts: %w[one two]), "linkedin")
+
+      expect(content.dig("multiImage", "images").map { it["id"] }).to eq((1..4).map { "urn:li:image:#{it}" })
+    end
+
+    it "turns a WebP photo into a JPEG, since LinkedIn takes none" do
+      store(photos[0], Vips::Image.black(8, 8).write_to_buffer(".webp"), type: "image/webp")
+      deliver(with_photos(held(nil)), "linkedin")
+
+      expect(a_request(:put, linkedin_upload_url(1)).with(headers: { "Content-Type" => "image/jpeg" }))
+        .to have_been_made
+    end
+
+    it "sends no content and uploads nothing for a post without photos", :aggregate_failures do
+      deliver(with_photos([]), "linkedin")
+
+      expect(posts.first).not_to have_key("content")
+      expect(a_request(:post, linkedin_images)).not_to have_been_made
+    end
+
+    it "keeps the error and posts nothing when LinkedIn starts no upload", :aggregate_failures do
+      stub_request(:post, linkedin_images).to_return(**json_response(value: {}))
+      social_post = with_photos(held(nil))
+      refused(social_post, "linkedin")
+
+      expect(delivery(social_post, "linkedin").error).to include("without an image and an upload URL")
+      expect(posts).to be_empty
+    end
+
+    it "retries when an upload times out, since nothing is posted yet" do
+      stub_request(:put, linkedin_upload_url(1)).to_raise(Net::ReadTimeout)
+
+      expect { deliver(with_photos(held(nil)), "linkedin") }.to raise_error(described_class::NetworkUnavailable)
+    end
+
+    context "with leave to read the member's posts" do
+      def scopes = %w[openid profile w_member_social r_member_social]
+      let(:social_post) { with_photos(held(nil)) }
+
+      before do
+        stub_request(:post, linkedin_posts).to_raise(Net::ReadTimeout)
+        refused(social_post, "linkedin")
+        stub_linkedin_recent("one")
+      end
+
+      it "uploads nothing again on a retry that finds the post already out" do
+        deliver(social_post, "linkedin")
+
+        expect(a_request(:post, linkedin_images)).to have_been_made.once
+      end
+    end
+  end
+
   describe "one post to Mastodon, Bluesky and LinkedIn" do
     let(:social_post) { queued(targets: %w[mastodon bluesky linkedin], parts: %w[hello]) }
     let(:urls) do
