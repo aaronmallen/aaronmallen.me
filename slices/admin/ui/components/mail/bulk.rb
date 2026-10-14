@@ -30,6 +30,7 @@ module Admin
             BulkBar(
               id: ID, action: path(:admin_bulk_mail), label: t(".label"), fields:,
               menu: path(:admin_mail_bulk_menu, **fields), all: t(".all", count: @count), hint: t(".hint"),
+              toggled: true,
             ) do |bar|
               @list[:folder] == TRASH ? trash(bar) : filed(bar)
             end

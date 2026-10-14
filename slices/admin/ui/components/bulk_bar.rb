@@ -14,6 +14,7 @@ module Admin
         prop :menu, Blog::Types::String.optional, default: nil
         prop :all, Blog::Types::String.optional, default: nil
         prop :hint, Blog::Types::String.optional, default: nil
+        prop :toggled, Blog::Types::Bool, default: false
 
         def act(value, icon:, label:, variant: nil, data: nil)
           Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) { label }
@@ -57,13 +58,13 @@ module Admin
 
         def all
           label(class: "choice", hidden: true, data: { bulk_all: true }) do
-            input(type: "checkbox", class: "check")
+            input(type: "checkbox", class: "check", autocomplete: "off")
             span { @all || t(".all") }
             span(class: "bulk-hint") { @hint } if @hint
           end
         end
 
-        def form_data = { bulk: FIELD, bulk_menu: @menu }
+        def form_data = { bulk: FIELD, bulk_menu: @menu, bulk_off: @toggled }
       end
     end
   end

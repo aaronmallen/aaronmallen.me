@@ -45,7 +45,7 @@ module Admin
             end
           end
 
-          def bulk? = @tab != UPCOMING && @tab != COMPLETED
+          def bulk? = @tab != UPCOMING && @tab != COMPLETED && @tasks.rows.any?
 
           def list = ListCard(counts: @counts, lead: @lead, query:, tab: @tab, tasks: @tasks, today: @today)
 

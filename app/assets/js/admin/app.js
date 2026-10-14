@@ -34,39 +34,49 @@ import { setupToasts } from "./toast.js";
 import { setupTracked } from "./tracked.js";
 import { setupWorkForms } from "./work_form.js";
 
+const STEPS = [
+  setupAccountPickers,
+  setupAutosubmit,
+  setupBoardDrag,
+  setupBulk,
+  setupCalendars,
+  setupCommentAdds,
+  setupCommitImports,
+  setupConfirms,
+  setupContextMenus,
+  setupDialogs,
+  setupEditNotes,
+  setupFileDrops,
+  setupJournals,
+  setupKeys,
+  setupLinkForms,
+  setupMailDrag,
+  setupMailEditors,
+  setupMarkdownEditors,
+  setupPalette,
+  setupPersonFinder,
+  setupPersonForms,
+  setupPools,
+  setupPostEditors,
+  setupPostSyndication,
+  setupProjectEditors,
+  setupProjectPicks,
+  setupRecordKeys,
+  setupSocialComposers,
+  setupTaskOrder,
+  setupTaskPanel,
+  setupToasts,
+  setupWorkForms,
+];
+
 function setup() {
-  setupAccountPickers();
-  setupAutosubmit();
-  setupBoardDrag();
-  setupBulk();
-  setupCalendars();
-  setupCommentAdds();
-  setupCommitImports();
-  setupConfirms();
-  setupContextMenus();
-  setupDialogs();
-  setupEditNotes();
-  setupFileDrops();
-  setupJournals();
-  setupKeys();
-  setupLinkForms();
-  setupMailDrag();
-  setupMailEditors();
-  setupMarkdownEditors();
-  setupPalette();
-  setupPersonFinder();
-  setupPersonForms();
-  setupPools();
-  setupPostEditors();
-  setupPostSyndication();
-  setupProjectEditors();
-  setupProjectPicks();
-  setupRecordKeys();
-  setupSocialComposers();
-  setupTaskOrder();
-  setupTaskPanel();
-  setupToasts();
-  setupWorkForms();
+  for (const step of STEPS) {
+    try {
+      step();
+    } catch (error) {
+      reportError(error);
+    }
+  }
 }
 
 setup();

@@ -8,7 +8,7 @@ module Admin
 
         def view_template
           Button(
-            icon: "fa-regular fa-square-check", hidden: true, aria: { pressed: "false" }, data: { bulk_toggle: @form },
+            icon: "fa-regular fa-square-check", aria: { pressed: "false" }, data: { bulk_toggle: @form },
           ) { t(".label") }
         end
       end

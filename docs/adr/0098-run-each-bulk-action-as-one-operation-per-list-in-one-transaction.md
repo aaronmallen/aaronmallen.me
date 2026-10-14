@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, api, assets, contact, mcp, posts, social, tasks]
 issue: "#329"
+amended: ["#1273"]
 tags: [bulk, transactions, savepoint, after-commit, forms, routes, api, mcp, paging, tasks, posts, messages]
 ---
 
@@ -53,11 +54,13 @@ named `action`, since an element named `action` hides the form's own `action` pr
 toasts and redirects back to the same list and page. A failure redirects back with a toast that names the record and
 words its code.
 
-**Select all ticks the rows on screen.** The box ticks the rows of the page in view, under whatever filter shows
-them, and the form posts their ids. The server never turns "all" into a query, so a row that lands after the page
-loaded is never touched. Script draws the box and shows or hides the bar. With scripts off the bar always shows and
-the box does not draw. The checkbox sits outside the drag grip, so a tick never starts a drag, and a dragged row
-keeps its tick, since selection is a set of ids, not places.
+**Select all ticks the rows on screen.** The box ticks the rows of the page in view, under whatever filter shows them,
+and the form posts their ids. The server never turns "all" into a query, so a row that lands after the page loaded is
+never touched. Script draws the box and shows or hides the bar. With scripts off the box does not draw. The bar on posts
+and webmentions always shows. Tasks, mail and the project board hide theirs behind a Select button, and since #1273 the
+server sends that button with select mode off, so with scripts off those lists show no bar. The checkbox sits outside
+the drag grip, so a tick never starts a drag, and a dragged row keeps its tick, since selection is a set of ids, not
+places.
 
 **The API and MCP take one endpoint and one tool per action.** Each action has its own route, such as
 `post "/tasks/bulk/complete"`, and its own tool named for the action and the list, such as `complete_tasks`.
@@ -100,7 +103,8 @@ The first failure stops the batch, so three bad records take three tries to find
 The admin route takes its action from a field and the API from its path, so the two doors map the same set of
 actions in two places.
 
-With scripts off the operator ticks each row by hand, since select all needs a script.
+With scripts off the operator ticks each row by hand on posts and webmentions, since select all needs a script.
+Tasks, mail and the project board offer no bulk action with scripts off.
 
 Raising the admin page size past 100 lets select all tick more rows than the cap allows, and the batch refuses.
 

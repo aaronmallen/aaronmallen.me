@@ -12,7 +12,7 @@ module Admin
         def view_template
           label(**mix({ class: "bulk-pick" }, @attributes)) do
             input(type: "checkbox", class: "check", name: BulkBar::FIELD, value: @value, form: @form,
-                  aria: { label: @label })
+                  autocomplete: "off", aria: { label: @label })
           end
         end
       end

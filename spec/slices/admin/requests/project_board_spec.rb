@@ -123,8 +123,9 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(arrows("canceled")).to eq(%w[done])
       end
 
-      it "offers a Select button for the board's bulk bar" do
-        expect(page).to have_css("button[data-bulk-toggle='board-bulk']", visible: :all)
+      it "offers a Select button for the board's bulk bar with bulk mode off", :aggregate_failures do
+        expect(page).to have_css("button[data-bulk-toggle='board-bulk'][aria-pressed='false']")
+        expect(page).to have_css("form#board-bulk[data-bulk-off]")
       end
 
       it "gives each card a box that joins the bar" do

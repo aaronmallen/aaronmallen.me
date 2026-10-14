@@ -247,12 +247,17 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(repo.open_in_list("someday").map(&:title)).to include("Learn Rust")
       end
 
-      it "offers the Select button for bulk mode on a list" do
+      it "offers the Select button with bulk mode off, so a list shows it with scripts off", :aggregate_failures do
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_css(
-          ".page-head-actions button.bt[data-bulk-toggle='task-bulk'][aria-pressed='false']", visible: :all,
-        )
+        expect(page).to have_css(".page-head-actions button.bt[data-bulk-toggle='task-bulk'][aria-pressed='false']")
+        expect(page).to have_css("form#task-bulk[data-bulk-off]")
+      end
+
+      it "offers no Select button on an empty list" do
+        get "/admin/tasks", filter: "next", q: "nothing matches this"
+
+        expect(page).to have_no_css("[data-bulk-toggle]", visible: :all)
       end
 
       %w[upcoming completed].each do |filter|

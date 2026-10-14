@@ -12,7 +12,8 @@ module Admin
           prop :project_id, Blog::Types::Integer
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_project_tasks, id: @project_id), label: t(".label")) do |bar|
+            BulkBar(id: ID, action: path(:admin_bulk_project_tasks, id: @project_id), label: t(".label"),
+                    toggled: true) do |bar|
               bar.choose("to", MOVE, prompt: t(".pick_column"), options: columns, icon: ICON, label: t(".move"))
             end
           end

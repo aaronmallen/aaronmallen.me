@@ -64,6 +64,13 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
         expect(page).to have_css("[data-bulk-acts]:not([hidden])")
       end
 
+      it "keeps the browser from restoring ticks on reload", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task input[name='ids[]'][autocomplete='off']").size).to eq(2)
+        expect(page).to have_css("[data-bulk-all] input[autocomplete='off']", visible: :all)
+      end
+
       it "leaves select all for the script to draw" do
         get "/admin/tasks", filter: "next"
 

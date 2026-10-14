@@ -870,9 +870,25 @@ RSpec.describe "Admin mail", type: :request do
         threads
         get "/admin/mail"
 
-        expect(page).to have_css("button[data-bulk-toggle='mail-bulk']", text: "Select", visible: :all)
+        expect(page).to have_css("button[data-bulk-toggle='mail-bulk']", text: "Select")
         expect(page.all("form#mail-bulk button[name='act']").map(&:value)).to eq(%w[archive read unread move trash])
         expect(page.all(".mail-row input[name='ids[]'][form='mail-bulk']").size).to eq(2)
+      end
+
+      it "starts with select mode off, so the list shows Select with scripts off", :aggregate_failures do
+        threads
+        get "/admin/mail"
+
+        expect(page).to have_css("button[data-bulk-toggle='mail-bulk'][aria-pressed='false']", text: "Select")
+        expect(page).to have_css("form#mail-bulk[data-bulk-off]")
+      end
+
+      it "keeps the browser from restoring ticks on reload", :aggregate_failures do
+        threads
+        get "/admin/mail"
+
+        expect(page.all(".mail-row input[name='ids[]'][autocomplete='off']").size).to eq(2)
+        expect(page).to have_css("form#mail-bulk [data-bulk-all] input[autocomplete='off']", visible: :all)
       end
 
       it "marks every ticked thread read", :aggregate_failures do

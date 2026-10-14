@@ -22,7 +22,6 @@ export function setupBulk(root = document) {
     const form = document.getElementById(button.dataset.bulkToggle);
     if (!form) continue;
 
-    button.hidden = false;
     pick(form, button, pressed.has(form.id));
     if (fresh(ready, [button]).length) button.addEventListener("click", () => flip(button));
   }
