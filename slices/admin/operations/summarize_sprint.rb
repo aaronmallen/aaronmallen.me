@@ -3,27 +3,25 @@
 module Admin
   module Operations
     class SummarizeSprint < Blog::Operation
+      include Blog::Constants
+
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
         task_queries: "tasks.repos.task_queries",
       ]
 
-      def call(now: Time.now, pool: nil)
+      def call(page:, now: Time.now, pool: nil)
         sprint = step current_sprint.call(now:)
-        pools = self.pools
+        pool = Blog::Types::TaskListParam[pool]
 
         {
-          counts: pools.transform_values(&:size),
+          counts: task_queries.open_counts(sprint:, planned: EMPTY_ARRAY),
           date: Blog::TimeZone.today(now),
-          pool: Blog::Types::TaskListParam[pool],
-          pools:,
+          pool:,
+          pools: { pool => task_queries.list(pool, sprint: nil, page:).rows },
           tasks: task_queries.in_sprint(sprint.id),
         }
       end
-
-      private
-
-      def pools = Blog::Types::TaskList.values.to_h { [it, task_queries.open_in_list(it)] }
     end
   end
 end

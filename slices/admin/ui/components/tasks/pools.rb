@@ -21,7 +21,7 @@ module Admin
           def view_template
             div(class: "task-planner-pull", data: { pools: "" }) do
               switch
-              LISTS.each_key { pool(it) }
+              div(data: { pool_panel: @pool }) { rows }
             end
           end
 
@@ -37,10 +37,6 @@ module Admin
               SourceLink(source: task.source)
               task.tags.each { Tag(tag: it) }
             end
-          end
-
-          def pool(list)
-            div(data: { pool_panel: list }, hidden: list != @pool) { rows(list) }
           end
 
           def pool_link(list)
@@ -75,11 +71,11 @@ module Admin
             end
           end
 
-          def rows(list)
-            waiting = @pools.fetch(list)
-            return Empty { t(EMPTY.fetch(list)) } if waiting.empty?
+          def rows
+            waiting = @pools.fetch(@pool)
+            return Empty { t(EMPTY.fetch(@pool)) } if waiting.empty?
 
-            div(class: "task-planner-list") { waiting.each { row(it, list) } }
+            div(class: "task-planner-list") { waiting.each { row(it, @pool) } }
           end
 
           def switch = SegmentedLinks(label: t(".pull_from"), items: LISTS.keys.map { pool_link(it) })

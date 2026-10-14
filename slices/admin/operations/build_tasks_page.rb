@@ -30,9 +30,11 @@ module Admin
         filters = { query: Blog::Types::TrimmedText[query], **closed_range(from, to) }
         tasks = step listed(tab, sprint, planned, page, filters)
 
+        pool = Blog::Types::TaskListParam[pool]
+
         {
           counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,
-          pool: Blog::Types::TaskListParam[pool], today:, **plan(tab, tasks, planned, page),
+          pool:, today:, **plan(tab, tasks, planned, page, pool),
         }
       end
 
@@ -74,17 +76,15 @@ module Admin
         tasks.past_end? ? Failure(:past_end) : Success(tasks)
       end
 
-      def plan(tab, tasks, planned, page)
+      def plan(tab, tasks, planned, page, pool)
         {
           planned: tab == UPCOMING ? scheduled(tasks.rows, planned) : EMPTY_ARRAY,
-          pools: tab == TODAY ? pools(page) : EMPTY_HASH,
+          pools: tab == TODAY ? pools(pool, page) : EMPTY_HASH,
           waiting: tab == UPCOMING ? task_queries.list(NEXT, sprint: nil, page: first_page(page)).rows : EMPTY_ARRAY,
         }
       end
 
-      def pools(page)
-        Blog::Types::TaskList.values.to_h { [it, task_queries.list(it, sprint: nil, page: first_page(page)).rows] }
-      end
+      def pools(pool, page) = { pool => task_queries.list(pool, sprint: nil, page: first_page(page)).rows }
 
       def scheduled(tasks, planned)
         held = tasks.group_by(&:sprint_id)

@@ -1,32 +1,34 @@
 import { fresh } from "./fresh.js";
-import { plain } from "./in_place.js";
+import { plain, setupVisit } from "./in_place.js";
 
 const LINK = "[data-pool]";
+const PANEL = "[data-pool-panel]";
 
 const ready = new WeakSet();
 
 export function setupPools() {
   for (const pools of fresh(ready, document.querySelectorAll("[data-pools]"))) {
+    const visit = setupVisit();
+
     pools.addEventListener("click", (event) => {
       const link = event.target.closest(LINK);
       if (!link || !plain(event)) return;
 
       event.preventDefault();
-      show(pools, link.dataset.pool);
-      history.replaceState(history.state, "", link.href);
+      mark(pools, link.dataset.pool);
+      visit(link.href, `${PANEL}[data-pool-panel="${link.dataset.pool}"]`, (panel) => {
+        pools.querySelector(PANEL).replaceWith(panel);
+        history.replaceState(history.state, "", link.href);
+      });
     });
   }
 }
 
-function show(pools, pool) {
+function mark(pools, pool) {
   for (const link of pools.querySelectorAll(LINK)) {
     const current = link.dataset.pool === pool;
     link.classList.toggle("current", current);
     if (current) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
-  }
-
-  for (const panel of pools.querySelectorAll("[data-pool-panel]")) {
-    panel.hidden = panel.dataset.poolPanel !== pool;
   }
 }

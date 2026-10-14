@@ -540,24 +540,27 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
           .to eq(%w[next someday external].map { "/admin/tasks?filter=today&pool=#{it}" })
       end
 
-      it "renders every pool" do
+      it "renders only the chosen pool" do
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(pool_panels("[data-pool-panel]")).to eq(%w[next someday external])
+        expect(pool_panels("[data-pool-panel]")).to eq(%w[someday])
       end
 
-      it "hides every pool but the chosen one" do
-        get "/admin/tasks", filter: "today", pool: "someday"
+      it "caps the chosen pool at the page size" do
+        lower_page_size(:admin, to: 1)
+        create(:task, title: "Email the accountant")
+        create(:task, title: "Call the plumber")
+        get "/admin/tasks", filter: "today"
 
-        expect(pool_panels("[data-pool-panel][hidden]")).to eq(%w[next external])
+        expect(pooled.size).to eq(1)
       end
 
       it "names the pool each pull comes from" do
         create(:task, title: "Email the accountant")
         create(:task, :someday, title: "Learn Elixir")
-        get "/admin/tasks", filter: "today"
+        get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(page.all(".task-pull form [name='pool']", visible: :all).map(&:value)).to eq(%w[next someday])
+        expect(page.all(".task-pull form [name='pool']", visible: :all).map(&:value)).to eq(%w[someday])
       end
 
       it "returns to the pool a task was pulled from" do

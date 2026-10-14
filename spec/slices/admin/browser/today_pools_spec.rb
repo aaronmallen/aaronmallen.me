@@ -31,9 +31,9 @@ RSpec.describe "Admin today pools", type: :feature do
       expect(evaluate_script("window.scrollY > 0 && window.scrollY === window.poolsScroll")).to be(true)
     end
 
-    it "marks someday as the current page" do
-      expect(panel.all(".seg-option[aria-current]").map { [it.text, it["aria-current"]] })
-        .to eq([["someday · 1", "page"]])
+    it "marks someday as the current page", :aggregate_failures do
+      expect(panel).to have_css(".seg-option[aria-current='page']", exact_text: "someday · 1")
+      expect(panel).to have_css(".seg-option[aria-current]", count: 1)
     end
   end
 end

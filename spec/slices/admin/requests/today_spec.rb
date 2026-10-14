@@ -1181,11 +1181,28 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(panel.find(".task-planner-list .task-meta")).to have_css(".record-key", exact_text: "##{task.id}")
       end
 
-      it "renders every pool and hides all but the chosen one" do
+      it "renders only the chosen pool" do
         get "/admin", pool: "external"
 
-        expect(panel.all("[data-pool-panel]:not([hidden])", visible: :all).map { it["data-pool-panel"] })
-          .to eq(%w[external])
+        expect(panel.all("[data-pool-panel]", visible: :all).map { it["data-pool-panel"] }).to eq(%w[external])
+      end
+
+      it "caps the chosen pool at the page size" do
+        lower_page_size(:admin, to: 1)
+        create(:task, title: "Email the accountant")
+        create(:task, title: "Call the plumber")
+        get "/admin"
+
+        expect(pulls.all(".li-title", visible: :all).size).to eq(1)
+      end
+
+      it "counts a pool past the page size" do
+        lower_page_size(:admin, to: 1)
+        create(:task, title: "Email the accountant")
+        create(:task, title: "Call the plumber")
+        get "/admin"
+
+        expect(panel.first(".seg-option", visible: :all).text(:all)).to eq("next · 2")
       end
 
       it "says the sprint holds nothing" do

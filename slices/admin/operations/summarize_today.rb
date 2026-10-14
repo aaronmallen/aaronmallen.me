@@ -27,8 +27,8 @@ module Admin
         webmention_queries: "social.repos.webmention_queries",
       ]
 
-      def call(now: Time.now, pool: nil)
-        sprint = step summarize_sprint.call(now:, pool:)
+      def call(page:, now: Time.now, pool: nil)
+        sprint = step summarize_sprint.call(page:, now:, pool:)
 
         {
           **publishing(now),
