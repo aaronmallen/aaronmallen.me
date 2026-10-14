@@ -75,6 +75,8 @@ module API
       repos.social_post_queries repos.webmention_queries
     ], from: :social
 
+    import keys: %w[repos.timing_report_queries], from: :performance
+
     import keys: %w[operations.record_sighting], from: :security
 
     import keys: %w[
@@ -111,7 +113,7 @@ module API
       endpoints.compose_announcement endpoints.create_post endpoints.delete_post endpoints.list_posts
       endpoints.update_post endpoints.write_post_seo
       endpoints.list_mail_threads endpoints.mark_mail_thread endpoints.read_mail_thread
-      endpoints.list_clients endpoints.read_analytics endpoints.read_photo
+      endpoints.list_clients endpoints.read_analytics endpoints.read_performance endpoints.read_photo
       endpoints.list_share_groups endpoints.list_shares endpoints.read_share endpoints.read_share_group
       endpoints.upload_share endpoints.upload_share_group
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment

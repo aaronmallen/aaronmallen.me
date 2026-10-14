@@ -8,7 +8,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         list_inbox list_journal_entries list_links list_people list_posts list_projects list_pull_requests
         list_saved_views list_social_posts list_sprints list_suggestions list_tags list_task_rules list_tasks
         list_webmentions list_work_entries read_activity read_analytics read_commit read_current_sprint read_decision
-        read_journal_entry read_person read_photo read_post read_project read_pull_request read_review
+        read_journal_entry read_performance read_person read_photo read_post read_project read_pull_request read_review
         read_saved_view read_social_post read_sync_state read_tag read_task read_time_report read_webmention
         read_webmention_settings read_work_entry search search_accounts summarize_activity
       ],

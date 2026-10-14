@@ -4,6 +4,8 @@ module Performance
   class Slice < Hanami::Slice
     import keys: %w[operations.classify_device], from: :analytics
 
-    export %w[operations.record_page_timing operations.record_timing repos.timing_queries]
+    export %w[
+      operations.record_page_timing operations.record_timing repos.timing_queries repos.timing_report_queries
+    ]
   end
 end

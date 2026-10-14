@@ -54,6 +54,7 @@ module API
         ["unlink_task", "delete", "/tasks/{id}/links/{other_id}", OK],
         ["read_activity", "get", "/activity", OK],
         ["read_analytics", "get", "/analytics", OK],
+        ["read_performance", "get", "/performance", OK],
         ["summarize_activity", "get", "/activity/summary", OK],
         ["list_commits", "get", "/commits", OK],
         ["import_commits", "post", "/commits/import", OK],
