@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [db, lib, social, admin]
 superseded-by: "0132"
 issue: AA-577
-amended: [AA-814, "#793", "#922"]
+amended: [AA-814, "#793", "#922", "#1243"]
 tags: [social, sidekiq, jobs, retry, mastodon, bluesky, idempotency]
 ---
 
@@ -32,6 +32,9 @@ queues one `Social::Jobs::DeliverSocialPost` per claim. That job retries five ti
 the delivery failed. `Social::Operations::DeliverSocialPost` sends `parts.drop(delivery.remote_ids.size)`, so a
 retry starts at the first part that has not gone out, and passes each part a key built from the post, the network
 and the position, so the network can refuse a repeat.
+
+Since #1243 LinkedIn, which has neither replies nor a key, sends a thread as one post and checks the account's recent
+posts before a retry. [ADR 0161][0161] records it.
 
 A claim takes a delivery again once no job has touched it for 15 minutes, as long as it holds no error and has not
 failed (AA-621). A post with any delivery row refuses edits and removal (AA-606).
@@ -73,4 +76,5 @@ A new network needs a client that answers the four methods, an entry in `network
 `network` enum and to `Blog::Types::NetworkName`.
 
 [0132]: 0132-send-a-social-post-to-each-connected-account-the-owner-ticks.md
+[0161]: 0161-join-a-threads-parts-into-one-linkedin-post-and-check-recent-posts-before-a-retry.md
 [status]: https://img.shields.io/badge/0132-black?style=for-the-badge&label=Superseded&labelColor=orange

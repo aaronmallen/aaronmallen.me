@@ -6,7 +6,7 @@ created: 2026-10-08
 area: [social, admin, db]
 supersedes: ["0040"]
 issue: "#793"
-amended: ["#805", "#899"]
+amended: ["#805", "#899", "#1243"]
 tags: [social, mastodon, bluesky, connections, delivery, composer]
 ---
 
@@ -35,6 +35,8 @@ a network's row now holds for an account's row: the claim, one job per row, the 
 first part not sent, and the settle once each row has sent or failed. The job and the operation take a connection,
 build the client from its credentials, and check each part against the limit of that account's network. The key on
 each part names the connection in place of the network, so two accounts on one network never share a key.
+Since #1243 a LinkedIn account takes neither replies nor part keys: its row sends the thread as one post and
+checks the account's recent posts before a retry, as [ADR 0161][0161] records.
 
 The row keeps its network, so rows sent before this change, which have no connection to name, stay as history.
 
@@ -58,4 +60,5 @@ A post due while none of its accounts is connected has nowhere to go. Since #899
 row per target network and no connection, so it shows among the failed social posts.
 
 [0040]: 0040-send-a-social-post-to-each-network-on-its-own-from-that-networks-delivery-row.md
+[0161]: 0161-join-a-threads-parts-into-one-linkedin-post-and-check-recent-posts-before-a-retry.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
