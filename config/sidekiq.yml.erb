@@ -57,6 +57,9 @@ production:
     roll_up_analytics:
       cron: "0 1 * * * <%= Blog::TimeZone::NAME %>"
       class: Analytics::Jobs::RollUpAnalytics
+    roll_up_timing:
+      cron: "15 1 * * * <%= Blog::TimeZone::NAME %>"
+      class: Performance::Jobs::RollUpTiming
     send_due_social_posts:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::SendDueSocialPosts
