@@ -7,6 +7,7 @@ const COUNT = "[data-bulk-count]";
 const FORM = "form[data-bulk]";
 const TOGGLE = "[data-bulk-toggle]";
 
+const pressed = new Set();
 const ready = new WeakSet();
 let bound = false;
 
@@ -17,13 +18,13 @@ export function setupBulk(root = document) {
     show(form);
   }
 
-  for (const button of fresh(ready, root.querySelectorAll(TOGGLE))) {
+  for (const button of root.querySelectorAll(TOGGLE)) {
     const form = document.getElementById(button.dataset.bulkToggle);
     if (!form) continue;
 
     button.hidden = false;
-    pick(form, button, false);
-    button.addEventListener("click", () => pick(form, button, button.getAttribute("aria-pressed") !== "true"));
+    pick(form, button, pressed.has(form.id));
+    if (fresh(ready, [button]).length) button.addEventListener("click", () => flip(button));
   }
 
   for (const form of fresh(ready, root.querySelectorAll(FORM))) {
@@ -64,7 +65,14 @@ function all(form) {
   return form.querySelector(ALL).querySelector("input");
 }
 
+function flip(button) {
+  const form = document.getElementById(button.dataset.bulkToggle);
+  pick(form, button, !pressed.has(form.id));
+}
+
 function pick(form, button, on) {
+  if (on) pressed.add(form.id);
+  else pressed.delete(form.id);
   button.setAttribute("aria-pressed", String(on));
   form.toggleAttribute("data-bulk-off", !on);
   if (on) show(form);

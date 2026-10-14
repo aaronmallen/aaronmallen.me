@@ -61,4 +61,12 @@ RSpec.describe "Admin mail", type: :feature do
 
     expect(page).to have_css(".toast", text: "Moved 2 threads to Spam")
   end
+
+  it "keeps Select on screen after the reader marks a thread read", :aggregate_failures do
+    visit "/admin/mail?thread=#{create(:message, subject: 'Fresh').id}"
+    find(".mail-reader").click_button("Mark read")
+
+    expect(page).to have_css(".toast", text: "Marked read")
+    expect(page).to have_css("button[data-bulk-toggle][aria-pressed='false']", text: "Select")
+  end
 end

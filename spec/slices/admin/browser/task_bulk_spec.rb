@@ -159,6 +159,25 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     end
   end
 
+  describe "after the page morphs" do
+    before do
+      visit "/admin/tasks?filter=next"
+      select_mode
+      confirm_yes { find(".task", text: "first").tap(&:hover).click_button("Cancel") }
+      find(".toast", text: Admin::Slice["i18n"].t("tasks_page.toasts.canceled"))
+    end
+
+    it "keeps Select on screen and pressed" do
+      expect(page).to have_css("button[data-bulk-toggle][aria-pressed='true']", text: "Select")
+    end
+
+    it "still ticks rows" do
+      box("second").check
+
+      expect(page).to have_css("[data-bulk-count]", exact_text: "1 ticked")
+    end
+  end
+
   describe "select all on a paged list" do
     before do
       lower_page_size(:admin, to: 2)

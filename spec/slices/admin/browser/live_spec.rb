@@ -56,6 +56,14 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css(".mail-reader h2", text: "Answered")
   end
 
+  it "keeps the mail Select button on screen after a live update" do
+    live "/admin/mail"
+    message = create(:message, subject: "Hello there")
+    find("#thread-#{message.id}")
+
+    expect(page).to have_css("button[data-bulk-toggle][aria-pressed='false']", text: "Select")
+  end
+
   it "shows a new webmention in the open inbox" do
     live "/admin/inbox"
     mention = create(:webmention, author_name: "A neighbour")
