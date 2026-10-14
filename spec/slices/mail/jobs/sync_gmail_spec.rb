@@ -288,6 +288,38 @@ RSpec.describe Mail::Jobs::SyncGmail do
     expect(failure).to include(reason: "gmail_failed", message: "#{address} needs a reconnect")
   end
 
+  describe "a revoked account that sorts first" do
+    before do
+      connect_google(account_id: "aa@example.com", scopes: Spec::GoogleAccounts::GMAIL_SCOPES, revoked_at: Time.now)
+      connect
+      stub_gmail(profile: "100")
+      run
+    end
+
+    it("still syncs the next account") { expect(account.history_id).to eq("100") }
+
+    it "records the revoked one as needing a reconnect" do
+      expect(failure).to include(reason: "gmail_failed", message: "aa@example.com needs a reconnect")
+    end
+  end
+
+  describe "a failing account that sorts first" do
+    before do
+      connect_google(account_id: "aa@example.com", scopes: Spec::GoogleAccounts::GMAIL_SCOPES, token: "ya29.failing")
+      connect
+      stub_gmail(profile: "100")
+      stub_request(:get, "#{Spec::GoogleAccounts::GMAIL}/labels")
+        .with(headers: { "Authorization" => "Bearer ya29.failing" }).to_return(status: 503)
+      run
+    end
+
+    it("still syncs the next account") { expect(account.history_id).to eq("100") }
+
+    it "records the failure" do
+      expect(failure).to include(reason: "gmail_failed", message: "Google answered 503")
+    end
+  end
+
   it "asks Google nothing and records nothing while no account granted Gmail", :aggregate_failures do
     run
 

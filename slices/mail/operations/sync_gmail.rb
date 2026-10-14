@@ -78,13 +78,14 @@ module Mail
         store_labels(address, account.id)
         store_signature(address, account.id)
 
-        account.history_id ? catch_up(address, account) : start(address, account)
+        Success(account.history_id ? catch_up(address, account) : start(address, account))
+      rescue Google::Error => e
+        Failure([:gmail_failed, e.message])
       end
 
       def synced
-        Success(google.holders(SCOPE).sum { sync(it) })
-      rescue Google::Error => e
-        Failure([:gmail_failed, e.message])
+        results = google.holders(SCOPE).map { sync(it) }
+        results.find(&:failure?) || Success(results.sum(&:value!))
       end
 
       def token(page_token) = page_token ? { pageToken: page_token } : {}
