@@ -66,8 +66,17 @@ export function setupLive() {
     },
   });
 
+  let missed = false;
+  const changed = () => {
+    missed = document.hidden;
+    if (!missed) refetch.later();
+  };
+
   document.addEventListener("close", morph, true);
-  listen(url, () => refetch.later());
+  document.addEventListener("visibilitychange", () => {
+    if (missed) changed();
+  });
+  listen(url, changed);
 }
 
 function keepsOpen(name, node, change) {

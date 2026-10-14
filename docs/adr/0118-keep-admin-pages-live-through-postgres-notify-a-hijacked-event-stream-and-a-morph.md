@@ -77,6 +77,8 @@ stream. The toast sits outside what the morph touches.
   idiomorph matches it by record and the row the key map has focused keeps its focus when a new row lands above.
 - **Reconnects catch up.** After every `open` but the first, `live.js` refetches once. When the stream ends for good,
   as it does when the tunnel answers 502 during a deploy, `live.js` opens a new one after a growing wait.
+- **Hidden tabs wait.** A tab whose document is hidden makes no request when an event arrives. It notes the miss and
+  refetches once when it shows again, so tabs in the background do not take Puma threads from the page in front.
 - **Pages left behind let go.** `live.js` closes its stream on `pagehide` and opens it again when the page comes back
   from the back-forward cache. Chrome keeps a stream open after the tab moves on, so without this the seventh page
   visit in a tab waits on the six-connection limit of HTTP/1.1.

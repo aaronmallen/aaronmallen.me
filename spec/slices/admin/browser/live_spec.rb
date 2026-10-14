@@ -157,6 +157,47 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     end
   end
 
+  describe "in a hidden tab" do
+    let(:message) { create(:message) }
+
+    def hide(hidden)
+      execute_script(<<~JS, hidden)
+        Object.defineProperty(document, "hidden", { configurable: true, value: arguments[0] });
+        document.dispatchEvent(new Event("visibilitychange"));
+      JS
+    end
+
+    def renders = request_gate.count("/admin/inbox")
+
+    before do
+      live "/admin/inbox"
+      hide(true)
+    end
+
+    it "makes no request when a change arrives" do
+      message
+      sleep 1
+
+      expect(renders).to eq(1)
+    end
+
+    it "refetches once it shows again", :aggregate_failures do
+      message
+      sleep 1
+      hide(false)
+
+      expect(page).to have_css("#message-#{message.id}")
+      expect(renders).to eq(2)
+    end
+
+    it "makes no request when it shows again with nothing missed" do
+      hide(false)
+      sleep 1
+
+      expect(renders).to eq(1)
+    end
+  end
+
   describe "after the stream drops" do
     let(:message) { create(:message) }
     let(:reconnect) { request_gate.hold(events) }
