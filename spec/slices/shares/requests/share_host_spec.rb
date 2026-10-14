@@ -343,6 +343,89 @@ RSpec.describe "The share host", type: :request do
       end
     end
 
+    describe "the zip" do
+      def unzip(body)
+        io = StringIO.new(body)
+        ZipKit::FileReader.read_zip_structure(io:).to_h do |entry|
+          [entry.filename, entry.extractor_from(io).extract]
+        end
+      end
+
+      def zip_downloads = Shares::Slice["relations.share_groups"].by_pk(group.id).one[:zip_download_count]
+
+      before do
+        group.share_group_files.each do |file|
+          stub_request(:get, share_store_url(file.key)).to_return(body: file.filename)
+        end
+      end
+
+      it "has a download all button on the page" do
+        fetch("/#{group.code}")
+
+        expect(page).to have_link("Download all", href: "/#{group.code}.zip")
+      end
+
+      it "holds every file under its own name", :aggregate_failures do
+        fetch("/#{group.code}.zip")
+
+        expect(last_response.status).to eq(200)
+        expect(unzip(last_response.body)).to eq(%w[beach.jpg dunes.png notes.txt paper.pdf].to_h { [it, it] })
+      end
+
+      it "downloads as an attachment no cache keeps", :aggregate_failures do
+        fetch("/#{group.code}.zip")
+
+        expect(last_response.headers["Content-Type"]).to eq("application/zip")
+        expect(disposition).to eq(%(attachment; filename="#{group.code}.zip"))
+        expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+      end
+
+      it "gives a second file of the same name a name of its own" do
+        Shares::Slice["relations.share_group_files"].by_pk(file("dunes.png").id).update(filename: "beach.jpg")
+        fetch("/#{group.code}.zip")
+
+        expect(unzip(last_response.body).keys).to eq(["beach.jpg", "beach (1).jpg", "notes.txt", "paper.pdf"])
+      end
+
+      it "writes nothing to the bucket" do
+        group
+        WebMock::RequestRegistry.instance.reset!
+        fetch("/#{group.code}.zip")
+
+        expect(a_request(:put, %r{\A#{share_store_url}/})).not_to have_been_made
+      end
+
+      it "counts a browser download against the zip alone", :aggregate_failures do
+        expect { fetch("/#{group.code}.zip", "HTTP_USER_AGENT" => browser) }.to change { zip_downloads }.from(0).to(1)
+        expect(views).to eq(0)
+        expect(file_downloads("notes.txt")).to eq(0)
+      end
+
+      it "skips a bot" do
+        expect { fetch("/#{group.code}.zip", "HTTP_USER_AGENT" => "curl/8.4.0") }.not_to(change { zip_downloads })
+      end
+
+      it "answers a head request with no body and no count", :aggregate_failures do
+        expect { head "/#{group.code}.zip", {}, "HTTP_HOST" => "shares.localhost", "HTTP_USER_AGENT" => browser }
+          .not_to(change { zip_downloads })
+        expect(last_response.body).to be_empty
+      end
+
+      it "answers 404 under a single share's code" do
+        fetch("/#{upload_share.value!.code}.zip")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "answers 503 when the share store is not configured" do
+        group
+        connect_share_store(access_key: nil)
+        fetch("/#{group.code}.zip")
+
+        expect(last_response.status).to eq(503)
+      end
+    end
+
     it "answers 404 for an id outside the group" do
       fetch("/#{group.code}/#{group.share_group_files.map(&:id).max + 1}")
 

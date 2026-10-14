@@ -42,6 +42,7 @@ gem "sidekiq", "~> 8"
 gem "sidekiq-scheduler", "~> 6"
 gem "tzinfo", "~> 2"
 gem "tzinfo-data"
+gem "zip_kit", "~> 6"
 
 group :cli, :development do
   gem "hanami-reloader", "~> 3", source: "https://gem.coop/@hanami"

@@ -11,6 +11,8 @@ module Shares
 
       def count_view(id) = share_groups.by_pk(id).update(view_count: Sequel[:view_count] + 1)
 
+      def count_zip_download(id) = share_groups.by_pk(id).update(zip_download_count: Sequel[:zip_download_count] + 1)
+
       def create(code:)
         transaction do
           short_code = short_codes.command(:create).call(code:)

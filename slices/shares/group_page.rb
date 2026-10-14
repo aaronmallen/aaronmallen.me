@@ -4,6 +4,7 @@
 module Shares
   class GroupPage < Phlex::HTML
     IMAGE = %r{\Aimage/}
+    DOWNLOAD = "Download all"
     TITLE = "Shared files"
     STYLE = <<~CSS
       :root {
@@ -71,6 +72,17 @@ module Shares
         object-fit: contain;
       }
 
+      .download {
+        display: inline-block;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.375rem;
+        background: var(--accent);
+        color: var(--ground);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
       .files li {
         padding: 0.75rem 0;
         border-top: 1px solid var(--line);
@@ -108,6 +120,7 @@ module Shares
       header { a(href: @settings.site_url) { @settings.owner_name } }
       main do
         h1 { TITLE }
+        a(class: "download", href: "/#{@group.code}.zip", download: "") { DOWNLOAD }
         render_images
         render_files
       end

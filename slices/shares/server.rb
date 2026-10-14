@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "erb"
+require "zip_kit"
 
 module Shares
   class Server
@@ -8,7 +9,7 @@ module Shares
       def each(&) = client.stream(key, range: range && "bytes=#{range.begin}-#{range.end}", &)
     end
 
-    CODE_PATH = %r{\A/(?<code>[^/]+)(?:/(?<id>[1-9][0-9]*))?\z}
+    CODE_PATH = %r{\A/(?<code>[^/.]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
     PAGE_HEADERS = {
       "content-security-policy" => "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'",
       "content-type" => "text/html; charset=utf-8",
@@ -28,8 +29,9 @@ module Shares
 
     def call(env)
       request = ::Rack::Request.new(env)
-      code, id = requested_path(request)
+      code, id, zip = requested_path(request)
       return [404, {}, []] unless code
+      return zip(request, code) if zip
 
       id ? group_file(request, code, Integer(id)) : answer(request, code)
     end
@@ -112,5 +114,28 @@ module Shares
     end
 
     def stream(request, file, &) = client.configured? ? serve(request, file, &) : [503, {}, []]
+
+    def zip(request, code)
+      group = share_group_queries.by_code(code)
+      return [404, {}, []] unless group
+      return [503, {}, []] unless client.configured?
+
+      share_group_mutations.count_zip_download(group.id) if counted?(request)
+      [200, zip_headers(group), request.head? ? [] : zip_body(group.share_group_files)]
+    end
+
+    def zip_body(files)
+      ZipKit::OutputEnumerator.new(auto_rename_duplicate_filenames: true) do |zip|
+        files.each { |file| zip.write_file(file.filename) { |sink| client.stream(file.key) { sink << it } } }
+      end
+    end
+
+    def zip_headers(group)
+      {
+        "content-disposition" => "attachment; filename=\"#{group.code}.zip\"",
+        "content-type" => "application/zip",
+        "x-content-type-options" => "nosniff",
+      }
+    end
   end
 end
