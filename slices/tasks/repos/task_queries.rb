@@ -3,6 +3,10 @@
 module Tasks
   module Repos
     class TaskQueries < Blog::DB::Repo
+      BOARD_ORDER = [Sequel.desc(Sequel[:tasks][:completed_at]), Sequel[:tasks][:position], Sequel[:tasks][:id]].freeze
+      COLUMNS = Blog::Types::TaskColumn.values.freeze
+      OPEN = Blog::Types::TaskStatus["open"]
+      COLUMN = Sequel.case({ { status: OPEN } => Sequel.cast(:stage, String) }, Sequel.cast(:status, String))
       KEY = /\A#?(\d{1,9})\z/
       LINK_LIMIT = 6
       TODAY = Blog::Types::TaskFilter["today"]
@@ -12,6 +16,13 @@ module Tasks
       include Deps["settings", project_queries: "projects.repos.project_queries"]
 
       def all_open = tasks.open.in_order.to_a
+
+      def board_counts(project_id)
+        counted = on_project(tasks, project_id).unordered
+        counts = counted.select { COLUMNS.map { integer.count(id).filter(COLUMN => it).as(it.to_sym) } }.one
+
+        counts.to_h.transform_keys(&:to_s)
+      end
 
       def by_id(id) = with_details.by_pk(id).one
 
@@ -61,7 +72,9 @@ module Tasks
         page.fill(found.open.searched(**by_project(**search)).in_order.paged(page).to_a)
       end
 
-      def on_board(project_id) = recent(with_details.searched(project_ids: [project_id])).in_order.to_a
+      def on_board(project_id, sizes)
+        on_project(with_details, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
+      end
 
       def on_public_board(project_id)
         recent(tasks.searched(project_ids: project_id)).order(Sequel.desc(:completed_at), :position, :id).to_a
@@ -102,9 +115,18 @@ module Tasks
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
       end
 
+      def on_project(found, project_id) = recent(found.searched(project_ids: [project_id]))
+
       def recent(found)
         since = Time.now - (settings.board[:closed_days] * DAY)
         found.where(Sequel.|({ completed_at: nil }, Sequel[:completed_at] > since))
+      end
+
+      def shown(project_id, sizes)
+        rank = Sequel.function(:row_number).over(partition: COLUMN, order: BOARD_ORDER)
+        ranked = on_project(tasks, project_id).dataset.unordered.select(:id, COLUMN.as(:column), rank.as(:rank))
+
+        ranked.from_self.where(Sequel.|(*sizes.map { |column, size| { column:, rank: ..size } })).select(:id)
       end
 
       def with_details = tasks.detailed

@@ -16,6 +16,9 @@ module Admin
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
+          prop :sizes, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
+          prop :step, Blog::Types::Integer
 
           def view_template
             BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
@@ -35,7 +38,8 @@ module Admin
             div(class: "kb-bulk") do
               Bulk(project_id: @project.id)
               div(class: "kb", aria: { label: t(".board", name: @project.name) }) do
-                COLUMNS.each { column(it, sorted(it, columns.fetch(it, Blog::Constants::EMPTY_ARRAY))) }
+                input(type: "hidden", name: "return_to", value: here, form: Bulk::ID)
+                COLUMNS.each { column(it, columns.fetch(it, Blog::Constants::EMPTY_ARRAY)) }
               end
             end
           end
@@ -44,12 +48,13 @@ module Admin
             label = t(NAMES.fetch(name))
 
             section(class: ["kcol", "k-#{name}"], aria: { label: }, data: { board_column: name }) do
-              column_head(label, tasks.size)
+              column_head(label, @counts.fetch(name))
               div(class: "kcol-list", data: { key_list: true }) do
                 next p(class: "kcol-empty") { t(".empty") } if tasks.empty?
 
-                tasks.each { BoardCard(task: it, project_id: @project.id) }
+                tasks.each { BoardCard(task: it, project_id: @project.id, return_to: here) }
               end
+              more(name, tasks.size)
             end
           end
 
@@ -62,9 +67,9 @@ module Admin
           end
 
           def counts
-            open = @tasks.count { !it.closed? }
+            open = @counts.values_at(*COLUMNS - CLOSED).sum
 
-            span { t(".counts", open:, total: @tasks.size) }
+            span { t(".counts", open:, total: @counts.values.sum) }
           end
 
           def facts
@@ -76,6 +81,8 @@ module Admin
             end
           end
 
+          def grown = @sizes.reject { |_, size| size == @step }
+
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
@@ -85,8 +92,20 @@ module Admin
             end
           end
 
+          def here = path(:admin_project, id: @project.id, **grown.transform_keys(&:to_sym))
+
           def link(href, text, icon)
             a(href:, target: "_blank", rel: "noopener") { IconLabel(icon:) { text } }
+          end
+
+          def more(name, shown)
+            left = @counts.fetch(name) - shown
+            return unless left.positive?
+
+            AutoForm(action: path(:admin_project, id: @project.id)) do
+              HiddenFields(values: grown.merge(name => @sizes.fetch(name) + @step))
+              Button(type: "submit", variant: :gh, small: true) { t(".load_more", count: left) }
+            end
           end
 
           def published
@@ -100,12 +119,6 @@ module Admin
           def repo_url = (format(GITHUB, @project.repo) if written?(@project.repo))
 
           def site? = written?(@project.url) && @project.url != repo_url
-
-          def sorted(name, tasks)
-            return tasks unless CLOSED.include?(name)
-
-            tasks.sort_by { -it.completed_at.to_f }
-          end
 
           def tagline = written?(@project.tagline) ? @project.tagline : t(".no_tagline")
         end

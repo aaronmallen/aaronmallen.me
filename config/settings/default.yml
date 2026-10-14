@@ -22,6 +22,7 @@ backup_store:
   secret_key: <%= ENV["BACKUP_STORE_SECRET_KEY"].to_json %>
 board:
   closed_days: 14
+  column_size: 20
 bluesky:
   profile_url: https://bsky.app/profile/aaronmallen.dev
 client_registration:

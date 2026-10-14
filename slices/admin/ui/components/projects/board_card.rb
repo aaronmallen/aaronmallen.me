@@ -12,6 +12,7 @@ module Admin
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :project_id, Blog::Types::Integer
+          prop :return_to, Blog::Types::String
 
           def view_template
             div(class: classes, data: { key_row: true, menu: menu_path, board_card: true }) do
@@ -34,7 +35,7 @@ module Admin
             label = t(".move", column: t(NAMES.fetch(to)))
 
             Form(action: path(:admin_move_project_task, id: @project_id, task_id: @task.id), data: { morph: true }) do
-              input(type: "hidden", name: "to", value: to)
+              HiddenFields(values: { to:, return_to: @return_to })
               Button(type: "submit", variant: :gh, small: true, icon:, label:)
             end
           end

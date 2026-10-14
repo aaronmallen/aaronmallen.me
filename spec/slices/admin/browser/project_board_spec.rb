@@ -29,6 +29,8 @@ RSpec.describe "Admin project board", type: :feature do
 
   def kept_page? = evaluate_script("window.kept === true")
 
+  def link(task) = Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", project.id])
+
   def stroke(from, to)
     (1..6).map do |step|
       { x: from["x"] + ((to["x"] - from["x"]) * step / 6), y: from["y"] + ((to["y"] - from["y"]) * step / 6) }
@@ -37,7 +39,7 @@ RSpec.describe "Admin project board", type: :feature do
 
   before do
     sign_in_to_admin
-    Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", project.id])
+    link(task)
     visit "/admin/projects/#{project.id}"
     keep_page
   end
@@ -74,6 +76,39 @@ RSpec.describe "Admin project board", type: :feature do
 
     expect(page).to have_css(".kcol.k-in_progress .kc.doing", text: "Write the brief")
     expect(Tasks::Slice["repos.task_queries"].by_id(task.id).status).to eq("in_progress")
+  end
+
+  describe "a full column" do
+    def backlog_cards = column("backlog").all(".kc").size
+
+    before do
+      change_board_setting(:column_size, to: 1)
+      link(create(:task, title: "Second brief"))
+      visit "/admin/projects/#{project.id}"
+      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      keep_page
+      click_button "Load more · 1 left"
+    end
+
+    it "loads more cards in place", :aggregate_failures do
+      expect(column("backlog")).to have_css(".kc", count: 2)
+      expect(page).to have_current_path("/admin/projects/#{project.id}?backlog=2")
+      expect(kept_page?).to be(true)
+    end
+
+    it "keeps the grown column through a live refresh", :aggregate_failures do
+      link(create(:task, stage: "ready", title: "Live brief"))
+
+      expect(column("ready")).to have_css(".kc", text: "Live brief")
+      expect(backlog_cards).to eq(2)
+    end
+
+    it "keeps the grown column through a reload", :aggregate_failures do
+      expect(page).to have_current_path("/admin/projects/#{project.id}?backlog=2")
+      visit current_url
+
+      expect(column("backlog")).to have_css(".kc", count: 2)
+    end
   end
 
   it "opens the task drawer from a card" do

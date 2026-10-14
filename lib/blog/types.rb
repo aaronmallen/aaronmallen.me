@@ -119,6 +119,7 @@ module Blog
     end
     PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
+    BoardSizeParam = PageNumber.optional.fallback(nil)
     PKCEValue = Types::String.constrained(format: /\A[A-Za-z0-9\-._~]{43,128}\z/)
     PhotoType = Types::String.enum(
       "gif" => "image/gif", "jpg" => "image/jpeg", "png" => "image/png", "webp" => "image/webp",

@@ -18,7 +18,7 @@ module Admin
 
         def act(params) = set_tasks_column.call(params)
 
-        def back(request) = routes.path(:admin_project, id: record_id(request))
+        def back(request) = back_here(request) || routes.path(:admin_project, id: record_id(request))
 
         def done(request, response, records)
           column = UI::Components::Projects::BoardCard::NAMES[request.params[:to]]

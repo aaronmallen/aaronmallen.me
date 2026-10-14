@@ -9,8 +9,8 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def arrows(name) = column(name).all(".hov form[data-morph] input[name=to]", visible: :all).map(&:value)
 
-  def bulk(ids, to)
-    post("/admin/projects/#{project.id}/tasks/bulk", { _csrf_token: admin_csrf_token, act: "move", ids:, to: })
+  def bulk(ids, to, **)
+    post("/admin/projects/#{project.id}/tasks/bulk", { _csrf_token: admin_csrf_token, act: "move", ids:, to:, ** })
   end
 
   def column(name) = page.find("section.kcol.k-#{name}")
@@ -324,6 +324,93 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         post "/admin/projects/#{project.id}/tasks/0/move", _csrf_token: admin_csrf_token, to: "ready"
 
         expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "a full column" do
+      def days_ago(days) = now - (days * 86_400)
+
+      def more(name) = column(name).find("form[data-autosubmit][method='get']")
+
+      def more_fields(name) = more(name).all("input[type=hidden]", visible: :all).to_h { [it[:name], it.value] }
+
+      before do
+        change_board_setting(:column_size, to: 2)
+        3.times { linked(title: "Plan #{it}") }
+        3.times { linked(stage: "ready", title: "Ready #{it}") }
+      end
+
+      it "shows the cap and offers the rest", :aggregate_failures do
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("backlog").size).to eq(2)
+        expect(more("backlog")).to have_button("Load more · 1 left")
+        expect(more("backlog")[:action]).to eq("/admin/projects/#{project.id}")
+      end
+
+      it "grows only that column" do
+        get "/admin/projects/#{project.id}"
+
+        expect(more_fields("backlog")).to eq("backlog" => "4")
+      end
+
+      it "shows the grown column whole and leaves the others capped", :aggregate_failures do
+        get "/admin/projects/#{project.id}", backlog: 4
+
+        expect([titles("backlog").size, titles("ready").size]).to eq([3, 2])
+        expect(column("backlog")).to have_no_css("form[data-autosubmit]")
+        expect(more_fields("ready")).to eq("backlog" => "4", "ready" => "4")
+      end
+
+      it "never shows fewer than the cap" do
+        get "/admin/projects/#{project.id}", backlog: 1
+
+        expect(titles("backlog").size).to eq(2)
+      end
+
+      it "counts every task in the heads and the facts bar", :aggregate_failures do
+        get "/admin/projects/#{project.id}"
+
+        expect(page.all(".kcol-count").map(&:text)).to eq(%w[3 3 0 0 0])
+        expect(page).to have_css(".kb-meta", text: "6 open · 6 total")
+      end
+
+      it "leaves old closed tasks out of the count and Load More", :aggregate_failures do
+        2.times { linked(:done, completed_at: days_ago(1)) }
+        linked(:done, completed_at: days_ago(30))
+        get "/admin/projects/#{project.id}"
+
+        expect(column("done").find(".kcol-count").text).to eq("2")
+        expect(column("done")).to have_no_css("form[data-autosubmit]")
+      end
+
+      it "shows the latest closed tasks first" do
+        linked(:done, title: "Oldest", completed_at: days_ago(3))
+        linked(:done, title: "Newest", completed_at: days_ago(1))
+        linked(:done, title: "Middle", completed_at: days_ago(2))
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("done")).to eq(%w[Newest Middle])
+      end
+
+      it "returns a card move and the bulk bar to the grown board", :aggregate_failures do
+        get "/admin/projects/#{project.id}", backlog: 4
+        grown = "/admin/projects/#{project.id}?backlog=4"
+
+        expect(column("backlog").first(".hov input[name=return_to]", visible: :all).value).to eq(grown)
+        expect(page.find("input[name=return_to][form=board-bulk]", visible: :all).value).to eq(grown)
+      end
+
+      it "goes back to the grown board after a card move" do
+        move(linked, "ready", return_to: "/admin/projects/#{project.id}?backlog=4")
+
+        expect(last_response.location).to end_with("/admin/projects/#{project.id}?backlog=4")
+      end
+
+      it "goes back to the grown board after a bulk move" do
+        bulk([linked.id], "done", return_to: "/admin/projects/#{project.id}?ready=4")
+
+        expect(last_response.location).to end_with("/admin/projects/#{project.id}?ready=4")
       end
     end
 

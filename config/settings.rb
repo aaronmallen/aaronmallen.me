@@ -144,7 +144,7 @@ module Blog
 
     setting :backup_store, default: {}, constructor: object_store(DEFAULT_BACKUP_STORE_READ_TIMEOUT)
 
-    setting :board, constructor: Schema.schema(closed_days: BoardDays)
+    setting :board, constructor: Schema.schema(closed_days: BoardDays, column_size: PageSize)
 
     setting :bluesky, default: {}, constructor: Schema.schema(profile_url?: Value)
 
