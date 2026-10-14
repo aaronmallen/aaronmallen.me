@@ -12,6 +12,8 @@ module Tasks
       def counted_between(from:, to:) = sprints.dated_between(from, to).with_task_counts.in_date_order.to_a
 
       def on(date) = sprints.on(date).one
+
+      def settled?(id) = !tasks.unfinished_in(sprints.before_sprint(id).ids).exist?
     end
   end
 end

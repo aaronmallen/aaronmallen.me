@@ -6,6 +6,19 @@ module Tasks
       include Deps[sprint_mutations: "repos.sprint_mutations", sprint_queries: "repos.sprint_queries"]
 
       def call(now: Time.now)
+        sprint = sprint_queries.on(Blog::TimeZone.today(now))
+        return sprint if sprint && sprint_queries.settled?(sprint.id)
+
+        roll_over(now)
+      end
+
+      private
+
+      def find(id)
+        found(sprint_queries.by_id(id))
+      end
+
+      def roll_over(now)
         transaction do
           sprint_mutations.lock_roll_over
           sprint = sprint_mutations.claim(Blog::TimeZone.today(now))
@@ -15,12 +28,6 @@ module Tasks
           sprint_mutations.count_arrivals(sprint.id, arrived)
           step find(sprint.id)
         end
-      end
-
-      private
-
-      def find(id)
-        found(sprint_queries.by_id(id))
       end
     end
   end

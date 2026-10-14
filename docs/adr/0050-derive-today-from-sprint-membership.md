@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, admin, tasks]
 issue: AA-689
-amended: [AA-397, AA-398, "#53", "#81", "#941"]
+amended: [AA-397, AA-398, "#53", "#81", "#941", "#1290"]
 tags: [tasks, sprints, schema, today, upcoming, rollover, dashboard]
 ---
 
@@ -94,6 +94,12 @@ Whether the job ran matters to neither.
 A GET to `/admin` writes. A glance at the dashboard starts the day: it can insert the sprint and carry tasks
 forward, and it has a failed claim to handle that a plain read did not. The claim upserts on `sprint_date`, so two
 loads at once still make one sprint.
+
+Most loads find the day already started, so `CurrentSprint` reads first. When today's sprint exists and no
+unfinished task waits in an earlier sprint, it returns the sprint with no lock and no write. Only a missing sprint
+or work left behind takes the lock and rolls over, so screens refreshing in several tabs no longer queue behind each
+other (#1290). A sprint claimed ahead still gets its carry on its day, since the work left behind sends that read
+through the lock.
 
 The carry count resets when the operator moves a task to a list or clears its date. It survives a schedule ahead,
 and a dropped sprint sends its tasks to Next with their counts. The count on the sprint survives a task later
