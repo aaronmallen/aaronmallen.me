@@ -860,6 +860,25 @@ END;
 $$;
 
 
+--
+-- Name: tasks_next_number(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.tasks_next_number() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext('tasks_next_number'), coalesce(NEW.project_id, 0));
+
+  SELECT coalesce(max(number), 0) + 1 INTO NEW.number
+    FROM tasks
+    WHERE project_id IS NOT DISTINCT FROM NEW.project_id;
+
+  RETURN NEW;
+END
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -1168,9 +1187,11 @@ CREATE TABLE public.tasks (
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(note, ''::text)), 'B'::"char"))) STORED,
     stage public.task_stage DEFAULT 'backlog'::public.task_stage NOT NULL,
     project_id integer,
+    number integer NOT NULL,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
+    CONSTRAINT tasks_number_check CHECK ((number > 0)),
     CONSTRAINT tasks_position_check CHECK (("position" > 0)),
     CONSTRAINT tasks_worked_seconds_check CHECK ((worked_seconds >= 0))
 );
@@ -6576,6 +6597,13 @@ CREATE INDEX tasks_project_id_index ON public.tasks USING btree (project_id);
 
 
 --
+-- Name: tasks_project_id_number_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX tasks_project_id_number_index ON public.tasks USING btree (project_id, number) NULLS NOT DISTINCT;
+
+
+--
 -- Name: tasks_search_vector_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -7350,6 +7378,20 @@ CREATE TRIGGER tasks_drop_attention_snoozes AFTER DELETE ON public.tasks FOR EAC
 --
 
 CREATE TRIGGER tasks_drop_record_links AFTER DELETE ON public.tasks FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('task');
+
+
+--
+-- Name: tasks tasks_next_number; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tasks_next_number BEFORE INSERT ON public.tasks FOR EACH ROW EXECUTE FUNCTION public.tasks_next_number();
+
+
+--
+-- Name: tasks tasks_next_number_on_move; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tasks_next_number_on_move BEFORE UPDATE OF project_id ON public.tasks FOR EACH ROW WHEN ((old.project_id IS DISTINCT FROM new.project_id)) EXECUTE FUNCTION public.tasks_next_number();
 
 
 --
@@ -8212,4 +8254,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015000200_move_task_projects_onto_tasks.rb'),
 ('20261015000300_add_relation_to_record_links.rb'),
 ('20261015001000_backfill_task_projects_and_tags_from_rules.rb'),
-('20261015003000_add_sync_token_to_calendars.rb');
+('20261015003000_add_sync_token_to_calendars.rb'),
+('20261015010000_add_number_to_tasks.rb');
