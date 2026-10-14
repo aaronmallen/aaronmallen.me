@@ -8,6 +8,7 @@ require "phlex-hanami"
 require "rack/static"
 require "blog/extensions/dry/logger/filter/extension"
 require "blog/extensions/hanami/cli/db/postgres/extension" if defined?(Hanami::CLI)
+require "blog/extensions/hanami/middleware/assets/extension"
 require "blog/extensions/hanami/providers/routes/extension"
 require "blog/extensions/hanami/router/node/extension"
 require "blog/extensions/hanami/router/trie/extension"
