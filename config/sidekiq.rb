@@ -5,7 +5,11 @@ require "sidekiq-scheduler"
 require "hanami/boot"
 
 Sidekiq.configure_server do |config|
+  database = -> { Hanami.app["db.rom"].gateways[:default].connection }
   record = ->(**row) { Performance::Slice["operations.record_timing"].call(:job, **row) }
 
-  config.server_middleware { it.add Blog::JobTimer, record }
+  config.server_middleware do |chain|
+    chain.add Blog::JobConnection, database
+    chain.add Blog::JobTimer, record
+  end
 end

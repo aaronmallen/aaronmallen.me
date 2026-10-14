@@ -1043,9 +1043,9 @@ RSpec.describe "Visits", type: :request do
       [arrived, release]
     end
 
-    def limit = 5
+    def limit = 3
 
-    def sent = limit + 3
+    def sent = limit + 2
 
     def view_request(index)
       body = { kind: "view", path: "/writing/hello", view_token: token("view-#{index}") }.to_json

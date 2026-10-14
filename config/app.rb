@@ -15,6 +15,7 @@ require "blog/extensions/hanami/router/node/extension"
 require "blog/extensions/hanami/router/trie/extension"
 require "blog/extensions/rom/sql/postgres/type_builder/extension"
 require "blog/params_guard"
+require "blog/request_connection"
 require "blog/request_timer"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
@@ -62,6 +63,7 @@ module Blog
     config.middleware.use Honeybadger::Rack::ErrorNotifier
     config.middleware.use ParamsGuard, ->(request) { Admin::Slice["auth.session_reader"].call(request) }
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
+    config.middleware.use RequestConnection, -> { Hanami.app["db.rom"].gateways[:default].connection }
 
     config.settings_store = Hanami::Settings::CompositeStore.new(
       Hanami::Settings::FileStore.new(config.root.join("config/settings/#{Hanami.env}.yml")),
