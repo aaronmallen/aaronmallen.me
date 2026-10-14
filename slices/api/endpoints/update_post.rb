@@ -36,17 +36,15 @@ module API
         return missing(id) unless post
 
         now = Time.now
-        return invalid(publish_at: [PAST]) if post.status == SCHEDULED && past?(given, now)
+        return invalid(publish_at: [PAST]) if post.status == SCHEDULED && past?(post, given, now)
 
         saved(save_post.call(post.form.merge(form(given)), id:, intent: INTENTS.fetch(post.status), now:), id)
       end
 
       private
 
-      def past?(given, now)
-        return false unless given.key?(:publish_at)
-
-        time = Blog::Types::LocalTime[given[:publish_at]]
+      def past?(post, given, now)
+        time = given.key?(:publish_at) ? Blog::Types::LocalTime[given[:publish_at]] : post.published_at
         time.nil? || (time.is_a?(Time) && time <= now)
       end
     end

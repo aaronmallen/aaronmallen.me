@@ -266,6 +266,29 @@ RSpec.describe "MCP post tools", type: :request do
       expect(Social::Jobs::SyndicatePost.jobs).to be_empty
     end
 
+    it "refuses an overdue scheduled post given no publish time and keeps it scheduled", :aggregate_failures do
+      overdue = create(:post, :scheduled, published_at: Time.now - 60)
+      call_tool("update_post", id: overdue.id, body: "two")
+
+      expect(message).to include("publish_post")
+      expect(stored(overdue.id)).to have_attributes(status: "scheduled", body: overdue.body)
+    end
+
+    it "sends no announcement when it refuses an overdue scheduled post", :commits do
+      overdue = create(:post, :scheduled, published_at: Time.now - 60, **announced)
+      call_tool("update_post", id: overdue.id, body: "two")
+
+      expect(Social::Jobs::SyndicatePost.jobs).to be_empty
+    end
+
+    it "moves an overdue scheduled post to a publish time still to come", :aggregate_failures do
+      overdue = create(:post, :scheduled, published_at: Time.now - 60)
+      call_tool("update_post", id: overdue.id, publish_at: future(5))
+
+      expect(stored(overdue.id).status).to eq("scheduled")
+      expect(Blog::TimeZone.input_value(stored(overdue.id).published_at)).to eq(future(5))
+    end
+
     it "still clears the publish time of a draft" do
       call_tool("update_post", id: draft.id, publish_at: "")
 
