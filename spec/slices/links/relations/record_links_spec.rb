@@ -53,6 +53,40 @@ RSpec.describe Links::Relations::RecordLinks do
     end
   end
 
+  describe "the relation" do
+    let(:decision) { linkable_record("decision") }
+
+    def source(task_id) = Tasks::Slice["relations.record_links"].source_from_decision(task_id, decision.id)
+
+    it "makes a link by hand related" do
+      link("task", linkable_record("task").id, "decision", decision.id)
+
+      expect(db[:record_links].select_map(:relation)).to eq(["related"])
+    end
+
+    it "keeps a hand link beside the sourced task of the same decision" do
+      source(linkable_record("task").id)
+      link("task", linkable_record("task").id, "decision", decision.id)
+
+      expect(db[:record_links].order(:id).select_map(:relation)).to eq(%w[sourced_from related])
+    end
+
+    it "refuses a second task sourced from one decision" do
+      source(linkable_record("task").id)
+
+      expect { source(linkable_record("task").id) }
+        .to raise_error(Sequel::UniqueConstraintViolation, /record_links_one_source_key/)
+    end
+
+    it "refuses a sourced link that isn't a task sourced from a decision" do
+      row = { left_kind: "task", left_id: linkable_record("task").id, right_kind: "post",
+              right_id: linkable_record("post").id, relation: "sourced_from" }
+
+      expect { db[:record_links].insert(row) }
+        .to raise_error(Sequel::CheckConstraintViolation, /record_links_sourced_from_check/)
+    end
+  end
+
   it "refuses a row that names a missing record, whoever writes it" do
     decision = linkable_record("decision")
     row = { left_kind: "post", left_id: 999_999, right_kind: "decision", right_id: decision.id }

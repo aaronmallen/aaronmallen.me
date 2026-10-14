@@ -75,6 +75,23 @@ RSpec.describe "API decisions", type: :request do
       expect(Decisions::Slice["relations.decision_events"].where(decision_id: id).pluck(:kind)).to eq(["opened"])
     end
 
+    it "adds a task to resolve it to the end of the next list" do
+      create(:task, title: "Earlier", position: 5)
+      id = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
+
+      expect(Tasks::Slice["relations.tasks"].where(list: "next").order(:position).pluck(:title))
+        .to eq(["Earlier", "Resolve decision ##{id}: Pick a queue"])
+    end
+
+    it "ties the task to it with a sourced from link" do
+      id = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
+      task_id = Tasks::Slice["relations.tasks"].to_a.last[:id]
+
+      expect(Links::Slice["relations.record_links"].one).to include(
+        left_kind: "task", left_id: task_id, right_kind: "decision", right_id: id, relation: "sourced_from",
+      )
+    end
+
     it "refuses a blank problem with a 422 naming the field" do
       refusal = { "error" => "invalid", "message" => "problem: write the problem down first",
                   "errors" => { "problem" => ["write the problem down first"] } }

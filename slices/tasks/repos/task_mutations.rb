@@ -61,6 +61,8 @@ module Tasks
 
       def return_to_list(id, at: Time.now) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT, at:)
 
+      def source_from_decision(id, decision_id) = record_links.source_from_decision(id, decision_id)
+
       def unlink(id, other_id) = task_links.between(id, other_id).delete
     end
   end

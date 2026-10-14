@@ -4,6 +4,7 @@ module Links
   module Relations
     class RecordLinks < Blog::DB::Relation
       PROJECT = Sequel.cast(Blog::Types::RecordKind["project"], :record_kind)
+      RELATED = Sequel.cast(Blog::Types::RecordLinkRelation["related"], :record_link_relation)
       TASK = Sequel.cast(Blog::Types::RecordKind["task"], :record_kind)
 
       schema :record_links, infer: true
@@ -21,7 +22,7 @@ module Links
       def task_projects
         dataset.db[:tasks].exclude(project_id: nil).select(
           Sequel.cast(nil, Integer).as(:id), TASK.as(:left_kind), Sequel[:id].as(:left_id), PROJECT.as(:right_kind),
-          Sequel[:project_id].as(:right_id), Sequel[:updated_at].as(:created_at),
+          Sequel[:project_id].as(:right_id), Sequel[:updated_at].as(:created_at), RELATED.as(:relation),
         )
       end
     end

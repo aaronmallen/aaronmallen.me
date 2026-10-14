@@ -217,6 +217,47 @@ RSpec.describe "Admin decisions", type: :request do
 
         expect(page).to have_css("#decision-problem[aria-invalid='true'][aria-describedby='decision-problem-error']")
       end
+
+      describe "its task" do
+        def failing_capture
+          capture = Tasks::Slice["operations.capture_task"]
+          lambda do |params|
+            capture.call(params)
+            Dry::Monads::Failure([:invalid, { title: ["is too long"] }])
+          end
+        end
+
+        def links = Links::Slice["relations.record_links"].to_a
+
+        def open_one = send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
+
+        def opened_id = Decisions::Slice["relations.decisions"].to_a.last[:id]
+
+        def tasks = Tasks::Slice["relations.tasks"]
+
+        it "adds it to the end of the next list" do
+          create(:task, title: "Earlier", position: 5)
+          open_one
+
+          expect(tasks.where(list: "next").order(:position).pluck(:title))
+            .to eq(["Earlier", "Resolve decision ##{opened_id}: Pick a host"])
+        end
+
+        it "ties it to the decision with a sourced from link" do
+          open_one
+          link = { left_kind: "task", left_id: tasks.to_a.last[:id], right_kind: "decision", right_id: opened_id }
+
+          expect(links.map { it.slice(*link.keys, :relation) }).to eq([{ **link, relation: "sourced_from" }])
+        end
+
+        it "opens neither when the task can't be made", :aggregate_failures do
+          replace_component("operations.capture_task", failing_capture)
+          open_one
+
+          expect(last_response.status).to eq(422)
+          expect([Decisions::Slice["relations.decisions"].count, tasks.count, links.count]).to eq([0, 0, 0])
+        end
+      end
     end
 
     describe "the decision page" do

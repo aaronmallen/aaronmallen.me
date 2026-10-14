@@ -302,6 +302,16 @@ CREATE TYPE public.record_kind AS ENUM (
 
 
 --
+-- Name: record_link_relation; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.record_link_relation AS ENUM (
+    'related',
+    'sourced_from'
+);
+
+
+--
 -- Name: ref_source; Type: DOMAIN; Schema: public; Owner: -
 --
 
@@ -3299,7 +3309,9 @@ CREATE TABLE public.record_links (
     right_kind public.record_kind NOT NULL,
     right_id integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    relation public.record_link_relation DEFAULT 'related'::public.record_link_relation NOT NULL,
     CONSTRAINT record_links_order_check CHECK ((ROW(left_kind, left_id) < ROW(right_kind, right_id))),
+    CONSTRAINT record_links_sourced_from_check CHECK (((relation <> 'sourced_from'::public.record_link_relation) OR ((left_kind = 'task'::public.record_kind) AND (right_kind = 'decision'::public.record_kind)))),
     CONSTRAINT record_links_task_pair_check CHECK ((NOT ((left_kind = 'task'::public.record_kind) AND (right_kind = 'task'::public.record_kind)))),
     CONSTRAINT record_links_task_project_check CHECK ((NOT ((left_kind = 'task'::public.record_kind) AND (right_kind = 'project'::public.record_kind))))
 );
@@ -6227,6 +6239,13 @@ CREATE INDEX pull_requests_search_vector_index ON public.pull_requests USING gin
 
 
 --
+-- Name: record_links_one_source_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX record_links_one_source_key ON public.record_links USING btree (right_kind, right_id) WHERE (relation = 'sourced_from'::public.record_link_relation);
+
+
+--
 -- Name: record_links_pair_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8189,4 +8208,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261014234500_add_recurred_to_task_event_kind.rb'),
 ('20261014235100_ignore_bookkeeping_in_notify_admin_change.rb'),
 ('20261015000100_add_key_to_projects.rb'),
-('20261015000200_move_task_projects_onto_tasks.rb');
+('20261015000200_move_task_projects_onto_tasks.rb'),
+('20261015000300_add_relation_to_record_links.rb');
