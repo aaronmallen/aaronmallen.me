@@ -3,6 +3,8 @@
 module API
   module Repos
     class InboxQueries < Blog::DB::Repo
+      LIMIT = 100
+
       include Deps[
         message_queries: "mail.repos.message_queries",
         task_source_queries: "tasks.repos.task_source_queries",
@@ -11,7 +13,7 @@ module API
 
       def snoozed = snoozed_rows.sort_by { [it.at, it.kind, it.record.id] }
 
-      def unseen = unseen_rows.sort_by { [it.at, it.kind, it.record.id] }.reverse
+      def unseen = unseen_rows.sort_by { [it.at, it.kind, it.record.id] }.last(LIMIT).reverse
 
       def unseen_count
         message_queries.unread_count + webmention_queries.unseen_count + task_source_queries.unseen_task_count

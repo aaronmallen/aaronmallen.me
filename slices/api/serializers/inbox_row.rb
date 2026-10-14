@@ -48,7 +48,7 @@ module API
 
       def excerpt(row)
         case row.kind
-          when :message then untrusted(row.record.body)
+          when :message then untrusted(row.record.preview)
           when :webmention then untrusted(row.record.excerpt)
         end
       end

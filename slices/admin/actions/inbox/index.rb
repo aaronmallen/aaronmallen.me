@@ -16,14 +16,17 @@ module Admin
         def handle(_request, response)
           rows = inbox_queries.unseen
           response[:rows] = rows
+          response[:count] = inbox_queries.unseen_count
           response[:snoozed] = inbox_queries.snoozed
           response[:slugs] = post_queries.summaries.to_h { [it.id, it.slug] }
-          response[:tasks] = record_link_queries.partner_ids(THREAD, message_ids(rows), TASK)
+          response[:tasks] = tasks(rows)
         end
 
         private
 
-        def message_ids(rows) = rows.filter_map { it.record.id if it.kind == :message }
+        def tasks(rows)
+          record_link_queries.partner_ids(THREAD, rows.filter_map { it.record.id if it.kind == :message }, TASK)
+        end
       end
     end
   end

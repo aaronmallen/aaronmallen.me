@@ -4,9 +4,9 @@ module Mail
   module Relations
     class MailThreads < Blog::DB::Relation
       FOLDERS = Blog::Types::MailFolder.values.to_h { [it, :"#{it}_folder"] }.freeze
-      LETTER = %i[reply_to body].freeze
       NEEDS_REPLY = "needs-reply"
       NOTIFICATION = /(@(github\.com|linear\.app|docs\.google\.com)|^drive-shares-(dm-)?noreply@google\.com)$/i
+      PREVIEW = 500
       PRIMARY = Sequel.|({ category: nil }, { category: Blog::Types::MailCategory["personal"] })
       SEARCHED = %i[reply_to body from_name].map { Sequel.function(:coalesce, it, "") }.freeze
       SPAM = Blog::Types::MessageStatus["spam"]
@@ -60,7 +60,9 @@ module Mail
         select_append(column(named, :account))
       end
 
-      def with_letter = select_append(*LETTER.map { column(first_message.select(it), it) })
+      def with_letter = with_preview.select_append(column(first_message.select(:body), :body))
+
+      def with_preview = select_append(column(first_message.select(:reply_to), :reply_to), preview(first_message))
 
       def with_reason(rules)
         reasons = reasons(rules)
@@ -74,7 +76,7 @@ module Mail
         select_append(
           column(first_message.select(Sequel.function(:coalesce, :from_name, :reply_to)), :sender),
           column(first_message.select(:reply_to), :reply_to),
-          column(last_message.select(:body), :preview),
+          preview(last_message),
           column(own_messages.select { count.function.* }, :message_count, ROM::Types::Integer),
         )
       end
@@ -122,6 +124,8 @@ module Mail
       end
 
       def own_messages = mail_messages.dataset.unordered.where(mail_thread_id: self[:id].qualified)
+
+      def preview(message) = column(message.select(Sequel.function(:left, :body, PREVIEW)), :preview)
 
       def reasons(rules) = Blog::Types::MailWaitReason.values.select { rules.fetch(it.to_sym) }.map { [wait(it), it] }
 

@@ -20,7 +20,7 @@ RSpec.describe "Contact", type: :request do
 
   def sent_path = "/contact?sent=1"
 
-  def stored = message_queries.unread
+  def stored = message_queries.unread.map { message_queries.by_id(it.id) }
 
   def stored_hash = message_queries.mail_messages.pluck(:visitor_hash).first
 

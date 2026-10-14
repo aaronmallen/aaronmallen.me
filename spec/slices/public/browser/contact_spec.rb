@@ -22,7 +22,7 @@ RSpec.describe "Contact form", type: :feature do
     click_button "Send message"
   end
 
-  def stored = message_queries.unread.first
+  def stored = message_queries.unread.first&.then { message_queries.by_id(it.id) }
 
   def tab
     page.driver.browser.keyboard.type(:Tab)

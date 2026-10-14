@@ -18,7 +18,7 @@ module Admin
           def view_template
             Row(id: "message-#{@message.id}", kind: :message, title: @message.subject, menu: menu_path) do |row|
               row.meta { meta }
-              row.body { p(class: "msg-body inbox-row-body") { @message.body } }
+              row.body { p(class: "msg-body inbox-row-body") { @message.preview } }
               actions
             end
           end

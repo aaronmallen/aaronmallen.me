@@ -39,14 +39,14 @@ module Mail
 
       def settings = SETTINGS.merge(mail_settings.by_pk(SETTINGS_ID).one.to_h.slice(*SETTINGS.keys))
 
-      def snoozed = waiting.asleep.with_letter.with_account.newest_first.to_a
+      def snoozed = waiting.asleep.with_preview.with_account.newest_first.to_a
 
       def thread(id)
         mail_threads.with_letter.with_account.combine(:tags, :mail_messages)
                     .node(:mail_messages) { it.order(:received_at, :id) }.by_pk(id).one
       end
 
-      def unread = waiting.awake.with_letter.with_account.newest_first.to_a
+      def unread = waiting.awake.with_preview.with_account.newest_first.to_a
 
       def unread_count = waiting.awake.count
 

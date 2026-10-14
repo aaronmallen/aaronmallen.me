@@ -7,13 +7,14 @@ module Admin
         class Index < View
           include Components::Inbox
 
+          prop :count, Blog::Types::Integer
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
           prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size)) { head_actions if @rows.any? }
+            PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { head_actions if @rows.any? }
 
             Card do
               div(data: { key_list: true }) do

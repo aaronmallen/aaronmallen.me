@@ -65,6 +65,14 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page).to have_css(".page-head-sub", exact_text: "2 waiting")
     end
 
+    it "lists only the newest rows past its limit and still counts them all", :aggregate_failures do
+      stub_const("API::Repos::InboxQueries::LIMIT", 2)
+      [120, 60, 0].each { create(:message, subject: "#{it}s ago", received_at: Time.now - it) }
+
+      expect(inbox).to eq(["0s ago", "60s ago"])
+      expect(page).to have_css(".page-head-sub", exact_text: "3 waiting")
+    end
+
     it "leaves out what no longer waits" do
       create(:message, :read)
       create(:webmention, :approved)
@@ -166,6 +174,13 @@ RSpec.describe "Admin inbox", type: :request do
         get "/admin/inbox"
 
         expect(page).to have_css(".msg-body", text: "How?")
+      end
+
+      it "reads out only the start of a long body" do
+        create(:message, body: "#{'a' * 500}TAIL")
+        get "/admin/inbox"
+
+        expect(page).to have_css(".msg-body", exact_text: "a" * 500).and have_no_text("TAIL")
       end
 
       it "offers a reply by mail" do

@@ -52,6 +52,13 @@ RSpec.describe "API inbox", type: :request do
                 ["Oldest", nil, issue_url]])
     end
 
+    it "cuts a message's excerpt to the start of its body" do
+      create(:mail_message, mail_thread_id: records[:message].id, body: "#{'c' * 500}TAIL",
+                            received_at: Time.now - 120)
+
+      expect(rows[1].fetch("excerpt")).to eq("c" * 500)
+    end
+
     it "gives each row its time" do
       expect(Time.iso8601(rows[1].fetch("at"))).to be_within(1).of(records[:message].received_at)
     end
