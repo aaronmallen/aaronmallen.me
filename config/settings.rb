@@ -180,7 +180,11 @@ module Blog
       report_data?: Types::Params::Bool.optional,
     )
 
-    setting :linkedin, default: {}, constructor: Schema.schema(client_id?: Value, client_secret?: Value)
+    setting :linkedin, default: {}, constructor: Schema.schema(
+      client_id?: Value,
+      client_secret?: Value,
+      profile_url?: Value,
+    )
 
     setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 

@@ -7,6 +7,7 @@ module Public
         class Syndication < Component
           LABELS = {
             Blog::Types::NetworkName["bluesky"] => ".networks.bluesky",
+            Blog::Types::NetworkName["linkedin"] => ".networks.linkedin",
             Blog::Types::NetworkName["mastodon"] => ".networks.mastodon",
           }.freeze
 

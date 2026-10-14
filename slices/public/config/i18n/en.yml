@@ -58,6 +58,7 @@ en:
         networks:
           bluesky: "bluesky"
           github: "github"
+          linkedin: "linkedin"
           mastodon: "mastodon"
       posts:
         edits:
@@ -79,6 +80,7 @@ en:
           heading: "Also posted on"
           networks:
             bluesky: "Bluesky"
+            linkedin: "LinkedIn"
             mastodon: "Mastodon"
         toc:
           label: "On this page"

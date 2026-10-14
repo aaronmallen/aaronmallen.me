@@ -8,6 +8,7 @@ module Public
           github: ["fa-brands fa-github", ".networks.github"].freeze,
           bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".networks.bluesky"].freeze,
           mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".networks.mastodon"].freeze,
+          linkedin: [Blog::Constants::NETWORK_ICONS.fetch("linkedin"), ".networks.linkedin"].freeze,
         }.freeze
 
         prop :year, Blog::Types::Integer

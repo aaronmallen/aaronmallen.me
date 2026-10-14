@@ -28,6 +28,7 @@ honeybadger:
 linkedin:
   client_id: null
   client_secret: null
+  profile_url: null
 mastodon:
   profile_url: https://ruby.social/@aaronmallen
 maxmind:

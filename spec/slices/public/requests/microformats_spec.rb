@@ -158,6 +158,26 @@ RSpec.describe "Microformats", type: :request do
     end
   end
 
+  describe "an article that went out on LinkedIn" do
+    before do
+      social_post = create(:social_post, :posted, post_id: publish("hello").id)
+      create(
+        :social_post_delivery,
+        network: "linkedin",
+        social_post_id: social_post.id,
+        remote_url: "https://linkedin.example/feed/update/1",
+      )
+      get "/writing/hello"
+    end
+
+    it "labels the LinkedIn link with its icon", :aggregate_failures do
+      link = page.find(".post-syndication a.u-syndication", text: "LinkedIn")
+
+      expect(link[:href]).to eq("https://linkedin.example/feed/update/1")
+      expect(link).to have_css("i.fa-linkedin", visible: :all)
+    end
+  end
+
   describe "an article with an approved reply" do
     subject(:comment) { doc.at_css("article.h-entry .u-comment.h-cite") }
 

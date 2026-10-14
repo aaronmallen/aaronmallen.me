@@ -47,6 +47,7 @@ honeybadger:
 linkedin:
   client_id: <%= ENV["LINKEDIN_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["LINKEDIN_CLIENT_SECRET"].to_json %>
+  profile_url: https://www.linkedin.com/in/aaronmallen/
 mastodon:
   profile_url: https://ruby.social/@aaronmallen
 maxmind:

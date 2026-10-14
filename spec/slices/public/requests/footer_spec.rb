@@ -7,6 +7,7 @@ RSpec.describe "Footer", type: :request do
     {
       bluesky: { profile_url: "https://bsky.example/ada" },
       github: { profile_url: "https://github.example/ada" },
+      linkedin: { profile_url: "https://linkedin.example/in/ada" },
       mastodon: { profile_url: "https://social.example/@ada" },
     }
   end
@@ -46,7 +47,14 @@ RSpec.describe "Footer", type: :request do
   end
 
   it "labels each profile link" do
-    expect(profile_links.map { it.text.strip }).to eq(%w[github bluesky mastodon])
+    expect(profile_links.map { it.text.strip }).to eq(%w[github bluesky mastodon linkedin])
+  end
+
+  it "links the LinkedIn profile rel=me with its icon", :aggregate_failures do
+    link = page.find("footer.site-footer a.site-footer-link[href='https://linkedin.example/in/ada']")
+
+    expect(link[:rel]).to eq("me")
+    expect(link).to have_css("i.fa-linkedin", visible: :all)
   end
 
   it "hides each profile link's icon from assistive tech" do
@@ -80,7 +88,9 @@ RSpec.describe "Footer", type: :request do
   end
 
   context "with a network left unconfigured" do
-    let(:profiles) { { bluesky: {}, github: { profile_url: "https://github.example/ada" }, mastodon: {} } }
+    let(:profiles) do
+      { bluesky: {}, github: { profile_url: "https://github.example/ada" }, linkedin: {}, mastodon: {} }
+    end
 
     it "leaves the unconfigured networks out" do
       expect(profile_links.map { it[:href] }).to eq(["https://github.example/ada"])
