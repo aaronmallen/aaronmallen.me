@@ -201,6 +201,13 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(message.body).to eq("Hi x")
     end
 
+    it "keeps the styling of a stored HTML body but not its position" do
+      html = %(<div style="position: fixed; z-index: 9999; top: 0; color: red"><img src="https://example.com/a.png">Hi</div>)
+      sync_message(parts: [gmail_part("text/html", html)])
+
+      expect(message.html_body).to eq(%(<div style="  top: 0; color: red"><img src="https://example.com/a.png">Hi</div>))
+    end
+
     it "reads a body in the charset its part names" do
       sync_message(parts: [gmail_part("text/plain", "Caf\xE9".b, charset: "ISO-8859-1")])
 

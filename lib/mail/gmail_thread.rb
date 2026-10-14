@@ -16,7 +16,13 @@ module Mail
     NUL = "\0"
     PLAIN = "text/plain"
     RELAXED = Sanitize::Config::RELAXED
-    SANITIZE = Sanitize::Config.freeze_config(Sanitize::Config.merge(RELAXED, elements: RELAXED[:elements] - %w[style]))
+    SANITIZE = Sanitize::Config.freeze_config(
+      Sanitize::Config.merge(
+        RELAXED,
+        elements: RELAXED[:elements] - %w[style],
+        css: { properties: RELAXED[:css][:properties] - %w[position z-index] },
+      ),
+    )
 
     def initialize(json)
       @json = json
