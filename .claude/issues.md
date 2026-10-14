@@ -44,10 +44,14 @@ Write the body to a file first, so the Markdown survives the shell.
 
 ```sh
 gh issue create --title '<title>' --body-file <path> --assignee aaronmallen \
-  --label enhancement --label tasks --label p2
+  --label enhancement,tasks,p2
 ```
 
 It prints the issue's URL. The number is the last part of it. Always assign `aaronmallen`.
+
+Pass the labels as one comma list. The shell is zsh, which does not split a variable into words, so flags kept in
+one, such as `L='--label chore --label p1'`, reach `gh` as a single argument and file nothing. A comma list such as
+`L=chore,tasks,p1` passes through `--label "$L"` whole.
 
 ## Redact
 
