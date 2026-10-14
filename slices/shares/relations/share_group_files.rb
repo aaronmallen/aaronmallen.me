@@ -8,6 +8,12 @@ module Shares
           belongs_to :share_group
         end
       end
+
+      def images = where(Sequel.like(self[:content_type], Relations::Shares::IMAGE))
+
+      def matching(text, code) = containing(text, self[:filename], self[:content_type], code)
+
+      def others = exclude(Sequel.like(self[:content_type], Relations::Shares::IMAGE))
     end
   end
 end

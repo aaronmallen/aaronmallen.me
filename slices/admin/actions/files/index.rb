@@ -6,20 +6,30 @@ module Admin
       class Index < Action
         PAGE_SIZE = 12
 
-        include Deps[share_queries: "shares.repos.share_queries"]
+        include Deps[
+          share_group_queries: "shares.repos.share_group_queries", share_queries: "shares.repos.share_queries",
+        ]
 
         def handle(request, response)
           list = listed(request.params)
-          shares = share_queries.page_listed(requested_page(request, response), **list)
+          page = requested_page(request, response)
+          shares = share_queries.page_listed(page, **list)
           not_found(response) if shares.past_end?
 
-          response[:count] = share_queries.count_listed(**list)
+          list_groups(response, list, page)
           response[:list] = list
           response[:shares] = shares
-          response[:totals] = share_queries.totals
+          response[:totals] = share_queries.totals.merge(groups: share_group_queries.count)
         end
 
         private
+
+        def list_groups(response, list, page)
+          groups = share_group_queries.listed(**list)
+
+          response[:count] = share_queries.count_listed(**list) + groups.size
+          response[:groups] = page.number == 1 ? groups : []
+        end
 
         def listed(params)
           {

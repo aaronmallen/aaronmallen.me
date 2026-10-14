@@ -5102,6 +5102,38 @@
   @apply flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4;
 }
 
+@utility file-group-list {
+  @apply m-0 flex list-none flex-col gap-3 p-0;
+}
+
+@utility file-group-item {
+  @apply grid grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 border-b border-line pb-3 last:border-b-0;
+}
+
+@utility file-group-thumb {
+  @apply flex aspect-square w-14 items-center justify-center rounded-menu border border-line bg-wash object-cover text-[22px] text-ink-muted;
+}
+
+@utility file-group-item-body {
+  @apply flex min-w-0 flex-col gap-1.5;
+}
+
+@utility file-group-item-name {
+  @apply truncate font-display font-semibold text-ink;
+
+  & a {
+    @apply text-inherit admin-focus;
+  }
+}
+
+@utility file-group-add {
+  @apply flex flex-wrap items-center gap-2.5 border-t border-line pt-4;
+
+  & > .f {
+    @apply w-full;
+  }
+}
+
 @utility work-row {
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;

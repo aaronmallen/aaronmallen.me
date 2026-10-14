@@ -12,6 +12,7 @@ module Admin
           SEARCH_ID = "files-search"
 
           prop :count, Blog::Types::Integer
+          prop :groups, Blog::Types::Array
           prop :list, Blog::Types::Hash
           prop :shares, Blog::Types::Instance(Blog::Structs::Paged)
           prop :totals, Blog::Types::Hash
@@ -20,13 +21,13 @@ module Admin
             PageHead(title: t(".heading"), sub:) { filter_form }
             upload_form
             search_form
-            @shares.rows.empty? ? Card { Empty { t(empty) } } : grid
+            @shares.rows.empty? && @groups.empty? ? Card { Empty { t(empty) } } : grid
             Pager(page: @shares, route: :admin_files, params: query)
           end
 
           private
 
-          def empty = @totals[:count].zero? ? ".empty" : ".no_match"
+          def empty = (@totals[:count] + @totals[:groups]).zero? ? ".empty" : ".no_match"
 
           def filter = @list[:filter]
 
@@ -38,7 +39,11 @@ module Admin
           end
 
           def grid
-            div(class: "file-grid") { @shares.rows.each { Tile(share: it) } }
+            div(class: "file-grid") do
+              @groups.each { GroupTile(group: it) }
+              @shares.rows.each { Tile(share: it) }
+            end
+            @groups.each { GroupDrawer(group: it) }
             @shares.rows.each { Drawer(share: it) }
           end
 

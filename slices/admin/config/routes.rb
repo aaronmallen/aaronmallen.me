@@ -89,6 +89,13 @@ module Admin
     get "/files", to: "files.index", as: :files
     post "/files", to: "files.create", as: :create_files
     get "/files/:id/edit", to: "files.edit", as: :edit_file, id: ID
+    get "/files/groups/:id/edit", to: "files.edit_group", as: :edit_file_group, id: ID
+    post "/files/groups/:id", to: "files.update_group", as: :update_file_group, id: ID
+    post "/files/groups/:id/delete", to: "files.destroy_group", as: :delete_file_group, id: ID
+    post(
+      "/files/groups/:id/files/:file_id/delete",
+      to: "files.remove_group_file", as: :remove_file_group_file, id: ID, file_id: ID,
+    )
     get "/files/:id/menu", to: "files.menu", as: :file_menu, id: ID
     post "/files/:id", to: "files.update", as: :update_file, id: ID
     post "/files/:id/delete", to: "files.destroy", as: :delete_file, id: ID

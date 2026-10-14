@@ -6,6 +6,7 @@ module Admin
   module Actions
     module Files
       class Create < Action
+        ADDED = "files_page.toasts.added"
         CREATED = 201
         GROUPED = "files_page.toasts.grouped"
         JSON_TYPE = "application/json"
@@ -19,6 +20,7 @@ module Admin
         }.freeze
 
         include Deps[
+          add_share_group_files: "shares.operations.add_share_group_files",
           upload_share: "shares.operations.upload_share", upload_share_group: "shares.operations.upload_share_group",
         ]
 
@@ -34,6 +36,14 @@ module Admin
 
         private
 
+        def add(id, files)
+          case add_share_group_files.call(id, files)
+            in Success(group) then [[Helpers::ShareLink.for(group.code)], nil, ADDED, files.size]
+            in Failure(:not_found) then halt 404
+            in Failure[reason, *] then [[], reason, TOASTS.fetch(reason), 0]
+          end
+        end
+
         def answer(response, links, reason, message)
           response.status = reason ? STATUSES.fetch(reason) : CREATED
           response.format = :json
@@ -44,6 +54,9 @@ module Admin
 
         def sent(request)
           files = Array(request.params[:files]).select { it.is_a?(::Hash) && it[:tempfile] }
+          group_id = Blog::Types::IdParam[request.params[:group_id]]
+          return add(group_id, files) if group_id
+
           request.params[:group] == Blog::Constants::CHECKED ? upload_group(files) : upload(files)
         end
 

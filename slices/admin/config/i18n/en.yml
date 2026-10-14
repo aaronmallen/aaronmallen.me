@@ -81,10 +81,16 @@ en:
           other: "Uploaded %{count} files, then the share store stopped answering"
           zero: "Nothing uploaded · the share store isn't answering"
         delete: "Nothing deleted · the share store isn't answering"
+      added:
+        one: "Added to the group"
+        other: "%{count} files added to the group"
       deleted: "File deleted"
       grouped:
         one: "Uploaded as one link"
         other: "%{count} files uploaded as one link"
+      group_deleted: "Group deleted"
+      group_saved: "Group saved"
+      removed: "File removed from the group"
       saved: "File saved"
       uploaded:
         one: "Uploaded"
@@ -839,6 +845,51 @@ en:
         foot:
           delete: "Delete file"
           save: "Save"
+        group_drawer:
+          title: "Shared group"
+        group_foot:
+          delete: "Delete group"
+          save: "Save"
+        group_form:
+          add: "Add"
+          add_label: "Add files to this group"
+          alt_text: "Alt text"
+          alt_text_hint: "The group's page shows it with the image."
+          alt_text_placeholder: "What the image shows"
+          code: "Short code"
+          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
+          confirm_delete:
+            one: "Delete this group and its file? Its link stops working at once."
+            other: "Delete this group and its %{count} files? Its link stops working at once."
+          confirm_remove: "Remove %{name}? Its link stops working at once."
+          copy_link: "Copy link"
+          downloads:
+            one: "%{downloads} download"
+            other: "%{downloads} downloads"
+          files: "Files"
+          link: "Share link"
+          link_copied: "Link copied"
+          name:
+            one: "%{count} file"
+            other: "%{count} files"
+          remove: "Remove %{name}"
+          uploaded: "uploaded %{on}"
+          views:
+            one: "%{views} view"
+            other: "%{views} views"
+          zips:
+            one: "%{zips} zip download"
+            other: "%{zips} zip downloads"
+        group_tile:
+          copied: "Link copied"
+          copy: "Copy link"
+          name:
+            one: "%{count} file"
+            other: "%{count} files"
+          open: "Open %{name}"
+          views:
+            one: "%{views} view"
+            other: "%{views} views"
         share_form:
           alt_text: "Alt text"
           alt_text_hint: "Used when you copy it as markdown."
@@ -2843,6 +2894,9 @@ en:
       files:
         edit:
           all_files: "All files"
+        edit_group:
+          all_files: "All files"
+          title: "Group %{code}"
         index:
           all: "all"
           copied: "Uploaded · link copied"
