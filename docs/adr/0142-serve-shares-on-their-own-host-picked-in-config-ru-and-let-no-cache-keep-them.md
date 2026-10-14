@@ -5,6 +5,7 @@ status: active
 created: 2026-10-10
 area: [config]
 issue: "#1055"
+amended: ["#1259"]
 tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, cache-control, puma, aa-cool]
 ---
 
@@ -38,7 +39,8 @@ We serve shares on a host of their own and pick the app by host in `.config/conf
   split works on the machine running it.
 - A request for the share host goes to the shares app. Every other request goes to the blog as it does today, so
   `config/routes.rb` and the slices mounted in it never see a share host request.
-- The shares app answers a code from `short_codes` and nothing else. Every other path answers 404.
+- The shares app answers a code from `short_codes` and nothing else. Every other path answers 404. #1259 adds a
+  share group's file and zip paths under its code ([ADR 0163][0163]).
 - A share link names the setting's host, never the host a request arrived on, as [ADR 0014][0014] says for the site.
 
 No cache keeps a share, a short link redirect or a 404 on the share host. Each of them sends `Cache-Control:
@@ -76,4 +78,5 @@ outside the repo, so #1061 writes them down.
 [0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [0111]: 0111-send-strict-transport-security-from-the-app-for-the-apex-alone.md
 [0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
