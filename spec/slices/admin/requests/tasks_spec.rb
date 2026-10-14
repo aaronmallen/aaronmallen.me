@@ -90,11 +90,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to eq(["Ship the screen"])
       end
 
-      it "offers a tab for every list and the archive" do
+      it "offers a tab for every list, the recurring series and the archive" do
         get "/admin/tasks"
 
         expect(page.all(".task-tabs .screen-tab span:first-of-type").map(&:text))
-          .to eq(%w[today upcoming next someday external completed])
+          .to eq(%w[today upcoming next someday external recurring completed])
       end
 
       it "says nothing arrived in a sprint nothing was carried into" do
@@ -108,7 +108,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
           create(:task, status, title: "Filed already")
           get "/admin/tasks", filter: "someday"
 
-          expect(page.all(".task-tab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
+          expect(page.all(".task-tab-count").map(&:text)).to eq(%w[1 0 1 1 0 0 1])
         end
       end
 

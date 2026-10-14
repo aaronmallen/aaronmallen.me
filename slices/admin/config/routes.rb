@@ -259,6 +259,7 @@ module Admin
     post "/tasks/rules/:id", to: "task_rules.update", as: :update_task_rule, id: ID
     get "/tasks/rules/:id/menu", to: "task_rules.menu", as: :task_rule_menu, id: ID
     post "/tasks/rules/:id/delete", to: "task_rules.destroy", as: :delete_task_rule, id: ID
+    post "/tasks/series/:id/switch", to: "task_series.switch", as: :switch_task_series, id: ID
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
     get "/tasks/:id/menu", to: "tasks.menu", as: :task_menu, id: ID

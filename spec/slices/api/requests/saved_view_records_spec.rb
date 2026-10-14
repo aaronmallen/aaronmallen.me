@@ -50,6 +50,14 @@ RSpec.describe "API saved view records", type: :request do
   def today = Blog::TimeZone.today
 
   describe "a tasks view" do
+    it "answers the current copy of each series for the recurring tab" do
+      task = create(:task)
+      create(:task)
+      Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "days", every: 1 })
+
+      expect(ids(records(filter: "recurring"))).to eq([task.id])
+    end
+
     it "answers the view, the tasks in its list and paging" do
       view = create(:saved_view, name: "Next", screen: "tasks", filters: { filter: "next" })
       task = create(:task)

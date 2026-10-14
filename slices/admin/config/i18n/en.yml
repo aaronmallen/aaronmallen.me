@@ -420,6 +420,8 @@ en:
       reopened: "Reopened"
       saved: "Task saved"
       scheduled: "Scheduled for the %{date} sprint"
+      series_paused: "Paused · closing %{task} makes no new copy"
+      series_resumed: "Repeating %{task} again"
       session_deleted: "Session deleted"
       session_saved: "Session saved"
       sprint_ahead: "Plan a sprint for a day after today"
@@ -2597,6 +2599,35 @@ en:
           title: "Pull in"
         quick_add:
           add: "Add"
+        recurring_card:
+          blurb: "Each series shows once. Closing its copy makes the next one, unless the series is off."
+          cadence:
+            days:
+              one: "Every day"
+              other: "Every %{count} days"
+            month_day: "Day %{day} of each month"
+            month_end: "Last day of each month"
+            month_weekday: "The %{week} %{weekday} of each month"
+            weeks:
+              one: "Every %{weekday}"
+              other: "Every %{count} weeks on %{weekday}"
+            yearly: "Each year on %{month} %{day}"
+          count:
+            one: "%{count} series"
+            other: "%{count} series"
+          empty: "Nothing repeats yet. Pick a cadence in a task's Repeats field."
+          label: "Repeats"
+          next: "next %{date}"
+          save: "Save"
+          switch: "%{title} repeats"
+          title: "Recurring"
+          unscheduled: "not in a sprint"
+          weeks:
+            "-1": "last"
+            "1": "first"
+            "2": "second"
+            "3": "third"
+            "4": "fourth"
         row:
           edit: "Edit"
           edit_key: "Edit the highlighted task"
@@ -2632,6 +2663,7 @@ en:
           external: "external"
           label: "Task lists"
           next: "next"
+          recurring: "recurring"
           someday: "someday"
           today: "today"
           upcoming: "upcoming"

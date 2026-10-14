@@ -9,6 +9,7 @@ module Admin
 
           COMPLETED = Blog::Types::TaskTab["completed"]
           FINISHED_TODAY = :finished_today
+          RECURRING = Blog::Types::TaskTab["recurring"]
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
@@ -18,6 +19,7 @@ module Admin
           prop :planned, Blog::Types::Array.of(Blog::Types::Hash)
           prop :pool, Blog::Types::String
           prop :pools, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)))
+          prop :series, Blog::Types::Array.of(Blog::Types::Hash)
           prop :tab, Blog::Types::TaskTab
           prop :tasks, Blog::Types::Instance(Blog::Structs::Paged)
           prop :today, Blog::Types::Date
@@ -41,6 +43,7 @@ module Admin
               when UPCOMING then UpcomingSprints(planned: @planned, today: @today, waiting: @waiting)
               when TODAY then sprint
               when COMPLETED then CompletedCard(query:, range:, tasks: @tasks, today: @today)
+              when RECURRING then RecurringCard(series: @series)
               else list
             end
           end

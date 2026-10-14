@@ -9,6 +9,7 @@ module API
       JOURNAL = Blog::Types::SavedViewScreen["journal"]
       JOURNAL_FIELDS = %i[tag].freeze
       POSTS = Blog::Types::SavedViewScreen["posts"]
+      RECURRING = Blog::Types::TaskTab["recurring"]
       TASK_FIELDS = %i[tag contributor agent model].freeze
       TODAY = Blog::Types::TaskTab["today"]
       UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -82,6 +83,12 @@ module API
         { rows: found.rows, **Helpers::Paging.fields(found) }
       end
 
+      def recurring
+        rows = task_queries.recurring
+
+        { rows:, sprint_on: rows.to_h { [it.id, it.sprint&.sprint_date] }, partial: false }
+      end
+
       def tasks(filters, page, now)
         tab = Blog::Types::TaskTabParam[filters["filter"]]
         search = search_query.call(query: filters["q"], fields: TASK_FIELDS).to_h
@@ -89,6 +96,7 @@ module API
         case tab
           when COMPLETED then finished(page, search)
           when UPCOMING then upcoming(Blog::TimeZone.today(now), search)
+          when RECURRING then recurring
           else open_tasks(tab, step(current_sprint.call(now:)), page, search)
         end
       end

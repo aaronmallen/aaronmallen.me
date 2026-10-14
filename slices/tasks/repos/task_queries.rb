@@ -109,6 +109,8 @@ module Tasks
         by_task.filter_map { |id, project_id| [id, [slugs[project_id]]] if slugs.key?(project_id) }.to_h
       end
 
+      def recurring = with_details.combine(:sprint).where(id: task_series.pluck(:task_id)).in_order.to_a
+
       def timeline(task_id) = task_timeline.for_task(task_id).oldest_first.to_a
 
       private

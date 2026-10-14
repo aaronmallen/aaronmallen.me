@@ -10,16 +10,19 @@ module Admin
       FIELDS = %i[tag project contributor agent model].freeze
       FINISHED_TODAY = :finished_today
       NEXT = Blog::Types::TaskFilter["next"]
+      RECURRING = Blog::Types::TaskTab["recurring"]
       TODAY = Blog::Types::TaskTab["today"]
       UPCOMING = Blog::Types::TaskTab["upcoming"]
-      UNORDERED = [COMPLETED, UPCOMING].freeze
+      UNORDERED = [COMPLETED, RECURRING, UPCOMING].freeze
       UNSEEN = :unseen
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
+        next_cadence_date: "tasks.operations.next_cadence_date",
         search_query: "contracts.search_query_contract",
         sprint_queries: "tasks.repos.sprint_queries",
         task_queries: "tasks.repos.task_queries",
+        task_series_queries: "tasks.repos.task_series_queries",
         task_source_queries: "tasks.repos.task_source_queries",
       ]
 
@@ -34,7 +37,7 @@ module Admin
 
         {
           counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,
-          pool:, today:, **plan(tab, tasks, planned, page, pool),
+          pool:, today:, **plan(tab, tasks, planned, page, pool), series: recurring(tab, today),
         }
       end
 
@@ -51,7 +54,7 @@ module Admin
 
         task_queries.open_counts(sprint:, planned:).merge(
           COMPLETED => finished.fetch(:total), FINISHED_TODAY => finished.fetch(:on_day), CARRIED => sprint.carried_in,
-          UNSEEN => task_source_queries.unseen_task_count,
+          UNSEEN => task_source_queries.unseen_task_count, RECURRING => task_series_queries.count,
         )
       end
 
@@ -70,10 +73,17 @@ module Admin
         tasks = case tab
                   when COMPLETED then task_queries.finished(page:, **filters.slice(:from, :to), **search)
                   when UPCOMING then whole(task_queries.planned(planned, **search))
+                  when RECURRING then whole(EMPTY_ARRAY)
                   else task_queries.list(tab, sprint:, page:, **search)
                 end
 
         tasks.past_end? ? Failure(:past_end) : Success(tasks)
+      end
+
+      def next_on(series, today)
+        task = series.task
+
+        task.closed? ? next_cadence_date.call(series.to_h, today) : task.sprint&.sprint_date
       end
 
       def plan(tab, tasks, planned, page, pool)
@@ -85,6 +95,12 @@ module Admin
       end
 
       def pools(pool, page) = { pool => task_queries.list(pool, sprint: nil, page: first_page(page)).rows }
+
+      def recurring(tab, today)
+        return EMPTY_ARRAY unless tab == RECURRING
+
+        task_series_queries.listed.map { { series: it, next_on: next_on(it, today) } }
+      end
 
       def scheduled(tasks, planned)
         held = tasks.group_by(&:sprint_id)

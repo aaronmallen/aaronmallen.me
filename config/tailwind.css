@@ -5948,6 +5948,27 @@
   }
 }
 
+@utility series-row {
+  @apply flex items-center justify-between gap-3;
+  @apply border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility series-head {
+  @apply min-w-0;
+}
+
+@utility series-title {
+  @apply text-li font-semibold break-words text-ink hover:underline;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
+@utility series-meta {
+  @apply meta;
+}
+
 @utility rule-row {
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5;
   @apply border-t border-line py-3 first:border-t-0 first:pt-0;

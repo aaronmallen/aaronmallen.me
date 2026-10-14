@@ -224,7 +224,7 @@ module Blog
       "comment", "session", "moved", "tagged", "untagged", "status_changed", "recurred",
     )
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
-    TaskTab = Types::String.enum(*TaskView.values, "completed")
+    TaskTab = Types::String.enum(*TaskView.values, "recurring", "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)
     Text = Types::String.constructor { |value| value.is_a?(::String) ? value : Blog::Constants::EMPTY_STRING }
     TextList = Types::Array.of(Types::String).constructor do |values|
