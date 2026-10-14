@@ -12,7 +12,7 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1
       esbuild:
-        specifier: ^0.28.1
+        specifier: ^0.28.2
         version: 0.28.2
       hanami-assets:
         specifier: ^3.0.0

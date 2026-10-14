@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "hanami-assets": "^3.0.0",
     "idiomorph": "^0.8.0"
   },
