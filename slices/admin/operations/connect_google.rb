@@ -34,7 +34,7 @@ module Admin
 
       def held(account_id, id)
         accounts = connection_queries.for(PROVIDER)
-        accounts.find { it.account_id == account_id } || accounts.find { it.id == id }
+        accounts.find { it.account_id == account_id } || accounts.find { it.id == id && !it.account_id.include?("@") }
       end
 
       def save(held, grant)

@@ -253,6 +253,34 @@ RSpec.describe "Admin Google connection", type: :request do
       end
     end
 
+    describe "reconnecting an account and picking another in Google's chooser" do
+      before do
+        connect_account(account_id: "aaron@example.com")
+        grant("work@example.com", [mail_scope])
+        callback(code: "code", state: start_connect(connection: account("aaron@example.com").id))
+      end
+
+      it "adds the other account and leaves the first as it was", :aggregate_failures do
+        expect(account("aaron@example.com")).to have_attributes(scopes: [sleep_scope])
+        expect(account("aaron@example.com").credentials).to include(access_token: "ya29.old")
+        expect(account("work@example.com")).to have_attributes(scopes: [mail_scope])
+      end
+    end
+
+    describe "reconnecting a legacy row held without an address" do
+      before do
+        connect_account
+        grant("aaron@example.com", [sleep_scope])
+      end
+
+      it "gives that row its address", :aggregate_failures do
+        expect { callback(code: "code", state: start_connect(connection: connection.id)) }
+          .not_to(change { connections.map(&:id) })
+        expect(connection).to have_attributes(account_id: "aaron@example.com")
+        expect(connection.credentials).to include(access_token: "ya29.new")
+      end
+    end
+
     it "saves nothing when I decline on Google", :aggregate_failures do
       callback(error: "access_denied", state: start_connect)
       follow_redirect!
