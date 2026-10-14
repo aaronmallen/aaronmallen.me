@@ -9,29 +9,36 @@ module Calendar
       API = "https://www.googleapis.com/calendar/v3"
       BEHIND_DAYS = 90
       BUSY_ONLY = "freeBusyReader"
+      CANCELLED = "cancelled"
       PAGE_SIZE = 2500
       SCOPES = %w[
         https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.calendarlist.readonly
       ].freeze
       WRITERS = %w[owner writer].freeze
 
-      include Deps[google: "google.client", calendar_mutations: "repos.calendar_mutations"]
+      include Deps[
+        google: "google.client", calendar_mutations: "repos.calendar_mutations",
+        calendar_queries: "repos.calendar_queries",
+      ]
 
       def call(today = Blog::TimeZone.today) = step synced(today - BEHIND_DAYS, today + AHEAD_DAYS)
 
       private
 
-      def calendar(account, item, from, to)
+      def calendar(account, item, token, from, to)
+        id = item.fetch("id")
+
         {
-          google_id: item.fetch("id"), name: item["summaryOverride"] || item.fetch("summary"),
-          writable: writable?(account, item), events: events(account, item.fetch("id"), from, to),
+          google_id: id, name: item["summaryOverride"] || item.fetch("summary"), writable: writable?(account, item),
+          **events(account, id, token, from, to),
         }
       end
 
       def calendars(account, from, to)
-        listed = pages(account, "#{API}/users/me/calendarList")
+        listed = pages(account, "#{API}/users/me/calendarList").fetch("items", [])
+        tokens = calendar_queries.sync_tokens(account)
 
-        listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, from, to) }
+        listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, tokens[it["id"]], from, to) }
       end
 
       def details(item)
@@ -46,12 +53,19 @@ module Calendar
         { google_id: item.fetch("id"), **timing(item.fetch("start"), item.fetch("end")), **details(item) }
       end
 
-      def events(account, id, from, to)
-        bounds = Blog::TimeZone.day_bounds(from, to).map { it.utc.iso8601 }
+      def events(account, id, token, from, to)
         url = "#{API}/calendars/#{ERB::Util.url_encode(id)}/events"
+        found = pages(account, url, singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to))
+        cancelled, kept = found.fetch("items", []).partition { it["status"] == CANCELLED }
 
-        pages(account, url, singleEvents: true, timeMin: bounds[0], timeMax: bounds[1], maxResults: PAGE_SIZE)
-          .map { event(it) }
+        {
+          events: kept.map { event(it) }, cancelled: cancelled.map { it.fetch("id") }, full: token.nil?,
+          sync_token: found["nextSyncToken"],
+        }
+      rescue Google::Gone
+        raise if token.nil?
+
+        events(account, id, nil, from, to)
       end
 
       def guests(attendees)
@@ -63,9 +77,16 @@ module Calendar
       def pages(account, url, **params)
         page = google.get(url, account:, **params)
         token = page["nextPageToken"].to_s
-        rows = page.fetch("items", [])
+        return page if token.empty?
 
-        token.empty? ? rows : rows + pages(account, url, **params, pageToken: token)
+        rest = pages(account, url, **params, pageToken: token)
+        rest.merge("items" => page.fetch("items", []) + rest.fetch("items", []))
+      end
+
+      def since(token, from, to)
+        return { syncToken: token } if token
+
+        Blog::TimeZone.day_bounds(from, to).map { it.utc.iso8601 }.then { { timeMin: it[0], timeMax: it[1] } }
       end
 
       def sync(account, from, to)

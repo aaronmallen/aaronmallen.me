@@ -221,6 +221,72 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
       end
     end
 
+    describe "with a sync token from the last run" do
+      let(:mine) do
+        [timed("kept", local(today, 9), local(today, 10)), timed("gone", local(today, 11), local(today, 12))]
+      end
+
+      def moved = timed("kept", local(today, 9), local(today, 10), summary: "Moved standup")
+
+      def stub_changes(*items, **body)
+        stub_request(:get, %r{/calendars/me@example\.com/events\?.*syncToken=first})
+          .to_return(google_json(items:, nextSyncToken: "next", **body))
+      end
+
+      before do
+        stub_events("me@example.com", *mine, nextSyncToken: "first")
+        run
+      end
+
+      it "asks Google only for what changed since that token" do
+        stub_changes
+        run
+
+        expect(a_request(:get, %r{/me@example\.com/events}).with(query: hash_including("syncToken" => "first")))
+          .to have_been_made
+      end
+
+      it "keeps the token Google sends back for the run after" do
+        stub_changes
+        run
+
+        expect(calendars.find { it.account == "me@example.com" }.sync_token).to eq("next")
+      end
+
+      it "writes no event rows when nothing changed" do
+        stored = events.map { it.to_h.except(:calendar) }
+        stub_changes
+        allow(Time).to receive(:now).and_return(now + 60)
+        run
+
+        expect(events.map { it.to_h.except(:calendar) }).to eq(stored)
+      end
+
+      it "stores what changed, drops what Google cancelled and leaves the rest" do
+        stub_changes(moved, { id: "gone", status: "cancelled" }, timed("new", local(today, 13), local(today, 14)))
+        run
+
+        expect(events.map { [it.google_id, it.title] }).to eq([["kept", "Moved standup"], %w[new Standup]])
+      end
+
+      describe "when Google answers that the token expired" do
+        before do
+          stub_request(:get, %r{/calendars/me@example\.com/events\?.*syncToken=first}).to_return(status: 410)
+          stub_request(:get, %r{/calendars/me@example\.com/events\?.*timeMin=})
+            .to_return(google_json(items: [timed("kept", local(today, 9), local(today, 10))], nextSyncToken: "fresh"))
+          run
+        end
+
+        it "reads the whole window again and drops what it no longer holds" do
+          expect(events.map(&:google_id)).to eq(["kept"])
+        end
+
+        it("starts over from the new token") { expect(calendars.map(&:sync_token)).to include("fresh") }
+
+        it("records no failure") { expect(failure).to be_nil }
+      end
+    end
+
     describe "when one account fails" do
       before do
         stub_request(:get, "#{api}/users/me/calendarList").with(headers: { "Authorization" => "Bearer ya29.work" })

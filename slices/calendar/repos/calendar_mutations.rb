@@ -11,18 +11,25 @@ module Calendar
 
       def store(account, found, from:, to:, now: Time.now)
         transaction do
-          ids = calendars.store(account, found.map { it.except(:events) }, now:)
+          ids = calendars.store(account, found.map { it.except(:events, :cancelled, :full) }, now:)
           calendars.where(account:).exclude(google_id: ids.keys).delete
-          found.sum { store_events(ids.fetch(it[:google_id]), it[:events], from, to, now) }
+          found.sum { store_events(ids.fetch(it[:google_id]), it, from, to, now) }
         end
       end
 
       private
 
-      def store_events(calendar_id, events, from, to, now)
-        calendar_events.store(events.map { it.merge(calendar_id:) }, now:)
-        calendar_events.where(calendar_id:).between(from, to).exclude(google_id: events.map { it[:google_id] }).delete
-        events.size
+      def stale(calendar_id, found, from, to)
+        held = calendar_events.where(calendar_id:)
+        return held.where(google_id: found[:cancelled]) unless found[:full]
+
+        held.between(from, to).exclude(google_id: found[:events].map { it[:google_id] })
+      end
+
+      def store_events(calendar_id, found, from, to, now)
+        calendar_events.store(found[:events].map { it.merge(calendar_id:) }, now:)
+        stale(calendar_id, found, from, to).delete
+        found[:events].size
       end
     end
   end

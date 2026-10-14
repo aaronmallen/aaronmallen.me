@@ -10,6 +10,7 @@ module Google
       "https://mail.google.com/" => "https://www.googleapis.com/auth/gmail.",
       "https://www.googleapis.com/auth/calendar" => "https://www.googleapis.com/auth/calendar.",
     }.freeze
+    GONE = 410
     JSON_HEADERS = { "Content-Type" => "application/json" }.freeze
     NOT_FOUND = 404
     NOT_CONNECTED = "%s isn't connected"
@@ -131,6 +132,7 @@ module Google
 
     def refused(response)
       return NotFound if response&.status == NOT_FOUND
+      return Gone if response&.status == GONE
 
       rate_limited?(response) ? RateLimited : Error
     end
