@@ -151,7 +151,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "the key" do
     let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
-    let(:key) { "##{task.id}" }
+    let(:key) { task.label }
 
     describe "clicking it" do
       before do
@@ -419,7 +419,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "opening a task" do
     let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
-    let(:key) { "##{task.id}" }
+    let(:key) { task.label }
 
     def sideways?(selector) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{selector})")
 
@@ -893,7 +893,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def finder(name) = translate(["ui.components.tasks.link_finder", name].join("."))
 
-    def key(task) = "##{task.id}"
+    def key(task) = task.number.to_s
 
     def kind(name) = translate(["ui.components.tasks.link_finder.kinds", name].join("."))
 

@@ -9,7 +9,7 @@ module Admin
 
           def view_template
             div(class: "decision-row", data: { key_row: true, menu: path(:admin_decision_menu, id: @decision.id) }) do
-              RecordKey(kind: "decision", id: @decision.id)
+              RecordKey(kind: "decision", label: RecordKey.key(@decision.id))
               div(class: "decision-row-body") do
                 a(class: "decision-row-title", href: path(:admin_decision, id: @decision.id),
                   data: { key_open: true }) do

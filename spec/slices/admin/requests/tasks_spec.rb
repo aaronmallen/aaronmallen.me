@@ -916,7 +916,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
           tasks = Array.new(2) { create(:task, *traits, sprint_id: (sprint.id if traits.include?(:in_sprint))) }
           get "/admin/tasks", filter: filter
 
-          expect(keys).to match_array(tasks.map { "##{it.id}" })
+          expect(keys).to match_array(tasks.map { it.number.to_s })
         end
       end
 
@@ -924,7 +924,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
         get "/admin/tasks", filter: "upcoming"
 
-        expect(keys).to eq(["##{task.id}"])
+        expect(keys).to eq([task.number.to_s])
       end
 
       it "strikes through a task that is done" do

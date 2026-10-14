@@ -62,7 +62,7 @@ module Admin
           def meta
             Card do
               p(class: "read-meta decision-meta") do
-                RecordKey(kind: "decision", id: @decision.id)
+                RecordKey(kind: "decision", label: Components::RecordKey.key(@decision.id))
                 span { Stamped(text: t(".opened", date: Stamped::MARK), at: @decision.created_at, format: :day) }
                 @decision.tags.each { Tag(tag: it) }
               end

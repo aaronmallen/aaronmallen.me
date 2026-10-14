@@ -6,7 +6,10 @@ module Admin
       class MoveTask < Action
         MOVED = "projects_page.toasts.moved"
 
-        include Deps[set_task_column: "tasks.operations.set_task_column"]
+        include Deps[
+          set_task_column: "tasks.operations.set_task_column",
+          task_queries: "tasks.repos.task_queries",
+        ]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:task_id]] || halt(404)
@@ -24,7 +27,7 @@ module Admin
         def moved(request, response, id, column)
           column_name = i18n.t!(UI::Components::Projects::BoardCard::NAMES.fetch(column))
 
-          toast(response, MOVED, key: UI::Components::RecordKey.key(id), column: column_name)
+          toast(response, MOVED, key: task_queries.by_id(id).label, column: column_name)
           response.redirect_to(back_here(request) || routes.path(:admin_project, id: record_id(request)))
         end
       end

@@ -318,7 +318,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       it "names the task in the toast" do
         follow_redirect!
 
-        expect(toast).to eq("Nothing changed · ##{task.id} Held would not change")
+        expect(toast).to eq("Nothing changed · #{task.number} Held would not change")
       end
     end
 
@@ -386,7 +386,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       it "names the task and why" do
         follow_redirect!
 
-        expect(toast).to eq("Nothing changed · ##{closed.id} Filed already is closed already")
+        expect(toast).to eq("Nothing changed · #{closed.number} Filed already is closed already")
       end
     end
 
@@ -405,7 +405,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       it "names the task and why" do
         follow_redirect!
 
-        expect(toast).to eq("Nothing changed · ##{closed.id} Dropped is closed already")
+        expect(toast).to eq("Nothing changed · #{closed.number} Dropped is closed already")
       end
     end
 

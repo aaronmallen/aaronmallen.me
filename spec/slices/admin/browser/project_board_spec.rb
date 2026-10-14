@@ -49,7 +49,7 @@ RSpec.describe "Admin project board", type: :feature do
     card.find("button[aria-label='Move to ready']").click
 
     expect(page).to have_css(".kcol.k-ready .kc", text: "Write the brief")
-    expect(page).to have_css(".toast", text: "Moved ##{task.id} to ready")
+    expect(page).to have_css(".toast", text: "Moved BLO-1 to ready")
     expect(kept_page?).to be(true)
   end
 
@@ -66,7 +66,7 @@ RSpec.describe "Admin project board", type: :feature do
     drag_to("ready")
 
     expect(page).to have_css(".kcol.k-ready .kc", text: "Write the brief")
-    expect(page).to have_css(".toast", text: "Moved ##{task.id} to ready")
+    expect(page).to have_css(".toast", text: "Moved BLO-1 to ready")
     expect(Tasks::Slice["repos.task_queries"].by_id(task.id).stage).to eq("ready")
     expect(kept_page?).to be(true)
   end

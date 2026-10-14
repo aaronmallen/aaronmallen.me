@@ -73,7 +73,7 @@ module Admin
                                     confirm:)
           end
 
-          def key = Components::RecordKey.key(@task.id)
+          def key = @task.label
 
           def open_path = act(:admin_task, filter: @filter, origin: @origin)
 

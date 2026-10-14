@@ -72,7 +72,7 @@ module Admin
             edit
           end
 
-          def key = Components::RecordKey.key(@task.id)
+          def key = @task.label
 
           def linked
             RecordLinks::Section(

@@ -101,11 +101,11 @@ RSpec.describe "Project board", type: :request do
     end
 
     it "shows a card's number, then its title", :aggregate_failures do
-      task = link(create(:task, title: "Ship it"), project)
+      link(create(:task, title: "Ship it"), project)
       get "/projects/doing-it"
 
       expect(page).to have_css("li > .board-card > .board-num + .board-title", exact_text: "Ship it")
-      expect(page).to have_css(".board-num", exact_text: "##{task.id}")
+      expect(page).to have_css(".board-num", exact_text: "DOI-1")
     end
 
     it "links each card to its task page" do

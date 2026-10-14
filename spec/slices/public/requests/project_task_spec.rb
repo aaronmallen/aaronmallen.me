@@ -24,7 +24,7 @@ RSpec.describe "Project task page", type: :request do
       visit_task(task)
 
       expect(last_response).to be_ok
-      expect(page).to have_css("header.hd > .kicker", exact_text: "Task ##{task.id}")
+      expect(page).to have_css("header.hd > .kicker", exact_text: "Task DOI-1")
       expect(page).to have_css("h1", exact_text: "Ship it")
     end
 
@@ -105,15 +105,15 @@ RSpec.describe "Project task page", type: :request do
       blocked = link(create(:task, title: "Blocked"), project)
       visit_related(blocked, type: "blocks")
 
-      expect(page).to have_css(".task-related li", text: "blocks ##{blocked.id} Blocked")
-      expect(page).to have_link("##{blocked.id} Blocked", href: "/projects/doing-it/tasks/#{blocked.id}")
+      expect(page).to have_css(".task-related li", text: "blocks DOI-1 Blocked")
+      expect(page).to have_link("DOI-1 Blocked", href: "/projects/doing-it/tasks/#{blocked.id}")
     end
 
     it "links a related task on another published board to that board" do
       other = link(create(:task, title: "Elsewhere"), create(:project, name: "Other", board_published: true))
       visit_related(other)
 
-      expect(page).to have_link("##{other.id} Elsewhere", href: "/projects/other/tasks/#{other.id}")
+      expect(page).to have_link("OTH-1 Elsewhere", href: "/projects/other/tasks/#{other.id}")
     end
 
     it "leaves out a related task on no published board of a public project", :aggregate_failures do

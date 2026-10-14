@@ -58,7 +58,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "opens the menu at the pointer", :aggregate_failures do
-      expect(menu).to have_css(".ctx-head", text: "##{task.id} · Ship it")
+      expect(menu).to have_css(".ctx-head", text: "#{task.number} · Ship it")
       expect([menu_box["left"], menu_box["top"]]).to eq(evaluate_script("window.pointer"))
       expect(evaluate_script("window.prevented")).to eq([true])
     end

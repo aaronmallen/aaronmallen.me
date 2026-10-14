@@ -8,6 +8,10 @@ module Tasks
       CREATED_ON = site_day(:created_at)
       CLOSED = Blog::Types::ClosedTaskStatus.values.freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
+      LABEL = Sequel.function(
+        :concat_ws, "-", Sequel.lit("(SELECT key FROM projects WHERE projects.id = tasks.project_id)"),
+        Sequel[:tasks][:number],
+      )
       LISTS = Blog::Types::TaskList.values.freeze
       MANUAL = (Sequel[:worked_seconds] - Sequel.function(:coalesce, Sequel[:sessions][:seconds], 0)).cast(Integer)
       MANUAL_DAY = Sequel.function(:coalesce, COMPLETED_ON, site_day(Sequel[:sessions][:last_at]))
@@ -48,7 +52,7 @@ module Tasks
         counted = select_append(ROM::SQL::Attribute[ROM::Types::Integer].meta(sql_expr: comments).as(:comment_count))
         links = { incoming_links: :from_task, outgoing_links: :to_task }
 
-        counted.combine(:contributors, :running_session, :series, :source, :tags, **links)
+        counted.labelled.combine(:contributors, :running_session, :series, :source, :tags, **links)
       end
 
       def finished_counts(day)
@@ -69,6 +73,8 @@ module Tasks
       def in_order = order(self[:position].asc, self[:id].asc)
 
       def in_progress = where(status: IN_PROGRESS)
+
+      def labelled = select_append(ROM::SQL::Attribute[ROM::Types::String].meta(sql_expr: LABEL).as(:label))
 
       def last_position = unordered.max(:position).to_i
 

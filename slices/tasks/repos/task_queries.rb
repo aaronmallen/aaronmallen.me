@@ -61,7 +61,7 @@ module Tasks
         query = Blog::Types::TrimmedText[text]
         return Blog::Constants::EMPTY_ARRAY if query.empty?
 
-        found = tasks.linkable_from(id)
+        found = tasks.labelled.linkable_from(id)
         key = query[KEY, 1]
         found = key ? found.where(id: key.to_i) : found.titled(query)
 
@@ -79,13 +79,13 @@ module Tasks
       end
 
       def on_public_board(project_id, sizes)
-        on_project(tasks, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
+        on_project(tasks.labelled, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
       end
 
       def on_public_board_by_id(project_id, id)
         links = { incoming_links: :from_task, outgoing_links: :to_task }
 
-        tasks.searched(project_ids: project_id).combine(:source, **links).by_pk(id).one
+        tasks.labelled.searched(project_ids: project_id).combine(:source, **links).by_pk(id).one
       end
 
       def open_after(task) = tasks.beside(task).following(task).limit(1).one

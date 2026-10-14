@@ -44,7 +44,9 @@ module Admin
         end
 
         def named(id)
-          { task: [UI::Components::RecordKey.key(id), task_queries.detailed(id)&.title].compact.join(" ") }
+          task = task_queries.detailed(id)
+
+          { task: task ? "#{task.label} #{task.title}" : UI::Components::RecordKey.key(id) }
         end
 
         def refusal(errors)

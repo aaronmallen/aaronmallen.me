@@ -11,7 +11,7 @@ module Admin
 
           def view_template
             header(class: "task-drawer-head") do
-              RecordKey(kind: "task", id: @task.id)
+              RecordKey(kind: "task", label: @task.label)
               Status(status: @task.status)
               span(class: "read-meta-list") { t(Helpers::TaskLists.name(@task.place)) }
               SourceLink(source: @task.source)

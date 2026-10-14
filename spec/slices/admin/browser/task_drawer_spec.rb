@@ -59,7 +59,7 @@ RSpec.describe "Admin task drawer", type: :feature do
     end
 
     it "asks first" do
-      key = Admin::UI::Components::RecordKey.key(task.id)
+      key = task.number.to_s
 
       expect(confirm_ask).to have_text(translate("ui.views.tasks.show.confirm_delete", key:))
     end
@@ -83,7 +83,7 @@ RSpec.describe "Admin task drawer", type: :feature do
     end
 
     it "swaps the header" do
-      expect(panel.find(".task-drawer-head .record-key")).to have_text("##{other.id}", exact: true)
+      expect(panel.find(".task-drawer-head .record-key")).to have_text(other.number.to_s, exact: true)
     end
 
     it "swaps the footer" do

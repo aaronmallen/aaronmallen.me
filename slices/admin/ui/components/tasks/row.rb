@@ -22,7 +22,7 @@ module Admin
           def view_template
             div(class: classes, data: { key_row: true, menu: menu_path, **order }) do
               @bulk ? pick : box
-              RecordKey(kind: "task", id: @task.id)
+              RecordKey(kind: "task", label: @task.label)
               div(class: "task-body") do
                 task_title
                 Meta(task: @task, scheduled: (@scheduled if waiting?))

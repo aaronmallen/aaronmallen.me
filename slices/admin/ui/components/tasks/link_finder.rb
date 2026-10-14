@@ -66,7 +66,7 @@ module Admin
 
           def target(task)
             button(type: "submit", form: form_id, name: "link[other_id]", value: task.id, class: "task-link-target") do
-              span(class: "record-key") { RecordKey.key(task.id) }
+              span(class: "record-key") { task.label }
               span(class: "task-link-title") { task.title }
               span(class: "task-link-place") { t(LinkRow.place_key(task)) }
             end

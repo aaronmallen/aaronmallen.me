@@ -89,14 +89,14 @@ RSpec.describe "Admin bulk context menu", type: :feature do
     it "opens a row's own menu when the row is not picked" do
       open_menu("fourth")
 
-      expect(menu).to have_css(".ctx-head", exact_text: "##{tasks.last.id} · fourth")
+      expect(menu).to have_css(".ctx-head", exact_text: "#{tasks.last.number} · fourth")
     end
 
     it "opens a row's own menu when it is the only one picked" do
       %w[first second].each { box(it).uncheck }
       open_menu("third")
 
-      expect(menu).to have_css(".ctx-head", exact_text: "##{tasks[2].id} · third")
+      expect(menu).to have_css(".ctx-head", exact_text: "#{tasks[2].number} · third")
     end
   end
 

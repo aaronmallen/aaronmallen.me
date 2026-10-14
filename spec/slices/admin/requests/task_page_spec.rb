@@ -116,7 +116,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         form = foot.find("form.task-drawer-delete")
 
         expect(form["action"]).to eq("/admin/tasks/#{task.id}/delete")
-        expect(form["data-confirm"]).to eq(label(:confirm_delete, key: "##{task.id}"))
+        expect(form["data-confirm"]).to eq(label(:confirm_delete, key: task.number.to_s))
         expect(form.find("input[name='filter']", visible: :all).value).to eq("next")
       end
     end
@@ -131,7 +131,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       read
 
       expect(page).to have_css(
-        ".task-drawer-head button.record-key[data-record-key='##{task.id}']", text: "##{task.id}",
+        ".task-drawer-head button.record-key[data-record-key='#{task.number}']", text: task.number.to_s,
       )
     end
 
@@ -601,7 +601,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
 
         expect(last_response.location).to start_with("/admin/tasks/#{task.id}?")
         follow_redirect!
-        expect(targets).to eq(["##{other.id}"])
+        expect(targets).to eq([other.number.to_s])
       end
 
       it "keeps the query in the field" do

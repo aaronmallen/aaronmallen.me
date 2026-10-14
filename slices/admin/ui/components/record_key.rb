@@ -17,7 +17,7 @@ module Admin
         def self.key(id) = "#{PREFIX}#{id}"
 
         prop :kind, Blog::Types::String.enum(*COPY.keys)
-        prop :id, Blog::Types::Integer
+        prop :label, Blog::Types::String
 
         def view_template
           button(
@@ -30,7 +30,7 @@ module Admin
 
         private
 
-        def key = self.class.key(@id)
+        def key = @label
       end
     end
   end

@@ -268,7 +268,6 @@ en:
             heading: "That board isn't public."
             lede: "I may have taken it down. The project itself still shows on the projects page."
             title: "Board not found"
-          number: "#%{number}"
           stars: "★ %{stars}"
           title: "%{name} board"
       tags:
@@ -291,12 +290,12 @@ en:
             in_progress: "in progress"
             ready: "ready"
           comments: "Comments"
-          description: "Task #%{number} on the %{name} board."
+          description: "Task %{label} on the %{name} board."
           facts:
             column: "Column"
             source: "Issue"
             status: "Status"
-          kicker: "Task #%{number}"
+          kicker: "Task %{label}"
           links:
             blocked_by: "blocked by"
             blocks: "blocks"
@@ -306,12 +305,11 @@ en:
             parent_of: "parent of"
             relates: "relates to"
           notes: "Notes"
-          number: "#%{number}"
           related: "Related"
           statuses:
             canceled: "canceled"
             done: "done"
             in_progress: "in progress"
             open: "open"
-          title: "#%{number} %{title}"
+          title: "%{label} %{title}"
           unknown_author: "someone"

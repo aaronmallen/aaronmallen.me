@@ -45,7 +45,7 @@ module Admin
           def head
             div(class: "kc-h") do
               BulkCheck(form: Bulk::ID, value: @task.id, label: t(".pick", task: @task.title))
-              RecordKey(kind: "task", id: @task.id)
+              RecordKey(kind: "task", label: @task.label)
               div(class: "hov") do
                 arrow(-1, LEFT)
                 arrow(1, RIGHT)

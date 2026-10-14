@@ -22,7 +22,7 @@ module Admin
           def view_template
             div(class: "task-link-row") do
               span(class: "task-link-label") { t(Links.label_key(@link)) }
-              RecordKey(kind: "task", id: other.id)
+              RecordKey(kind: "task", label: other.label)
               link_title
               span(class: "task-link-place") { t(self.class.place_key(other)) }
               unlink_form
@@ -39,7 +39,7 @@ module Admin
           def other = @link.task
 
           def unlink_form
-            label = t(".remove", key: RecordKey.key(other.id))
+            label = t(".remove", key: other.label)
 
             Form(action: path(:admin_unlink_task, id: @task.id, other_id: other.id)) do
               HiddenFields(values: { filter: @tab, origin: @origin })

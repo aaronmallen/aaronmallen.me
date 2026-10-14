@@ -46,7 +46,7 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       end
 
       it "draws the menu alone, headed by the task" do
-        expect(page).to have_css("[data-context-menu] > .ctx-head", text: "##{task.id} · Ship it")
+        expect(page).to have_css("[data-context-menu] > .ctx-head", text: "#{task.number} · Ship it")
       end
 
       it "holds every action an open task takes", :aggregate_failures do

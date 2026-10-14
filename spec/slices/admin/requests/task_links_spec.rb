@@ -46,7 +46,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     it "reads the type and the other task's key, with its title as a tooltip, on the task that blocks" do
       get "/admin/tasks", filter: "next"
 
-      expect(chips("Ship the links")).to eq([[link_label(:blocks), "##{other.id}", "Write the migration"]])
+      expect(chips("Ship the links")).to eq([[link_label(:blocks), other.number.to_s, "Write the migration"]])
     end
 
     [
@@ -87,7 +87,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
 
       it "reads the reverse with the blocker's key and no title", :aggregate_failures do
         expect([chip.find(".task-link-label").text, chip.find(".record-key").text])
-          .to eq([link_label(:blocked_by), "##{task.id}"])
+          .to eq([link_label(:blocked_by), task.number.to_s])
         expect(chip).to have_no_css(".task-link-title")
       end
 
@@ -110,7 +110,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       get "/admin/tasks", filter: "next"
 
       expect(row("Ship the links"))
-        .to have_css(".task-link .record-key[data-record-key='##{other.id}']")
+        .to have_css(".task-link .record-key[data-record-key='#{other.number}']")
     end
 
     it "draws no chips on a task with no links" do
@@ -210,19 +210,19 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     it "finds a task by its key" do
       find_link("##{other.id}")
 
-      expect(targets).to eq(["##{other.id}"])
+      expect(targets).to eq([other.number.to_s])
     end
 
     it "finds a task by its bare number" do
       find_link(other.id.to_s)
 
-      expect(targets).to eq(["##{other.id}"])
+      expect(targets).to eq([other.number.to_s])
     end
 
     it "finds a task by its title" do
       find_link("migration")
 
-      expect(targets).to eq(["##{other.id}"])
+      expect(targets).to eq([other.number.to_s])
     end
 
     it "leaves the task itself out" do
@@ -242,7 +242,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       canceled = create(:task, :canceled, title: "Drop the migration", position: 1)
       find_link("migration")
 
-      expect(targets).to eq(["##{other.id}", "##{canceled.id}"])
+      expect(targets).to eq([other.number.to_s, canceled.number.to_s])
     end
 
     it "says when nothing matches" do
@@ -271,7 +271,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       get "/admin/tasks/#{waiting.id}", filter: "upcoming", link_q: "migration"
 
       expect(page).to have_css("#task-#{waiting.id}-link-other-id")
-      expect(targets).to eq(["##{other.id}"])
+      expect(targets).to eq([other.number.to_s])
     end
 
     it "sends the find on the upcoming tab back to that tab" do
@@ -305,7 +305,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
         follow_redirect!
 
         expect(page.find("#task-#{task.id}-link-kind option[selected]").value).to eq("blocked_by")
-        expect(targets).to eq(["##{other.id}"])
+        expect(targets).to eq([other.number.to_s])
       end
 
       it "writes nothing" do
@@ -377,7 +377,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       link
       follow_redirect!
 
-      expect(chips("Ship the links")).to eq([[link_label(:blocks), "##{other.id}", "Write the migration"]])
+      expect(chips("Ship the links")).to eq([[link_label(:blocks), other.number.to_s, "Write the migration"]])
     end
 
     it "shows a waiting task's page with the error, keeping the upcoming tab", :aggregate_failures do

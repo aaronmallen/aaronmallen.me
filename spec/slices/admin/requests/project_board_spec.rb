@@ -143,6 +143,33 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
     end
 
+    describe "a card's key" do
+      def keys = column("backlog").all(".record-key").map(&:text)
+
+      def rekey(key)
+        fields = { name: "blog", repo: "aaronmallen/blog", visibility: "public", key: }
+        post "/admin/projects/#{project.id}", _csrf_token: admin_csrf_token, project: fields
+      end
+
+      before do
+        linked(title: "Plan it")
+        linked(title: "Write it")
+      end
+
+      it "joins the project key to the task's number" do
+        get "/admin/projects/#{project.id}"
+
+        expect(keys).to match_array(%w[BLO-1 BLO-2])
+      end
+
+      it "shows the new key once the project's key changes" do
+        rekey("WEB")
+        get "/admin/projects/#{project.id}"
+
+        expect(keys).to match_array(%w[WEB-1 WEB-2])
+      end
+    end
+
     describe "the card menu" do
       let(:task) { linked(title: "Plan it") }
 
@@ -154,6 +181,10 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(forms.map { it.find("input[name=to]", visible: :all).value })
           .to eq(%w[backlog ready in_progress done canceled])
         expect(forms.first).to have_css("button[disabled]", visible: :all)
+      end
+
+      it "copies the task's label" do
+        expect(page).to have_css("[data-copy='BLO-1']", visible: :all)
       end
 
       it "returns to the board" do
@@ -305,7 +336,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
         expect(last_response.location).to end_with("/admin/projects/#{project.id}")
         follow_redirect!
-        expect(toast).to eq("Moved ##{task.id} to ready")
+        expect(toast).to eq("Moved BLO-1 to ready")
       end
 
       it "returns to the page the menu opened on" do

@@ -5,8 +5,8 @@ module Tasks
     class TaskLinks < Blog::DB::Relation
       schema :task_links, infer: true do
         associations do
-          belongs_to :tasks, as: :from_task, foreign_key: :from_task_id
-          belongs_to :tasks, as: :to_task, foreign_key: :to_task_id
+          belongs_to :tasks, as: :from_task, foreign_key: :from_task_id, view: :labelled
+          belongs_to :tasks, as: :to_task, foreign_key: :to_task_id, view: :labelled
         end
       end
 

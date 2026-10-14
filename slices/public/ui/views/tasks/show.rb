@@ -70,7 +70,7 @@ module Public
 
           def head
             header(class: "hd") do
-              span(class: "kicker") { t(".kicker", number: @task.id) }
+              span(class: "kicker") { t(".kicker", label: @task.label) }
               h1 { @task.title }
               facts
             end
@@ -88,8 +88,8 @@ module Public
           end
 
           def page_meta
-            content_for(:title, t(".title", number: @task.id, title: @task.title))
-            content_for(:description, t(".description", number: @task.id, name: @project.name))
+            content_for(:title, t(".title", label: @task.label, title: @task.title))
+            content_for(:description, t(".description", label: @task.label, name: @project.name))
           end
 
           def related
@@ -104,7 +104,7 @@ module Public
               span(class: "meta") { t([".links", link.label].join(".")) }
               whitespace
               a(href: path(:project_task, slug:, number: link.task.id)) do
-                plain t(".number", number: link.task.id)
+                plain link.task.label
                 whitespace
                 plain link.task.title
               end

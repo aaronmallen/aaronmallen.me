@@ -51,7 +51,7 @@ module Public
           def card(task)
             li do
               a(class: "board-card", href: path(:project_task, slug: @project.slug, number: task.id)) do
-                span(class: "board-num") { t(".number", number: task.id) }
+                span(class: "board-num") { task.label }
                 span(class: "board-title") { task.title }
                 closed_on(task) if task.completed_at
               end

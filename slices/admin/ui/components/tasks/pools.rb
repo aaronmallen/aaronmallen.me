@@ -33,7 +33,7 @@ module Admin
 
           def meta(task)
             p(class: "task-meta") do
-              RecordKey(kind: "task", id: task.id)
+              RecordKey(kind: "task", label: task.label)
               SourceLink(source: task.source)
               task.tags.each { Tag(tag: it) }
             end
