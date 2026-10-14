@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, mcp, projects, record, tasks]
 issue: "#660"
+amended: ["#1315"]
 tags: [tasks, projects, tags, rules, imports, sync, github, linear, providers, repos, links]
 ---
 
@@ -39,6 +40,9 @@ owner removes stays removed. Creating a rule links the issues already imported t
 repo, on create or edit, links the issues already imported from that repo. Both find those issues by
 `task_sources.url`. Editing or deleting a rule, or clearing a project's repo, unlinks nothing.
 
+Since #1315 a rule names one project at most, and a rule or repo match sets the task's one project in
+`tasks.project_id` instead of adding a link, as [ADR 0166][0166] records.
+
 ## Alternatives
 
 **A separate table of project rules.** Project rules get their own table, repo, operations, admin page, API endpoints
@@ -67,4 +71,5 @@ apart. A project added to a rule after it was created never reaches past imports
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
 [0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-create.md
 [0112]: 0112-give-every-tag-rule-a-provider-and-match-linear-issues-by-workspace-and-team.md
+[0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

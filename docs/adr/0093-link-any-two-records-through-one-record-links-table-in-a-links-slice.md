@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
-amended: ["#966", "#911", "#1139"]
+amended: ["#966", "#911", "#1139", "#1315"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -46,7 +46,8 @@ operation sorts the two sides, kind first and then id, so a pair has one spellin
 - `record_links_order_check` holds `(left_kind, left_id) < (right_kind, right_id)`. Since the operation sorts, only a
   record linked to itself can break it.
 - `record_links_task_pair_check` refuses a task on both sides. Task to task links stay in `task_links`, with their
-  types (ADR 0051).
+  types (ADR 0051). Since #1315 a task's project lives in `tasks.project_id` ([ADR 0166][0166]), so no task
+  to project pair lands here.
 - A trigger before insert finds the row each side names in its kind's table, and locks it `FOR KEY SHARE` as a
   foreign key would. A missing row raises with `ERRCODE = 'foreign_key_violation'` and `CONSTRAINT =
   'record_links_record_missing'`.
@@ -107,4 +108,5 @@ ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 upd
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
+[0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

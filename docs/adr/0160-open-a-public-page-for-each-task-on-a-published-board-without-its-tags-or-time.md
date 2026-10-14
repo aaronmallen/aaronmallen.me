@@ -5,6 +5,7 @@ status: active
 created: 2026-10-14
 area: [public]
 issue: "#1182"
+amended: ["#1315"]
 tags: [projects, tasks, kanban, board, public, privacy, visibility, notes, comments, links, sources, tags]
 ---
 
@@ -25,7 +26,9 @@ comments ([ADR 0075][0075]), links to other tasks ([ADR 0117][0117]), a source i
 ## Decision
 
 **Each card on a published board links to a page for its task**, at `/projects/:slug/tasks/:number` in the public
-slice. A board is published as ADR 0157 says: the project is public and its board flag is on.
+slice. A board is published as ADR 0157 says: the project is public and its board flag is on. Since #1315 `:number`
+is the task's number within that project, not its internal id, and the page answers 404 for a number the project
+lacks ([ADR 0166][0166]).
 
 **The page shows everything but tags and time.** It shows the number, title, status, column, done or canceled
 date, notes cleaned as ADR 0072 cleans them, comments, related tasks named by how each relates, and a link to the
@@ -60,4 +63,5 @@ or a project that goes private, stays readable that long.
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
+[0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

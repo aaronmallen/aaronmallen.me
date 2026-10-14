@@ -5,7 +5,7 @@ status: active
 created: 2026-10-12
 area: [db, admin, api, mcp, projects, public]
 issue: "#1163"
-amended: ["#1182"]
+amended: ["#1182", "#1315"]
 tags: [projects, tasks, kanban, board, public, privacy, visibility, tags]
 ---
 
@@ -31,7 +31,8 @@ private project, or one without the flag, reads "That board isn't public." at it
 **A published board shows every linked task, and little of each.** A card shows the task's number, title, and its
 done or canceled date. It shows no tags, notes, comments, time or issue links. Since #1182 each card links to a
 page for its task that shows its notes, comments, related tasks and issue link, but no tags or time, as
-[ADR 0160][0160] records.
+[ADR 0160][0160] records. Since #1315 a task sits on one board at most, the one in `tasks.project_id`, and its
+card shows its `KEY-n` label ([ADR 0166][0166]).
 
 ## Alternatives
 
@@ -55,4 +56,5 @@ visitors late.
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0119]: 0119-mark-a-project-archived-by-its-archive-date-and-keep-visibility-in-its-own-enum.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
+[0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
