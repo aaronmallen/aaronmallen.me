@@ -263,6 +263,7 @@ en:
           description: "What I am working on in %{name}."
           empty: "Nothing here."
           kicker: "Project board"
+          load_more: "Load more · %{count} left"
           missing:
             heading: "That board isn't public."
             lede: "I may have taken it down. The project itself still shows on the projects page."

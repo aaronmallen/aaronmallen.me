@@ -12,6 +12,9 @@ module Public
 
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
+          prop :sizes, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
+          prop :step, Blog::Types::Integer
 
           def view_template
             back_link
@@ -65,8 +68,9 @@ module Public
 
           def column(key, tasks)
             section(class: ["board-col", key.tr("_", "-")]) do
-              column_head(key, tasks.size)
+              column_head(key, @counts.fetch(key))
               tasks.empty? ? p(class: "board-empty") { t(".empty") } : ul { tasks.each { card(it) } }
+              more(key, tasks.size)
             end
           end
 
@@ -78,6 +82,8 @@ module Public
               span(class: "n") { count.to_s }
             end
           end
+
+          def grown = @sizes.reject { |_, size| size == @step }
 
           def link(href, text, icon)
             a(href:, rel: "noopener") { IconLabel(icon:) { text } }
@@ -99,6 +105,14 @@ module Public
               h1 { t(".missing.heading") }
               p(class: "ld") { t(".missing.lede") }
             end
+          end
+
+          def more(key, shown)
+            left = @counts.fetch(key) - shown
+            return unless left.positive?
+
+            sizes = grown.merge(key => @sizes.fetch(key) + @step).transform_keys(&:to_sym)
+            a(class: "board-more", href: path(:project, slug: @project.slug, **sizes)) { t(".load_more", count: left) }
           end
 
           def stats

@@ -76,8 +76,8 @@ module Tasks
         on_project(with_details, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
       end
 
-      def on_public_board(project_id)
-        recent(tasks.searched(project_ids: project_id)).order(Sequel.desc(:completed_at), :position, :id).to_a
+      def on_public_board(project_id, sizes)
+        on_project(tasks, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
       end
 
       def on_public_board_by_id(project_id, id)

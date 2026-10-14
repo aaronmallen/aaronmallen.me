@@ -155,6 +155,72 @@ RSpec.describe "Project board", type: :request do
       end
     end
 
+    describe "a full column" do
+      def days_ago(days) = Time.now - (days * 86_400)
+
+      def more(key) = column(key).find("a.board-more")
+
+      def titles(key) = column(key).all(".board-title").map(&:text)
+
+      before do
+        change_board_setting(:column_size, to: 2)
+        3.times { link(create(:task, title: "Plan #{it}"), project) }
+        3.times { link(create(:task, stage: "ready", title: "Ready #{it}"), project) }
+      end
+
+      it "shows the cap and links to the rest", :aggregate_failures do
+        get "/projects/doing-it"
+
+        expect(titles("backlog").size).to eq(2)
+        expect(more("backlog")).to have_text("Load more · 1 left")
+        expect(more("backlog")[:href]).to eq("/projects/doing-it?backlog=4")
+      end
+
+      it "grows only that column", :aggregate_failures do
+        get "/projects/doing-it", backlog: 4
+
+        expect([titles("backlog").size, titles("ready").size]).to eq([3, 2])
+        expect(column("backlog")).to have_no_css("a.board-more")
+        expect(more("ready")[:href]).to eq("/projects/doing-it?backlog=4&ready=4")
+      end
+
+      it "never shows fewer than the cap" do
+        get "/projects/doing-it", backlog: 1
+
+        expect(titles("backlog").size).to eq(2)
+      end
+
+      it "ignores a size that is not a number" do
+        get "/projects/doing-it", backlog: "lots"
+
+        expect(titles("backlog").size).to eq(2)
+      end
+
+      it "counts every task in the column heads" do
+        get "/projects/doing-it"
+
+        expect(page.all(".board-col h2 .n").map(&:text)).to eq(%w[3 3 0 0 0])
+      end
+
+      it "leaves old closed tasks out of the count and Load More", :aggregate_failures do
+        2.times { link(create(:task, :done, completed_at: days_ago(1)), project) }
+        link(create(:task, :done, completed_at: days_ago(30)), project)
+        get "/projects/doing-it"
+
+        expect(column("done").find("h2 .n").text).to eq("2")
+        expect(column("done")).to have_no_css("a.board-more")
+      end
+
+      it "shows the latest closed tasks first" do
+        [["Oldest", 3], ["Newest", 1], ["Middle", 2]].each do |title, days|
+          link(create(:task, :canceled, title:, completed_at: days_ago(days)), project)
+        end
+        get "/projects/doing-it"
+
+        expect(titles("canceled")).to eq(%w[Newest Middle])
+      end
+    end
+
     it "keeps the board once the project is archived" do
       create(:project, :archived, name: "old", board_published: true)
       get "/projects/old"

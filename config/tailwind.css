@@ -836,6 +836,10 @@
   & .board-empty {
     @apply m-0 grid min-h-14 place-items-center rounded-field border border-dashed border-line font-mono text-ps text-ink-muted;
   }
+
+  & .board-more {
+    @apply mt-2 block px-1 font-mono text-ps text-ink-muted hover:text-ink;
+  }
 }
 
 @utility task-facts {
