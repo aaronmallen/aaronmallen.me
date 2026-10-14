@@ -8211,4 +8211,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015000100_add_key_to_projects.rb'),
 ('20261015000200_move_task_projects_onto_tasks.rb'),
 ('20261015000300_add_relation_to_record_links.rb'),
+('20261015001000_backfill_task_projects_and_tags_from_rules.rb'),
 ('20261015003000_add_sync_token_to_calendars.rb');
