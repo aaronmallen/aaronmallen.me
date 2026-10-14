@@ -181,4 +181,56 @@ RSpec.describe Social::Jobs::RefreshSocialEngagement do
 
     expect(delivery(later, "mastodon").like_count).to eq(3)
   end
+
+  describe "a post sent to LinkedIn" do
+    let(:social_post) { posted(remote_ids: {}) }
+
+    def deliver_to_linkedin(scopes: %w[openid profile w_member_social r_member_postAnalytics])
+      create(:social_post_delivery, social_post_id: social_post.id, network: "linkedin",
+                                    connection_id: connect_linkedin(scopes:).id, remote_ids: %w[urn:li:share:7])
+    end
+
+    it "stores the counts LinkedIn gives" do
+      stub_linkedin_engagement(likes: 4, replies: 3, reposts: 2)
+      deliver_to_linkedin
+      job.perform
+
+      expect(delivery(social_post, "linkedin")).to have_attributes(like_count: 4, reply_count: 3, repost_count: 2)
+    end
+
+    it "names the post the way LinkedIn's Rest.li syntax wants it" do
+      stub_linkedin_engagement
+      deliver_to_linkedin
+      job.perform
+
+      expect(a_request(:get, linkedin_analytics).with(query: hash_including("entity" => "(share:urn:li:share:7)")))
+        .to have_been_made.times(3)
+    end
+
+    it "asks nothing of an account that never granted post stats" do
+      deliver_to_linkedin(scopes: Spec::LinkedInAccounts::SCOPES)
+      job.perform
+
+      expect(a_request(:get, linkedin_analytics)).not_to have_been_made
+    end
+
+    describe "when LinkedIn refuses the read" do
+      let!(:later) { posted }
+
+      before do
+        stub_request(:get, linkedin_analytics).with(query: hash_including({})).to_return(status: 403)
+        stub_mastodon_engagement("110", likes: 3)
+        deliver_to_linkedin
+        job.perform
+      end
+
+      it "keeps the counts blank and records no error" do
+        expect(delivery(social_post, "linkedin")).to have_attributes(like_count: 0, error: nil)
+      end
+
+      it "moves on to the next delivery" do
+        expect(delivery(later, "mastodon").like_count).to eq(3)
+      end
+    end
+  end
 end

@@ -2,6 +2,7 @@
 
 module Spec
   module LinkedInAccounts
+    ANALYTICS = "https://api.linkedin.com/rest/memberCreatorPostAnalytics"
     POSTS = "https://api.linkedin.com/rest/posts"
     SCOPES = %w[openid profile w_member_social].freeze
 
@@ -15,6 +16,8 @@ module Spec
       )
     end
 
+    def linkedin_analytics = ANALYTICS
+
     def linkedin_posts = POSTS
 
     def set_up_linkedin_client(credentials = { client_id: "li-id", client_secret: "li-secret" })
@@ -27,6 +30,13 @@ module Spec
 
     def stub_linkedin(*ids)
       stub_request(:post, POSTS).to_return(*ids.map { { status: 201, headers: { "x-restli-id" => it } } })
+    end
+
+    def stub_linkedin_engagement(likes: 0, replies: 0, reposts: 0)
+      { "REACTION" => likes, "COMMENT" => replies, "RESHARE" => reposts }.each do |type, count|
+        response = json_response(elements: [{ count:, metricType: type }])
+        stub_request(:get, ANALYTICS).with(query: hash_including("queryType" => type)).to_return(**response)
+      end
     end
 
     def stub_linkedin_recent(*commentaries)

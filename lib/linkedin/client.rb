@@ -5,7 +5,7 @@ require "time"
 
 module LinkedIn
   class Client
-    Account = Data.define(:author, :expires_at, :reads_posts, :token)
+    Account = Data.define(:author, :expires_at, :reads_analytics, :reads_posts, :token)
 
     API_URL = "https://api.linkedin.com"
     HASHTAG = /\{hashtag\|\\#\|([^{}]*)\}/
@@ -34,7 +34,7 @@ module LinkedIn
 
     def count(text) = text.to_s.grapheme_clusters.size
 
-    def engagement(_id) = nil
+    def engagement(id) = account.reads_analytics ? Analytics.read(id) { analytics(it) } : nil
 
     def find_post(text)
       return nil unless account.reads_posts
@@ -48,6 +48,7 @@ module LinkedIn
       credentials = connection.credentials
       account = Account.new(
         author: "urn:li:person:#{connection.account_id}", expires_at: credentials[:expires_at],
+        reads_analytics: connection.scopes.to_a.include?(Analytics::SCOPE),
         reads_posts: connection.scopes.to_a.include?(READ_POSTS), token: credentials.fetch(:access_token),
       )
 
@@ -82,6 +83,12 @@ module LinkedIn
     private
 
     def account = @account || raise(Error, "LinkedIn is not connected")
+
+    def analytics(params)
+      request("GET #{Analytics::PATH}") do
+        connection.get(Analytics::PATH, params) { it.options.params_encoder = Analytics }
+      end.body
+    end
 
     def answered(route, response)
       return response if response.success?

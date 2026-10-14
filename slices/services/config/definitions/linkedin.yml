@@ -11,3 +11,4 @@ scopes:
   - {id: "openid profile", label: See your name, why: Naming the account you connect}
   - {id: w_member_social, label: Post on your behalf, why: Social queue}
   - {id: r_member_social, label: Read your posts, why: Checking before a retry so a post never goes out twice, optional: true}
+  - {id: r_member_postAnalytics, label: Read your post stats, why: "Likes, reposts and replies on your posts", optional: true}
