@@ -270,6 +270,14 @@ RSpec.describe "API time report", type: :request do
       expect(sums(**range)).to eq([["2026-03-03", 2 * 3600]])
     end
 
+    it "stays on the task's last closed session day while a session runs" do
+      task = create(:task, :in_progress, worked_seconds: 2 * 3600)
+      create(:work_session, task_id: task.id, started_at: at(3, 9), ended_at: at(3, 10))
+      create(:work_session, task_id: task.id, started_at: Time.now - 600)
+
+      expect(sums(**range)).to eq([["2026-03-03", 2 * 3600]])
+    end
+
     it "lands on the day the task closed when it has no sessions" do
       spent("Set by hand", total: 2700, completed_at: at(5, 15))
 

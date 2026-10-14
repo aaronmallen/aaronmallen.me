@@ -59,7 +59,7 @@ module Tasks
 
       def totals_by_task
         dataset.unordered.group(:task_id).select(
-          :task_id, Sequel.function(:sum, SESSION).as(:seconds), Sequel.function(:max, ENDED).as(:last_at),
+          :task_id, Sequel.function(:sum, SESSION).as(:seconds), Sequel.function(:max, :ended_at).as(:last_at),
         )
       end
 

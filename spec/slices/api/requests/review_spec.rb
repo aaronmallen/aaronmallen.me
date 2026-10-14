@@ -314,6 +314,13 @@ RSpec.describe "API review", type: :request do
 
         expect(seconds_on("2026-09-16")).to eq([2400])
       end
+
+      it "keeps time set by hand on the day an open task last ran while a session runs" do
+        task = work(at(wednesday, 9), at(wednesday, 10), task: create(:task, :in_progress, worked_seconds: 5400))
+        create(:work_session, task_id: task.id, started_at: Time.now - 600)
+
+        expect(seconds_on("2026-09-16")).to eq([5400])
+      end
     end
 
     it "counts only the part of a session inside the week" do
