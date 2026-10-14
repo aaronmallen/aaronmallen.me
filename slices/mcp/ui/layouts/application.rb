@@ -18,6 +18,8 @@ module MCP
           super
           meta(name: "robots", content: BrowserAction::ROBOTS)
         end
+
+        def stylesheet = "admin/app.css"
       end
     end
   end

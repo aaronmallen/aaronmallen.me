@@ -3,5 +3,7 @@
 
 set -e
 
-aube exec tailwindcss -i config/tailwind.css -o app/assets/css/tailwind.css
+for sheet in public admin; do
+  aube exec tailwindcss -i "config/tailwind/$sheet.css" -o "app/assets/css/tailwind/$sheet.css"
+done
 bundle exec hanami assets compile

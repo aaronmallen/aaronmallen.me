@@ -115,6 +115,8 @@ module Public
           meta(name: "twitter:image:alt", content: page_image_alt)
         end
 
+        def stylesheet = "public/app.css"
+
         def writing_feed_title = t(".writing_feed", owner: settings.owner_name)
       end
     end

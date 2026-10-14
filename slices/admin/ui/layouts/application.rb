@@ -54,6 +54,8 @@ module Admin
           render_palette(navigation)
         end
 
+        def stylesheet = "admin/app.css"
+
         def title_suffix = t(".title", owner: settings.owner_name)
 
         def toast_message = flash[Components::Toast::FLASH_KEY]

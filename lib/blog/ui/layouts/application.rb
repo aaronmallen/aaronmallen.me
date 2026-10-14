@@ -50,7 +50,7 @@ module Blog
           render_icon_links
           render_feed_link
           render_webmention_link
-          link(rel: "stylesheet", href: asset_url("app.css"))
+          link(rel: "stylesheet", href: asset_url(stylesheet))
           script(src: asset_url("app.js"), type: "module")
         end
 

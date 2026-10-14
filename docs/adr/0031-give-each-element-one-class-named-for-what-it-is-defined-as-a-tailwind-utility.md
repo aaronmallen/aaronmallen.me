@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, public, admin, mcp]
 issue: AA-667
+amended: ["#1304"]
 tags: [css, tailwind, design, phlex, ui]
 ---
 
@@ -51,10 +52,12 @@ A change to a look is one edit, in one place, and a view reads as a list of thin
 lets a class be checked against its source: AA-343 audited the type by laying each design class beside its
 counterpart, and its notes are how AA-407 found the eyebrow missing.
 
-One sheet serves the public, admin and MCP slices, since `Blog::UI::Layouts::Application` links the same `app.css`
-for all three. A rule no class guards reaches every slice, so the site cannot do what the design does and cap every
-`p` at a measure. Each run of prose names its own cap instead, and a rule meant for one side has to hang off a
-class that side owns, as the admin's phone type steps hang off `.adm`.
+Every slice builds its sheet from the same `config/tailwind.css`. `config/tailwind/public.css` scans only the public
+sources, and `config/tailwind/admin.css` scans the whole tree for the admin and MCP slices. Each layout links its own
+sheet. A utility reaches the public sheet only when a public source names it, but a rule no class guards reaches every
+slice, so the site cannot do what the design does and cap every `p` at a measure. Each run of prose names its own cap
+instead, and a rule meant for one side has to hang off a class that side owns, as the admin's phone type steps hang off
+`.adm`.
 
 Most phone rules live inside the utility they change, each in its own `@media (width < 43.75rem)` block, and the
 rest sit in the base layer. Finding all of them takes a search for the breakpoint.

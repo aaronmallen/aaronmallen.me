@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
-#MISE description="Start the tailwind watcher"
+#MISE description="Start the tailwind watchers"
 
 set -e
 
-aube exec tailwindcss -i config/tailwind.css -o app/assets/css/tailwind.css --watch=always
+trap 'kill 0' INT TERM EXIT
+
+for sheet in public admin; do
+  aube exec tailwindcss -i "config/tailwind/$sheet.css" -o "app/assets/css/tailwind/$sheet.css" --watch=always &
+done
+wait

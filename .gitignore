@@ -1,5 +1,5 @@
 .env
-app/assets/css/tailwind.css
+app/assets/css/tailwind/
 /coverage
 log/*
 node_modules

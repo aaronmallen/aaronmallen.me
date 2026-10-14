@@ -3,7 +3,7 @@
 RSpec.describe "Assets", type: :request do
   def asset(source) = Hanami.app["assets"][source].url
 
-  %w[app.css app.js favicon.svg].each do |source|
+  %w[public/app.css admin/app.css app.js favicon.svg].each do |source|
     describe "GET #{source}" do
       before { get asset(source) }
 

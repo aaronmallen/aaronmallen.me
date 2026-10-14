@@ -1,0 +1,8 @@
+@import "tailwindcss" source(none);
+@import "../tailwind.css";
+
+@source "../../app/assets/js/*.js";
+@source "../../app/assets/js/public";
+@source "../../lib/blog/ui";
+@source "../../lib/markdown";
+@source "../../slices/public";

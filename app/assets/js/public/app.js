@@ -1,3 +1,4 @@
+import "../../css/public.css";
 import { setupBeacon } from "./beacon.js";
 import { setupClock } from "./clock.js";
 import { setupContactErrors } from "./contact_errors.js";
