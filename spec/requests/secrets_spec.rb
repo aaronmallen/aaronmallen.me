@@ -45,6 +45,14 @@ RSpec.describe "Secrets a request carries", type: :request do
 
   def secret = SecureRandom.hex(12)
 
+  def timed
+    serve_like_puma
+    yield
+    reply
+
+    Performance::Slice["db.rom"].relations[:performance_requests].to_a.inspect
+  end
+
   describe "GitHub calling the admin back" do
     let(:code) { secret }
     let(:state) { start_admin_sign_in("github") }
@@ -199,6 +207,14 @@ RSpec.describe "Secrets a request carries", type: :request do
     it "reports no visitor address" do
       expect(reported("posts.repos.post_queries", :published) { visit_home }).not_to include(forwarded, remote)
     end
+
+    it "times the request" do
+      expect(timed { visit_home }).to include('route: "/"')
+    end
+
+    it "times the request without the visitor address" do
+      expect(timed { visit_home }).not_to include(forwarded, remote)
+    end
   end
 
   describe "a visitor reading a post with secrets in the query" do
@@ -214,6 +230,14 @@ RSpec.describe "Secrets a request carries", type: :request do
 
     it "logs none of the secrets" do
       expect(logged { read_post }).not_to include(*secrets.values)
+    end
+
+    it "times the request by its route, not its path" do
+      expect(timed { read_post }).to include('route: "/writing/:slug"')
+    end
+
+    it "times the request without the slug or the secrets" do
+      expect(timed { read_post }).not_to include("hello", *secrets.values)
     end
   end
 
@@ -282,6 +306,31 @@ RSpec.describe "Secrets a request carries", type: :request do
 
     it "reports none of the photo" do
       expect(reported("media.operations.upload_photo") { through_api }).not_to include(data)
+    end
+  end
+
+  describe "a timing row that fails to write" do
+    let(:statement) { "INSERT INTO performance_requests (route) VALUES ('#{value}')" }
+    let(:value) { secret }
+
+    def write_and_fail
+      error = Sequel::DatabaseError.new(statement)
+      repo = Object.new.tap { |stub| stub.define_singleton_method(:record_request) { |**| raise error } }
+      replace_component("repos.timing_mutations", repo)
+      serve_like_puma
+
+      logged do
+        get "/"
+        reply
+      end
+    end
+
+    it "logs the lost row" do
+      expect(write_and_fail).to include(Performance::Operations::RecordTiming::LOST)
+    end
+
+    it "logs neither the statement nor its values" do
+      expect(write_and_fail).not_to include(statement, value)
     end
   end
 end

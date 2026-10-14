@@ -28,6 +28,7 @@ module Spec
       def answered(path) = @answered[path]
 
       def call(env)
+        env.delete(Blog::RequestTimer::AFTER_REPLY)
         path = env[Rack::PATH_INFO]
         @counts[path] += 1
         @holds.delete(path)&.then do |hold|

@@ -109,6 +109,7 @@ RSpec.describe "MCP reach", type: :app do
       "mcp.operations.reap_expired_credentials" => "a background job reaps spent OAuth codes, tokens and idle clients",
       "mcp.operations.register_client" => "OAuth: a client registers itself",
       "mcp.operations.revoke_client" => "OAuth: the owner cuts off a client in the admin, which no client should do",
+      "performance.operations.record_timing" => "each request and job stores its own timing as it finishes",
       "posts.operations.check_post_links" => "the weekly link check job checks every published post's links",
       "posts.operations.move_post" => "the admin's calendar moves a post a day; update_post sets any time",
       "posts.operations.record_post_webmentions" => "the webmention delivery job records what it sent",

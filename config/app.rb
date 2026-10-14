@@ -10,10 +10,12 @@ require "blog/extensions/dry/logger/filter/extension"
 require "blog/extensions/hanami/cli/db/postgres/extension" if defined?(Hanami::CLI)
 require "blog/extensions/hanami/middleware/assets/extension"
 require "blog/extensions/hanami/providers/routes/extension"
+require "blog/extensions/hanami/router/extension"
 require "blog/extensions/hanami/router/node/extension"
 require "blog/extensions/hanami/router/trie/extension"
 require "blog/extensions/rom/sql/postgres/type_builder/extension"
 require "blog/params_guard"
+require "blog/request_timer"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
 require "bluesky"
@@ -56,6 +58,7 @@ module Blog
       linkedin.auth mastodon.auth media_store.client networks.all operations.read_visitor_address share_store.client
     ]
 
+    config.middleware.use RequestTimer, ->(**row) { Performance::Slice["operations.record_timing"].call(:request, **row) }
     config.middleware.use Honeybadger::Rack::ErrorNotifier
     config.middleware.use ParamsGuard, ->(request) { Admin::Slice["auth.session_reader"].call(request) }
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
