@@ -2376,6 +2376,31 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{time}"
           done_at: "done %{time}"
+        cadence_fields:
+          cadence: "Repeats"
+          day: "Day"
+          every:
+            days: "Days apart"
+            weeks: "Weeks apart"
+          kinds:
+            days: "Every few days"
+            month_day: "On a day each month"
+            month_end: "On the last day of each month"
+            month_weekday: "On a weekday each month"
+            weeks: "Every few weeks"
+            yearly: "On a date each year"
+          month: "Month"
+          never: "Never"
+          starts_on: "From"
+          starts_on_hint: "Weeks count from this day."
+          week: "Week"
+          weekday: "Weekday"
+          weeks:
+            "-1": "Last"
+            "1": "First"
+            "2": "Second"
+            "3": "Third"
+            "4": "Fourth"
         comments:
           label: "Comments"
           unknown_author: "unknown"
@@ -2422,6 +2447,9 @@ en:
             control: "Take out the control characters."
           contributors:
             format: "Give an agent and its model, each in lowercase letters, numbers, dots and dashes."
+          day:
+            blank: "Give a day of the month."
+            format: "Give a day that month has."
           ended_at:
             blank: "Give the time it ended."
             format: "Give the end as a date and time."
@@ -2429,6 +2457,9 @@ en:
             order: "End it after it starts."
             running: "Pause or complete the task before you delete its running session."
             skipped: "That time does not exist here. The clocks skip it."
+          every:
+            blank: "Say how far apart."
+            format: "Give a whole number from 1 to 365."
           hours:
             blank: "Give the hours, the minutes or both."
             format: "Give whole hours, up to 9999."
@@ -2441,6 +2472,8 @@ en:
             missing: "That task is gone. Find another."
             self: "A task cannot link to itself."
             taken: "These two tasks are already linked."
+          starts_on:
+            format: "Give the first day as a date."
           started_at:
             blank: "Give the time it started."
             format: "Give the start as a date and time."

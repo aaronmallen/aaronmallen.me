@@ -73,6 +73,7 @@ RSpec.describe "Admin screens", type: :feature do
         find("dialog#person-#{person.id}-drawer[open] form[data-person-form]")
       end,
       "snooze drawer" => -> { open_snooze },
+      "recurring task editor" => -> { visit "/admin/tasks/#{recurring_task.id}/edit" },
       "task editor" => -> { open_editor },
       "task panel" => -> { open_panel },
     }
@@ -288,6 +289,12 @@ RSpec.describe "Admin screens", type: :feature do
       "task record search" => "/admin/tasks/#{task.id}?record_q=published",
       "post record search" => "/admin/posts/#{draft.id}/edit?record_q=published",
     }
+  end
+
+  def recurring_task
+    task = create(:task, title: "Water the plants")
+    Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "weeks", every: 2, weekday: 4 })
+    task
   end
 
   def rule_project_search

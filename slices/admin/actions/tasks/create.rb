@@ -36,7 +36,7 @@ module Admin
         end
 
         def invalid(request, response, params, errors)
-          values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }
+          values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }.merge(recur: Blog::Types::Fields[params[:recur]])
 
           response.status = 422
           response.render(new_view, errors:, origin: task_origin(request), values:)

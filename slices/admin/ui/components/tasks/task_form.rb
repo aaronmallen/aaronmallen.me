@@ -29,6 +29,7 @@ module Admin
               note_field
               pair
               SprintField(scope: @scope, scheduled:, today: @today)
+              CadenceFields(scope: @scope, today: @today, values: @values[:recur], errors: @errors) unless @task&.source
               credit_fields if @task
               foot(&) unless @bare
             end

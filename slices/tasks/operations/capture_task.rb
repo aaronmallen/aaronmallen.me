@@ -12,6 +12,7 @@ module Tasks
         contract: "contracts.task_contract",
         current_sprint: "operations.current_sprint",
         schedule_task: "operations.schedule_task",
+        set_task_cadence: "operations.set_task_cadence",
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",
       ]
@@ -22,6 +23,7 @@ module Tasks
 
         transaction do
           task = write(fields, placed)
+          step recur(task.id, Blog::Types::Fields[params[:recur]])
           next [:captured, task] if Blog::Types::TrimmedText[sprint_on].empty?
 
           step schedule_task.call(task.id, sprint_on)
@@ -35,6 +37,8 @@ module Tasks
 
         { list: Blog::Types::TaskList[filter], sprint_id: nil }
       end
+
+      def recur(id, recur) = Blog::Types::Text[recur[:cadence]].empty? ? Success() : set_task_cadence.call(id, recur)
 
       def retag(id, names) = task_event_mutations.track(id, Time.now) { task_mutations.replace_tags(id, names) }
 

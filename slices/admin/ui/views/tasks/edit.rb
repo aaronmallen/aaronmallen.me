@@ -15,6 +15,7 @@ module Admin
           prop :forms, Blog::Types::Hash
           prop :linking, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
+          prop :series, Blog::Types::Instance(ROM::Struct).optional, default: nil
           prop(:values, Blog::Types::Hash) { it || stored }
           prop :filter, Blog::Types::String
           prop :origin, Blog::Types::TaskOrigin
@@ -72,6 +73,7 @@ module Admin
               contributors: @task.credits,
               list: @task.place,
               note: @task.note.to_s,
+              recur: @series.to_h,
               sprint_on: @task.sprint&.sprint_date&.iso8601,
               tags: @task.tags.map(&:name).join(TAG_SEPARATOR),
               title: @task.title,

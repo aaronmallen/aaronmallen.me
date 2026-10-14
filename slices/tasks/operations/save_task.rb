@@ -9,9 +9,11 @@ module Tasks
 
       include Deps[
         claim_photos: "media.operations.claim_photos",
+        clear_task_cadence: "operations.clear_task_cadence",
         contract: "contracts.task_contract",
         move_task: "operations.move_task",
         schedule_task: "operations.schedule_task",
+        set_task_cadence: "operations.set_task_cadence",
         task_contributor_mutations: "repos.task_contributor_mutations",
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",
@@ -24,7 +26,7 @@ module Tasks
 
         transaction do
           persist(task, fields)
-          credit(id, fields[:contributors])
+          step recur(id, params)
           step schedule_task.call(id, params[:sprint_on]) if schedules?(task, fields, params[:sprint_on])
 
           task_queries.by_id(id)
@@ -47,9 +49,20 @@ module Tasks
 
       def persist(task, fields)
         task_mutations.update(task.id, note: fields[:note], title: fields[:title])
+        credit(task.id, fields[:contributors])
         retag(task.id, fields[:tags])
         claim_photos.call(PHOTO_OWNER, task.id, fields[:note])
         step move(task, fields[:list])
+      end
+
+      def recur(id, params)
+        return Success() unless params.key?(:recur)
+
+        recur = Blog::Types::Fields[params[:recur]]
+        return set_task_cadence.call(id, recur) unless Blog::Types::Text[recur[:cadence]].empty?
+
+        clear_task_cadence.call(id)
+        Success()
       end
 
       def retag(id, names) = task_event_mutations.track(id, Time.now) { task_mutations.replace_tags(id, names) }

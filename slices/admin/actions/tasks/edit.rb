@@ -7,9 +7,11 @@ module Admin
         FRESH = { errors: Blog::Constants::EMPTY_HASH, values: nil }.freeze
         PARTS = %i[task timeline forms linking].freeze
 
+        include Deps[task_series_queries: "tasks.repos.task_series_queries"]
+
         private
 
-        def shown(page) = page.slice(*PARTS).merge(FRESH)
+        def shown(page) = page.slice(*PARTS).merge(FRESH, series: task_series_queries.by_task(page[:task].id))
       end
     end
   end

@@ -701,7 +701,9 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "answers 200 asking for every field a task has but its type", :aggregate_failures do
         expect(last_response.status).to eq(200)
-        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]"])
+        expect(fields).to eq(
+          ["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]", "task[recur][cadence]"],
+        )
       end
 
       it "puts a new task in next unless told otherwise" do
@@ -737,7 +739,9 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "holds the same fields as the new task page" do
-        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]"])
+        recur = %w[cadence every week weekday month day starts_on].map { "task[recur][#{it}]" }
+
+        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]", *recur])
       end
 
       it "starts on next away from Today", :aggregate_failures do

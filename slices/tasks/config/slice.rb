@@ -19,7 +19,7 @@ module Tasks
       operations.set_task_project operations.set_task_total operations.set_tasks_column operations.snooze_tasks
       operations.stage_task operations.start_task operations.unlink_task operations.wake_task
       repos.sprint_queries repos.task_comment_queries repos.task_queries
-      repos.task_rule_queries repos.task_source_queries repos.time_report_queries
+      repos.task_rule_queries repos.task_series_queries repos.task_source_queries repos.time_report_queries
     ]
   end
 end

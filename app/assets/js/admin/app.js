@@ -2,6 +2,7 @@ import "../../css/admin.css";
 import { setupAutosubmit } from "./autosubmit.js";
 import { setupBoardDrag } from "./board_drag.js";
 import { setupBulk } from "./bulk.js";
+import { setupCadences } from "./cadence.js";
 import { setupCalendars } from "./calendar.js";
 import { setupCommentAdds } from "./comment_add.js";
 import { setupCommitImports } from "./commits.js";
@@ -40,6 +41,7 @@ const STEPS = [
   setupAutosubmit,
   setupBoardDrag,
   setupBulk,
+  setupCadences,
   setupCalendars,
   setupCommentAdds,
   setupCommitImports,

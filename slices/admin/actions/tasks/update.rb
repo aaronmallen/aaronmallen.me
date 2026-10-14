@@ -26,6 +26,7 @@ module Admin
 
           case save_task.call(id, form(id, fields))
             in Failure(:closed) then done(request, response, CLOSED)
+            in Failure(:imported) then halt 422
             in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
             in Failure[:invalid, errors] then invalid(request, response, id, fields, errors)
             in result then settle(response, result, SAVED, tasks_path(request))
@@ -68,12 +69,16 @@ module Admin
 
         def invalid(request, response, id, fields, errors)
           page = build_task_page.call(id).value_or { halt 404 }
-          values = FIELDS.to_h { [it, Blog::Types::Text[fields[it]]] }
+          values = values(fields)
           credits = credits(fields[:contributors])
           values[:contributors] = credits if credits
 
           response.status = 422
           response.render(edit_view, **page.slice(*Edit::PARTS), errors:, values:, **return_to(request))
+        end
+
+        def values(fields)
+          FIELDS.to_h { [it, Blog::Types::Text[fields[it]]] }.merge(recur: Blog::Types::Fields[fields[:recur]])
         end
       end
     end
