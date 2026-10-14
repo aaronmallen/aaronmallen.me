@@ -20,6 +20,10 @@ module Posts
 
       def publish_due(id, at:) = posts.by_pk(id).due_at(at).publish(at).first
 
+      def record_webmentions(id, targets:, unsent:)
+        posts.by_pk(id).command(:update).call(webmention_targets: targets, unsent_webmention_targets: unsent)
+      end
+
       def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
 
       def remove_tag(id, name)

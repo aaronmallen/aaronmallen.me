@@ -18,6 +18,15 @@ RSpec.describe "Feeds", type: :request do
     %i[draft scheduled].each { create(:post, it, tags: [tag]) }
   end
 
+  def send_webmentions_for_post_at(time)
+    dated = { published_at: time, updated_at: time }
+    post = create(:post, :published, body: "[a note](https://ada.example/notes/1)", **dated)
+    resolves_publicly("ada.example")
+    stub_request(:get, %r{ada\.example/notes}).to_return(headers: { "Link" => '</wm>; rel="webmention"' })
+    stub_request(:post, "https://ada.example/wm").to_return(status: 202)
+    Social::Jobs::SendWebmentions.new.perform(post.id)
+  end
+
   def value(xpath) = feed.at_xpath(xpath)&.text
 
   def watch_markdown = %i[parse to_html].each { allow(Commonmarker).to receive(it).and_call_original }
@@ -90,6 +99,13 @@ RSpec.describe "Feeds", type: :request do
       get "/writing.atom"
 
       expect(value("/feed/updated")).to eq("2026-09-09T00:00:00Z")
+    end
+
+    it "keeps the feed's updated time after the post's webmentions send" do
+      send_webmentions_for_post_at(Time.utc(2026, 9, 2))
+      get "/writing.atom"
+
+      expect(value("/feed/updated")).to eq("2026-09-02T00:00:00Z")
     end
   end
 
