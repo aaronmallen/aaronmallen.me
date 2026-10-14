@@ -136,6 +136,14 @@ RSpec.describe Mail::Jobs::SyncGmail do
       end
     end
 
+    it "sends the admin no notice when Gmail has nothing new", :commits do
+      stub_gmail(labels: receipts)
+      run
+      stub_gmail(history_id: "300", labels: receipts)
+
+      expect(admin_notice { run }).to be_nil
+    end
+
     describe "a change made in Gmail" do
       before do
         stub_gmail(history: %w[t1], threads: { "t1" => [gmail_message("m1"), gmail_message("m2")] })

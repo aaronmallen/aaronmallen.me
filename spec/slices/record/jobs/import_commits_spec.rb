@@ -245,6 +245,12 @@ RSpec.describe Record::Jobs::ImportCommits do
       expect(github_request(GitHubGraphQL::REFS_QUERY, since: edge)).to have_been_made.at_least_once
     end
 
+    it "sends the admin no notice when a run finds nothing new", :commits do
+      run_through
+
+      expect(admin_notice { run_through }).to be_nil
+    end
+
     it "reads a commit twice into one row" do
       2.times { run_through }
 

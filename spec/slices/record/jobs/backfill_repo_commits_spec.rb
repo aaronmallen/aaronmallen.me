@@ -195,6 +195,13 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       expect(commit_queries.synced_through(repo)).to eq(clock - day)
     end
 
+    it "sends the admin no notice when the walk finds nothing new", :commits do
+      stub_refs(unanswered_github_branch("main"))
+      commit_mutations.record_backfilled_to(repo, at: floor + empty_step)
+
+      expect(admin_notice { walk }).to be_nil
+    end
+
     it "keeps stepping while the forward edge is still below" do
       stub_refs(unanswered_github_branch("main"))
       walk

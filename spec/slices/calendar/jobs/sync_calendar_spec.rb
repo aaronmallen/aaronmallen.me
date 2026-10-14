@@ -119,6 +119,17 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
       end
     end
 
+    describe "with an event that has not changed since the last run", :commits do
+      let(:mine) { [coffee] }
+
+      it "sends the admin no notice" do
+        run
+        allow(Time).to receive(:now).and_return(now + 60)
+
+        expect(admin_notice { run }).to be_nil
+      end
+    end
+
     describe "with an instance of a recurring event" do
       let(:mine) { [timed("standup_20261011", local(today, 9), local(today, 10), recurringEventId: "standup")] }
 

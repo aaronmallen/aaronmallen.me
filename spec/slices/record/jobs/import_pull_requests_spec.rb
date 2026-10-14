@@ -176,6 +176,10 @@ RSpec.describe Record::Jobs::ImportPullRequests do
       expect(stored(1)).to have_attributes(title: "Import them all", body: "Edited")
     end
 
+    it "sends the admin no notice when it reads nothing new", :commits do
+      expect(admin_notice { import }).to be_nil
+    end
+
     it "keeps one row for a pull request it reads again" do
       import
 

@@ -622,8 +622,13 @@ $$;
 CREATE FUNCTION public.notify_admin_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+DECLARE
+  bookkeeping text[] := ARRAY[
+    'click_count', 'download_count', 'history_id', 'last_clicked_at', 'last_used_at', 'updated_at',
+    'view_count', 'zip_download_count'
+  ];
 BEGIN
-  IF TG_OP <> 'UPDATE' OR OLD IS DISTINCT FROM NEW THEN
+  IF TG_OP <> 'UPDATE' OR to_jsonb(OLD) - bookkeeping IS DISTINCT FROM to_jsonb(NEW) - bookkeeping THEN
     PERFORM pg_notify('admin_changes', TG_TABLE_NAME);
   END IF;
   RETURN NULL;
@@ -7127,10 +7132,24 @@ CREATE TRIGGER suggestions_notify_admin_change AFTER INSERT OR DELETE OR UPDATE 
 
 
 --
--- Name: sync_states sync_states_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+-- Name: sync_states sync_states_delete_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER sync_states_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.sync_states FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+CREATE TRIGGER sync_states_delete_notify_admin_change AFTER DELETE ON public.sync_states FOR EACH ROW WHEN ((old.kind = 'failure'::public.sync_state_kind)) EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: sync_states sync_states_insert_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sync_states_insert_notify_admin_change AFTER INSERT ON public.sync_states FOR EACH ROW WHEN ((new.kind = 'failure'::public.sync_state_kind)) EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: sync_states sync_states_update_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sync_states_update_notify_admin_change AFTER UPDATE ON public.sync_states FOR EACH ROW WHEN (((old.kind = 'failure'::public.sync_state_kind) OR (new.kind = 'failure'::public.sync_state_kind))) EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -8084,4 +8103,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261014231253_create_performance_pages.rb'),
 ('20261014231500_create_task_series.rb'),
 ('20261014233000_create_performance_rollups.rb'),
-('20261014234500_add_recurred_to_task_event_kind.rb');
+('20261014234500_add_recurred_to_task_event_kind.rb'),
+('20261014235100_ignore_bookkeeping_in_notify_admin_change.rb');

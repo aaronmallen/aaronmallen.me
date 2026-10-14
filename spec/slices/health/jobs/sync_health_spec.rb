@@ -106,6 +106,10 @@ RSpec.describe Health::Jobs::SyncHealth do
         expect { run }.not_to(change { stored })
       end
 
+      it "sends the admin no notice when it runs twice over the same days", :commits do
+        expect(admin_notice { run }).to be_nil
+      end
+
       it "updates a day Google has changed since the last run" do
         stub_google_health(steps: steps(today, 9000))
         run
