@@ -24,8 +24,9 @@ module API
 
       schema_attributes
       stamps :ready_at, :merged_at, :closed_at
+      untrusted :title
 
-      def description(pull_request) = pull_request.body
+      def description(pull_request) = untrusted(pull_request.body)
     end
   end
 end

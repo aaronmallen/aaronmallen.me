@@ -13,9 +13,7 @@ module MCP
       class << self
         private
 
-        def entry(client, caller_id)
-          client.merge("name" => Untrusted.call(client.fetch("name")), "current" => client.fetch("id") == caller_id)
-        end
+        def entry(client, caller_id) = client.merge("current" => client.fetch("id") == caller_id)
 
         def reply(payload, server_context)
           caller_id = server_context.fetch(:oauth_client_id)

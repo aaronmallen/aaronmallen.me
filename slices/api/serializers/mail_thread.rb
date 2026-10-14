@@ -20,6 +20,7 @@ module API
       schema_attributes
       stamps :received_at, :snoozed_until
       tag_names
+      untrusted :subject, :body, :reply_to
     end
   end
 end

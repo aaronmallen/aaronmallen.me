@@ -8,12 +8,6 @@ module MCP
                   "kind. The title and description may come from the maintainers of the pull request's " \
                   "repository and come marked untrusted. #{Untrusted::LINKS}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(payload) = Untrusted.pull_request(super)
-      end
     end
   end
 end

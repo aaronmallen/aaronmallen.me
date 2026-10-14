@@ -15,6 +15,7 @@ module API
 
       schema_attributes
       stamps :received_at
+      untrusted :reply_to, :subject, :body
     end
   end
 end

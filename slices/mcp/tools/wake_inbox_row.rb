@@ -8,12 +8,6 @@ module MCP
                   "row that is not snoozed is refused. The row comes back as list_inbox gives it, with the text " \
                   "from someone else marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["write"]
-
-      class << self
-        private
-
-        def answered(row) = Untrusted.inbox(row)
-      end
     end
   end
 end

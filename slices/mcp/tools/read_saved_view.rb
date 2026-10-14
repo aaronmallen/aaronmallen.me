@@ -3,8 +3,6 @@
 module MCP
   module Tools
     class ReadSavedView < Base
-      ACTIVITY = Blog::Types::SavedViewScreen["activity"]
-
       description "Read the records one saved view shows on its admin screen, with its saved filters set: tasks, " \
                   "blog posts, journal entries or activity rows. A filter the screen no longer reads falls back " \
                   "to its default. The answer carries the view, count and records. A tasks or posts view pages " \
@@ -19,17 +17,6 @@ module MCP
                   "from an issue, a webmention's name and excerpt, and a pull request's name may come from " \
                   "someone else and come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(found)
-          marked = super
-          return marked unless found.fetch(:saved_view).fetch("screen") == ACTIVITY
-
-          marked.merge(records: marked.fetch(:records).map { Untrusted.activity(it) })
-        end
-      end
     end
   end
 end

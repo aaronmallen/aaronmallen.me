@@ -21,8 +21,10 @@ module API
       stamps :created_at, :last_used_at
 
       def name(client)
-        [client.client_name, Blog::Types::Normalized::Host.call(client.redirect_uris.first) { nil }]
-          .map { it.to_s.strip }.find { !it.empty? } || client.client_id
+        untrusted(
+          [client.client_name, Blog::Types::Normalized::Host.call(client.redirect_uris.first) { nil }]
+            .map { it.to_s.strip }.find { !it.empty? } || client.client_id,
+        )
       end
 
       def scopes(client) = params.fetch(:scopes).fetch(client.id)

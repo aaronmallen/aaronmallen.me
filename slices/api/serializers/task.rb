@@ -70,11 +70,15 @@ module API
 
       stamps :completed_at, :created_at, :updated_at
       tag_names
+      untrusted :note
 
       def contributors(task) = task.credits
 
       def links(task)
-        task.links.map { { label: it.label, id: it.task.id, title: it.task.title, status: it.task.status } }
+        task.links.map do |link|
+          linked = link.task
+          { label: link.label, id: linked.id, title: synced(linked.id, linked.title), status: linked.status }
+        end
       end
 
       def source(task)
@@ -91,6 +95,8 @@ module API
       end
 
       def sprint_on(task) = day(params.fetch(:sprint_on) { task.sprint&.sprint_date })
+
+      def title(task) = task.source ? untrusted(task.title) : task.title
     end
   end
 end

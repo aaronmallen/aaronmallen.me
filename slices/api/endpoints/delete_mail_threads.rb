@@ -11,7 +11,7 @@ module API
 
       private
 
-      def answered(threads) = threads.map { { id: it.id, subject: it.subject, deleted: true } }
+      def answered(threads) = threads.map { { id: it.id, subject: Helpers::Untrusted.call(it.subject), deleted: true } }
     end
   end
 end

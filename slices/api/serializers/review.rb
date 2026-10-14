@@ -117,7 +117,12 @@ module API
 
       def carried(review)
         review.carried.map do |task|
-          { id: task.task_id, title: task.title, carried_count: task.carried_count, sprint_on: day(task.sprint_date) }
+          {
+            id: task.task_id,
+            title: synced(task.task_id, task.title),
+            carried_count: task.carried_count,
+            sprint_on: day(task.sprint_date),
+          }
         end
       end
 
@@ -182,7 +187,7 @@ module API
       def done_task(task)
         {
           id: task.task_id,
-          title: task.title,
+          title: synced(task.task_id, task.title),
           worked_seconds: task.worked_seconds,
           contributors: Task.credits(task.contributors),
         }

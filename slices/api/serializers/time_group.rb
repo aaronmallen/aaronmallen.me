@@ -32,7 +32,7 @@ module API
 
       def key(group) = group.key.is_a?(Date) ? day(group.key) : group.key
 
-      def tasks(group) = group.tasks.map(&:to_h)
+      def tasks(group) = group.tasks.map { it.to_h.merge(title: synced(it.id, it.title)) }
     end
   end
 end

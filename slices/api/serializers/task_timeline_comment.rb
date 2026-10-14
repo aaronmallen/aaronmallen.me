@@ -19,8 +19,9 @@ module API
 
       schema_attributes
       stamps :occurred_at
+      untrusted :body
 
-      def author(entry) = entry.synced? ? entry.author : params.fetch(:owner)
+      def author(entry) = entry.synced? ? untrusted(entry.author) : params.fetch(:owner)
 
       def id(entry) = entry.source_id
 

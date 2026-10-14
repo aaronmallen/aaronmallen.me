@@ -19,8 +19,9 @@ module API
 
       schema_attributes
       stamps :created_at, :updated_at
+      untrusted :body
 
-      def author(comment) = comment.remote_id ? comment.author : params.fetch(:owner)
+      def author(comment) = comment.remote_id ? untrusted(comment.author) : params.fetch(:owner)
 
       def source(comment) = comment.provider || LOCAL
     end

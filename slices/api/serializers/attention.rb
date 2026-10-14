@@ -5,6 +5,8 @@ module API
     class Attention < Serializer
       BROKEN_LINK = Blog::Types::AttentionKind["broken_link"]
       CARRIED = Blog::Types::AttentionKind["carried"]
+      NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
+      TASKS = [CARRIED, Blog::Types::AttentionKind["someday"]].freeze
 
       SCHEMA = Helpers::Schema.object(
         {
@@ -29,6 +31,12 @@ module API
       def days(row) = counted?(row) ? nil : row.days
 
       def failures(row) = row.kind == BROKEN_LINK ? row.days : nil
+
+      def title(row)
+        return synced(row.record_id, row.title) if TASKS.include?(row.kind)
+
+        row.kind == NEW_DEVICE ? untrusted(row.title) : row.title
+      end
 
       private
 

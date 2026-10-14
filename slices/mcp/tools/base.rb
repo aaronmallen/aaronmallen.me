@@ -30,18 +30,26 @@ module MCP
 
         def answer(payload) = Tool::Response.new([{ type: TEXT, text: JSON.generate(payload) }])
 
-        def answered(payload) = Untrusted.shaped(payload)
+        def answered(payload) = payload
 
         def hand_over(endpoint, input, server_context)
-          case server_context.fetch(endpoint).call(input, scopes: server_context.fetch(:scopes))
-            in Success(payload) then block_given? ? yield(payload) : answer(payload)
+          case handed(endpoint, input, server_context)
+            in Success(payload)
+              settled = synced(payload, server_context)
+              block_given? ? yield(settled) : answer(settled)
             in Failure(refusal) then refuse(refusal.message)
+          end
+        end
+
+        def handed(endpoint, input, server_context)
+          API::Helpers::Untrusted.marking do
+            server_context.fetch(endpoint).call(input, scopes: server_context.fetch(:scopes))
           end
         end
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
-        def reply(payload, server_context) = answer(synced(answered(payload), server_context))
+        def reply(payload, _server_context) = answer(answered(payload))
 
         def synced(payload, server_context)
           Untrusted.synced(payload) { server_context.fetch(:task_source_queries).synced_task_ids(it) }

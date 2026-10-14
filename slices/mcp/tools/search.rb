@@ -9,10 +9,6 @@ module MCP
         "message" => "read_mail_thread", "webmention" => "read_webmention", "decision" => "read_decision",
         "pull_request" => "read_pull_request",
       }.freeze
-      MARKED = {
-        "task" => %w[match], "message" => %w[title match], "webmention" => %w[title match],
-        "pull_request" => %w[title match],
-      }.freeze
 
       description "Find records of every kind the admin keeps by their words, best match first, as the admin's " \
                   "search screen does: tasks open and closed, posts, social posts, journal entries, commits, " \
@@ -24,14 +20,6 @@ module MCP
                   "this page. #{API::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
                   "and the title and match of a message, webmention or pull request, come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(found) = found.merge(results: found.fetch(:results).map { marked_hit(it) })
-
-        def marked_hit(hit) = Untrusted.fields(hit, *MARKED.fetch(hit.fetch("kind"), Blog::Constants::EMPTY_ARRAY))
-      end
     end
   end
 end

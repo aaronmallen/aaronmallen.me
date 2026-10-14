@@ -20,6 +20,7 @@ module API
 
       schema_attributes
       stamps :received_at
+      untrusted :source_url, :author_name, :author_url, :excerpt
     end
   end
 end

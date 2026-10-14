@@ -3,6 +3,8 @@
 module API
   module Serializers
     class Link < Serializer
+      PULL_REQUEST = Blog::Types::RecordKind["pull_request"]
+      TASK = Blog::Types::RecordKind["task"]
       KINDS = (Blog::Types::RecordKind.values - [Blog::Types::RecordKind["mail_thread"]]).freeze
       SCHEMA = Helpers::Schema.object(
         {
@@ -22,6 +24,14 @@ module API
       schema_attributes
 
       def day(link) = super(link.day)
+
+      def title(link)
+        case link.kind
+          when TASK then synced(link.id, link.title)
+          when PULL_REQUEST then untrusted(link.title)
+          else link.title
+        end
+      end
     end
   end
 end

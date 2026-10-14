@@ -31,12 +31,6 @@ module MCP
                   "name and excerpt, and a pull request's name, may come from someone else and come marked " \
                   "untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(found) = found.merge(activity: found.fetch(:activity).map { Untrusted.activity(it) })
-      end
     end
   end
 end

@@ -10,14 +10,6 @@ module MCP
                   "title and description may come from the maintainers of the pull request's repository and " \
                   "comes marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(payload)
-          payload.merge(pull_requests: payload.fetch(:pull_requests).map { Untrusted.pull_request(it) })
-        end
-      end
     end
   end
 end
