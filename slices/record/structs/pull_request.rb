@@ -3,7 +3,7 @@
 module Record
   module Structs
     class PullRequest < Blog::DB::Struct
-      def moved_at = merged_at || closed_at || ready_at || created_at
+      def moved_at = merged_at || closed_at || ready_at || opened_at
 
       def state
         Blog::Types::PullRequestState[

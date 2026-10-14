@@ -151,6 +151,15 @@ RSpec.describe "MCP record tools", type: :request do
       expect(numbers).to eq([2, 1])
     end
 
+    it "dates an open draft by when it opened" do
+      create(:pull_request, number: 1, ready_at: nil, opened_at: on(2))
+      create(:pull_request, number: 2, ready_at: on(1))
+      create(:pull_request, number: 3, ready_at: nil, opened_at: Blog::TimeZone.local_time(2026, 2, 20))
+      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+
+      expect(numbers).to eq([1, 2])
+    end
+
     it "answers a draft as a draft" do
       create(:pull_request, ready_at: nil)
       call_tool("list_pull_requests", from: today.iso8601, to: today.iso8601)

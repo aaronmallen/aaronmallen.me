@@ -945,6 +945,7 @@ CREATE TABLE public.pull_requests (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, title), 'A'::"char") || setweight(to_tsvector('english'::regconfig, body), 'B'::"char"))) STORED,
+    opened_at timestamp with time zone NOT NULL,
     CONSTRAINT pull_requests_merged_or_closed_check CHECK (((merged_at IS NULL) OR (closed_at IS NULL)))
 );
 
@@ -7465,4 +7466,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261013030000_match_owner_identities_on_email.rb'),
 ('20261013030100_name_the_provider_on_sign_ins.rb'),
 ('20261013041000_add_stage_to_tasks.rb'),
-('20261013041100_add_board_published_to_projects.rb');
+('20261013041100_add_board_published_to_projects.rb'),
+('20261014181552_add_opened_at_to_pull_requests.rb');

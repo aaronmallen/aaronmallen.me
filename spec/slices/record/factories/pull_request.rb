@@ -7,4 +7,5 @@ Spec::DB::Factories.define(:pull_request) do |f|
   f.body { Faker::Lorem.paragraph }
   f.url { |repo, number| "https://github.com/#{repo}/pull/#{number}" }
   f.ready_at { Time.now }
+  f.opened_at { |ready_at| ready_at || Time.now }
 end

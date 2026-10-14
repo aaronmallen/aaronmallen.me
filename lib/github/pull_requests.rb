@@ -67,6 +67,7 @@ module GitHub
         body: node["body"].to_s,
         closed_at: node.fetch("state") == "CLOSED" ? read_time(node["closedAt"]) : nil,
         merged_at: read_time(node["mergedAt"]),
+        opened_at: read_time(node.fetch("createdAt")),
         number: node.fetch("number"),
         ready_at: ready_at(node),
         repo: node.dig("repository", "nameWithOwner"),

@@ -85,6 +85,13 @@ RSpec.describe Record::Jobs::ImportPullRequests do
       expect(stored(1).ready_at).to be_nil
     end
 
+    it "stores the time GitHub says a draft opened" do
+      stub_search(github_pull_request(1, created_at:, isDraft: true))
+      import
+
+      expect(stored(1).opened_at).to eq(created_at)
+    end
+
     it "stores the time a draft was marked ready once it is" do
       stub_search(github_pull_request(1, created_at:, isDraft: true))
       import

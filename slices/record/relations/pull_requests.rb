@@ -3,7 +3,7 @@
 module Record
   module Relations
     class PullRequests < Blog::DB::Relation
-      MOVED_AT = Sequel.function(:coalesce, :merged_at, :closed_at, :ready_at, :created_at)
+      MOVED_AT = Sequel.function(:coalesce, :merged_at, :closed_at, :ready_at, :opened_at)
 
       schema :pull_requests, infer: true
 
