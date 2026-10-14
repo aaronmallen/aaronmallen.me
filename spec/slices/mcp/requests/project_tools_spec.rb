@@ -57,6 +57,10 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(named("newer")).to include("archived_on" => "2025-03-04", "status" => "archived")
     end
 
+    it "gives each project its key" do
+      expect(named("first")).to include("key" => "FIR")
+    end
+
     it "gives each project its visibility" do
       expect([named("first"), named("second")].map { it.fetch("visibility") }).to eq(%w[public private])
     end
@@ -150,6 +154,28 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
       expect(message).to eq("visibility: pick public or private")
       expect(project_queries.live).to be_empty
+    end
+
+    it "gives a new project a key from its name, or the one it is given", :aggregate_failures do
+      call_tool("save_project", name: "fresh", visibility: "public")
+      expect(content).to include("key" => "FRE")
+
+      call_tool("save_project", name: "other", key: "oth9", visibility: "public")
+      expect(content).to include("key" => "OTH9")
+    end
+
+    it "keeps the key a change leaves out" do
+      project = create(:project, key: "POD")
+      call_tool("save_project", id: project.id, name: "renamed")
+
+      expect(content).to include("key" => "POD")
+    end
+
+    it "refuses a key another project holds" do
+      create(:project, key: "POD")
+      call_tool("save_project", name: "fresh", key: "POD", visibility: "public")
+
+      expect(message).to eq("key: another project already has this key")
     end
 
     it "refuses a visibility it does not know" do

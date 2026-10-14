@@ -15,7 +15,8 @@ RSpec.describe "API reading a project", type: :request do
 
   def shown(project)
     {
-      "id" => project.id, "name" => "blog", "tagline" => "my site", "status" => "archived", "visibility" => "private",
+      "id" => project.id, "key" => "BLO", "name" => "blog", "tagline" => "my site", "status" => "archived",
+      "visibility" => "private",
       "board_published" => true, "started_on" => "2024-06-01", "archived_on" => "2026-03-02", "tags" => %w[ruby],
       "repo" => "aaronmallen/blog",
       "url" => "https://aaronmallen.me", "og_image_url" => nil, "stars" => 12, "release" => "v2.0.0",

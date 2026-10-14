@@ -313,6 +313,70 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
     end
 
+    describe "the key" do
+      it "fills the key on the edit form" do
+        project = create(:project, key: "POD")
+        get "/admin/projects/#{project.id}/edit"
+
+        expect(page).to have_css("input[name='project[key]'][value='POD']")
+      end
+
+      it "takes the key it is given, in capitals" do
+        save(key: " pod2 ")
+
+        expect(tracking("aaronmallen/sai").key).to eq("POD2")
+      end
+
+      it "gives a project saved without a key the first 3 letters of its name" do
+        save(name: "pod-cast", key: "")
+
+        expect(tracking("aaronmallen/sai").key).to eq("POD")
+      end
+
+      it "adds a digit when another project, archived too, holds that key" do
+        create(:project, :archived, key: "SAI")
+        save(key: "")
+
+        expect(tracking("aaronmallen/sai").key).to eq("SAI2")
+      end
+
+      it "adds a digit to a name too short to give 2 letters" do
+        save(name: "x", key: "")
+
+        expect(tracking("aaronmallen/sai").key).to eq("X2")
+      end
+
+      it "skips what is not a letter when it reads the name" do
+        save(name: "1-a.b c", key: "")
+
+        expect(tracking("aaronmallen/sai").key).to eq("ABC")
+      end
+
+      it "keeps its own key when a saved project's key is cleared" do
+        project = create(:project, name: "sai", key: "OTHER")
+        save(project, key: "")
+
+        expect(repo.by_id(project.id).key).to eq("SAI")
+      end
+
+      %w[A 1AB ABCDEFG A-B].each do |key|
+        it "refuses #{key.inspect}", :aggregate_failures do
+          save(key:)
+
+          expect(last_response.status).to eq(422)
+          expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.key.format"))
+        end
+      end
+
+      it "refuses a key another project holds in any case, archived too", :aggregate_failures do
+        create(:project, :archived, key: "POD")
+        save(key: "pod")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.key.taken"))
+      end
+    end
+
     describe "the repository and the url" do
       it "fills the url from owner/repo" do
         save(repo: "aaronmallen/sai", url: "")

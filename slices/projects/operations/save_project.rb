@@ -13,6 +13,7 @@ module Projects
 
       CONSTRAINTS = {
         "projects_archived_order_check" => [:started_on, "after_archived"],
+        "projects_key_index" => [:key, "taken"],
         "projects_repo_index" => [:repo, "taken"],
       }.freeze
 

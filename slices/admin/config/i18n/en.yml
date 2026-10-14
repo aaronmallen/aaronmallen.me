@@ -1715,6 +1715,9 @@ en:
           restore: "Restore"
           save: "Save project"
         field_error:
+          key:
+            format: "Use 2 to 6 letters and digits that start with a letter, as POD."
+            taken: "Another project already has this key."
           name:
             blank: "Add a name."
           og_image_url:
@@ -1746,6 +1749,9 @@ en:
           pick_column: "Move to…"
         placement:
           heading: "Placement"
+          key: "Key"
+          key_note: "Its tasks show as KEY-1. Leave it blank to take the first 3 letters of the name."
+          key_placeholder: "POD"
           restore_note: "Restore puts it back on /projects."
           status: "Status"
           tags: "Tags"

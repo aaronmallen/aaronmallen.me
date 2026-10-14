@@ -6,6 +6,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
+          key: { type: "string", description: "the short key its task labels start with, as POD" },
           name: Helpers::Schema::STRING,
           tagline: Helpers::Schema.nullable(Helpers::Schema::STRING),
           status: { type: "string", enum: %w[active archived], description: "archived once it has an archive date" },

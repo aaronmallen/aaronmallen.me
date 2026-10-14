@@ -14,6 +14,7 @@ module Projects
 
       params do
         required(:name).value(Blog::Types::TrimmedText, :filled?)
+        required(:key).maybe(Blog::Types::Nullable::ProjectKey)
         required(:tagline).maybe(Blog::Types::OptionalText)
         required(:repo).maybe(Blog::Types::Nullable::Repo)
         required(:url).maybe(Blog::Types::Nullable::Url)

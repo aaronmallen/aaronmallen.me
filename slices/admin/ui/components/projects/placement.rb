@@ -17,6 +17,7 @@ module Admin
           def view_template
             Card(title: t(".heading")) do
               div(class: "form-stack") do
+                key_field
                 visibility_field
                 archived_status if @archived
                 tags_field
@@ -30,6 +31,19 @@ module Admin
             Field(label: t(".status")) do
               div { StatusPill(status: :archived) }
               Hint { t(".restore_note") }
+            end
+          end
+
+          def key_field
+            Field(label: t(".key"), name: :key, errors: @errors, error: FieldError) do |control|
+              Input(
+                **control,
+                class: "mono",
+                name: "project[key]",
+                value: @values[:key],
+                placeholder: t(".key_placeholder"),
+              )
+              Hint { t(".key_note") }
             end
           end
 

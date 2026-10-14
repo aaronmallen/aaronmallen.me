@@ -4,13 +4,19 @@
 module API
   module Endpoints
     class ProjectEndpoint < Endpoint
-      FIELDS = %i[board_published name og_image_url repo started_on tagline tags url visibility].freeze
+      ABOUT_KEY = "2 to 6 letters and digits that start with a letter, as POD; its tasks show as KEY-n. Empty, " \
+                  "or left out of a new project, it takes the first 3 letters of the name"
+      FIELDS = %i[board_published key name og_image_url repo started_on tagline tags url visibility].freeze
       LINK = "enter a link that starts with http:// or https://"
       MONTH = "%Y-%m"
       UNCHECKED = "0"
       UNSAVED = "could not save the project"
 
       COMPLAINTS = {
+        key: {
+          Blog::Contract::FORMAT => "use 2 to 6 letters and digits that start with a letter, as POD",
+          "taken" => "another project already has this key",
+        },
         name: { Blog::Contract::BLANK => "add a name" },
         og_image_url: { Blog::Contract::FORMAT => LINK },
         repo: {
@@ -30,6 +36,7 @@ module API
 
       PROPERTIES = {
         board_published: { type: "boolean", description: "whether a public project shows its task board" },
+        key: { type: "string", description: ABOUT_KEY },
         name: { type: "string" },
         og_image_url: { type: "string", description: "a link to the social card image" },
         repo: { type: "string", description: "the GitHub repository, as owner/repo" },
@@ -69,6 +76,7 @@ module API
 
         {
           board_published: project.board_published,
+          key: project.key,
           name: project.name,
           og_image_url: project.og_image_url,
           repo: project.repo,

@@ -137,6 +137,7 @@ module Blog
     PostIntentParam = PostIntent.fallback(PostIntent.values.first)
     ProjectFilter = Types::String.enum("live", "archived", "work")
     ProjectFilterParam = ProjectFilter.fallback(ProjectFilter.values.first)
+    ProjectKey = Types::String.constrained(format: /\A[A-Z][A-Z0-9]{1,5}\z/)
     ProjectMonth = Types::String.constrained(format: /\A\d{4}-(?:0[1-9]|1[0-2])\z/)
     ProjectVisibility = Types::String.enum("public", "private")
     PullRequestState = Types::String.enum("draft", "open", "merged", "closed")
@@ -290,6 +291,7 @@ module Blog
 
     module Nullable
       MailMove = Types::MailMove.optional.constructor { |value| OptionalText[value] }
+      ProjectKey = Types::ProjectKey.optional.constructor { |value| OptionalText[value]&.upcase }
       Repo = Types::Repo.optional.constructor { |value| OptionalText[value] }
       Slug = Types::Slug.optional.constructor { |value| OptionalText[value] }
       Tag = Types::String.optional.constructor { |value| OptionalText[value]&.then { Normalizers::Tag[it] } }

@@ -266,6 +266,14 @@ CREATE TYPE public.post_status AS ENUM (
 
 
 --
+-- Name: project_key; Type: DOMAIN; Schema: public; Owner: -
+--
+
+CREATE DOMAIN public.project_key AS text
+	CONSTRAINT project_key_check CHECK ((VALUE ~ '^[A-Z][A-Z0-9]{1,5}$'::text));
+
+
+--
 -- Name: project_visibility; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -707,6 +715,42 @@ $$;
 
 
 --
+-- Name: projects_default_key(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.projects_default_key() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  base text := coalesce(nullif(left(regexp_replace(upper(NEW.name), '[^A-Z]', '', 'g'), 3), ''), 'PRJ');
+  marks text[] := regexp_split_to_array('23456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', '');
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext('projects_default_key'));
+
+  SELECT candidate INTO NEW.key
+    FROM (
+      SELECT base AS candidate, 0 AS place
+      UNION ALL
+      SELECT base || one.mark, one.place FROM unnest(marks) WITH ORDINALITY AS one(mark, place)
+      UNION ALL
+      SELECT base || one.mark || two.mark, 100 * one.place + two.place
+        FROM unnest(marks) WITH ORDINALITY AS one(mark, place),
+          unnest(marks) WITH ORDINALITY AS two(mark, place)
+    ) candidates
+    WHERE length(candidate) >= 2
+      AND NOT EXISTS (
+        SELECT 1 FROM projects
+          WHERE lower(projects.key) = lower(candidate) AND projects.id IS DISTINCT FROM NEW.id
+      )
+    ORDER BY length(candidate), place
+    LIMIT 1;
+
+  RETURN NEW;
+END
+$$;
+
+
+--
 -- Name: record_links_drop_record(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -967,6 +1011,7 @@ CREATE TABLE public.projects (
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((name)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(tagline, ''::text) || ' '::text) || COALESCE((repo)::text, ''::text))), 'B'::"char"))) STORED,
     visibility public.project_visibility NOT NULL,
     board_published boolean DEFAULT false NOT NULL,
+    key public.project_key NOT NULL,
     CONSTRAINT projects_archived_order_check CHECK ((archived_on >= started_on)),
     CONSTRAINT projects_stars_check CHECK ((stars >= 0))
 );
@@ -6145,6 +6190,13 @@ CREATE INDEX projects_created_on_index ON public.projects USING btree ((((create
 
 
 --
+-- Name: projects_key_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projects_key_index ON public.projects USING btree (lower((key)::text));
+
+
+--
 -- Name: projects_repo_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6961,6 +7013,13 @@ CREATE TRIGGER posts_record_deletion AFTER DELETE ON public.posts FOR EACH ROW W
 --
 
 CREATE TRIGGER project_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.project_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: projects projects_default_key; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER projects_default_key BEFORE INSERT OR UPDATE ON public.projects FOR EACH ROW WHEN ((new.key IS NULL)) EXECUTE FUNCTION public.projects_default_key();
 
 
 --
@@ -8104,4 +8163,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261014231500_create_task_series.rb'),
 ('20261014233000_create_performance_rollups.rb'),
 ('20261014234500_add_recurred_to_task_event_kind.rb'),
-('20261014235100_ignore_bookkeeping_in_notify_admin_change.rb');
+('20261014235100_ignore_bookkeeping_in_notify_admin_change.rb'),
+('20261015000100_add_key_to_projects.rb');

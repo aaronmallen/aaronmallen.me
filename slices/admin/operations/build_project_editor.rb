@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildProjectEditor
-      FIELDS = %i[board_published name og_image_url repo started_on tagline url visibility].freeze
+      FIELDS = %i[board_published key name og_image_url repo started_on tagline url visibility].freeze
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       TAG_SEPARATOR = ", "
@@ -26,6 +26,7 @@ module Admin
 
         {
           board_published: project.board_published ? Blog::Constants::CHECKED : UNCHECKED,
+          key: project.key,
           name: project.name,
           visibility: project.visibility,
           started_on: started_on(project),
