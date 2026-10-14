@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           list: { type: "string", enum: Tasks::LISTS, description: "today puts it in today's sprint" },
         },
         required: %w[id list],

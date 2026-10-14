@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class DeleteTask < Endpoint
-      SCHEMA = Helpers::Schema.by_id
+      SCHEMA = Tasks::BY_ID
       REPLY = Helpers::Schema.object(
         { id: Helpers::Schema::INTEGER, title: Helpers::Schema::STRING, deleted: Helpers::Schema::BOOLEAN },
       ).freeze

@@ -13,6 +13,8 @@ module Projects
 
       def by_tag(tag) = with_tags.tagged(tag).in_order.to_a
 
+      def id_by_key(key) = projects.where(Sequel.function(:lower, :key) => key.downcase).pluck(:id).first
+
       def ids_by_repo(repo) = projects.where(repo:).pluck(:id)
 
       def ids_by_slug(slugs) = projects.slugged(slugs)

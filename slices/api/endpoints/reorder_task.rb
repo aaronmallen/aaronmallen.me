@@ -9,11 +9,11 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          after_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(
-            description: "the task to follow, from the same list or sprint; null puts the task first",
+          after_id: Helpers::Schema.nullable(Tasks::TASK).merge(
+            description: "the task to follow, by ID or label, from the same list or sprint; null puts the task first",
           ),
           direction: { type: "string", enum: Tasks::DIRECTIONS, description: "move one place up or down" },
-          id: Tasks::ID,
+          id: Tasks::TASK,
         },
         required: %w[id],
       }.freeze

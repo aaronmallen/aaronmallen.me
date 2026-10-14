@@ -25,9 +25,9 @@ RSpec.describe "API task links", type: :request do
     it "answers 201 with the task and its new link" do
       answered = link(task.id, kind: "relates", other_id: other.id)
 
-      expect([answered.fetch("links"), status]).to eq(
-        [[{ "label" => "relates", "id" => other.id, "title" => "Migrate", "status" => "open" }], 201],
-      )
+      linked = { "label" => "relates", "id" => other.id, "task_label" => tasks.by_id(other.id).label }
+
+      expect([answered.fetch("links"), status]).to eq([[linked.merge("title" => "Migrate", "status" => "open")], 201])
     end
 
     it "stores a blocked_by link from the other end" do

@@ -9,7 +9,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           contributors: Tasks::CONTRIBUTORS,
           list: { type: "string", enum: Tasks::LISTS, description: "moves the task to this list or today's sprint" },
           note: { type: "string", description: "what done looks like" },

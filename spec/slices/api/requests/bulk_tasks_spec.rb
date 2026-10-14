@@ -6,7 +6,7 @@ RSpec.describe "API bulk task actions", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
   def bare(answer)
-    answer.fetch("tasks").map { it.except("id", "position", "completed_at", "created_at", "updated_at") }
+    answer.fetch("tasks").map { it.except("id", "label", "position", "completed_at", "created_at", "updated_at") }
   end
 
   def call_api(name, body)
@@ -59,6 +59,18 @@ RSpec.describe "API bulk task actions", type: :request do
         act(name, ids(picked))
 
         expect(status_of(left)).to eq("open")
+      end
+
+      it "takes labels beside IDs" do
+        labelled = create(:task, project_id: create(:project, name: "Podcast").id)
+
+        expect(act(name, [ids(picked).first, "POD-1"]).fetch("tasks").map { it.values_at("id", "label") })
+          .to eq([[picked.first.id, repo.by_id(picked.first.id).label], [labelled.id, "POD-1"]])
+      end
+
+      it "changes none when a label finds no task and names it" do
+        expect([act(name, [*ids(picked), "POD-9"]), status, picked.map { status_of(it) }])
+          .to eq([refusal("no task has the label POD-9"), 422, %w[open open]])
       end
 
       it "changes none when one ID is gone and names it" do

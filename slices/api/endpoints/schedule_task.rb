@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           sprint_on: {
             type: "string",
             description: "the sprint day as YYYY-MM-DD, today or later, or an empty string to send it back to next",

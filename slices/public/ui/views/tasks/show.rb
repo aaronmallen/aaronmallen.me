@@ -103,7 +103,7 @@ module Public
             li do
               span(class: "meta") { t([".links", link.label].join(".")) }
               whitespace
-              a(href: path(:project_task, slug:, number: link.task.id)) do
+              a(href: path(:project_task, slug:, number: link.task.number)) do
                 plain link.task.label
                 whitespace
                 plain link.task.title

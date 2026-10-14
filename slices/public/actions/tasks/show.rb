@@ -25,8 +25,8 @@ module Public
         private
 
         def find_task(request, response, project)
-          id = Blog::Types::Id.call(path_param(request, :number)) { not_found(response) }
-          task_queries.on_public_board_by_id(project.id, id) || not_found(response)
+          number = Blog::Types::Id.call(path_param(request, :number)) { not_found(response) }
+          task_queries.on_public_board_by_number(project.id, number) || not_found(response)
         end
 
         def related(task, project)

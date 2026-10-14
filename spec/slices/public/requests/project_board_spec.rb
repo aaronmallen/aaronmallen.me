@@ -8,7 +8,7 @@ RSpec.describe "Project board", type: :request do
 
   def link(task, project)
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
-    task
+    Tasks::Slice["repos.task_queries"].by_id(task.id)
   end
 
   def missing = i18n.t("ui.views.projects.show.missing.heading")
@@ -112,7 +112,7 @@ RSpec.describe "Project board", type: :request do
       task = link(create(:task, title: "Ship it"), project)
       get "/projects/doing-it"
 
-      expect(page).to have_css("a.board-card[href='/projects/doing-it/tasks/#{task.id}']", text: "Ship it")
+      expect(page).to have_css("a.board-card[href='/projects/doing-it/tasks/#{task.number}']", text: "Ship it")
     end
 
     it "leaves the tags, note and time off a card", :aggregate_failures do
@@ -149,7 +149,7 @@ RSpec.describe "Project board", type: :request do
 
       it "keeps the page of a task off the board" do
         task = link(create(:task, :done, title: "Shipped", completed_at: cutoff - 60), project)
-        get "/projects/doing-it/tasks/#{task.id}"
+        get "/projects/doing-it/tasks/#{task.number}"
 
         expect(page).to have_css("h1", exact_text: "Shipped")
       end

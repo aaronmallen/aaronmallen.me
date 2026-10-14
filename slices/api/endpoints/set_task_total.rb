@@ -5,7 +5,7 @@ module API
     class SetTaskTotal < TaskEndpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { id: Tasks::ID, **Tasks::WORKED },
+        properties: { id: Tasks::TASK, **Tasks::WORKED },
         required: ["id"],
       }.freeze
 

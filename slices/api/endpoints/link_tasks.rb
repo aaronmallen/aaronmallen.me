@@ -6,13 +6,13 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           kind: {
             type: "string",
             enum: Blog::Types::TaskLinkKind.values,
             description: "how this task stands to the other: it blocks, is blocked_by, relates to or duplicates it",
           },
-          other_id: Tasks::ID,
+          other_id: Tasks::TASK,
         },
         required: %w[id kind other_id],
       }.freeze

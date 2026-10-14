@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           comment_id: Tasks::ID,
           body: { type: "string", description: "the comment, in Markdown" },
         },

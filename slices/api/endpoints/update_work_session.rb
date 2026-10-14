@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           session_id: Tasks::ID,
           started_at: Tasks.moment("when the session started"),
           ended_at: Tasks.moment("when the session ended; a finished session needs it, the running one takes none"),

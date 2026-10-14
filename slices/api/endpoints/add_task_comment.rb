@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Helpers::Schema::ID.merge(description: "the task to comment on"),
+          id: Tasks::TASK.merge(description: "the task to comment on, #{Tasks::TASK[:description]}"),
           body: { type: "string", description: "the comment, in Markdown" },
         },
         required: %w[id body],

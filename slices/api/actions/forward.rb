@@ -11,7 +11,11 @@ module API
         delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread
         read_mail_thread snooze_mail_threads tag_mail_threads untag_mail_threads
       ].freeze
-      PARAMS = { "array" => Blog::Types::ListParam, "integer" => Blog::Types::IntegerParam }.freeze
+      PARAMS = {
+        "array" => Blog::Types::ListParam,
+        "integer" => Blog::Types::IntegerParam,
+        Helpers::Schema::TASK[:type] => Blog::Types::IntegerParam,
+      }.freeze
       PUBLISH = Blog::Types::OAuthScope["publish"]
       SUGGEST = Blog::Types::OAuthScope["suggest"]
       SCOPES = {

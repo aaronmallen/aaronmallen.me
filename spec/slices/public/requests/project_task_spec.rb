@@ -7,7 +7,7 @@ RSpec.describe "Project task page", type: :request do
 
   def link(task, project)
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
-    task
+    Tasks::Slice["repos.task_queries"].by_id(task.id)
   end
 
   def visit_related(*others, type: "relates")
@@ -16,7 +16,7 @@ RSpec.describe "Project task page", type: :request do
     visit_task(task)
   end
 
-  def visit_task(task, slug = "doing-it") = get("/projects/#{slug}/tasks/#{task.id}")
+  def visit_task(task, slug = "doing-it") = get("/projects/#{slug}/tasks/#{task.number}")
 
   describe "a task on a published board" do
     it "shows the number and title under an h1", :aggregate_failures do
@@ -106,14 +106,14 @@ RSpec.describe "Project task page", type: :request do
       visit_related(blocked, type: "blocks")
 
       expect(page).to have_css(".task-related li", text: "blocks DOI-1 Blocked")
-      expect(page).to have_link("DOI-1 Blocked", href: "/projects/doing-it/tasks/#{blocked.id}")
+      expect(page).to have_link("DOI-1 Blocked", href: "/projects/doing-it/tasks/#{blocked.number}")
     end
 
     it "links a related task on another published board to that board" do
       other = link(create(:task, title: "Elsewhere"), create(:project, name: "Other", board_published: true))
       visit_related(other)
 
-      expect(page).to have_link("OTH-1 Elsewhere", href: "/projects/other/tasks/#{other.id}")
+      expect(page).to have_link("OTH-1 Elsewhere", href: "/projects/other/tasks/#{other.number}")
     end
 
     it "leaves out a related task on no published board of a public project", :aggregate_failures do
@@ -127,6 +127,14 @@ RSpec.describe "Project task page", type: :request do
   end
 
   describe "a task that is not public" do
+    it "answers 404 for a task's internal id when the project has no such number" do
+      2.times { create(:task) }
+      task = link(create(:task), project)
+      get "/projects/doing-it/tasks/#{task.id}"
+
+      expect([task.number == task.id, last_response.status]).to eq([false, 404])
+    end
+
     it "answers 404 for a task on no board" do
       visit_task(create(:task))
 

@@ -8,6 +8,7 @@ module Tasks
       OPEN = Blog::Types::TaskStatus["open"]
       COLUMN = Sequel.case({ { status: OPEN } => Sequel.cast(:stage, String) }, Sequel.cast(:status, String))
       KEY = /\A#?(\d{1,9})\z/
+      LABEL = /\A(?:(?<key>[A-Za-z][A-Za-z0-9]*)-)?(?<number>\d{1,9})\z/
       LINK_LIMIT = 6
       TODAY = Blog::Types::TaskFilter["today"]
 
@@ -53,6 +54,16 @@ module Tasks
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
 
+      def id_by_label(label)
+        key, number = label.match(LABEL)&.captures
+        return if number.nil?
+
+        project_id = project_queries.id_by_key(key) if key
+        return if key && project_id.nil?
+
+        tasks.where(project_id:, number: number.to_i).pluck(:id).first
+      end
+
       def in_progress = all_open.select(&:in_progress?)
 
       def in_sprint(sprint_id) = with_details.for_sprint(sprint_id).in_order.to_a
@@ -82,10 +93,10 @@ module Tasks
         on_project(tasks.labelled, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
       end
 
-      def on_public_board_by_id(project_id, id)
+      def on_public_board_by_number(project_id, number)
         links = { incoming_links: :from_task, outgoing_links: :to_task }
 
-        tasks.labelled.searched(project_ids: project_id).combine(:source, **links).by_pk(id).one
+        tasks.labelled.where(project_id:, number:).combine(:source, **links).one
       end
 
       def open_after(task) = tasks.beside(task).following(task).limit(1).one

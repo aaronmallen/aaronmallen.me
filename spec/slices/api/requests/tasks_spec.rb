@@ -477,6 +477,89 @@ RSpec.describe "API tasks", type: :request do
     end
   end
 
+  describe "a task by its label" do
+    let(:podcast) { create(:project, name: "Podcast") }
+
+    def in_project(project, **) = create(:task, project_id: project.id, **)
+
+    def rekey(project, key) = Projects::Slice["relations.projects"].dataset.where(id: project.id).update(key:)
+
+    def relocate(task, project)
+      Tasks::Slice["relations.tasks"].dataset.where(id: task.id).update(project_id: project&.id)
+    end
+
+    it "finds a task by KEY-n" do
+      in_project(podcast)
+      second = in_project(podcast, title: "Second")
+
+      expect(read("POD-2")).to include("id" => second.id, "label" => "POD-2", "title" => "Second")
+    end
+
+    it "finds a task by KEY-n written in lowercase" do
+      task = in_project(podcast)
+
+      expect(read("pod-1").fetch("id")).to eq(task.id)
+    end
+
+    it "finds a task with no project by its plain number through MCP" do
+      create(:task)
+      second = create(:task, title: "Loose")
+
+      expect(trusted(mcp_answer("read_task", id: "2"))).to include("id" => second.id, "label" => "2")
+    end
+
+    it "keeps a number in the path as the internal id" do
+      in_project(podcast)
+      task = in_project(podcast)
+
+      expect(read(task.id)).to include("id" => task.id, "label" => "POD-2")
+    end
+
+    it "answers 404 for a label no task holds", :aggregate_failures do
+      in_project(podcast)
+
+      expect([read("POD-2").fetch("message"), status]).to eq(["no task has the label POD-2", 404])
+      expect([read("NOPE-1").fetch("message"), status]).to eq(["no task has the label NOPE-1", 404])
+    end
+
+    it "refuses a label that is not KEY-n or a number" do
+      read("POD-")
+
+      expect(status).to eq(422)
+    end
+
+    it "finds nothing by the old label after the task moves", :aggregate_failures do
+      task = in_project(podcast)
+      relocate(task, create(:project, name: "Compose"))
+
+      expect(read("POD-1").fetch("message")).to eq("no task has the label POD-1")
+      expect(read("COM-1").fetch("id")).to eq(task.id)
+    end
+
+    it "finds nothing by the old key after the key changes", :aggregate_failures do
+      task = in_project(podcast)
+      rekey(podcast, "CAST")
+
+      expect(read("POD-1").fetch("message")).to eq("no task has the label POD-1")
+      expect(read("CAST-1")).to include("id" => task.id, "label" => "CAST-1")
+    end
+
+    it "acts on a task by its label" do
+      task = in_project(podcast)
+
+      expect([act("POD-1", "complete").fetch("id"), tasks.by_id(task.id).status]).to eq([task.id, "done"])
+    end
+
+    it "links to a task by its label" do
+      task = create(:task)
+      other = in_project(podcast)
+
+      answered = call_api(:post, "/#{task.id}/links", JSON.generate(kind: "relates", other_id: "POD-1"))
+
+      expect(answered.fetch("links")).to match([include("id" => other.id, "task_label" => "POD-1")])
+    end
+  end
+
   describe "GET /api/v1/tasks/:id timeline" do
     let(:task) { create(:task) }
 
@@ -1106,8 +1189,9 @@ RSpec.describe "API tasks", type: :request do
       fields = { title: "the same", list: "someday", tags: %w[ruby] }
       captured = capture(fields)
 
-      expect(trusted(mcp_answer("capture_task", **fields)).except("id", "position", "created_at", "updated_at"))
-        .to eq(captured.except("id", "position", "created_at", "updated_at"))
+      expect(trusted(mcp_answer("capture_task", **fields)).except("id", "label", "position", "created_at",
+                                                                  "updated_at"))
+        .to eq(captured.except("id", "label", "position", "created_at", "updated_at"))
     end
 
     it "save as save_task does" do
@@ -1133,7 +1217,7 @@ RSpec.describe "API tasks", type: :request do
       it "#{verb} as #{verb}_task does" do
         ids = [create(:task, title: "same").id, create(:task, title: "same").id]
         answered = act(ids.first, verb)
-        stamps = %w[id position completed_at created_at updated_at]
+        stamps = %w[id label position completed_at created_at updated_at]
 
         expect(trusted(mcp_answer("#{verb}_task", id: ids.last)).except(*stamps)).to eq(answered.except(*stamps))
       end

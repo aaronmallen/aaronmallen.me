@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadTask < TaskEndpoint
-      SCHEMA = Helpers::Schema.by_id
+      SCHEMA = Tasks::BY_ID
 
       TIMELINE = "comments, work sessions, moves, tag and status changes and when a series made the task, oldest first"
 

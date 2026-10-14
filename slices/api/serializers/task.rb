@@ -4,6 +4,7 @@ module API
   module Serializers
     class Task < Serializer
       LABELS = %w[blocks blocked_by child_of duplicates duplicated_by parent_of relates].freeze
+      LABEL = { type: "string", description: "KEY-n for a task in a project, or n for a task with no project" }.freeze
       SLUG = { type: "string", pattern: "^[a-z0-9]+([.-][a-z0-9]+)*$", maxLength: 64 }.freeze
 
       CONTRIBUTOR = Helpers::Schema.object(
@@ -18,6 +19,7 @@ module API
         {
           label: { type: "string", enum: LABELS },
           id: Helpers::Schema::INTEGER,
+          task_label: LABEL,
           title: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
         },
@@ -38,6 +40,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
+          label: LABEL,
           title: Helpers::Schema::STRING,
           note: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
@@ -80,7 +83,10 @@ module API
       def links(task)
         task.links.map do |link|
           linked = link.task
-          { label: link.label, id: linked.id, title: synced(linked.id, linked.title), status: linked.status }
+          {
+            label: link.label, id: linked.id, task_label: linked.label,
+            title: synced(linked.id, linked.title), status: linked.status,
+          }
         end
       end
 

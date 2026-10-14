@@ -5,7 +5,7 @@ module API
     class DeleteTaskComment < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { id: Tasks::ID, comment_id: Tasks::ID },
+        properties: { id: Tasks::TASK, comment_id: Tasks::ID },
         required: %w[id comment_id],
       }.freeze
 

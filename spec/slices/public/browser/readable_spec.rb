@@ -13,7 +13,7 @@ RSpec.describe "Public screens", type: :feature do
     create(:task_link, from_task_id: blocker.id, to_task_id: task.id)
     create(:task_source, task:)
     create(:task_comment, task:, body: "Looks *good*")
-    task
+    Tasks::Slice["repos.task_queries"].by_id(task.id)
   end
 
   def screens
@@ -33,7 +33,7 @@ RSpec.describe "Public screens", type: :feature do
       "privacy" => "/privacy",
       "projects" => "/projects",
       "tag" => "/writing/tags/ruby",
-      "task" => "/projects/sai/tasks/#{board_task.id}",
+      "task" => "/projects/sai/tasks/#{board_task.number}",
       "writing" => "/writing",
     }
   end

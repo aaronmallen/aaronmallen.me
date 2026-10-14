@@ -5,7 +5,7 @@ module API
     class UnlinkTask < TaskEndpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { id: Tasks::ID, other_id: Tasks::ID },
+        properties: { id: Tasks::TASK, other_id: Tasks::TASK },
         required: %w[id other_id],
       }.freeze
 

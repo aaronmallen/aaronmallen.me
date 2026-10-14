@@ -4,7 +4,9 @@
 module API
   module Endpoints
     module Tasks
-      BULK = Helpers::Schema.bulk("tasks")
+      TASK = Helpers::Schema::TASK
+      BULK = Helpers::Schema.bulk("tasks", TASK)
+      BY_ID = Helpers::Schema.by_id(TASK)
       CLOSED = "task %s is already done or canceled"
       CREDITS = "the whole set of who did the work: the owner, or an agent with the model it ran on; " \
                 "an empty list clears it, which lists the owner again"

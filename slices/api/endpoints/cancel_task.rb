@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class CancelTask < TaskEndpoint
-      SCHEMA = Helpers::Schema.by_id
+      SCHEMA = Tasks::BY_ID
 
       include Deps[cancel_task: "tasks.operations.cancel_task"]
 

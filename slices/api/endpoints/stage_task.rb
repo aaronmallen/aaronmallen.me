@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Tasks::ID,
+          id: Tasks::TASK,
           stage: { type: "string", enum: Blog::Types::TaskStage.values },
         },
         required: %w[id stage],

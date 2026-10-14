@@ -19,19 +19,28 @@ module API
       STAMP = { type: "string", format: "date-time" }.freeze
       STRING = { type: "string" }.freeze
       TAGS = { type: "array", items: STRING }.freeze
+      TASK = {
+        type: %w[integer string],
+        minimum: 1,
+        maximum: Blog::Constants::INTEGER_MAX,
+        pattern: "^([A-Za-z][A-Za-z0-9]{1,5}-)?[1-9][0-9]{0,8}$",
+        description: "a task's internal ID as a number, or its label as a string: KEY-n, or n with no project",
+      }.freeze
 
       module_function
 
-      def bulk(noun) = { additionalProperties: false, properties: { ids: ids(noun) }, required: ["ids"] }.freeze
+      def bulk(noun, item = ID)
+        { additionalProperties: false, properties: { ids: ids(noun, item) }, required: ["ids"] }.freeze
+      end
 
-      def by_id = { additionalProperties: false, properties: { id: ID }, required: ["id"] }.freeze
+      def by_id(id = ID) = { additionalProperties: false, properties: { id: }, required: ["id"] }.freeze
 
-      def ids(noun)
+      def ids(noun, item = ID)
         most = Blog::Contract::MAX_IDS
 
         {
           type: "array",
-          items: ID,
+          items: item,
           minItems: 1,
           maxItems: most,
           description: "the #{noun} to change, #{most} at most; one that fails changes none".freeze,
@@ -43,7 +52,7 @@ module API
       def names(properties) = properties.keys.map(&:to_s)
 
       def nullable(schema)
-        widened = schema.merge(type: [schema.fetch(:type), "null"])
+        widened = schema.merge(type: [*schema.fetch(:type), "null"])
         schema.key?(:enum) ? widened.merge(enum: [*schema.fetch(:enum), nil]) : widened
       end
 
@@ -56,6 +65,8 @@ module API
       def paged(properties, more: { next_page: INTEGER })
         object(properties.merge(partial: BOOLEAN), optional: more)
       end
+
+      def task?(schema) = (schema[:items] || schema)[:pattern] == TASK[:pattern]
 
       def widen(schema, **properties)
         required = schema.fetch(:required) + names(properties)
