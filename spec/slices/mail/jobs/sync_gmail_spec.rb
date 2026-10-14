@@ -213,6 +213,23 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(message).to have_attributes(body: nil, reply_to: nil, subject: "(no subject)")
     end
 
+    it "treats a filename of only whitespace as no filename", :aggregate_failures do
+      blank = { **gmail_part("application/pdf", "%PDF"), partId: "2", filename: "   　 " }
+      sync_message(parts: [gmail_part("text/plain", "Report"), blank])
+
+      expect(message.body).to eq("Report")
+      expect(rows("mail_attachments").to_a).to be_empty
+      expect(failure).to be_nil
+    end
+
+    it "treats a subject, sender name and body of only Unicode whitespace as blank", :aggregate_failures do
+      sync_message(parts: [gmail_part("text/plain", "  \n")], Subject: "　 ", From: "  <ada@example.com>")
+
+      expect(message).to have_attributes(body: nil, from_name: nil, subject: "(no subject)")
+      expect(thread.subject).to eq("(no subject)")
+      expect(failure).to be_nil
+    end
+
     it "reads every page of history Gmail sends" do
       stub_gmail(threads: { "t1" => [gmail_message("m1")], "t2" => [gmail_message("m2")] })
       stub_request(:get, %r{/history\?}).to_return(history_page(%w[t1], nextPageToken: "page-2", historyId: "300"))

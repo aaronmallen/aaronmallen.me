@@ -6,6 +6,7 @@ require "sanitize"
 module Mail
   class GmailThread
     ADDRESS = /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/
+    BLANK = /\A[[:space:]]*\z/
     CATEGORY = "CATEGORY_"
     CHARSET = /charset="?([^";\s]+)/i
     FLAGS = { starred: "STARRED", trashed: "TRASH", sent: "SENT", draft: "DRAFT", important: "IMPORTANT" }.freeze
@@ -43,7 +44,7 @@ module Mail
 
     private
 
-    def attachment?(part) = !part["filename"].to_s.empty?
+    def attachment?(part) = !BLANK.match?(part["filename"].to_s)
 
     def body(payload)
       plain = text(payload, PLAIN)
@@ -93,7 +94,7 @@ module Mail
     def present(text)
       text = text&.delete(NUL)&.strip
 
-      text unless text.nil? || text.empty?
+      text unless text.nil? || BLANK.match?(text)
     end
 
     def sender(from)
