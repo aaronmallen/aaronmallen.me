@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
-amended: ["#63", "#132", "#396"]
+amended: ["#63", "#132", "#396", "#1314"]
 tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
 ---
 
@@ -71,7 +71,7 @@ When the house loses power or internet, the site goes down. We chose that.
 Postgres connections have a budget. Each process sizes its pool at its threads plus one, capped by
 `DATABASE_MAX_CONNECTIONS`, so at the defaults the worker opens 11 and the web process 6. `HANAMI_WEB_CONCURRENCY`
 above 1 forks Puma, and each fork opens its own pool. The total has to stay inside the NAS Postgres
-`max_connections`.
+`max_connections`. #1314 runs two web workers in production, and [ADR 0172][0172] holds the budget that follows.
 
 Redis on the NAS listens on port 30059. The settings fall back to 6379, so the deploy must set `REDIS_PORT` or the
 worker cannot connect. The NAS runs Postgres 17, which clears the schema's floor.
@@ -86,4 +86,5 @@ the releases share.
 
 [0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
+[0172]: 0172-run-puma-as-two-preloaded-workers-with-yjit-and-two-malloc-arenas.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
