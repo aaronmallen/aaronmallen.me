@@ -55,6 +55,9 @@ module API
           blocked: Helpers::Schema::BOOLEAN,
           carried_count: Helpers::Schema::INTEGER,
           worked_seconds: Helpers::Schema::INTEGER,
+          recur: Helpers::Schema.nullable(TaskSeries::SCHEMA).merge(
+            description: "the series this task is the current copy of, or null when it does not recur",
+          ),
           source: Helpers::Schema.nullable(SOURCE).merge(
             description: "the issue the task syncs from, or null for a local task",
           ),
@@ -80,6 +83,8 @@ module API
           { label: link.label, id: linked.id, title: synced(linked.id, linked.title), status: linked.status }
         end
       end
+
+      def recur(task) = task.series && TaskSeries.new(task.series).serializable_hash
 
       def source(task)
         found = task.source

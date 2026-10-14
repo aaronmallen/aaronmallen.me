@@ -8,7 +8,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         list_inbox list_journal_entries list_links list_people list_posts list_projects list_pull_requests
         list_saved_views
         list_share_groups list_shares
-        list_social_posts list_sprints list_suggestions list_tags list_task_rules list_tasks
+        list_social_posts list_sprints list_suggestions list_tags list_task_rules list_task_series list_tasks
         list_webmentions list_work_entries read_activity read_analytics read_commit read_current_sprint read_decision
         read_journal_entry read_performance read_person read_photo read_post read_project read_pull_request read_review
         read_saved_view
@@ -25,8 +25,9 @@ RSpec.describe "MCP tool scopes", type: :request do
         create_journal_entry create_post create_saved_view create_social_post drop_decision drop_sprint edit_decision
         edit_decision_comment edit_decision_option edit_task_comment ignore_webmentions import_commits link_records
         link_tasks mark_task_seen mark_webmentions_spam
-        moderate_webmention move_task move_tasks open_decision pause_task plan_sprint
-        reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project save_person
+        moderate_webmention move_task move_tasks open_decision pause_task pause_task_series plan_sprint
+        reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project
+        resume_task_series save_person
         save_project save_review_note save_tag save_task save_task_rule schedule_task set_task_total
         snooze_attention
         snooze_inbox

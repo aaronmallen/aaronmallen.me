@@ -110,4 +110,60 @@ RSpec.describe "MCP task tools", type: :request do
       expect(message).to eq("no task has the ID 999999")
     end
   end
+
+  describe "recurrence" do
+    def answer = JSON.parse(message)
+
+    def series = Tasks::Slice["relations.task_series"]
+
+    it "captures a task on a cadence" do
+      call_tool("capture_task", title: "Pay rent", recur: { cadence: "month_day", day: 1 })
+
+      expect(answer.fetch("recur")).to include("cadence" => "month_day", "day" => 1, "paused" => false)
+    end
+
+    it "changes and clears a cadence with save_task", :aggregate_failures do
+      task = create(:task)
+      call_tool("save_task", id: task.id, recur: { cadence: "yearly", month: 3, day: 14 })
+      expect(answer.fetch("recur")).to include("cadence" => "yearly", "month" => 3, "day" => 14)
+
+      call_tool("save_task", id: task.id, recur: nil)
+      expect([answer.fetch("recur"), series.count]).to eq([nil, 0])
+    end
+
+    it "refuses a cadence on an imported task as an error" do
+      task = create(:task_source, task: create(:task, :external)).task
+      call_tool("save_task", id: task.id, recur: { cadence: "month_end" })
+
+      expect([refused?, series.count]).to eq([true, 0])
+    end
+
+    it "shows a task's cadence when read_task reads it" do
+      task = create(:task)
+      Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "days", every: 4 })
+      call_tool("read_task", id: task.id)
+
+      expect(answer.fetch("recur")).to include("cadence" => "days", "every" => 4)
+    end
+
+    describe "a series" do
+      let(:task) { create(:task, title: "Water the plants") }
+      let(:id) { Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "days", every: 2 }).value!.id }
+
+      it "lists it with its current copy" do
+        id
+        call_tool("list_task_series")
+
+        expect(answer.fetch("task_series")).to match([include("id" => id, "task" => include("id" => task.id))])
+      end
+
+      it "pauses and resumes it", :aggregate_failures do
+        call_tool("pause_task_series", id:)
+        expect(answer.fetch("paused")).to be(true)
+
+        call_tool("resume_task_series", id:)
+        expect(answer.fetch("paused")).to be(false)
+      end
+    end
+  end
 end

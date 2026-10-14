@@ -3,6 +3,9 @@
 module API
   module Endpoints
     class SaveTask < TaskEndpoint
+      RECUR = "#{Tasks::RECUR.fetch(:description)}; a new cadence replaces the old one and keeps a paused series " \
+              "paused; null stops it".freeze
+
       SCHEMA = {
         additionalProperties: false,
         properties: {
@@ -10,6 +13,7 @@ module API
           contributors: Tasks::CONTRIBUTORS,
           list: { type: "string", enum: Tasks::LISTS, description: "moves the task to this list or today's sprint" },
           note: { type: "string", description: "what done looks like" },
+          recur: Helpers::Schema.nullable(Tasks::RECUR).merge(description: RECUR),
           sprint_on: {
             type: "string",
             description: "a sprint day as YYYY-MM-DD to schedule it for, or an empty string to send it back to next",
@@ -29,6 +33,7 @@ module API
 
         case save_task.call(id, form(task, fields))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
+          in Failure(:imported) then invalid(recur: [Tasks::IMPORTED])
           in result then placed(result, id)
         end
       end
@@ -43,6 +48,7 @@ module API
           tags: Helpers::Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
           title: fields.fetch(:title, task.title),
           **fields.slice(:contributors),
+          **({ recur: Tasks.recur(fields[:recur]) } if fields.key?(:recur)),
         }
       end
     end

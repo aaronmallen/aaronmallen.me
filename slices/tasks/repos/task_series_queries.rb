@@ -9,7 +9,13 @@ module Tasks
 
       def count = task_series.count
 
-      def listed = task_series.combine(task: :sprint).order(:id).to_a
+      def listed = with_task.order(:id).to_a
+
+      def shown(id) = with_task.by_pk(id).one
+
+      private
+
+      def with_task = task_series.combine(task: :sprint)
     end
   end
 end

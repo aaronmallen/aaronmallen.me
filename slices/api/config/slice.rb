@@ -92,13 +92,14 @@ module API
       operations.delete_task_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
       operations.edit_work_session operations.link_repo_tasks operations.link_tasks operations.mark_task_seen
       operations.move_task
-      operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
-      operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
+      operations.pause_task operations.pause_task_series operations.place_task operations.plan_sprint
+      operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.resume_task_series
+      operations.save_task operations.save_task_rule
       operations.schedule_task operations.set_task_total operations.snooze_tasks operations.stage_task
       operations.start_task
       operations.unlink_task operations.wake_task
       repos.sprint_queries repos.task_comment_queries repos.task_queries repos.task_rule_queries
-      repos.task_source_queries repos.time_report_queries
+      repos.task_series_queries repos.task_source_queries repos.time_report_queries
     ], from: :tasks
 
     export %w[
@@ -132,17 +133,20 @@ module API
       endpoints.list_attention endpoints.list_calendar endpoints.list_decisions endpoints.list_inbox
       endpoints.list_journal_entries endpoints.list_links endpoints.list_people endpoints.list_saved_views
       endpoints.list_social_posts
-      endpoints.list_sprints endpoints.list_task_rules endpoints.list_tasks endpoints.list_webmentions
+      endpoints.list_sprints endpoints.list_task_rules endpoints.list_task_series endpoints.list_tasks
+      endpoints.list_webmentions
       endpoints.mark_mail_threads_read endpoints.mark_mail_threads_unread endpoints.mark_task_seen
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
-      endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
+      endpoints.pause_task endpoints.pause_task_series endpoints.plan_sprint endpoints.publish_post
+      endpoints.read_activity endpoints.read_commit
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_health_days endpoints.read_journal_entry
       endpoints.read_person
       endpoints.read_post endpoints.read_project endpoints.read_pull_request endpoints.read_review
       endpoints.read_saved_view
       endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
       endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
-      endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
+      endpoints.reorder_task endpoints.resolve_decision endpoints.resume_task_series endpoints.save_review_note
+      endpoints.save_task
       endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.send_social_post
       endpoints.set_task_total
       endpoints.snooze_attention

@@ -11,16 +11,58 @@ module API
       CONTRIBUTORS = Helpers::Schema.list(Serializers::Task::CONTRIBUTOR).merge(description: CREDITS).freeze
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
       ID = Helpers::Schema::ID
+      IMPORTED = "an imported task cannot recur"
       LISTS = Blog::Types::TaskFilter.values.freeze
       SPRINT_PAST = "a sprint opens on today or a day after it"
+      SERIES = "task series"
       TAG = Helpers::Tags.schema("private")
       WORKED = {
         hours: { type: "integer", description: "whole hours worked, 0 to 9999" },
         minutes: { type: "integer", description: "minutes on top of the hours, 0 to 59" },
       }.freeze
 
+      RECUR = {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          cadence: {
+            type: "string",
+            enum: Blog::Types::TaskCadence.values,
+            description: [
+              "days: every few days; weeks: every few weeks on a weekday; month_day: a day each month, the last",
+              "day in a shorter month; month_end: the last day of each month; month_weekday: a weekday each month,",
+              "such as the first Monday; yearly: a date each year",
+            ].join(" "),
+          },
+          every: { type: "integer", minimum: 1, maximum: 365, description: "days or weeks apart, for days and weeks" },
+          weekday: {
+            type: "integer", minimum: 0, maximum: 6,
+            description: "0 for Sunday to 6 for Saturday, for weeks and month_weekday",
+          },
+          week: {
+            type: "integer", enum: [-1, 1, 2, 3, 4],
+            description: "1 to 4 for the first to fourth, or -1 for the last, for month_weekday",
+          },
+          day: {
+            type: "integer", minimum: 1, maximum: 31,
+            description: "the day of the month, for month_day and yearly",
+          },
+          month: { type: "integer", minimum: 1, maximum: 12, description: "1 for January to 12, for yearly" },
+          starts_on: {
+            type: "string",
+            description: "for weeks, the day as YYYY-MM-DD that weeks count from; today when you leave it out",
+          },
+        },
+        required: ["cadence"],
+        description: [
+          "repeats the task: when it closes, done or canceled, a copy appears on the next cadence day after today;",
+          "a field the cadence does not use is dropped; an imported task cannot recur",
+        ].join(" "),
+      }.freeze
+
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
+        cadence: { "blank" => "pick a cadence" },
         contributors: {
           Blog::Contract::FORMAT => "a contributor is the owner alone, or an agent with its model, as lowercase slugs",
         },
@@ -32,6 +74,11 @@ module API
           "order" => "a session ends after it starts",
           "running" => "pause or complete the task before you delete its running session",
         },
+        day: {
+          "blank" => "month_day and yearly need a day",
+          Blog::Contract::FORMAT => "that month has fewer days",
+        },
+        every: { "blank" => "days and weeks need every" },
         hours: {
           "blank" => "give the hours, the minutes or both",
           Blog::Contract::FORMAT => "hours run from 0 to 9999",
@@ -39,6 +86,7 @@ module API
         kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
         list: { Blog::Contract::FORMAT => "pick one of the four lists" },
         minutes: { Blog::Contract::FORMAT => "minutes run from 0 to 59" },
+        month: { "blank" => "yearly needs a month" },
         other_id: {
           Blog::Contract::FORMAT => "pick a task by its ID",
           "missing" => "that task is gone, so find another",
@@ -51,9 +99,12 @@ module API
           Blog::Contract::SKIPPED => "that start falls in the hour the clocks skip",
           "future" => "a session cannot start later than now",
         },
+        starts_on: { Blog::Contract::FORMAT => "give the start as YYYY-MM-DD" },
         tag: Helpers::Tags::COMPLAINTS,
         tags: { Blog::Contract::FORMAT => Helpers::Tags::REFUSAL },
         title: { "blank" => "write the task down first" },
+        week: { "blank" => "month_weekday needs a week" },
+        weekday: { "blank" => "weeks and month_weekday need a weekday" },
       }.freeze
 
       module_function
@@ -65,6 +116,8 @@ module API
       def moment(meaning)
         { type: "string", description: "#{meaning}, as YYYY-MM-DDTHH:MM in #{Blog::TimeZone::NAME}" }
       end
+
+      def recur(value) = value&.transform_keys(&:to_sym)
     end
   end
 end

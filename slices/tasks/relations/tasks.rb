@@ -21,6 +21,7 @@ module Tasks
           has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id
           has_many :task_tags
           has_many :tags, through: :task_tags, view: :in_name_order
+          has_one :task_series, as: :series
           has_one :task_sources, as: :source
           has_one :work_sessions, as: :running_session, view: :running
         end
@@ -47,7 +48,7 @@ module Tasks
         counted = select_append(ROM::SQL::Attribute[ROM::Types::Integer].meta(sql_expr: comments).as(:comment_count))
         links = { incoming_links: :from_task, outgoing_links: :to_task }
 
-        counted.combine(:contributors, :running_session, :source, :tags, **links)
+        counted.combine(:contributors, :running_session, :series, :source, :tags, **links)
       end
 
       def finished_counts(day)
@@ -140,11 +141,7 @@ module Tasks
 
       def titles(ids) = dataset.unordered.where(id: ids).select_hash(:id, :title)
 
-      def touched_between(first, last)
-        days = Range.new(first, last)
-
-        where(Sequel.|({ CREATED_ON => days }, { COMPLETED_ON => days }))
-      end
+      def touched_between(first, last) = where(Sequel.|({ CREATED_ON => first..last }, { COMPLETED_ON => first..last }))
 
       def unfinished_in(sprint_ids) = where(sprint_id: sprint_ids).open
 
