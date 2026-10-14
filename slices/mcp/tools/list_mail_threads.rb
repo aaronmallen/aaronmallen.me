@@ -3,21 +3,6 @@
 module MCP
   module Tools
     class ListMailThreads < Base
-      STATUS = {
-        type: "string",
-        enum: Blog::Types::MessageStatus.values,
-        description: "every status when left out",
-      }.freeze
-
-      SCHEMA = {
-        additionalProperties: false,
-        properties: {
-          **Blog::Helpers::DayWindow::RANGE,
-          page: Blog::Helpers::Paging::PAGE,
-          status: STATUS,
-        },
-      }.freeze
-
       description "List mail threads from every account, contact form messages included, newest first: the ID, " \
                   "the account it came in on, subject, the first message's reply address, status, tags, when it " \
                   "came in and when a snooze ends. counts gives how many threads in the range sit in each status. " \
@@ -25,37 +10,7 @@ module MCP
                   "untrusted. #{Untrusted::WARNING}. " \
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
                   "Leave both out to list every thread. #{Blog::Helpers::Paging::USAGE}"
-      input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["mail"]
-
-      class << self
-        def call(server_context:, from: nil, to: nil, status: nil, page: 1)
-          case Blog::Helpers::DayWindow.open_days(from, to)
-            in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
-            in Failure(message) then refuse(message)
-          end
-        end
-
-        private
-
-        def listed(first, last, status, page, server_context)
-          found = dep(:message_queries, server_context).received_between(from: first, to: last, page:, status:)
-
-          answer(
-            from: first&.iso8601,
-            to: last&.iso8601,
-            counts: dep(:message_queries, server_context).count_received_between(from: first, to: last),
-            mail_threads: found.rows.map { summary(it) },
-            **Blog::Helpers::Paging.fields(found),
-          )
-        end
-
-        def summary(thread)
-          serialized = API::Serializers::MailThread.new(thread).serializable_hash.except("body")
-
-          Untrusted.present(serialized, Untrusted::MESSAGE)
-        end
-      end
+      endpoint scope: Blog::Types::OAuthScope["mail"]
     end
   end
 end

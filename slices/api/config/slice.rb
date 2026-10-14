@@ -10,7 +10,10 @@ module API
       operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries
     ], from: :activity
 
-    import keys: %w[repos.analytics_rollup_queries repos.post_reader_queries], from: :analytics
+    import keys: %w[
+      repos.analytics_event_queries repos.analytics_page_queries repos.analytics_rollup_queries repos.feed_fetch_queries
+      repos.post_reader_queries
+    ], from: :analytics
 
     import keys: %w[repos.calendar_queries], from: :calendar
 
@@ -33,18 +36,22 @@ module API
 
     import keys: %w[operations.link_records operations.unlink_records repos.record_link_queries], from: :links
 
-    import keys: %w[operations.upload_photo], from: :media
+    import keys: %w[operations.read_photo operations.upload_photo], from: :media
 
     import keys: %w[
-      operations.act_on_posts operations.publish_draft operations.revise_edit_note repos.post_queries
+      operations.act_on_posts operations.compose_announcement operations.delete_post operations.publish_draft
+      operations.revise_edit_note operations.save_post operations.save_post_seo repos.post_queries
     ], from: :posts
 
-    import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
+    import keys: %w[
+      operations.add_work_entry operations.archive_project operations.delete_work_entry operations.restore_project
+      operations.save_project repos.project_queries repos.work_entry_queries
+    ], from: :projects
 
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.save_review_note
-      operations.update_journal_entry repos.commit_queries repos.journal_entry_queries repos.pull_request_queries
-      repos.review_note_queries
+      operations.queue_commit_import operations.update_journal_entry repos.commit_queries repos.journal_entry_queries
+      repos.pull_request_queries repos.review_note_queries repos.sync_state_queries
     ], from: :record
 
     import keys: %w[
@@ -57,22 +64,27 @@ module API
     import keys: %w[
       operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.list_target_accounts operations.mark_webmention_seen
-      operations.measure_parts operations.save_person
-      operations.search_accounts operations.snooze_webmentions operations.wake_webmention repos.person_queries
+      operations.measure_parts operations.moderate_webmention operations.save_person
+      operations.search_accounts operations.snooze_webmentions operations.update_webmention_settings
+      operations.wake_webmention repos.person_queries
       repos.social_post_queries repos.webmention_queries
     ], from: :social
 
     import keys: %w[operations.record_sighting], from: :security
 
-    import keys: %w[repos.suggestion_queries], from: :suggestions
+    import keys: %w[
+      operations.accept_suggestion_edits operations.reject_suggestion_edits operations.replace_post_edits
+      operations.replace_social_post_edits repos.suggestion_queries
+    ], from: :suggestions
 
-    import keys: %w[repos.tag_queries], from: :tags
+    import keys: %w[operations.remove_tag operations.save_tag repos.tag_queries], from: :tags
 
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
       operations.delete_task_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
-      operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
+      operations.edit_work_session operations.link_repo_tasks operations.link_tasks operations.mark_task_seen
+      operations.move_task
       operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
       operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
       operations.schedule_task operations.set_task_total operations.snooze_tasks operations.stage_task
@@ -83,6 +95,18 @@ module API
     ], from: :tasks
 
     export %w[
+      endpoints.add_work_entry endpoints.archive_project endpoints.create_project endpoints.delete_work_entry
+      endpoints.list_projects endpoints.list_work_entries endpoints.restore_project endpoints.update_project
+      endpoints.create_tag endpoints.list_tags endpoints.remove_tag endpoints.update_tag
+      endpoints.moderate_webmention endpoints.read_webmention_settings endpoints.update_webmention_settings
+      endpoints.import_commits endpoints.list_api_tokens endpoints.list_commits endpoints.list_pull_requests
+      endpoints.read_sync_state
+      endpoints.accept_suggestion_edits endpoints.list_suggestions endpoints.reject_suggestion_edits
+      endpoints.suggest_edits
+      endpoints.compose_announcement endpoints.create_post endpoints.delete_post endpoints.list_posts
+      endpoints.update_post endpoints.write_post_seo
+      endpoints.list_mail_threads endpoints.mark_mail_thread endpoints.read_mail_thread
+      endpoints.list_clients endpoints.read_analytics endpoints.read_photo
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
       endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
       endpoints.clear_inbox

@@ -3,26 +3,13 @@
 module MCP
   module Tools
     class SaveTag < Base
-      UNSAVED = "could not save the tag"
-
-      MESSAGES = {
-        color: { "format" => "pick one of the six colours" },
-        name: {
-          "blank" => "give the tag a name first",
-          "format" => API::Helpers::Tags::REFUSAL,
-          "taken" => "another tag already holds that name",
-        },
-      }.freeze
-
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          color: { type: "string", enum: Blog::Types::TagColor.values },
           id: API::Helpers::Schema::ID.merge(
             description: "the tag to rename or recolour; leave it out to add a new one",
           ),
-          name: { type: "string", description: API::Helpers::Tags::FORMAT },
-          scope: TAG_SCOPE,
+          **API::Endpoints::TagEndpoint::PROPERTIES,
         },
         required: ["scope"],
       }.freeze
@@ -35,24 +22,8 @@ module MCP
       scope Blog::Types::OAuthScope["write"]
 
       class << self
-        def call(scope:, server_context:, id: nil, name: nil, color: nil)
-          current = id && dep(:tag_queries, server_context).find_in(scope, id)
-          return refuse(missing(id)) if id && current.nil?
-
-          saved(dep(:save_tag, server_context).call({ name: name || current&.name, color: }, scope:, id:), id)
-        end
-
-        private
-
-        def missing(id) = API::Helpers::Wording.missing("tag", id)
-
-        def saved(result, id)
-          case result
-            in Success(tag) then answer(id: tag.id, name: tag.name, color: tag.color)
-            in Failure[:invalid, errors] then invalid(errors, MESSAGES)
-            in Failure(:not_found) then refuse(missing(id))
-            else refuse(UNSAVED)
-          end
+        def call(server_context:, **input)
+          hand_over(input.key?(:id) ? :update_tag : :create_tag, input, server_context)
         end
       end
     end

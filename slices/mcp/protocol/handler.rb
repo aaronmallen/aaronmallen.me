@@ -14,50 +14,6 @@ module MCP
           data: "This server takes one request per POST, not a batch",
         },
       )
-      CONTEXT = {
-        accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
-        add_work_entry: "projects.operations.add_work_entry",
-        analytics_event_queries: "analytics.repos.analytics_event_queries",
-        analytics_page_queries: "analytics.repos.analytics_page_queries",
-        analytics_rollup_queries: "analytics.repos.analytics_rollup_queries",
-        api_token_queries: "api.repos.api_token_queries",
-        archive_project: "projects.operations.archive_project",
-        commit_queries: "record.repos.commit_queries",
-        compose_announcement: "posts.operations.compose_announcement",
-        delete_post: "posts.operations.delete_post",
-        delete_work_entry: "projects.operations.delete_work_entry",
-        feed_fetch_queries: "analytics.repos.feed_fetch_queries",
-        link_repo_tasks: "tasks.operations.link_repo_tasks",
-        mark_mail_thread: "mail.operations.mark_message",
-        message_queries: "mail.repos.message_queries",
-        moderate_webmention: "social.operations.moderate_webmention",
-        oauth_client_queries: "repos.oauth_client_queries",
-        oauth_token_queries: "repos.oauth_token_queries",
-        post_figure_queries: "api.repos.post_figure_queries",
-        post_reader_queries: "analytics.repos.post_reader_queries",
-        post_queries: "posts.repos.post_queries",
-        project_queries: "projects.repos.project_queries",
-        pull_request_queries: "record.repos.pull_request_queries",
-        queue_commit_import: "record.operations.queue_commit_import",
-        read_photo: "media.operations.read_photo",
-        reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
-        remove_tag: "tags.operations.remove_tag",
-        replace_post_edits: "suggestions.operations.replace_post_edits",
-        replace_social_post_edits: "suggestions.operations.replace_social_post_edits",
-        restore_project: "projects.operations.restore_project",
-        save_post: "posts.operations.save_post",
-        save_post_seo: "posts.operations.save_post_seo",
-        save_project: "projects.operations.save_project",
-        save_tag: "tags.operations.save_tag",
-        social_post_queries: "social.repos.social_post_queries",
-        suggestion_queries: "suggestions.repos.suggestion_queries",
-        sync_state_queries: "record.repos.sync_state_queries",
-        tag_queries: "tags.repos.tag_queries",
-        task_source_queries: "tasks.repos.task_source_queries",
-        update_webmention_settings: "social.operations.update_webmention_settings",
-        webmention_queries: "social.repos.webmention_queries",
-        work_entry_queries: "projects.repos.work_entry_queries",
-      }.freeze
       INSTRUCTIONS = [
         "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings, the",
         "journal, commits, pull requests and the sync state, API tokens and MCP clients, tasks, sprints, task rules,",
@@ -75,7 +31,10 @@ module MCP
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
-      SPLIT_ENDPOINTS = %i[create_person create_task_rule update_person update_task_rule].freeze
+      SPLIT_ENDPOINTS = %i[
+        create_person create_project create_tag create_task_rule update_person update_project update_tag
+        update_task_rule
+      ].freeze
       TITLE = "%s's site"
       TOOLS = [
         Tools::AcceptSuggestionEdits,
@@ -229,7 +188,12 @@ module MCP
       TOOL_ENDPOINTS = TOOLS.filter_map(&:endpoint_key).union(SPLIT_ENDPOINTS)
                             .to_h { [it, "api.endpoints.#{it}"] }.freeze
 
-      include Deps["settings", honeybadger: "honeybadger.agent", **CONTEXT, **TOOL_ENDPOINTS]
+      include Deps[
+        "settings",
+        honeybadger: "honeybadger.agent",
+        task_source_queries: "tasks.repos.task_source_queries",
+        **TOOL_ENDPOINTS,
+      ]
 
       def call(payload, scopes:, oauth_client_id:)
         batch?(payload) ? BATCH_REFUSAL : server(scopes, oauth_client_id).handle_json(payload)
@@ -244,8 +208,8 @@ module MCP
       end
 
       def context(scopes, oauth_client_id)
-        endpoints = CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }
-        endpoints.merge(oauth_client_id:, scopes:, settings:)
+        endpoints = TOOL_ENDPOINTS.keys.to_h { [it, public_send(it)] }
+        endpoints.merge(oauth_client_id:, scopes:, task_source_queries:)
       end
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])

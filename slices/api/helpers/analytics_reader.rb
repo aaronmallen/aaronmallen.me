@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
-module MCP
-  module Tools
-    class AnalyticsReader < Data.define(:range, :at, :path, :context)
+module API
+  module Helpers
+    class AnalyticsReader < Data.define(:range, :at, :path, :repos)
+      RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for " \
+                    "#{Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS} days; start from or since inside " \
+                    "them to get these. The daily counts still hold".freeze
+      TOP = 25
       PAGE_RANKED = %i[referrers countries].freeze
       RANKED = %i[paths referrers countries sources devices].freeze
       WEEKDAYS = %i[monday tuesday wednesday thursday friday saturday sunday].freeze
@@ -11,26 +15,24 @@ module MCP
 
       private
 
-      def between(repo, name, **) = dep(repo).public_send(name, from: range.first, to: range.last, **)
+      def between(name, query, **) = repo(name).public_send(query, from: range.first, to: range.last, **)
 
       def breakdowns(page_path)
-        { sources: between(:analytics_page_queries, :sources_between, path: page_path).take(top),
+        { sources: between(:analytics_page_queries, :sources_between, path: page_path).take(TOP),
           devices: between(:analytics_page_queries, :devices_between, path: page_path) }
       end
 
       def change(totals)
         to = range.first - 1
         from = to - (range.count - 1)
-        before = dep(:analytics_rollup_queries).summary_between(from:, to:).fetch(:totals).fetch(:views)
+        before = repo(:analytics_rollup_queries).summary_between(from:, to:).fetch(:totals).fetch(:views)
 
         { from: from.iso8601, to: to.iso8601, views: before, percent: percent(totals.fetch(:views), before) }
       end
 
       def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
-      def dep(name) = context.fetch(name)
-
-      def events = dep(:analytics_event_queries)
+      def events = repo(:analytics_event_queries)
 
       def feed = between(:feed_fetch_queries, :feed_subscribers_between).then { it.merge(days: dated(it.fetch(:days))) }
 
@@ -47,9 +49,9 @@ module MCP
 
       def page_ranked(found)
         {
-          **PAGE_RANKED.to_h { [it, found.fetch(it).take(top)] },
+          **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
           **breakdowns(path),
-          clicks: between(:analytics_page_queries, :clicks_between, path:).take(top),
+          clicks: between(:analytics_page_queries, :clicks_between, path:).take(TOP),
           scroll: between(:analytics_page_queries, :scroll_depths_between, path:),
         }
       end
@@ -73,7 +75,7 @@ module MCP
 
       def post
         slug = path.delete_prefix("#{Blog::Constants::WRITING_PATH}/")
-        dep(:post_queries).published_by_slug(slug) unless slug == path
+        repo(:post_queries).published_by_slug(slug) unless slug == path
       end
 
       def published(days)
@@ -82,8 +84,8 @@ module MCP
 
         {
           since_publish: since_publish(days, Blog::TimeZone.today(found.published_at)),
-          first_days: dep(:analytics_page_queries).first_days(path),
-          unique_readers: dep(:post_reader_queries).unique_readers([found]).fetch(found.id),
+          first_days: repo(:analytics_page_queries).first_days(path),
+          unique_readers: repo(:post_reader_queries).unique_readers([found]).fetch(found.id),
         }
       end
 
@@ -98,15 +100,13 @@ module MCP
         )
       end
 
-      def ranked_path(found, read_throughs)
-        found.merge(title: Untrusted.call(found[:title]), read_throughs: read_throughs.fetch(found.fetch(:path), 0))
-      end
+      def ranked_path(found, read_throughs) = found.merge(read_throughs: read_throughs.fetch(found.fetch(:path), 0))
 
       def raw
         found = events.hourly_between(**raw_window)
-        return { refused: ReadAnalytics::RAW_REFUSAL } unless found
+        return { refused: RAW_REFUSAL } unless found
 
-        timed(found).merge(events.navigation_between(**raw_window).transform_values { it.take(top) })
+        timed(found).merge(events.navigation_between(**raw_window).transform_values { it.take(TOP) })
       end
 
       def raw_window
@@ -117,8 +117,10 @@ module MCP
 
       def read_throughs_by_path = between(:analytics_rollup_queries, :read_throughs_between)
 
+      def repo(name) = repos.fetch(name)
+
       def since_counts(found)
-        { at: stamped(at), **found.fetch(:totals), **found.slice(:paths).transform_values { it.take(top) } }
+        { at: stamped(at), **found.fetch(:totals), **found.slice(:paths).transform_values { it.take(TOP) } }
       end
 
       def since_publish(days, first)
@@ -147,7 +149,7 @@ module MCP
           totals: totals(found),
           days: dated(found.fetch(:days)),
           **raw,
-          **RANKED.to_h { [it, found.fetch(it).take(top)] },
+          **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
           **site_wide(found),
         }
       end
@@ -159,8 +161,6 @@ module MCP
         at ? { hours:, read_spread:, since: since_counts(found) } : { hours:, read_spread: }
       end
 
-      def top = ReadAnalytics::TOP
-
       def totals(found, path: nil)
         found.fetch(:totals).merge(reach: between(:analytics_rollup_queries, :reach_between, path:))
       end
@@ -169,12 +169,12 @@ module MCP
 
       def webmentions
         counts = between(:webmention_queries, :received_by_post)
-        posts = dep(:post_queries).by_ids(counts.keys).map { webmention_post(it, counts) }
+        posts = repo(:post_queries).by_ids(counts.keys).map { webmention_post(it, counts) }
 
         {
-          pending: dep(:webmention_queries).pending_count,
+          pending: repo(:webmention_queries).pending_count,
           received: between(:webmention_queries, :received_between),
-          posts: posts.sort_by { [-it[:received], it[:title]] }.take(top),
+          posts: posts.sort_by { [-it[:received], it[:title]] }.take(TOP),
         }
       end
 

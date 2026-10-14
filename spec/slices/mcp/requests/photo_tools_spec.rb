@@ -65,7 +65,7 @@ RSpec.describe "MCP photo tools", type: :request do
       connect_media_store
       stub_store(status: 500)
 
-      expect(refusal(photo.key)).to eq([true, [{ "type" => "text", "text" => MCP::Tools::ReadPhoto::UNAVAILABLE }]])
+      expect(refusal(photo.key)).to eq([true, [{ "type" => "text", "text" => API::Endpoints::ReadPhoto::STORE_DOWN }]])
     end
   end
 end

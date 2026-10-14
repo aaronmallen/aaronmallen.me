@@ -8,6 +8,16 @@ module API
       COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
       TAG = Helpers::Tags.schema("private")
       UNCHANGED = "could not change mail thread %s"
+
+      THREAD = Serializers::MailThread::SCHEMA
+      HEAD = THREAD.merge(
+        properties: THREAD.fetch(:properties).except(:body, :reply_to),
+        required: THREAD.fetch(:required) - %w[body reply_to],
+      ).freeze
+      SUMMARY = THREAD.merge(
+        properties: THREAD.fetch(:properties).except(:body),
+        required: THREAD.fetch(:required) - %w[body],
+      ).freeze
     end
   end
 end

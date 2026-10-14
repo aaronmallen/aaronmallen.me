@@ -3,32 +3,10 @@
 module MCP
   module Tools
     class RemoveTag < Base
-      RULES = { true => "the task rule", false => "the task rules" }.freeze
-      UNREMOVED = "could not remove the tag"
-
-      SCHEMA = {
-        additionalProperties: false,
-        properties: { id: API::Helpers::Schema::ID, scope: TAG_SCOPE },
-        required: %w[id scope],
-      }.freeze
-
       description "Remove one tag for good from its scope. #{TAG_KINDS}. Every record that carries the tag loses it. " \
                   "A tag that is the only tag on a task rule with no projects stays until the rule takes another tag " \
                   "or a project, or goes"
-      input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["delete"]
-
-      class << self
-        def call(id:, scope:, server_context:)
-          case dep(:remove_tag, server_context).call(id, scope:)
-            in Success(_) then answer(id:, removed: true)
-            in Failure[:last_tag_of_rules, patterns]
-              refuse("tag #{id} is the only tag on #{RULES.fetch(patterns.one?)} #{patterns.join(', ')}")
-            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("tag", id))
-            else refuse(UNREMOVED)
-          end
-        end
-      end
+      endpoint scope: Blog::Types::OAuthScope["delete"]
     end
   end
 end

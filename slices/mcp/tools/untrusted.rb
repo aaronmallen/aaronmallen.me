@@ -36,7 +36,8 @@ module MCP
       WEBMENTION = %w[author_name author_url excerpt source_url].freeze
       SHAPES = {
         API::Endpoints::DeleteMailThreads::DELETED => ->(_) { %w[subject] },
-        API::Serializers::MailThread::SCHEMA => ->(_) { MESSAGE },
+        API::Endpoints::MailThreads::HEAD => ->(_) { MESSAGE },
+        API::Serializers::MailMessage::SCHEMA => ->(_) { MESSAGE },
         API::Serializers::Task::SCHEMA => ->(entry) { entry.fetch("source").nil? ? %w[note] : %w[note title] },
         API::Serializers::TaskComment::SCHEMA => ->(entry) { comment_fields(entry) },
         API::Serializers::Webmention::SCHEMA => ->(_) { WEBMENTION },

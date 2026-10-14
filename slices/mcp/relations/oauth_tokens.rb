@@ -15,8 +15,6 @@ module MCP
 
       def of_type(type) = where(type:)
 
-      def unexpired(at: Time.now) = where { expires_at > at }
-
       def with_digest(token_digest) = where(token_digest:)
     end
   end

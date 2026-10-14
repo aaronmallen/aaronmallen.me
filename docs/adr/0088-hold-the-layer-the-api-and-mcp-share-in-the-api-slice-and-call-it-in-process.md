@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [api, mcp]
 issue: "#154"
-amended: ["#927", "#1001"]
+amended: ["#927", "#1001", "#1188"]
 tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
 ---
 
@@ -39,31 +39,21 @@ Both doors call the same class, in process:
   success, 404 for a missing record, 422 for a contract's errors. Since #1001 one action, `API::Actions::Forward`,
   serves every endpoint, and the operation table in `BuildDocument` draws the routes as well as the document.
 - `api` exports each endpoint. `mcp` imports them in `slices/mcp/config/slice.rb` and puts them in the tool's server
-  context, as it does an operation now. A tool keeps its name, description and scope, takes its input schema from
-  the endpoint, hands the work over and wraps the payload as its answer, or the failure as its refusal.
+  context. A tool keeps its name, description and scope, takes its input schema from the endpoint, hands the work
+  over and wraps the payload as its answer, or the failure as its refusal.
 
 `api` builds `/api/v1/openapi.json` by walking its endpoints: each one's schema gives the request, and its
 serializer gives the response. No schema is written twice, so the document, the tools and the endpoints cannot
 disagree.
 
 The edge runs one way. `mcp` imports from `api`, and `api` never imports from `mcp`, so it adds no cycle to the three
-[ADR 0003][0003] names. A tool joins the layer when it moves to the API: journal entries and tasks first. Until
-then it calls operations straight, as [ADR 0056][0056] says.
+[ADR 0003][0003] names. Journal entries and tasks joined the layer first.
 
-A resource moves one tool at a time, since #927. A resource can have tools on the layer and tools off it, since
-moving a tool changes what it returns. These tools still call operations or repos straight while other tools for their
-resource sit on the layer:
-
-- posts: `create_post`, `update_post`, `list_posts`, `delete_post`, `write_post_seo` and `compose_announcement`;
-- suggestions: `suggest_edits`, `list_suggestions`, `accept_suggestion_edits` and `reject_suggestion_edits`;
-- tags: `list_tags`, `save_tag` and `remove_tag`;
-- projects: `list_projects`, `save_project`, `archive_project` and `restore_project`;
-- work entries: `list_work_entries`, `add_work_entry` and `delete_work_entry`;
-- webmentions: `moderate_webmention`, `read_webmention_settings` and `update_webmention_settings`;
-- messages: `list_messages`, `read_message` and `mark_message`;
-- commits and pull requests: `list_commits`, `import_commits` and `list_pull_requests`;
-- photos: `read_photo`;
-- API tokens: `list_api_tokens`.
+From #927 on, a resource moved one tool at a time, because moving a tool changes what it returns. Since #1188 every tool
+sits on the layer: each hands its work to an endpoint through `endpoint scope:` or `hand_over`, and no tool calls an
+operation or a repo itself. `MCP::Protocol::Handler` keeps no table of operations and repos for its tools, only their
+endpoints and the repo that marks synced task titles untrusted. `list_clients` reads the MCP clients through
+relations the `api` slice keeps on the same tables, since `api` cannot import from `mcp`.
 
 ## Alternatives
 
@@ -89,9 +79,7 @@ spec that compares a tool's answer with its endpoint's catches the rest.
 `mcp` now depends on `api`, a presentation slice on another. A key `api` stops exporting breaks every tool that
 reached it, and `api` can never import from `mcp` without closing a cycle.
 
-A tool on the layer no longer shows its work. A reader follows it into `slices/api/endpoints` to see what it calls,
-and a moved tool and one still on its operations look different until every tool moves, even two tools for one
-resource.
+A tool on the layer no longer shows its work. A reader follows it into `slices/api/endpoints` to see what it calls.
 
 The layer, not the tool, now calls the operation the admin calls, so [ADR 0056][0056]'s rule that MCP refuses what
 the admin refuses still holds, one step further down.

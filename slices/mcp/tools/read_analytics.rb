@@ -10,23 +10,8 @@ module MCP
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RAW_DAYS = Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS
-      RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for " \
-                    "#{RAW_DAYS} days; start from or since inside them to get these. The daily counts still " \
-                    "hold".freeze
       REF = Analytics::Operations::TagRef::KEY
-      SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
-      TOP = 25
-
-      SCHEMA = {
-        additionalProperties: false,
-        properties: {
-          **Blog::Helpers::DayWindow::RANGE,
-          path: { type: "string",
-                  description: "one page to read alone, such as #{Blog::Constants::WRITING_PATH}/hello" },
-          since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
-        },
-        required: %w[from to],
-      }.freeze
+      TOP = API::Helpers::AnalyticsReader::TOP
 
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
@@ -113,36 +98,17 @@ module MCP
                   "later of from and since falls before them, the answer leaves them out and says why in " \
                   "refused, and the daily counts still come back. With a path, hours, since and read_spread " \
                   "count that page alone. #{DEFINITIONS}"
-      input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["read"]
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
-        def call(from:, to:, server_context:, path: nil, since: nil)
-          reader = parse_since(since).bind do |at|
-            range(from, to).fmap { AnalyticsReader.new(range: it, at:, path:, context: server_context) }
-          end
-
-          case reader
-            in Success(found) then answer(found.call)
-            in Failure(message) then refuse(message)
-          end
-        end
-
         def described(analytics) = format(description_value, analytics)
 
         private
 
-        def parse_since(since)
-          return Success(nil) unless since
+        def answered(payload)
+          return super unless payload.key?(:paths)
 
-          at = Blog::TimeZone.parse_time(since)
-          at ? Success(at) : Failure(SINCE_REFUSAL)
-        end
-
-        def range(from, to)
-          Blog::Helpers::DayWindow.days(from, to).bind do |first, last|
-            too_long?(first, last) ? Failure(Blog::Helpers::DayWindow::TOO_LONG) : Success(first..last)
-          end
+          super.merge(paths: payload.fetch(:paths).map { it.merge(title: Untrusted.call(it[:title])) })
         end
       end
     end

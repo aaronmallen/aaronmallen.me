@@ -8,14 +8,16 @@ module API
       HEALTH = Blog::Types::OAuthScope["health"]
       MAIL = Blog::Types::OAuthScope["mail"]
       MAIL_ENDPOINTS = %w[
-        delete_mail_threads mark_mail_threads_read mark_mail_threads_unread snooze_mail_threads tag_mail_threads
-        untag_mail_threads
+        delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread
+        read_mail_thread snooze_mail_threads tag_mail_threads untag_mail_threads
       ].freeze
       PARAMS = { "array" => Blog::Types::ListParam, "integer" => Blog::Types::IntegerParam }.freeze
       PUBLISH = Blog::Types::OAuthScope["publish"]
+      SUGGEST = Blog::Types::OAuthScope["suggest"]
       SCOPES = {
         "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE, "publish_post" => PUBLISH,
-        "read_health_days" => HEALTH, "send_social_post" => PUBLISH, "unlink_records" => WRITE, "unlink_task" => WRITE,
+        "read_health_days" => HEALTH, "send_social_post" => PUBLISH, "suggest_edits" => SUGGEST,
+        "unlink_records" => WRITE, "unlink_task" => WRITE,
         "untag_decision" => WRITE, **MAIL_ENDPOINTS.to_h { [it, MAIL] },
       }.freeze
 

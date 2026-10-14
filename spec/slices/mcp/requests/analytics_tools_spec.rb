@@ -983,7 +983,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
     it "refuses a since it cannot read" do
       expect(mcp_text("read_analytics", from: day.iso8601, to: day.iso8601, since: "this morning"))
-        .to eq(MCP::Tools::ReadAnalytics::SINCE_REFUSAL)
+        .to eq(API::Endpoints::ReadAnalytics::SINCE_REFUSAL)
     end
 
     describe "a range older than the raw visits" do
@@ -994,7 +994,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       it "refuses the hours and still gives the days", :aggregate_failures do
         answer = read_raw(from: old, to: today)
 
-        expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+        expect(answer).to include("refused" => API::Helpers::AnalyticsReader::RAW_REFUSAL)
         expect(answer).not_to have_key("hours")
         expect(answer.fetch("totals")).to include("views" => 9)
       end
@@ -1002,7 +1002,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       it "refuses a since older than the raw visits", :aggregate_failures do
         answer = read_raw(from: old, to: today, since: Blog::TimeZone.day_start(old).iso8601)
 
-        expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+        expect(answer).to include("refused" => API::Helpers::AnalyticsReader::RAW_REFUSAL)
         expect(answer).not_to have_key("since")
         expect(answer.fetch("days").first).to include("views" => 9)
       end
@@ -1083,7 +1083,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       roll_up(today - 120, views: 9, visitors: 4)
       answer = mcp_answer("read_analytics", from: (today - 120).iso8601, to: today.iso8601)
 
-      expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+      expect(answer).to include("refused" => API::Helpers::AnalyticsReader::RAW_REFUSAL)
       expect(answer).not_to have_key("read_spread")
       expect(answer.fetch("totals")).to include("views" => 9)
     end
@@ -1159,7 +1159,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       roll_up(today - 120, views: 9, visitors: 4)
       answer = read_raw(from: today - 120, to: today)
 
-      expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+      expect(answer).to include("refused" => API::Helpers::AnalyticsReader::RAW_REFUSAL)
       expect(answer.keys).not_to include("entry_pages", "exit_pages")
       expect(answer.fetch("totals")).to include("views" => 9)
     end

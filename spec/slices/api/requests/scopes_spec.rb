@@ -4,6 +4,8 @@ RSpec.describe "API token scopes", type: :request do
   def self.tools
     {
       "create_person" => "save_person", "update_person" => "save_person",
+      "create_project" => "save_project", "update_project" => "save_project",
+      "create_tag" => "save_tag", "update_tag" => "save_tag",
       "create_task_rule" => "save_task_rule", "update_task_rule" => "save_task_rule",
     }
   end

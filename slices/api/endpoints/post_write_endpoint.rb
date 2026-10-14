@@ -1,13 +1,12 @@
+# auto_register: false
 # frozen_string_literal: true
 
-module MCP
-  module Tools
-    class PostWrite < Base
-      CHECKED = Blog::Constants::CHECKED
+module API
+  module Endpoints
+    class PostWriteEndpoint < Endpoint
       FLAGS = %i[syndication_enabled webmentions_enabled].freeze
       TAG_SEPARATOR = ", "
       UNCHECKED = "0"
-      UNSAVED = "could not save the blog post"
 
       FIELDS = {
         title: { type: "string" },
@@ -35,34 +34,28 @@ module MCP
         webmentions_enabled: { type: "boolean", description: "whether the post sends and takes webmentions" },
       }.freeze
 
-      class << self
-        private
+      OUTCOME = { type: "string", enum: %w[drafted published saved scheduled] }.freeze
+      REPLY = Helpers::Schema.widen(Serializers::Post::SCHEMA, outcome: OUTCOME).freeze
 
-        def complaint(errors)
-          errors.map { |field, (token)| "#{field} #{reason(field, token)}" }.join("; ")
+      private
+
+      def form(given)
+        given.to_h do |field, value|
+          next [field, value.join(TAG_SEPARATOR)] if field == :tags
+          next [field, value ? Blog::Constants::CHECKED : UNCHECKED] if FLAGS.include?(field)
+
+          [field, value]
         end
+      end
 
-        def form(given)
-          given.to_h do |field, value|
-            next [field, value.join(TAG_SEPARATOR)] if field == :tags
-            next [field, value ? CHECKED : UNCHECKED] if FLAGS.include?(field)
+      def missing(id) = not_found(Helpers::Wording.missing("blog post", id))
 
-            [field, value]
-          end
-        end
-
-        def missing(id) = refuse(API::Helpers::Wording.missing("blog post", id))
-
-        def reason(field, token) = API::Endpoints::Posts.field_reason(field, token)
-
-        def saved(result, id = nil)
-          case result
-            in Success[outcome, post]
-              answer(API::Serializers::Post.new(post).serializable_hash.merge("outcome" => outcome.to_s))
-            in Failure[:invalid, errors] then refuse(complaint(errors))
-            in Failure(:not_found) then missing(id)
-            else refuse(UNSAVED)
-          end
+      def saved(result, id = nil)
+        case result
+          in Success[outcome, post] then Success(serialized(Serializers::Post, post).merge(outcome: outcome.to_s))
+          in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
+          in Failure(:not_found) then missing(id)
+          else failed("could not save the blog post")
         end
       end
     end
