@@ -36,8 +36,21 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     queued(targets: %w[mastodon], **).tap { connect_social_networks(mastodon: {}) }
   end
 
+  def picked_then_disconnected
+    stub_bluesky
+    queued(connection_ids: [social_account("bluesky").id, mastodon.id])
+      .tap { Services::Slice["repos.connection_mutations"].delete(mastodon.id) }
+  end
+
   def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60, connection_ids: [])
     social_post_mutations.create_with_parts(targets:, posted_at:, connection_ids:, status: "scheduled", parts: %w[one])
+  end
+
+  def run_twice
+    2.times do
+      job.perform
+      Social::Jobs::DeliverSocialPost.drain
+    end
   end
 
   def sent = Social::Jobs::DeliverSocialPost.jobs.map { it["args"] }
@@ -119,6 +132,14 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
     expect(sent).to eq([[social_post.id, mastodon.id]])
     expect(social_post_queries.by_id(social_post.id).status).to eq("scheduled")
+  end
+
+  it "fails a picked account disconnected before send time once the rest have sent" do
+    social_post = picked_then_disconnected
+    run_twice
+
+    expect(social_post_queries.by_id(social_post.id).deliveries.map { [it.network, it.failed] })
+      .to contain_exactly(["bluesky", false], ["mastodon", true])
   end
 
   it "leaves a social post scheduled for later alone" do

@@ -6,7 +6,7 @@ created: 2026-10-08
 area: [social, admin, db]
 supersedes: ["0040"]
 issue: "#793"
-amended: ["#805", "#899", "#1243"]
+amended: ["#805", "#899", "#1243", "#1225"]
 tags: [social, mastodon, bluesky, connections, delivery, composer]
 ---
 
@@ -58,6 +58,8 @@ delivery rows with it.
 
 A post due while none of its accounts is connected has nowhere to go. Since #899 it settles at once with a failed
 row per target network and no connection, so it shows among the failed social posts.
+Since #1225 a post that loses some of its accounts sends to the rest. The transaction that marks it posted adds the
+same failed row for each target network left with no picked account, so the post shows what it skipped.
 
 [0040]: 0040-send-a-social-post-to-each-network-on-its-own-from-that-networks-delivery-row.md
 [0161]: 0161-join-a-threads-parts-into-one-linkedin-post-and-check-recent-posts-before-a-retry.md

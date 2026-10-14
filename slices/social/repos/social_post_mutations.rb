@@ -34,15 +34,19 @@ module Social
 
       def mark_posted(id, at: Time.now) = social_posts.mark_posted(id, at:)
 
+      def mark_sent(social_post, accounts)
+        transaction do
+          posted = mark_posted(social_post.id)
+          record_unconnected(social_post, accounts) if posted
+          posted
+        end
+      end
+
       def mark_unsendable(social_post, due_by:)
         transaction do
           next unless lock_due(social_post.id, due_by)
 
-          social_post.targets.each do |network|
-            social_post_deliveries.record(social_post_id: social_post.id, connection_id: nil, network:,
-                                          error: "No #{network} account is connected", failed: true)
-          end
-          mark_posted(social_post.id)
+          mark_sent(social_post, Blog::Constants::EMPTY_ARRAY)
         end
       end
 
@@ -80,6 +84,13 @@ module Social
       def lock_due(id, time) = social_posts.due_at(time).by_pk(id).lock(mode: :share).one
 
       def lock_unclaimed(id) = unposted(id).lock.one && unclaimed(id).exist?
+
+      def record_unconnected(social_post, accounts)
+        (social_post.targets.to_a - accounts.map(&:provider)).each do |network|
+          social_post_deliveries.record(social_post_id: social_post.id, connection_id: nil, network:,
+                                        error: "No #{network} account is connected", failed: true)
+        end
+      end
 
       def unclaimed(id) = unposted(id).unclaimed
 

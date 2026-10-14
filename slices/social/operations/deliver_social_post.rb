@@ -49,10 +49,11 @@ module Social
         retrying && client.respond_to?(:retrying) ? client.retrying : client
       end
 
-      def done?(delivery, sends)
+      def done?(social_post, account)
+        delivery = social_post.deliveries.find { it.connection_id == account.id }
         return false unless delivery
 
-        delivery.failed || delivery.remote_ids.to_a.size >= sends
+        delivery.failed || delivery.remote_ids.to_a.size >= sends(account, social_post)
       end
 
       def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
@@ -123,16 +124,13 @@ module Social
 
       def settle(social_post_id)
         social_post = social_post_queries.by_id(social_post_id)
-        return social_post unless settled?(social_post)
+        accounts = list_target_accounts.call(social_post)
+        return social_post unless settled?(social_post, accounts)
 
-        social_post_mutations.mark_posted(social_post_id) || social_post
+        social_post_mutations.mark_sent(social_post, accounts) || social_post
       end
 
-      def settled?(social_post)
-        deliveries = social_post.deliveries.to_h { [it.connection_id, it] }
-
-        list_target_accounts.call(social_post).all? { done?(deliveries[it.id], sends(it, social_post)) }
-      end
+      def settled?(social_post, accounts) = accounts.all? { done?(social_post, it) }
 
       def targeted(social_post_id, connection_id)
         found(social_post_queries.by_id(social_post_id)).bind do |social_post|

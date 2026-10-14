@@ -1204,6 +1204,41 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a picked account disconnected before send time" do
+    let(:social_post) { queued(targets: %w[mastodon bluesky]) }
+
+    before do
+      stub_bluesky
+      social_post_mutations.update(social_post.id, connection_ids: %w[mastodon bluesky].map { social_account(it).id })
+      Services::Slice["repos.connection_mutations"].delete(social_account("mastodon").id)
+    end
+
+    def unconnected = reloaded(social_post).deliveries.reject(&:connection_id)
+
+    it "fails the gone account's network once the rest have sent", :aggregate_failures do
+      deliver(social_post, "bluesky")
+
+      expect(reloaded(social_post).status).to eq("posted")
+      expect(unconnected.map { [it.network, it.failed, it.error] })
+        .to eq([["mastodon", true, "No mastodon account is connected"]])
+    end
+
+    it "fails the gone account's network only once, however often the post settles" do
+      deliver(social_post, "bluesky")
+      deliver(social_post, "bluesky")
+      exhaust(social_post, "bluesky")
+
+      expect(unconnected.size).to eq(1)
+    end
+
+    it "fails nothing while the rest are still sending" do
+      stub_request(:post, bluesky_url("com.atproto.repo.putRecord")).to_return(status: 502)
+      refused(social_post, "bluesky")
+
+      expect(unconnected).to be_empty
+    end
+  end
+
   describe "a network the social post does not target" do
     it "sends nothing and opens no delivery", :aggregate_failures do
       social_post = queued(targets: %w[mastodon])
