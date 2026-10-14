@@ -10,6 +10,7 @@ module Decisions
         contract: "contracts.decision_contract",
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
+        rename_decision_task: "tasks.operations.rename_decision_task",
         require_edit_note: "operations.require_edit_note",
       ]
 
@@ -37,6 +38,7 @@ module Decisions
 
         kept = step require_edit_note.call(needed: edited && decision.closed?, note:)
         decision_mutations.update(decision.id, title:, problem:)
+        step rename_decision_task.call(decision.id, title) unless decision.title == title
         Success(decision_mutations.record(decision.id, EDITED, note: kept))
       end
 

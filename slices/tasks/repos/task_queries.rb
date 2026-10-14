@@ -24,6 +24,8 @@ module Tasks
         counts.to_h.transform_keys(&:to_s)
       end
 
+      def by_decision(decision_id) = tasks.where(id: record_links.sourced_task_ids(decision_id)).one
+
       def by_id(id) = with_details.by_pk(id).one
 
       def by_ids(ids) = tasks.where(id: ids).combine(:tags).to_a

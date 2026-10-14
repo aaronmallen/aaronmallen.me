@@ -4,7 +4,10 @@ module Decisions
   class Slice < Hanami::Slice
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
-    import keys: %w[operations.open_decision_task], from: :tasks
+    import keys: %w[
+      operations.close_decision_task operations.open_decision_task operations.rename_decision_task
+      operations.reopen_decision_task
+    ], from: :tasks
 
     export %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment

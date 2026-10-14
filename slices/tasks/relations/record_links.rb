@@ -13,6 +13,10 @@ module Tasks
         link = { left_kind: TASK, left_id: task_id, right_kind: DECISION, right_id: decision_id }
         dataset.insert(**link, relation: SOURCED_FROM)
       end
+
+      def sourced_task_ids(decision_id)
+        where(relation: SOURCED_FROM, right_kind: DECISION, right_id: decision_id).unordered.dataset.select(:left_id)
+      end
     end
   end
 end

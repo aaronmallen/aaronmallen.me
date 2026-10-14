@@ -609,4 +609,44 @@ RSpec.describe "API decisions", type: :request do
         .to eq("id" => decision.id, "comment_id" => added.fetch("id"), "deleted" => true)
     end
   end
+
+  describe "the decision's task" do
+    let!(:task_id) { Tasks::Slice["operations.open_decision_task"].call(decision.id, decision.title).value!.id }
+
+    def task = Tasks::Slice["relations.tasks"].by_pk(task_id).one
+
+    it "follows a new title" do
+      call_api(:patch, "/#{decision.id}", { title: "Pick a job queue" })
+
+      expect(task[:title]).to eq("Resolve decision ##{decision.id}: Pick a job queue")
+    end
+
+    it "completes when the decision resolves" do
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+
+      expect(task[:status]).to eq("done")
+    end
+
+    it "cancels when the decision drops" do
+      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
+
+      expect(task[:status]).to eq("canceled")
+    end
+
+    it "reopens when the decision reopens" do
+      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
+      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
+
+      expect(task[:status]).to eq("open")
+    end
+
+    it "comes back when I deleted it and the decision reopens" do
+      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
+      Tasks::Slice["operations.delete_task"].call(task_id)
+      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
+
+      expect(Tasks::Slice["repos.task_queries"].by_decision(decision.id))
+        .to have_attributes(title: "Resolve decision ##{decision.id}: Pick a queue", status: "open", list: "next")
+    end
+  end
 end

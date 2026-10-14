@@ -606,5 +606,89 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page).to have_css("[data-toast]", text: t("decisions_page.toasts.open"))
       end
     end
+
+    describe "the decision's task" do
+      let!(:task_id) { Tasks::Slice["operations.open_decision_task"].call(decision.id, decision.title).value!.id }
+
+      def link_by_hand(task)
+        Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "decision", other_id: decision.id })
+      end
+
+      def next_titles
+        Tasks::Slice["relations.tasks"].where(list: "next", status: "open").order(:position).pluck(:title)
+      end
+
+      def rename
+        send_to("/admin/decisions/#{decision.id}", decision: { title: "Pick a job queue", problem: "Jobs pile up" })
+      end
+
+      def task(id = task_id) = Tasks::Slice["relations.tasks"].by_pk(id).one
+
+      it "follows a new title" do
+        rename
+
+        expect(task[:title]).to eq("Resolve decision ##{decision.id}: Pick a job queue")
+      end
+
+      it "completes when the decision resolves" do
+        close(:resolve, option_id: option.id, reason: "It runs")
+
+        expect(task[:status]).to eq("done")
+      end
+
+      it "cancels when the decision drops" do
+        close(:drop, reason: "No need")
+
+        expect(task[:status]).to eq("canceled")
+      end
+
+      it "stays canceled when the decision resolves after I cancel it" do
+        Tasks::Slice["operations.cancel_task"].call(task_id)
+        close(:resolve, option_id: option.id, reason: "It runs")
+
+        expect(task[:status]).to eq("canceled")
+      end
+
+      it "reopens when a resolved decision reopens" do
+        close(:resolve, option_id: option.id, reason: "It runs")
+        close(:reopen, reason: "Load grew")
+
+        expect(task[:status]).to eq("open")
+      end
+
+      it "reopens when a dropped decision reopens" do
+        close(:drop, reason: "No need")
+        close(:reopen, reason: "It matters again")
+
+        expect(task[:status]).to eq("open")
+      end
+
+      it "comes back at the end of the next list when I deleted it" do
+        close(:drop, reason: "No need")
+        Tasks::Slice["operations.delete_task"].call(task_id)
+        create(:task, title: "Earlier", position: 50)
+        close(:reopen, reason: "It matters again")
+
+        expect(next_titles).to eq(["Earlier", "Resolve decision ##{decision.id}: Pick a queue"])
+      end
+
+      it "leaves the decision open when I complete, cancel or delete it" do
+        others = Array.new(2) { Tasks::Slice["operations.open_decision_task"].call(create(:decision).id, "Other") }
+        Tasks::Slice["operations.complete_task"].call(task_id)
+        Tasks::Slice["operations.cancel_task"].call(others[0].value!.id)
+        Tasks::Slice["operations.delete_task"].call(others[1].value!.id)
+
+        expect(Decisions::Slice["relations.decisions"].pluck(:status)).to eq(%w[open open open])
+      end
+
+      it "never touches a task I link by hand" do
+        mine = create(:task, title: "Ask ops").tap { link_by_hand(it) }
+        rename
+        close(:resolve, option_id: option.id, reason: "It runs")
+
+        expect([task(mine.id), task].map { it.values_at(:title, :status) })
+          .to eq([["Ask ops", "open"], ["Resolve decision ##{decision.id}: Pick a job queue", "done"]])
+      end
+    end
   end
 end
