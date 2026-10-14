@@ -15,8 +15,7 @@ module API
       include Deps[activity_queries: "activity.repos.activity_queries"]
 
       def handle(from:, to:, scopes:)
-        case Helpers::DayWindow.days(from, to)
-          in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then bad_window(Blog::Helpers::DayWindow::TOO_LONG)
+        case Helpers::DayWindow.days(from, to, capped: true)
           in Success[first, last] then Success(summary(first, last, activity_kinds(scopes)))
           in Failure(message) then bad_window(message)
         end

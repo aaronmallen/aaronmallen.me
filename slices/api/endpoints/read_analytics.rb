@@ -143,15 +143,7 @@ module API
 
       private
 
-      def range(from, to)
-        Helpers::DayWindow.days(from, to).bind do |first, last|
-          if Blog::Helpers::DayWindow.too_long?(first, last)
-            Failure(Blog::Helpers::DayWindow::TOO_LONG)
-          else
-            Success(first..last)
-          end
-        end
-      end
+      def range(from, to) = Helpers::DayWindow.days(from, to, capped: true).fmap { |first, last| first..last }
 
       def reader(range, at, path)
         Helpers::AnalyticsReader.new(range:, at:, path:, repos:)

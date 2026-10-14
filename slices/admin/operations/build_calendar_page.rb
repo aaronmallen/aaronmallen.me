@@ -16,7 +16,7 @@ module Admin
       def call(month: nil, day: nil, today: Blog::TimeZone.today)
         picked = Blog::Types::DateParam[day]
         first = first_of(picked || month_param(month) || today)
-        days = calendar_day_queries.between(from: grid_start(first), to: grid_end(first), include_hidden: false).value!
+        days = calendar_day_queries.between(from: grid_start(first), to: grid_end(first), include_hidden: false)
         shown = days.find { it.date == (picked || chosen(first, today)) }
         calendars = calendar_queries.listed
 

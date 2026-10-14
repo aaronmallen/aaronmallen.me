@@ -27,11 +27,14 @@ module API
 
       module_function
 
-      def days(from, to)
+      def days(from, to, capped: false)
         first = Blog::TimeZone.parse_day(from)
         last = Blog::TimeZone.parse_day(to)
         return Failure(BAD_DAY) unless first && last
         return Failure(BACKWARDS) if first > last
+        if capped && last - first >= Blog::Helpers::DayWindow::LONGEST
+          return Failure(Blog::Helpers::DayWindow::TOO_LONG)
+        end
 
         Success([first, last])
       end

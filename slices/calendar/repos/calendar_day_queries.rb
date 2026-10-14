@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require "dry/monads"
-
 module Calendar
   module Repos
     class CalendarDayQueries < Blog::DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
-      include Dry::Monads[:result]
       include Deps[
         sprint_queries: "tasks.repos.sprint_queries",
         event_queries: "repos.calendar_queries",
@@ -17,9 +14,9 @@ module Calendar
       ]
 
       def between(from:, to:, include_hidden: true)
-        return Failure(Blog::Helpers::DayWindow::TOO_LONG) if Blog::Helpers::DayWindow.too_long?(from, to)
+        held = held(from, to, include_hidden)
 
-        Success(days(from, to, include_hidden))
+        (from..to).map { day(it, **held) }
       end
 
       private
@@ -31,12 +28,6 @@ module Calendar
           date:, sprint: sprints[date], posts: posts.fetch(date, NONE), social_posts: social_posts.fetch(date, NONE),
           journal: journal.include?(date), events: events.select { (it.starts_on..it.ends_on).cover?(date) },
         )
-      end
-
-      def days(from, to, include_hidden)
-        held = held(from, to, include_hidden)
-
-        (from..to).map { day(it, **held) }
       end
 
       def held(from, to, include_hidden)

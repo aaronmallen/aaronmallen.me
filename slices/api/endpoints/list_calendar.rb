@@ -24,7 +24,7 @@ module API
       ]
 
       def handle(from:, to:)
-        found = Helpers::DayWindow.days(from, to).bind { |first, last| calendar_day_queries.between(from: first, to: last) }
+        found = Helpers::DayWindow.days(from, to, capped: true).fmap { |first, last| calendar_day_queries.between(from: first, to: last) }
 
         found.either(->(days) { Success(listed(days)) }, method(:bad_window))
       end
