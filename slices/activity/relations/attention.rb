@@ -7,6 +7,7 @@ module Activity
       CARRIED = Blog::Types::AttentionKind["carried"]
       DRAFT = Blog::Types::AttentionKind["draft"]
       JOURNAL = Blog::Types::AttentionKind["journal"]
+      LAPSING = Blog::Types::AttentionKind["lapsing"]
       NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
       SOMEDAY = Blog::Types::AttentionKind["someday"]
       ROWS = Sequel[:attention]
@@ -17,12 +18,14 @@ module Activity
       schema :attention, infer: true
 
       def stalled(
-        on:, now:, broken_link_failures:, carried_count:, draft_days:, journal_days:, new_device_days:, someday_days:
+        on:, now:, broken_link_failures:, carried_count:, draft_days:, journal_days:, lapsing_days:, new_device_days:,
+        someday_days:
       )
         where(
           Sequel.|(
             failing(broken_link_failures),
             carried(carried_count),
+            lapsing(on + lapsing_days),
             seen_since(NEW_DEVICE, on - new_device_days),
             untouched(DRAFT, on - draft_days),
             untouched(JOURNAL, on - journal_days),
@@ -36,6 +39,8 @@ module Activity
       def carried(count) = Sequel[kind: CARRIED] & (Sequel[:carried_count] >= count)
 
       def failing(count) = Sequel[kind: BROKEN_LINK] & (Sequel[:failures] >= count)
+
+      def lapsing(by) = Sequel[kind: LAPSING] & (Sequel[:touched_on] <= by)
 
       def seen_since(kind, since) = Sequel[kind:] & (Sequel[:touched_on] > since)
 

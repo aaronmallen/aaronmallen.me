@@ -94,9 +94,10 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
         expect(toast).to include("LinkedIn connected as Ada Lovelace")
       end
 
-      it "stores the token and when it expires" do
+      it "stores the token and when it expires", :aggregate_failures do
         expect(connection.credentials)
           .to match(access_token: "li-member-ada", expires_at: be_within(60).of(Time.now.to_i + lifetime))
+        expect(connection.lapses_at).to be_within(60).of(Time.now + lifetime)
       end
 
       it "sends the exchange with the app's secret" do
@@ -138,12 +139,66 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
       end
     end
 
-    it "refuses the same profile twice" do
-      connect_linkedin(account_id: "member-ada")
-      grant("member-ada", "Ada Lovelace")
-      callback(code: "code", state: start_connect)
+    describe "a connection close to lapsing" do
+      def row = page.find(".svc-group", text: "Social").find(".li", text: "Ada Lovelace")
 
-      expect(connections.size).to eq(1)
+      it "marks it on the services page and offers a reconnect", :aggregate_failures do
+        held = connect_linkedin(lapses_at: Time.now + (3 * 86_400))
+        get "/admin/services", selected: held.id
+
+        expect(row).to have_css(".pill", text: "lapses soon")
+        expect(page).to have_text("LinkedIn stops taking the site's token on")
+        expect(page).to have_button("Reconnect")
+      end
+
+      it "marks it lapsed once the expiry passes", :aggregate_failures do
+        held = connect_linkedin(lapses_at: Time.now - 60)
+        get "/admin/services", selected: held.id
+
+        expect(row).to have_css(".pill", text: "lapsed")
+        expect(page).to have_text("LinkedIn no longer takes the site's token")
+      end
+
+      it "leaves a connection more than a week out marked connected" do
+        connect_linkedin(lapses_at: Time.now + (8 * 86_400))
+        get "/admin/services"
+
+        expect(row).to have_css(".pill", text: "connected")
+      end
+    end
+
+    describe "reconnecting a held profile" do
+      let!(:held) { connect_linkedin(account_id: "member-ada", lapses_at: Time.now + 86_400) }
+      let!(:delivery) do
+        social_post = Social::Slice["repos.social_post_mutations"]
+                      .create_with_parts(parts: %w[sent], targets: %w[linkedin], status: "posted", posted_at: Time.now)
+        create(:social_post_delivery, :linkedin, social_post_id: social_post.id, connection_id: held.id)
+      end
+
+      before do
+        grant("member-ada", "Ada Lovelace", access_token: "li-fresh")
+        callback(code: "code", state: start_connect)
+      end
+
+      it "replaces the token on the same connection", :aggregate_failures do
+        expect(connections.map(&:id)).to eq([held.id])
+        expect(connection.credentials[:access_token]).to eq("li-fresh")
+        expect(connection.lapses_at).to be_within(60).of(Time.now + lifetime)
+      end
+
+      it "clears the warning on the services page and the attention list", :aggregate_failures do
+        get "/admin/services"
+
+        expect(page.find(".svc-group", text: "Social").find(".li", text: "Ada Lovelace"))
+          .to have_css(".pill", text: "connected")
+        expect(Activity::Slice["repos.attention_queries"].stalled.map(&:kind)).not_to include("lapsing")
+      end
+
+      it "keeps the connection's past deliveries" do
+        kept = Social::Slice["relations.social_post_deliveries"].where(id: delivery.id).one
+
+        expect(kept).to include(connection_id: held.id)
+      end
     end
 
     it "saves nothing when I decline on LinkedIn", :aggregate_failures do

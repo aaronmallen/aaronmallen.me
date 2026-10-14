@@ -66,6 +66,8 @@ module Admin
 
           def label(text) = p(class: "svc-group-label") { text }
 
+          def lapse_date = l(Blog::TimeZone.today(@row.connection.lapses_at), format: :medium)
+
           def line(text, note = nil, name: "svc-line-name", &)
             div(class: "svc-line") do
               span do
@@ -112,6 +114,8 @@ module Admin
               span(class: "svc-account") { @row.account } if @row.account
             end
             Hint { t(".revoked", name: definition.name) } if @row.status == :reconnect
+            Hint { t(".lapsed", name: definition.name) } if @row.status == :lapsed
+            Hint { t(".lapsing", name: definition.name, date: lapse_date) } if @row.status == :lapsing
           end
 
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }

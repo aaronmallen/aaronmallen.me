@@ -16,7 +16,7 @@ module Admin
           def view_template
             ContextMenu(label: definition.name) do |menu|
               menu.link(t(".details"), href: path(:admin_services, selected: @row.key), icon: OPEN_ICON)
-              reconnect(menu) if @row.status == :reconnect
+              reconnect(menu) if @row.reconnect?
               checks(menu) if @connectable
               dashboard(menu) if definition.dashboard
               disconnect(menu) if connection

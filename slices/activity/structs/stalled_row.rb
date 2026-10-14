@@ -8,17 +8,21 @@ module Activity
         Blog::Types::AttentionKind["carried"] => :carried_count,
         Blog::Types::AttentionKind["draft"] => :draft_days,
         Blog::Types::AttentionKind["journal"] => :journal_days,
+        Blog::Types::AttentionKind["lapsing"] => :lapsing_days,
         Blog::Types::AttentionKind["new_device"] => :new_device_days,
         Blog::Types::AttentionKind["someday"] => :someday_days,
       }.freeze
+      LAPSING = Blog::Types::AttentionKind["lapsing"]
       NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
+
+      def self.days(row, on) = (row.kind == LAPSING ? row.touched_on - on : on - row.touched_on).to_i
 
       def self.from(row, on:, limits:)
         new(
           kind: row.kind,
           record_id: row.record_id,
           title: row.title,
-          days: row.carried_count || row.failures || (on - row.touched_on).to_i,
+          days: row.carried_count || row.failures || days(row, on),
           limit: limits.fetch(LIMITS.fetch(row.kind)),
           post_id: row.post_id,
           url: row.url,
@@ -26,7 +30,12 @@ module Activity
         )
       end
 
-      def overdue = kind == NEW_DEVICE ? Float::INFINITY : (days - limit).fdiv(limit)
+      def overdue
+        return Float::INFINITY if kind == NEW_DEVICE || (kind == LAPSING && days.negative?)
+        return (limit - days).fdiv(limit) if kind == LAPSING
+
+        (days - limit).fdiv(limit)
+      end
 
       def rank = [-overdue, kind, record_id.to_i]
     end

@@ -5,10 +5,13 @@ module Spec
     POSTS = "https://api.linkedin.com/rest/posts"
     SCOPES = %w[openid profile w_member_social].freeze
 
-    def connect_linkedin(account_id: "member-ada", token: "li-token", scopes: SCOPES, expires_at: nil)
+    def connect_linkedin(
+      account_id: "member-ada", label: "Ada Lovelace", token: "li-token",
+      scopes: SCOPES, expires_at: nil, lapses_at: nil
+    )
       Services::Slice["repos.connection_mutations"].add(
-        provider: "linkedin", account_id:, label: "Ada Lovelace", scopes:,
-        credentials: { access_token: token, expires_at: expires_at || (Time.now.to_i + 3600) },
+        provider: "linkedin", account_id:, label:, scopes:,
+        credentials: { access_token: token, expires_at: expires_at || (Time.now.to_i + 3600) }, lapses_at:,
       )
     end
 

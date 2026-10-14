@@ -14,7 +14,9 @@ module API
           record_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
           title: Helpers::Schema.nullable(Helpers::Schema::STRING),
           carried_count: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
-          days: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          days: Helpers::Schema.nullable(Helpers::Schema::INTEGER).merge(
+            description: "days since the row's last change, or days left before a lapsing connection lapses",
+          ),
           post_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER).merge(description: "a broken link's post"),
           url: Helpers::Schema.nullable(Helpers::Schema::STRING).merge(description: "a broken link's URL"),
           reason: Helpers::Schema.nullable(Helpers::Schema::STRING).merge(description: "why a broken link failed"),

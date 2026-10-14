@@ -6,6 +6,8 @@ module Admin
       def account = connection&.label || definition.account
 
       def failing_jobs = jobs.select { it[:failure] }
+
+      def reconnect? = %i[reconnect lapsing lapsed].include?(status)
     end
   end
 end

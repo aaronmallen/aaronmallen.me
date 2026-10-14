@@ -4,14 +4,8 @@ module Admin
   module UI
     module Components
       class AttentionCard < Component
-        BROKEN_LINK = Blog::Types::AttentionKind["broken_link"]
-        CARRIED = Blog::Types::AttentionKind["carried"]
-        DRAFT = Blog::Types::AttentionKind["draft"]
-        JOURNAL = Blog::Types::AttentionKind["journal"]
-        NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
-        SOMEDAY = Blog::Types::AttentionKind["someday"]
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
         prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
@@ -41,6 +35,8 @@ module Admin
           task_form(:admin_cancel_task, row, t(".cancel"), "fa-solid fa-ban", data:)
         end
 
+        def carried(row) = task(row, t(".carried", count: row.days), "fa-solid fa-rotate-left")
+
         def draft(row) = post(row, row.record_id, t(".untouched", count: row.days), "fa-regular fa-file-lines")
 
         def hovered(row) = { hover: true, data: { menu: path(:admin_attention_menu, **identity(row)) } }
@@ -60,6 +56,16 @@ module Admin
 
           ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", **hovered(row)) do
             icon_link(href, t(".write"), "fa-solid fa-feather", **link)
+            snooze(row)
+          end
+        end
+
+        def lapsing(row)
+          href = path(:admin_services, selected: row.record_id)
+          sub = row.days.negative? ? t(".lapsed") : t(".lapsing", count: row.days)
+
+          ListItem(title: row.title, href:, sub:, icon: "fa-solid fa-hourglass-end", **hovered(row)) do
+            icon_link(href, t(".open_services"), "fa-solid fa-plug")
             snooze(row)
           end
         end
@@ -89,16 +95,7 @@ module Admin
           end
         end
 
-        def row(row)
-          case row.kind
-            when CARRIED then task(row, t(".carried", count: row.days), "fa-solid fa-rotate-left")
-            when SOMEDAY then task(row, t(".untouched", count: row.days), "fa-regular fa-hourglass")
-            when DRAFT then draft(row)
-            when JOURNAL then journal(row)
-            when NEW_DEVICE then new_device(row)
-            when BROKEN_LINK then broken_link(row)
-          end
-        end
+        def row(row) = send(row.kind, row)
 
         def snooze(row)
           Form(action: path(:admin_snooze_attention)) do
@@ -106,6 +103,8 @@ module Admin
             icon_button(t(".snooze"), "fa-solid fa-bell-slash")
           end
         end
+
+        def someday(row) = task(row, t(".untouched", count: row.days), "fa-regular fa-hourglass")
 
         def task(row, sub, icon)
           href = path(:admin_task, id: row.record_id, origin: ORIGIN)

@@ -16,7 +16,7 @@ module Admin
 
           def view_template
             div(class: "svc-actions") do
-              reconnect if @row.status == :reconnect
+              reconnect if @row.reconnect?
               test if @connectable && connection
               another if @connectable && definition.multiple
               dashboard

@@ -9,6 +9,7 @@ attention:
   carried_count: 3
   draft_days: 30
   journal_days: 2
+  lapsing_days: 7
   new_device_days: 7
   someday_days: 90
 backup_store:

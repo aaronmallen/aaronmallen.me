@@ -4,6 +4,7 @@ module Admin
   module Operations
     class ListServices
       BRIDGY = "bridgy"
+      DAY = 86_400
 
       include Deps[
         "settings",
@@ -22,6 +23,16 @@ module Admin
       end
 
       private
+
+      def access(connection)
+        return :reconnect if connection&.revoked_at
+
+        lapses_at = connection&.lapses_at
+        return unless lapses_at
+        return :lapsed if lapses_at <= Time.now
+
+        :lapsing if lapses_at <= Time.now + (settings.attention[:lapsing_days] * DAY)
+      end
 
       def env(definition)
         definition.env.flat_map do |setting, keys|
@@ -57,13 +68,17 @@ module Admin
         end
       end
 
-      def status(definition, connection, env, jobs, bridgy)
-        return :not_set_up unless env.values.all?
-        return :reconnect if connection&.revoked_at
+      def running(definition, jobs, bridgy)
         return :paused if definition.id == BRIDGY && !bridgy
         return :failing if jobs.any? { it[:failure] }
 
         :connected
+      end
+
+      def status(definition, connection, env, jobs, bridgy)
+        return :not_set_up unless env.values.all?
+
+        access(connection) || running(definition, jobs, bridgy)
       end
 
       def unready?(definition) = definition.oauth? && !definition.credentials? && !env(definition).values.all?

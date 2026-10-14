@@ -9,6 +9,7 @@ module Admin
           CARRIED = Blog::Types::AttentionKind["carried"]
           DRAFT = Blog::Types::AttentionKind["draft"]
           JOURNAL = Blog::Types::AttentionKind["journal"]
+          LAPSING = Blog::Types::AttentionKind["lapsing"]
           NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
           NEXT = Blog::Types::TaskFilter["next"]
           ORIGIN = Blog::Types::TaskOrigin["today"]
@@ -39,8 +40,11 @@ module Admin
               when BROKEN_LINK then opener(menu, path(:admin_edit_post, id: @row.post_id))
               when JOURNAL then write(menu)
               when NEW_DEVICE then opener(menu, path(:admin_security), t(".open_security"))
+              when LAPSING then services(menu)
             end
           end
+
+          def services(menu) = opener(menu, path(:admin_services, selected: @row.record_id), t(".open_services"))
 
           def snooze(menu)
             fields = { kind: @row.kind, record_id: @row.record_id }.compact

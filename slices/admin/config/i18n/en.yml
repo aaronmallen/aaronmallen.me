@@ -568,9 +568,15 @@ en:
         journal_gap:
           one: "No entry in %{count} day"
           other: "No entry in %{count} days"
+        lapsed: "Connection lapsed, reconnect it to post again"
+        lapsing:
+          zero: "Connection lapses today"
+          one: "Connection lapses in %{count} day"
+          other: "Connection lapses in %{count} days"
         move: "Move to %{list}"
         open: "Open"
         open_security: "Open security"
+        open_services: "Open services"
         snooze: "Snooze for a week"
         title: "Needs attention"
         untouched:
@@ -1940,6 +1946,8 @@ en:
           environment: "Set in the server environment. Change them there, then redeploy."
           granted: "granted"
           jobs: "Jobs"
+          lapsed: "%{name} no longer takes the site's token. Reconnect the same profile to post again."
+          lapsing: "%{name} stops taking the site's token on %{date}. Reconnect the same profile before then."
           left_off: "off"
           missing: "missing"
           no_credentials: "No credentials. It follows the Bridgy toggle in"
@@ -2103,6 +2111,8 @@ en:
         draft: "draft"
         dropped: "dropped"
         failing: "failing"
+        lapsed: "lapsed"
+        lapsing: "lapses soon"
         not_set_up: "not set up"
         open: "open"
         paused: "paused"
@@ -3403,6 +3413,7 @@ en:
           move: "Move to %{list}"
           open: "Open"
           open_security: "Open security"
+          open_services: "Open services"
           snooze: "Snooze"
           write: "Write"
         dead_job_menu:
