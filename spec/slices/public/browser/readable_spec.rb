@@ -1,9 +1,25 @@
 # frozen_string_literal: true
 
 RSpec.describe "Public screens", type: :feature do
+  def link_to(project, task)
+    Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
+  end
+
+  let(:board_task) do
+    project = create(:project, name: "sai", tagline: "Terminal colors", tags: %w[ruby], board_published: true)
+    task = create(:task, :done, title: "Ship the palette", note: "Pick the **colors** first\n\n- [x] light\n- [ ] dark")
+    blocker = create(:task, title: "Name the colors")
+    [task, blocker].each { link_to(project, it) }
+    create(:task_link, from_task_id: blocker.id, to_task_id: task.id)
+    create(:task_source, task:)
+    create(:task_comment, task:, body: "Looks *good*")
+    task
+  end
+
   def screens
     {
       "about" => "/about",
+      "board" => "/projects/sai",
       "contact" => "/contact",
       "contact refused" => lambda do
         visit "/contact"
@@ -17,13 +33,14 @@ RSpec.describe "Public screens", type: :feature do
       "privacy" => "/privacy",
       "projects" => "/projects",
       "tag" => "/writing/tags/ruby",
+      "task" => "/projects/sai/tasks/#{board_task.id}",
       "writing" => "/writing",
     }
   end
 
   before do
     create(:tag, name: "ruby", color: "mk-violet")
-    create(:project, name: "sai", tagline: "Terminal colors", tags: %w[ruby])
+    board_task
     post = create(
       :post,
       :published,

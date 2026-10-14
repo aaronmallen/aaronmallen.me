@@ -65,6 +65,12 @@ module Tasks
         tasks.searched(project_ids: project_id).order(Sequel.desc(:completed_at), :position, :id).to_a
       end
 
+      def on_public_board_by_id(project_id, id)
+        links = { incoming_links: :from_task, outgoing_links: :to_task }
+
+        tasks.searched(project_ids: project_id).combine(:source, **links).by_pk(id).one
+      end
+
       def open_after(task) = tasks.beside(task).following(task).limit(1).one
 
       def open_before(task) = tasks.beside(task).preceding(task).limit(1).one
@@ -77,6 +83,13 @@ module Tasks
 
       def planned(sprints, **search)
         with_details.for_sprint(sprints.map(&:id)).open.searched(**by_project(**search)).in_order.to_a
+      end
+
+      def public_board_slugs(task_ids)
+        by_task = record_links.project_ids_by_task(task_ids)
+        slugs = project_queries.public_boards(by_task.values.flatten).to_h { [it.id, it.slug] }
+
+        by_task.transform_values { slugs.values_at(*it).compact }.reject { |_, found| found.empty? }
       end
 
       def timeline(task_id) = task_timeline.for_task(task_id).oldest_first.to_a

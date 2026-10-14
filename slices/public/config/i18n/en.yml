@@ -275,3 +275,40 @@ en:
           projects: "Projects"
           title: "Tagged %{tag}"
           writing: "Writing"
+      tasks:
+        show:
+          back: "%{name} board"
+          closed:
+            canceled: "Canceled"
+            done: "Done"
+          columns:
+            backlog: "backlog"
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            ready: "ready"
+          comments: "Comments"
+          description: "Task #%{number} on the %{name} board."
+          facts:
+            column: "Column"
+            source: "Issue"
+            status: "Status"
+          kicker: "Task #%{number}"
+          links:
+            blocked_by: "blocked by"
+            blocks: "blocks"
+            child_of: "child of"
+            duplicated_by: "duplicated by"
+            duplicates: "duplicates"
+            parent_of: "parent of"
+            relates: "relates to"
+          notes: "Notes"
+          number: "#%{number}"
+          related: "Related"
+          statuses:
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            open: "open"
+          title: "#%{number} %{title}"
+          unknown_author: "someone"

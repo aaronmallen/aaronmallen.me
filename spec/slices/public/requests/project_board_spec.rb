@@ -104,15 +104,22 @@ RSpec.describe "Project board", type: :request do
       task = link(create(:task, title: "Ship it"), project)
       get "/projects/doing-it"
 
-      expect(page).to have_css("li > .board-num + .board-title", exact_text: "Ship it")
+      expect(page).to have_css("li > .board-card > .board-num + .board-title", exact_text: "Ship it")
       expect(page).to have_css(".board-num", exact_text: "##{task.id}")
+    end
+
+    it "links each card to its task page" do
+      task = link(create(:task, title: "Ship it"), project)
+      get "/projects/doing-it"
+
+      expect(page).to have_css("a.board-card[href='/projects/doing-it/tasks/#{task.id}']", text: "Ship it")
     end
 
     it "leaves the tags, note and time off a card", :aggregate_failures do
       link(create(:task, note: "secret note", tags: %w[private-tag], worked_seconds: 3600), project)
       get "/projects/doing-it"
 
-      expect(column("backlog").find("li").all("*").map(&:tag_name)).to eq(%w[span span])
+      expect(column("backlog").find("li").all("*").map(&:tag_name)).to eq(%w[a span span])
       expect(page).to have_no_text("secret note")
     end
 

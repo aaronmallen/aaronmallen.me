@@ -800,10 +800,16 @@
   }
 
   & li {
-    @apply m-0 flex flex-col gap-1.5 rounded-field border border-line bg-ground px-3.5 py-3;
+    @apply m-0;
   }
 
-  &.in-progress li {
+  & .board-card {
+    @apply flex flex-col gap-1.5 rounded-field border border-line bg-ground px-3.5 py-3 text-ink no-underline;
+    @apply transition-colors duration-150 hover:border-ink-muted hover:no-underline;
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  &.in-progress .board-card {
     box-shadow: inset 3px 0 0 var(--tone);
   }
 
@@ -828,6 +834,42 @@
   & .board-empty {
     @apply m-0 grid min-h-14 place-items-center rounded-field border border-dashed border-line font-mono text-ps text-ink-muted;
   }
+}
+
+@utility task-facts {
+  @apply mt-4.5 mb-0 grid grid-cols-[max-content_1fr] gap-x-5 gap-y-1.5 meta;
+
+  & dd {
+    @apply m-0 text-ink;
+  }
+
+  & a {
+    @apply text-ink hover:text-accent-text focus-ring;
+  }
+}
+
+@utility task-section {
+  @apply mt-10 max-w-measure;
+
+  & > .kicker {
+    @apply mb-3;
+  }
+}
+
+@utility task-related {
+  @apply m-0 flex list-none flex-col gap-2 p-0;
+
+  & a {
+    @apply focus-ring;
+  }
+}
+
+@utility task-comments {
+  @apply m-0 flex list-none flex-col gap-6 p-0;
+}
+
+@utility task-comment-head {
+  @apply m-0 mb-2 flex flex-wrap gap-x-3 meta;
 }
 
 @utility kicker {

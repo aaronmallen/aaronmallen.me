@@ -26,6 +26,8 @@ module Projects
         projects.by_pk(id).one if id
       end
 
+      def public_boards(ids) = projects.in_public.with_board.where(id: ids).in_order.to_a
+
       def public_by_tag(tag) = with_tags.in_public.live.tagged(tag).in_order.to_a
 
       def public_grid(limit = nil) = with_tags.in_public.live.by_stars.limit(limit).to_a
