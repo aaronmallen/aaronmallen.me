@@ -577,6 +577,13 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       expect(contributors).to be_empty
     end
 
+    it "credits the task when the issue URL keeps uppercase letters the repository name drops" do
+      Tasks::Slice["relations.task_sources"].update(url: "https://github.com/AaronMallen/AaronMallen.me/issues/42")
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+
+      expect(contributors).to contain_exactly([task.id, "agent", "claude-code", "claude-opus-5-5"])
+    end
+
     it "changes nothing for the same issue number in another repository" do
       Tasks::Slice["relations.task_sources"].update(url: "https://github.com/aaronmallen/other/issues/42")
       import("app: credit nobody\n\n#{claude}\n\nCloses #42")

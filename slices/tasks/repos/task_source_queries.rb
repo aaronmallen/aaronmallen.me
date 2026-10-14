@@ -9,7 +9,9 @@ module Tasks
 
       def synced_task_ids(ids) = task_sources.where(task_id: ids).pluck(:task_id)
 
-      def task_ids_at(provider, urls) = task_sources.where(provider:, url: urls).pluck(:task_id)
+      def task_ids_at(provider, urls)
+        task_sources.where(provider:).where(Sequel.function(:lower, :url) => urls.map(&:downcase)).pluck(:task_id)
+      end
 
       def unseen_task_count = unseen.count
 
