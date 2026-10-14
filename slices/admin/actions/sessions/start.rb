@@ -13,8 +13,8 @@ module Admin
           client = provider == GOOGLE ? google : github
           return not_configured(request, response) unless client.configured?
 
-          state = auth_session(request).start_sign_in
-          response.redirect_to(client.sign_in_url(redirect_uri: auth_callback_url(provider), state:))
+          started = auth_session(request).start_sign_in
+          response.redirect_to(client.sign_in_url(redirect_uri: auth_callback_url(provider), **started))
         end
 
         private

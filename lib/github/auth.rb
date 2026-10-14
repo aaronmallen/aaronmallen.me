@@ -42,12 +42,12 @@ module GitHub
       )
     end
 
-    def sign_in_url(redirect_uri:, state:)
-      client.auth_code.authorize_url(allow_signup: "false", redirect_uri:, scope: SIGN_IN_SCOPE, state:)
+    def sign_in_url(redirect_uri:, state:, code_challenge:)
+      connect_url(redirect_uri:, state:, scope: SIGN_IN_SCOPE, code_challenge:)
     end
 
-    def verified_email(code:, redirect_uri:)
-      emails = parse(exchange(code:, redirect_uri:).get(EMAILS_URL, headers: ACCEPT.dup))
+    def verified_email(code:, redirect_uri:, code_verifier:)
+      emails = parse(exchange(code:, redirect_uri:, code_verifier:).get(EMAILS_URL, headers: ACCEPT.dup))
       raise KeyError, "GitHub answered the emails with no JSON list" unless emails.is_a?(Array)
 
       emails.find { it.is_a?(Hash) && it["primary"] == true && it["verified"] == true }&.fetch("email")
@@ -59,8 +59,8 @@ module GitHub
 
     def basic_auth = "Basic #{Base64.strict_encode64("#{client.id}:#{client.secret}")}"
 
-    def exchange(code:, redirect_uri:, **)
-      client.auth_code.get_token(code, redirect_uri:, **)
+    def exchange(code:, redirect_uri:, code_verifier:)
+      client.auth_code.get_token(code, redirect_uri:, code_verifier:)
     rescue JSON::ParserError, MultiXML::ParseError
       raise KeyError, "GitHub answered the token with a body no parser reads"
     end

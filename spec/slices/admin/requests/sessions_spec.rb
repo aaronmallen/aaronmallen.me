@@ -63,6 +63,11 @@ RSpec.describe "Admin sessions", type: :request do
     a_request(:post, "https://github.com/login/oauth/access_token")
   end
 
+  def verifier_matches?(request, challenge)
+    verifier = Rack::Utils.parse_query(request.body)["code_verifier"].to_s
+    Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false) == challenge
+  end
+
   describe "signed out" do
     before { get "/admin/posts?page=2" }
 
@@ -115,6 +120,13 @@ RSpec.describe "Admin sessions", type: :request do
 
     it "sends GitHub a state to check on the way back" do
       expect(start_admin_sign_in("github").length).to be >= 32
+    end
+
+    it "sends GitHub an S256 code challenge", :aggregate_failures do
+      start_admin_sign_in("github")
+
+      expect(authorize_query).to include("code_challenge_method" => "S256")
+      expect(authorize_query.fetch("code_challenge")).to match(/\A[\w-]{43}\z/)
     end
 
     it "refuses to start a sign-in without a CSRF token" do
@@ -212,6 +224,54 @@ RSpec.describe "Admin sessions", type: :request do
       sign_in
 
       expect(session_cookie.expires).to eq(now + thirty_days)
+    end
+  end
+
+  describe "the code GitHub hands back" do
+    it "goes back with the verifier behind the challenge" do
+      state = start_sign_in
+      challenge = authorize_query.fetch("code_challenge")
+      callback(code: "code", state:)
+
+      expect(token_request.with { verifier_matches?(it, challenge) }).to have_been_made
+    end
+  end
+
+  describe "a code swapped in from another sign-in" do
+    before do
+      start_sign_in
+      challenge = authorize_query.fetch("code_challenge")
+      state = start_sign_in
+      stub_request(:post, "https://github.com/login/oauth/access_token")
+        .to_return(status: 400, headers: { "Content-Type" => "application/json" }, body: { error: "bad" }.to_json)
+      stub_request(:post, "https://github.com/login/oauth/access_token")
+        .with { verifier_matches?(it, challenge) }
+        .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
+      callback(code: "code", state:)
+    end
+
+    it "renders an error page" do
+      expect(last_response.status).to eq(502)
+    end
+
+    it "stays signed out" do
+      expect(signed_out?).to be(true)
+    end
+  end
+
+  describe "a sign-in started with no verifier" do
+    before do
+      started = Spec::AdminSession.encryptor.encrypt("oauth_states" => ["legacy-state"])
+      restore("#{Blog::SessionCookie::KEY}=#{Rack::Utils.escape(started)}")
+      callback(code: "code", state: "legacy-state")
+    end
+
+    it "renders an error page" do
+      expect(last_response.status).to eq(401)
+    end
+
+    it "never asks GitHub for a token" do
+      expect(token_request).not_to have_been_made
     end
   end
 
@@ -790,6 +850,22 @@ RSpec.describe "Admin sessions", type: :request do
       start_admin_sign_in("google")
 
       expect(authorize_query.fetch("scope")).to eq("openid email")
+    end
+
+    it "sends Google an S256 code challenge", :aggregate_failures do
+      start_admin_sign_in("google")
+
+      expect(authorize_query).to include("code_challenge_method" => "S256")
+      expect(authorize_query.fetch("code_challenge")).to match(/\A[\w-]{43}\z/)
+    end
+
+    it "sends Google the verifier behind the challenge with the code" do
+      state = start_admin_sign_in("google")
+      challenge = authorize_query.fetch("code_challenge")
+      google_callback(code: "code", state:)
+
+      expect(a_request(:post, "https://oauth2.googleapis.com/token").with { verifier_matches?(it, challenge) })
+        .to have_been_made
     end
 
     it "asks Google to come back to its own sign-in callback" do

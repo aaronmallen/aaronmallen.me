@@ -1,6 +1,8 @@
 # auto_register: false
 # frozen_string_literal: true
 
+require "base64"
+require "digest"
 require "rack/utils"
 require "securerandom"
 require "uri"
@@ -61,19 +63,20 @@ module Admin
 
       def start_sign_in
         state = SecureRandom.urlsafe_base64(32)
-        @session["oauth_states"] = oauth_states.push(state).last(SIGN_IN_LIMIT)
-        state
+        verifier = SecureRandom.urlsafe_base64(48)
+        @session["oauth_states"] = oauth_states.push("state" => state, "verifier" => verifier).last(SIGN_IN_LIMIT)
+        { code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false), state: }
       end
 
-      def state?(state)
-        return false unless state.is_a?(String)
+      def take_sign_in(state)
+        return unless state.is_a?(String)
 
         started = oauth_states
-        matched = started.find { it.is_a?(String) && Rack::Utils.secure_compare(it, state) }
-        return false if matched.nil?
+        matched = started.find { it.is_a?(Hash) && same_state?(it["state"], state) }
+        return if matched.nil?
 
         @session["oauth_states"] = started - [matched]
-        true
+        matched["verifier"]
       end
 
       private
@@ -111,6 +114,8 @@ module Admin
         path = local_path(wanted)
         wanted if path && !admin_path?(path)
       end
+
+      def same_state?(held, given) = held.is_a?(String) && Rack::Utils.secure_compare(held, given)
 
       def valid_after
         @valid_after = session_validity_queries.valid_after unless defined?(@valid_after)

@@ -29,15 +29,16 @@ module Admin
 
           client = sign_in_client(provider) || not_found(response)
           code = Blog::Types::Text[request.params[:code]]
-          return fail_sign_in(request, response, :denied) unless callback_valid?(request, code)
+          code_verifier = started_verifier(request, code)
+          return fail_sign_in(request, response, :denied) if code_verifier.nil?
 
-          finish_sign_in(request, response, sign_in.call(client:, code:, redirect_uri: auth_callback_url(provider)))
+          finish_sign_in(request, response, check_account(client, provider, code:, code_verifier:))
         end
 
         private
 
-        def callback_valid?(request, code)
-          auth_session(request).state?(request.params[:state]) && request.params[:error].nil? && !code.empty?
+        def check_account(client, provider, code:, code_verifier:)
+          sign_in.call(client:, code:, code_verifier:, redirect_uri: auth_callback_url(provider))
         end
 
         def connect_callback(provider)
@@ -75,6 +76,11 @@ module Admin
           record(request, :signed_in)
           path = auth_session(request).sign_in(email)
           response.redirect_to(path || routes.path(:admin_root))
+        end
+
+        def started_verifier(request, code)
+          code_verifier = auth_session(request).take_sign_in(request.params[:state])
+          code_verifier if request.params[:error].nil? && !code.empty?
         end
       end
     end
