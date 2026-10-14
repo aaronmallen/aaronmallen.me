@@ -164,6 +164,7 @@ one.
 | [0157][0157] | Publish a project's tasks through its board flag | ![Active][active] | 2026-10-12 |
 | [0158][0158] | Match the owner on a verified email from GitHub or Google | ![Active][active] | 2026-10-12 |
 | [0159][0159] | Group shared lib code by service and register service clients at app level | ![Active][active] | 2026-10-12 |
+| [0160][0160] | Open a public page for each task on a published board, without its tags or time | ![Active][active] | 2026-10-14 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -324,6 +325,7 @@ one.
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0158]: 0158-match-the-owner-on-a-verified-email-from-github-or-google.md
 [0159]: 0159-group-shared-lib-code-by-service-and-register-service-clients-at-app-level.md
+[0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
