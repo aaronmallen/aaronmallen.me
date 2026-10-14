@@ -12,21 +12,7 @@ module API
         webmention_queries: "social.repos.webmention_queries",
       ]
 
-      def call(from:, to:, top:)
-        found = rollup_queries.summary_between(from:, to:)
-        read_throughs = rollup_queries.read_throughs_between(from:, to:)
-        views = found.fetch(:totals).fetch(:views)
-
-        {
-          totals: totals(found, read_throughs, from:, to:),
-          days: found.fetch(:days),
-          **ranked(found, read_throughs, from:, to:).transform_values { it.take(top) },
-          change: change(views, from, to),
-          feed: feed_queries.feed_subscribers_between(from:, to:),
-          webmentions: webmentions(from, to, top),
-          weekday_hours: event_queries.weekday_hours,
-        }
-      end
+      def call(from:, to:, top:) = event_queries.memoizing { summarize(from, to, top) }
 
       private
 
@@ -46,6 +32,22 @@ module API
           countries: found.fetch(:countries),
           sources: page_queries.sources_between(**window),
           devices: page_queries.devices_between(**window),
+        }
+      end
+
+      def summarize(from, to, top)
+        found = rollup_queries.summary_between(from:, to:)
+        read_throughs = rollup_queries.read_throughs_between(from:, to:)
+        views = found.fetch(:totals).fetch(:views)
+
+        {
+          totals: totals(found, read_throughs, from:, to:),
+          days: found.fetch(:days),
+          **ranked(found, read_throughs, from:, to:).transform_values { it.take(top) },
+          change: change(views, from, to),
+          feed: feed_queries.feed_subscribers_between(from:, to:),
+          webmentions: webmentions(from, to, top),
+          weekday_hours: event_queries.weekday_hours,
         }
       end
 

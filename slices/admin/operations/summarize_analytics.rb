@@ -6,12 +6,26 @@ module Admin
       TOP_ROWS = 10
 
       include Deps[
+        event_queries: "analytics.repos.analytics_event_queries",
         page_queries: "analytics.repos.analytics_page_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
         summarize: "api.operations.summarize_analytics",
       ]
 
-      def call(range:)
+      def call(range:) = event_queries.memoizing { summary(range) }
+
+      private
+
+      def stats(totals)
+        views = totals.fetch(:views)
+
+        {
+          per_visit: Blog::Helpers::Figures.rate(views, totals.fetch(:visitors)),
+          read_time: Blog::Helpers::Figures.average(totals.fetch(:read_seconds), views),
+        }
+      end
+
+      def summary(range)
         to = Blog::TimeZone.today
         from = to - (range - 1)
         found = summarize.call(from:, to:, top: TOP_ROWS)
@@ -26,17 +40,6 @@ module Admin
           series: found.fetch(:days),
           totals: totals.slice(:views, :visitors, :read_seconds),
           **stats(totals),
-        }
-      end
-
-      private
-
-      def stats(totals)
-        views = totals.fetch(:views)
-
-        {
-          per_visit: Blog::Helpers::Figures.rate(views, totals.fetch(:visitors)),
-          read_time: Blog::Helpers::Figures.average(totals.fetch(:read_seconds), views),
         }
       end
 

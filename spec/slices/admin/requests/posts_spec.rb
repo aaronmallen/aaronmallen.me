@@ -257,6 +257,13 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
         expect(figures).to eq(["7 views", "5 visitors", "3 read-throughs"])
       end
 
+      it "reads today's views without building today's summary" do
+        allow(Analytics::Structs::AnalyticsSummary).to receive(:new).and_call_original
+        get "/admin/posts"
+
+        expect(Analytics::Structs::AnalyticsSummary).not_to have_received(:new)
+      end
+
       it "counts a rolled up day once, leaving out its raw events" do
         read("three", at: Blog::TimeZone.day_start(today - 1) + 60)
         get "/admin/posts"

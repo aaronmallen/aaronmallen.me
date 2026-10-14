@@ -19,6 +19,7 @@ module Analytics
       end
       LOCAL_TIME = Sequel.function(:timezone, Blog::TimeZone::NAME, :occurred_at)
       CLOCK_HOUR = Sequel.extract(:hour, LOCAL_TIME).cast(Integer)
+      DAY = site_day(:occurred_at)
       LATEST_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
       MEDIAN_READ = Sequel.function(:percentile_cont, 0.5).within_group(:read_seconds)
       NEWEST_FIRST = Sequel.desc(:occurred_at)
@@ -33,6 +34,7 @@ module Analytics
         ]
       end
       VISITORS = Sequel.function(:count, :visitor_hash).distinct
+      DAY_VIEWS = [DAY.as(:day), Sequel.function(:count, :id).as(:views), VISITORS.as(:visitors)].freeze
       VISITS = Sequel.function(:count).*
       WEEKDAY = Sequel.extract(:isodow, LOCAL_TIME).cast(Integer)
 
@@ -121,6 +123,8 @@ module Analytics
       def since(time) = where { occurred_at >= time }
 
       def totals = unordered.select(&TOTALS)
+
+      def views_by_day_and_path(**) = read_throughs_by_path(**).dataset.select_append(*DAY_VIEWS).group_append(DAY)
 
       def views_by_read_floor(floors)
         floor = Sequel.case(floors.reverse.map { [Sequel[:read_seconds] >= it, it] }, floors.first)

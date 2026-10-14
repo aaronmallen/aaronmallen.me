@@ -165,6 +165,13 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       it "lists today's paths in the top pages" do
         expect(page).to have_css(".tbl-title", text: "Hello")
       end
+
+      it "builds today's summary once" do
+        allow(Analytics::Structs::AnalyticsSummary).to receive(:new).and_call_original
+        get "/admin/analytics", range: "7"
+
+        expect(Analytics::Structs::AnalyticsSummary).to have_received(:new).once
+      end
     end
 
     describe "with earlier days not rolled up yet" do

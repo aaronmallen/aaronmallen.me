@@ -53,44 +53,30 @@ module Analytics
 
       def totals(from:, to:) = analytics_rollups.between(from, to).totals.one
 
-      def unrolled_summaries(from:, to:)
-        oldest = event_queries.oldest_day
-        return Blog::Constants::EMPTY_ARRAY unless oldest
-
-        days = [from, oldest].max..[to, Blog::TimeZone.today].min
-        rolled = days(from: days.first, to: days.last).map(&:day)
-
-        days.reject { rolled.include?(it) }.map { event_queries.summary_for(it) }
-      end
+      def unrolled_summaries(from:, to:) = unrolled_days(from:, to:).map { event_queries.summary_for(it) }
 
       def views_by_path(to: Blog::TimeZone.today)
         from = to - (VIEW_DAYS - 1)
         found = by_path(paths_between(from, to).views_by_path, :views)
 
-        unrolled_summaries(from:, to:).flat_map(&:paths).each { found[it.path] = found.fetch(it.path, 0) + it.views }
+        live_views(from, to).each { found[it.fetch(:path)] = found.fetch(it.fetch(:path), 0) + it.fetch(:views) }
         found
       end
 
       def views_by_post(post_ids, to: Blog::TimeZone.today)
         from = to - (VIEW_DAYS - 1)
         found = paths_between(from, to).views_by_post(post_ids).to_a.to_h { [it.post_id, it.to_h.slice(*UNSEEN.keys)] }
-
         posts = post_paths(post_ids)
 
-        unrolled_summaries(from:, to:).each { add_views(found, posts, it) }
+        live_views(from, to, paths: posts.keys).each { add_views(found, posts, it) }
         found
       end
 
       private
 
-      def add_views(found, posts, summary)
-        summary.paths.each do |row|
-          id = posts[row.path]
-          next unless id
-
-          seen = { views: row.views, visitors: row.visitors, read_throughs: summary.read_throughs.fetch(row.path, 0) }
-          found[id] = found.fetch(id, UNSEEN).merge(seen) { |_key, held, more| held + more }
-        end
+      def add_views(found, posts, row)
+        id = posts.fetch(row.fetch(:path))
+        found[id] = found.fetch(id, UNSEEN).merge(row.slice(*UNSEEN.keys)) { |_key, held, more| held + more }
       end
 
       def by_path(rows, field) = rows.to_a.to_h { [it.path, it.public_send(field)] }
@@ -101,6 +87,8 @@ module Analytics
           found[row[key]] = held ? held.merge(row, fields.to_h { [it, sum(held[it], row[it])] }) : row
         end.values
       end
+
+      def live_views(from, to, paths: nil) = event_queries.views_on(unrolled_days(from:, to:), paths:)
 
       def months(from, to) = (from..to).slice_when { |day, after| day.month != after.month }.map { it.first..it.last }
 
@@ -151,6 +139,16 @@ module Analytics
       end
 
       def top(rows) = rows.limit(TOP_ROWS).to_a
+
+      def unrolled_days(from:, to:)
+        oldest = event_queries.oldest_day
+        return Blog::Constants::EMPTY_ARRAY unless oldest
+
+        days = [from, oldest].max..[to, Blog::TimeZone.today].min
+        rolled = days(from: days.first, to: days.last).map(&:day)
+
+        days.reject { rolled.include?(it) }
+      end
 
       def whole_month?(days) = days.first.mday == 1 && days.last.next_day.mday == 1
     end
