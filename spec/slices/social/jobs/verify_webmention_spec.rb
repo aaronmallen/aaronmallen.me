@@ -281,10 +281,21 @@ RSpec.describe Social::Jobs::VerifyWebmention do
   describe "a source that can't be read" do
     {
       "breaks" => ->(url) { stub_request(:get, url).to_return(status: 500) },
+      "is down for now" => ->(url) { stub_request(:get, url).to_return(status: 503) },
+      "asks us to slow down" => ->(url) { stub_request(:get, url).to_return(status: 429) },
       "times out" => ->(url) { stub_request(:get, url).to_timeout },
       "refuses the connection" => ->(url) { stub_request(:get, url).to_raise(Faraday::ConnectionFailed) },
       "names a host the resolver can't answer for" => ->(url) { unresolvable(URI(url).host) },
       "names a host the resolver answers for with nothing" => ->(url) { resolves(URI(url).host) },
+    }.each do |what, stub|
+      it "raises so Sidekiq tries again when the source #{what}" do
+        instance_exec(source, &stub)
+
+        expect { verify }.to raise_error(described_class::SourceUnreachable)
+      end
+    end
+
+    {
       "redirects without naming where" =>
         ->(url) { stub_request(:get, url).to_return(status: 302, headers: { "Location" => "" }) },
       "redirects in a loop" => lambda { |url|
@@ -296,11 +307,14 @@ RSpec.describe Social::Jobs::VerifyWebmention do
         stub_request(:get, url).to_return(headers: { "Content-Length" => Social::Webmentions::Client::MAX_BODY + 1 },
                                           body: "x")
       },
+      "answers 400" => ->(url) { stub_request(:get, url).to_return(status: 400) },
+      "answers 403" => ->(url) { stub_request(:get, url).to_return(status: 403) },
     }.each do |what, stub|
-      it "raises so Sidekiq tries again when the source #{what}" do
+      it "gives up at once and stores nothing when the source #{what}", :aggregate_failures do
         instance_exec(source, &stub)
 
-        expect { verify }.to raise_error(described_class::SourceUnreachable)
+        expect { verify }.not_to raise_error
+        expect(stored).to be_nil
       end
     end
 

@@ -5,6 +5,7 @@ module Social
     class VerifyWebmention < Blog::Operation
       GONE_STATUSES = [404, 410].freeze
       OK_STATUSES = (200..299)
+      RETRY_STATUSES = [429, *500..599].freeze
 
       include Deps[
         "webmentions.client",
@@ -44,12 +45,11 @@ module Social
 
       def fetch(post, source)
         response = client.fetch(source)
-        return forget(post, source, :source_gone) if GONE_STATUSES.include?(response.status)
-        return Failure(:fetch_failed) unless OK_STATUSES.cover?(response.status)
-
-        Success(response)
+        GONE_STATUSES.include?(response.status) ? forget(post, source, :source_gone) : read(response)
       rescue Webmentions::Client::Refused
         Failure(:source_refused)
+      rescue Webmentions::Client::Unreachable
+        Failure(:source_unreachable)
       rescue Webmentions::Client::Error
         Failure(:fetch_failed)
       end
@@ -66,6 +66,12 @@ module Social
       def open_post(post_id)
         post = post_queries.by_id(post_id)
         post&.published? && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
+      end
+
+      def read(response)
+        return Failure(:source_unreachable) if RETRY_STATUSES.include?(response.status)
+
+        OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
       end
 
       def status(page, source, settings)

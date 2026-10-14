@@ -5,7 +5,7 @@ module Social
     class VerifyWebmention < Blog::Job
       class SourceUnreachable < StandardError; end
 
-      RETRYABLE = :fetch_failed
+      RETRYABLE = :source_unreachable
 
       include Deps[verify_webmention: "operations.verify_webmention"]
 
