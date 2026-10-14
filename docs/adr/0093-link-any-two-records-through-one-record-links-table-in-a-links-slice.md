@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
-amended: ["#966", "#911", "#1139", "#1315"]
+amended: ["#966", "#911", "#1139", "#1315", "#1324"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -37,7 +37,8 @@ through the `api` endpoints ([ADR 0088][0088]). The `api` leaves `mail_thread` o
 **Each side is a kind and an id.** A `record_kind` enum (ADR 0015) holds the eight kinds, declared in the order above,
 since the Linked section groups by kind in that order. It now holds ten: #911 declared `pull_request` ninth, and
 `mail_thread` came last in #1139. A row holds `left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The
-operation sorts the two sides, kind first and then id, so a pair has one spelling.
+operation sorts the two sides, kind first and then id, so a pair has one spelling. #1324 gives each link a
+`relation`: `related`, or `sourced_from` for the task the site opens for a decision, as [ADR 0167][0167] decides.
 
 **Postgres holds the rules.**
 
@@ -109,4 +110,5 @@ ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 upd
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
+[0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

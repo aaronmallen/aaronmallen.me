@@ -171,6 +171,7 @@ one.
 | [0164][0164] | Cap board columns, grow each by URL param, and drop closed tasks after 14 days | ![Active][active] | 2026-10-14 |
 | [0165][0165] | Keep task recurrence in a series beside tasks, and copy the last task when it closes | ![Active][active] | 2026-10-14 |
 | [0166][0166] | Give each task one project, and a number Postgres gives out within it | ![Active][active] | 2026-10-14 |
+| [0167][0167] | Tie a decision to its task with a sourced from record link the tasks slice writes | ![Active][active] | 2026-10-14 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -338,6 +339,7 @@ one.
 [0164]: 0164-cap-board-columns-grow-each-by-url-param-and-drop-closed-tasks-after-14-days.md
 [0165]: 0165-keep-task-recurrence-in-a-series-beside-tasks-and-copy-the-last-task-when-it-closes.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
+[0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
