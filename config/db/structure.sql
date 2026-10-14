@@ -175,7 +175,8 @@ CREATE TYPE public.message_status AS ENUM (
 
 CREATE TYPE public.network AS ENUM (
     'bluesky',
-    'mastodon'
+    'mastodon',
+    'linkedin'
 );
 
 
@@ -7467,4 +7468,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261013030100_name_the_provider_on_sign_ins.rb'),
 ('20261013041000_add_stage_to_tasks.rb'),
 ('20261013041100_add_board_published_to_projects.rb'),
-('20261014181552_add_opened_at_to_pull_requests.rb');
+('20261014181552_add_opened_at_to_pull_requests.rb'),
+('20261014200244_add_linkedin_to_network.rb');

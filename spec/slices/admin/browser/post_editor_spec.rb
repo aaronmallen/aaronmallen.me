@@ -37,7 +37,7 @@ RSpec.describe "Admin post editor", type: :feature do
     it "counts as you type" do
       write "hello"
 
-      expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300"])
+      expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 5/3000"])
     end
 
     it "counts a link the way Mastodon does" do
@@ -49,7 +49,7 @@ RSpec.describe "Admin post editor", type: :feature do
     it "counts emoji the way Bluesky does" do
       write "👍🏽 👨‍👩‍👧 done"
 
-      expect(counts.last).to eq("Bluesky #{bluesky.count('👍🏽 👨‍👩‍👧 done')}/300")
+      expect(counts[1]).to eq("Bluesky #{bluesky.count('👍🏽 👨‍👩‍👧 done')}/300")
     end
 
     it "counts a mention as the handle each network gets" do
@@ -58,7 +58,7 @@ RSpec.describe "Admin post editor", type: :feature do
       visit "/admin/posts/new"
       write "hi @{ada}"
 
-      expect(counts).to eq(["Mastodon 15/500", "Bluesky 19/300"])
+      expect(counts).to eq(["Mastodon 15/500", "Bluesky 19/300", "LinkedIn 15/3000"])
     end
 
     it "mutes a network that is off" do
@@ -122,7 +122,7 @@ RSpec.describe "Admin post editor", type: :feature do
       end
 
       it "counts nothing while the title is blank" do
-        expect(counts).to eq(["Mastodon 0/500", "Bluesky 0/300"])
+        expect(counts).to eq(["Mastodon 0/500", "Bluesky 0/300", "LinkedIn 0/3000"])
       end
 
       it "counts the text you type over the title and the URL" do
@@ -131,7 +131,7 @@ RSpec.describe "Admin post editor", type: :feature do
 
         write "hello"
 
-        expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300"])
+        expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 5/3000"])
       end
 
       it "turns a title over a network's limit pink" do

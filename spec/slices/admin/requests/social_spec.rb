@@ -31,7 +31,7 @@ RSpec.describe "Admin social", type: :request do
       it "counts an empty part for each network" do
         get "/admin/social"
 
-        expect(counts).to eq(["Mastodon 0/500", "Bluesky 0/300"])
+        expect(counts).to eq(["Mastodon 0/500", "Bluesky 0/300", "LinkedIn 0/3000"])
       end
 
       it "leaves the first part unfocused" do
@@ -77,13 +77,13 @@ RSpec.describe "Admin social", type: :request do
       it "counts a link to the site as each network sends it" do
         compose(parts: ["https://aaronmallen.me/writing/hello there"], targets: %w[])
 
-        expect(counts).to eq(["Mastodon 29/500", "Bluesky 54/300"])
+        expect(counts).to eq(["Mastodon 29/500", "Bluesky 54/300", "LinkedIn 55/3000"])
       end
 
       it "counts a link elsewhere at its short link's length" do
         compose(parts: ["https://example.com/hello there"], targets: %w[])
 
-        expect(counts).to eq(["Mastodon 29/500", "Bluesky 35/300"])
+        expect(counts).to eq(["Mastodon 29/500", "Bluesky 35/300", "LinkedIn 35/3000"])
       end
 
       it "marks a part over the limit once its link to the site is tagged" do
@@ -99,11 +99,11 @@ RSpec.describe "Admin social", type: :request do
       end
 
       it "counts a mention as the handle each network gets" do
-        create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
-                        bluesky_did: "did:plc:ada")
+        create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
+                        bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada")
         compose(parts: ["hi @{ada}"], targets: %w[])
 
-        expect(counts).to eq(["Mastodon 7/500", "Bluesky 19/300"])
+        expect(counts).to eq(["Mastodon 7/500", "Bluesky 19/300", "LinkedIn 15/3000"])
       end
 
       it "ships the directory as a hidden list of people to mention" do
@@ -1004,7 +1004,7 @@ RSpec.describe "Admin social", type: :request do
       it "counts the text it opened with" do
         get "/admin/social", filter: "drafts", edit: social_post.id
 
-        expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300"])
+        expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 5/3000"])
       end
 
       it "points the composer at the item" do

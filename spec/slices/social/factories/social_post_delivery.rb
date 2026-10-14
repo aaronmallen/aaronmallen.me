@@ -8,6 +8,10 @@ Spec::DB::Factories.define(:social_post_delivery) do |f|
     t.network "bluesky"
   end
 
+  f.trait :linkedin do |t|
+    t.network "linkedin"
+  end
+
   f.trait :mastodon do |t|
     t.network "mastodon"
   end

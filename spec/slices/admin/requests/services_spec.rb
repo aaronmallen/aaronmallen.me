@@ -61,7 +61,7 @@ RSpec.describe "Admin connected services", type: :request do
     it "lists the services that need no sign-in in their groups", :aggregate_failures do
       get "/admin/services"
 
-      expect(names("Social")).to eq(["Bridgy"])
+      expect(names("Social")).to eq(%w[Bridgy LinkedIn])
       expect(names("Infrastructure")).to eq(["Backup store", "Honeybadger", "MaxMind", "Media store"])
     end
 

@@ -25,6 +25,9 @@ google:
   client_secret: null
 honeybadger:
   api_key: null
+linkedin:
+  client_id: null
+  client_secret: null
 mastodon:
   profile_url: https://ruby.social/@aaronmallen
 maxmind:

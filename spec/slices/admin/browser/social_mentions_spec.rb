@@ -197,7 +197,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       it "counts the handle each network gets" do
         type "hi @kay", :enter
 
-        expect(counts).to eq(["Mastodon 12/500", "Bluesky 21/300"])
+        expect(counts).to eq(["Mastodon 12/500", "Bluesky 21/300", "LinkedIn 12/3000"])
       end
 
       it "turns a part pink once its mention runs it over the limit", :aggregate_failures do

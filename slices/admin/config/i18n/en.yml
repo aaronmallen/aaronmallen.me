@@ -281,6 +281,7 @@ en:
       disconnected: "%{name} disconnected"
       github_failed: "GitHub didn't answer · nothing was saved"
       google_failed: "Google didn't answer · nothing was saved"
+      linkedin_failed: "LinkedIn didn't answer · nothing was saved"
       mastodon_failed: "That server didn't answer as Mastodon · nothing was saved"
       not_configured: "%{name} sign-in isn't set up, so %{name} can't connect"
       personal: "%{account} is no longer a work account"
@@ -293,6 +294,7 @@ en:
   social:
     networks:
       bluesky: "Bluesky"
+      linkedin: "LinkedIn"
       mastodon: "Mastodon"
   social_page:
     toasts:
@@ -1986,6 +1988,7 @@ en:
           when: "When"
         counts:
           bluesky: "Bluesky %{count}/%{limit}"
+          linkedin: "LinkedIn %{count}/%{limit}"
           mastodon: "Mastodon %{count}/%{limit}"
         field_error:
           parts:

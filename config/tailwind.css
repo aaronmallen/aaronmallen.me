@@ -55,6 +55,8 @@
   --color-bluesky-text: light-dark(#0b63c4, #5aaeff);
   --color-mastodon: #6364ff;
   --color-bluesky: #1185fe;
+  --color-linkedin-text: light-dark(#0a66c2, #70b5f9);
+  --color-linkedin: #0a66c2;
 
   --animate-mk-cycle: mk-cycle 7.2s linear infinite;
 
@@ -6103,6 +6105,10 @@
   &.bluesky {
     @apply border-transparent bg-bluesky text-[#fff];
   }
+
+  &.linkedin {
+    @apply border-transparent bg-linkedin text-[#fff];
+  }
 }
 
 @utility svc-start {
@@ -7107,6 +7113,10 @@
     @apply text-bluesky-text;
   }
 
+  &.linkedin:has(:checked) {
+    @apply text-linkedin-text;
+  }
+
   &.mastodon:has(:checked) {
     @apply text-mastodon-text;
   }
@@ -7160,6 +7170,10 @@
 
   &.bluesky {
     --net: var(--color-bluesky-text);
+  }
+
+  &.linkedin {
+    --net: var(--color-linkedin-text);
   }
 
   & > i {
@@ -7242,6 +7256,10 @@
 
   &.bluesky {
     --net: var(--color-bluesky-text);
+  }
+
+  &.linkedin {
+    --net: var(--color-linkedin-text);
   }
 }
 
@@ -7333,6 +7351,10 @@
 
   &.bluesky {
     --net: var(--color-bluesky-text);
+  }
+
+  &.linkedin {
+    --net: var(--color-linkedin-text);
   }
 
   &:is(a) {

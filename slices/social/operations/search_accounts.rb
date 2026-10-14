@@ -21,7 +21,7 @@ module Social
       def find_client(network)
         client = networks[network]
 
-        client&.configured? ? Success(client) : Failure(:unconfigured)
+        client.respond_to?(:search) && client.configured? ? Success(client) : Failure(:unconfigured)
       end
 
       def search(client, text)

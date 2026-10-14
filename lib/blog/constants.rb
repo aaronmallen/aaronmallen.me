@@ -15,6 +15,7 @@ module Blog
     MEDIA_REFERENCE = /#{MEDIA_PATH}([0-9a-f]{32}\.(?:#{Types::PhotoType.values.join('|')}))/
     NETWORK_ICONS = {
       Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
+      Types::NetworkName["linkedin"] => "fa-brands fa-linkedin",
       Types::NetworkName["mastodon"] => "fa-brands fa-mastodon",
     }.freeze
     SUGGESTION_EDITS_MAX = 50

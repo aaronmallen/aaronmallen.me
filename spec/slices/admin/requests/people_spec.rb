@@ -321,9 +321,10 @@ RSpec.describe "Admin people", type: :request do
 
       it "answers with the handles each network shows" do
         mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
+        named = { "ada" => "Ada Lovelace" }
 
         expect(JSON.parse(page.find("[data-social-people]", visible: :all)["data-social-people"]))
-          .to eq("mastodon" => { "ada" => "@ada@ruby.social" }, "bluesky" => { "ada" => "Ada Lovelace" })
+          .to eq("mastodon" => { "ada" => "@ada@ruby.social" }, "bluesky" => named, "linkedin" => named)
       end
 
       it "answers with no layout and no toast", :aggregate_failures do

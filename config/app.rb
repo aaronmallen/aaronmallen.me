@@ -20,6 +20,7 @@ require "github"
 require "google"
 require "issues"
 require "linear"
+require "linkedin"
 require "markdown"
 require "mastodon"
 require "object_store"
@@ -31,12 +32,13 @@ module Blog
     autoloader.push_dir(root.join("lib/google"), namespace: Google)
     autoloader.push_dir(root.join("lib/issues"), namespace: Issues)
     autoloader.push_dir(root.join("lib/linear"), namespace: Linear)
+    autoloader.push_dir(root.join("lib/linkedin"), namespace: LinkedIn)
     autoloader.push_dir(root.join("lib/markdown"), namespace: Markdown)
     autoloader.push_dir(root.join("lib/mastodon"), namespace: Mastodon)
     autoloader.push_dir(root.join("lib/object_store"), namespace: ObjectStore)
 
     config.inflections do |inflections|
-      inflections.acronym "CLI", "GitHub", "MCP", "OAuth", "PKCE", "UI", "URI"
+      inflections.acronym "CLI", "GitHub", "LinkedIn", "MCP", "OAuth", "PKCE", "UI", "URI"
     end
 
     config.actions.content_security_policy[:manifest_src] = "'self'"
@@ -50,7 +52,7 @@ module Blog
     config.shared_app_component_keys += %w[
       backup_store.client contracts.contributor_terms_contract contracts.review_range_contract
       contracts.search_query_contract github.auth github.client google.auth google.client linear.client
-      mastodon.auth media_store.client networks.all operations.read_visitor_address share_store.client
+      linkedin.auth mastodon.auth media_store.client networks.all operations.read_visitor_address share_store.client
     ]
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier

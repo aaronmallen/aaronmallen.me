@@ -55,6 +55,7 @@ module SocialCredentials
   def replace_social_clients
     replace_component("networks.all", {
       "bluesky" => Bluesky::Providers::ClientProvider.client(Hanami.app["http"]),
+      "linkedin" => LinkedIn::Providers::ClientProvider.client(Hanami.app.settings),
       "mastodon" => Mastodon::Providers::ClientProvider.client(Hanami.app["http"]),
     }.freeze)
   end

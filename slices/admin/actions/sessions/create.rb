@@ -18,6 +18,7 @@ module Admin
           github_connect: "actions.services.github_callback",
           google: "google.auth",
           google_connect: "actions.services.google_callback",
+          linkedin_connect: "actions.services.linkedin_callback",
           mastodon_connect: "actions.services.mastodon_callback",
           record_sign_in: "security.operations.record_sign_in",
           sign_in: "operations.sign_in",
@@ -42,7 +43,10 @@ module Admin
         end
 
         def connect_callback(provider)
-          { "github" => github_connect, "google" => google_connect, "mastodon" => mastodon_connect }.fetch(provider)
+          {
+            "github" => github_connect, "google" => google_connect, "linkedin" => linkedin_connect,
+            "mastodon" => mastodon_connect,
+          }.fetch(provider)
         end
 
         def connecting?(request, provider)

@@ -271,7 +271,9 @@ RSpec.describe "Admin social composer", type: :feature do
       add_part
       write "hello"
 
-      expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300", "Mastodon 0/500", "Bluesky 0/300"])
+      expect(counts).to eq(
+        ["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 5/3000", "Mastodon 0/500", "Bluesky 0/300", "LinkedIn 0/3000"],
+      )
     end
 
     it "removes a part" do
@@ -332,7 +334,7 @@ RSpec.describe "Admin social composer", type: :feature do
     it "counts a link to the site with the tag Bluesky sends" do
       write link
 
-      expect(counts.last).to eq("Bluesky #{bluesky.count(link.sub('/hello', '/hello?ref=bluesky'))}/300")
+      expect(counts[1]).to eq("Bluesky #{bluesky.count(link.sub('/hello', '/hello?ref=bluesky'))}/300")
     end
 
     {
@@ -346,7 +348,7 @@ RSpec.describe "Admin social composer", type: :feature do
       it "counts #{typed} as Bluesky gets it" do
         write "see #{typed}"
 
-        expect(counts.last).to eq("Bluesky #{bluesky.count("see #{sent}")}/300")
+        expect(counts[1]).to eq("Bluesky #{bluesky.count("see #{sent}")}/300")
       end
     end
 
@@ -359,7 +361,7 @@ RSpec.describe "Admin social composer", type: :feature do
     it "counts emoji the way Bluesky does" do
       write "👍🏽 👨‍👩‍👧 done"
 
-      expect(counts.last).to eq("Bluesky #{bluesky.count('👍🏽 👨‍👩‍👧 done')}/300")
+      expect(counts[1]).to eq("Bluesky #{bluesky.count('👍🏽 👨‍👩‍👧 done')}/300")
     end
 
     it "mutes a network that is off" do

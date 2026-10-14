@@ -19,7 +19,9 @@ module Admin
 
         private
 
-        def searchable = Blog::Types::NetworkName.values.select { networks.fetch(it).configured? }
+        def searchable
+          Blog::Types::NetworkName.values.select { networks.fetch(it).then { it.respond_to?(:search) && it.configured? } }
+        end
       end
     end
   end

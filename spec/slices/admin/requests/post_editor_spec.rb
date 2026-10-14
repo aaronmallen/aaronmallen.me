@@ -633,6 +633,8 @@ RSpec.describe "Admin post editor", type: :request do
 
       def bluesky_only = { syndication_targets: %w[bluesky] }
 
+      def counts = page.all("[data-social-count-text]").map(&:text)
+
       def delivered
         stub_bluesky
         Social::Jobs::SyndicatePost.drain
@@ -663,8 +665,8 @@ RSpec.describe "Admin post editor", type: :request do
         get "/admin/posts/new"
 
         expect(toggle).to be_checked
-        expect(page.all("[data-social-target]").map { it["value"] }).to eq(%w[mastodon bluesky])
-        expect(page.all("[data-social-target]")).to all(be_checked)
+        expect(page.all("[data-social-target]:not([disabled])").map { it["value"] }).to eq(%w[mastodon bluesky])
+        expect(page.all("[data-social-target]:not([disabled])")).to all(be_checked)
       end
 
       it "names the pills for the post form" do
@@ -684,7 +686,7 @@ RSpec.describe "Admin post editor", type: :request do
         post = create(:post, title: "Hello", slug: "hello")
         get "/admin/posts/#{post.id}/edit"
 
-        expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 30/500", "Bluesky 55/300"])
+        expect(counts).to eq(["Mastodon 30/500", "Bluesky 55/300", "LinkedIn 56/3000"])
       end
 
       it "marks the text over the Bluesky limit once its link to the site is tagged" do
@@ -696,12 +698,12 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "counts a mention in the text as each network gets it" do
-        create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
-                        bluesky_did: "did:plc:ada")
+        create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
+                        bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada")
         post = create(:post, syndication_body: "hi @{ada}")
         get "/admin/posts/#{post.id}/edit"
 
-        expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 7/500", "Bluesky 19/300"])
+        expect(counts).to eq(["Mastodon 7/500", "Bluesky 19/300", "LinkedIn 15/3000"])
       end
 
       it "starts the text with the title and the post's URL" do

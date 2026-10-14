@@ -9,7 +9,7 @@ module Admin
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
-    OAUTH_SERVICE = /github|google|mastodon/
+    OAUTH_SERVICE = /github|google|linkedin|mastodon/
     SIGN_IN_PROVIDER = /github|google/
     PART = /[\d.]+/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)

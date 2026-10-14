@@ -1,0 +1,12 @@
+name: LinkedIn
+group: social
+auth: oauth
+multiple: true
+dashboard: https://www.linkedin.com/psettings/permitted-services
+env:
+  linkedin: [client_id, client_secret]
+powers:
+  - Posting from the social queue
+scopes:
+  - {id: "openid profile", label: See your name, why: Naming the account you connect}
+  - {id: w_member_social, label: Post on your behalf, why: Social queue}

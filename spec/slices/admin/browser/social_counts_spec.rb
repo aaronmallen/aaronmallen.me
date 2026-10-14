@@ -4,8 +4,8 @@ RSpec.describe "Admin social counts", type: :feature do
   let(:samples) { YAML.load_file(Hanami.app.root.join("spec/fixtures/social_counts.yml")) }
 
   before do
-    create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.example",
-                    bluesky_did: "did:plc:ada")
+    create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
+                    bluesky_handle: "ada.example", bluesky_did: "did:plc:ada")
   end
 
   def counted(texts)

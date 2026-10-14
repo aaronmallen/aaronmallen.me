@@ -104,7 +104,7 @@ module Blog
       "label",
     )
     MessageStatus = Types::String.enum("unread", "read", "spam")
-    NetworkName = Types::String.enum("mastodon", "bluesky")
+    NetworkName = Types::String.enum("mastodon", "bluesky", "linkedin")
     OAuthDecision = Types::String.enum("cancel", "approve")
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
     OAuthGrantType = Types::String.enum("authorization_code", "refresh_token")
@@ -175,7 +175,7 @@ module Blog
     ShortLinkSort = Types::String.enum("recent", "clicks")
     ShortLinkSortParam = ShortLinkSort.fallback(ShortLinkSort.values.first)
     ShortCode = Types::String.constrained(format: SLUG_FORMAT)
-    ServiceProvider = Types::String.enum("bluesky", "github", "google", "linear", "mastodon")
+    ServiceProvider = Types::String.enum("bluesky", "github", "google", "linear", "linkedin", "mastodon")
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)
     SocialMode = Types::String.enum("now", "schedule")

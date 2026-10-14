@@ -9,6 +9,7 @@ const SEGMENTER = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 const COUNTS = {
   bluesky: (text) => graphemes(text),
+  linkedin: (text) => graphemes(text),
   mastodon: (text, counter) =>
     graphemes(shrinkLinks(text, Number(counter.dataset.reservedPerUrl)).replace(MENTION, "@$1")),
 };

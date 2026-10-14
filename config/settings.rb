@@ -104,7 +104,6 @@ module Blog
         secret_key?: Value,
       )
     end
-    private_class_method :object_store
 
     def self.throttle(limit, **keys)
       Schema.schema(
@@ -113,17 +112,15 @@ module Blog
         **keys,
       )
     end
-    private_class_method :throttle
 
     def self.unless_blank(type)
       type.optional.constructor { |value| value.to_s.strip.empty? ? nil : value }
     end
-    private_class_method :unless_blank
 
     def self.unless_set(type, default)
       type.default(default).constructor { it.nil? ? Dry::Types::Undefined : it }
     end
-    private_class_method :unless_set
+    private_class_method :object_store, :throttle, :unless_blank, :unless_set
 
     setting :analytics, default: {}, constructor: throttle(
       DEFAULT_ANALYTICS_THROTTLE_LIMIT,
@@ -181,6 +178,8 @@ module Blog
       project_url?: Value,
       report_data?: Types::Params::Bool.optional,
     )
+
+    setting :linkedin, default: {}, constructor: Schema.schema(client_id?: Value, client_secret?: Value)
 
     setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 

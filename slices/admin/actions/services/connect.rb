@@ -5,12 +5,14 @@ module Admin
     module Services
       class Connect < Action
         GOOGLE = Blog::Types::ServiceProvider["google"]
+        LINKEDIN = Blog::Types::ServiceProvider["linkedin"]
         TOASTS = "services_page.toasts"
 
         include Deps[
           definition_queries: "services.repos.definition_queries",
           github: "github.auth",
           google: "google.client",
+          linkedin: "linkedin.auth",
           mastodon: "mastodon.auth",
           register_mastodon_app: "operations.register_mastodon_app",
         ]
@@ -44,7 +46,7 @@ module Admin
         end
 
         def oauth_url(request, definition, scope)
-          client = definition.id == GOOGLE ? google : github
+          client = { GOOGLE => google, LINKEDIN => linkedin }.fetch(definition.id, github)
           return Failure(:not_configured) unless client.configured?
 
           Success(client.connect_url(redirect_uri: auth_callback_url(definition.id), scope:,
