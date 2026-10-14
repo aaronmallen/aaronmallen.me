@@ -6,10 +6,14 @@ RSpec.describe "MCP tool scopes", type: :request do
       "read" => %w[
         compose_announcement list_api_tokens list_attention list_calendar list_clients list_commits list_decisions
         list_inbox list_journal_entries list_links list_people list_posts list_projects list_pull_requests
-        list_saved_views list_social_posts list_sprints list_suggestions list_tags list_task_rules list_tasks
+        list_saved_views
+        list_share_groups list_shares
+        list_social_posts list_sprints list_suggestions list_tags list_task_rules list_tasks
         list_webmentions list_work_entries read_activity read_analytics read_commit read_current_sprint read_decision
         read_journal_entry read_performance read_person read_photo read_post read_project read_pull_request read_review
-        read_saved_view read_social_post read_sync_state read_tag read_task read_time_report read_webmention
+        read_saved_view
+        read_share read_share_group
+        read_social_post read_sync_state read_tag read_task read_time_report read_webmention
         read_webmention_settings read_work_entry search search_accounts summarize_activity
       ],
       "suggest" => %w[suggest_edits],
@@ -29,7 +33,9 @@ RSpec.describe "MCP tool scopes", type: :request do
         snooze_inbox_row
         stage_task start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task
         untag_decision untag_tasks update_journal_entry update_post update_post_edit_note update_saved_view
-        update_social_post update_webmention_settings update_work_session upload_photo wake_inbox_row write_post_seo
+        update_social_post update_webmention_settings update_work_session upload_photo
+        upload_share upload_share_group
+        wake_inbox_row write_post_seo
       ],
       "publish" => %w[publish_post send_social_post],
       "health" => %w[read_health_days],

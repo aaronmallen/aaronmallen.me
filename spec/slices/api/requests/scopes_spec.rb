@@ -12,16 +12,6 @@ RSpec.describe "API token scopes", type: :request do
 
   def self.unscoped = %w[read_document read_token]
 
-  def self.untooled
-    read = Blog::Types::OAuthScope["read"]
-    write = Blog::Types::OAuthScope["write"]
-
-    {
-      "list_share_groups" => read, "list_shares" => read, "read_share" => read, "read_share_group" => read,
-      "upload_share" => write, "upload_share_group" => write,
-    }
-  end
-
   def all_scopes = Blog::Types::OAuthScope.values
 
   def call_api(verb, path, token)
@@ -36,7 +26,6 @@ RSpec.describe "API token scopes", type: :request do
 
   def needed(id)
     return Blog::Types::OAuthScope["read"] if self.class.unscoped.include?(id)
-    return self.class.untooled.fetch(id) if self.class.untooled.key?(id)
 
     MCP::Tools.const_get(Hanami.app["inflector"].camelize(self.class.tools.fetch(id, id)), false).scope_value
   end
