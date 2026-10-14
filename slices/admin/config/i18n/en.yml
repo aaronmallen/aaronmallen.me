@@ -3025,7 +3025,7 @@ en:
             one: "%{count} reader"
             other: "%{count} readers"
           readers: "Readers"
-          readers_note: "in %{month}"
+          readers_note: "counted once a month"
           sources: "Sources"
           unique_readers: "Unique readers"
           unkept: "no count kept"

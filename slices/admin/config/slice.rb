@@ -37,6 +37,7 @@ module Admin
       operations.mint_token operations.revoke_token
       operations.snooze_inbox
       operations.snooze_inbox_row
+      operations.summarize_analytics operations.summarize_page
       operations.wake_inbox_row
       repos.api_token_queries repos.inbox_queries
     ], from: :api

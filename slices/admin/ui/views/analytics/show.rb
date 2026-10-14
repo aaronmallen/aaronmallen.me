@@ -51,7 +51,7 @@ module Admin
           def count(number) = Blog::Helpers::Figures.count(number)
 
           def mentioned_posts
-            @webmentions.fetch(:posts).map { { count: it[:count], label: it[:title] } }
+            @webmentions.fetch(:posts).map { { count: it[:received], label: it[:title] } }
           end
 
           def mentions_card

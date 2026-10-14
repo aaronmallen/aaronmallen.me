@@ -212,16 +212,31 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(names("Outbound clicks")).to eq(%w[docs.example/guide])
       end
 
-      it "counts each of this month's readers once" do
+      it "counts each of the range's readers once" do
         expect(stat("Readers")).to have_css(".stat-value", exact_text: "2")
       end
 
-      it "names the month the readers count in" do
-        expect(stat("Readers")).to have_css(".stat-change", exact_text: "in #{today.strftime('%B %Y')}")
+      it "says a reader counts once a month" do
+        expect(stat("Readers")).to have_css(".stat-change", exact_text: "counted once a month")
       end
 
       it "counts each reader who read it through once a day" do
         expect(stat("Read-throughs")).to have_css(".stat-value", exact_text: "2")
+      end
+    end
+
+    describe "with a reader before the range" do
+      before do
+        create(
+          :analytics_event,
+          path: "/writing/hello", month_visitor_hash: Digest::SHA256.hexdigest("early"),
+          occurred_at: Blog::TimeZone.day_start(today - 10) + 43_200,
+        )
+        get "/admin/posts/#{post.id}/analytics", range: "7"
+      end
+
+      it "leaves them out of the readers" do
+        expect(stat("Readers")).to have_css(".stat-value", exact_text: "0")
       end
     end
 

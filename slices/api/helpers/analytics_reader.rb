@@ -7,100 +7,41 @@ module API
                     "#{Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS} days; start from or since inside " \
                     "them to get these. The daily counts still hold".freeze
       TOP = 25
-      PAGE_RANKED = %i[referrers countries].freeze
-      RANKED = %i[paths referrers countries sources devices].freeze
       WEEKDAYS = %i[monday tuesday wednesday thursday friday saturday sunday].freeze
 
       def call = path ? page_summary : summary
 
       private
 
-      def between(name, query, **) = repo(name).public_send(query, from: range.first, to: range.last, **)
-
-      def breakdowns(page_path)
-        { sources: between(:analytics_page_queries, :sources_between, path: page_path).take(TOP),
-          devices: between(:analytics_page_queries, :devices_between, path: page_path) }
-      end
-
-      def change(totals)
-        to = range.first - 1
-        from = to - (range.count - 1)
-        before = repo(:analytics_rollup_queries).summary_between(from:, to:).fetch(:totals).fetch(:views)
-
-        { from: from.iso8601, to: to.iso8601, views: before, percent: percent(totals.fetch(:views), before) }
-      end
+      def change(found) = found.merge(from: found.fetch(:from).iso8601, to: found.fetch(:to).iso8601)
 
       def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
       def events = repo(:analytics_event_queries)
 
-      def feed = between(:feed_fetch_queries, :feed_subscribers_between).then { it.merge(days: dated(it.fetch(:days))) }
-
       def heading
         { from: range.first.iso8601, to: range.last.iso8601, time_zone: Blog::TimeZone::NAME }
       end
 
-      def page
-        found = between(:analytics_page_queries, :page_between, path:)
-        read_throughs = read_throughs_by_path.fetch(path, 0)
-
-        found.merge(totals: found.fetch(:totals).merge(read_throughs:, bounces: found.fetch(:bounces)))
-      end
-
-      def page_ranked(found)
-        {
-          **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
-          **breakdowns(path),
-          clicks: between(:analytics_page_queries, :clicks_between, path:).take(TOP),
-          scroll: between(:analytics_page_queries, :scroll_depths_between, path:),
-        }
-      end
-
       def page_summary
-        found = page
-        days = found.fetch(:days)
+        found = post
+        summary = repo(:summarize_page).call(path:, from: range.first, to: range.last, top: TOP, post: found)
+        days = summary.fetch(:days)
 
         {
           **heading,
           path:,
-          totals: totals(found, path:),
+          **summary,
           days: dated(days),
-          **page_ranked(found),
           **raw,
-          **published(days),
+          **(found ? { since_publish: since_publish(days, Blog::TimeZone.today(found.published_at)) } : {}),
         }
       end
-
-      def percent(views, before) = (Blog::Helpers::Figures.share(views - before, before) if before.positive?)
 
       def post
         slug = path.delete_prefix("#{Blog::Constants::WRITING_PATH}/")
         repo(:post_queries).published_by_slug(slug) unless slug == path
       end
-
-      def published(days)
-        found = post
-        return {} unless found
-
-        {
-          since_publish: since_publish(days, Blog::TimeZone.today(found.published_at)),
-          first_days: repo(:analytics_page_queries).first_days(path),
-          unique_readers: repo(:post_reader_queries).unique_readers([found]).fetch(found.id),
-        }
-      end
-
-      def ranked
-        found = between(:analytics_rollup_queries, :summary_between)
-        read_throughs = read_throughs_by_path
-
-        found.merge(
-          breakdowns(nil),
-          paths: found.fetch(:paths).map { ranked_path(it, read_throughs) },
-          totals: found.fetch(:totals).merge(read_throughs: read_throughs.values.sum),
-        )
-      end
-
-      def ranked_path(found, read_throughs) = found.merge(read_throughs: read_throughs.fetch(found.fetch(:path), 0))
 
       def raw
         found = events.hourly_between(**raw_window)
@@ -114,8 +55,6 @@ module API
 
         { from: [from, at].compact.max, to:, path: }
       end
-
-      def read_throughs_by_path = between(:analytics_rollup_queries, :read_throughs_between)
 
       def repo(name) = repos.fetch(name)
 
@@ -132,24 +71,22 @@ module API
 
       def site_wide(found)
         {
-          weekday_hours:,
-          change: change(found.fetch(:totals)),
-          feed:,
-          webmentions:,
+          change: change(found.fetch(:change)),
+          feed: found.fetch(:feed).then { it.merge(days: dated(it.fetch(:days))) },
+          weekday_hours: weekday_hours(found.fetch(:weekday_hours).fetch(:hours)),
         }
       end
 
       def stamped(time) = Blog::TimeZone.local(time).iso8601
 
       def summary
-        found = ranked
+        found = repo(:summarize_analytics).call(from: range.first, to: range.last, top: TOP)
 
         {
           **heading,
-          totals: totals(found),
+          **found,
           days: dated(found.fetch(:days)),
           **raw,
-          **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
           **site_wide(found),
         }
       end
@@ -161,25 +98,7 @@ module API
         at ? { hours:, read_spread:, since: since_counts(found) } : { hours:, read_spread: }
       end
 
-      def totals(found, path: nil)
-        found.fetch(:totals).merge(reach: between(:analytics_rollup_queries, :reach_between, path:))
-      end
-
-      def webmention_post(found, counts) = { post_id: found.id, title: found.title, received: counts.fetch(found.id) }
-
-      def webmentions
-        counts = between(:webmention_queries, :received_by_post)
-        posts = repo(:post_queries).by_ids(counts.keys).map { webmention_post(it, counts) }
-
-        {
-          pending: repo(:webmention_queries).pending_count,
-          received: between(:webmention_queries, :received_between),
-          posts: posts.sort_by { [-it[:received], it[:title]] }.take(TOP),
-        }
-      end
-
-      def weekday_hours(to = Blog::TimeZone.today)
-        found = events.weekday_hours(to:).fetch(:hours)
+      def weekday_hours(found, to = Blog::TimeZone.today)
         hours = found.each_with_index.map { |counts, hour| { hour:, **WEEKDAYS.zip(counts).to_h } }
 
         { from: events.retention_start(to).iso8601, to: to.iso8601, time_zone: Blog::TimeZone::NAME, hours: }

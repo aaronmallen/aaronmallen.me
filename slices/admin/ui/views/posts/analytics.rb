@@ -69,8 +69,6 @@ module Admin
             { views: @views, visitors: @visitors, bounces: @bounces, readers: @readers, read_throughs: @read_throughs }
           end
 
-          def month = l(Blog::TimeZone.today, format: :month)
-
           def range_form = RangeSwitch(action: path(:admin_post_analytics, id: @post.id), range: @range)
 
           def rows(list) = list.map { { count: it[:visitors], label: yield(it) } }
@@ -82,7 +80,7 @@ module Admin
           def stats
             figure(:views)
             figure(:visitors, change: t(".bounce", percent: bounce_rate))
-            figure(:readers, change: t(".readers_note", month:))
+            figure(:readers, change: t(".readers_note"))
             figure(:read_throughs, change: t(".read_note"))
             unique_readers
           end

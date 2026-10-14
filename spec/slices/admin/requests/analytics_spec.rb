@@ -119,6 +119,18 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
     end
 
+    describe "with a previous range not rolled up yet" do
+      before do
+        create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)
+        2.times { create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 8) + 43_200) }
+        get "/admin/analytics", range: "7"
+      end
+
+      it "compares against the previous range's raw views" do
+        expect(lede).to include("up 400% on the previous 7 days")
+      end
+    end
+
     describe "without a previous range" do
       before do
         create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)

@@ -3,71 +3,40 @@
 module Admin
   module Operations
     class SummarizeAnalytics
-      RANKED = %i[countries paths referrers].freeze
       TOP_ROWS = 10
 
       include Deps[
-        event_queries: "analytics.repos.analytics_event_queries",
-        feed_queries: "analytics.repos.feed_fetch_queries",
         page_queries: "analytics.repos.analytics_page_queries",
-        post_queries: "posts.repos.post_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
-        webmention_queries: "social.repos.webmention_queries",
+        summarize: "api.operations.summarize_analytics",
       ]
 
       def call(range:)
         to = Blog::TimeZone.today
         from = to - (range - 1)
-        before = rollup_queries.totals(from: from - range, to: from - 1).to_h
-        found = period(from, to)
+        found = summarize.call(from:, to:, top: TOP_ROWS)
+        totals = found.fetch(:totals)
 
         {
-          feed: feed_queries.feed_subscribers_between(from:, to:),
+          **found.slice(:countries, :feed, :referrers, :webmentions, :weekday_hours),
+          change: found.fetch(:change).fetch(:percent),
+          paths: with_posts(found.fetch(:paths)),
           range:,
-          webmentions: webmentions(from, to),
-          weekday_hours: event_queries.weekday_hours(to:),
-          **found,
-          **stats(found.fetch(:totals), before),
+          scroll: page_queries.scroll_depths_between(from:, to:),
+          series: found.fetch(:days),
+          totals: totals.slice(:views, :visitors, :read_seconds),
+          **stats(totals),
         }
       end
 
       private
 
-      def mentioned_posts(counts)
-        rows = post_queries.by_ids(counts.keys).map { { count: counts.fetch(it.id), title: it.title } }
-
-        rows.sort_by { [-it[:count], it[:title]] }.take(TOP_ROWS)
-      end
-
-      def period(from, to)
-        summary = rollup_queries.summary_between(from:, to:)
-        ranked = RANKED.to_h { [it, summary.fetch(it).take(TOP_ROWS)] }
-
-        {
-          **ranked,
-          paths: with_posts(ranked.fetch(:paths)),
-          scroll: page_queries.scroll_depths_between(from:, to:),
-          series: summary.fetch(:days),
-          totals: summary.fetch(:totals),
-        }
-      end
-
-      def stats(totals, before)
+      def stats(totals)
         views = totals.fetch(:views)
-        prior = before.fetch(:views)
 
         {
-          change: (Blog::Helpers::Figures.share(views - prior, prior) if prior.positive?),
           per_visit: Blog::Helpers::Figures.rate(views, totals.fetch(:visitors)),
           read_time: Blog::Helpers::Figures.average(totals.fetch(:read_seconds), views),
-        }
-      end
-
-      def webmentions(from, to)
-        {
-          pending: webmention_queries.pending_count,
-          posts: mentioned_posts(webmention_queries.received_by_post(from:, to:)),
-          received: webmention_queries.received_between(from:, to:),
         }
       end
 

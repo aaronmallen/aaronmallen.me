@@ -126,12 +126,9 @@ module API
 
       include Deps[
         analytics_event_queries: "analytics.repos.analytics_event_queries",
-        analytics_page_queries: "analytics.repos.analytics_page_queries",
-        analytics_rollup_queries: "analytics.repos.analytics_rollup_queries",
-        feed_fetch_queries: "analytics.repos.feed_fetch_queries",
         post_queries: "posts.repos.post_queries",
-        post_reader_queries: "analytics.repos.post_reader_queries",
-        webmention_queries: "social.repos.webmention_queries",
+        summarize_analytics: "operations.summarize_analytics",
+        summarize_page: "operations.summarize_page",
       ]
 
       def handle(from:, to:, path: nil, since: nil)
@@ -160,12 +157,7 @@ module API
         Helpers::AnalyticsReader.new(range:, at:, path:, repos:)
       end
 
-      def repos
-        {
-          analytics_event_queries:, analytics_page_queries:, analytics_rollup_queries:, feed_fetch_queries:,
-          post_queries:, post_reader_queries:, webmention_queries:,
-        }
-      end
+      def repos = { analytics_event_queries:, post_queries:, summarize_analytics:, summarize_page: }
     end
   end
 end
