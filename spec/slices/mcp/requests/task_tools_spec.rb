@@ -42,6 +42,47 @@ RSpec.describe "MCP task tools", type: :request do
     expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => mine.id)])
   end
 
+  describe "a column change" do
+    def first_task = Tasks::Slice["relations.tasks"].in_order.pluck(:id).first
+
+    before { create(:task, :in_progress) }
+
+    it "puts a task stage_task moves first" do
+      task = create(:task)
+      call_tool("stage_task", id: task.id, stage: "ready")
+
+      expect(first_task).to eq(task.id)
+    end
+
+    it "puts a task pause_task moves first" do
+      task = create(:task, :in_progress)
+      call_tool("pause_task", id: task.id)
+
+      expect(first_task).to eq(task.id)
+    end
+
+    it "puts a task start_task moves first" do
+      task = create(:task)
+      call_tool("start_task", id: task.id)
+
+      expect(first_task).to eq(task.id)
+    end
+
+    it "keeps the place of a task start_task finds running" do
+      task = create(:task, :in_progress)
+      call_tool("start_task", id: task.id)
+
+      expect(first_task).not_to eq(task.id)
+    end
+
+    it "keeps the place of a task stage_task leaves in its stage" do
+      task = create(:task)
+      call_tool("stage_task", id: task.id, stage: "backlog")
+
+      expect(first_task).not_to eq(task.id)
+    end
+  end
+
   describe "capture_task with a note" do
     let(:photo) { create(:photo) }
     let(:note) { "![The gutter](/media/#{photo.key})" }

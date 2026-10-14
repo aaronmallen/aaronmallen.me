@@ -3,6 +3,8 @@
 module Tasks
   module Operations
     class ReopenTask < Blog::Operation
+      OPEN = Blog::Types::TaskStatus["open"]
+
       include Deps[
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",
@@ -11,17 +13,18 @@ module Tasks
       ]
 
       def call(id, at: Time.now)
-        step find(id)
+        task = step find(id)
 
         task_event_mutations.track(id, at) do
           work_session_mutations.close(id, at)
-          task_mutations.update(id, completed_at: nil, status: Blog::Types::TaskStatus["open"])
+          task_mutations.lead(id) unless task.status == OPEN
+          task_mutations.update(id, completed_at: nil, status: OPEN)
         end
       end
 
       private
 
-      def find(id) = found(task_queries.by_id(id) && id)
+      def find(id) = found(task_queries.by_id(id))
     end
   end
 end

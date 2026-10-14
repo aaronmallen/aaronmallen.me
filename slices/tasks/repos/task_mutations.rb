@@ -30,6 +30,16 @@ module Tasks
 
       def join_sprint(id, sprint_id) = update(id, list: nil, sprint_id:)
 
+      def lead(id)
+        transaction do
+          tasks.lock_until_commit
+          first = tasks.unordered.min(:position)
+          ahead = tasks.exclude(id:).where(Sequel[:position] <= tasks.unordered.by_pk(id).select(:position).dataset)
+          ahead.dataset.update(position: Sequel[:position] + 1)
+          update(id, position: first)
+        end
+      end
+
       def link(from_task_id, to_task_id, type) = task_links.command(:create).call(from_task_id:, to_task_id:, type:)
 
       def move_to_list(id, list, at: Time.now)

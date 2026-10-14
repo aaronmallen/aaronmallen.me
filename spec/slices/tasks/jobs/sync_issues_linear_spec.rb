@@ -15,6 +15,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def failure(name = Blog::Types::SyncName["linear_issues"]) = sync_state_queries.failure(name)
 
+  def first_task = Tasks::Slice["relations.tasks"].in_order.pluck(:id).first
+
   def imported = repo.by_id(sources.at("linear", "L_one").pluck(:task_id).first)
 
   def issue(**) = linear_issue("L_one", **)
@@ -529,6 +531,24 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(repo.by_id(task.id)).to have_attributes(list: nil, status: "in_progress")
       expect(repo.by_id(task.id).sprint_id).not_to be_nil
+    end
+
+    it "puts its task ahead of every other when it starts" do
+      create(:task, :in_progress)
+      task = tracked
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(first_task).to eq(task.id)
+    end
+
+    it "puts its task ahead of every other when it reopens" do
+      create(:task)
+      task = tracked(:done, state: "completed")
+      stub_assigned(issue(state: "unstarted"))
+      sync
+
+      expect(first_task).to eq(task.id)
     end
 
     it "leaves an unseen task unseen as it moves into Today" do

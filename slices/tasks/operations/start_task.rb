@@ -3,6 +3,8 @@
 module Tasks
   module Operations
     class StartTask < Blog::Operation
+      IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
+
       include Deps[
         current_sprint: "operations.current_sprint",
         task_event_mutations: "repos.task_event_mutations",
@@ -14,15 +16,16 @@ module Tasks
         sprint = step current_sprint.call
 
         transaction do
-          step find(id)
+          task = step find(id)
           task_event_mutations.track(id, at, seen:) do
             work_session_mutations.open(id, at)
+            task_mutations.lead(id) unless task.status == IN_PROGRESS
             task_mutations.update(
               id,
               completed_at: nil,
               list: nil,
               sprint_id: sprint.id,
-              status: Blog::Types::TaskStatus["in_progress"],
+              status: IN_PROGRESS,
             )
           end
         end
@@ -30,7 +33,7 @@ module Tasks
 
       private
 
-      def find(id) = found(work_session_mutations.lock_task(id) && id)
+      def find(id) = found(work_session_mutations.lock_task(id))
     end
   end
 end

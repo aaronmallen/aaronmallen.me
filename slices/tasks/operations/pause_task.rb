@@ -15,6 +15,7 @@ module Tasks
 
         task_event_mutations.track(id, at) do
           work_session_mutations.close(id, at)
+          task_mutations.lead(id)
           task_mutations.update(id, status: Blog::Types::TaskStatus["open"])
         end
       end

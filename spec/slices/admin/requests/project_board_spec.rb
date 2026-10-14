@@ -274,6 +274,30 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect([found.status, found.stage]).to eq(%w[open backlog])
       end
 
+      it "puts a card moved into an open column first in it" do
+        linked(stage: "ready", title: "Waiting")
+        move(linked(title: "Plan it"), "ready")
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("ready")).to eq(["Plan it", "Waiting"])
+      end
+
+      it "puts a card moved into in progress first there, ahead of tasks in other lists" do
+        linked(:in_progress, :in_sprint, title: "Doing")
+        move(linked(:someday, title: "Plan it"), "in_progress")
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("in_progress")).to eq(["Plan it", "Doing"])
+      end
+
+      it "puts a reopened card first in its open column" do
+        linked(title: "Waiting")
+        move(linked(:done, title: "Ship it"), "backlog")
+        get "/admin/projects/#{project.id}"
+
+        expect(titles("backlog")).to eq(["Ship it", "Waiting"])
+      end
+
       it "returns to the board with a toast", :aggregate_failures do
         task = linked
         move(task, "ready")

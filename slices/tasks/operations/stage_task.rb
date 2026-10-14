@@ -6,8 +6,12 @@ module Tasks
       include Deps[task_mutations: "repos.task_mutations", task_queries: "repos.task_queries"]
 
       def call(id, stage)
-        step find(id)
-        task_mutations.update(id, stage: Blog::Types::TaskStage[stage])
+        task = step find(id)
+
+        transaction do
+          task_mutations.lead(id) unless task.in_progress? || task.stage == stage
+          task_mutations.update(id, stage: Blog::Types::TaskStage[stage])
+        end
       end
 
       private
