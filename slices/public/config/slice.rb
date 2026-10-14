@@ -19,6 +19,8 @@ module Public
 
     import keys: %w[repos.photo_queries], from: :media
 
+    import keys: %w[operations.record_page_timing], from: :performance
+
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
     import keys: %w[repos.post_queries], from: :posts

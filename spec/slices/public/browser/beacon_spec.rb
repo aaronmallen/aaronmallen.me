@@ -261,6 +261,53 @@ RSpec.describe "Analytics beacon", type: :feature do
     end
   end
 
+  describe "load timing" do
+    def leave_loaded_page
+      visit "/writing"
+      recorded("/writing")
+      evaluate_async_script(<<~JS)
+        const done = arguments[arguments.length - 1];
+        const sendBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = (url, body) => {
+          body.text().then((text) => done(JSON.parse(text)));
+          return sendBeacon(url, body);
+        };
+        const leave = () => dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true }));
+        const painted = new PerformanceObserver(() => {
+          painted.disconnect();
+          if (document.readyState === "complete") setTimeout(leave);
+          else addEventListener("load", () => setTimeout(leave));
+        });
+        painted.observe({ type: "largest-contentful-paint", buffered: true });
+      JS
+    end
+
+    def timings = Performance::Slice["db.rom"].relations[:performance_pages].to_a
+
+    it "sends time to first byte, DOM content loaded, load and LCP with the read" do
+      expect(leave_loaded_page).to include(
+        "kind" => "read",
+        "timing" => { "ttfb" => an_instance_of(Integer), "dom_content_loaded" => an_instance_of(Integer),
+                      "load" => an_instance_of(Integer), "lcp" => an_instance_of(Integer) },
+      )
+    end
+
+    it "stores the timing under the route" do
+      leave_loaded_page
+
+      expect(wait_for { timings.first }).to include(route: "/writing", device_class: "desktop")
+    end
+
+    it "sends the timing once when the page is left a second time" do
+      leave_loaded_page
+      restore
+      leave_page
+      wait_for { request_gate.answered("/pulse") == 3 }
+
+      expect(timings).to have(1).item
+    end
+  end
+
   it "sets no cookie" do
     visit "/writing"
     wait_for { events.first }

@@ -13,10 +13,12 @@ module Public
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
         REJECTED = 400
         THROTTLED = 429
+        TIMING = "timing"
 
         include Deps[
           "operations.find_page",
           check_visit: "analytics.operations.check_visit",
+          record_page_timing: "performance.operations.record_page_timing",
           record_visit: "analytics.operations.record_visit",
         ]
 
@@ -76,11 +78,27 @@ module Public
           return REJECTED unless route
           return uncounted(visit) unless countable?(visit, route)
 
+          store(request, visit, route)
+        end
+
+        def store(request, visit, route)
           case outcome(request, visit)
-            in Success(_) then ACCEPTED
+            in Success(counted)
+              time(request, visit, route) if counted
+              ACCEPTED
             in Failure(Blog::Throttle::THROTTLED) then THROTTLED
             else REJECTED
           end
+        end
+
+        def time(request, visit, route)
+          return unless visit.key?(TIMING)
+
+          record_page_timing.call(
+            visit[TIMING],
+            route: route.endpoint.route,
+            user_agent: request.get_header("HTTP_USER_AGENT"),
+          )
         end
 
         def uncounted(visit) = check_visit.call(visit).success? ? ACCEPTED : REJECTED

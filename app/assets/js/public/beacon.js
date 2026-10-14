@@ -1,3 +1,4 @@
+const LCP = "largest-contentful-paint";
 const MIDDLE_BUTTON = 1;
 const TYPE = "application/json";
 const WEB = ["http:", "https:"];
@@ -9,6 +10,29 @@ const depthReached = (depths) => {
   const seen = (100 * Math.ceil(scrollY + innerHeight)) / document.documentElement.scrollHeight;
 
   return depths.find((depth) => seen >= depth) ?? 0;
+};
+
+const watchPaint = () => {
+  const paint = { at: undefined };
+  if (!PerformanceObserver.supportedEntryTypes?.includes(LCP)) return paint;
+
+  new PerformanceObserver((list) => {
+    paint.at = list.getEntries().at(-1)?.startTime ?? paint.at;
+  }).observe({ type: LCP, buffered: true });
+
+  return paint;
+};
+
+const timingOf = (paint) => {
+  const [entry] = performance.getEntriesByType("navigation");
+  if (!entry?.loadEventEnd) return undefined;
+
+  return {
+    ttfb: Math.round(entry.responseStart),
+    dom_content_loaded: Math.round(entry.domContentLoadedEventEnd),
+    load: Math.round(entry.loadEventEnd),
+    ...(paint.at !== undefined && { lcp: Math.round(paint.at) }),
+  };
 };
 
 const referrerOf = (url) => {
@@ -55,9 +79,11 @@ export function setupBeacon() {
   const path = location.pathname;
   const ref = refKey && new URLSearchParams(location.search).get(refKey);
   const viewToken = mintToken();
+  const paint = watchPaint();
   let opened = Date.now();
   let read = 0;
   let left = false;
+  let timed = false;
   let deepest = depthReached(depths);
 
   const send = (visit) => {
@@ -70,7 +96,9 @@ export function setupBeacon() {
     if (left) return;
     left = true;
     read += Math.ceil((Date.now() - opened) / 1000);
-    send({ kind: "read", read_seconds: Math.min(read, Number(readCap)) });
+    const timing = timed ? undefined : timingOf(paint);
+    timed ||= timing !== undefined;
+    send({ kind: "read", read_seconds: Math.min(read, Number(readCap)), ...(timing && { timing }) });
   };
 
   const readAgain = () => {

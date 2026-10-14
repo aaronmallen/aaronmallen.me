@@ -7,16 +7,16 @@ module Blog
     module Hanami
       module Router
         module Extension
-          private
-
-          def resolve_endpoint(path, *)
-            endpoint = super
-
-            lambda do |env|
-              env[RequestTimer::ROUTE] = path
+          Endpoint = Data.define(:route, :endpoint) do
+            def call(env)
+              env[RequestTimer::ROUTE] = route
               endpoint.call(env)
             end
           end
+
+          private
+
+          def resolve_endpoint(path, *) = Endpoint.new(path, super)
         end
       end
     end
