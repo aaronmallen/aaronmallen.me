@@ -56,7 +56,7 @@ module API
         found = named(social_post, rows, accounts.select { it.provider == network }) + unnamed(rows, accounts)
 
         (found.empty? ? [[nil, nil]] : found).map do |account, delivery|
-          SocialDelivery::Entry.new(network:, account:, delivery:, part_count: social_post.parts.length)
+          SocialDelivery::Entry.new(network:, account:, delivery:, part_count: sends(social_post, network))
         end
       end
 
@@ -70,6 +70,8 @@ module API
           [account.label, row] if row || waiting
         end
       end
+
+      def sends(social_post, network) = params.fetch(:networks).fetch(network).joiner ? 1 : social_post.parts.length
 
       def unnamed(rows, accounts) = rows.reject { |row| accounts.any? { it.id == row.connection_id } }.map { [nil, it] }
     end

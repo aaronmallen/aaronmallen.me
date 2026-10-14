@@ -35,8 +35,9 @@ module Admin
 
           def counter_data(network, template)
             {
-              limit: network.limit, max_bytes: network.max_bytes, ref_key: ::Analytics::Operations::TagRef::KEY,
-              reserved_per_url: network.reserved_per_url, short_link:, social_count: network.name,
+              joiner: network.joiner, limit: network.limit, max_bytes: network.max_bytes,
+              ref_key: ::Analytics::Operations::TagRef::KEY, reserved_per_url: network.reserved_per_url, short_link:,
+              social_count: network.name,
               tagged_host: network.tagged_host, template:,
             }
           end

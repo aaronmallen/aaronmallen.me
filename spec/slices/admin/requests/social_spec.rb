@@ -488,6 +488,15 @@ RSpec.describe "Admin social", type: :request do
         expect(social_post_queries.queued).to have(1).item
       end
 
+      it "rejects a LinkedIn thread whose joined text runs over LinkedIn's limit", :aggregate_failures do
+        set_up_linkedin_client
+        connect_linkedin
+        compose(parts: ["a" * 1500, "b" * 1499], targets: %w[linkedin])
+
+        expect(page).to have_css(".field-error", text: "over the limit")
+        expect(page).to have_css(".compose-count.over", text: "LinkedIn 3001/3000", count: 2)
+      end
+
       it "rejects a part over the limit of another selected network" do
         compose(parts: ["a" * 301], targets: %w[mastodon bluesky])
 

@@ -9,7 +9,7 @@ module Social
         sent = targets.to_h { [it, expand_for_network.call(bodies, it).map(&:text)] }
 
         bodies.each_index.map do |index|
-          sent.to_h { |name, texts| [name, measure(name, index + 1, texts[index])] }
+          sent.to_h { |name, texts| [name, measure(name, index + 1, texts.fetch(index) { texts.first })] }
         end
       end
 

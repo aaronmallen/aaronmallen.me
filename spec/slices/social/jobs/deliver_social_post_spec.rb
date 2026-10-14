@@ -1292,4 +1292,202 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(runs.map { it.grep(/\ASELECT/).size }.uniq).to have(1).item
     end
   end
+
+  describe "a post to LinkedIn" do
+    before do
+      connect_linkedin
+      stub_linkedin("urn:li:share:7")
+    end
+
+    let(:social_post) { queued(targets: %w[linkedin], parts: %w[hello]) }
+
+    def commentary(social_post)
+      sent = []
+      stub_request(:post, linkedin_posts).to_return do |request|
+        sent << JSON.parse(request.body).fetch("commentary")
+        { status: 201, headers: { "x-restli-id" => "urn:li:share:7" } }
+      end
+      deliver(social_post, "linkedin")
+
+      sent.first
+    end
+
+    it "posts the text publicly as the member" do
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:post, linkedin_posts).with(body: hash_including(
+        "author" => "urn:li:person:member-ada", "commentary" => "hello", "visibility" => "PUBLIC",
+        "lifecycleState" => "PUBLISHED",
+      ))).to have_been_made
+    end
+
+    it "sends the token and the version headers LinkedIn asks for" do
+      deliver(social_post, "linkedin")
+
+      headers = { "Authorization" => "Bearer li-token", "LinkedIn-Version" => LinkedIn::Client::VERSION,
+                  "X-Restli-Protocol-Version" => "2.0.0" }
+
+      expect(a_request(:post, linkedin_posts).with(headers:)).to have_been_made
+    end
+
+    it "records the post's id and links to it" do
+      deliver(social_post, "linkedin")
+
+      expect(delivery(social_post, "linkedin")).to have_attributes(
+        remote_ids: %w[urn:li:share:7], remote_url: "https://www.linkedin.com/feed/update/urn:li:share:7/", error: nil,
+      )
+    end
+
+    it "escapes the characters LinkedIn reserves and leaves hashtags alone" do
+      expect(commentary(queued(targets: %w[linkedin], parts: ["a (b) [c] *d* #ruby"])))
+        .to eq("a \\(b\\) \\[c\\] \\*d\\* #ruby")
+    end
+
+    it "prints a mentioned person's name" do
+      create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social")
+
+      expect(commentary(queued(targets: %w[linkedin], parts: ["hi @{ada}"]))).to eq("hi Ada Lovelace")
+    end
+  end
+
+  describe "a thread to LinkedIn" do
+    let(:social_post) { queued(targets: %w[linkedin], parts: %w[one two three]) }
+
+    before do
+      connect_linkedin
+      stub_linkedin("urn:li:share:7")
+    end
+
+    it "sends one post with the parts split by a blank line", :aggregate_failures do
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:post, linkedin_posts)).to have_been_made.once
+      expect(a_request(:post, linkedin_posts).with(body: hash_including("commentary" => "one\n\ntwo\n\nthree")))
+        .to have_been_made
+    end
+
+    it "counts the social post posted once its one post is out" do
+      deliver(social_post, "linkedin")
+
+      expect(reloaded(social_post).status).to eq("posted")
+    end
+
+    it "refuses a thread whose parts fit but whose joined text does not", :aggregate_failures do
+      social_post = queued(targets: %w[linkedin], parts: ["a" * 1600, "b" * 1600])
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:post, linkedin_posts)).not_to have_been_made
+      expect(delivery(social_post, "linkedin")).to have_attributes(failed: true, error: /over the linkedin limit/)
+    end
+  end
+
+  describe "one post to Mastodon, Bluesky and LinkedIn" do
+    let(:social_post) { queued(targets: %w[mastodon bluesky linkedin], parts: %w[hello]) }
+    let(:urls) do
+      [
+        "https://ruby.social/@ada/110", %r{\Ahttps://bsky.app/profile/ada.example/post/},
+        "https://www.linkedin.com/feed/update/urn:li:share:7/",
+      ]
+    end
+
+    before do
+      connect_linkedin
+      stub_mastodon("110")
+      stub_bluesky
+      stub_linkedin("urn:li:share:7")
+    end
+
+    it "sends to all three and links each delivery to its post", :aggregate_failures do
+      %w[mastodon bluesky linkedin].each { deliver(social_post, it) }
+
+      expect(reloaded(social_post).status).to eq("posted")
+      expect(%w[mastodon bluesky linkedin].map { delivery(social_post, it).remote_url }).to match(urls)
+    end
+  end
+
+  describe "a LinkedIn timeout" do
+    let(:social_post) { queued(targets: %w[linkedin], parts: %w[one two]) }
+
+    before { stub_request(:post, linkedin_posts).to_raise(Net::ReadTimeout) }
+
+    context "without leave to read the member's posts" do
+      before { connect_linkedin }
+
+      it "fails for good in place of retrying", :aggregate_failures do
+        expect { deliver(social_post, "linkedin") }.not_to raise_error
+        expect(delivery(social_post, "linkedin")).to have_attributes(failed: true, error: /timed out/)
+      end
+
+      it "retries when the request never reached LinkedIn" do
+        stub_request(:post, linkedin_posts).to_timeout
+
+        expect { deliver(social_post, "linkedin") }.to raise_error(described_class::NetworkUnavailable)
+      end
+    end
+
+    context "with leave to read the member's posts" do
+      before do
+        connect_linkedin(scopes: %w[openid profile w_member_social r_member_social])
+        refused(social_post, "linkedin")
+      end
+
+      it "retries" do
+        expect(delivery(social_post, "linkedin")).to have_attributes(failed: false, error: /timed out/)
+      end
+
+      it "records the post it finds on the retry and posts nothing more", :aggregate_failures do
+        stub_linkedin_recent("other", "one\n\ntwo")
+        deliver(social_post, "linkedin")
+
+        expect(a_request(:post, linkedin_posts)).to have_been_made.once
+        expect(delivery(social_post, "linkedin")).to have_attributes(remote_ids: %w[urn:li:share:1], error: nil)
+      end
+
+      it "matches a post LinkedIn hands back escaped and with hashtag templates" do
+        social_post = queued(targets: %w[linkedin], parts: ["(a) #ruby"])
+        refused(social_post, "linkedin")
+        stub_linkedin_recent("\\(a\\) {hashtag|\\#|ruby}")
+        deliver(social_post, "linkedin")
+
+        expect(delivery(social_post, "linkedin").remote_ids).to eq(%w[urn:li:share:0])
+      end
+
+      it "posts on the retry when no recent post holds the text" do
+        stub_linkedin_recent("other")
+        stub_linkedin("urn:li:share:9")
+        deliver(social_post, "linkedin")
+
+        expect(delivery(social_post, "linkedin").remote_ids).to eq(%w[urn:li:share:9])
+      end
+    end
+  end
+
+  describe "a lapsed LinkedIn connection" do
+    let(:social_post) { queued(targets: %w[linkedin], parts: %w[hello]) }
+
+    let(:expired) { "LinkedIn connection expired at 2026-09-01T12:00:00Z; connect it again" }
+
+    it "fails for good with an error that names the expiry", :aggregate_failures do
+      connect_linkedin(expires_at: Time.utc(2026, 9, 1, 12).to_i)
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:post, linkedin_posts)).not_to have_been_made
+      expect(delivery(social_post, "linkedin")).to have_attributes(failed: true, error: expired)
+    end
+
+    it "fails for good when LinkedIn refuses the token" do
+      connect_linkedin
+      stub_request(:post, linkedin_posts).to_return(status: 401)
+      deliver(social_post, "linkedin")
+
+      expect(delivery(social_post, "linkedin")).to have_attributes(failed: true, error: /refused the access token/)
+    end
+
+    it "retries any other refusal" do
+      connect_linkedin
+      stub_request(:post, linkedin_posts).to_return(status: 500)
+
+      expect { deliver(social_post, "linkedin") }.to raise_error(described_class::NetworkUnavailable)
+    end
+  end
 end

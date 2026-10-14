@@ -22,6 +22,12 @@ RSpec.describe "Admin social composer", type: :feature do
 
   def open_accounts = find(".compose-accounts summary").click
 
+  def pick_linkedin
+    set_up_linkedin_client
+    connect_linkedin
+    remember(social_account("linkedin").id)
+  end
+
   def picked = all("[data-social-target]:checked", visible: :all).map(&:value)
 
   def remember(*accounts)
@@ -267,13 +273,22 @@ RSpec.describe "Admin social composer", type: :feature do
       expect(page).to have_css("[data-social-part]", count: 2)
     end
 
-    it "counts each part on its own" do
+    it "counts each part on its own, and every part of a LinkedIn thread as the joined post" do
       add_part
       write "hello"
 
       expect(counts).to eq(
-        ["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 5/3000", "Mastodon 0/500", "Bluesky 0/300", "LinkedIn 0/3000"],
+        ["Mastodon 5/500", "Bluesky 5/300", "LinkedIn 7/3000", "Mastodon 0/500", "Bluesky 0/300", "LinkedIn 7/3000"],
       )
+    end
+
+    it "turns every part of a LinkedIn thread pink once the joined text runs over" do
+      pick_linkedin
+      add_part
+      write "a" * 1500
+      write "b" * 1499, index: 1
+
+      expect(page).to have_css(".compose-count.over", text: "LinkedIn", count: 2)
     end
 
     it "removes a part" do

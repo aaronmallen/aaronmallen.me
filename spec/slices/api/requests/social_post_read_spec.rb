@@ -130,6 +130,15 @@ RSpec.describe "API reading a social post", type: :request do
         .to include(%w[mastodon sending])
     end
 
+    it "marks a LinkedIn thread sent once its one post is out" do
+      social_post = Social::Slice["repos.social_post_mutations"]
+                    .create_with_parts(parts: %w[one two], posted_at: Time.now, status: "posted", targets: %w[linkedin])
+      deliver(social_post, "linkedin", remote_ids: %w[urn:li:share:7])
+
+      expect(read(social_post.id).fetch("deliveries").map { it.values_at("network", "state") })
+        .to eq([%w[linkedin sent]])
+    end
+
     it "names each account a post went to on one network" do
       social_post = create(:social_post, :posted, targets: %w[mastodon])
       first, second = connect_two_mastodons

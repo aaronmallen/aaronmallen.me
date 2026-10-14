@@ -14,7 +14,7 @@ module Admin
         sent = per_network { expand_for_network.call(bodies, it) }
 
         bodies.each_index.map do |index|
-          sent.to_h { |name, texts| [name, measure(name, texts[index], shown[name][index])] }
+          sent.to_h { |name, texts| [name, measure(name, texts.fetch(index) { texts.first }, shown[name][index])] }
         end
       end
 

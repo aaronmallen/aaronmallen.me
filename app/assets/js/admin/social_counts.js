@@ -14,10 +14,10 @@ const COUNTS = {
     graphemes(shrinkLinks(text, Number(counter.dataset.reservedPerUrl)).replace(MENTION, "@$1")),
 };
 
-export function renderCounts(root, text, selected) {
+export function renderCounts(root, text, selected, texts = [text]) {
   const counters = [...root.querySelectorAll("[data-social-count]")];
 
-  return counters.map((counter) => renderCount(counter, text, selected)).some(Boolean);
+  return counters.map((counter) => renderCount(counter, sentText(counter, text, texts), selected)).some(Boolean);
 }
 
 export function selectedTargets(root) {
@@ -69,6 +69,12 @@ function proseClose(url) {
   const open = OPENER[close];
 
   return open !== undefined && tally(url, close) > tally(url, open);
+}
+
+function sentText(counter, text, texts) {
+  const joiner = counter.dataset.joiner;
+
+  return joiner === undefined ? text : texts.join(joiner);
 }
 
 function shrinkLinks(text, reserved) {

@@ -51,6 +51,8 @@ module Bluesky
 
     def inspect = "#<#{self.class.name}>"
 
+    def joiner = nil
+
     def limit = LIMIT
 
     def max_bytes = MAX_BYTES

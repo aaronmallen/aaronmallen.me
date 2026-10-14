@@ -46,6 +46,8 @@ module Mastodon
 
     def inspect = "#<#{self.class.name} configured=#{configured?}>"
 
+    def joiner = nil
+
     def limit = LIMIT
 
     def max_bytes = nil

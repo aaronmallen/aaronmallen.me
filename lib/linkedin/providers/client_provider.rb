@@ -12,7 +12,7 @@ module LinkedIn
       class << self
         def auth(settings) = Auth.new(client: oauth(settings))
 
-        def client(settings) = Client.new(auth: auth(settings))
+        def client(settings, http) = Client.new(auth: auth(settings), http:)
 
         private
 

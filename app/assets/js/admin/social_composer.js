@@ -25,7 +25,8 @@ function setupComposer(form) {
   const render = () => {
     const selected = selectedTargets(form);
     const bodies = [...parts.querySelectorAll("[data-social-part]")];
-    const over = bodies.map((part, index) => renderPart(part, index + 1, selected, bodies.length > 1)).some(Boolean);
+    const texts = bodies.map((part) => part.querySelector("[data-social-body]").value);
+    const over = bodies.map((part, index) => renderPart(part, index + 1, selected, texts)).some(Boolean);
     const blank = bodies.every((part) => part.querySelector("[data-social-body]").value.trim() === "");
 
     const count = form.querySelectorAll("[data-social-target]:checked").length;
@@ -66,13 +67,13 @@ function setupComposer(form) {
   render();
 }
 
-function renderPart(part, number, selected, removable) {
-  const text = part.querySelector("[data-social-body]").value;
-  part.querySelector("[data-social-remove]").hidden = !removable;
+function renderPart(part, number, selected, texts) {
+  const text = texts[number - 1];
+  part.querySelector("[data-social-remove]").hidden = texts.length < 2;
   const photos = renderPhotos(part, number);
   renderPreview(part.querySelector("[data-social-preview]"), text, photos, selected);
 
-  return renderCounts(part, text, selected);
+  return renderCounts(part, text, selected, texts);
 }
 
 function renderPreview(preview, text, photos, selected) {

@@ -25,4 +25,9 @@ RSpec.describe Social::Operations::CheckNetworkFit do
 
     expect(fits?(["#{'a' * 285} @{ada}"], %w[bluesky])).to be(false)
   end
+
+  it "refuses a LinkedIn thread whose parts each fit but whose joined text runs over", :aggregate_failures do
+    expect(fits?(["a" * 1500, "b" * 1498], %w[linkedin])).to be(true)
+    expect(fits?(["a" * 1500, "b" * 1499], %w[linkedin])).to be(false)
+  end
 end

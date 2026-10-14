@@ -633,6 +633,12 @@ RSpec.describe "Admin post editor", type: :request do
 
       def bluesky_only = { syndication_targets: %w[bluesky] }
 
+      def connect_linkedin_to_post
+        set_up_linkedin_client
+        connect_linkedin
+        stub_linkedin("urn:li:share:7")
+      end
+
       def counts = page.all("[data-social-count-text]").map(&:text)
 
       def delivered
@@ -653,6 +659,15 @@ RSpec.describe "Admin post editor", type: :request do
       def toggle = page.find_field("Queue a cross-post when this goes live", type: "checkbox")
 
       before { connect_social_networks }
+
+      it "announces a published post on LinkedIn when LinkedIn is ticked", :commits do
+        connect_linkedin_to_post
+        save(intent: "publish", title: "Hello", **card, syndication_targets: %w[linkedin])
+        Social::Jobs::DeliverSocialPost.new.perform(queued.first.id, social_account("linkedin").id)
+
+        expect(a_request(:post, linkedin_posts).with(body: hash_including("commentary" => "In my own words")))
+          .to have_been_made
+      end
 
       it "heads the card and hints at what it does", :aggregate_failures do
         get "/admin/posts/new"

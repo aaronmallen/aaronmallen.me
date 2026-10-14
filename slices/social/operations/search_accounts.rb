@@ -5,7 +5,7 @@ module Social
     class SearchAccounts < Blog::Operation
       LIMIT = 8
       MINIMUM = 2
-      RATE_LIMITED = [Bluesky::RateLimited, Mastodon::RateLimited].freeze
+      RATE_LIMITED = [Bluesky::RateLimited, LinkedIn::RateLimited, Mastodon::RateLimited].freeze
 
       include Deps[networks: "networks.all"]
 
@@ -28,7 +28,7 @@ module Social
         Success(client.search(text, limit: LIMIT).reject { it.handle.empty? })
       rescue *RATE_LIMITED
         Failure(:rate_limited)
-      rescue Social::Error, Bluesky::Error, Mastodon::Error
+      rescue Social::Error, Bluesky::Error, LinkedIn::Error, Mastodon::Error
         Failure(:failed)
       end
     end

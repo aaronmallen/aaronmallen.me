@@ -3,6 +3,8 @@
 module Social
   module Operations
     class DeliverSocialPost < Blog::Operation
+      FINAL = [LinkedIn::Expired, LinkedIn::Unsure].freeze
+      GAVE_UP = :gave_up
       OVER_LIMIT = :over_limit
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
       SEND_FAILED = :send_failed
@@ -20,7 +22,7 @@ module Social
 
       def call(social_post_id, connection_id)
         social_post, account = step targeted(social_post_id, connection_id)
-        client = networks.fetch(account.provider).for(account)
+        client = client_for(social_post, account)
         bodies = expanded(social_post, account.provider)
         step within_limits(social_post, account, client, bodies)
         delivery = social_post_mutations.record_delivery(social_post.id, account, error: nil, failed: false)
@@ -40,10 +42,17 @@ module Social
 
       private
 
-      def done?(delivery, parts)
+      def client_for(social_post, account)
+        client = networks.fetch(account.provider).for(account)
+        retrying = social_post.deliveries.any? { it.connection_id == account.id }
+
+        retrying && client.respond_to?(:retrying) ? client.retrying : client
+      end
+
+      def done?(delivery, sends)
         return false unless delivery
 
-        delivery.failed || delivery.remote_ids.to_a.size >= parts
+        delivery.failed || delivery.remote_ids.to_a.size >= sends
       end
 
       def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
@@ -91,17 +100,26 @@ module Social
       end
 
       def send_parts(social_post, account, client, delivery, bodies)
-        parts = social_post.parts.zip(bodies, held_photos(social_post.parts))
-
-        parts.drop(delivery.remote_ids.size).each do |sending|
+        sendings(social_post, bodies).drop(delivery.remote_ids.size).each do |sending|
           delivery = send_part(social_post, account, client, delivery, sending)
         end
 
         Success(settle(social_post.id))
-      rescue Social::Error, Bluesky::Error, Mastodon::Error => e
+      rescue *FINAL => e
+        refuse(social_post, account, GAVE_UP, e.message)
+      rescue Social::Error, Bluesky::Error, LinkedIn::Error, Mastodon::Error => e
         social_post_mutations.record_delivery(social_post.id, account, error: e.message)
         Failure(SEND_FAILED)
       end
+
+      def sendings(social_post, bodies)
+        held = held_photos(social_post.parts)
+        return social_post.parts.zip(bodies, held) if bodies.size == social_post.parts.size
+
+        [[social_post.parts.first, bodies.first, held.flatten]]
+      end
+
+      def sends(account, social_post) = networks.fetch(account.provider).joiner ? 1 : social_post.parts.size
 
       def settle(social_post_id)
         social_post = social_post_queries.by_id(social_post_id)
@@ -113,7 +131,7 @@ module Social
       def settled?(social_post)
         deliveries = social_post.deliveries.to_h { [it.connection_id, it] }
 
-        list_target_accounts.call(social_post).all? { done?(deliveries[it.id], social_post.parts.size) }
+        list_target_accounts.call(social_post).all? { done?(deliveries[it.id], sends(it, social_post)) }
       end
 
       def targeted(social_post_id, connection_id)
@@ -132,10 +150,10 @@ module Social
       end
 
       def within_limits(social_post, account, client, bodies)
-        over = social_post.parts.zip(bodies).find { |_, body| !client.within_limit?(body.text) }&.first
+        over = bodies.index { !client.within_limit?(it.text) }
         return Success(social_post) unless over
 
-        refuse(social_post, account, OVER_LIMIT, "Part #{over.position} is over the #{account.provider} limit")
+        refuse(social_post, account, OVER_LIMIT, "Part #{over + 1} is over the #{account.provider} limit")
       end
     end
   end

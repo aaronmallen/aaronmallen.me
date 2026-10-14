@@ -24,12 +24,15 @@ module API
       include Deps[
         list_target_accounts: "social.operations.list_target_accounts",
         measure_parts: "social.operations.measure_parts",
+        networks: "networks.all",
       ]
 
       private
 
       def answered(social_post)
-        serialized(Serializers::SocialPost, social_post, measure_parts:, target_accounts: list_target_accounts)
+        params = { measure_parts:, networks:, target_accounts: list_target_accounts }
+
+        serialized(Serializers::SocialPost, social_post, **params)
       end
 
       def composed(result, id, params)

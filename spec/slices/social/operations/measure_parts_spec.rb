@@ -35,4 +35,10 @@ RSpec.describe Social::Operations::MeasureParts do
     expect(lengths.fetch("mastodon").over).to be(false)
     expect(lengths.fetch("bluesky")).to have_attributes(part: 1, count: 400, limit: 300, over: true)
   end
+
+  it "gives every part a LinkedIn thread's joined count and flags them all once it runs over" do
+    lengths = measure(["a" * 1500, "b" * 1499], %w[linkedin mastodon])
+
+    expect(lengths.map { it.fetch("linkedin") }).to all(have_attributes(count: 3001, limit: 3000, over: true))
+  end
 end

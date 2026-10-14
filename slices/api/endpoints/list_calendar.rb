@@ -19,6 +19,7 @@ module API
 
       include Deps[
         calendar_day_queries: "calendar.repos.calendar_day_queries",
+        networks: "networks.all",
         target_accounts: "social.operations.list_target_accounts",
       ]
 
@@ -31,7 +32,7 @@ module API
       private
 
       def listed(days)
-        listed = serialized(Serializers::CalendarDay, days, target_accounts:)
+        listed = serialized(Serializers::CalendarDay, days, networks:, target_accounts:)
 
         { from: days.first.date.iso8601, to: days.last.date.iso8601, days: listed }
       end
