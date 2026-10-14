@@ -89,8 +89,8 @@ Five retries on Sidekiq's backoff last under ten minutes, so a network down for 
 post then shows the delivery failed. A webmention send, a verify and a cross-post leave only Honeybadger's
 reports.
 
-Two scheduled failures leave no trace anywhere. `ReapSyncStates` drops a GitHub refusal, and
-`RefreshSocialEngagement` drops each network error, and both rest on the next run trying again. A refusal that
-repeats every night stays unseen.
+`RefreshSocialEngagement` leaves no trace anywhere. It drops each network error and rests on the next run trying
+again, so an error that repeats every night stays unseen. `ReapSyncStates` records a GitHub refusal or the page
+limit under the commits sync (#1237), but leaves a missing token for the commit import to report.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

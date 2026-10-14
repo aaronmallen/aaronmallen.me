@@ -11,7 +11,7 @@ module Record
 
       def failure(sync, repo: nil) = to_failure(sync_states.of(FAILURE, sync:, repo:).one)
 
-      def failures = listed(failure_rows.exclude(sync: COMMITS, failure_reason: PAGE_LIMIT))
+      def failures = listed(failure_rows.exclude(walk_page_limits))
 
       private
 
@@ -27,6 +27,8 @@ module Record
           reason: state.failure_reason, repo: state.repo, since: state.failing_since, sync: state.sync,
         }
       end
+
+      def walk_page_limits = Sequel.&({ sync: COMMITS, failure_reason: PAGE_LIMIT }, Sequel.~(repo: nil))
     end
   end
 end

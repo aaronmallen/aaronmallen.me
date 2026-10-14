@@ -75,6 +75,54 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     expect(commit_queries.backfilled_to(gone)).not_to be_nil
   end
 
+  describe "recording how the reap went" do
+    def whole_sync_failure = sync_state_queries.failure(commits_sync)
+
+    it "records the page limit under the commits sync" do
+      pages = Array.new(GitHub::Client::MAX_PAGES) { github_repos_page(github_repository(repo), more: true) }
+      stub_repos_answer(*pages, github_repos_page(github_repository(gone)))
+      reap
+
+      expect(whole_sync_failure).to include(reason: "page_limit")
+    end
+
+    it "records a GitHub failure with its message" do
+      stub_repos_answer({ status: 500, body: "something broke" })
+      reap
+
+      expect(whole_sync_failure).to include(reason: "github_failed", message: "GitHub answered 500 for GraphQL")
+    end
+
+    it "records a rate limit" do
+      stub_repos_answer(github_rate_limited)
+      reap
+
+      expect(whole_sync_failure).to include(reason: "rate_limited")
+    end
+
+    it "leaves the import's failure alone after a clean reap" do
+      sync_state_mutations.record_failure(commits_sync, :rate_limited)
+      reap
+
+      expect(whole_sync_failure).to include(reason: "rate_limited", count: 1)
+    end
+
+    it "leaves a missing token for the import to report, counting it once" do
+      sync_state_mutations.record_failure(commits_sync, :not_configured)
+      disconnect_github
+      reap
+
+      expect(whole_sync_failure).to include(reason: "not_configured", count: 1)
+    end
+
+    it "records nothing when the list comes back empty" do
+      stub_repos
+      reap
+
+      expect(whole_sync_failure).to be_nil
+    end
+  end
+
   describe "when the list cannot be trusted" do
     before { leave_traces(gone) }
 

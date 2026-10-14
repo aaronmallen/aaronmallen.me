@@ -664,6 +664,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
           .to eq(["Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
+      it "reports the page limit cutting the whole commits sync short" do
+        record_commit_failure(:page_limit)
+        get "/admin"
+
+        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · It stopped at the page limit"])
+      end
+
       it "links nowhere for a repository the page limit stopped", :aggregate_failures do
         record_commit_failure(:page_limit, repo: "aaronmallen/big")
         get "/admin"
