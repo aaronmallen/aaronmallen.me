@@ -50,7 +50,7 @@ module API
       ).freeze
 
       include Deps[
-        "repos.post_figure_queries",
+        post_figure_queries: "posts.repos.post_figure_queries",
         post_queries: "posts.repos.post_queries",
         social_post_queries: "social.repos.social_post_queries",
       ]

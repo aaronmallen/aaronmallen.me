@@ -2,15 +2,15 @@
 
 require "dry/monads"
 
-module API
+module Calendar
   module Repos
-    class CalendarQueries < Blog::DB::Repo
+    class CalendarDayQueries < Blog::DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
       include Dry::Monads[:result]
       include Deps[
         sprint_queries: "tasks.repos.sprint_queries",
-        event_queries: "calendar.repos.calendar_queries",
+        event_queries: "repos.calendar_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         post_queries: "posts.repos.post_queries",
         social_post_queries: "social.repos.social_post_queries",

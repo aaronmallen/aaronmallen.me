@@ -41,7 +41,7 @@ module API
       ).freeze
 
       include Deps[
-        activity_view_queries: "repos.activity_view_queries",
+        activity_queries: "activity.repos.activity_queries",
         list_saved_view_records: "operations.list_saved_view_records",
         saved_view_queries: "saved_views.repos.saved_view_queries",
       ]
@@ -73,7 +73,7 @@ module API
       end
 
       def records(screen, rows, found)
-        return serialized(Serializers::Activity, rows, views: activity_view_queries.views(rows)) if screen == ACTIVITY
+        return serialized(Serializers::Activity, rows, views: activity_queries.views(rows)) if screen == ACTIVITY
         return serialized(SERIALIZERS.fetch(screen), rows) unless screen == TASKS
 
         sprint_on = found.fetch(:sprint_on)

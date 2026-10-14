@@ -8,16 +8,17 @@ module Admin
       WEEK = 7
 
       include Deps[
-        calendar_queries: "api.repos.calendar_queries", calendar_list: "calendar.repos.calendar_queries",
+        calendar_day_queries: "calendar.repos.calendar_day_queries",
+        calendar_queries: "calendar.repos.calendar_queries",
         task_queries: "tasks.repos.task_queries",
       ]
 
       def call(month: nil, day: nil, today: Blog::TimeZone.today)
         picked = Blog::Types::DateParam[day]
         first = first_of(picked || month_param(month) || today)
-        days = calendar_queries.between(from: grid_start(first), to: grid_end(first), include_hidden: false).value!
+        days = calendar_day_queries.between(from: grid_start(first), to: grid_end(first), include_hidden: false).value!
         shown = days.find { it.date == (picked || chosen(first, today)) }
-        calendars = calendar_list.listed
+        calendars = calendar_queries.listed
 
         { month: first, today:, days:, day: shown, tasks: tasks(shown), calendars:, tones: tones(calendars) }
       end

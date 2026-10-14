@@ -9,8 +9,8 @@ module Admin
 
           prop :month, Blog::Types::Date
           prop :today, Blog::Types::Date
-          prop :days, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::CalendarDay))
-          prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
+          prop :days, Blog::Types::Array.of(Blog::Types::Instance(::Calendar::Structs::CalendarDay))
+          prop :day, Blog::Types::Instance(::Calendar::Structs::CalendarDay)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :calendars, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tones, Blog::Types::Hash

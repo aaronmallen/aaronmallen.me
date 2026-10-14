@@ -3,8 +3,6 @@
 module Admin
   module Operations
     class ListActivityEvents
-      include Blog::Constants
-
       COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]
       DECISION = Blog::Types::ActivityKind["decision"]
@@ -43,12 +41,11 @@ module Admin
       include Deps[
         "i18n",
         activity_queries: "activity.repos.activity_queries",
-        rollup_queries: "analytics.repos.analytics_rollup_queries",
       ]
 
       def call(from:, day:, size:, **filters)
         found = page(from, day, size, filters)
-        views = found.rows.any? { it.type == POST } ? rollup_queries.views_by_path : EMPTY_HASH
+        views = activity_queries.views(found.rows)
 
         found.with(rows: found.rows.map { event(it, views) })
       end

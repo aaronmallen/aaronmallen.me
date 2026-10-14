@@ -5,7 +5,7 @@ module Admin
     module Components
       module Calendar
         class Month < Component
-          prop :days, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::CalendarDay))
+          prop :days, Blog::Types::Array.of(Blog::Types::Instance(::Calendar::Structs::CalendarDay))
           prop :month, Blog::Types::Date
           prop :picked, Blog::Types::Date
           prop :today, Blog::Types::Date

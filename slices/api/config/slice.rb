@@ -15,7 +15,7 @@ module API
       repos.post_reader_queries
     ], from: :analytics
 
-    import keys: %w[repos.calendar_queries], from: :calendar
+    import keys: %w[repos.calendar_day_queries], from: :calendar
 
     import keys: %w[
       operations.act_on_messages
@@ -40,7 +40,8 @@ module API
 
     import keys: %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.publish_draft
-      operations.revise_edit_note operations.save_post operations.save_post_seo repos.post_queries
+      operations.revise_edit_note operations.save_post operations.save_post_seo repos.post_figure_queries
+      repos.post_queries
     ], from: :posts
 
     import keys: %w[
@@ -155,7 +156,7 @@ module API
       operations.snooze_inbox
       operations.snooze_inbox_row
       operations.wake_inbox_row
-      repos.api_token_queries repos.calendar_queries repos.inbox_queries repos.post_figure_queries
+      repos.api_token_queries repos.inbox_queries
     ]
   end
 end

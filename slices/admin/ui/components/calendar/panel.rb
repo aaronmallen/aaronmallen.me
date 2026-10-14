@@ -16,7 +16,7 @@ module Admin
             **Helpers::TaskStatuses::NAMES,
           }.freeze
 
-          prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
+          prop :day, Blog::Types::Instance(::Calendar::Structs::CalendarDay)
           prop :calendars, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date

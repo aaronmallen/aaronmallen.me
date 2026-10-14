@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module API
+module Calendar
   module Structs
     CalendarDay = Data.define(:date, :sprint, :posts, :social_posts, :journal, :events)
   end

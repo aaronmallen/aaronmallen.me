@@ -4,7 +4,7 @@ module Admin
   module Operations
     class BuildPostsPage
       include Deps[
-        post_figure_queries: "api.repos.post_figure_queries",
+        post_figure_queries: "posts.repos.post_figure_queries",
         post_queries: "posts.repos.post_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]

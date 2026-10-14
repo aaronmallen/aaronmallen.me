@@ -17,10 +17,13 @@ module API
         },
       ).freeze
 
-      include Deps["repos.calendar_queries", target_accounts: "social.operations.list_target_accounts"]
+      include Deps[
+        calendar_day_queries: "calendar.repos.calendar_day_queries",
+        target_accounts: "social.operations.list_target_accounts",
+      ]
 
       def handle(from:, to:)
-        found = Blog::Helpers::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
+        found = Blog::Helpers::DayWindow.days(from, to).bind { |first, last| calendar_day_queries.between(from: first, to: last) }
 
         found.either(->(days) { Success(listed(days)) }, method(:bad_window))
       end

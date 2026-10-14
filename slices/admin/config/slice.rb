@@ -29,7 +29,7 @@ module Admin
     import keys: %w[
       operations.create_event operations.delete_event operations.edit_event operations.move_event
       operations.show_calendars
-      repos.calendar_queries
+      repos.calendar_day_queries repos.calendar_queries
     ], from: :calendar
 
     import keys: %w[
@@ -38,7 +38,7 @@ module Admin
       operations.snooze_inbox
       operations.snooze_inbox_row
       operations.wake_inbox_row
-      repos.api_token_queries repos.calendar_queries repos.inbox_queries repos.post_figure_queries
+      repos.api_token_queries repos.inbox_queries
     ], from: :api
 
     import keys: %w[
@@ -76,7 +76,8 @@ module Admin
 
     import keys: %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.move_post
-      operations.publish_draft operations.revise_edit_note operations.save_post repos.post_queries
+      operations.publish_draft operations.revise_edit_note operations.save_post repos.post_figure_queries
+      repos.post_queries
     ], from: :posts
 
     import keys: %w[operations.remove_tag operations.save_tag repos.tag_queries], from: :tags

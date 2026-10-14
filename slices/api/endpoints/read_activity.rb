@@ -43,7 +43,6 @@ module API
 
       include Deps[
         activity_queries: "activity.repos.activity_queries",
-        activity_view_queries: "repos.activity_view_queries",
         contributor_terms: "contracts.contributor_terms_contract",
       ]
 
@@ -88,7 +87,7 @@ module API
           to: last.iso8601,
           count: rows.length,
           **page.except(:rows),
-          activity: serialized(Serializers::Activity, rows, views: activity_view_queries.views(rows)),
+          activity: serialized(Serializers::Activity, rows, views: activity_queries.views(rows)),
         }
       end
     end

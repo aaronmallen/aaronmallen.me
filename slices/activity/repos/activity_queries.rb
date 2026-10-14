@@ -4,7 +4,10 @@ module Activity
   module Repos
     class ActivityQueries < Blog::DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
+      POST = Blog::Types::ActivityKind["post"]
       TYPES = Blog::Types::ActivityKind.values
+
+      include Deps[rollup_queries: "analytics.repos.analytics_rollup_queries"]
 
       def between(from:, to:, limit: nil, **filters)
         found = narrowed(from:, to:, **filters).newest_first.with_tags
@@ -37,6 +40,8 @@ module Activity
       end
 
       def day_count(from:, to:, **filters) = narrowed(from:, to:, **filters).day_count
+
+      def views(rows) = rows.any? { it.type == POST } ? rollup_queries.views_by_path : Blog::Constants::EMPTY_HASH
 
       private
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module API
+module Posts
   module Repos
     class PostFigureQueries < Blog::DB::Repo
       include Deps[
