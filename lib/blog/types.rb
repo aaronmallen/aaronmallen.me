@@ -200,6 +200,7 @@ module Blog
     TaskAct = Types::String.enum("complete", "pause")
     TaskActParam = TaskAct.fallback(TaskAct.values.first)
     TaskBulkAction = Types::String.enum("complete", "cancel", "move", "tag", "untag", "delete")
+    TaskCadence = Types::String.enum("days", "weeks", "month_day", "month_end", "month_weekday", "yearly")
     TaskList = Types::String.enum("next", "someday", "external")
     TaskListParam = TaskList.fallback(TaskList.values.first)
     TaskFilter = Types::String.enum("today", *TaskList.values)
