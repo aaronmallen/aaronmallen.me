@@ -68,7 +68,9 @@ module Linear
     def assigned_issues
       return unless configured?
 
-      transports.flat_map { assigned_in(it).items }
+      listings = transports.map { assigned_in(it) }
+
+      Blog::CursorPaging::Listing.new(items: listings.flat_map(&:items), cut_short: listings.any?(&:cut_short?))
     end
 
     def issues(urls)

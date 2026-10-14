@@ -61,7 +61,7 @@ module GitHub
     def assigned_issues
       return unless configured?
 
-      walk { |cursor, found| assigned_page(cursor, found) }.items
+      walk { |cursor, found| assigned_page(cursor, found) }
     end
 
     def issues(urls)

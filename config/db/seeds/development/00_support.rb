@@ -13,7 +13,7 @@ module Seeds
       @issues = issues
     end
 
-    def assigned_issues = @issues
+    def assigned_issues = Blog::CursorPaging::Listing.new(items: @issues, cut_short: false)
 
     def configured? = true
 

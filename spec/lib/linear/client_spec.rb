@@ -35,7 +35,7 @@ RSpec.describe Linear::Client do
     it "hands back each issue's updatedAt" do
       stub_linear(LinearGraphQL::ASSIGNED_QUERY, linear_assigned(linear_issue("L_one", updatedAt: at(5).iso8601(3))))
 
-      expect(client.assigned_issues.first[:updated_at]).to eq(at(5))
+      expect(client.assigned_issues.items.first[:updated_at]).to eq(at(5))
     end
   end
 

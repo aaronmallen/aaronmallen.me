@@ -110,6 +110,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(linear_request(LinearGraphQL::ASSIGNED_QUERY)).to have_been_made.times(10)
       expect(sources.where(provider: "linear").count).to eq(10)
     end
+
+    it "records the page limit on the sync state" do
+      sync
+
+      expect(failure).to include(reason: "page_limit")
+    end
   end
 
   describe "a new issue already started" do
@@ -382,7 +388,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     def inverse(type, id) = { type:, issue: { id: } }
 
-    def keep(issues) = issues.tap { handed.concat(it) }
+    def keep(issues) = issues.tap { handed.concat(it.respond_to?(:items) ? it.items : it) }
 
     def link(type, id) = { type:, relatedIssue: { id: } }
 

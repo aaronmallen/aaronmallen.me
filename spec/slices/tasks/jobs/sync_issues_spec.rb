@@ -506,7 +506,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     let(:client) { Tasks::Slice["github.client"] }
     let(:found) { [] }
 
-    def collect(issues) = issues.tap { found.concat(it) }
+    def collect(issues) = issues.tap { found.concat(it.respond_to?(:items) ? it.items : it) }
 
     def gather(name) = allow(client).to(receive(name).and_wrap_original { |read, *args| collect(read.call(*args)) })
 

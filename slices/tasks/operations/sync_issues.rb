@@ -31,13 +31,10 @@ module Tasks
 
       def call(provider:, client:, now: Time.now)
         known = tracked(provider)
-        assigned, checked, history = step fetch(provider, client, known, now)
-        held, fresh = assigned.partition { known.key?(it[:id]) }
+        listing, checked, history = step fetch(provider, client, known, now)
+        count = settle(provider, client, known, now, [listing.items, checked, history])
 
-        follow_all([*held, *checked], known, history, now)
-        import_all(provider, fresh, known, now)
-
-        fresh.size + step(relate(provider, client, known, now, [assigned, checked])).size
+        listing.cut_short? ? step(Failure(:page_limit)) : count
       end
 
       private
@@ -50,10 +47,11 @@ module Tasks
 
       def fetch(provider, client, known, now)
         remote(client, provider) do
-          assigned = client.assigned_issues
+          listing = client.assigned_issues
+          assigned = listing.items
           checked = client.issues(unseen(known, assigned, now))
 
-          Success([assigned, checked, history(client, [*assigned, *checked], known)])
+          Success([listing, checked, history(client, [*assigned, *checked], known)])
         end
       end
 
@@ -133,6 +131,15 @@ module Tasks
 
         fields = copy(issue)
         task_mutations.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
+      end
+
+      def settle(provider, client, known, now, (assigned, checked, history))
+        held, fresh = assigned.partition { known.key?(it[:id]) }
+
+        follow_all([*held, *checked], known, history, now)
+        import_all(provider, fresh, known, now)
+
+        fresh.size + step(relate(provider, client, known, now, [assigned, checked])).size
       end
 
       def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }

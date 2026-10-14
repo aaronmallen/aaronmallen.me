@@ -15,7 +15,7 @@ module Spec
     def assigned_issues
       raise failure if failure
 
-      assigned
+      Blog::CursorPaging::Listing.new(items: assigned, cut_short: false)
     end
 
     def configured? = configured
