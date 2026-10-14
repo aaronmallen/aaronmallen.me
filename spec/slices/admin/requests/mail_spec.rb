@@ -794,6 +794,40 @@ RSpec.describe "Admin mail", type: :request do
         expect(toast).to eq("This thread already has a task")
       end
 
+      describe "from two tabs at once", :commits do
+        def database = Mail::Slice["db.rom"].gateways[:default].connection
+
+        def held_by_another_session
+          other = Sequel.connect(database.opts.merge(max_connections: 1))
+          other.transaction do
+            other[:mail_threads].where(id: thread.id).for_update.all
+            yield
+          end
+        ensure
+          other&.disconnect
+        end
+
+        def make_in_thread
+          cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
+          params = { _csrf_token: admin_csrf_token, folder: "inbox", task: { title: "Book lunch", list: "next" } }
+
+          Thread.new { Rack::MockRequest.new(app).post("/admin/mail/#{thread.id}/task", params:, "HTTP_COOKIE" => cookie) }
+        end
+
+        def wait_until_both_wait
+          waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database),
+                                                      wait_event_type: "Lock")
+          Timeout.timeout(5) { sleep(0.01) until waiting.count == 2 }
+        end
+
+        it "makes one task" do
+          tabs = held_by_another_session { Array.new(2) { make_in_thread }.tap { wait_until_both_wait } }
+          tabs.each(&:join)
+
+          expect(Tasks::Slice["relations.tasks"].where(title: "Book lunch").count).to eq(1)
+        end
+      end
+
       it "refuses a blank title and makes nothing", :aggregate_failures do
         make(title: " ")
         follow_redirect!

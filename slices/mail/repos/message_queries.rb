@@ -12,6 +12,8 @@ module Mail
 
       def by_id(id) = mail_threads.with_letter.with_account.with_reason(settings).combine(:tags).by_pk(id).one
 
+      def by_id_for_update(id) = mail_threads.by_pk(id).lock.one
+
       def count_from_visitor_since(visitor_hashes, time)
         mail_messages.for_visitor(visitor_hashes).received_since(time).count
       end

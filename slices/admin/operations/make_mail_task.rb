@@ -16,10 +16,11 @@ module Admin
       ]
 
       def call(id, params, filter:, archive:)
-        step found(message_queries.exist?(id) || nil)
-        step untasked(id)
-
-        task = transaction { linked(id, step(capture_task.call(params, filter:)).last) }
+        task = transaction do
+          step found(message_queries.by_id_for_update(id))
+          step untasked(id)
+          linked(id, step(capture_task.call(params, filter:)).last)
+        end
         archive ? step(archived(id, task)) : task
       end
 
