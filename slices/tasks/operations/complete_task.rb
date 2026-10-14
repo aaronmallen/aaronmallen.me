@@ -5,6 +5,7 @@ module Tasks
     class CompleteTask < Blog::Operation
       include Deps[
         contract: "contracts.worked_contract",
+        recur_task: "operations.recur_task",
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",
         task_queries: "repos.task_queries",
@@ -15,14 +16,22 @@ module Tasks
         step find(id)
         total = step reported(worked)
 
+        transaction do
+          closed = close(id, at, total)
+          step recur_task.call(id, at:)
+          closed
+        end
+      end
+
+      private
+
+      def close(id, at, total)
         task_event_mutations.track(id, at) do
           work_session_mutations.close(id, at)
           completed = task_mutations.complete(id, at:)
           total ? task_mutations.update(id, worked_seconds: total) : completed
         end
       end
-
-      private
 
       def find(id)
         found(task_queries.by_id(id)).bind { it.closed? ? Failure(:closed) : Success(it) }

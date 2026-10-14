@@ -485,7 +485,8 @@ CREATE TYPE public.task_event_kind AS ENUM (
     'moved',
     'tagged',
     'untagged',
-    'status_changed'
+    'status_changed',
+    'recurred'
 );
 
 
@@ -3287,7 +3288,9 @@ CREATE TABLE public.task_events (
 CASE kind
     WHEN 'moved'::public.task_event_kind THEN ((num_nonnulls(from_list, from_sprint_on) = 1) AND (num_nonnulls(to_list, to_sprint_on) = 1) AND ((from_list IS DISTINCT FROM to_list) OR (from_sprint_on IS DISTINCT FROM to_sprint_on)) AND (num_nonnulls(tag_name, from_status, to_status) = 0))
     WHEN 'status_changed'::public.task_event_kind THEN ((from_status IS NOT NULL) AND (to_status IS NOT NULL) AND (from_status <> to_status) AND (num_nonnulls(from_list, to_list, from_sprint_on, to_sprint_on, tag_name) = 0))
-    ELSE ((tag_name IS NOT NULL) AND (num_nonnulls(from_list, to_list, from_sprint_on, to_sprint_on, from_status, to_status) = 0))
+    WHEN 'tagged'::public.task_event_kind THEN ((tag_name IS NOT NULL) AND (num_nonnulls(from_list, to_list, from_sprint_on, to_sprint_on, from_status, to_status) = 0))
+    WHEN 'untagged'::public.task_event_kind THEN ((tag_name IS NOT NULL) AND (num_nonnulls(from_list, to_list, from_sprint_on, to_sprint_on, from_status, to_status) = 0))
+    ELSE (num_nonnulls(from_list, to_list, from_sprint_on, to_sprint_on, tag_name, from_status, to_status) = 0)
 END)
 );
 
@@ -8080,4 +8083,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261014230000_create_share_groups.rb'),
 ('20261014231253_create_performance_pages.rb'),
 ('20261014231500_create_task_series.rb'),
-('20261014233000_create_performance_rollups.rb');
+('20261014233000_create_performance_rollups.rb'),
+('20261014234500_add_recurred_to_task_event_kind.rb');

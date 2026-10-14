@@ -218,7 +218,9 @@ module Blog
       *ReachableTaskSourceState.values | ClosedTaskSourceState.values | GoneTaskSourceState.values,
     )
     TaskStatus = Types::String.enum(*OpenTaskStatus.values, *ClosedTaskStatus.values)
-    TaskTimelineKind = Types::String.enum("comment", "session", "moved", "tagged", "untagged", "status_changed")
+    TaskTimelineKind = Types::String.enum(
+      "comment", "session", "moved", "tagged", "untagged", "status_changed", "recurred",
+    )
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)

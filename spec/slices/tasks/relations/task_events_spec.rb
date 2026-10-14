@@ -59,4 +59,13 @@ RSpec.describe Tasks::Relations::TaskEvents do
     expect { record("tagged", tag_name: "money", to_list: "next") }
       .to raise_error(ROM::SQL::CheckConstraintError, /task_events_kind_check/)
   end
+
+  it "takes a recurred event with nothing else set" do
+    expect(record("recurred").kind).to eq("recurred")
+  end
+
+  it "refuses a recurred event with a column set" do
+    expect { record("recurred", tag_name: "money") }
+      .to raise_error(ROM::SQL::CheckConstraintError, /task_events_kind_check/)
+  end
 end

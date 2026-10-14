@@ -5,11 +5,11 @@ module API
     class ReadTask < TaskEndpoint
       SCHEMA = Helpers::Schema.by_id
 
-      TIMELINE = "the task's comments, work sessions, moves, tag changes and status changes, oldest first"
+      TIMELINE = "comments, work sessions, moves, tag and status changes and when a series made the task, oldest first"
 
       ENTRIES = [
         Serializers::TaskTimelineComment, Serializers::TaskTimelineSession, Serializers::TaskTimelineMove,
-        Serializers::TaskTimelineTag, Serializers::TaskTimelineStatus,
+        Serializers::TaskTimelineTag, Serializers::TaskTimelineStatus, Serializers::TaskTimelineRecur,
       ].freeze
 
       SERIALIZERS = ENTRIES.flat_map { |serializer| serializer::KINDS.map { [it, serializer] } }.to_h.freeze

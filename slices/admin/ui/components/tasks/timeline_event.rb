@@ -7,6 +7,7 @@ module Admin
         class TimelineEvent < Component
           EVENTS = {
             Blog::Types::TaskTimelineKind["moved"] => ["fa-solid fa-arrow-right-arrow-left", ".moved"],
+            Blog::Types::TaskTimelineKind["recurred"] => ["fa-solid fa-repeat", ".recurred"],
             Blog::Types::TaskTimelineKind["status_changed"] => ["fa-regular fa-circle-dot", ".status_changed"],
             Blog::Types::TaskTimelineKind["tagged"] => ["fa-solid fa-tag", ".tagged"],
             Blog::Types::TaskTimelineKind["untagged"] => ["fa-solid fa-tag", ".untagged"],

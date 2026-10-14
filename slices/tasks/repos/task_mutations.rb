@@ -28,6 +28,10 @@ module Tasks
 
       def complete(id, at: Time.now) = update(id, status: DONE, completed_at: at)
 
+      def copy_projects(from_id, to_id)
+        record_links.link_projects([to_id], record_links.project_ids_by_task([from_id]).fetch(from_id, []))
+      end
+
       def join_sprint(id, sprint_id) = update(id, list: nil, sprint_id:)
 
       def lead(id)

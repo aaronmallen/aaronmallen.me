@@ -4,6 +4,7 @@ module Tasks
   module Operations
     class CancelTask < Blog::Operation
       include Deps[
+        recur_task: "operations.recur_task",
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",
         task_queries: "repos.task_queries",
@@ -13,9 +14,13 @@ module Tasks
       def call(id, at: Time.now)
         step find(id)
 
-        task_event_mutations.track(id, at) do
-          work_session_mutations.close(id, at)
-          task_mutations.cancel(id, at:)
+        transaction do
+          closed = task_event_mutations.track(id, at) do
+            work_session_mutations.close(id, at)
+            task_mutations.cancel(id, at:)
+          end
+          step recur_task.call(id, at:)
+          closed
         end
       end
 

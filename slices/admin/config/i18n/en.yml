@@ -2528,6 +2528,7 @@ en:
           title: "Timeline"
         timeline_event:
           moved: "Moved from %{from} to %{to}"
+          recurred: "Made by its recurring series"
           sprint: "the %{day} sprint"
           status_changed: "Changed the status from %{from} to %{to}"
           tagged: "Added the tag %{tag}"

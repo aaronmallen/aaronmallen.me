@@ -101,6 +101,13 @@ RSpec.describe "Admin task activity", type: :request do
     expect(events).to include(event_text("moved", from: "the Oct 3, 2026 sprint", to: "someday"))
   end
 
+  it "shows that a recurring series made the task" do
+    event("recurred")
+    read
+
+    expect(events).to include(event_text("recurred"))
+  end
+
   it "shows a tag added and a tag removed" do
     event("tagged", tag_name: "money")
     event("untagged", tag_name: "house")

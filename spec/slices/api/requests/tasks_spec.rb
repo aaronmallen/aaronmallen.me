@@ -516,6 +516,12 @@ RSpec.describe "API tasks", type: :request do
       expect(timeline).to eq([{ "kind" => "untagged", "occurred_at" => stamp(today, 9), "tag" => "money" }])
     end
 
+    it "says when a recurring series made the task" do
+      event("recurred", 9)
+
+      expect(timeline).to eq([{ "kind" => "recurred", "occurred_at" => stamp(today, 9) }])
+    end
+
     it "says what a status change changed" do
       event("status_changed", 9, from_status: "open", to_status: "done")
 
