@@ -20,6 +20,8 @@ RSpec.describe "A request body", type: :request do
 
   def rpc(size) = JSON.generate({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { note: "a" * size } })
 
+  def unsigned = json.except("HTTP_AUTHORIZATION")
+
   shared_examples "a refusal" do |status|
     it "answers #{status}" do
       expect(last_response.status).to eq(status)
@@ -78,6 +80,22 @@ RSpec.describe "A request body", type: :request do
       it "answers 413 in JSON" do
         expect(JSON.parse(last_response.body)).to include("status" => 413)
       end
+    end
+  end
+
+  describe "a JSON body to /api/v1/photos over 1 MB with no token" do
+    before { post "/api/v1/photos", rpc(2 * megabyte), unsigned.merge("HTTP_ACCEPT" => "application/json") }
+
+    it "answers 413 in JSON" do
+      expect(JSON.parse(last_response.body)).to include("status" => 413)
+    end
+  end
+
+  describe "a JSON body to /api/v1/photos under 1 MB with no token" do
+    before { post "/api/v1/photos", rpc(megabyte - 1024), unsigned }
+
+    it "reaches the action" do
+      expect(last_response.status).to eq(401)
     end
   end
 
