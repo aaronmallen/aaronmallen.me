@@ -121,6 +121,45 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     end
   end
 
+  describe "reconnecting an account it holds" do
+    let!(:held) do
+      Services::Slice["repos.connection_mutations"].add(
+        provider: "mastodon", host: "ruby.social", account_id: "109", label: "@old@ruby.social",
+        credentials: { access_token: "stale" }, scopes: [],
+      )
+    end
+    let!(:delivery) do
+      social_post = Social::Slice["repos.social_post_mutations"].create_with_parts(
+        parts: %w[later], targets: %w[mastodon], status: "scheduled", posted_at: Time.now + 3600,
+      )
+      create(:social_post_delivery, :mastodon, social_post_id: social_post.id, connection_id: held.id)
+    end
+
+    before do
+      callback(code: "code", state: start_connect)
+      follow_redirect!
+    end
+
+    it "replaces the token on the same connection", :aggregate_failures do
+      expect(connections.map(&:id)).to eq([held.id])
+      expect(connections.first.label).to eq("@aaronmallen@ruby.social")
+      expect(connections.first.credentials).to include(access_token: "masto-token", client_id: "app-id")
+    end
+
+    it "keeps the account on its scheduled posts" do
+      kept = Social::Slice["relations.social_post_deliveries"].where(id: delivery.id).one
+
+      expect(kept).to include(connection_id: held.id)
+    end
+
+    it "adds the same account on another server as its own connection" do
+      Services::Slice["relations.service_connections"].where(id: held.id).update(host: "hachyderm.io")
+      callback(code: "code", state: start_connect)
+
+      expect(connections.map(&:host)).to contain_exactly("hachyderm.io", "ruby.social")
+    end
+  end
+
   describe "refusals" do
     it "saves nothing when I decline on the server", :aggregate_failures do
       callback(error: "access_denied", state: start_connect)

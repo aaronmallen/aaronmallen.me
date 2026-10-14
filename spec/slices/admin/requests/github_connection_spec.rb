@@ -91,6 +91,25 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
   end
 
+  describe "reconnecting the account it holds" do
+    let!(:held) { connect_github_account(access_token: "gho_old", label: "@old", scopes: []) }
+
+    before do
+      callback(code: "code", state: start_connect)
+      follow_redirect!
+    end
+
+    it "replaces the token and scopes on the same connection", :aggregate_failures do
+      expect(connections.map(&:id)).to eq([held.id])
+      expect(connections.first).to have_attributes(label: "@aaronmallen", scopes: %w[repo read:org])
+      expect(connections.first.credentials).to eq(access_token: "gho_data")
+    end
+
+    it "says it connected" do
+      expect(page).to have_css("[data-toast]", text: "GitHub connected as @aaronmallen")
+    end
+  end
+
   it "offers GitHub in the picker while it is not connected" do
     get "/admin/services"
 
