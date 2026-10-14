@@ -13,8 +13,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::Helpers::DayWindow::RANGE,
-          page: Blog::Helpers::Paging::PAGE,
+          **Helpers::DayWindow::RANGE,
+          page: Helpers::Paging::PAGE,
           queue: {
             type: "string",
             enum: Blog::Types::SocialQueue.values,
@@ -35,7 +35,7 @@ module API
       include Deps[social_post_queries: "social.repos.social_post_queries"]
 
       def handle(from: nil, to: nil, queue: nil, page: 1)
-        case Blog::Helpers::DayWindow.open_days(from, to)
+        case Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(first, last, queue, page))
           in Failure(message) then bad_window(message)
         end
@@ -51,7 +51,7 @@ module API
           to: last&.iso8601,
           counts: social_post_queries.count_dated_between(from: first, to: last),
           social_posts: found.rows.map { answered(it) },
-          **Blog::Helpers::Paging.fields(found),
+          **Helpers::Paging.fields(found),
         }
       end
     end

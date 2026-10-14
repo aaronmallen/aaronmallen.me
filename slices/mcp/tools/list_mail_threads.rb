@@ -9,7 +9,7 @@ module MCP
                   "Read one with read_mail_thread for its messages. The subject and reply address come marked " \
                   "untrusted. #{Untrusted::WARNING}. " \
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
-                  "Leave both out to list every thread. #{Blog::Helpers::Paging::USAGE}"
+                  "Leave both out to list every thread. #{API::Helpers::Paging::USAGE}"
       endpoint scope: Blog::Types::OAuthScope["mail"]
     end
   end

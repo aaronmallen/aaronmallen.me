@@ -6,8 +6,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: Blog::Helpers::DayWindow::DAYS,
-          to: Blog::Helpers::DayWindow::DAYS,
+          from: Helpers::DayWindow::DAYS,
+          to: Helpers::DayWindow::DAYS,
           by: {
             type: "string",
             enum: Blog::Types::TimeGrouping.values,
@@ -22,7 +22,7 @@ module API
       include Deps[time_report_queries: "tasks.repos.time_report_queries"]
 
       def handle(from:, to:, by: Blog::Types::TimeGrouping.values.first)
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(report(first, last, by))
           in Failure(message) then bad_window(message)
         end

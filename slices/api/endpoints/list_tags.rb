@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          page: Blog::Helpers::Paging::PAGE,
+          page: Helpers::Paging::PAGE,
           query: { type: "string", description: "part of a tag's name; only tags whose name holds it come back" },
           scope: TagEndpoint::SCOPE,
         },
@@ -45,7 +45,7 @@ module API
         Success(
           tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
           count: tag_queries.count_matching(scope, text),
-          **Blog::Helpers::Paging.fields(tags),
+          **Helpers::Paging.fields(tags),
         )
       end
 

@@ -5,7 +5,7 @@ module API
     class ListWorkEntries < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: Blog::Helpers::DayWindow::RANGE,
+        properties: Helpers::DayWindow::RANGE,
         required: %w[from to],
       }.freeze
 
@@ -20,7 +20,7 @@ module API
       include Deps[work_entry_queries: "projects.repos.work_entry_queries"]
 
       def handle(from:, to:)
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(listed(first, last))
           in Failure(message) then bad_window(message)
         end

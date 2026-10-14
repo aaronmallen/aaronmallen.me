@@ -5,7 +5,7 @@ module API
     class ListSuggestions < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { **Blog::Helpers::DayWindow::RANGE, page: Blog::Helpers::Paging::PAGE },
+        properties: { **Helpers::DayWindow::RANGE, page: Helpers::Paging::PAGE },
         required: %w[from to],
       }.freeze
 
@@ -35,7 +35,7 @@ module API
       include Deps[suggestion_queries: "suggestions.repos.suggestion_queries"]
 
       def handle(from:, to:, page: 1)
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(listed(first, last, page_of(page)))
           in Failure(message) then bad_window(message)
         end
@@ -50,7 +50,7 @@ module API
           from: first.iso8601,
           to: last.iso8601,
           suggestions: found.rows.map { summary(it) },
-          **Blog::Helpers::Paging.fields(found),
+          **Helpers::Paging.fields(found),
         }
       end
 

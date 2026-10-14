@@ -42,7 +42,7 @@ module API
         search = { types: window[:types] & kinds,
                    **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
 
-        Blog::Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
+        Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
           activity_queries.between(from:, to:, limit:, **search)
         end
       end
@@ -58,12 +58,12 @@ module API
       def journal(filters, continue_to)
         search = search_query.call(query: filters["q"], fields: JOURNAL_FIELDS).to_h
         last_day = continue_to || Blog::Types::DateParam[filters["to"]]
-        found = journal_entry_queries.days(size: Blog::Helpers::DayWindow::CAP, to: last_day, **search)
+        found = journal_entry_queries.days(size: Helpers::DayWindow::CAP, to: last_day, **search)
 
         { rows: found.rows.flat_map(&:last), **paging(found.older_query) }
       end
 
-      def listed(found, sprint_on) = { rows: found.rows, sprint_on:, **Blog::Helpers::Paging.fields(found) }
+      def listed(found, sprint_on) = { rows: found.rows, sprint_on:, **Helpers::Paging.fields(found) }
 
       def open_tasks(tab, sprint, page, search)
         found = task_queries.list(tab, sprint:, page:, **search)
@@ -79,7 +79,7 @@ module API
       def posts(filters, page)
         found = post_queries.by_filter(Blog::Types::PostFilterParam[filters["status"]], page)
 
-        { rows: found.rows, **Blog::Helpers::Paging.fields(found) }
+        { rows: found.rows, **Helpers::Paging.fields(found) }
       end
 
       def tasks(filters, page, now)

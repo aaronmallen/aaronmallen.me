@@ -14,7 +14,7 @@ module MCP
                   "blog posts whose publish time falls inside those days; a post with no publish time then " \
                   "drops out. " \
                   "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
-                  "page of each. #{Blog::Helpers::Paging::USAGE}"
+                  "page of each. #{API::Helpers::Paging::USAGE}"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end

@@ -12,7 +12,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::Helpers::DayWindow::WINDOW,
+          **Helpers::DayWindow::WINDOW,
           agent: { type: "string", description: "an agent, such as claude-code; only the tasks it worked on" },
           contributor: {
             type: "string",
@@ -25,7 +25,7 @@ module API
             description: "next, someday or external; open tasks unless you name statuses; every list when left out",
           },
           model: { type: "string", description: "a model, such as claude-opus-5-5; only the tasks it worked on" },
-          page: Blog::Helpers::Paging::PAGE,
+          page: Helpers::Paging::PAGE,
           query: { type: "string", description: "words to find in the title or note" },
           sprint_on: { type: "string", description: "a sprint day, as YYYY-MM-DD; only the tasks planned into it" },
           statuses: {
@@ -51,7 +51,7 @@ module API
         day = sprint_on && Blog::TimeZone.parse_day(sprint_on)
         return invalid(sprint_on: [BAD_SPRINT_DAY]) if sprint_on && day.nil?
 
-        case Blog::Helpers::DayWindow.open_days(from, to)
+        case Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(narrowed(**filters, sprint_on: day), first, last, page))
           in Failure(message) then bad_window(message)
         end
@@ -71,7 +71,7 @@ module API
           count: rows.length,
           total: found.total,
           tasks: serialized(Serializers::Task, rows),
-          **Blog::Helpers::Paging.fields(found.paged),
+          **Helpers::Paging.fields(found.paged),
         }
       end
 

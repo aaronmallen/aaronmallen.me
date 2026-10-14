@@ -9,7 +9,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::Helpers::DayWindow::WINDOW,
+          **Helpers::DayWindow::WINDOW,
           **Helpers::Schema::CREDITS,
           kinds: {
             type: "array",
@@ -49,7 +49,7 @@ module API
       def handle(from:, to:, scopes:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
         filters = { kinds: types(kinds, scopes), repos:, tags:, text:, credits: contributor_terms.call(credited).to_h }
 
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(window(first, last, filters))
           in Failure(message) then bad_window(message)
         end
@@ -77,7 +77,7 @@ module API
       end
 
       def window(first, last, filters)
-        page = Blog::Helpers::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
           found(from, to, filters, limit)
         end
         rows = page.fetch(:rows)

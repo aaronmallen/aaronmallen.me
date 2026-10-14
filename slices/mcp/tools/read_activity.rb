@@ -25,7 +25,7 @@ module MCP
                   "read_social_post for a social post, read_webmention for a webmention, read_task for a task and " \
                   "read_project for a project. A comment, session or decision event names its task or decision " \
                   "through task_id or decision_id. " \
-                  "#{Blog::Helpers::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it " \
+                  "#{API::Helpers::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it " \
                   "a month at a time, newest first. A comment's name, its excerpt when its task syncs from an " \
                   "issue, the name of a task or session when its task syncs from an issue, and a webmention's " \
                   "name and excerpt, and a pull request's name, may come from someone else and come marked " \

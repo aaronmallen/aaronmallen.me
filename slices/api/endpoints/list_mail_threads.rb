@@ -6,8 +6,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::Helpers::DayWindow::RANGE,
-          page: Blog::Helpers::Paging::PAGE,
+          **Helpers::DayWindow::RANGE,
+          page: Helpers::Paging::PAGE,
           status: {
             type: "string",
             enum: Blog::Types::MessageStatus.values,
@@ -30,7 +30,7 @@ module API
       include Deps[message_queries: "mail.repos.message_queries"]
 
       def handle(from: nil, to: nil, status: nil, page: 1)
-        case Blog::Helpers::DayWindow.open_days(from, to)
+        case Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(first, last, status, page_of(page)))
           in Failure(message) then bad_window(message)
         end
@@ -46,7 +46,7 @@ module API
           to: last&.iso8601,
           counts: message_queries.count_received_between(from: first, to: last),
           mail_threads: found.rows.map { serialized(Serializers::MailThread, it).except("body") },
-          **Blog::Helpers::Paging.fields(found),
+          **Helpers::Paging.fields(found),
         }
       end
     end

@@ -6,13 +6,13 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: Blog::Helpers::DayWindow::DAYS,
+          from: Helpers::DayWindow::DAYS,
           repos: {
             type: "array",
             items: { type: "string" },
             description: "repository names, with or without the owner; a commit in any of them comes back",
           },
-          to: Blog::Helpers::DayWindow::DAYS,
+          to: Helpers::DayWindow::DAYS,
         },
         required: %w[from to],
       }.freeze
@@ -30,7 +30,7 @@ module API
       include Deps[commit_queries: "record.repos.commit_queries"]
 
       def handle(from:, to:, repos: nil)
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(listed(first, last, Array(repos)))
           in Failure(message) then bad_window(message)
         end
@@ -39,7 +39,7 @@ module API
       private
 
       def listed(first, last, repos)
-        page = Blog::Helpers::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
           commit_queries.between(from:, to:, repos:, limit:)
         end
         rows = page.fetch(:rows)

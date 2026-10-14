@@ -1105,7 +1105,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     describe "a window holding more than one answer" do
-      before { stub_const("Blog::Helpers::DayWindow::CAP", 2) }
+      before { stub_const("API::Helpers::DayWindow::CAP", 2) }
 
       def three_days
         3.downto(1) { |days| create(:commit, commit_date: today - days, message: "commit #{days}") }

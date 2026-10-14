@@ -8,7 +8,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::Helpers::DayWindow::RANGE,
+          **Helpers::DayWindow::RANGE,
           path: { type: "string",
                   description: "one page to read alone, such as #{Blog::Constants::WRITING_PATH}/hello" },
           since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
@@ -144,7 +144,7 @@ module API
       private
 
       def range(from, to)
-        Blog::Helpers::DayWindow.days(from, to).bind do |first, last|
+        Helpers::DayWindow.days(from, to).bind do |first, last|
           if Blog::Helpers::DayWindow.too_long?(first, last)
             Failure(Blog::Helpers::DayWindow::TOO_LONG)
           else

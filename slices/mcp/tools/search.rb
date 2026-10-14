@@ -21,7 +21,7 @@ module MCP
                   "kind to read the whole record (#{READERS.map do |kind, tool|
                     "#{kind}: #{tool}"
                   end.join(', ')}). count gives the results on " \
-                  "this page. #{Blog::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
+                  "this page. #{API::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
                   "and the title and match of a message, webmention or pull request, come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
 

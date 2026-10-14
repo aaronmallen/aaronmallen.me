@@ -20,7 +20,7 @@ module API
         additionalProperties: false,
         properties: {
           id: SavedViews::ID,
-          page: Blog::Helpers::Paging::PAGE.merge(
+          page: Helpers::Paging::PAGE.merge(
             description: "the page to read on a tasks or posts view, counting from 1",
           ),
           continue_to: {

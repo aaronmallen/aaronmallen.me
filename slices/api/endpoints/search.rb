@@ -16,7 +16,7 @@ module API
             enum: KINDS,
             description: "find only this kind; every kind when you leave it out. message needs the mail scope",
           },
-          page: Blog::Helpers::Paging::PAGE,
+          page: Helpers::Paging::PAGE,
         },
         required: %w[query],
       }.freeze
@@ -34,7 +34,7 @@ module API
         found = search_queries.search(text: query, page: page_of(page), kinds: kinds(kind, scopes))
         results = serialized(Serializers::SearchHit, found.rows)
 
-        Success(count: results.length, results:, **Blog::Helpers::Paging.fields(found))
+        Success(count: results.length, results:, **Helpers::Paging.fields(found))
       end
 
       private

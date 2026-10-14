@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Blog
+module API
   module Helpers
     module Paging
       USAGE = "Rows come a page at a time. When more remain, partial comes back true and next_page holds the " \
@@ -8,7 +8,7 @@ module Blog
       PAGE = {
         type: "integer",
         minimum: 1,
-        maximum: Constants::INTEGER_MAX,
+        maximum: Blog::Constants::INTEGER_MAX,
         description: "the page to read, counting from 1; 1 when left out",
       }.freeze
 

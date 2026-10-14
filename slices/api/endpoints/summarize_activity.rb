@@ -5,7 +5,7 @@ module API
     class SummarizeActivity < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { **Blog::Helpers::DayWindow::RANGE },
+        properties: { **Helpers::DayWindow::RANGE },
         required: %w[from to],
       }.freeze
 
@@ -15,7 +15,7 @@ module API
       include Deps[activity_queries: "activity.repos.activity_queries"]
 
       def handle(from:, to:, scopes:)
-        case Blog::Helpers::DayWindow.days(from, to)
+        case Helpers::DayWindow.days(from, to)
           in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then bad_window(Blog::Helpers::DayWindow::TOO_LONG)
           in Success[first, last] then Success(summary(first, last, activity_kinds(scopes)))
           in Failure(message) then bad_window(message)

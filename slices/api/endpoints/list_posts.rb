@@ -10,7 +10,7 @@ module API
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day a blog post's publish time may fall on, as YYYY-MM-DD" },
-          page: Blog::Helpers::Paging::PAGE,
+          page: Helpers::Paging::PAGE,
           status: { type: "string", enum: Blog::Types::PostStatus.values, description: "keep only blog posts in it" },
           to: { type: "string", description: "the last day a blog post's publish time may fall on, as YYYY-MM-DD" },
         },
@@ -56,7 +56,7 @@ module API
       ]
 
       def handle(page: 1, status: nil, **range)
-        case Blog::Helpers::DayWindow.open_days(range[:from], range[:to])
+        case Helpers::DayWindow.open_days(range[:from], range[:to])
           in Success[first, last] then Success(listed(first, last, status, page_of(page)))
           in Failure(message) then bad_window(message)
         end
@@ -78,7 +78,7 @@ module API
           counts: post_queries.count_dated_between(from: first, to: last),
           posts: summaries(posts.rows),
           social_posts: social_posts.rows.map { preview(it) },
-          **Blog::Helpers::Paging.fields(posts, social_posts),
+          **Helpers::Paging.fields(posts, social_posts),
         }
       end
 
