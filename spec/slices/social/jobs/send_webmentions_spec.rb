@@ -103,6 +103,7 @@ RSpec.describe Social::Jobs::SendWebmentions do
   describe "a page that fails for now" do
     {
       "answers 503" => ->(url) { stub_request(:get, url).to_return(status: 503) },
+      "answers 429" => ->(url) { stub_request(:get, url).to_return(status: 429) },
       "times out" => ->(url) { stub_request(:get, url).to_timeout },
       "refuses the connection" => ->(url) { stub_request(:get, url).to_raise(Faraday::ConnectionFailed) },
       "the resolver can't answer for" => ->(url) { unresolvable(URI(url).host) },
@@ -324,6 +325,12 @@ RSpec.describe Social::Jobs::SendWebmentions do
   describe "an endpoint that fails for now" do
     it "raises so Sidekiq tries again on a 5xx" do
       stub_target(target, endpoint, status: 503)
+
+      expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
+    end
+
+    it "raises so Sidekiq tries again on a 429" do
+      stub_target(target, endpoint, status: 429)
 
       expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
     end

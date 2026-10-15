@@ -10,11 +10,9 @@ module Social
       HEADER_LINK = /<([^>]*)>([^,]*)/
       LINK_SCHEMES = %w[http https].freeze
       LINK_SELECTOR = "a[href]"
-      OK_STATUSES = (200..299)
       REJECTED = :rejected
       REL = "webmention"
       REL_PARAM = /rel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^;\s]+))/i
-      RETRY_STATUSES = (500..599)
       SENT = :sent
       SKIPPED = :skipped
       private_constant :ENDPOINT_SELECTOR, :HEADER_LINK, :LINK_SCHEMES, :LINK_SELECTOR, :REL, :REL_PARAM
@@ -53,7 +51,7 @@ module Social
 
       def deliver(source, target)
         page = client.fetch(target)
-        return FAILED if RETRY_STATUSES.cover?(page.status)
+        return FAILED if Webmentions::Client::RETRY_STATUSES.include?(page.status)
 
         mention(endpoint_in(page), source, target)
       rescue Webmentions::Client::Unreachable
@@ -83,7 +81,7 @@ module Social
       end
 
       def endpoint_in(page)
-        return nil unless OK_STATUSES.cover?(page.status)
+        return nil unless Webmentions::Client::OK_STATUSES.cover?(page.status)
 
         endpoint_in_headers(page) || endpoint_in_markup(page)
       end
@@ -117,9 +115,9 @@ module Social
       end
 
       def outcome(status)
-        return SENT if OK_STATUSES.cover?(status)
+        return SENT if Webmentions::Client::OK_STATUSES.cover?(status)
 
-        RETRY_STATUSES.cover?(status) ? FAILED : REJECTED
+        Webmentions::Client::RETRY_STATUSES.include?(status) ? FAILED : REJECTED
       end
 
       def resolve(response, href)

@@ -25,8 +25,10 @@ module Social
       ENOUGH = :enough
       MAX_BODY = 1_000_000
       MAX_REDIRECTS = 3
+      OK_STATUSES = (200..299)
       PORTS = [80, 443].freeze
       REDIRECT_STATUSES = [301, 302, 303, 307, 308].freeze
+      RETRY_STATUSES = [429, *500..599].freeze
       SPECIAL = %i[link_local? loopback? private?].freeze
       UNREACHABLE = [Faraday::ConnectionFailed, Faraday::SSLError, Faraday::TimeoutError].freeze
 
