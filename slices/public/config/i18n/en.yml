@@ -125,6 +125,13 @@ en:
           done: "done"
           in_progress: "in progress"
           open: "open"
+      search_limit:
+        heading: "Too many searches at once."
+        kept: "; your search is still in the box."
+        lede: "Search takes a short breather when it gets a lot of requests in a row. "
+        projects: "Browse projects"
+        wait: "Try again in about a minute"
+        writing: "Browse writing"
       search_ways:
         latest: "Recent writing"
         tags: "Start from a tag"

@@ -190,4 +190,69 @@ RSpec.describe "Search", type: :request do
 
     expect(groups).to eq(["Posts · 1"])
   end
+
+  describe "the throttle" do
+    def attempts = Search::Slice["relations.search_attempts"].count
+
+    def search(address = "203.0.113.9", **) = get("/search", { q: "zeppelin", ** }, { "REMOTE_ADDR" => address })
+
+    before do
+      publish("Zeppelin")
+      lower_throttle_limit(:search, to: 2)
+    end
+
+    it "records an attempt for each search" do
+      expect { 2.times { search } }.to change { attempts }.by(2)
+    end
+
+    it "still searches when it cannot count the search" do
+      claim = Search::Slice["operations.claim_search_attempt"]
+      allow(claim).to receive(:call).and_raise(Sequel::DatabaseError)
+      replace_component("search.operations.claim_search_attempt", claim)
+      search
+
+      expect(groups).to eq(["Posts · 1"])
+    end
+
+    it "records nothing for the blank page" do
+      expect { get "/search" }.not_to(change { attempts })
+    end
+
+    it "searches as before under the limit", :aggregate_failures do
+      2.times { search }
+
+      expect(last_response.status).to eq(200)
+      expect(groups).to eq(["Posts · 1"])
+    end
+
+    describe "past the limit" do
+      before { 3.times { search(kind: "post") } }
+
+      it "shows the limited state with the query still in the box", :aggregate_failures do
+        expect(last_response.status).to eq(429)
+        expect(page).to have_css(".sq-n.wait h2", text: "Too many searches at once")
+        expect(page).to have_field("q", with: "zeppelin")
+        expect(page).to have_no_css(".sq-g, .sq-w")
+      end
+
+      it "links to writing and projects", :aggregate_failures do
+        expect(page).to have_link("Browse writing", href: "/writing")
+        expect(page).to have_link("Browse projects", href: "/projects")
+      end
+
+      it "keeps the limited page out of shared caches" do
+        expect(last_response.headers["Cache-Control"].to_s).not_to include("s-maxage")
+      end
+
+      it "records no attempt past the limit" do
+        expect(attempts).to eq(2)
+      end
+
+      it "still searches for another visitor" do
+        search("203.0.113.10")
+
+        expect(last_response.status).to eq(200)
+      end
+    end
+  end
 end

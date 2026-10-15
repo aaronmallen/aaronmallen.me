@@ -1547,6 +1547,10 @@
   &.err {
     --tone: var(--color-mk-pink-text);
   }
+
+  &.wait {
+    --tone: var(--color-mk-sand-text);
+  }
 }
 
 @utility sq-w {

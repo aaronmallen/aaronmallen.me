@@ -56,6 +56,7 @@ honeybadger:
     queue_held_webmentions: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_WEBMENTIONS"].to_json %>
     reap_expired_credentials: <%= ENV["HONEYBADGER_CHECK_IN_REAP_EXPIRED_CREDENTIALS"].to_json %>
     reap_spam_messages: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SPAM_MESSAGES"].to_json %>
+    reap_search_attempts: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SEARCH_ATTEMPTS"].to_json %>
     reap_sync_states: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SYNC_STATES"].to_json %>
     reap_webmention_receipts: <%= ENV["HONEYBADGER_CHECK_IN_REAP_WEBMENTION_RECEIPTS"].to_json %>
     refresh_country_database: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_COUNTRY_DATABASE"].to_json %>
@@ -101,6 +102,9 @@ page_size:
   mcp: 100
   public: 25
 previous_data_key: <%= ENV["PREVIOUS_DATA_KEY"].to_json %>
+search:
+  throttle_limit: <%= ENV["SEARCH_THROTTLE_LIMIT"].to_json %>
+  throttle_window_minutes: <%= ENV["SEARCH_THROTTLE_WINDOW_MINUTES"].to_json %>
 share_store:
   access_key: <%= ENV["SHARE_STORE_ACCESS_KEY"].to_json %>
   bucket: <%= ENV["SHARE_STORE_BUCKET"].to_json %>

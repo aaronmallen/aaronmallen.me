@@ -139,6 +139,8 @@ RSpec.describe "MCP reach", type: :app do
       "record.operations.tag_journal_entry" => "the admin's journal rows tag it; update_journal_entry sets tags",
       "record.operations.untag_journal_entry" => "the admin's journal rows untag it; update_journal_entry sets tags",
       "saved_views.operations.rename_saved_view" => "the admin renames a view; update_saved_view does it in one step",
+      "search.operations.claim_search_attempt" => "counts a reader's search against the public search throttle",
+      "search.operations.reap_search_attempts" => "a background job reaps old public search attempts",
       "security.operations.prune_access_records" => "a background job prunes sign-ins and sightings after 90 days",
       "security.operations.read_access" => "reads where a request came from as the security log stores it",
       "security.operations.read_device" => "reads a request's browser and system as read_access reads the request",

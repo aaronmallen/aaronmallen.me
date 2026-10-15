@@ -5,16 +5,20 @@ module Public
     module Views
       module Search
         class Index < View
+          EMPTY = Blog::Constants::EMPTY_ARRAY
+          NONE = Blog::Constants::EMPTY_HASH
           NOINDEX = "noindex"
+          PAGED = Blog::Types::Instance(Blog::Structs::Paged)
 
           prop :query, Blog::Types::String
           prop :kind, Blog::Types::String.optional
-          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
-          prop :groups, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Instance(Blog::Structs::Paged))
-          prop :boards, Blog::Types::Array.of(Blog::Types::Integer)
-          prop :failed, Blog::Types::Bool
-          prop :tags, Blog::Types::Array.of(Blog::Types::Hash)
-          prop :latest, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer), default: NONE
+          prop :groups, Blog::Types::Hash.map(Blog::Types::String, PAGED), default: NONE
+          prop :boards, Blog::Types::Array.of(Blog::Types::Integer), default: EMPTY
+          prop :failed, Blog::Types::Bool, default: false
+          prop :limited, Blog::Types::Bool, default: false
+          prop :tags, Blog::Types::Array.of(Blog::Types::Hash), default: EMPTY
+          prop :latest, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: EMPTY
 
           def view_template
             content_for(:title, blank? ? t(".title") : t(".title_for", query: @query))
@@ -24,7 +28,7 @@ module Public
             h1(class: "sr-only") { t(".heading") }
             search_form
             outcome
-            SearchWays(tags: @tags, latest: @latest) if !@failed && (blank? || nothing?)
+            SearchWays(tags: @tags, latest: @latest) if !@failed && !@limited && (blank? || nothing?)
           end
 
           private
@@ -89,6 +93,7 @@ module Public
 
             div(id: "results") do
               next failure if @failed
+              next SearchLimit() if @limited
               next nothing if nothing?
 
               SearchBar(query: @query, kind: @kind, counts: @counts)

@@ -49,6 +49,7 @@ module Blog
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
     DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
     DEFAULT_MEDIA_STORE_READ_TIMEOUT = 30
+    DEFAULT_SEARCH_THROTTLE_LIMIT = 20
     DEFAULT_SHARE_STORE_READ_TIMEOUT = 300
     DEFAULT_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
@@ -107,10 +108,10 @@ module Blog
       )
     end
 
-    def self.throttle(limit, **keys)
+    def self.throttle(limit, window: DEFAULT_THROTTLE_WINDOW_MINUTES, **keys)
       Schema.schema(
         throttle_limit?: unless_set(ThrottleLimit, limit),
-        throttle_window_minutes?: unless_set(ThrottleWindow, DEFAULT_THROTTLE_WINDOW_MINUTES),
+        throttle_window_minutes?: unless_set(ThrottleWindow, window),
         **keys,
       )
     end
@@ -222,6 +223,8 @@ module Blog
       timeout?: unless_blank(RedisTimeout),
       username?: Value,
     )
+
+    setting :search, default: {}, constructor: throttle(DEFAULT_SEARCH_THROTTLE_LIMIT, window: 1)
 
     setting :share_site, default: {}, constructor: Schema.schema(transfers?: unless_blank(Threads), url: SiteUrl)
 

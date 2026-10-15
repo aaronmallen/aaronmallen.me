@@ -3,9 +3,9 @@ id: "0020"
 title: Keep locks, throttles and claims in Postgres, not Redis
 status: active
 created: 2026-09-28
-area: [lib, record, contact, mcp, analytics, social, tasks]
+area: [lib, record, contact, mcp, analytics, social, tasks, search]
 issue: AA-644
-amended: [AA-823, "#200", "#585", "#988", "#957"]
+amended: [AA-823, "#200", "#585", "#988", "#957", "#1468"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -36,7 +36,8 @@ hand. When another run holds the lock, it hands back `Failure(:lock_busy)`,
 
 **A transaction advisory lock around a count and a write, for a step that must not run twice at once.** The throttle
 claims on `Contact::Relations::Messages`, `MCP::Relations::OAuthClients`, `Analytics::Relations::AnalyticsEvents`,
-`Analytics::Relations::AnalyticsClicks` (#957) and `Social::Relations::WebmentionReceipts` open a transaction, take
+`Analytics::Relations::AnalyticsClicks` (#957), `Social::Relations::WebmentionReceipts` and
+`Search::Relations::SearchAttempts` (#1468) open a transaction, take
 `pg_advisory_xact_lock`, count and insert. The lock ends with the commit, and a row lock would hold nothing before a
 sender's first row.
 `Blog::DB::Relation#lock_until_commit` takes the lock on `hashtext` of the relation's table, with any extra keys

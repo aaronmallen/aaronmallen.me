@@ -36,6 +36,9 @@ production:
     reap_spam_messages:
       cron: "45 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Mail::Jobs::ReapSpamMessages
+    reap_search_attempts:
+      cron: "20 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Search::Jobs::ReapSearchAttempts
     reap_sync_states:
       cron: "0 4 * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ReapSyncStates

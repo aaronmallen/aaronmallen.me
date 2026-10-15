@@ -93,6 +93,7 @@ Metrics/ClassLength:
     - heredoc
     - method_call
   Exclude:
+    - config/settings.rb
     - slices/admin/config/routes.rb
     - slices/api/config/routes.rb
 
