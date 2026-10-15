@@ -16,9 +16,8 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:group]]
 
-          case save_share_group.call(id, params)
-            in Failure[:invalid, errors] then invalid(response, id, params, errors)
-            in result then settle(response, result, SAVED, routes.path(:admin_files))
+          settle(response, save_share_group.call(id, params), SAVED, routes.path(:admin_files)) do |errors|
+            invalid(response, id, params, errors)
           end
         end
 

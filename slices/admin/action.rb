@@ -70,6 +70,7 @@ module Admin
         in Success(_)
           toast(response, key)
           response.redirect_to(path)
+        in Failure[:invalid, errors] if block_given? then yield errors
         in Failure(:not_found) then halt 404
         else halt 500
       end

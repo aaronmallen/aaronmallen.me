@@ -14,10 +14,8 @@ module Admin
 
           result = edit_decision_option.call(record_id(request), option_id, params)
 
-          case result
-            in Failure[:invalid, errors]
-              refuse_form(request, response, { name: :option, id: option_id, params:, errors: })
-            else settle(response, result, SAVED, decision_path(request))
+          settle(response, result, SAVED, decision_path(request)) do |errors|
+            refuse_form(request, response, { name: :option, id: option_id, params:, errors: })
           end
         end
       end

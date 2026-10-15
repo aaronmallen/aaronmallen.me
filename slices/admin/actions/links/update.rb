@@ -16,9 +16,8 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:link]]
 
-          case save_short_link.call(id, params)
-            in Failure[:invalid, errors] then invalid(response, id, params, errors)
-            in result then settle(response, result, SAVED, routes.path(:admin_links))
+          settle(response, save_short_link.call(id, params), SAVED, routes.path(:admin_links)) do |errors|
+            invalid(response, id, params, errors)
           end
         end
 

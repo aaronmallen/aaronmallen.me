@@ -11,9 +11,8 @@ module Admin
         def handle(request, response)
           result = rename_saved_view.call(record_id(request), name_params(request))
 
-          case result
-            in Failure[:invalid, _] then answer(request, response, INVALID)
-            else settle(response, result, RENAMED, return_path(request))
+          settle(response, result, RENAMED, return_path(request)) do
+            answer(request, response, INVALID)
           end
         end
       end

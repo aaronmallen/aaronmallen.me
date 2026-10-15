@@ -20,9 +20,8 @@ module Admin
 
           result = save_tag.call(params, scope:, id:)
 
-          case result
-            in Failure[:invalid, errors] then invalid(request, response, scope, editing(id, params, errors))
-            else settle(response, result, saved_key(params), back(request, scope))
+          settle(response, result, saved_key(params), back(request, scope)) do |errors|
+            invalid(request, response, scope, editing(id, params, errors))
           end
         end
 

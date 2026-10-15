@@ -13,10 +13,8 @@ module Admin
 
           result = delete_work_session.call(record_id(request), id)
 
-          case result
-            in Failure[:invalid, errors]
-              refuse(request, response, timing: { id:, values: Blog::Constants::EMPTY_HASH, errors: })
-            else settle(response, result, DELETED, tasks_path(request))
+          settle(response, result, DELETED, tasks_path(request)) do |errors|
+            refuse(request, response, timing: { id:, values: Blog::Constants::EMPTY_HASH, errors: })
           end
         end
       end

@@ -21,9 +21,8 @@ module Admin
 
           result = save(params, id)
 
-          case result
-            in Failure[:invalid, errors] then invalid(response, project_queries.by_id(id), params, errors)
-            else settle(response, result, SAVED, routes.path(:admin_edit_project, id:))
+          settle(response, result, SAVED, routes.path(:admin_edit_project, id:)) do |errors|
+            invalid(response, project_queries.by_id(id), params, errors)
           end
         end
 

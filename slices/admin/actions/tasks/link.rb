@@ -3,15 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class Link < Action
+      class Link < PageAction
         LINKED = "tasks_page.toasts.linked"
 
-        include Redirect
-        include Deps[
-          build_task_page: "operations.build_task_page",
-          link_tasks: "tasks.operations.link_tasks",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[link_tasks: "tasks.operations.link_tasks"]
 
         def handle(request, response)
           id = record_id(request)
@@ -36,22 +31,11 @@ module Admin
           )
         end
 
-        def invalid(request, response, id, params, errors)
-          case build_task_page.call(id, kind: Blog::Types::Text[params[:kind]], errors:)
-            in Success(page)
-              response.status = 422
-              response.render(task_view, **page, **return_to(request))
-            in Failure(:not_found) then halt 404
-            else halt 500
-          end
-        end
-
         def link(request, response, id, params)
           result = link_tasks.call(id, params)
 
-          case result
-            in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
-            else settle(response, result, LINKED, tasks_path(request))
+          settle(response, result, LINKED, tasks_path(request)) do |errors|
+            refuse(request, response, kind: Blog::Types::Text[params[:kind]], errors:)
           end
         end
       end

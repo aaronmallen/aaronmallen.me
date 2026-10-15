@@ -18,9 +18,8 @@ module Admin
 
           result = edit_decision.call(record_id(request), params)
 
-          case result
-            in Failure[:invalid, errors] then invalid(request, response, params, errors)
-            else settle(response, result, SAVED, decision_path(request))
+          settle(response, result, SAVED, decision_path(request)) do |errors|
+            invalid(request, response, params, errors)
           end
         end
 
