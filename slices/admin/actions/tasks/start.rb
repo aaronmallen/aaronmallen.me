@@ -12,7 +12,7 @@ module Admin
 
         def handle(request, response)
           result = start_task.call(record_id(request))
-          settle(response, result, STARTED, back_here(request) || tasks_path(request, filter: TODAY))
+          settle(response, result, STARTED, tasks_path(request, filter: TODAY))
         end
       end
     end

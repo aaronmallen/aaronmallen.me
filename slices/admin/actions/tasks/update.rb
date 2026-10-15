@@ -25,9 +25,9 @@ module Admin
           fields = Blog::Types::Fields[request.params[:task]]
 
           case save_task.call(id, form(id, fields))
-            in Failure(:closed) then done(request, response, CLOSED)
+            in Failure(:closed) then redirect_with(request, response, CLOSED)
             in Failure(:imported) then halt 422
-            in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
+            in Failure(:past) | Failure(:invalid) then redirect_with(request, response, PAST)
             in Failure[:invalid, errors] then invalid(request, response, id, fields, errors)
             in result then settle(response, result, SAVED, tasks_path(request))
           end
@@ -56,11 +56,6 @@ module Admin
 
           owner = form[:owner] == Blog::Constants::CHECKED ? [OWNER] : Blog::Constants::EMPTY_ARRAY
           owner + Blog::Types::Fields[form[:agents]].values.filter_map { agent(it) }
-        end
-
-        def done(request, response, key)
-          toast(response, key)
-          response.redirect_to(tasks_path(request))
         end
 
         def form(id, fields)

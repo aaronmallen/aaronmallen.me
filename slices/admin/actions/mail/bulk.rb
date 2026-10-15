@@ -13,6 +13,7 @@ module Admin
         REASONS = %i[gmail_failed not_found].freeze
         SKIPPED = "mail_page.toasts.bulk.label_skipping"
 
+        include Redirect
         include Deps[
           act_on_messages: "mail.operations.act_on_messages",
           thread_queries: "mail.repos.thread_queries",
@@ -38,13 +39,6 @@ module Admin
           label = request.params[:label].split(":", 2).last
 
           toast(response, skipped.positive? && count.positive? ? SKIPPED : LABELED, count:, skipped:, label:)
-        end
-
-        def listed(request)
-          list = Helpers::MailList.from(request.params)
-          page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
-
-          Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page))
         end
 
         def named(id)

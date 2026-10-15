@@ -40,6 +40,14 @@ module Admin
       halt 403, response.render(rejected_view)
     end
 
+    def landing(request)
+      number = page_number(request)
+      return number if number == 1
+
+      page = Blog::Structs::Page.new(number:, size: page_size)
+      yield(page) ? number - 1 : number
+    end
+
     def navigation(request) = request.env[UI::Navigated::KEY] ||= build_navigation.call(current_path: request.path)
 
     def not_found(response)

@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Calendar
       class ShowCalendars < Action
-        include Move
+        include Redirect
         include Deps[show_calendars: "calendar.operations.show_calendars"]
 
         def handle(request, response)

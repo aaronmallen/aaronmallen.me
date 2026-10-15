@@ -7,6 +7,7 @@ module Admin
         ARCHIVED = "projects_page.toasts.archived"
         NOT_STARTED = "projects_page.toasts.not_started"
 
+        include Redirect
         include Deps[archive_project: "projects.operations.archive_project"]
 
         def handle(request, response)
@@ -21,10 +22,6 @@ module Admin
         end
 
         private
-
-        def back_path(request) = back_here(request) || routes.path(:admin_projects, filter: filter(request))
-
-        def filter(request) = Blog::Types::ProjectFilterParam[request.params[:filter]]
 
         def not_started(response, id)
           toast(response, NOT_STARTED)

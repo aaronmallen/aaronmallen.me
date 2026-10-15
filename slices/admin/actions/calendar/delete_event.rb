@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Calendar
       class DeleteEvent < Action
-        include Move
+        include Redirect
         include Deps[delete_event: "calendar.operations.delete_event"]
 
         def handle(request, response)

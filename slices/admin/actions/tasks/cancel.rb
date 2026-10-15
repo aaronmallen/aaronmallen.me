@@ -14,16 +14,9 @@ module Admin
           result = cancel_task.call(record_id(request))
 
           case result
-            in Failure(:closed) then done(request, response, CLOSED)
+            in Failure(:closed) then redirect_with(request, response, CLOSED)
             else settle(response, result, CANCELED, tasks_path(request))
           end
-        end
-
-        private
-
-        def done(request, response, key)
-          toast(response, key)
-          response.redirect_to(tasks_path(request))
         end
       end
     end

@@ -30,14 +30,6 @@ module Admin
       toast(response, "#{self.class::FAILED}.#{code}", **named(id))
     end
 
-    def landing(request)
-      number = page_number(request)
-      return number if number == 1
-
-      page = Blog::Structs::Page.new(number:, size: page_size)
-      yield(page) ? number - 1 : number
-    end
-
     def refusal(_errors) = Blog::Contract::FORMAT
 
     def refused(errors)

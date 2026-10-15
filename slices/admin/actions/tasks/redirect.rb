@@ -12,6 +12,11 @@ module Admin
 
         def from_today?(request) = Blog::Types::TaskOriginParam[request.params[:origin]] == FROM_TODAY
 
+        def redirect_with(request, response, key)
+          toast(response, key)
+          response.redirect_to(tasks_path(request))
+        end
+
         def return_to(request) = { filter: task_tab(request), origin: task_origin(request) }
 
         def task_origin(request) = Blog::Types::TaskOriginParam[request.params[:origin]]

@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Calendar
       class MoveTask < Action
-        include Move
+        include Redirect
         include Deps[schedule_task: "tasks.operations.schedule_task", task_queries: "tasks.repos.task_queries"]
 
         def handle(request, response)

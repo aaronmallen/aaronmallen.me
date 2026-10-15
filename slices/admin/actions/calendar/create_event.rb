@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Calendar
       class CreateEvent < Action
-        include Move
+        include Redirect
         include Deps[create_event: "calendar.operations.create_event"]
 
         def handle(request, response)

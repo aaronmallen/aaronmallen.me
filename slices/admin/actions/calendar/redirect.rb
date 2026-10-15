@@ -1,9 +1,10 @@
+# auto_register: false
 # frozen_string_literal: true
 
 module Admin
   module Actions
     module Calendar
-      module Move
+      module Redirect
         TOASTS = "calendar_page.toasts"
 
         include Dry::Monads[:result]
