@@ -17,7 +17,12 @@ module Mail
         def get(path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
       end
 
-      include Deps["settings", google: "google.client", gmail_mutations: "repos.gmail_mutations"]
+      include Deps[
+        "settings",
+        google: "google.client",
+        gmail_backfills: "repos.gmail_backfills",
+        gmail_mutations: "repos.gmail_mutations",
+      ]
 
       def backfill(address, page_token = nil)
         mailbox = mailbox(address)
@@ -80,6 +85,7 @@ module Mail
       def start(mailbox, account)
         refresh(mailbox, account.id)
         gmail_mutations.follow(account.id, mailbox.get("profile").fetch("historyId"))
+        gmail_backfills.hold(mailbox.address, nil)
         Jobs::BackfillGmail.perform_async(mailbox.address)
         0
       end

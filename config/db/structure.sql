@@ -2669,7 +2669,9 @@ CREATE TABLE public.mail_accounts (
     shown boolean DEFAULT true NOT NULL,
     sends boolean DEFAULT true NOT NULL,
     signature text,
-    settings_synced_at timestamp with time zone
+    settings_synced_at timestamp with time zone,
+    backfill_page text,
+    backfill_held_at timestamp with time zone
 );
 
 
@@ -8472,4 +8474,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015130000_add_preview_to_activities.rb'),
 ('20261015140000_count_task_numbers_per_scope.rb'),
 ('20261015150700_index_waiting_mail_threads.rb'),
-('20261015180200_index_mail_message_letters.rb');
+('20261015180200_index_mail_message_letters.rb'),
+('20261015230200_add_backfill_page_to_mail_accounts.rb');

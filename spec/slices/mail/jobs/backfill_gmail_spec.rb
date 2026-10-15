@@ -87,6 +87,61 @@ RSpec.describe Mail::Jobs::BackfillGmail do
     expect(queued).to be_empty
   end
 
+  describe "a backfill whose page fails past its retries" do
+    def an_hour_passes
+      held = Mail::Slice["relations.mail_accounts"].where(address:).dataset.exclude(backfill_held_at: nil)
+      held.update(backfill_held_at: Time.now - 3601)
+    end
+
+    def run_out_of_retries(page_token)
+      4.times { backfill(page_token) rescue Mail::Error }
+    end
+
+    def sync
+      described_class.jobs.clear
+      Mail::Jobs::SyncGmail.new.perform
+    end
+
+    before do
+      stub_gmail
+      sync
+      stub_page([], next_page: "page-2")
+      backfill
+      stub_request(:get, %r{/threads\?.*pageToken=page-2}).to_return(status: 503)
+      run_out_of_retries("page-2")
+    end
+
+    it "goes on from that page once the scheduled sync finds it stalled" do
+      an_hour_passes
+      sync
+
+      expect(queued).to eq([[address, "page-2"]])
+    end
+
+    it "is left alone while it might still be retrying" do
+      sync
+
+      expect(queued).to be_empty
+    end
+
+    it "is queued again only once" do
+      an_hour_passes
+      sync
+      sync
+
+      expect(queued).to be_empty
+    end
+
+    it "is never queued again once it reads its last page" do
+      stub_page([])
+      backfill("page-2")
+      an_hour_passes
+      sync
+
+      expect(queued).to be_empty
+    end
+  end
+
   it "raises when Google fails, so Sidekiq tries the page again" do
     stub_request(:get, %r{/threads\?}).to_return(status: 503)
 
