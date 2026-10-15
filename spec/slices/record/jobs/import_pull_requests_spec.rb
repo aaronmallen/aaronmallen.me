@@ -185,6 +185,27 @@ RSpec.describe Record::Jobs::ImportPullRequests do
 
       expect(Record::Slice["relations.pull_requests"].count).to eq(1)
     end
+
+    context "when the last import was an hour ago" do
+      let(:imported_at) { Time.now.utc.round - (60 * 60) }
+
+      before { Record::Slice["relations.pull_requests"].dataset.update(updated_at: imported_at) }
+
+      it "leaves a pull request that has not changed untouched" do
+        import
+
+        expect(stored(1).updated_at).to eq(imported_at)
+      end
+
+      it "still picks up an edit made after a run that found no changes", :aggregate_failures do
+        import
+        stub_search(github_pull_request(1, title: "Renamed"))
+        import
+
+        expect(stored(1).title).to eq("Renamed")
+        expect(stored(1).updated_at).to be > imported_at
+      end
+    end
   end
 
   describe "reporting the outcome" do
