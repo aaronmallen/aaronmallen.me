@@ -8,7 +8,8 @@ module Admin
       COMMITS = Blog::Types::SyncName["commits"]
       COUNTRIES = "countries"
       DRAFT = Blog::Types::PostStatus["draft"]
-      SUMMARY_LIMIT = 60
+      SCHEDULED = Blog::Types::PostStatus["scheduled"]
+      SOCIAL_SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
       include Deps[
         "operations.summarize_sprint",
@@ -30,13 +31,13 @@ module Admin
         sprint = step summarize_sprint.call(page:, now:, pool:)
 
         {
-          **publishing(now),
           **counts(now),
           attention: attention(now, inbox),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
           last_night: last_night(now),
+          publishing:,
           sprint:,
         }
       end
@@ -76,12 +77,6 @@ module Admin
         { clients: oauth_client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.today(now)) }
       end
 
-      def draft_counts(drafts)
-        drafts.to_h { [it.id, { read_time: it.read_time, words: it.word_count }] }
-      end
-
-      def due(scheduled, social) = scheduled.map(&:published_at) + social[:scheduled].map(&:posted_at)
-
       def failures
         sync_state_queries.failures + [countries_failure].compact
       end
@@ -92,41 +87,15 @@ module Admin
         health_queries.days(from: today, to: today)[today]
       end
 
-      def posts(scheduled)
-        drafts = post_queries.by_status(DRAFT)
-
-        { scheduled:, drafts:, draft_counts: draft_counts(drafts) }
-      end
-
-      def publishing(now)
-        scheduled = post_queries.scheduled
-        social = social_queue
-
-        { posts: posts(scheduled), queue: queue(scheduled, social, now), social: }
-      end
-
-      def queue(scheduled, social, now)
-        today = Blog::TimeZone.today(now)
-        pending = due(scheduled, social)
+      def publishing
+        posts = post_queries.count_by_status
 
         {
-          count: pending.size,
-          posts: scheduled.size,
-          social_posts: social[:scheduled].size,
-          today: pending.count { Blog::TimeZone.today(it) == today },
+          drafts: posts.fetch(DRAFT, 0),
+          queued: posts.fetch(SCHEDULED, 0) + social_post_queries.count_by_status.fetch(SOCIAL_SCHEDULED, 0),
+          next_post: post_queries.next_scheduled,
+          next_social_at: social_post_queries.next_queued_at,
         }
-      end
-
-      def social_queue
-        scheduled = social_post_queries.queued
-
-        { scheduled:, summaries: scheduled.to_h { [it.id, summary(it)] } }
-      end
-
-      def summary(social_post)
-        body = Blog::Helpers::Whitespace.squish(social_post.parts.first.body)
-
-        Blog::Helpers::Truncation.cut(body, keep: SUMMARY_LIMIT)
       end
 
       def unshown(dead_jobs, failures)

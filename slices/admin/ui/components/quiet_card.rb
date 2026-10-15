@@ -10,9 +10,7 @@ module Admin
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :last_night, Blog::Types::Instance(ROM::Struct).optional, default: nil
-        prop :posts, Blog::Types::Hash
-        prop :social, Blog::Types::Hash
-        prop :queue, Blog::Types::Hash
+        prop :publishing, Blog::Types::Hash
         prop :visitors, Blog::Types::Integer
         prop :clients, Blog::Types::Integer
 
@@ -22,7 +20,7 @@ module Admin
             ships_next
             last_night
             TodayLine(label: t(".drafts"), href: path(:admin_posts, status: DRAFT)) do
-              t(".draft_count", count: @posts[:drafts].size)
+              t(".draft_count", count: @publishing[:drafts])
             end
             site_lines
           end
@@ -47,10 +45,12 @@ module Admin
         end
 
         def next_up
+          post, social_at = @publishing.values_at(:next_post, :next_social_at)
+
           [
-            *@posts[:scheduled].first(1).map { [it.published_at, path(:admin_edit_post, id: it.id)] },
-            *@social[:scheduled].first(1).map { [it.posted_at, path(:admin_social, filter: QUEUED)] },
-          ].min_by(&:first)
+            post && [post.published_at, path(:admin_edit_post, id: post.id)],
+            social_at && [social_at, path(:admin_social, filter: QUEUED)],
+          ].compact.min_by(&:first)
         end
 
         def ships_next
@@ -59,7 +59,7 @@ module Admin
 
           TodayLine(label: t(".ships_next"), href:) do
             Moment(at:)
-            plain "#{DOT}#{t('.queued', count: @queue[:count])}"
+            plain "#{DOT}#{t('.queued', count: @publishing[:queued])}"
           end
         end
 

@@ -73,6 +73,8 @@ module Posts
 
       def next_published(post) = pager(posts.published.newer_than(post).oldest_first)
 
+      def next_scheduled = posts.scheduled.oldest_first.select(:id, :published_at).limit(1).one
+
       def previous_published(post) = pager(posts.published.older_than(post).newest_first)
 
       def published(limit = nil) = listed.published.newest_first.limit(limit).to_a
@@ -100,8 +102,6 @@ module Posts
       def published_versions_by_tag(tag, page)
         page.fill(versions.published.tagged(tag).newest_first.paged(page).to_a)
       end
-
-      def scheduled = with_tags.scheduled.oldest_first.to_a
 
       def shown?(ids) = posts.with_ids(ids).scheduled_or_published.exist?
 

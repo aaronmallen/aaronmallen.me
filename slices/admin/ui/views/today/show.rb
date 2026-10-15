@@ -8,9 +8,9 @@ module Admin
           include Components::Tasks
 
           LIVE_TABLES = %w[
-            attention_snoozes commits health_days journal_entries journal_entry_tags oauth_clients oauth_tokens
-            post_tags posts projects service_connections social_post_deliveries social_post_parts social_posts sprints
-            sync_states task_comments task_contributors task_links task_series task_tags work_sessions
+            attention_snoozes commits health_days journal_entries journal_entry_tags oauth_clients oauth_tokens posts
+            projects service_connections social_post_deliveries social_posts sprints sync_states task_comments
+            task_contributors task_links task_series task_tags work_sessions
           ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -21,9 +21,7 @@ module Admin
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :last_night, Blog::Types::Instance(ROM::Struct).optional, default: nil
-          prop :posts, Blog::Types::Hash
-          prop :queue, Blog::Types::Hash
-          prop :social, Blog::Types::Hash
+          prop :publishing, Blog::Types::Hash
           prop :sprint, Blog::Types::Hash
           prop :visitors, Blog::Types::Integer
 
@@ -84,8 +82,8 @@ module Admin
             AttentionCard(**@attention)
             CommitsCard(**@commits, totals: @commit_totals)
             QuietCard(
-              entries: @entries, last_night: @last_night, posts: @posts, social: @social, queue: @queue,
-              visitors: @visitors, clients: @clients,
+              entries: @entries, last_night: @last_night, publishing: @publishing, visitors: @visitors,
+              clients: @clients,
             )
           end
 

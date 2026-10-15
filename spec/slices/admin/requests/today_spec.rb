@@ -71,6 +71,14 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       expect(sql.scan('FROM "mail_settings"').size).to eq(1)
     end
 
+    it "reads no post bodies" do
+      create(:post, :draft)
+      create(:post, :scheduled, published_at: Time.now + 60)
+      sql = logged_sql { get "/admin" }
+
+      expect(sql).not_to match(/"posts"\."body"|SELECT \* FROM "posts"/)
+    end
+
     it "lists the quiet lines under Shipped today" do
       get "/admin"
 

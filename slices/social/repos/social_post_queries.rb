@@ -59,6 +59,8 @@ module Social
 
       def failed_statuses = social_posts.with_failed_delivery.pluck(:status)
 
+      def next_queued_at = social_posts.with_status(SCHEDULED).oldest_first.limit(1).pluck(:posted_at).first
+
       def part_photo_keys(social_post_id)
         part_ids = social_post_parts.for_social_post(social_post_id).pluck(:id)
         held = social_post_photos.for_parts(part_ids).in_order.to_a.group_by(&:social_post_part_id)
