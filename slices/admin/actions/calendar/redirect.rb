@@ -38,12 +38,18 @@ module Admin
           }
         end
 
-        def written(request, response, result, key)
+        def refused(request, response, errors)
+          return done(request, response, :invalid_event) if errors.empty? || !block_given?
+
+          yield errors
+        end
+
+        def written(request, response, result, key, &)
           case result
             in Success(calendar) then done(request, response, key, calendar: calendar.name)
             in Failure(:not_found) then halt 404
             in Failure(:read_only) then done(request, response, :read_only)
-            in Failure[:invalid, _] then done(request, response, :invalid_event)
+            in Failure[:invalid, errors] then refused(request, response, errors, &)
             in Failure[:google_failed, _] then done(request, response, :google_failed)
             else halt 500
           end

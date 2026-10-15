@@ -21,6 +21,7 @@ module Admin
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
           prop :tones, Blog::Types::Hash
+          prop :refused, Blog::Types::Hash.optional, default: nil
 
           def view_template
             Card(label: t(".label"), title: l(date, format: :full), **attributes) do
@@ -63,8 +64,18 @@ module Admin
             return if @day.events.empty?
 
             group(t(".events")) do
-              @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id), day: date, today: @today) }
+              @day.events.each do |event|
+                refused = (@refused if @refused&.dig(:id) == event.id)
+
+                EventRow(event:, tone: @tones.fetch(event.calendar_id), day: date, today: @today, refused:)
+              end
             end
+          end
+
+          def form(refused)
+            return Blog::Constants::EMPTY_HASH unless refused
+
+            refused.slice(:values, :errors)
           end
 
           def group(title, &)
@@ -83,9 +94,11 @@ module Admin
           def new_event
             return unless @calendars.any?(&:writable)
 
-            details(class: "cal-new-event") do
+            refused = @refused if @refused && !@refused[:id]
+
+            details(class: "cal-new-event", open: !refused.nil?) do
               Button(summary: true, small: true) { IconLabel(icon: "fa-regular fa-calendar-plus") { t(".new_event") } }
-              EventForm(action: path(:admin_create_calendar_event), day: date, calendars: @calendars)
+              EventForm(action: path(:admin_create_calendar_event), day: date, calendars: @calendars, **form(refused))
             end
           end
 

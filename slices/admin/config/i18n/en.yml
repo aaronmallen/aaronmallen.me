@@ -654,6 +654,18 @@ en:
           read_only: "Read-only here"
           untitled: "(no title)"
           until: "until %{date}"
+        field_error:
+          control: "Take out the control characters."
+          date:
+            blank: "Pick a day."
+            format: "Pick a real day."
+          ends:
+            ends_first: "End it after it starts."
+            format: "Give an end time, such as 10:30."
+          starts:
+            format: "Give a start time, such as 10:00."
+          title:
+            blank: "Give it a title."
         month_pager:
           label: "Months"
           next: "Next month, %{month}"

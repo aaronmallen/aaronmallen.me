@@ -19,6 +19,7 @@ module Admin
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :calendars, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tones, Blog::Types::Hash
+          prop :refused, Blog::Types::Hash.optional, default: nil
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -28,7 +29,7 @@ module Admin
               section(class: "card") do
                 Month(month: @month, today: @today, days: @days, picked: @day.date, tones: @tones)
               end
-              Panel(day: @day, calendars: @calendars, tasks: @tasks, today: @today, tones: @tones)
+              Panel(day: @day, calendars: @calendars, tasks: @tasks, today: @today, tones: @tones, refused: @refused)
             end
           end
 

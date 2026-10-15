@@ -11,11 +11,12 @@ module Admin
           prop :tone, Blog::Types::String
           prop :day, Blog::Types::Date
           prop :today, Blog::Types::Date
+          prop :refused, Blog::Types::Hash.optional, default: nil
 
           def view_template
             div(class: "cal-event", style: Tone.style(@tone), data:) do
               span(class: "cal-event-time") { @event.all_day? ? t(".all_day") : clock(@event.starts_at) }
-              details(class: "cal-event-body") do
+              details(class: "cal-event-body", open: refused?) do
                 head
                 more
               end
@@ -33,13 +34,13 @@ module Admin
           def changes
             return p(class: "li-sub") { t(".read_only") } unless @event.calendar.writable
 
-            details(class: "cal-event-edit") do
+            details(class: "cal-event-edit", open: refused?) do
               Button(summary: true, small: true, variant: :gh) do
                 IconLabel(icon: :edit) do
                   t(".edit")
                 end
               end
-              EventForm(action: path(:admin_update_calendar_event, id: @event.id), day: @day, event: @event)
+              EventForm(action: path(:admin_update_calendar_event, id: @event.id), day: @day, event: @event, **form)
             end
             delete_form
           end
@@ -59,6 +60,12 @@ module Admin
               input(type: "hidden", name: "day", value: @day.iso8601)
               Scope(label: t(".delete_which")) if @event.recurring_id
             end
+          end
+
+          def form
+            return Blog::Constants::EMPTY_HASH unless @refused
+
+            { morph: @refused[:menu], values: @refused[:values], errors: @refused[:errors] }
           end
 
           def head
@@ -108,6 +115,8 @@ module Admin
           def move
             MoveForm(kind: :event, id: @event.id, title:, date: @day, today: @today) if @event.calendar.writable
           end
+
+          def refused? = !@refused.nil?
 
           def title = @event.title || t(".untitled")
         end

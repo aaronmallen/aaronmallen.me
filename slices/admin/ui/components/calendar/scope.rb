@@ -6,10 +6,11 @@ module Admin
       module Calendar
         class Scope < Component
           prop :label, Blog::Types::String
+          prop :selected, Blog::Types::String.optional, default: nil
 
           def view_template
             SegmentedControl(
-              label: @label, name: "scope", selected: nil, options: { "this" => t(".this"), "all" => t(".all") },
+              label: @label, name: "scope", selected: @selected, options: { "this" => t(".this"), "all" => t(".all") },
             )
           end
         end

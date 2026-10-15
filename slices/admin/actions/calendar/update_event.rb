@@ -3,14 +3,14 @@
 module Admin
   module Actions
     module Calendar
-      class UpdateEvent < Action
-        include Redirect
+      class UpdateEvent < EventWrite
         include Deps[edit_event: "calendar.operations.edit_event"]
 
         def handle(request, response)
-          result = edit_event.call(record_id(request), request.params.to_h, scope: request.params[:scope])
+          id = record_id(request)
+          result = edit_event.call(id, request.params.to_h, scope: request.params[:scope])
 
-          written(request, response, result, :event_saved)
+          written(request, response, result, :event_saved) { refuse(request, response, it, id:) }
         end
       end
     end

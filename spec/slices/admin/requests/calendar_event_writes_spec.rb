@@ -26,6 +26,8 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
   def row(title) = page.find("[data-calendar-panel] .cal-event", text: title)
 
+  def said(key) = Admin::Slice["i18n"].t(key, scope: "ui.components.calendar.field_error")
+
   def send_form(path, **) = post(path, { _csrf_token: admin_csrf_token, day: day.iso8601, ** })
 
   def timed(date, starts, ends)
@@ -75,11 +77,50 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         expect(a_request(:post, events_url).with(body: hash_including(whole(day, day + 1)))).to have_been_made
       end
 
-      it "refuses an end that comes before the start", :aggregate_failures do
-        send_form("/admin/calendar/events", calendar: mine.id, **fields(ends: "11:00"))
+      describe "refused" do
+        let(:form) { page.find("form#cal-event-new-form", visible: :all) }
 
-        expect(a_request(:post, events_url)).not_to have_been_made
-        expect(toast).to eq("An event needs a title and a day, and an end after its start")
+        def error(field) = form.find("#cal-event-new-#{field}-error", visible: :all).text(:all)
+
+        def value(field) = form.find("#cal-event-new-#{field}", visible: :all).value
+
+        describe "with an end before the start" do
+          before { send_form("/admin/calendar/events", calendar: mine.id, **fields(ends: "11:00", place: "Sawada")) }
+
+          it "answers 422 and sends nothing to Google", :aggregate_failures do
+            expect(last_response.status).to eq(422)
+            expect(a_request(:post, events_url)).not_to have_been_made
+          end
+
+          it "opens the form again with what I typed", :aggregate_failures do
+            expect(page).to have_css("details.cal-new-event[open]", visible: :all)
+            expect([value(:title), value(:ends), value(:place), value(:calendar)])
+              .to eq(["Lunch", "11:00", "Sawada", mine.id.to_s])
+          end
+
+          it "says why on the end" do
+            expect(error(:ends)).to eq(said("ends.ends_first"))
+          end
+        end
+
+        it "names a bad clock on its own field", :aggregate_failures do
+          send_form("/admin/calendar/events", calendar: mine.id, **fields(starts: "25:00", ends: "noon"))
+
+          expect([error(:starts), error(:ends)]).to eq([said("starts.format"), said("ends.format")])
+          expect(form).to have_css("#cal-event-new-starts[aria-invalid='true']", visible: :all)
+        end
+
+        it "names a title it can't take" do
+          send_form("/admin/calendar/events", calendar: mine.id, **fields(title: "  "))
+
+          expect(error(:title)).to eq(said("title.blank"))
+        end
+
+        it "keeps an all-day event all day" do
+          send_form("/admin/calendar/events", calendar: mine.id, **fields(title: "", all_day: "1"))
+
+          expect(form).to have_checked_field("all_day", visible: :all)
+        end
       end
 
       it "refuses a work calendar", :aggregate_failures do
@@ -132,6 +173,41 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
         expect(a_request(:patch, "#{events_url}/trip").with(body: hash_including(whole(day + 7, day + 10))))
           .to have_been_made
+      end
+
+      describe "refused" do
+        let(:standup) { event(mine, "Standup", google_id: "abc", recurring_id: "standup") }
+
+        def error(id, field) = form(id).find("##{id}-#{field}-error", visible: :all).text(:all)
+
+        def form(id) = page.find("form##{id}-form", visible: :all)
+
+        describe "from the day panel" do
+          def id = "cal-event-#{standup.id}"
+
+          before { send_form("/admin/calendar/events/#{standup.id}", scope: "all", **fields(ends: "11:00")) }
+
+          it "answers 422 and sends nothing to Google", :aggregate_failures do
+            expect(last_response.status).to eq(422)
+            expect(a_request(:patch, /googleapis/)).not_to have_been_made
+          end
+
+          it "opens the form again with what I typed", :aggregate_failures do
+            expect(row("Standup")).to have_css("details.cal-event-edit[open]", visible: :all)
+            expect(form(id).find("##{id}-title", visible: :all).value).to eq("Lunch")
+            expect(form(id)).to have_checked_field("scope", with: "all", visible: :all)
+          end
+
+          it "says why on the end" do
+            expect(error(id, :ends)).to eq(said("ends.ends_first"))
+          end
+        end
+
+        it "answers the menu's dialog with a form of the same id" do
+          send_form("/admin/calendar/events/#{standup.id}", menu: "1", **fields(starts: "9"))
+
+          expect(error("cal-event-#{standup.id}-menu", :starts)).to eq(said("starts.format"))
+        end
       end
 
       it "refuses an event on a work calendar" do
