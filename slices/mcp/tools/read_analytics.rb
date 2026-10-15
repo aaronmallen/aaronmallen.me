@@ -54,6 +54,8 @@ module MCP
                   "Each country gives its country_code and its English country_name, which is null for visits " \
                   "from before the site kept names. " \
                   "Each top path gives its latest page title, which the visitor's browser sends, marked untrusted. " \
+                  "Each referrer's host, each click's link_host and link_path, and each internal referrer's path " \
+                  "come from the visitor's browser and come marked untrusted too; a direct visit's host stays null. " \
                   "#{Untrusted::WARNING}. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
                   "#{Blog::Helpers::DayWindow::LONGEST} days. " \
@@ -100,13 +102,26 @@ module MCP
                   "count that page alone. #{DEFINITIONS}"
       endpoint scope: Blog::Types::OAuthScope["read"]
 
+      VISITOR_TEXT = {
+        paths: %i[title],
+        referrers: %i[host],
+        clicks: %i[link_host link_path],
+        internal_referrers: %i[path],
+      }.freeze
+
       class << self
         private
 
         def answered(payload)
-          return super unless payload.key?(:paths)
+          VISITOR_TEXT.reduce(super) do |answer, (key, fields)|
+            next answer unless answer.key?(key)
 
-          super.merge(paths: payload.fetch(:paths).map { it.merge(title: Untrusted.call(it[:title])) })
+            answer.merge(key => answer.fetch(key).map { |row| row.merge(marked(key, row.slice(*fields))) })
+          end
+        end
+
+        def marked(key, fields)
+          fields.to_h { |field, text| [field, text.nil? && key == :referrers ? text : Untrusted.call(text)] }
         end
       end
     end

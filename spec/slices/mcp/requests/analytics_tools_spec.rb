@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
+  def marked(text) = { "untrusted" => true, "text" => text }
+
   def roll_up(day, views:, visitors:)
     create(:analytics_rollup, day:, views:, visitors:, read_seconds: views * 10)
   end
@@ -55,7 +57,8 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       create(:analytics_rollup_referrer, day:, host: "news.example", views: 6)
       create(:analytics_rollup_referrer, :direct, day:, views: 4)
 
-      expect(read.fetch("referrers").map { it.values_at("host", "views") }).to eq([["news.example", 6], [nil, 4]])
+      expect(read.fetch("referrers").map { it.values_at("host", "views") })
+        .to eq([[marked("news.example"), 6], [nil, 4]])
     end
 
     it "gives the countries" do
@@ -73,7 +76,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       create(:analytics_rollup_referrer, day:, host: "wide.example", views: 5, visitors: 4)
 
       expect(read.fetch("referrers").map { it.values_at("host", "views", "visitors") })
-        .to eq([["wide.example", 5, 4], ["busy.example", 9, 2]])
+        .to eq([[marked("wide.example"), 5, 4], [marked("busy.example"), 9, 2]])
     end
 
     it "ranks the countries by visitors over the range" do
@@ -97,11 +100,13 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "sums the visitors of the days that counted them" do
-        expect(read.fetch("referrers").first).to include("host" => "news.example", "views" => 9, "visitors" => 2)
+        expect(read.fetch("referrers").first)
+          .to include("host" => marked("news.example"), "views" => 9, "visitors" => 2)
       end
 
       it "gives no visitors for a referrer with no counted day, after the ones with a count" do
-        expect(read.fetch("referrers").last).to include("host" => "old.example", "views" => 9, "visitors" => nil)
+        expect(read.fetch("referrers").last).to include("host" => marked("old.example"), "views" => 9,
+                                                        "visitors" => nil)
       end
 
       it "adds today's visitors to a country with no counted day" do
@@ -125,7 +130,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "counts a visitor once under each referrer they came from" do
         expect(read.fetch("referrers").map { it.values_at("host", "views", "visitors") })
-          .to eq([["news.example", 2, 1], ["blog.example", 1, 1]])
+          .to eq([[marked("news.example"), 2, 1], [marked("blog.example"), 1, 1]])
       end
 
       it "counts a visitor once under their country" do
@@ -168,7 +173,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "gives the referrers and countries of every unrolled day", :aggregate_failures do
         expect(read.fetch("referrers").map { it.values_at("host", "views") })
-          .to eq([["news.example", 2], ["old.example", 1]])
+          .to eq([[marked("news.example"), 2], [marked("old.example"), 1]])
         expect(read.fetch("countries").map { it.values_at("country_code", "views") }).to eq([["DE", 2], ["US", 1]])
       end
     end
@@ -195,14 +200,14 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "leaves out the path with the fewest views and the referrer with the fewest visitors", :aggregate_failures do
         expect(paths).not_to include("/writing/rolled-0")
-        expect(hosts).not_to include("rolled-0.example")
+        expect(hosts).not_to include(marked("rolled-0.example"))
       end
 
       it "ranks today's path and referrer among the rolled up ones and still sends the top", :aggregate_failures do
         (top + 3).times { create(:analytics_event, path: "/writing/fresh", referrer_host: "fresh.example") }
 
         expect(paths.values_at(0, top)).to eq(["/writing/fresh", nil])
-        expect(hosts.values_at(0, top)).to eq(["fresh.example", nil])
+        expect(hosts.values_at(0, top)).to eq([marked("fresh.example"), nil])
       end
     end
 
@@ -693,7 +698,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
         roll_up_origin(:analytics_rollup_page_referrer, today - 1, host: "news.example", views: 2, visitors: 2)
         roll_up_origin(:analytics_rollup_page_referrer, today - 1, :direct, views: 9, visitors: 3)
 
-        expect(origins.fetch(:referrers)).to eq([["news.example", 5, 4], [nil, 9, 3]])
+        expect(origins.fetch(:referrers)).to eq([[marked("news.example"), 5, 4], [nil, 9, 3]])
       end
 
       it "ranks the page's countries by visitors over the range" do
@@ -726,7 +731,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
         2.times { create(:analytics_event, path: "/writing/hello", country_code: "JP", visitor_hash: reader) }
         create(:analytics_event, path: "/writing/other")
 
-        expect(origins).to eq(referrers: [["news.example", 2, 1]], countries: [["JP", 2, 1]])
+        expect(origins).to eq(referrers: [[marked("news.example"), 2, 1]], countries: [["JP", 2, 1]])
       end
 
       it "keeps the page's referrers and countries past the 90 days of raw visits" do
@@ -734,7 +739,8 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
         roll_up_origin(:analytics_rollup_page_referrer, old, host: "news.example", views: 5, visitors: 3)
         roll_up_origin(:analytics_rollup_page_country, old, country_code: "JP", views: 5, visitors: 3)
 
-        expect(origins(from: old, to: old)).to eq(referrers: [["news.example", 5, 3]], countries: [["JP", 5, 3]])
+        expect(origins(from: old, to: old))
+          .to eq(referrers: [[marked("news.example"), 5, 3]], countries: [["JP", 5, 3]])
       end
     end
 
@@ -766,12 +772,12 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "ranks the links followed off the page by clicks, today's included" do
         expect(read_page("/writing/hello").fetch("clicks").map { it.values_at("link_host", "link_path", "clicks") })
-          .to eq([["code.example", "/b", 5], ["docs.example", "/a", 3]])
+          .to eq([[marked("code.example"), marked("/b"), 5], [marked("docs.example"), marked("/a"), 3]])
       end
 
       it "leaves out the days outside the range" do
         expect(read_page("/writing/hello", from: today, to: today).fetch("clicks"))
-          .to eq([{ "link_host" => "docs.example", "link_path" => "/a", "clicks" => 1 }])
+          .to eq([{ "link_host" => marked("docs.example"), "link_path" => marked("/a"), "clicks" => 1 }])
       end
     end
 
@@ -1138,13 +1144,13 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "ranks the pages on the site that sent readers to it by visitors" do
         expect(read_raw(path: "/about").fetch("internal_referrers"))
-          .to eq([{ "path" => "/writing/new", "views" => 2, "visitors" => 2 },
-                  { "path" => "/writing/old", "views" => 2, "visitors" => 1 }])
+          .to eq([{ "path" => marked("/writing/new"), "views" => 2, "visitors" => 2 },
+                  { "path" => marked("/writing/old"), "views" => 2, "visitors" => 1 }])
       end
 
       it "counts only the views from since" do
         expect(read_raw(path: "/about", since: at(11).iso8601).fetch("internal_referrers"))
-          .to eq([{ "path" => "/writing/old", "views" => 2, "visitors" => 1 }])
+          .to eq([{ "path" => marked("/writing/old"), "views" => 2, "visitors" => 1 }])
       end
 
       it "leaves out entry and exit pages", :aggregate_failures do
