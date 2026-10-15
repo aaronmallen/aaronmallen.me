@@ -7,6 +7,7 @@ module Blog
         include Components
 
         FEED_TYPE = "application/atom+xml"
+        FONT_TYPE = "font/woff2"
         ICON_TYPE = "image/svg+xml"
         MANIFEST_PATH = "/site.webmanifest"
         THEME_COOKIE = ThemeScript::COOKIE
@@ -40,8 +41,16 @@ module Blog
 
         def page_webmention = content_for(:webmention)
 
+        def preloaded_fonts = []
+
         def render_feed_link
           link(rel: "alternate", type: FEED_TYPE, title: page_title, href: page_feed) if page_feed
+        end
+
+        def render_font_preloads
+          preloaded_fonts.each do |font|
+            link(rel: "preload", href: asset_url(font), as: "font", type: FONT_TYPE, crossorigin: "anonymous")
+          end
         end
 
         def render_head
@@ -50,6 +59,7 @@ module Blog
           render_icon_links
           render_feed_link
           render_webmention_link
+          render_font_preloads
           link(rel: "stylesheet", href: asset_url(stylesheet))
           script(src: asset_url("app.js"), type: "module")
         end

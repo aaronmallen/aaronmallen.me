@@ -11,6 +11,9 @@ module Public
         BEACON_DEPTHS = Blog::Types::ScrollDepth.values.select(&:positive?).join(" ")
         BEACON_READ_CAP = ::Analytics::Operations::RecordVisit::MAX_READ_SECONDS
         BEACON_REF = ::Analytics::Operations::TagRef::KEY
+        FONTS = %w[
+          newsreader/newsreader-latin-opsz-normal.woff2 bricolage-grotesque/bricolage-grotesque-latin-opsz-normal.woff2
+        ].freeze
         IMAGE_CARD = "summary_large_image"
         SHARE_IMAGE = "share.png"
         SHARE_IMAGE_SIZE = { width: 1200, height: 630 }.freeze
@@ -60,6 +63,8 @@ module Public
         def page_social_title = content_for(:social_title) || content_for(:title) || settings.owner_name
 
         def page_url = content_for(:canonical) || settings.site_url(page_path)
+
+        def preloaded_fonts = FONTS
 
         def render_article_tags
           meta(property: "article:author", content: settings.owner_name)

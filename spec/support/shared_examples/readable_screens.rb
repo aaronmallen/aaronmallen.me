@@ -4,7 +4,32 @@ RSpec.shared_examples "readable screens" do |tap: false|
   def faults(screen, taps:)
     show(screen)
 
-    page.evaluate_script(format(readable_script, phone: 700, readable: 12, tap: taps ? 44 : 0))
+    page.evaluate_script(format(readable_script, phone: 700, readable: 12, tap: taps ? 44 : 0)) + idle_preloads
+  end
+
+  def idle_preloads
+    page.evaluate_async_script(<<~'JS')
+      const done = arguments[0];
+      const bare = (family) => family.replaceAll('"', '');
+
+      const source = (rule) => {
+        const url = rule.style.getPropertyValue('src').match(/url\(\s*["']?([^"')]+)/)[1];
+        return new URL(url, rule.parentStyleSheet.href).href;
+      };
+
+      const drawn = (rule) => [...document.fonts].some((font) => font.status === 'loaded' &&
+        bare(font.family) === bare(rule.style.fontFamily) && font.style === rule.style.fontStyle &&
+        font.unicodeRange === rule.style.getPropertyValue('unicode-range'));
+
+      document.fonts.ready.then(() => {
+        const faces = [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules])
+          .filter((rule) => rule instanceof CSSFontFaceRule);
+
+        done([...document.querySelectorAll('link[rel="preload"][as="font"]')]
+          .filter((link) => !faces.some((rule) => source(rule) === link.href && drawn(rule)))
+          .map((link) => link.getAttribute('href') + ' is preloaded but never drawn'));
+      });
+    JS
   end
 
   def readable_script

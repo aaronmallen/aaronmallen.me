@@ -3,7 +3,10 @@
 RSpec.describe "Stylesheets", type: :request do
   def asset(source) = Hanami.app["assets"][source].url
 
-  def sheet(source) = Hanami.app.root.join("public", asset(source).delete_prefix("/")).read
+  def font_preloads
+    Capybara.string(last_response.body).all("link[rel='preload'][as='font']", visible: :all)
+            .map { [it[:href], it[:crossorigin]] }
+  end
 
   it "links the public sheet alone on a public page" do
     get "/privacy"
@@ -17,6 +20,24 @@ RSpec.describe "Stylesheets", type: :request do
 
     expect(stylesheets).to eq([asset("admin/app.css")])
   end
+
+  it "preloads the Latin body and heading faces on a public page" do
+    get "/privacy"
+
+    expect(font_preloads).to eq(
+      %w[newsreader/newsreader-latin-opsz-normal.woff2 bricolage-grotesque/bricolage-grotesque-latin-opsz-normal.woff2]
+        .map { [asset(it), "anonymous"] },
+    )
+  end
+
+  it "preloads no fonts on an admin page" do
+    sign_in_to_admin
+    get "/admin"
+
+    expect(font_preloads).to be_empty
+  end
+
+  def sheet(source) = Hanami.app.root.join("public", asset(source).delete_prefix("/")).read
 
   def stylesheets = Capybara.string(last_response.body).all("link[rel='stylesheet']", visible: :all).map { it[:href] }
 
