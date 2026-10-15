@@ -27,6 +27,8 @@ module Shares
         found.newest_first.combine(:share_group_files).node(:share_group_files) { it.order(:id) }.to_a
       end
 
+      def options = share_groups.with_code.newest_first.to_a.to_h { [it.id.to_s, it.name || it.code] }
+
       def page(page) = page.fill(share_groups.with_code.newest_first.paged(page).combine(:share_group_files).to_a)
 
       private

@@ -14,13 +14,17 @@ module Admin
 
           prop :count, Blog::Types::Integer
           prop :groups, Blog::Types::Array
+          prop :group_options, Blog::Types::Hash
           prop :list, Blog::Types::Hash
           prop :shares, Blog::Types::Instance(Blog::Structs::Paged)
           prop :totals, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            PageHead(title: t(".heading"), sub:) { filter_form }
+            PageHead(title: t(".heading"), sub:) do
+              filter_form
+              BulkToggle(form: Bulk::ID) unless @shares.rows.empty?
+            end
             upload_form
             search_form
             listing
@@ -41,9 +45,12 @@ module Admin
           end
 
           def grid
-            div(class: "file-grid") do
-              @groups.each { GroupTile(group: it) }
-              @shares.rows.each { Tile(share: it) }
+            div(class: "file-bulk") do
+              Bulk(groups: @group_options)
+              div(class: "file-grid") do
+                @groups.each { GroupTile(group: it) }
+                @shares.rows.each { Tile(share: it) }
+              end
             end
             @groups.each { |group| ShareDrawer(form: GroupForm, record: group, kind: :group) { GroupForm(group:) } }
             @shares.rows.each { |share| ShareDrawer(form: ShareForm, record: share, kind: :file) { ShareForm(share:) } }

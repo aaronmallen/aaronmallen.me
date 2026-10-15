@@ -5251,6 +5251,15 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
 }
 
+@utility file-bulk {
+  &:has(form[data-bulk-off]) {
+    & .bulk-pick,
+    & .bulk-bar {
+      @apply hidden;
+    }
+  }
+}
+
 @utility file-card {
   @apply relative flex min-w-0 flex-col overflow-hidden rounded-menu border border-line bg-ground-sunk;
 }
@@ -5432,7 +5441,7 @@
 }
 
 @utility file-group-item {
-  @apply grid grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 border-b border-line pb-3 last:border-b-0;
+  @apply grid grid-cols-[56px_minmax(0,1fr)_auto_auto] items-start gap-3 border-b border-line pb-3 last:border-b-0;
 }
 
 @utility file-group-thumb {

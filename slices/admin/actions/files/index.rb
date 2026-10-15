@@ -29,6 +29,7 @@ module Admin
 
           response[:count] = share_queries.count_listed(**list) + groups.size
           response[:groups] = page.number == 1 ? groups : []
+          response[:group_options] = share_group_queries.options
         end
 
         def listed(params)

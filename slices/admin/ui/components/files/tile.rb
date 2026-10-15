@@ -34,6 +34,7 @@ module Admin
           def acts
             copied = t(".copied")
 
+            BulkCheck(form: Bulk::ID, value: @share.id, label: t(".pick", name: @share.filename))
             Button(small: true, icon: "fa-solid fa-link", data: { record_key: link, record_key_copied: copied }) do
               t(".copy")
             end

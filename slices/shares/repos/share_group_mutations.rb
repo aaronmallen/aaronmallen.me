@@ -26,6 +26,21 @@ module Shares
 
       def delete(short_code_id) = short_codes.by_pk(short_code_id).delete
 
+      def join(file_id, group_id, short_code_id)
+        transaction do
+          share_group_files.by_pk(file_id).update(share_group_id: group_id, short_code_id: nil, updated_at: Time.now)
+          short_codes.by_pk(short_code_id).delete
+        end
+      end
+
+      def leave(file_id, code:)
+        transaction do
+          short_code = short_codes.command(:create).call(code:)
+          share_group_files.by_pk(file_id).update(short_code_id: short_code.id, share_group_id: nil,
+                                                  updated_at: Time.now)
+        end
+      end
+
       def name(id, name) = share_groups.by_pk(id).update(name:, updated_at: Time.now)
 
       def remove_file(id) = share_group_files.by_pk(id).delete

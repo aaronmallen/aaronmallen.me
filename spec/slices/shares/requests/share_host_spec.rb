@@ -683,6 +683,82 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  describe "a file that moves between a share and a group" do
+    let(:first) { share("one.txt") }
+    let(:second) { share("two.txt") }
+    let(:group) { Shares::Slice["operations.group_shares"].call([first.id, second.id]).value! }
+
+    def count_of(id) = Shares::Slice["relations.share_group_files"].by_pk(id).one[:download_count]
+
+    def download(path)
+      fetch(path,
+            "HTTP_USER_AGENT" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Safari/605.1.15")
+    end
+
+    def ungroup(id) = Shares::Slice["operations.ungroup_share_file"].call(group.id, id).value!
+
+    before do
+      stub_object(first)
+      stub_object(second)
+      Shares::Slice["relations.share_group_files"].by_pk(first.id).update(download_count: 4)
+    end
+
+    it "answers 404 under a share's old code once it joins a group" do
+      old = first.code
+      group
+      fetch("/#{old}")
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "frees the old code for a short link", :aggregate_failures do
+      old = first.code
+      group
+      link = Shares::Slice["operations.create_short_link"].call(destination: "https://example.com", code: old)
+
+      expect(link).to be_success
+      expect(link.value!.code).to eq(old)
+    end
+
+    it "serves the file under the group's code and its id, with its downloads kept", :aggregate_failures do
+      download("/#{group.code}/#{first.id}")
+
+      expect(last_response.body).to eq(bytes)
+      expect(count_of(first.id)).to eq(5)
+    end
+
+    it "keeps each group file's link and downloads when another file leaves", :aggregate_failures do
+      ungroup(second.id)
+      download("/#{group.code}/#{first.id}")
+
+      expect(last_response.body).to eq(bytes)
+      expect(count_of(first.id)).to eq(5)
+    end
+
+    it "serves a file pulled out of a group under its own new code, with its downloads kept", :aggregate_failures do
+      moved = ungroup(first.id)
+      download("/#{moved.code}")
+
+      expect(last_response.body).to eq(bytes)
+      expect(count_of(first.id)).to eq(5)
+    end
+
+    it "answers 404 for a pulled out file under the group's code" do
+      ungroup(first.id)
+      fetch("/#{group.code}/#{first.id}")
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "keeps a group file's link when shares join its group" do
+      third = share("three.txt")
+      Shares::Slice["operations.add_shares_to_group"].call(group.id, [third.id])
+      fetch("/#{group.code}/#{first.id}")
+
+      expect(last_response.body).to eq(bytes)
+    end
+  end
+
   it "knows the share host with a port on it" do
     fetch("/zzzzz", "HTTP_HOST" => "shares.localhost:3000")
 

@@ -84,6 +84,18 @@ en:
       added:
         one: "Added to the group"
         other: "%{count} files added to the group"
+      bulk:
+        added:
+          one: "Moved %{count} file into %{name} · its old link stops working"
+          other: "Moved %{count} files into %{name} · their old links stop working"
+        failed:
+          blank: "Nothing moved · tick a file first"
+          no_group: "Nothing moved · pick a group first"
+          not_found: "Nothing moved · a file or the group is gone"
+          too_few: "Nothing moved · tick two or more files to make a group"
+        grouped:
+          one: "Grouped %{count} file under %{name} · its old link stops working"
+          other: "Grouped %{count} files under %{name} · their old links stop working"
       deleted: "File deleted"
       grouped:
         one: "Uploaded as one link"
@@ -92,6 +104,7 @@ en:
       group_saved: "Group saved"
       removed: "File removed from the group"
       saved: "File saved"
+      ungrouped: "Moved out of the group under a new link"
       uploaded:
         one: "Uploaded"
         other: "%{count} files uploaded"
@@ -853,6 +866,11 @@ en:
         save: "Save"
         title: "What changed and why"
       files:
+        bulk:
+          add: "Add"
+          group: "Make a group"
+          label: "Ticked files"
+          pick_group: "Add to group…"
         field_error:
           alt_text:
             control: "Take out the control characters."
@@ -875,6 +893,7 @@ en:
           filename: "File name"
           filename_hint: "Downloads and the zip save it under this name. Its link stays the same."
           remove: "Remove %{name}"
+          ungroup: "Move %{name} out of the group"
         group_form:
           add: "Add"
           add_label: "Add files to this group"
@@ -883,6 +902,7 @@ en:
             one: "Delete this group and its file? Its link stops working at once."
             other: "Delete this group and its %{count} files? Its link stops working at once."
           confirm_remove: "Remove %{name}? Its link stops working at once."
+          confirm_ungroup: "Move %{name} out of the group? Its link in the group stops working, and it gets a new one."
           copy_link: "Copy link"
           files: "Files"
           group_name: "Name"
@@ -933,6 +953,7 @@ en:
             one: "%{downloads} download"
             other: "%{downloads} downloads"
           open: "Open %{name}"
+          pick: "Tick %{name}"
       footer:
         version: "Version %{version}"
       github_record:

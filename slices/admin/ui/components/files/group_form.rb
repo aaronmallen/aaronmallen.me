@@ -17,6 +17,8 @@ module Admin
 
           def self.scope(group) = "share-group-#{group.id}"
 
+          def self.ungroup_id(group, file) = "#{scope(group)}-ungroup-#{file.id}"
+
           def view_template
             p(class: "file-drawer-name") { title }
             p(class: "file-drawer-meta") { meta }
@@ -99,6 +101,11 @@ module Admin
                 id: self.class.remove_id(@group, file),
                 action: path(:admin_remove_file_group_file, id: @group.id, file_id: file.id),
                 data: { confirm: t(".confirm_remove", name: file.filename) },
+              )
+              Form(
+                id: self.class.ungroup_id(@group, file),
+                action: path(:admin_ungroup_file_group_file, id: @group.id, file_id: file.id),
+                data: { confirm: t(".confirm_ungroup", name: file.filename) },
               )
             end
           end

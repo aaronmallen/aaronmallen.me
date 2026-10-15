@@ -15,6 +15,10 @@ module Admin
               thumb
               div(class: "file-group-item-body") { body }
               Button(
+                small: true, variant: :gh, type: "submit", form: GroupForm.ungroup_id(@group, @file),
+                icon: "fa-solid fa-arrow-right-from-bracket", label: t(".ungroup", name: @file.filename),
+              )
+              Button(
                 small: true, variant: :gh, type: "submit", form: GroupForm.remove_id(@group, @file),
                 icon: :trash, label: t(".remove", name: @file.filename),
               )
