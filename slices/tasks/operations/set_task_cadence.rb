@@ -5,6 +5,7 @@ module Tasks
     class SetTaskCadence < Blog::Operation
       include Deps[
         contract: "contracts.task_cadence_contract",
+        recur_task: "operations.recur_task",
         task_queries: "repos.task_queries",
         task_series_mutations: "repos.task_series_mutations",
         task_series_queries: "repos.task_series_queries",
@@ -14,8 +15,12 @@ module Tasks
         step find(id)
         fields = step validate(params, now)
 
-        task_series_mutations.set(id, cadence(fields), now)
-        task_series_queries.by_task(id)
+        transaction do
+          task_series_mutations.set(id, cadence(fields), now)
+          series = task_series_queries.by_task(id)
+          step recur_task.call(id, at: now)
+          task_series_queries.by_id(series.id)
+        end
       end
 
       private

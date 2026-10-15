@@ -34,7 +34,8 @@ places it. The series holds nothing a copy holds.
 **The next copy appears in the transaction that closes the current one.** `CompleteTask` and `CancelTask` make it,
 so every path that closes a task makes it too. The copy clones the task that just closed, and the series moves its
 current copy to the new one. A paused series makes no copy. Resuming a series whose current copy has closed makes
-the next one at once. The task timeline records each copy as coming from its series.
+the next one at once, and so does setting a cadence on a task that has already closed. The task timeline records
+each copy as coming from its series.
 
 No job makes copies, so [ADR 0012][0012]'s catch-up rule never applies to them.
 
@@ -52,8 +53,8 @@ need ADR 0012's catch-up for every night it missed. The owner wanted the next co
 
 ## Consequences
 
-A series moves only when its copy closes. A copy left open stalls the series, with no backlog of missed dates, and
-a late close still dates the next copy after today.
+A series moves only when its copy closes, or when it starts on a task already closed. A copy left open stalls the
+series, with no backlog of missed dates, and a late close still dates the next copy after today.
 
 `CompleteTask` and `CancelTask` grow a step and a dependency on series reads, and every close now writes in more
 than one table. A new way to close a task has to go through them, or a series stops.

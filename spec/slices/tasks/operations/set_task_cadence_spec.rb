@@ -8,6 +8,8 @@ RSpec.describe Tasks::Operations::SetTaskCadence, :frozen_clock do
 
   def series_ids = Tasks::Slice["relations.task_series"].pluck(:id)
 
+  def sprint_on(task) = Tasks::Slice["relations.sprints"].by_pk(task.sprint_id).one[:sprint_date]
+
   def stored(row) = row.to_h.slice(*Tasks::Relations::TaskSeries::CADENCE).compact
 
   {
@@ -45,6 +47,23 @@ RSpec.describe Tasks::Operations::SetTaskCadence, :frozen_clock do
     expect(series_ids).to eq([first.id])
     expect(stored(changed)).to eq(cadence: "month_end")
     expect(changed.paused).to be(true)
+  end
+
+  it "makes the next copy when the task is already done", :aggregate_failures do
+    done = create(:task, :done, title: "Water the plants")
+
+    series = set_cadence.call(done.id, { cadence: "days", every: 1 }).value!
+
+    copy = Tasks::Slice["repos.task_queries"].by_id(series.task_id)
+    expect(copy.id).not_to eq(done.id)
+    expect([copy.title, copy.status, sprint_on(copy)]).to eq(["Water the plants", "open", Blog::TimeZone.today + 1])
+  end
+
+  it "makes no copy for an open task", :aggregate_failures do
+    series = set_cadence.call(task.id, { cadence: "days", every: 1 }).value!
+
+    expect(series.task_id).to eq(task.id)
+    expect(Tasks::Slice["relations.tasks"].pluck(:id)).to eq([task.id])
   end
 
   it "refuses an imported task", :aggregate_failures do
