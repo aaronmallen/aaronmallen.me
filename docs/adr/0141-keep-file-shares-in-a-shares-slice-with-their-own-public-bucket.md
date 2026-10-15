@@ -5,7 +5,7 @@ status: active
 created: 2026-10-10
 area: [config, db, lib, media]
 issue: "#1054"
-amended: ["#1259"]
+amended: ["#1259", "#1447"]
 tags: [shares, short-codes, uploads, s3, buckets, providers, slices, media, photos]
 ---
 
@@ -37,7 +37,8 @@ Shares get their own feature slice, `shares`, and their own bucket.
   short links reach it through the slice's exported operations, never by writing it ([ADR 0021][0021],
   [ADR 0123][0123]). #1259 lets a share group own a code too, with its files under it and no code of their own
   ([ADR 0163][0163]).
-- **A `shares` table** holds the original filename, content type, size, alt text and download count.
+- **A `shares` table** holds the original filename, content type, size, alt text and download count. #1447 moves
+  these rows into `share_group_files`, where each file has a code or a group ([ADR 0177][0177]).
 - **A separate S3 bucket holds only shares.** Its own setting, shaped like `media_store`, names it, and its own
   store provider reads that setting ([ADR 0009][0009]). The client and provider live in `lib/shares` beside the
   media ones; the relations, repos, contracts and operations live in `slices/shares` ([ADR 0126][0126]).
@@ -74,4 +75,5 @@ An image shared on `aa.cool` and the same image in a post are two copies, stored
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
+[0177]: 0177-keep-single-shares-and-group-files-in-one-table-with-a-code-or-a-group.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
