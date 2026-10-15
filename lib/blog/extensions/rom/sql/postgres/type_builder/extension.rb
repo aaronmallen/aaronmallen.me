@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "rom/sql"
 require "rom/sql/extensions/postgres"
 
@@ -21,4 +22,11 @@ module Blog
   end
 end
 
-ROM::SQL::Postgres::TypeBuilder.prepend(Blog::Extensions::ROM::SQL::Postgres::TypeBuilder::Extension)
+Blog::Extensions.apply(
+  ROM::SQL::Postgres::TypeBuilder,
+  Blog::Extensions::ROM::SQL::Postgres::TypeBuilder::Extension,
+  gem: "rom-sql",
+  version: "3.7.0",
+  reason: "rom-sql maps no type to tsvector, so it cannot infer the schema of a relation with a search column",
+  upstream: nil,
+)

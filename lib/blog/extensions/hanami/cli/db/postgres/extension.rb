@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "hanami/cli"
 require "hanami/cli/commands/app/db/utils/postgres"
 require "shellwords"
@@ -47,4 +48,11 @@ module Blog
   end
 end
 
-Hanami::CLI::Commands::App::DB::Utils::Postgres.prepend(Blog::Extensions::Hanami::CLI::DB::Postgres::Extension)
+Blog::Extensions.apply(
+  Hanami::CLI::Commands::App::DB::Utils::Postgres,
+  Blog::Extensions::Hanami::CLI::DB::Postgres::Extension,
+  gem: "hanami-cli",
+  version: "3.0.0",
+  reason: "db commands pass the user and password to psql still percent encoded, and drop trusts a loose check",
+  upstream: "https://github.com/hanami/hanami-cli/issues/449, https://github.com/hanami/hanami-cli/issues/310",
+)

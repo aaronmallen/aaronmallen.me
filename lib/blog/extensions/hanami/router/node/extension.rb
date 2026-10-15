@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "hanami/router"
 
 module Blog
@@ -23,4 +24,11 @@ module Blog
   end
 end
 
-Hanami::Router::Node.prepend(Blog::Extensions::Hanami::Router::Node::Extension)
+Blog::Extensions.apply(
+  Hanami::Router::Node,
+  Blog::Extensions::Hanami::Router::Node::Extension,
+  gem: "hanami-router",
+  version: "3.0.0",
+  reason: "a leaf keeps the params of its last match on itself, which threads serving requests at once share",
+  upstream: nil,
+)

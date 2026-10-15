@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "hanami/middleware/assets"
 
 module Blog
@@ -27,4 +28,11 @@ module Blog
   end
 end
 
-Hanami::Middleware::Assets.prepend(Blog::Extensions::Hanami::Middleware::Assets::Extension)
+Blog::Extensions.apply(
+  Hanami::Middleware::Assets,
+  Blog::Extensions::Hanami::Middleware::Assets::Extension,
+  gem: "hanami",
+  version: "3.0.2",
+  reason: "the assets middleware sends no Cache-Control, so fingerprinted assets never cache as immutable",
+  upstream: nil,
+)

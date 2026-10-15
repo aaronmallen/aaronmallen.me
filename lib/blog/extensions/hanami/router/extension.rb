@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "hanami/router"
 
 module Blog
@@ -23,4 +24,11 @@ module Blog
   end
 end
 
-Hanami::Router.prepend(Blog::Extensions::Hanami::Router::Extension)
+Blog::Extensions.apply(
+  Hanami::Router,
+  Blog::Extensions::Hanami::Router::Extension,
+  gem: "hanami-router",
+  version: "3.0.0",
+  reason: "the router gives no way to read the matched route pattern, which the request timer records",
+  upstream: nil,
+)

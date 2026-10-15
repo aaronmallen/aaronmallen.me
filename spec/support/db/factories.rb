@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "rom-factory"
 
 module ROM
@@ -28,13 +29,36 @@ module ROM
           Mail::Slice["repos.message_queries"].by_id(thread.id)
         end
       end
-
-      prepend Linking
-      prepend Threading
-      prepend Tagging
     end
   end
 end
+
+Blog::Extensions.apply(
+  ROM::Factory::Factories,
+  ROM::Factory::Factories::Linking,
+  gem: "rom-factory",
+  version: "0.14.1",
+  reason: "create takes a record such as post: and stores its id, which rom-factory has no way to do",
+  upstream: nil,
+)
+
+Blog::Extensions.apply(
+  ROM::Factory::Factories,
+  ROM::Factory::Factories::Threading,
+  gem: "rom-factory",
+  version: "0.14.1",
+  reason: "create(:message) builds the thread and its first message as one, which rom-factory has no way to do",
+  upstream: nil,
+)
+
+Blog::Extensions.apply(
+  ROM::Factory::Factories,
+  ROM::Factory::Factories::Tagging,
+  gem: "rom-factory",
+  version: "0.14.1",
+  reason: "create takes tags: and writes them through the repo, which rom-factory has no way to do",
+  upstream: nil,
+)
 
 module Spec
   module DB

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "dry/logger/filter"
 
 module Blog
@@ -18,4 +19,11 @@ module Blog
   end
 end
 
-Dry::Logger::Filter.prepend(Blog::Extensions::Dry::Logger::Filter::Extension)
+Blog::Extensions.apply(
+  Dry::Logger::Filter,
+  Blog::Extensions::Dry::Logger::Filter::Extension,
+  gem: "dry-logger",
+  version: "1.2.2",
+  reason: "the filter walks every Enumerable as a hash, so an array param that holds a filtered name raises",
+  upstream: nil,
+)
