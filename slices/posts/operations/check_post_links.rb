@@ -20,10 +20,12 @@ module Posts
         check(post, at, only: url) if post
       end
 
-      def call(at: Time.now)
+      def call(at: Time.now, &checked)
         link_check_mutations.forget_unpublished
-        post_queries.published_bodies.each { check(it, at) }
+        post_queries.published_bodies.each { check(it, at, &checked) }
       end
+
+      def due = post_queries.published_bodies.sum { links(it.body).size }
 
       def links(body)
         anchors(body).each_with_object({}) do |anchor, found|
@@ -36,10 +38,13 @@ module Posts
 
       def anchors(body) = Nokogiri::HTML5.parse(Markdown.to_html(body)).css(LINK_SELECTOR)
 
-      def check(post, at, only: nil)
+      def check(post, at, only: nil, &checked)
         urls = links(post.body).keys
         link_check_mutations.forget_unlinked(post.id, urls)
-        (only ? urls & [only] : urls).each { record(post, it, at) }
+        (only ? urls & [only] : urls).each do |url|
+          record(post, url, at)
+          checked&.call
+        end
       end
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }

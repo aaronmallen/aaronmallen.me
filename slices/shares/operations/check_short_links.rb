@@ -14,13 +14,18 @@ module Shares
         check([link], at) if link
       end
 
-      def call(at: Time.now) = check(short_link_queries.destinations, at)
+      def call(at: Time.now, &) = check(short_link_queries.destinations, at, &)
+
+      def due = short_link_queries.destinations.size
 
       private
 
-      def check(links, at)
+      def check(links, at, &checked)
         link_check_mutations.forget_stale
-        links.each { record(it.id, it.destination, at) }
+        links.each do |link|
+          record(link.id, link.destination, at)
+          checked&.call
+        end
       end
 
       def record(short_link_id, url, at)

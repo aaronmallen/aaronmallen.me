@@ -222,4 +222,46 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
 
     expect(a_request(:get, live)).to have_been_made.once
   end
+
+  describe "each run" do
+    def run = runs.one!
+
+    def runs = Posts::Slice["relations.link_check_runs"]
+
+    def short_link(destination) = Shares::Slice["operations.create_short_link"].call(destination:).value!
+
+    it "records how many links it checked of those due in published posts and short links" do
+      post_with(live, dead)
+      post_with("https://ada.example/draft", status: :draft)
+      short_link(live)
+      check
+
+      expect(run).to include(links_checked: 3, links_due: 3, stopped_early: false)
+    end
+
+    it "records when it started and finished" do
+      post_with(live)
+      check
+
+      expect(run.values_at(:started_at, :finished_at)).to all(be_within(5).of(Time.now))
+    end
+
+    it "records a run that stops before it checks every link as stopped early", :aggregate_failures do
+      post_with(live, dead)
+      stub_request(:get, dead).to_raise(Sidekiq::Shutdown)
+
+      expect { check }.to raise_error(Sidekiq::Shutdown)
+      expect(run).to include(links_checked: 1, links_due: 2, stopped_early: true)
+      expect(run[:finished_at]).to be_within(5).of(Time.now)
+    end
+
+    it "starts a new run on demand as a queued job" do
+      post_with(live)
+      check
+      Posts::Slice["operations.queue_link_check_run"].call
+      described_class.drain
+
+      expect(runs.to_a.map { it[:links_checked] }).to eq([1, 1])
+    end
+  end
 end
