@@ -1954,6 +1954,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(repo.by_id(task.id)).to have_attributes(list: "external", sprint_id: nil)
       end
 
+      it "keeps a waiting task on its later sprint when only its title changed" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1))
+        save(task, filter: "upcoming", title: "Renamed")
+
+        expect(repo.by_id(task.id)).to have_attributes(title: "Renamed", sprint_id: sprint_repo.on(today + 1).id)
+      end
+
       it "moves a waiting task to the day it was given when only its date changed" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1))
         save(task, filter: "upcoming", sprint_on: (today + 2).iso8601)

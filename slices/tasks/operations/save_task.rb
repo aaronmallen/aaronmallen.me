@@ -24,10 +24,12 @@ module Tasks
         task = step find(id)
         fields = step validate(params)
 
+        moves = moves?(task, fields[:list], params[:sprint_on])
+
         transaction do
-          persist(task, fields)
+          persist(task, fields, moves)
           step recur(id, params)
-          step schedule_task.call(id, params[:sprint_on]) if schedules?(task, fields, params[:sprint_on])
+          step schedule(id, params[:sprint_on]) unless moves
 
           task_queries.by_id(id)
         end
@@ -39,20 +41,22 @@ module Tasks
         task_contributor_mutations.replace(id, contributors.map { Blog::Types::Contributor[it] }.uniq) if contributors
       end
 
-      def find(id) = found(task_queries.by_id(id))
+      def find(id) = found(task_queries.detailed(id))
 
       def form(params) = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*OPTIONAL))
 
-      def move(task, list) = moves?(task, list) ? move_task.call(task.id, list) : Success(task)
+      def moves?(task, list, sprint_on)
+        return false if list.nil?
 
-      def moves?(task, list) = !list.nil? && list != task.place
+        list != task.place || (sprint_on.nil? && task.ahead?(Blog::TimeZone.today))
+      end
 
-      def persist(task, fields)
+      def persist(task, fields, moves)
         task_mutations.update(task.id, note: fields[:note], title: fields[:title])
         credit(task.id, fields[:contributors])
         retag(task.id, fields[:tags])
         claim_photos.call(PHOTO_OWNER, task.id, fields[:note])
-        step move(task, fields[:list])
+        step move_task.call(task.id, fields[:list]) if moves
       end
 
       def recur(id, params)
@@ -67,7 +71,7 @@ module Tasks
 
       def retag(id, names) = task_event_mutations.track(id, Time.now) { task_mutations.replace_tags(id, names) }
 
-      def schedules?(task, fields, sprint_on) = !(sprint_on.nil? || moves?(task, fields[:list]))
+      def schedule(id, sprint_on) = sprint_on.nil? ? Success() : schedule_task.call(id, sprint_on)
 
       def validate(params) = validated(contract.call(form(params)))
     end

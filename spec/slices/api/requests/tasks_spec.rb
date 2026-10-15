@@ -732,6 +732,19 @@ RSpec.describe "API tasks", type: :request do
       expect(tasks.by_id(task.id).list).to eq("someday")
     end
 
+    describe "a task in a later sprint" do
+      let(:later) { create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today + 2).id) }
+
+      it "pulls it into today's sprint for the today list" do
+        expect(save(later.id, list: "today").fetch("sprint_on")).to eq(today.iso8601)
+      end
+
+      it "keeps the sprint day it names alongside the today list" do
+        expect(save(later.id, list: "today", sprint_on: (today + 2).iso8601).fetch("sprint_on"))
+          .to eq((today + 2).iso8601)
+      end
+    end
+
     it "refuses a blank title with a 422 and keeps the old one" do
       save(task.id, title: "")
 
