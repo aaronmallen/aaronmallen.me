@@ -154,4 +154,36 @@ RSpec.describe "MCP share tools", type: :request do
         .first).to be(true)
     end
   end
+
+  describe "group_shares" do
+    it "groups single shares under one new link" do
+      ids = [upload_share.value!.id, upload_share.value!.id]
+
+      expect(answer("group_shares", ids:).fetch("files").map { it.fetch("id") }).to match_array(ids)
+    end
+
+    it "refuses one share" do
+      expect(refusal("group_shares", ids: [upload_share.value!.id]).first).to be(true)
+    end
+  end
+
+  describe "add_shares_to_group" do
+    it "moves a single share into a group" do
+      group = make_group(share_upload("a", "a.txt", "text/plain"))
+      share = upload_share.value!
+
+      expect(answer("add_shares_to_group", id: group.id, ids: [share.id]).fetch("files").map { it.fetch("id") })
+        .to include(share.id)
+    end
+  end
+
+  describe "ungroup_share_file" do
+    it "pulls a file out of its group under a new code" do
+      group = make_group(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain"))
+      file = group.share_group_files.first
+      answered = answer("ungroup_share_file", id: group.id, file_id: file.id)
+
+      expect(answered).to include("id" => file.id, "url" => "http://shares.localhost/#{answered.fetch('code')}")
+    end
+  end
 end

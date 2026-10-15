@@ -18,12 +18,13 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "suggest" => %w[suggest_edits],
       "write" => %w[
-        accept_suggestion_edits add_decision_comment add_decision_option add_task_comment
+        accept_suggestion_edits add_decision_comment add_decision_option add_shares_to_group add_task_comment
         archive_project cancel_task cancel_tasks capture_task
         clear_inbox
         complete_task complete_tasks
         create_journal_entry create_post create_saved_view create_social_post drop_decision drop_sprint edit_decision
-        edit_decision_comment edit_decision_option edit_task_comment ignore_webmentions import_commits link_records
+        edit_decision_comment edit_decision_option edit_task_comment group_shares ignore_webmentions import_commits
+        link_records
         link_tasks mark_task_seen mark_webmentions_spam
         moderate_webmention move_task move_tasks open_decision pause_task pause_task_series plan_sprint
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project
@@ -32,7 +33,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         snooze_attention
         snooze_inbox
         snooze_inbox_row
-        stage_task start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task
+        stage_task start_task sync_issues tag_decision tag_posts tag_tasks ungroup_share_file unlink_records unlink_task
         untag_decision untag_tasks update_journal_entry update_post update_saved_view update_share
         update_share_group update_share_group_file update_social_post update_work_session upload_photo
         wake_inbox_row write_post_seo

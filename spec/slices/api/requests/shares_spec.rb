@@ -290,4 +290,102 @@ RSpec.describe "API shares", type: :request do
       expect([status, group_files.find { it[:id] == file.id }[:filename]]).to eq([404, "a.txt"])
     end
   end
+
+  describe "POST /api/v1/shares/bulk/group" do
+    let(:first) { make_share("a", "a.txt", "text/plain") }
+    let(:second) { make_share("b", "b.txt", "text/plain") }
+
+    it "answers 201 with a new group holding the shares, keeping their IDs" do
+      answered = call_api(:post, "/shares/bulk/group", { ids: [first.id, second.id] })
+
+      expect([answered.fetch("files").map { it.fetch("id") }, status]).to eq([[first.id, second.id], 201])
+    end
+
+    it "frees each share's own code", :aggregate_failures do
+      call_api(:post, "/shares/bulk/group", { ids: [first.id, second.id] })
+
+      expect(Shares::Slice["repos.share_queries"].by_code(first.code)).to be_nil
+      expect(call_api(:get, "/shares").fetch("count")).to eq(0)
+    end
+
+    it "refuses one share, counted once", :aggregate_failures do
+      expect([call_api(:post, "/shares/bulk/group", { ids: [first.id, first.id] }).fetch("message"), status])
+        .to eq(["ids: needs two or more single shares", 422])
+      expect(call_api(:get, "/shares").fetch("count")).to eq(1)
+    end
+
+    it "refuses a share already in a group and groups none", :aggregate_failures do
+      file = make_group(share_upload("c", "c.txt", "text/plain")).share_group_files.first
+
+      expect([call_api(:post, "/shares/bulk/group", { ids: [first.id, file.id] }).fetch("message"), status])
+        .to eq(["names a share that is not there or already sits in a group", 422])
+      expect(call_api(:get, "/shares").fetch("count")).to eq(1)
+    end
+  end
+
+  describe "POST /api/v1/share_groups/{id}/files" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain")) }
+    let(:share) { make_share("b", "b.txt", "text/plain") }
+
+    it "moves the share into the group under the group's link" do
+      answered = call_api(:post, "/share_groups/#{group.id}/files", { ids: [share.id] })
+
+      expect(answered.fetch("files").map { it.values_at("id", "url") })
+        .to include([share.id, "http://shares.localhost/#{group.code}/#{share.id}"])
+    end
+
+    it "answers 404 for a group that is not there", :aggregate_failures do
+      call_api(:post, "/share_groups/999/files", { ids: [share.id] })
+
+      expect(status).to eq(404)
+      expect(call_api(:get, "/shares/#{share.id}")).to include("code" => share.code)
+    end
+
+    it "refuses a share that is not there" do
+      call_api(:post, "/share_groups/#{group.id}/files", { ids: [999] })
+
+      expect(status).to eq(422)
+    end
+  end
+
+  describe "POST /api/v1/share_groups/{id}/files/{file_id}/ungroup" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain")) }
+    let(:file) { group.share_group_files.first }
+
+    it "answers with the file as a single share under its new code" do
+      answered = call_api(:post, "/share_groups/#{group.id}/files/#{file.id}/ungroup", {})
+
+      expect(answered).to include(
+        "id" => file.id, "filename" => "a.txt", "url" => "http://shares.localhost/#{answered.fetch('code')}",
+      )
+    end
+
+    it "leaves the other file in the group" do
+      call_api(:post, "/share_groups/#{group.id}/files/#{file.id}/ungroup", {})
+
+      expect(call_api(:get, "/share_groups/#{group.id}").fetch("files").map { it.fetch("filename") }).to eq(%w[b.txt])
+    end
+
+    it "answers 404 for a file in another group" do
+      other = make_group(share_upload("c", "c.txt", "text/plain"))
+      message = call_api(:post, "/share_groups/#{other.id}/files/#{file.id}/ungroup", {}).fetch("message")
+
+      expect([status, message]).to eq([404, "share group #{other.id} has no file with the ID #{file.id}"])
+    end
+
+    it "answers 404 for a group that is not there" do
+      call_api(:post, "/share_groups/999/files/#{file.id}/ungroup", {})
+
+      expect(status).to eq(404)
+    end
+  end
+
+  describe "a token without the write scope" do
+    it "may not group, move or ungroup shares" do
+      token = api_token(%w[read publish])
+      paths = ["/shares/bulk/group", "/share_groups/1/files", "/share_groups/1/files/2/ungroup"]
+
+      expect(paths.map { call_api(:post, it, { ids: [1, 2] }, token:).then { status } }).to eq([403, 403, 403])
+    end
+  end
 end
