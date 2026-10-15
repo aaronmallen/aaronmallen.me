@@ -167,6 +167,13 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response.location).to end_with("/admin?tab=today")
     end
 
+    it "opens /admin after a signed-out tab asked for the event stream" do
+      get "/admin/events"
+      sign_in("/admin/sign-in")
+
+      expect(last_response.location).to end_with("/admin")
+    end
+
     it "opens /admin when no admin URL was asked for" do
       sign_in("/admin/sign-in")
 

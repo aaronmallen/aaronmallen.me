@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -62,8 +62,9 @@ what they missed. That event waits for the tick like the rest. Under Puma's clus
 after the fork.
 
 **Streams cost a socket, not a thread.** `GET /admin/events` runs the GitHub sign-in check like every admin action,
-then takes the socket through Rack's full hijack, writes the status line and headers itself
-(`Content-Type: text/event-stream`, `Cache-Control: no-cache`, no `Content-Length`, no compression) and a
+but answers 401 when it fails in place of a redirect, so a retry from a stale tab never saves the stream as the page
+to open after sign-in (#1357). Then it takes the socket through Rack's full hijack, writes the status line and headers
+itself (`Content-Type: text/event-stream`, `Cache-Control: no-cache`, no `Content-Length`, no compression) and a
 `retry:` line, and hands the socket to the hub. The Puma thread goes back to the pool at once, so open tabs never
 hold the threads that serve pages. Events carry only a table name and a clock reading, so a stream that outlives its
 session gives away nothing, and the refetch it causes still meets the sign-in check.

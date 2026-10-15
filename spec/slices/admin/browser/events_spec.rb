@@ -59,8 +59,8 @@ RSpec.describe "Admin events", type: :feature do
     expect(read_until(connect, "retry:")).to include("Content-Type: text/event-stream\r\n")
   end
 
-  it "sends a visitor who is not signed in to sign in" do
-    expect(read_until(connect(cookie: ""), "\r\n\r\n")).to match(%r{\AHTTP/1.1 302 .*^location: /admin/sign-in\r$}im)
+  it "answers a visitor who is not signed in with 401" do
+    expect(read_until(connect(cookie: ""), "\r\n\r\n")).to start_with("HTTP/1.1 401 ")
   end
 
   it "tells every open stream when issues sync" do
