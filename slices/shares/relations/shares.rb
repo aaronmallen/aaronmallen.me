@@ -5,10 +5,16 @@ module Shares
     class Shares < Blog::DB::Relation
       IMAGE = "image/%"
 
-      schema :shares, infer: true do
+      schema :share_group_files, as: :shares, infer: true do
         associations do
           belongs_to :short_code
         end
+      end
+
+      dataset do |relation|
+        columns = relation.schema
+        coded = select(*columns.qualified_projection).exclude(columns[:short_code_id].qualified => nil)
+        coded.order(columns[:id].qualified)
       end
 
       def images = where(Sequel.like(self[:content_type], IMAGE))

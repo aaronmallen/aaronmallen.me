@@ -7,7 +7,7 @@ module Admin
         class Edit < View
           include Components::Files
 
-          LIVE_TABLES = %w[shares short_codes].freeze
+          LIVE_TABLES = %w[share_group_files short_codes].freeze
 
           prop :share, Blog::Types::Instance(ROM::Struct)
           prop :values, Blog::Types::Hash.optional, default: nil

@@ -9,7 +9,7 @@ module Admin
 
           FILTERS = Blog::Types::ShareFilter.values.to_h { [it, "ui.views.files.index.#{it}"] }.freeze
           FILES_ID = "files-upload"
-          LIVE_TABLES = %w[share_group_files share_groups shares short_codes].freeze
+          LIVE_TABLES = %w[share_group_files share_groups short_codes].freeze
           SEARCH_ID = "files-search"
 
           prop :count, Blog::Types::Integer

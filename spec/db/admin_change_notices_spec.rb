@@ -33,10 +33,11 @@ RSpec.describe "Admin change notices", :commits, type: :app do
   end
 
   it "sends none for a share download" do
-    id = db[:shares].insert(short_code_id: short_code("file"), key: "0" * 32, filename: "a.txt",
-                            content_type: "text/plain", byte_size: 1)
+    file = { key: "0" * 32, filename: "a.txt", content_type: "text/plain", byte_size: 1 }
+    id = db[:share_group_files].insert(short_code_id: short_code("file"), **file)
+    count = { download_count: Sequel[:download_count] + 1 }
 
-    expect(admin_notice { db[:shares].where(id:).update(download_count: Sequel[:download_count] + 1) }).to be_nil
+    expect(admin_notice { db[:share_group_files].where(id:).update(count) }).to be_nil
   end
 
   it "sends none for a share group view or zip download" do
