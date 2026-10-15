@@ -95,6 +95,15 @@ RSpec.describe "Admin links", type: :feature do
       expect(copied).to eq(["[example.com](http://shares.localhost/talk)"])
     end
 
+    it "keeps text I closed it on when I shorten another link" do
+      drawer { fill_in("Title", with: "My talk").then { send_keys(:escape) } }
+      shorten("https://example.com/other")
+      assert_selector(".link-row", count: 2)
+      find(".link-row", text: "/talk").click
+
+      drawer { expect(page).to have_field("Title", with: "My talk") }
+    end
+
     it "saves a new title" do
       drawer { fill_in("Title", with: "My talk").then { click_button "Save" } }
 

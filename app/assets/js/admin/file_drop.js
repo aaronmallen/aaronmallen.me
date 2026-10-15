@@ -1,11 +1,9 @@
-import { Idiomorph } from "idiomorph";
 import { fresh } from "./fresh.js";
 import { load } from "./in_place.js";
-import { whilePosting } from "./live.js";
+import { morphPage, whilePosting } from "./live.js";
 import { showToast } from "./toast.js";
 
 const FIELD = "files[]";
-const MORPHED = "admin:morphed";
 const OVER = "file-drop-on";
 
 const ready = new WeakSet();
@@ -87,13 +85,8 @@ export function copyLater(link) {
 }
 
 export async function refresh() {
-  const next = await load(window.location.href, "main").catch(() => null);
+  const next = await load(window.location.href, "html").catch(() => null);
   if (!next) return window.location.reload();
 
-  show(next);
-}
-
-export function show(next) {
-  Idiomorph.morph(document.querySelector("main"), next);
-  document.dispatchEvent(new Event(MORPHED));
+  morphPage(next);
 }

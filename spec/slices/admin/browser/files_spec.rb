@@ -98,6 +98,22 @@ RSpec.describe "Admin files", type: :feature do
       expect(copied).to eq(["![A cat](#{link('shot.png')})"])
     end
 
+    describe "after another upload" do
+      before do
+        drop(["shot.png", "png", "image/png"])
+        open_card("shot.png")
+        drawer { fill_in("Alt text", with: "A cat").then { send_keys(:escape) } }
+        drop(["deck.pdf", "%PDF-1.7", "application/pdf"])
+        find(".file-card-name", exact_text: "deck.pdf")
+      end
+
+      it "keeps text I closed it on" do
+        open_card("shot.png")
+
+        drawer { expect(page).to have_field("Alt text", with: "A cat") }
+      end
+    end
+
     describe "deleting" do
       before do
         drop(["deck.pdf", "%PDF-1.7", "application/pdf"])

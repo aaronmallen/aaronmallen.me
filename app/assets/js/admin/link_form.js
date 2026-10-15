@@ -1,7 +1,7 @@
-import { copyLater, refresh, show } from "./file_drop.js";
+import { copyLater, refresh } from "./file_drop.js";
 import { fresh } from "./fresh.js";
-import { part } from "./in_place.js";
-import { whilePosting } from "./live.js";
+import { parse } from "./in_place.js";
+import { forgetEdits, morphPage, whilePosting } from "./live.js";
 import { showToast } from "./toast.js";
 
 const CREATED = 201;
@@ -44,8 +44,9 @@ async function send(form) {
     return showToast((await copied) ? form.dataset.linkFormCopied : body.message);
   }
 
-  const next = status === REFUSED && part(body, "main");
-  if (!next) return form.submit();
+  const next = status === REFUSED && parse(body);
+  if (!next?.querySelector("main")) return form.submit();
 
-  show(next);
+  forgetEdits(form);
+  morphPage(next);
 }
