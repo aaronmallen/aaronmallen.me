@@ -9,15 +9,14 @@ module API
 
       include Deps[
         journal_entry_queries: "record.repos.journal_entry_queries",
-        record_link_queries: "links.repos.record_link_queries",
+        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
       ]
 
       def handle(id:)
         entry = journal_entry_queries.by_id(id)
         return missing("journal entry", id) if entry.nil?
 
-        record_links = linked(record_link_queries.for_record(KIND, id))
-        Success(serialized(Serializers::JournalEntry, entry).merge(record_links:))
+        Success(serialized(Serializers::JournalEntry, entry).merge(record_links: links_for(id)))
       end
     end
   end

@@ -13,7 +13,7 @@ module API
       ).freeze
 
       include Deps[
-        record_link_queries: "links.repos.record_link_queries",
+        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
         task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
       ]
@@ -44,9 +44,7 @@ module API
         comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id),
                               owner: settings.owner_name)
 
-        record_links = linked(record_link_queries.for_record(KIND, task.id))
-
-        Success(serialized(Serializers::Task, task).merge(comments:, record_links:, **extra))
+        Success(serialized(Serializers::Task, task).merge(comments:, record_links: links_for(task.id), **extra))
       end
     end
   end

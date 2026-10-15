@@ -62,6 +62,8 @@ module API
 
     def linked(groups) = groups.slice(*Serializers::Link::KINDS).transform_values { serialized(Serializers::Link, it) }
 
+    def links_for(id) = linked(record_link_queries.for_record(self.class::KIND, id))
+
     def lost_task(name, label)
       message = Helpers::Wording.missing("task", label, by: "label")
       name == :id ? not_found(message) : invalid(name => [message])

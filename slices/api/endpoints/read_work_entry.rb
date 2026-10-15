@@ -8,7 +8,7 @@ module API
       REPLY = Helpers::Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
       include Deps[
-        record_link_queries: "links.repos.record_link_queries",
+        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
         work_entry_queries: "projects.repos.work_entry_queries",
       ]
 
@@ -16,8 +16,7 @@ module API
         entry = work_entry_queries.by_id(id)
         return missing("work entry", id) if entry.nil?
 
-        record_links = linked(record_link_queries.for_record(KIND, entry.id))
-        Success(serialized(Serializers::WorkEntry, entry).merge(record_links:))
+        Success(serialized(Serializers::WorkEntry, entry).merge(record_links: links_for(entry.id)))
       end
     end
   end

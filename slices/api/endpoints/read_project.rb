@@ -9,15 +9,14 @@ module API
 
       include Deps[
         project_queries: "projects.repos.project_queries",
-        record_link_queries: "links.repos.record_link_queries",
+        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
       ]
 
       def handle(id:)
         project = project_queries.by_id(id)
         return missing("project", id) if project.nil?
 
-        record_links = linked(record_link_queries.for_record(KIND, project.id))
-        Success(serialized(Serializers::Project, project).merge(record_links:))
+        Success(serialized(Serializers::Project, project).merge(record_links: links_for(project.id)))
       end
     end
   end

@@ -28,7 +28,7 @@ module API
 
       include Deps[
         decision_queries: "decisions.repos.decision_queries",
-        record_link_queries: "links.repos.record_link_queries",
+        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
       ]
 
       def handle(id:)
@@ -44,7 +44,7 @@ module API
         serialized(Serializers::Decision, decision).merge(
           choice: choice(decision, timeline),
           comments: serialized(Serializers::DecisionComment, decision_queries.comments(decision.id)),
-          record_links: linked(record_link_queries.for_record(KIND, decision.id)),
+          record_links: links_for(decision.id),
           timeline: timeline.map { serialized(SERIALIZERS.fetch(it.kind), it) },
         )
       end
