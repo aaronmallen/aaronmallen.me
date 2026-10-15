@@ -1,6 +1,7 @@
 import { Idiomorph } from "idiomorph";
 import { fresh } from "./fresh.js";
 import { load } from "./in_place.js";
+import { whilePosting } from "./live.js";
 import { showToast } from "./toast.js";
 
 const FIELD = "files[]";
@@ -35,7 +36,7 @@ function setup(form) {
     status.textContent = fileDropBusy;
     form.setAttribute("aria-busy", "true");
 
-    const sent = upload(files).catch(() => ({ ok: false, links: [], message: fileDropFailed }));
+    const sent = whilePosting(upload(files)).catch(() => ({ ok: false, links: [], message: fileDropFailed }));
     const single = files.length === 1 || form.querySelector("input[type=checkbox][name=group]")?.checked;
     const copied = single ? copyLater(sent.then(only)) : Promise.resolve(false);
     const { ok, links, message } = await sent;

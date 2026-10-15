@@ -69,6 +69,7 @@ RSpec.describe "Admin task order", type: :feature do
   end
 
   before do
+    create(:sprint, sprint_date: today)
     %w[first second third].each_with_index { |title, index| create(:task, title:, position: index + 1) }
     create(:task, :someday, title: "elsewhere")
     sign_in_to_admin
@@ -203,6 +204,35 @@ RSpec.describe "Admin task order", type: :feature do
 
     it "says the order did not save" do
       expect(page).to have_css(".toast-failed", text: translate("ui.components.tasks.grip.failed"))
+    end
+  end
+
+  describe "a live change while a save is in flight" do
+    let(:saving) { request_gate.hold(place_path) }
+
+    def renders = request_gate.count("/admin/tasks")
+
+    before do
+      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      saving
+      nudge("first", :down)
+      saving.wait_for_arrival
+      Tasks::Slice["db.rom"].gateways[:default].connection.notify("admin_changes", payload: "tasks")
+      sleep 1.2
+    end
+
+    after { saving.release }
+
+    it "waits to refetch" do
+      expect(renders).to eq(1)
+    end
+
+    it "refetches once the save lands and keeps the new order", :aggregate_failures do
+      saving.release
+      Timeout.timeout(5) { sleep 0.05 until renders >= 2 }
+
+      expect(shown).to eq(%w[second first third])
+      expect(listed).to eq(%w[second first third])
     end
   end
 

@@ -1,4 +1,5 @@
 import { parse } from "./in_place.js";
+import { whilePosting } from "./live.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
@@ -25,7 +26,7 @@ export function setupCalendarDrag(calendar) {
     drag(calendar, grip, event, async (day) => {
       busy = true;
       try {
-        await move(calendar, grip, day);
+        await whilePosting(move(calendar, grip, day));
       } finally {
         busy = false;
       }

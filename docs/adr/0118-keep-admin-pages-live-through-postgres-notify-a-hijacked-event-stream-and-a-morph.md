@@ -73,8 +73,9 @@ clock before it runs, and the layout draws that reading on `<main>` as `data-liv
 after its commit, so a page whose request began after the hub heard of a change already shows it. `live.js` keeps the
 reading of the page on screen and skips any event older than it, so a tab's own in-place submit, whose answer is drawn
 after the commit, refetches nothing. While a `data-morph` form posts, events wait, and the tab refetches once it answers
-only if an event is newer than the answer. Saving from the task panel stops the stream's refetches, since closing the
-panel reloads the page.
+only if an event is newer than the answer. Since #1418 a task reorder, a calendar or mail drag, a file drop and a link
+form wait the same way, so a live morph cannot undo a move before its save lands. Saving from the task panel stops
+the stream's refetches, since closing the panel reloads the page.
 
 **Each page lists its tables.** Since #1287 a view can pass the tables it draws to the layout through
 `content_for(:live_tables)`, counting the tables behind any view it reads. The layout adds the tables its own top bar

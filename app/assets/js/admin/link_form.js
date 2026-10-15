@@ -1,6 +1,7 @@
 import { copyLater, refresh, show } from "./file_drop.js";
 import { fresh } from "./fresh.js";
 import { part } from "./in_place.js";
+import { whilePosting } from "./live.js";
 import { showToast } from "./toast.js";
 
 const CREATED = 201;
@@ -18,14 +19,16 @@ export function setupLinkForms() {
 }
 
 async function send(form) {
-  const sent = fetch(form.action, {
-    method: "POST",
-    body: new URLSearchParams(new FormData(form)),
-    headers: { Accept: "application/json" },
-  }).then(async (response) => ({
-    status: response.status,
-    body: response.status === CREATED ? await response.json() : await response.text(),
-  }));
+  const sent = whilePosting(
+    fetch(form.action, {
+      method: "POST",
+      body: new URLSearchParams(new FormData(form)),
+      headers: { Accept: "application/json" },
+    }).then(async (response) => ({
+      status: response.status,
+      body: response.status === CREATED ? await response.json() : await response.text(),
+    })),
+  );
   const copied = copyLater(
     sent.then(({ status, body }) => {
       if (status !== CREATED) throw new Error("not shortened");

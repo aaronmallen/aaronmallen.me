@@ -1,5 +1,5 @@
 import { parse } from "./in_place.js";
-import { morphPage } from "./live.js";
+import { morphPage, whilePosting } from "./live.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
@@ -90,7 +90,7 @@ function drag(row, press, at) {
 
     busy = true;
     try {
-      await send(form, ids, target);
+      await whilePosting(send(form, ids, target));
     } finally {
       busy = false;
     }

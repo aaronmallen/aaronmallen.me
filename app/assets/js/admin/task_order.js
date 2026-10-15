@@ -1,5 +1,6 @@
 import { fresh } from "./fresh.js";
 import { bind } from "./keys.js";
+import { whilePosting } from "./live.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
@@ -107,7 +108,9 @@ async function send() {
 
   let ok = false;
   try {
-    const response = await fetch(next.grip.dataset.taskGrip, { method: "POST", body: next.body, redirect: "manual" });
+    const response = await whilePosting(
+      fetch(next.grip.dataset.taskGrip, { method: "POST", body: next.body, redirect: "manual" }),
+    );
     ok = response.ok;
   } catch {
     ok = false;
