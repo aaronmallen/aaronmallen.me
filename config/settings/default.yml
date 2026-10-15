@@ -55,6 +55,7 @@ mastodon:
   profile_url: https://ruby.social/@aaronmallen
 maxmind:
   account_id: <%= ENV["MAXMIND_ACCOUNT_ID"].to_json %>
+  database_path: <%= ENV["MAXMIND_DATABASE_PATH"].to_json %>
   license_key: <%= ENV["MAXMIND_LICENSE_KEY"].to_json %>
 media_store:
   access_key: <%= ENV["MEDIA_STORE_ACCESS_KEY"].to_json %>

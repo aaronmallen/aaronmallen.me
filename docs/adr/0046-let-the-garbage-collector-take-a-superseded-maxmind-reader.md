@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics]
 issue: AA-681
-amended: ["#941"]
+amended: ["#941", "#1372"]
 tags: [analytics, geolite2, maxmind, concurrency]
 ---
 
@@ -16,8 +16,8 @@ tags: [analytics, geolite2, maxmind, concurrency]
 ## Context
 
 `Analytics::GeoLite2::Countries` (`lib/analytics/geo_lite2/countries.rb`) looks a visitor's country up in a GeoLite2
-database at `tmp/maxmind/GeoLite2-City.mmdb`, the path `Analytics::Providers::GeoProvider::DATABASE_PATH` names. In
-this paragraph, #941 corrected the names of the class, its file and the database.
+database at the path the `maxmind.database_path` setting names, `tmp/maxmind/GeoLite2-City.mmdb` by default. In this
+paragraph, #941 corrected the names of the class, its file and the database, and #1372 moved the path into settings.
 `Analytics::Jobs::RefreshCountryDatabase` downloads a fresh copy at 03:00 each Wednesday (`config/sidekiq.yml.erb`),
 and `Countries#replace` writes it beside the old file and renames it into place.
 
@@ -56,15 +56,16 @@ nothing; the day a reader holds a real handle, this closes it under a running lo
 ## Consequences
 
 A superseded database holds its memory until the garbage collector gets to it, so a rotation can briefly hold two
-copies of the country database. It is a few megabytes, once a week.
+copies of the country database. GeoLite2-City is 60 to 70 MB in memory, so each worker holds that much, and a
+rotation briefly holds twice that, once a week. The Pi has the room, and the city database stays.
 
 Anyone who moves `Countries` off `MODE_MEMORY` takes on a real leak and a real race in the same change. The mode
 lives in one place, `Countries#open_database`, and this record is the reason it is not a setting.
 
-The file sits under `tmp/` and nothing fetches it at boot, so a fresh host looks up no country until the first
-Wednesday run. Until then `Analytics::Repos::CountryQueries#database_failure` reports the database missing to the
-admin once settings hold a MaxMind account ID and license key. AA-307 has to plan for that on the Pi. A refresh
-that fails lands as a `country_database` failure row, which `RefreshCountryDatabase` records through
-`record.operations.record_sync_outcome` (#941).
+When the file is missing and settings hold a MaxMind account ID and license key, the worker queues
+`RefreshCountryDatabase` at boot (#1372), so a fresh host looks up countries once that run lands rather than after the
+first Wednesday run. Until then `Analytics::Repos::CountryQueries#database_failure` reports the database missing to the
+admin. A refresh that fails lands as a `country_database` failure row, which `RefreshCountryDatabase` records
+through `record.operations.record_sync_outcome` (#941).
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

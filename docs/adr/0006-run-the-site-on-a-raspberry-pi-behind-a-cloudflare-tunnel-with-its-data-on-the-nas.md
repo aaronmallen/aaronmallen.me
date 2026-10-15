@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
-amended: ["#63", "#132", "#396", "#1314"]
+amended: ["#63", "#132", "#396", "#1314", "#1372"]
 tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
 ---
 
@@ -80,9 +80,10 @@ After a power cut the Pi and the NAS come back in any order, so the units must r
 than give up at boot.
 
 `mise run db:migrate` starts a local Postgres container first (`scripts/util/ensure_postgres`), so the deploy has to
-call `hanami db migrate` itself. The MaxMind database sits in `tmp/maxmind` under the release root
-(`lib/analytics/providers/geo_provider.rb`), so each release starts without it until AA-307 moves it to a directory
-the releases share.
+call `hanami db migrate` itself. The MaxMind database sits at the path the `maxmind.database_path` setting names,
+`tmp/maxmind/GeoLite2-City.mmdb` under the release root unless `MAXMIND_DATABASE_PATH` says otherwise. #1372 added the
+setting so production can point it at a directory the releases share, and has the worker queue
+`RefreshCountryDatabase` at boot when the file is missing and MaxMind credentials are set.
 
 [0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md

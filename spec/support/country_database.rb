@@ -9,10 +9,11 @@ module CountryDatabase
     replace_component("geo.geo_lite2.client", geo_provider.geo_lite2(Hanami.app["settings"], Hanami.app["http"]))
   end
 
-  def country_database_path = country_database_root.join(geo_provider::DATABASE_PATH)
+  def country_database_path = country_database_root.join("tmp/maxmind/GeoLite2-City.mmdb")
 
   def disconnect_maxmind_client
-    allow(Hanami.app.settings).to receive(:maxmind).and_return({})
+    maxmind = Hanami.app.settings.maxmind.except(:account_id, :license_key)
+    allow(Hanami.app.settings).to receive(:maxmind).and_return(maxmind)
     replace_component("geo.geo_lite2.client", geo_provider.geo_lite2(Hanami.app["settings"], Hanami.app["http"]))
   end
 
@@ -22,7 +23,8 @@ module CountryDatabase
 
   def use_country_database
     @country_databases = geo_provider::Databases.new
-    replace_component("geo.countries", geo_provider.countries(country_database_root, @country_databases))
+    replace_component("geo.countries",
+                      geo_provider.countries(country_database_root, Hanami.app.settings, @country_databases))
   end
 
   def write_country_database(bytes = geo_lite2_database)

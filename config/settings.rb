@@ -191,7 +191,11 @@ module Blog
 
     setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 
-    setting :maxmind, default: {}, constructor: Schema.schema(account_id?: Value, license_key?: Value)
+    setting :maxmind, default: {}, constructor: Schema.schema(
+      account_id?: Value,
+      database_path?: unless_set(Types::String, "tmp/maxmind/GeoLite2-City.mmdb"),
+      license_key?: Value,
+    )
 
     setting :media_store, default: {}, constructor: object_store(DEFAULT_MEDIA_STORE_READ_TIMEOUT)
 

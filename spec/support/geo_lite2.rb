@@ -14,7 +14,8 @@ module GeoLite2Database
   MODE = 0o644
 
   def connect_maxmind(**credentials)
-    allow(Hanami.app.settings).to receive(:maxmind).and_return(CREDENTIALS.merge(credentials))
+    maxmind = Hanami.app.settings.maxmind.merge(CREDENTIALS, credentials)
+    allow(Hanami.app.settings).to receive(:maxmind).and_return(maxmind)
   end
 
   def geo_lite2_archive(database = geo_lite2_database, name: ENTRY)

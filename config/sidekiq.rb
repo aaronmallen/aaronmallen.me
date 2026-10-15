@@ -14,4 +14,6 @@ Sidekiq.configure_server do |config|
     chain.add Blog::JobConnection, database
     chain.add Blog::JobTimer, record
   end
+
+  config.on(:startup) { Analytics::Slice["operations.queue_country_database"].call }
 end

@@ -216,6 +216,26 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "#maxmind" do
+    def maxmind_with(**variables)
+      stub_const("ENV", ENV.to_h.merge(variables))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:maxmind)
+      store = Hanami::Settings::CompositeStore.new({ maxmind: file }, Hanami.app.config.settings_store)
+      described_class.new(store).maxmind
+    end
+
+    it "keeps the database under tmp/maxmind when nothing names a path" do
+      stub_const("ENV", ENV.to_h.except("MAXMIND_DATABASE_PATH"))
+
+      expect(maxmind_with[:database_path]).to eq("tmp/maxmind/GeoLite2-City.mmdb")
+    end
+
+    it "takes the path MAXMIND_DATABASE_PATH names" do
+      expect(maxmind_with("MAXMIND_DATABASE_PATH" => "/srv/shared/GeoLite2-City.mmdb")[:database_path])
+        .to eq("/srv/shared/GeoLite2-City.mmdb")
+    end
+  end
+
   describe "#web_threads" do
     def web_threads(threads)
       stub_const("ENV", ENV.to_h.merge("HANAMI_MAX_THREADS" => threads))

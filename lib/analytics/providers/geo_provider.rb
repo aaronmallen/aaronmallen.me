@@ -30,12 +30,13 @@ module Analytics
       end
 
       CONNECT_TIMEOUT = 10
-      DATABASE_PATH = "tmp/maxmind/GeoLite2-City.mmdb"
       DOWNLOAD_TIMEOUT = 120
       DOWNLOAD_URL = "https://download.maxmind.com"
 
       class << self
-        def countries(root, databases) = GeoLite2::Countries.new(databases:, path: root.join(DATABASE_PATH))
+        def countries(root, settings, databases)
+          GeoLite2::Countries.new(databases:, path: root.join(settings.maxmind.fetch(:database_path)))
+        end
 
         def geo_lite2(settings, http)
           account_id, license_key = credentials(settings)
