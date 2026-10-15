@@ -27,6 +27,7 @@ module Mail
       include Deps[
         google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
+        gmail_queries: "repos.gmail_queries",
         message_mutations: "repos.message_mutations",
         message_queries: "repos.message_queries",
         message_tag_mutations: "repos.message_tag_mutations",
@@ -56,7 +57,7 @@ module Mail
       end
 
       def gmail(thread)
-        address = thread.gmail_id && gmail_mutations.address(thread.mail_account_id)
+        address = thread.gmail_id && gmail_queries.address(thread.mail_account_id)
         yield(address) if address
         Success(thread)
       rescue Google::Error
@@ -66,7 +67,7 @@ module Mail
       def labeled(thread, account, name)
         return unless thread.mail_account_id == Integer(account)
 
-        label = gmail_mutations.label_named(thread.mail_account_id, name)
+        label = gmail_queries.label_named(thread.mail_account_id, name)
         if label
           step gmail(thread) { post(it, thread, "modify", addLabelIds: [label.gmail_id]) }
           gmail_mutations.add_label(thread.id, label.id)

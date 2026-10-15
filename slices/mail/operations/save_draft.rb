@@ -12,6 +12,7 @@ module Mail
       include Deps[
         google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
+        gmail_queries: "repos.gmail_queries",
         send_mail: "operations.send_mail",
       ]
 
@@ -27,7 +28,7 @@ module Mail
       end
 
       def values(thread)
-        address = thread&.draft && gmail_mutations.address(thread.mail_account_id)
+        address = thread&.draft && gmail_queries.address(thread.mail_account_id)
         return unless address
 
         listed = google.get(DRAFTS, account: address, maxResults: LISTED).fetch("drafts", [])

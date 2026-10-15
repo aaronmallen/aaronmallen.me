@@ -22,6 +22,7 @@ module Mail
         google: "google.client",
         gmail_backfills: "repos.gmail_backfills",
         gmail_mutations: "repos.gmail_mutations",
+        gmail_queries: "repos.gmail_queries",
       ]
 
       def backfill(address, page_token = nil)
@@ -79,7 +80,7 @@ module Mail
         return true if account.settings_synced_at.nil? || account.settings_synced_at < Time.now - SETTINGS_EVERY
 
         labels = added_user_labels(records)
-        labels.any? && (labels - gmail_mutations.label_ids(account.id)).any?
+        labels.any? && (labels - gmail_queries.label_ids(account.id)).any?
       end
 
       def start(mailbox, account)

@@ -19,17 +19,11 @@ module Mail
         mail_thread_labels.dataset.insert_conflict.insert(mail_thread_id: thread_id, mail_label_id: label_id)
       end
 
-      def address(account_id) = mail_accounts.where(id: account_id, provider: GMAIL).pluck(:address).first
-
       def delete_thread(account_id, gmail_id) = mail_threads.where(mail_account_id: account_id, gmail_id:).delete
 
       def follow(account_id, history_id)
         mail_accounts.where(id: account_id).dataset.update(history_id:, updated_at: Time.now)
       end
-
-      def label_ids(account_id) = mail_labels.where(mail_account_id: account_id).pluck(:gmail_id)
-
-      def label_named(account_id, name) = mail_labels.where(mail_account_id: account_id, name:).one
 
       def sign(account_id, signature, now: Time.now)
         signature = nil if signature.empty?

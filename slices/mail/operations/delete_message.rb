@@ -5,7 +5,7 @@ module Mail
     class DeleteMessage < Blog::Operation
       include Deps[
         google: "google.client",
-        gmail_mutations: "repos.gmail_mutations",
+        gmail_queries: "repos.gmail_queries",
         message_mutations: "repos.message_mutations",
         message_queries: "repos.message_queries",
       ]
@@ -20,7 +20,7 @@ module Mail
       private
 
       def erased(thread)
-        address = thread.gmail_id && gmail_mutations.address(thread.mail_account_id)
+        address = thread.gmail_id && gmail_queries.address(thread.mail_account_id)
         google.delete("#{ChangeThread::THREADS}/#{thread.gmail_id}", account: address) if address
         Success(thread)
       rescue Google::NotFound

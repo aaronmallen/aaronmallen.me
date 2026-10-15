@@ -7,14 +7,14 @@ module Mail
     class DownloadAttachment < Blog::Operation
       include Deps[
         google: "google.client",
-        gmail_mutations: "repos.gmail_mutations",
+        gmail_queries: "repos.gmail_queries",
         thread_queries: "repos.thread_queries",
       ]
 
       def call(message_id, part_id)
         attachment = step found(thread_queries.attachment(message_id, part_id))
         message = attachment.mail_message
-        address = step found(gmail_mutations.address(message.mail_thread.mail_account_id))
+        address = step found(gmail_queries.address(message.mail_thread.mail_account_id))
 
         step fetched(attachment, address, "#{SyncGmail::GMAIL}/messages/#{message.gmail_id}")
       end
