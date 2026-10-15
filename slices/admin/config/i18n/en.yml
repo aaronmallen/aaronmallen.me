@@ -1756,7 +1756,7 @@ en:
           key: "Key"
           key_note: "Its tasks show as KEY-1. Leave it blank to take the first 3 letters of the name."
           key_placeholder: "POD"
-          restore_note: "Restore puts it back on /projects."
+          restore_note: "Restore moves it out of Past Projects on /projects."
           status: "Status"
           tags: "Tags"
           tags_placeholder: "ruby, ddd"
@@ -1787,7 +1787,7 @@ en:
           started_on_placeholder: "2024-06"
           sync_note: "Stars and release refresh nightly from the GitHub API."
           url: "Link"
-          url_note: "Where the card points. Leave it blank to link to the repository."
+          url_note: "The card links here unless its board is published. Leave it blank to use the repository."
           url_placeholder: "https://example.com"
         row:
           archive: "Archive"
@@ -2325,7 +2325,7 @@ en:
       task_rules:
         capture:
           add: "Add rule"
-          note: "Adding a rule also tags every task already imported that it matches, and gives its project to each with none."
+          note: "Adding a rule also tags every imported task it matches, and gives its project to each with none."
         field_error:
           pattern:
             blank: "Name a repo or team first."
@@ -2364,7 +2364,6 @@ en:
           confirm_delete: "Delete the %{provider} rule for %{pattern}? Tasks keep the tags and projects it gave them."
           delete: "Delete"
           edit: "Edit"
-          note: "Saving changes only what new imports take. Tasks already imported keep the tags and projects they have."
           save: "Save"
       tasks:
         bulk:
@@ -2716,7 +2715,7 @@ en:
           empty: "Nothing scheduled for this day yet."
           in_days: "In %{count} days"
           none: "No future sprints. Open one above to load tomorrow before tomorrow asks."
-          note: "A future sprint starts on its date and absorbs anything left unfinished the day before."
+          note: "A planned sprint becomes today's sprint on its date."
           nothing_waiting: "Nothing in next yet."
           open: "Open sprint"
           open_for: "Open a sprint for"
@@ -3323,7 +3322,7 @@ en:
           restore: "Restore"
           tags: "Tags"
         index:
-          archive_note: "Archiving keeps the repo link and history but removes the project from /projects."
+          archive_note: "Archiving keeps the repo link and history, and moves the project to Past Projects on /projects."
           archived: "archived"
           archived_count: "%{count} archived"
           empty:
@@ -3355,7 +3354,7 @@ en:
           counts: "%{open} open · %{total} total"
           edit: "Edit Project"
           empty: "No tasks"
-          hint: "Drag a card to another column, or move it with its arrows or its menu. Select moves several at once. In progress starts the task in today's sprint; done and canceled close it."
+          hint: "Drag a card, or use its arrows or menu, to move it. Select moves several. In progress starts the task in today's sprint; done and canceled close it."
           load_more: "Load more · %{count} left"
           no_tagline: "No description yet."
           private: "board is private"
@@ -3537,7 +3536,7 @@ en:
             other: "%{count} rules"
           empty: "No rules yet."
           heading: "Task rules"
-          note: "Deleting a rule, or taking a tag or project out of one, takes nothing off a task."
+          note: "Editing or deleting a rule changes only new imports. Tasks keep the tags and projects they have."
           sub: "Each rule gives the issues it matches private tags and projects on import."
           title: "Tags and projects by repo or team"
         menu:
@@ -3562,7 +3561,7 @@ en:
           finished_today:
             one: "%{count} finished today"
             other: "%{count} finished today"
-          footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
+          footnote: "Sprints last one day. Open tasks left in a past sprint move into today's. Starting a task pulls it into today; completing one files it under completed and on that day's activity feed."
           heading: "Tasks"
           open_in_today:
             one: "%{count} open in today"

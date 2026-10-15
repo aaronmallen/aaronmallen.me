@@ -179,12 +179,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: "Sprint #{Blog::TimeZone.today.strftime('%B %-d, %Y')}")
       end
 
-      it "closes the screen with the note on how sprints roll" do
-        get "/admin/tasks"
-
-        expect(page).to have_css(".task-note", exact_text: i18n.t("ui.views.tasks.index.footnote"))
-      end
-
       it "titles the today card with the sprint date" do
         get "/admin/tasks", filter: "today"
 
@@ -1952,6 +1946,86 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         save(task, filter: "upcoming", sprint_on: (today + 2).iso8601)
 
         expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today + 2).id)
+      end
+    end
+
+    describe "the notes" do
+      let(:today) { Blog::TimeZone.today }
+
+      def completed(title) = create(:task, title:).tap { send_to("/admin/tasks/#{it.id}/complete") }
+
+      def footnote = i18n.t("ui.views.tasks.index.footnote")
+
+      def hint(key) = i18n.t(["ui.components.tasks.sprint_field", key].join("."))
+
+      def in_sprint_on(date, *) = create(:task, *, :in_sprint, sprint: create(:sprint, sprint_date: date))
+
+      def sprint_hint(task) = page.find("#task-#{task.id}-form .field:has([name='task[sprint_on]']) .hint").text
+
+      it "says an open task left in a past sprint moves into today's", :aggregate_failures do
+        task = in_sprint_on(today - 2)
+        get "/admin/tasks", filter: "today"
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today).id)
+        expect(page).to have_css(".task-note", exact_text: footnote)
+      end
+
+      it "says starting a task pulls it into today", :aggregate_failures do
+        task = in_sprint_on(today + 3)
+        send_to("/admin/tasks/#{task.id}/start")
+        follow_redirect!
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today).id)
+        expect(page).to have_css(".task-note", exact_text: footnote)
+      end
+
+      it "says completing a task files it under completed", :aggregate_failures do
+        completed("Ship the notes")
+        get "/admin/tasks", filter: "completed"
+
+        expect(titles).to eq(["Ship the notes"])
+        expect(page).to have_css(".task-note", exact_text: footnote)
+      end
+
+      it "puts a completed task on that day's activity feed, as the note says" do
+        completed("Ship the notes")
+        get "/admin/activity"
+
+        expect(page).to have_css(".activity-day:has(time[datetime='#{today.iso8601}'])", text: "Ship the notes")
+      end
+
+      it "says a planned sprint becomes today's sprint on its date", :aggregate_failures do
+        planned = create(:sprint, sprint_date: today + 1)
+        allow(Time).to receive(:now).and_return(now + 86_400)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(sprint_repo.on(today + 1).id).to eq(planned.id)
+        expect(page).to have_css(".sprint-plan-note", exact_text: i18n.t("ui.components.tasks.upcoming_sprints.note"))
+      end
+
+      { "ran" => -1, "running" => 0 }.each do |key, offset|
+        it "says the #{key} sprint state on the edit page" do
+          task = in_sprint_on(today + offset, :done)
+          get "/admin/tasks/#{task.id}/edit"
+
+          expect(sprint_hint(task)).to eq(hint(key))
+        end
+      end
+
+      it "keeps a task without a sprint in a list and out of every sprint", :aggregate_failures do
+        task = create(:task)
+        get "/admin/tasks/#{task.id}/edit"
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
+        expect(sprint_hint(task)).to eq(hint("unscheduled"))
+      end
+
+      it "leaves a waiting task out of today until its sprint starts", :aggregate_failures do
+        task = in_sprint_on(today + 1)
+        get "/admin/tasks/#{task.id}/edit"
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today + 1).id)
+        expect(sprint_hint(task)).to eq(hint("waiting"))
       end
     end
 

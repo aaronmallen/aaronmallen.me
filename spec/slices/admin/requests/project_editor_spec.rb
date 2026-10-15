@@ -377,6 +377,80 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
     end
 
+    describe "the hints" do
+      def card_link = public_cards.find(".pc")[:href]
+
+      def editor_hints(project)
+        get "/admin/projects/#{project.id}/edit"
+        Capybara.string(last_response.body).all(".hint").map(&:text)
+      end
+
+      def grids = public_cards.then { |cards| [names(cards, ".pc:not(.past)"), names(cards, ".pc.past")] }
+
+      def hint(key) = i18n.t(["ui.components.projects", key].join("."))
+
+      def label(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).label
+
+      def names(cards, selector) = cards.all("#{selector} .pn").map(&:text)
+
+      def public_cards
+        get "/projects"
+        Capybara.string(last_response.body)
+      end
+
+      def publish_board(project) = Projects::Slice["relations.projects"].by_pk(project.id).update(board_published: true)
+
+      def shared_image = public_cards.all("meta[property='og:image']", visible: :all).map { it[:content] }
+
+      def task_in(project) = create(:task).tap { Tasks::Slice["operations.set_task_project"].call(it.id, project.id) }
+
+      it "says a blank key takes the first 3 letters of the name, and its tasks show as KEY-1" do
+        save(name: "pod-cast", key: "")
+        project = tracking("aaronmallen/sai")
+        task = task_in(project)
+
+        expect([label(task), editor_hints(project)]).to match([/\APOD-\d+\z/, include(hint("placement.key_note"))])
+      end
+
+      it "says restoring moves a project out of Past Projects" do
+        project = create(:project, :archived, name: "back")
+        before = [grids, editor_hints(project)]
+        post "/admin/projects/#{project.id}/restore", _csrf_token: admin_csrf_token
+
+        expect([*before, grids]).to match([[[], %w[back]], include(hint("placement.restore_note")), [%w[back], []]])
+      end
+
+      it "says the first card with an image gives /projects its social card" do
+        images = ["", "https://example.com/first.png", "https://example.com/second.png"]
+        projects = images.zip([30, 20, 10]).map { |url, stars| create(:project, stars:, og_image_url: url) }
+
+        expect([shared_image, editor_hints(projects[1])])
+          .to match([[images[1]], include(hint("public_copy.og_image_url_note"))])
+      end
+
+      it "says stars and release refresh nightly from GitHub" do
+        cron = Fugit::Cron.parse(sidekiq_config.dig(:scheduler, :schedule, "refresh_projects", "cron"))
+
+        expect([cron.rough_frequency, cron.hours, editor_hints(create(:project))])
+          .to match([86_400, [2], include(hint("repository.sync_note"))])
+      end
+
+      it "says a blank url points the card at the repository unless the board is published" do
+        save(repo: "aaronmallen/sai", url: "")
+        plain = card_link
+        publish_board(tracking("aaronmallen/sai"))
+
+        expect([plain, card_link, editor_hints(tracking("aaronmallen/sai"))])
+          .to match(["https://github.com/aaronmallen/sai", "/projects/sai", include(hint("repository.url_note"))])
+      end
+
+      it "says a public project's card on /projects opens its published board" do
+        project = create(:project, name: "board", board_published: true)
+
+        expect([card_link, editor_hints(project)]).to match(["/projects/board", include(hint("board.hint"))])
+      end
+    end
+
     describe "the repository and the url" do
       it "fills the url from owner/repo" do
         save(repo: "aaronmallen/sai", url: "")

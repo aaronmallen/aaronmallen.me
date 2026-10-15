@@ -109,6 +109,14 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
 
     def form_id = "task-#{task.id}-form"
 
+    def next_copy(**fields)
+      series = cadence(task, **fields)
+      Tasks::Slice["operations.complete_task"].call(task.id)
+      repo.by_id(series_repo.by_id(series.id).task_id)
+    end
+
+    def starts_on_hint = i18n.t("ui.components.tasks.cadence_fields.starts_on_hint")
+
     it "shows its cadence with only that kind's fields enabled", :aggregate_failures do
       cadence(task, cadence: "month_weekday", week: -1, weekday: 5)
       get "/admin/tasks/#{task.id}/edit", filter: "next"
@@ -116,6 +124,14 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
       expect(page).to have_css("##{form_id} [name='task[recur][cadence]'] option[selected][value='month_weekday']")
       expect(enabled("##{form_id}")).to eq(%w[cadence week weekday])
       expect(page.find("##{form_id} select[name='task[recur][week]'] option[selected]").value).to eq("-1")
+    end
+
+    it "says weeks count from the first day it is given", :aggregate_failures do
+      copy = next_copy(cadence: "weeks", every: 2, weekday: (today - 7).wday, starts_on: today - 7)
+      get "/admin/tasks/#{copy.id}/edit", filter: "upcoming"
+
+      expect(Tasks::Slice["repos.sprint_queries"].on(today + 7).id).to eq(copy.sprint_id)
+      expect(page.all("#task-#{copy.id}-form .hint").map(&:text)).to include(starts_on_hint)
     end
 
     it "changes its cadence" do

@@ -27,6 +27,8 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
 
+  def today_sprint = Tasks::Slice["repos.sprint_queries"].on(Blog::TimeZone.today).id
+
   describe "signed out" do
     it "sends me to sign in" do
       get "/admin/projects/#{project.id}"
@@ -388,6 +390,15 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(last_response.location).to end_with("/admin/projects/#{project.id}")
         follow_redirect!
         expect(toast).to eq("Moved BLO-1 to ready")
+      end
+
+      it "says in progress starts a task in today's sprint and done and canceled close it", :aggregate_failures do
+        moved = %w[in_progress done canceled].map { |to| linked.tap { move(it, to) } }
+        follow_redirect!
+
+        expect(moved.map { tasks.by_id(it.id).then { |t| [t.status, t.closed?, t.sprint_id] } })
+          .to eq([["in_progress", false, today_sprint], ["done", true, nil], ["canceled", true, nil]])
+        expect(page).to have_css("p.hint", exact_text: Admin::Slice["i18n"].t("ui.views.projects.show.hint"))
       end
 
       it "returns to the page the menu opened on" do

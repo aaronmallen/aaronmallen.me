@@ -116,12 +116,40 @@ RSpec.describe "Admin task rules", type: :request do
       expect(page).to have_link("Task rules", href: "/admin/tasks/rules")
     end
 
-    it "says adding a rule tags tasks already imported, and editing one does not", :aggregate_failures do
-      rule("aaronmallen/*", "projects")
-      get "/admin/tasks/rules"
+    describe "the notes" do
+      let(:blog) { create(:project) }
+      let!(:task) { create(:task, :external).tap { create(:task_source, task: it, url: "https://github.com/x/blog/issues/1") } }
 
-      expect(page.find(".rule-capture")).to have_text("also tags every task already imported")
-      expect(page.find(".rule-editor")).to have_text("Tasks already imported keep the tags and projects they have")
+      def edit_then_delete(id)
+        send_to("/admin/tasks/rules/#{id}", rule: { pattern: "x/*", tags: "ruby" })
+        send_to("/admin/tasks/rules/#{id}/delete")
+      end
+
+      def held = Tasks::Slice["repos.task_queries"].by_id(task.id).then { [it.tags.map(&:name), it.project_id] }
+
+      it "says adding a rule tags the tasks already imported and gives them its project", :aggregate_failures do
+        add("x/*", "projects", projects: [blog.id.to_s])
+        follow_redirect!
+
+        expect(held).to eq([%w[projects], blog.id])
+        expect(page.find(".rule-capture .hint")).to have_text(i18n.t("ui.components.task_rules.capture.note"))
+      end
+
+      it "says editing or deleting a rule leaves what tasks hold", :aggregate_failures do
+        add("x/*", "projects", projects: [blog.id.to_s])
+        edit_then_delete(rules.first.id)
+        follow_redirect!
+
+        expect(held).to eq([%w[projects], blog.id])
+        expect(page).to have_css("p.hint", exact_text: i18n.t("ui.views.task_rules.index.note"))
+      end
+
+      it "states the edit note once, under the list and not in each editor" do
+        rule("aaronmallen/*", "projects")
+        get "/admin/tasks/rules"
+
+        expect(page).to have_css(".hint", exact_text: i18n.t("ui.views.task_rules.index.note"), count: 1)
+      end
     end
 
     describe "adding a rule" do

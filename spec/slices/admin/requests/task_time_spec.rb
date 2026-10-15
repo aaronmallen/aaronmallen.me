@@ -37,6 +37,13 @@ RSpec.describe "Admin task time", type: :request do
 
   def total(on = task) = repo.by_id(on.id).worked_seconds
 
+  def total_hint = page.find(".task-total-edit .hint", visible: :all).text(:all)
+
+  def work(from:, to:)
+    Tasks::Slice["operations.start_task"].call(task.id, at: from)
+    Tasks::Slice["operations.reopen_task"].call(task.id, at: to)
+  end
+
   describe "signed out" do
     it "edits no session" do
       session = closed
@@ -233,13 +240,12 @@ RSpec.describe "Admin task time", type: :request do
         expect(total).to eq(8100)
       end
 
-      it "adds a later session to the number set" do
+      it "says the number set replaces the total and later sessions add to it", :aggregate_failures do
         set_total(hours: "", minutes: "20")
-        found = repo.by_id(task.id)
-        Tasks::Slice["operations.start_task"].call(found.id, at: started)
-        Tasks::Slice["operations.reopen_task"].call(found.id, at: started + 600)
+        work(from: started, to: started + 600)
+        read
 
-        expect(total).to eq(1800)
+        expect([total, total_hint]).to eq([1800, t("ui.components.tasks.total_form.hint")])
       end
 
       it "counts a running session's time so far in the number set", :aggregate_failures do

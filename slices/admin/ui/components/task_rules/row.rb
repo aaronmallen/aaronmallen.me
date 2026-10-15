@@ -57,7 +57,6 @@ module Admin
               Form(action: path(:admin_update_task_rule, id: @rule.id), id: form_id) do
                 Fields(**values, choices: @choices, scope:)
               end
-              Hint { t(".note") }
               foot
             end
           end

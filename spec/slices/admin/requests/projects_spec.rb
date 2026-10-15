@@ -9,6 +9,12 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
 
   def names = page.all(".project-card-name").map(&:text)
 
+  def past_cards_after_archiving(project)
+    post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token
+    get "/projects"
+    Capybara.string(last_response.body).all(".kicker.kt + .pgrid .pc").map { [it.find(".pn").text, it[:href]] }
+  end
+
   describe "signed in" do
     before { sign_in_to_admin }
 
@@ -270,9 +276,12 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".cols > .card.project-card", count: 1)
       end
 
-      it "notes what archiving does under the live list" do
+      it "notes that archiving keeps the repo link and moves the project to Past Projects", :aggregate_failures do
+        project = create(:project, name: "kept", url: "https://github.com/aaronmallen/kept")
+        past = past_cards_after_archiving(project)
         get "/admin/projects"
 
+        expect(past).to eq([["kept", "https://github.com/aaronmallen/kept"]])
         expect(page).to have_css("p.hint", exact_text: i18n.t("ui.views.projects.index.archive_note"))
       end
 
