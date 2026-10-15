@@ -8,7 +8,6 @@ module Admin
           EDIT = "[data-key='e']"
           ID = "key-help"
           ROWS = "[data-key-list] [data-key-row]"
-          TITLE_ID = "key-help-title"
           FIXED = [
             [%w[j], ".next", ROWS],
             [%w[k], ".previous", ROWS],
@@ -21,7 +20,7 @@ module Admin
 
           def view_template
             Dialog(
-              id: ID, title_id: TITLE_ID, title: t(".title"), class: "modal", data: { dialog: true, key_help: true },
+              id: ID, title: t(".title"), class: "modal", data: { dialog: true, key_help: true },
             ) do
               dl(class: "keys", data: { key_help_list: true }) { FIXED.each { fixed(*it) } }
               row_template

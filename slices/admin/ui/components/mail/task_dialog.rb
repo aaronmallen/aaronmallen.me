@@ -14,11 +14,13 @@ module Admin
 
           def view_template
             Button(small: true, icon: "fa-solid fa-square-check", data: { dialog_open: id }) { t(".open") } if @trigger
-            Dialog(id:, title_id: "#{id}-heading", title: t(".title"), class: "modal", data: { dialog: true }) do
-              Form(action: path(:admin_make_mail_task, id: @thread.id), class: "form-stack") do
+            Dialog(
+              id:, title_id: "#{id}-heading", title: t(".title"), class: "modal", data: { dialog: true },
+            ) do |dialog|
+              dialog.foot { foot }
+              Form(id: form_id, action: path(:admin_make_mail_task, id: @thread.id), class: "form-stack") do
                 HiddenFields(values: @list)
                 fields
-                foot
               end
             end
           end
@@ -37,11 +39,11 @@ module Admin
           end
 
           def foot
-            div(class: "dialog-foot") do
-              Button(variant: :gh, small: true, data: { dialog_close: true }) { t(".cancel") }
-              Button(type: "submit", variant: :pri, small: true) { t(".save") }
-            end
+            Button(variant: :gh, small: true, data: { dialog_close: true }) { t(".cancel") }
+            Button(type: "submit", form: form_id, variant: :pri, small: true) { t(".save") }
           end
+
+          def form_id = "#{id}-form"
 
           def id = "mail-task-#{@thread.id}"
 

@@ -61,6 +61,14 @@ RSpec.describe "Admin inbox snooze", type: :request do
     end
   end
 
+  it "titles the dialog from its id and saves from its foot", :aggregate_failures do
+    id = "snooze-message-#{records['message'].id}"
+
+    expect(dialog).to have_css(".dialog-head h2##{id}-title", visible: :all)
+    expect(page).to have_css("dialog[aria-labelledby='#{id}-title'] form##{id}-form", visible: :all)
+    expect(page).to have_css("##{id} > .dialog-box > .dialog-foot [type=submit][form='#{id}-form']", visible: :all)
+  end
+
   it "offers a date and time field that starts now" do
     expect(dialog.find("input[type=datetime-local]", visible: :all)[:min]).to eq("2026-10-07T10:10")
   end

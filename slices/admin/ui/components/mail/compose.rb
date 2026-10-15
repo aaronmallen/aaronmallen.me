@@ -8,7 +8,6 @@ module Admin
           ID = "mail-compose"
           SCOPE = "mail-compose"
           TIME = "{time}"
-          TITLE_ID = "mail-compose-title"
           TO = :to
           MULTIPART = "multipart/form-data"
           OPEN = { compose: Blog::Constants::CHECKED }.freeze
@@ -20,7 +19,7 @@ module Admin
 
           def view_template
             CreateLink(href: path(:admin_mail, **@list, **OPEN), label: t(".compose"), dialog: ID)
-            Dialog(id: ID, title_id: TITLE_ID, title: t(".title"), class: "modal mail-compose", data:) do
+            Dialog(id: ID, title: t(".title"), class: "modal mail-compose", data:) do
               Form(action: path(:admin_send_mail), enctype: MULTIPART, class: "mail-compose-form", data: form_data) do
                 fields
               end

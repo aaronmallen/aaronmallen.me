@@ -73,6 +73,19 @@ RSpec.describe "Admin list row actions", type: :feature do
       it_behaves_like "a row action in place", "Snoozed until"
     end
 
+    describe "snoozing a message until a time of my own" do
+      before { create(:message, subject: "Hello there") }
+
+      def act
+        row("Hello there").click_button("Snooze")
+        dialog = find("dialog[open]")
+        dialog.fill_in "Date and time", with: Blog::TimeZone.input_value(Time.now + 86_400)
+        dialog.click_button "Snooze"
+      end
+
+      it_behaves_like "a row action in place", "Snoozed until"
+    end
+
     describe "waking a snoozed message" do
       before do
         message = create(:message, subject: "Hello there")

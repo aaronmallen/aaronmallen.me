@@ -36,7 +36,7 @@ module Admin
             label, title, icon, variant = CLOSINGS.fetch(name).values_at(:label, :title, :icon, :variant)
 
             menu.link(t(label), href: act(:admin_decision), icon:, dialog: id)
-            Dialog(id:, title_id: "#{id}-title", title: t(title), class: "modal", data: { dialog: true }) do
+            Dialog(id:, title: t(title), class: "modal", data: { dialog: true }) do
               ReasonForm(
                 decision: @decision, form: Blog::Constants::EMPTY_HASH, name:, route: :"admin_#{name}_decision",
                 variant:, morph: true,

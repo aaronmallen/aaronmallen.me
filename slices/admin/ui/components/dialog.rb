@@ -5,7 +5,7 @@ module Admin
     module Components
       class Dialog < Component
         prop :id, Blog::Types::String.optional, default: nil
-        prop :title_id, Blog::Types::String
+        prop :title_id, Blog::Types::String.optional, default: nil
         prop :title, Blog::Types::String.optional, default: nil
         prop :attributes, Blog::Types::Hash, :**
 
@@ -30,7 +30,7 @@ module Admin
 
         def head
           div(class: "dialog-head") do
-            h2(id: @title_id, class: "card-title") { @title }
+            h2(id: title_id, class: "card-title") { @title }
             Button(
               variant: :gh, small: true, label: t(".close"), data: { dialog_close: true },
               icon: "fa-solid fa-xmark",
@@ -39,8 +39,10 @@ module Admin
         end
 
         def shell_attributes
-          { id: @id, class: "dialog", role: "dialog", hidden: true, aria: { labelledby: @title_id, modal: "true" } }
+          { id: @id, class: "dialog", role: "dialog", hidden: true, aria: { labelledby: title_id, modal: "true" } }
         end
+
+        def title_id = @title_id || "#{@id}-title"
       end
     end
   end

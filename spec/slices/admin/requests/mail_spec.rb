@@ -827,6 +827,14 @@ RSpec.describe "Admin mail", type: :request do
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
       end
 
+      it "labels the task dialog by its heading and saves from its foot", :aggregate_failures do
+        get "/admin/mail", thread: thread.id
+
+        id = "mail-task-#{thread.id}"
+        expect(page).to have_css("dialog##{id}[aria-labelledby='#{id}-heading'] form##{id}-form", visible: :all)
+        expect(page).to have_css("##{id} > .dialog-box > .dialog-foot [type=submit][form='#{id}-form']", visible: :all)
+      end
+
       it "says the task keeps a link back to the thread" do
         get "/admin/mail", thread: thread.id
 

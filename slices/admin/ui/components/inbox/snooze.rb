@@ -11,10 +11,8 @@ module Admin
 
           def view_template(&)
             Button(small: true, data: { dialog_open: dialog_id }) { t(".open") }
-            Dialog(id: dialog_id, title_id: "#{dialog_id}-title", title: t(".title"), data: { dialog: true }) do
-              SnoozeForm(
-                action: @action || path(:admin_inbox_snooze, kind: @kind, id: @id), field_id: "#{dialog_id}-until", &
-              )
+            Dialog(id: dialog_id, title: t(".title"), data: { dialog: true }) do |dialog|
+              SnoozeForm(id: dialog_id, dialog:, action: @action || path(:admin_inbox_snooze, kind: @kind, id: @id), &)
             end
           end
 

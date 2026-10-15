@@ -5757,10 +5757,6 @@
 
 @utility dialog-foot {
   @apply flex flex-wrap items-center justify-end gap-2 border-t border-line px-[22px] py-3.5;
-
-  :where(.dialog-body) & {
-    @apply border-0 p-0;
-  }
 }
 
 @utility confirm {

@@ -18,7 +18,7 @@ module Admin
           prop :connection, Blog::Types::Instance(::Services::Structs::ServiceConnection).optional, default: nil
 
           def view_template
-            Dialog(id:, title_id: "#{id}-title", title:, **SHELL) do |dialog|
+            Dialog(id:, title:, **SHELL) do |dialog|
               head
               continue
               asks

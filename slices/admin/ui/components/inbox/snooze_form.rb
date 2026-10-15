@@ -24,29 +24,33 @@ module Admin
           end
 
           prop :action, Blog::Types::String
-          prop :field_id, Blog::Types::String
+          prop :id, Blog::Types::String
+          prop :dialog, Blog::Types::Instance(Dialog)
 
           def view_template(&)
             @now = Time.now
 
-            Form(action: @action, class: "snooze-form", data: { morph: true }) do
+            @dialog.foot { Button(type: "submit", form: form_id, variant: :pri, small: true) { t(".save") } }
+
+            Form(id: form_id, action: @action, class: "snooze-form", data: { morph: true }) do
               yield if block_given?
               picks
               field
-              div(class: "dialog-foot") { Button(type: "submit", variant: :pri, small: true) { t(".save") } }
             end
           end
 
           private
 
           def field
-            Field(label: t(".until"), id: @field_id) do |control|
+            Field(label: t(".until"), id: "#{@id}-until") do |control|
               Input(
                 type: "datetime-local", name: "snoozed_until", required: true,
                 min: Blog::TimeZone.input_value(@now), **control,
               )
             end
           end
+
+          def form_id = "#{@id}-form"
 
           def pick(label_key, at)
             value = Blog::TimeZone.input_value(at)

@@ -39,7 +39,7 @@ module Admin
 
           def dialog_attributes
             {
-              id: ID, title_id: "#{ID}-title", title: t(".title"), class: "wide post-details", hidden: false,
+              id: ID, title: t(".title"), class: "wide post-details", hidden: false,
               open: open?, data: { dialog: true },
             }
           end

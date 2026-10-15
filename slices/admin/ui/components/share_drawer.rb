@@ -25,8 +25,7 @@ module Admin
         def attributes
           id = self.class.id_for(@form, @record)
 
-          { id:, title_id: "#{id}-title", title: t(TITLES.fetch(@kind)), class: "wide file-drawer",
-            data: { dialog: true } }
+          { id:, title: t(TITLES.fetch(@kind)), class: "wide file-drawer", data: { dialog: true } }
         end
       end
     end

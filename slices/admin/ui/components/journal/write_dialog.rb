@@ -8,7 +8,6 @@ module Admin
           BODY_HEIGHT = "300px"
           ID = "journal-write"
           SCOPE = "journal-write"
-          TITLE_ID = "journal-write-title"
 
           prop :today, Blog::Types::Date
           prop :body, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
@@ -17,7 +16,7 @@ module Admin
           prop :return_to, Blog::Types::String.optional, default: nil
 
           def view_template
-            Dialog(id: ID, title_id: TITLE_ID, title:, class: "modal journal-modal", data:) do
+            Dialog(id: ID, title:, class: "modal journal-modal", data:) do
               Form(**form_attributes) do
                 input(type: "hidden", name: "modal", value: Blog::Constants::CHECKED)
                 input(type: "hidden", name: "return_to", value: @return_to) if @return_to

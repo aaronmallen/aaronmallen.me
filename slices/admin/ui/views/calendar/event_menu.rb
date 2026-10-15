@@ -49,7 +49,7 @@ module Admin
 
             menu.link(t(".edit"), href: path(:admin_calendar, day: @day.iso8601), icon: "fa-regular fa-pen-to-square",
                                   dialog: id)
-            Dialog(id:, title_id: "#{id}-title", title: t(".edit_title"), class: "modal", data: { dialog: true }) do
+            Dialog(id:, title: t(".edit_title"), class: "modal", data: { dialog: true }) do
               EventForm(action: act(:admin_update_calendar_event), day: @day, event: @event, morph: true)
             end
           end

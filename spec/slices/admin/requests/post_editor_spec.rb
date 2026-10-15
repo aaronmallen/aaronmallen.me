@@ -276,6 +276,14 @@ RSpec.describe "Admin post editor", type: :request do
         expect(dialog).to have_button("Save", type: "button", visible: :all)
       end
 
+      it "titles the note dialog in its head", :aggregate_failures do
+        dialog = page.find("dialog[data-edit-note-dialog]", visible: :all)
+        title = ".dialog-head h2##{dialog['aria-labelledby']}"
+
+        expect(dialog).to have_css(title, text: "What changed and why", visible: :all)
+        expect(dialog).to have_no_css(".dialog-body h2", visible: :all)
+      end
+
       it "keeps the note box out of the dialog until a script moves it" do
         expect(page).to have_no_css("dialog #{note_box}", visible: :all)
       end

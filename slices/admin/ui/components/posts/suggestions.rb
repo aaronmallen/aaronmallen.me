@@ -6,7 +6,7 @@ module Admin
       module Posts
         class Suggestions < Component
           ID = "post-suggestions"
-          DIALOG = { id: ID, title_id: "#{ID}-title", hidden: false }.freeze
+          DIALOG = { id: ID, hidden: false }.freeze
 
           prop :body, Blog::Types::String
           prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))

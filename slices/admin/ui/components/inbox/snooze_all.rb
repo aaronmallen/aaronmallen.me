@@ -11,8 +11,8 @@ module Admin
 
           def view_template
             Button(small: true, icon: "fa-solid fa-bell-slash", data: { dialog_open: DIALOG }) { t(".label") }
-            Dialog(id: DIALOG, title_id: "#{DIALOG}-title", title: t(".title"), data: { dialog: true }) do
-              SnoozeForm(action: path(:admin_inbox_snooze_all), field_id: "#{DIALOG}-until") do
+            Dialog(id: DIALOG, title: t(".title"), data: { dialog: true }) do |dialog|
+              SnoozeForm(id: DIALOG, dialog:, action: path(:admin_inbox_snooze_all)) do
                 @rows.each { input(type: "hidden", name: SeeAll::FIELDS.fetch(it.kind), value: it.record.id) }
               end
             end

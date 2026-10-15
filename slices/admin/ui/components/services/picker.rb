@@ -11,7 +11,7 @@ module Admin
           prop :definitions, Blog::Types::Array.of(Blog::Types::Instance(::Services::Structs::Definition))
 
           def view_template
-            Dialog(id: ID, title_id: "#{ID}-title", title: t(".title"), class: "modal", data: { dialog: true }) do
+            Dialog(id: ID, title: t(".title"), class: "modal", data: { dialog: true }) do
               @definitions.each { pick(it) }
               Hint { t(".hint") }
             end
