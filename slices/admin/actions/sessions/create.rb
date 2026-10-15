@@ -83,8 +83,8 @@ module Admin
         end
 
         def started_verifier(request, code)
-          code_verifier = auth_session(request).take_sign_in(request.params[:state])
-          code_verifier if request.params[:error].nil? && !code.empty?
+          started = Auth::ConnectState.new(request.session).take(Auth::ConnectState::SIGN_IN, request.params[:state])
+          started["verifier"] if started && request.params[:error].nil? && !code.empty?
         end
       end
     end

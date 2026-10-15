@@ -431,6 +431,33 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "a callback after the sign-in state expired" do
+    let!(:state) { start_sign_in }
+
+    def callback_after(seconds)
+      allow(Time).to receive(:now).and_return(Time.at(Time.now.to_i + seconds))
+      callback(code: "code", state:)
+    end
+
+    it "renders an error page" do
+      callback_after(Admin::Auth::ConnectState::LIFETIME)
+
+      expect(last_response.status).to eq(401)
+    end
+
+    it "never asks GitHub for a token" do
+      callback_after(Admin::Auth::ConnectState::LIFETIME)
+
+      expect(token_request).not_to have_been_made
+    end
+
+    it "signs in while the state is still fresh" do
+      callback_after(Admin::Auth::ConnectState::LIFETIME - 5)
+
+      expect(last_response.location).to end_with("/admin")
+    end
+  end
+
   describe "a callback replayed" do
     let!(:state) { start_sign_in }
 

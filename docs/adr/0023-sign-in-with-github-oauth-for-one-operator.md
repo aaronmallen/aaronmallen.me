@@ -34,7 +34,7 @@ We sign in with GitHub OAuth and let in one GitHub account, the one `settings.ow
 - There is no users table. The sign-in lives in a cookie that `Blog::SessionCookie.store` encrypts, handing
   `app_secret` to rack-session as its `secrets`.
 - The cookie is `SameSite=Lax`. GitHub's callback reaches us as a cross-site navigation, and the cookie holding
-  `oauth_states` has to come back on it.
+  the sign-in state has to come back on it.
 - A session lasts 30 days from `signed_in_at` (AA-204). Rack moves the cookie's `expires` forward on each response,
   but `Admin::Auth::Session` counts from sign-in, so the life is fixed.
 - After sign-in, the operator lands on the admin URL they first asked for (AA-204).

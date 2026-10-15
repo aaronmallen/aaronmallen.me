@@ -12,6 +12,7 @@ module Admin
       KEY = "service_connects"
       LIFETIME = 10 * 60
       LIMIT = 5
+      SIGN_IN = "sign_in"
 
       def initialize(session, now: Time.now)
         @now = now.to_i
