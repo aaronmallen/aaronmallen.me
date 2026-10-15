@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Lint the locale files for keys no code reads"
+#MISE alias=["l:i18n"]
+
+set -e
+
+exec bundle exec ruby .config/i18n/unused.rb

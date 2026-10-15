@@ -1,0 +1,162 @@
+# frozen_string_literal: true
+
+require "prism"
+require "yaml"
+
+class UnusedKeys
+  ALLOWED = ".config/i18n/allowed.yml"
+  LOCALES = "{config,slices/*/config}/i18n/*.yml"
+  PLURALS = %w[zero one two few many other].freeze
+  SOURCES = "{app,lib,slices}/**/*.rb"
+
+  class Source
+    attr_reader :classes, :dynamic, :literals, :path, :relative
+
+    def initialize(path)
+      @path = path
+      @classes = {}
+      @literals = []
+      @relative = []
+      @dynamic = false
+      walk(Prism.parse_file(path).value, [])
+    end
+
+    private
+
+    def define(node, nesting)
+      name = [*nesting, node.constant_path.full_name].join("::")
+      @classes[name] = node.superclass&.slice if node.is_a?(Prism::ClassNode)
+      name
+    end
+
+    def interpolated(head)
+      text = head.is_a?(Prism::StringNode) ? head.unescaped.scrub : ""
+      @dynamic ||= text == "."
+      @literals << text if text.end_with?(".") && keyish?(text) && text != "."
+    end
+
+    def keyish?(text) = text.match?(/\A\.?\w+(\.\w+)*\.?\z/)
+
+    def relative_join?(node)
+      return false unless node.name == :join && node.receiver.is_a?(Prism::ArrayNode)
+
+      head = node.receiver.elements.first
+      head.is_a?(Prism::StringNode) && (head.unescaped.empty? || head.unescaped.start_with?("."))
+    end
+
+    def string(text)
+      @literals << strip_plural(text) if keyish?(text)
+      @relative << text if text.match?(/\A\w+\z/)
+    end
+
+    def strip_plural(text)
+      parts = text.split(".", -1)
+      PLURALS.include?(parts.last) && parts.size > 2 ? parts[..-2].join(".") : text
+    end
+
+    def symbol(text) = text.start_with?(".") && keyish?(text) ? @literals << strip_plural(text) : @relative << text
+
+    def visit(node, nesting)
+      case node
+        when Prism::ClassNode, Prism::ModuleNode then return [define(node, nesting)]
+        when Prism::StringNode then string(node.unescaped.scrub)
+        when Prism::SymbolNode then symbol(node.unescaped.scrub)
+        when Prism::CallNode then @dynamic ||= relative_join?(node)
+        when Prism::InterpolatedStringNode then interpolated(node.parts.first)
+      end
+      nesting
+    end
+
+    def walk(node, nesting)
+      nesting = visit(node, nesting)
+      node.compact_child_nodes.each { walk(it, nesting) }
+    end
+  end
+
+  def self.base(path)
+    parts = path.delete_suffix(".rb").split("/")
+    parts = parts.drop(parts.first == "app" ? 1 : 2)
+    parts = parts.drop(1) if %w[actions views].include?(parts.first)
+    parts.join(".")
+  end
+
+  def initialize(root)
+    @root = root
+  end
+
+  def call
+    Dir.chdir(@root) do
+      sources = Dir[SOURCES].map { Source.new(it) }
+      used = used_keys(sources)
+      allowed = YAML.load_file(ALLOWED)
+      keys.reject { |key| used.any? { covers?(it, key) } || allowed.any? { File.fnmatch?(it, key) } }
+    end
+  end
+
+  private
+
+  def bases_for(source, children)
+    seen = Set[source.path]
+    queue = [source.path]
+    queue.concat(children.fetch(queue.shift, []).reject { seen.include?(it) }.each { seen << it }) until queue.empty?
+    seen.map { self.class.base(it) }
+  end
+
+  def children(sources)
+    owners = owners(sources)
+    sources.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |source, map|
+      source.classes.each do |name, parent|
+        owner = parent && lookup(name, parent, owners)
+        map[owner] << source.path if owner && owner != source.path
+      end
+    end
+  end
+
+  def covers?(literal, key)
+    return key.start_with?(literal) if literal.end_with?(".")
+
+    key == literal || (literal.include?(".") && !namespaces.include?(literal) && key.start_with?("#{literal}."))
+  end
+
+  def flatten(tree, prefix = nil)
+    tree.flat_map do |name, value|
+      key = [prefix, name].compact.join(".")
+      next [key] unless value.is_a?(Hash)
+      next [key] if value.keys.all? { PLURALS.include?(it) }
+
+      flatten(value, key)
+    end
+  end
+
+  def keys = Dir[LOCALES].flat_map { flatten(YAML.load_file(it).values.first) }.uniq
+
+  def lookup(name, parent, owners)
+    nesting = name.split("::")[..-2]
+    nesting.size.downto(0).map { [*nesting.first(it), parent].join("::") }.find { owners.key?(it) }.then { owners[it] }
+  end
+
+  def namespaces
+    @namespaces ||= Dir[SOURCES].flat_map do |path|
+      parts = self.class.base(path).split(".")
+      parts.each_index.map { parts[..it].join(".") }
+    end.to_set
+  end
+
+  def owners(sources) = sources.each_with_object({}) { |source, map| source.classes.each_key { map[it] = source.path } }
+
+  def used_keys(sources)
+    tree = children(sources)
+    sources.flat_map do |source|
+      relative, absolute = source.literals.partition { it.start_with?(".") }
+      relative += source.relative.map { ".#{it}" } if source.dynamic
+      bases = relative.empty? ? [] : bases_for(source, tree)
+      absolute + bases.product(relative).map { |base, key| "#{base}#{key}" }
+    end.to_set
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+  unused = UnusedKeys.new(ARGV.first || File.expand_path("../..", __dir__)).call
+  unused.each { warn "#{it} is in a locale file but no code reads it" }
+  exit(unused.empty?)
+end

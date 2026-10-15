@@ -59,8 +59,10 @@ code and the form finds it.
 A key that matches by accident now shows. A stray `.<field>.<code>` left in a locale file is live copy, not dead
 weight, so delete a key when its code goes.
 
-A missing key still shows "Check this field." and no spec fails, as it did under ADR 0027. Nothing checks that a
-code a contract can return has a key.
+A missing key still shows "Check this field." at run time, but `spec/lib/blog/ui/field_error_codes_spec.rb` fails
+first (#1390). It reads the codes each contract can return, from its schema, `config/errors.yml` and the `failure`
+calls in its rules and macros, and wants a key for each field the form shows. `mise run lint` fails on a locale key
+no code reads; `.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
 
 `Public::UI::Components::ContactFieldError` words its codes the same way, but keeps a `MESSAGES` table, since it
 hands the browser the copy for `blank` and `format` before any code arrives.
