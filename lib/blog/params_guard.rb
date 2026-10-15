@@ -11,11 +11,13 @@ module Blog
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
     MAIL_DRAFT_PATH = "/admin/mail/draft"
     MAIL_SEND_PATH = "/admin/mail/send"
+    MCP_PATH = "/mcp"
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
     SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
     SHARE_UPLOAD_PATH = "/admin/files"
     TOKEN_UPLOAD_PATH = "/api/v1/photos"
+    TOKEN_UPLOAD_PATHS = [TOKEN_UPLOAD_PATH, MCP_PATH].freeze
     TOO_LARGE = 413
     UNSUPPORTED = 415
     UPLOAD_LIMIT = 25 * 1024 * 1024
@@ -24,7 +26,7 @@ module Blog
     UPLOAD_LIMITS = {
       UPLOAD_PATH => UPLOAD_LIMIT,
       TOKEN_UPLOAD_PATH => ENCODED_UPLOAD_LIMIT,
-      "/mcp" => ENCODED_UPLOAD_LIMIT,
+      MCP_PATH => ENCODED_UPLOAD_LIMIT,
       SHARE_UPLOAD_PATH => SHARE_UPLOAD_LIMIT,
       MAIL_SEND_PATH => UPLOAD_LIMIT,
     }.freeze
@@ -50,7 +52,9 @@ module Blog
     def limit(request)
       return BODY_LIMIT unless request.post?
       return BODY_LIMIT if UPLOAD_PATHS.include?(request.path_info) && !signed_in?(request)
-      return BODY_LIMIT if request.path_info == TOKEN_UPLOAD_PATH && request.get_header(AUTHORIZATION).to_s.empty?
+      if TOKEN_UPLOAD_PATHS.include?(request.path_info) && request.get_header(AUTHORIZATION).to_s.empty?
+        return BODY_LIMIT
+      end
 
       UPLOAD_LIMITS.fetch(request.path_info, BODY_LIMIT)
     end

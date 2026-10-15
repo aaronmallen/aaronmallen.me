@@ -81,21 +81,21 @@ RSpec.describe "A request body", type: :request do
         expect(JSON.parse(last_response.body)).to include("status" => 413)
       end
     end
-  end
 
-  describe "a JSON body to /api/v1/photos over 1 MB with no token" do
-    before { post "/api/v1/photos", rpc(2 * megabyte), unsigned.merge("HTTP_ACCEPT" => "application/json") }
+    describe "a JSON body to #{path} over 1 MB with no token" do
+      before { post path, rpc(2 * megabyte), unsigned.merge("HTTP_ACCEPT" => "application/json") }
 
-    it "answers 413 in JSON" do
-      expect(JSON.parse(last_response.body)).to include("status" => 413)
+      it "answers 413 in JSON" do
+        expect(JSON.parse(last_response.body)).to include("status" => 413)
+      end
     end
-  end
 
-  describe "a JSON body to /api/v1/photos under 1 MB with no token" do
-    before { post "/api/v1/photos", rpc(megabyte - 1024), unsigned }
+    describe "a JSON body to #{path} under 1 MB with no token" do
+      before { post path, rpc(megabyte - 1024), unsigned }
 
-    it "reaches the action" do
-      expect(last_response.status).to eq(401)
+      it "reaches the action" do
+        expect(last_response.status).to eq(401)
+      end
     end
   end
 
