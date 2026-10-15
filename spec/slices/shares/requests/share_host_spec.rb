@@ -17,6 +17,12 @@ RSpec.describe "The share host", type: :request do
 
   def share(filename = "notes.txt", type = "text/plain") = upload_share(bytes, filename, type).value!
 
+  def stored_as(type)
+    file = share("photo.png", "image/png")
+    Shares::Slice["relations.shares"].by_pk(file.id).update(content_type: type)
+    Shares::Slice["repos.share_queries"].find(file.id)
+  end
+
   def stub_object(share, range: nil, body: bytes)
     stub = stub_request(:get, share_store_url(share.key))
     stub = stub.with(headers: { "Range" => range }) if range
@@ -85,12 +91,28 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  it "downloads a stored type that only begins with an inline type" do
+    file = stored_as("image/png, text/html")
+    stub_object(file)
+    fetch("/#{file.code}")
+
+    expect(disposition).to eq(%(attachment; filename="photo.png"; filename*=UTF-8''photo.png))
+  end
+
   it "keeps a filename outside ASCII in the encoded name and swaps it in the plain one" do
     file = share("café \"menu\".zip", "application/zip")
     stub_object(file)
     fetch("/#{file.code}")
 
     expect(disposition).to eq(%(attachment; filename="caf_ _menu_.zip"; filename*=UTF-8''caf%C3%A9%20%22menu%22.zip))
+  end
+
+  it "sandboxes the file and lets it load nothing" do
+    file = share("page.html", "text/html")
+    stub_object(file)
+    fetch("/#{file.code}")
+
+    expect(last_response.headers["Content-Security-Policy"]).to start_with("sandbox; default-src 'none';")
   end
 
   it "stops the browser sniffing another type" do

@@ -63,6 +63,19 @@ RSpec.describe "API shares", type: :request do
       expect(call_api(:post, "/shares", file("data", "blob")).fetch("content_type")).to eq("application/octet-stream")
     end
 
+    it "refuses a content type that holds more than one type and stores nothing", :aggregate_failures do
+      answered = call_api(:post, "/shares", file("<p>hi</p>", "photo.png", "image/png, text/html"))
+
+      expect([status, answered.fetch("errors")]).to eq([422, { "content_type" => ["is not valid"] }])
+      expect(shares).to be_empty
+    end
+
+    it "stores the content type in lower case" do
+      answered = call_api(:post, "/shares", file("data", "photo.png", "Image/PNG"))
+
+      expect(answered.fetch("content_type")).to eq("image/png")
+    end
+
     it "refuses data that is not base64 and stores nothing", :aggregate_failures do
       answered = call_api(:post, "/shares", { data: "not*base64!", filename: "a.txt" })
 

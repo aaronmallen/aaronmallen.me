@@ -10,13 +10,14 @@ module Shares
     end
 
     CODE_PATH = %r{\A/(?<code>[^/.]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
+    FILE_POLICY = "sandbox; default-src 'none'; style-src 'unsafe-inline'"
     PAGE_HEADERS = {
       "content-security-policy" => "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'",
       "content-type" => "text/html; charset=utf-8",
       "x-content-type-options" => "nosniff",
     }.freeze
     PROBE_END = 1
-    INLINE_TYPE = %r{\A(?:(?:image/(?!svg)|video/|audio/)|application/pdf\z)}i
+    INLINE_TYPE = %r{\A(?:(?:image/(?!svg)|video/|audio/)[\w.+-]+|application/pdf)\z}i
     PREVIEW = "preview"
     UNSAFE_FILENAME = /[^\x20-\x7e]|["\\]/
 
@@ -107,6 +108,7 @@ module Shares
       {
         "accept-ranges" => "bytes",
         "content-disposition" => disposition(share),
+        "content-security-policy" => FILE_POLICY,
         "content-length" => share.byte_size.to_s,
         "content-type" => share.content_type,
         "x-content-type-options" => "nosniff",
@@ -137,6 +139,7 @@ module Shares
     def zip_headers(group)
       {
         "content-disposition" => "attachment; filename=\"#{group.code}.zip\"",
+        "content-security-policy" => FILE_POLICY,
         "content-type" => "application/zip",
         "x-content-type-options" => "nosniff",
       }

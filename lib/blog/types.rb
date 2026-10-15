@@ -273,6 +273,9 @@ module Blog
         Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end
       Lines = Types::String.constructor { |text| TrimmedText[text].gsub(/\r\n?/, "\n") }
+      MediaType = Types::String.constructor { |value| value.to_s.strip.downcase }.constrained(
+        format: %r{\A[a-z0-9][\w!$&#^.+-]{0,126}/[a-z0-9][\w!$&#^.+-]{0,126}\z},
+      )
       Networks = Types::Array.of(Types::NetworkName).constructor do |names|
         found = [*names].map(&:to_s)
 
