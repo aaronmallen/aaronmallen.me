@@ -69,6 +69,13 @@ RSpec.describe "Admin files", type: :feature do
     expect(copied).to eq([link("deck.pdf")] * 2)
   end
 
+  it "pinks a card's open icon on hover" do
+    drop(["deck.pdf", "%PDF-1.7", "application/pdf"])
+    find(".file-card-acts .bt.gh").hover
+
+    expect(color_of(find(".file-card-acts .bt.gh > i"))).to eq(accent_text)
+  end
+
   describe "a card's drawer" do
     def drawer(&) = within("dialog[open].file-drawer", &)
 

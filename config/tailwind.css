@@ -5298,6 +5298,11 @@
 
 @utility file-card-acts {
   @apply relative mt-auto flex items-center gap-1.5 pt-1.5;
+
+  & .bt.gh:hover,
+  & .bt.gh:hover > i {
+    @apply text-accent-text;
+  }
 }
 
 @utility link-new {
@@ -5335,6 +5340,10 @@
   @media (width < 43.75rem) {
     @apply grid-cols-1;
   }
+
+  &:hover .link-row-title {
+    @apply text-accent-text;
+  }
 }
 
 @utility link-row-main {
@@ -5371,6 +5380,11 @@
 
 @utility link-row-acts {
   @apply relative flex flex-wrap items-center justify-end gap-2;
+
+  & .bt.gh:hover,
+  & .bt.gh:hover > i {
+    @apply text-accent-text;
+  }
 
   @media (width < 43.75rem) {
     @apply justify-start;

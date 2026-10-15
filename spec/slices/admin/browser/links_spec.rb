@@ -75,6 +75,25 @@ RSpec.describe "Admin links", type: :feature do
     expect(copied).to eq(["http://shares.localhost/talk"])
   end
 
+  describe "hovering a row" do
+    before do
+      talk
+      visit "/admin/links"
+    end
+
+    it "pinks its title" do
+      find(".link-row").hover
+
+      expect(color_of(find(".link-row-title"))).to eq(accent_text)
+    end
+
+    it "pinks its open icon" do
+      find(".link-row-acts .bt.gh").hover
+
+      expect(color_of(find(".link-row-acts .bt.gh > i"))).to eq(accent_text)
+    end
+  end
+
   describe "a row's drawer" do
     def drawer(&) = within("dialog[open].file-drawer", &)
 

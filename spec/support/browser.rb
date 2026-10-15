@@ -57,6 +57,18 @@ module Spec
       end
     end
 
+    def accent_text
+      evaluate_script(<<~JS)
+        (() => {
+          const probe = document.body.appendChild(document.createElement("span"));
+          probe.style.color = "var(--color-accent-text)";
+          const color = getComputedStyle(probe).color;
+          probe.remove();
+          return color;
+        })()
+      JS
+    end
+
     def admin_session_cookie = Spec::AdminSession.cookie
 
     def answer_confirm(button)
@@ -75,6 +87,8 @@ module Spec
         ));
       JS
     end
+
+    def color_of(element) = evaluate_script("getComputedStyle(arguments[0]).color", element)
 
     def confirm_ask = find("[data-confirm-ask]")
 
