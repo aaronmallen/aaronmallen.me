@@ -47,6 +47,8 @@ module Admin
             end
           end
 
+          def complete = CompleteForm(task: @task, filter: @filter, origin: @origin, compact: @row, keyed: @row)
+
           def keyed(key)
             return Blog::Constants::EMPTY_HASH unless @row && key
 
@@ -75,16 +77,12 @@ module Admin
           def origin_fields = HiddenFields(values: { filter: @filter, origin: @origin })
 
           def progress
-            running? ? running : start
+            complete if @row || running?
+            running? ? stop : start
             cancel
           end
 
           def reopen = change(:admin_reopen_task, "fa-solid fa-rotate-left", t(".reopen"))
-
-          def running
-            CompleteForm(task: @task, filter: @filter, origin: @origin, compact: @row, keyed: @row)
-            stop
-          end
 
           def running? = @task.in_progress? && @task.in_sprint?
 

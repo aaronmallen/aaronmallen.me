@@ -132,9 +132,6 @@
   --text-task: 1.08rem;
   --text-task--line-height: 1.3;
   --text-task--letter-spacing: -0.012em;
-  --text-task-lg: clamp(1.15rem, 1.4vw, 1.6rem);
-  --text-task-lg--line-height: 1.25;
-  --text-task-lg--letter-spacing: -0.018em;
   --text-task-done: 1rem;
   --text-task-done--line-height: 1.3;
   --text-task-title-in: 1.6rem;
@@ -3307,26 +3304,26 @@
 }
 
 @utility task {
-  @apply relative grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2;
+  @apply relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2;
   @apply border-t border-line py-4 first:border-t-0 first:pt-0;
 
   @media (hover: hover) and (width >= 43.75rem) {
-    @apply grid-cols-[auto_auto_minmax(0,1fr)];
+    @apply grid-cols-[auto_minmax(0,1fr)];
   }
 
   @media (width < 43.75rem) {
-    @apply grid-cols-[auto_auto_minmax(0,1fr)] gap-x-3;
+    @apply grid-cols-[auto_minmax(0,1fr)] gap-x-3;
   }
 
-  &.large {
-    @apply py-5 first:pt-0;
+  &:has(> .task-pick) {
+    @apply grid-cols-[auto_auto_minmax(0,1fr)_auto];
 
-    & > .record-key {
-      @apply mt-1 text-[0.78125rem];
+    @media (hover: hover) and (width >= 43.75rem) {
+      @apply grid-cols-[auto_auto_minmax(0,1fr)];
     }
 
-    & .task-title {
-      @apply text-task-lg;
+    @media (width < 43.75rem) {
+      @apply grid-cols-[auto_auto_minmax(0,1fr)];
     }
   }
 
@@ -3340,31 +3337,6 @@
 
   &:has(> .task-pick :checked) {
     background: color-mix(in oklab, var(--color-mk-green) 7%, transparent);
-  }
-}
-
-@utility task-box {
-  @apply mt-[3px] grid size-5 shrink-0 place-items-center rounded-btn border-[1.5px] border-ink-muted bg-transparent p-0;
-  @apply text-badge text-transparent;
-
-  &:is(button) {
-    @apply cursor-pointer hover:border-mk-green hover:text-mk-green-text focus-ring;
-
-    @media (width < 43.75rem) {
-      @apply mt-0 size-tap;
-    }
-  }
-
-  :where(.task.large) & {
-    @apply mt-1 size-6;
-  }
-
-  :where(.task.doing) & {
-    @apply border-mk-blue;
-  }
-
-  :where(.task.done) & {
-    @apply border-mk-green bg-mk-green text-ground;
   }
 }
 
@@ -3422,7 +3394,11 @@
 
 @utility task-acts {
   @media (width < 43.75rem) {
-    @apply col-start-3 flex-wrap gap-2;
+    @apply col-start-2 flex-wrap gap-2;
+
+    :where(.task:has(> .task-pick)) > & {
+      @apply col-start-3;
+    }
   }
 }
 

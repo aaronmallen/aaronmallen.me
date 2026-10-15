@@ -48,8 +48,7 @@ module Admin
           end
 
           def row(task)
-            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID,
-                large: today?)
+            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID)
           end
 
           def rows

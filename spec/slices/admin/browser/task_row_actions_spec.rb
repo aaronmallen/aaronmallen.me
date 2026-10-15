@@ -178,6 +178,14 @@ RSpec.describe "Admin task row actions", type: :feature do
       expect(repo.by_id(task.id)).to be_canceled
     end
 
+    it "completes it in place without asking for time", :aggregate_failures do
+      complete("Write the brief")
+
+      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.completed"))
+      expect(kept_page?).to be(true)
+      expect(repo.by_id(task.id)).to be_done
+    end
+
     it "moves it right in place", :aggregate_failures do
       move("Write the brief", "right")
 
@@ -214,7 +222,7 @@ RSpec.describe "Admin task row actions", type: :feature do
       row("Filed the taxes").click_button(translate("ui.components.tasks.controls.reopen"))
     end
 
-    it "reopens it in place", :aggregate_failures do
+    it "reopens it in place from its hover bar", :aggregate_failures do
       expect(page).to have_css(".toast", text: translate("tasks_page.toasts.reopened"))
       expect(kept_page?).to be(true)
     end

@@ -17,11 +17,10 @@ module Admin
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
           prop :bulk, Blog::Types::String.optional, default: nil
-          prop :large, Blog::Types::Bool, default: false
 
           def view_template
             div(class: classes, data: { key_row: true, menu: menu_path, **order }) do
-              @bulk ? pick : box
+              pick if @bulk
               RecordKey(kind: "task", label: @task.label)
               div(class: "task-body") do
                 task_title
@@ -33,25 +32,9 @@ module Admin
 
           private
 
-          def box
-            route, label = @task.closed? ? [:admin_reopen_task, reopen_label] : [:admin_complete_task, complete_label]
-
-            Form(action: path(route, id: @task.id), data: { morph: true }) do
-              HiddenFields(values: { filter: @filter, origin: @origin })
-              button(type: "submit", class: "task-box", title: label, aria: { label: }) do
-                Icon(@task.canceled? ? "fa-solid fa-xmark" : "fa-solid fa-check")
-              end
-            end
-          end
-
           def classes
-            [
-              "task", ("large" if @large), ("done" if @task.closed?), ("canceled" if @task.canceled?),
-              ("doing" if @task.in_progress?),
-            ]
+            ["task", ("done" if @task.closed?), ("canceled" if @task.canceled?), ("doing" if @task.in_progress?)]
           end
-
-          def complete_label = t("ui.components.tasks.complete_form.complete")
 
           def edit
             href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)
@@ -77,12 +60,10 @@ module Admin
             BulkCheck(form: @bulk, value: @task.id, label: t(".pick", task: @task.title), class: "task-pick")
           end
 
-          def reopen_label = t("ui.components.tasks.controls.reopen")
-
           def side
             div(class: "task-acts hov") do
               Grip(task: @task, lead: @lead) if ordered?
-              Controls(task: @task, filter: @filter, origin: @origin, row: true, ahead: waiting?) unless @task.closed?
+              Controls(task: @task, filter: @filter, origin: @origin, row: true, ahead: waiting?)
               edit
             end
           end

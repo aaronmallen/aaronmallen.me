@@ -208,18 +208,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".card-note", exact_text: "1 open")
       end
 
-      it "sets today's tasks in the large row" do
-        get "/admin/tasks", filter: "today"
-
-        expect(page).to have_css(".task.large")
-      end
-
-      it "sets the other lists in the normal row" do
-        get "/admin/tasks", filter: "next"
-
-        expect(page).to have_css(".task:not(.large)")
-      end
-
       it "offers no capture row" do
         get "/admin/tasks", filter: "next"
 
@@ -992,12 +980,20 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page.find(".task-finished time")[:datetime]).to eq(at.iso8601)
       end
 
-      it "offers a start on an open task", :aggregate_failures do
+      it "offers a start and a complete on an open task in its hover bar", :aggregate_failures do
         create(:task)
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_css("form[action$='/start']")
-        expect(page).to have_no_css("form[action$='/complete']")
+        expect(page).to have_css(".task-acts form[action$='/start']")
+        expect(page).to have_css(".task-acts form[data-task-act='complete'] details.task-complete")
+      end
+
+      it "draws no box on any row" do
+        create(:task)
+        create(:task, :done)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-box, .task > form")
       end
 
       it "offers a complete and a stop on the task in progress", :aggregate_failures do
@@ -1457,11 +1453,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_no_css(".task.canceled")
       end
 
-      it "reopens it from the box beside the key" do
+      it "reopens it from the hover bar" do
         create(:task, :canceled)
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_css(".task > form[action$='/reopen'] button.task-box .fa-xmark")
+        expect(page).to have_css(".task-acts form[action$='/reopen'] button")
       end
 
       it "offers reopen and nothing else that moves it", :aggregate_failures do

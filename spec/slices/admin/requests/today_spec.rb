@@ -1015,18 +1015,10 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(done.all(".task-title", visible: :all).map { it.text(:all) }).to eq(["Ship the panel"])
       end
 
-      it "sets the open tasks in the large row and what is done in the normal one", :aggregate_failures do
-        plan("Ship the panel", "Read the design", done: 1)
-        get "/admin"
-
-        expect(panel.all(".sprint-rows .task.large .task-title").map(&:text)).to eq(["Read the design"])
-        expect(panel).to have_no_css("details.today-more .task.large", visible: :all)
-      end
-
-      it "completes a task from its box" do
+      it "completes a task from its hover bar" do
         plan("Ship the panel")
         get "/admin"
-        form = panel.find(".task > form:has(button.task-box)")
+        form = panel.find(".task-acts form[data-task-act='complete']")
         post form[:action], _csrf_token: admin_csrf_token, filter: "today", origin: "today"
 
         expect(task_repo.in_sprint(sprint.id).map(&:status)).to eq(["done"])
