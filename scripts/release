@@ -1,15 +1,18 @@
 #!/usr/bin/env sh
 #MISE description="Give the newest commit that is not empty an annotated tag named for the next CalVer version"
-#USAGE flag "--dry-run" help="Print the version and the commit, and make no tag"
+#USAGE flag "--dry-run" help="Print the version, the commit and its CI state, and make no tag"
+#USAGE flag "--skip-ci" help="Tag even when CI has not passed on the commit, for an emergency"
 #USAGE arg "[date]" help="The date that names the version, as YYYY-MM-DD. Defaults to today in UTC."
 
 set -e
 
 dry_run=""
+skip_ci=""
 on=""
 for arg; do
   case "$arg" in
   --dry-run) dry_run=1 ;;
+  --skip-ci) skip_ci=1 ;;
   *) on="$arg" ;;
   esac
 done
@@ -48,9 +51,17 @@ else
   version="$year.$month.$((last + 1))"
 fi
 
+ci_state() {
+  gh run list --repo aaronmallen/aaronmallen.me --workflow ci.yml --commit "$target" --limit 1 \
+    --json status,conclusion \
+    --jq 'if length == 0 then "missing" elif .[0].status != "completed" then "running" elif .[0].conclusion == "success" then "passed" else "failed" end' \
+    2>/dev/null || echo "unknown"
+}
+
 if [ -n "$dry_run" ]; then
   echo "$version"
   echo "$target"
+  echo "CI $(ci_state)"
   exit 0
 fi
 
@@ -68,6 +79,30 @@ fi
 if ! grep -q "^## \[$version\]" CHANGELOG.md; then
   echo "CHANGELOG.md has no section for $version." >&2
   exit 1
+fi
+
+if [ -n "$skip_ci" ]; then
+  echo "Skipped the CI check on $target."
+else
+  case "$(ci_state)" in
+  passed) ;;
+  running)
+    echo "CI is still running on $target. Wait for it to pass, or pass --skip-ci." >&2
+    exit 1
+    ;;
+  failed)
+    echo "CI did not pass on $target. Fix it, or pass --skip-ci." >&2
+    exit 1
+    ;;
+  missing)
+    echo "CI has not run on $target. Push it and wait for CI, or pass --skip-ci." >&2
+    exit 1
+    ;;
+  *)
+    echo "Could not read the CI state of $target from GitHub. Check gh, or pass --skip-ci." >&2
+    exit 1
+    ;;
+  esac
 fi
 
 git -c tag.gpgSign=false tag --annotate --message "$version" "$version" "$target"

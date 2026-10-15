@@ -12,11 +12,25 @@ RSpec.describe "mise run release", type: :script do
       "JJ_CONFIG" => File.join(root, "jj.toml"),
       "JJ_EMAIL" => "spec@example.com",
       "JJ_USER" => "Spec",
+      "PATH" => "#{bin}:#{ENV.fetch('PATH')}",
     }
   end
 
-  before { FileUtils.mkdir_p(repo) }
+  before do
+    FileUtils.mkdir_p([repo, bin])
+    File.write(File.join(bin, "gh"), "#!/bin/sh\ncat \"$(dirname \"$0\")/ci\"\n")
+    File.chmod(0o755, File.join(bin, "gh"))
+    ci("passed")
+  end
+
   after { FileUtils.remove_entry(root) }
+
+  def bin = File.join(root, "bin")
+
+  def ci(state)
+    path = File.join(bin, "ci")
+    state ? File.write(path, state) : FileUtils.rm_f(path)
+  end
 
   def commit(message, file: nil)
     File.write(File.join(repo, file), message) if file
@@ -148,12 +162,20 @@ RSpec.describe "mise run release", type: :script do
       end
     end
 
-    it "prints the version and the target on a dry run and makes no tag", :aggregate_failures do
+    it "prints the version, the target and its CI state on a dry run and makes no tag", :aggregate_failures do
+      ci("running")
       output, status = release("--dry-run", "2026-10-14")
 
       expect(status).to be_success
-      expect(output.lines.map(&:chomp)).to eq(["26.10.0", target])
+      expect(output.lines.map(&:chomp)).to eq(["26.10.0", target, "CI running"])
       expect(git("tag", "--list")).to be_empty
+    end
+
+    it "reports an unknown CI state on a dry run when gh fails" do
+      ci(nil)
+      output, = release("--dry-run", "2026-10-14")
+
+      expect(output.lines.last.chomp).to eq("CI unknown")
     end
 
     shared_examples "a refusal" do |reason|
@@ -190,6 +212,31 @@ RSpec.describe "mise run release", type: :script do
 
       it_behaves_like "a refusal", "no section for 26.10.0"
     end
+
+    {
+      "running" => "CI is still running",
+      "failed" => "CI did not pass",
+      "missing" => "CI has not run",
+      nil => "Could not read the CI state",
+    }.each do |state, reason|
+      context "when CI is #{state || 'unreadable'}" do
+        before { ci(state) }
+
+        it_behaves_like "a refusal", reason
+      end
+    end
+
+    context "with --skip-ci" do
+      before { ci("failed") }
+
+      it "tags anyway and says it skipped the check", :aggregate_failures do
+        output, status = release("--skip-ci", "2026-10-14")
+
+        expect(status).to be_success
+        expect(output).to include("Skipped the CI check on #{target}.")
+        expect(git("rev-parse", "26.10.0^{commit}").chomp).to eq(target)
+      end
+    end
   end
 
   context "with jj", skip: ("jj is not installed" unless system("command -v jj >/dev/null 2>&1")) do
@@ -212,7 +259,7 @@ RSpec.describe "mise run release", type: :script do
     it "names the same target on a dry run" do
       output, = release("--dry-run", "2026-10-14")
 
-      expect(output.lines.map(&:chomp)).to eq(["26.10.0", target])
+      expect(output.lines.map(&:chomp)).to eq(["26.10.0", target, "CI passed"])
     end
   end
 end
