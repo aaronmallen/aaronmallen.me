@@ -4,13 +4,20 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:url) { "https://github.com/aaronmallen/aaronmallen.me/issues/7" }
 
+  def another_issue = github_issue("I_eight", number: 8)
   def api = "https://api.github.com"
+  def comment(id, **) = github_comment("IC_#{id}", **)
   def comments(task = imported) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
 
   before do
     connect_github_token
     stub_assigned
     stub_known
+  end
+
+  def copied(id, at:, author: "octocat")
+    { author:, body: "Looks good", created_at: at, provider: "github", remote_id: "IC_#{id}",
+      url: "https://github.com/aaronmallen/aaronmallen.me/issues/7#issuecomment-#{id}" }
   end
 
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
@@ -21,9 +28,16 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def issue(id = "I_seven", **) = github_issue(id, number: 7, **)
 
+  def searched = github_request(GitHubGraphQL::ASSIGNED_QUERY)
+
   def sources = Tasks::Slice["relations.task_sources"]
 
-  def stub_assigned(*nodes) = stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search(*nodes))
+  def stub_assigned(*nodes, &during)
+    stub_github(GitHubGraphQL::ASSIGNED_QUERY) do
+      during&.call
+      github_issue_search(*nodes)
+    end
+  end
 
   def stub_known(*nodes)
     stub_github(GitHubGraphQL::ISSUES_QUERY) do |request|
@@ -45,6 +59,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
+  def taken_off(**) = issue(assignees: ["MDQ6VXNlcjE="], **)
+
   def tracked(*traits, state: "open", checked_at: nil, **)
     task = create(:task, *traits, list: "external", **)
 
@@ -52,41 +68,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       .then { repo.by_id(it.task_id) }
   end
 
+  it_behaves_like(
+    "an issue sync", provider: "github", sync_name: "issues", body: :body, reference: "aaronmallen/aaronmallen.me#7",
+  )
+
   describe "a new issue assigned to me" do
     before { stub_assigned(issue(title: "Sync my issues", body: "Keep them in step")) }
-
-    it "becomes a task on the external list with no tags", :aggregate_failures do
-      sync
-
-      expect(imported).to have_attributes(list: "external", note: "Keep them in step", sprint_id: nil,
-                                          status: "open", title: "Sync my issues")
-      expect(imported.tags).to be_empty
-    end
-
-    it "links the task to its issue" do
-      sync
-
-      expect(imported.source).to have_attributes(provider: "github", remote_id: "I_seven", url:)
-    end
-
-    it "arrives unseen" do
-      sync
-
-      expect(imported.source.seen_at).to be_nil
-    end
-
-    it "makes one task when the job runs twice" do
-      2.times { sync }
-
-      expect(Tasks::Slice["relations.task_sources"].where(remote_id: "I_seven").count).to eq(1)
-    end
-
-    it "clears a failure the last run left" do
-      sync_state_mutations.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
-      sync
-
-      expect(failure).to be_nil
-    end
 
     it "is found by a search of every repository for open issues, not pull requests, assigned to me" do
       sync
@@ -124,27 +111,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     def labeled(*names) = issue(labels: { nodes: names.map { { name: it } } })
 
-    it "imports with the private tags its labels name" do
-      create(:tag, :private, name: "needs-review")
-      stub_assigned(labeled("Bug Fix", "needs review", "BugFix"))
-      sync
-
-      expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "needs-review")
-    end
-
     it "arrives unseen with its tags" do
       stub_assigned(labeled("Bug Fix"))
       sync
 
       expect(imported.source.seen_at).to be_nil
-    end
-
-    it "adds no tag and creates none for a label no private tag matches", :aggregate_failures do
-      create(:tag, name: "area-api")
-      stub_assigned(labeled("area/api", "Someday"))
-
-      expect { sync }.not_to(change { Tags::Slice["relations.tags"].count })
-      expect(imported.tags).to be_empty
     end
 
     it "keeps the app's acronyms whole in a label" do
@@ -160,24 +131,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(imported.status).to eq("open")
-      expect(imported.tags).to be_empty
-    end
-
-    it "keeps a tag I removed off on the next sync" do
-      stub_assigned(labeled("Bug Fix"))
-      sync
-      Tasks::Slice["repos.task_mutations"].replace_tags(imported.id, [])
-      sync
-
-      expect(imported.tags).to be_empty
-    end
-
-    it "adds no tag for a label added after import" do
-      stub_assigned(labeled)
-      sync
-      stub_assigned(labeled("Bug Fix"))
-      sync
-
       expect(imported.tags).to be_empty
     end
   end
@@ -372,36 +325,9 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(imported.title).to eq(reference)
     end
-
-    it "keeps that title while the issue's title stays blank" do
-      stub_assigned(issue(title: "\u0000"))
-      sync
-      stub_assigned(issue(title: " \u0000 ", body: "New body"))
-      sync
-
-      expect(imported).to have_attributes(note: "New body", title: reference)
-    end
-
-    it "takes a real title once the issue has one" do
-      stub_assigned(issue(title: "\u0000"))
-      sync
-      stub_assigned(issue(title: "Sync my issues"))
-      sync
-
-      expect(imported.title).to eq("Sync my issues")
-    end
   end
 
   describe "an issue's comments" do
-    let(:at) { Time.utc(2026, 9, 28, 12) }
-
-    def copied(id, author:, at:)
-      { author:, body: "Looks good", created_at: at, provider: "github", remote_id: id,
-        url: "https://github.com/aaronmallen/aaronmallen.me/issues/7#issuecomment-#{id.delete_prefix('IC_')}" }
-    end
-
-    def remote(comment) = comment.to_h.slice(:author, :body, :created_at, :provider, :remote_id, :url)
-
     def sync_twice(first, second)
       stub_assigned(first)
       sync
@@ -409,36 +335,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
     end
 
-    it "arrive on its task with author, body, time and link" do
-      stub_assigned(discussed(github_comment("IC_1", at:), github_comment("IC_2", author: "hubot", at: at + 60)))
-      sync
-
-      expect(comments.map { remote(it) })
-        .to eq([copied("IC_1", author: "octocat", at:), copied("IC_2", author: "hubot", at: at + 60)])
-    end
-
     it "arrive with no author from a deleted account" do
       stub_assigned(discussed(github_comment("IC_1", author: nil)))
       sync
 
       expect(comments.map(&:author)).to eq([nil])
-    end
-
-    it "arrive on a task already tracked" do
-      task = tracked
-      stub_assigned(discussed(github_comment("IC_1")))
-      sync
-
-      expect(comments(task).map(&:remote_id)).to eq(%w[IC_1])
-    end
-
-    it "add no rows and change nothing when synced again unchanged", :aggregate_failures do
-      stub_assigned(discussed(github_comment("IC_1"), github_comment("IC_2")))
-      before = sync.then { comments.map(&:to_h) }
-      sync
-
-      expect(comments.map(&:to_h)).to eq(before)
-      expect(Tasks::Slice["relations.task_comments"].count).to eq(2)
     end
 
     it "take an edit made on GitHub" do
@@ -461,28 +362,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(comments.map(&:remote_id)).to eq(%w[IC_1 IC_2 IC_3])
     end
 
-    it "leave my own comments alone" do
-      task = tracked
-      mine = create(:task_comment, task_id: task.id)
-      stub_assigned(discussed(github_comment("IC_1")))
-      sync
-
-      expect(comments(task).map(&:id)).to include(mine.id)
-    end
-
     it "skip a comment with nothing to show once cleaned" do
       stub_assigned(discussed(github_comment("IC_1", body: "\u0000 "), github_comment("IC_2", body: "Fine\u0000")))
       sync
 
       expect(comments.map { [it.remote_id, it.body] }).to eq([%w[IC_2 Fine]])
-    end
-
-    it "stop coming to a task I finished" do
-      task = tracked(:done)
-      stub_assigned(discussed(github_comment("IC_1")))
-      sync
-
-      expect(comments(task)).to be_empty
     end
 
     it "stop coming to a canceled task" do
@@ -963,14 +847,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   describe "an issue taken off me" do
-    it "cancels its task" do
-      task = tracked
-      stub_known(issue(assignees: ["MDQ6VXNlcjE="]))
-      sync
-
-      expect(repo.by_id(task.id).status).to eq("canceled")
-    end
-
     it "marks the task done when the issue was also closed as completed" do
       task = tracked
       stub_known(issue(assignees: ["MDQ6VXNlcjE="], state: "CLOSED", stateReason: "COMPLETED"))
@@ -993,14 +869,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(repo.by_id(task.id).status).to eq("canceled")
-    end
-
-    it "reopens the task when the issue is assigned back to me" do
-      task = tracked(:canceled, state: "unassigned")
-      stub_assigned(issue)
-      sync
-
-      expect(repo.by_id(task.id).status).to eq("open")
     end
   end
 
@@ -1079,29 +947,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(github_request(GitHubGraphQL::ISSUES_QUERY)).not_to have_been_made
-    end
-  end
-
-  describe "a tracked task deleted while the run waits on GitHub" do
-    before do
-      task = tracked
-      stub_github(GitHubGraphQL::ASSIGNED_QUERY) do
-        Tasks::Slice["operations.delete_task"].call(task.id)
-        github_issue_search(issue(title: "Renamed"), github_issue("I_eight", number: 8))
-      end
-    end
-
-    it "lets the rest of the run import" do
-      sync
-
-      expect(imported("I_eight").status).to eq("open")
-    end
-
-    it "lets the run clear a failure the last run left" do
-      sync_state_mutations.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
-      sync
-
-      expect(failure).to be_nil
     end
   end
 
@@ -1209,23 +1054,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(a_request(:any, %r{\A#{api}/})).not_to have_been_made
-      expect(failure).to be_nil
-    end
-  end
-
-  describe "when another run is already going" do
-    let(:connection) { Tasks::Slice["db.rom"].gateways.fetch(:default).connection }
-    let(:elsewhere) { Sequel.connect(connection.opts) }
-    let(:lock) { Blog::DB::Relation.lock_key(Tasks::Repos::TaskSourceMutations::SYNC_LOCKS.fetch("github")) }
-
-    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, lock)) }
-
-    after { elsewhere.disconnect }
-
-    it "leaves the run to the one holding the lock", :aggregate_failures do
-      sync
-
-      expect(github_request(GitHubGraphQL::ASSIGNED_QUERY)).not_to have_been_made
       expect(failure).to be_nil
     end
   end

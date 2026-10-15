@@ -4,7 +4,15 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:url) { "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues" }
 
+  def another_issue = linear_issue("L_two", key: "ABC-2")
+  def comment(id, **) = linear_comment("c#{id}", **)
   def comments(task = imported) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
+
+  def copied(id, at:, author: "aaron")
+    { author:, body: "Looks good", created_at: at, provider: "linear", remote_id: "c#{id}",
+      url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-c#{id}" }
+  end
+
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
   before do
@@ -17,15 +25,22 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def first_task = Tasks::Slice["relations.tasks"].in_order.pluck(:id).first
 
-  def imported = repo.by_id(sources.at("linear", "L_one").pluck(:task_id).first)
+  def imported(id = "L_one") = repo.by_id(sources.at("linear", id).pluck(:task_id).first)
 
   def issue(**) = linear_issue("L_one", **)
+
+  def searched = linear_request(LinearGraphQL::ASSIGNED_QUERY)
 
   def sources = Tasks::Slice["relations.task_sources"]
 
   def status(task) = repo.by_id(task.id).status
 
-  def stub_assigned(*nodes) = stub_linear(LinearGraphQL::ASSIGNED_QUERY, linear_assigned(*nodes))
+  def stub_assigned(*nodes, &during)
+    stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
+      during&.call
+      linear_assigned(*nodes)
+    end
+  end
 
   def stub_known(*nodes)
     stub_linear(LinearGraphQL::ISSUES_QUERY) do |request|
@@ -40,6 +55,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
+  def taken_off(**) = issue(assignee: "someone-else", **)
+
   def tracked(*traits, state: "open", checked_at: nil, history_cursor: nil, **)
     task = create(:task, *traits, list: "external", title: "Sync my issues", note: "Keep them in step", **)
     fields = { remote_state: state, checked_at:, history_cursor: }
@@ -48,35 +65,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     repo.by_id(task.id)
   end
 
+  it_behaves_like(
+    "an issue sync", provider: "linear", sync_name: "linear_issues", body: :description, reference: "ABC-1",
+  )
+
   describe "a new issue assigned to me" do
     before { stub_assigned(issue(title: "Sync Linear", description: "Keep Linear in step")) }
-
-    it "becomes a task on the external list with no tags", :aggregate_failures do
-      sync
-
-      expect(imported).to have_attributes(list: "external", note: "Keep Linear in step", sprint_id: nil,
-                                          status: "open", title: "Sync Linear")
-      expect(imported.tags).to be_empty
-    end
-
-    it "links the task to its issue" do
-      sync
-
-      expect(imported.source).to have_attributes(provider: "linear", remote_id: "L_one", url:)
-    end
-
-    it "makes one task when the job runs twice" do
-      2.times { sync }
-
-      expect(sources.where(remote_id: "L_one").count).to eq(1)
-    end
-
-    it "clears a failure the last run left" do
-      sync_state_mutations.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
-      sync
-
-      expect(failure).to be_nil
-    end
 
     it "is asked for among only the issues that are not completed or canceled" do
       sync
@@ -148,40 +142,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     before { create(:tag, :private, name: "bug-fix") }
 
     def labeled(*names) = issue(labels: { nodes: names.map { { name: it } } })
-
-    it "imports with the private tags its labels name" do
-      create(:tag, :private, name: "needs-review")
-      stub_assigned(labeled("Bug Fix", "needs review", "BugFix"))
-      sync
-
-      expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "needs-review")
-    end
-
-    it "adds no tag and creates none for a label no private tag matches", :aggregate_failures do
-      create(:tag, name: "area-api")
-      stub_assigned(labeled("area/api", "Someday"))
-
-      expect { sync }.not_to(change { Tags::Slice["relations.tags"].count })
-      expect(imported.tags).to be_empty
-    end
-
-    it "keeps a tag I removed off on the next sync" do
-      stub_assigned(labeled("Bug Fix"))
-      sync
-      Tasks::Slice["repos.task_mutations"].replace_tags(imported.id, [])
-      sync
-
-      expect(imported.tags).to be_empty
-    end
-
-    it "adds no tag for a label added after import" do
-      stub_assigned(labeled)
-      sync
-      stub_assigned(labeled("Bug Fix"))
-      sync
-
-      expect(imported.tags).to be_empty
-    end
 
     it "names a label in a group by its own name alone" do
       create(:tag, :private, name: "type-bug-fix")
@@ -264,47 +224,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   describe "an issue's comments" do
-    let(:at) { Time.utc(2026, 9, 28, 12) }
-
-    def copied(id, author:, at:)
-      { author:, body: "Looks good", created_at: at, provider: "linear", remote_id: id,
-        url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-#{id}" }
-    end
-
-    def remote(comment) = comment.to_h.slice(:author, :body, :created_at, :provider, :remote_id, :url)
-
-    def rows = Tasks::Slice["relations.task_comments"]
-
     def sync_twice(first, second)
       stub_assigned(first)
       sync
       stub_assigned(second)
       sync
-    end
-
-    it "arrive on its task with author, body, time and link" do
-      stub_assigned(discussed(linear_comment("c1", at:), linear_comment("c2", author: "sam", at: at + 60)))
-      sync
-
-      expect(comments.map { remote(it) })
-        .to eq([copied("c1", author: "aaron", at:), copied("c2", author: "sam", at: at + 60)])
-    end
-
-    it "arrive on a task already tracked" do
-      task = tracked
-      stub_assigned(discussed(linear_comment("c1")))
-      sync
-
-      expect(comments(task).map(&:remote_id)).to eq(%w[c1])
-    end
-
-    it "add no rows and change nothing when synced again unchanged", :aggregate_failures do
-      stub_assigned(discussed(linear_comment("c1"), linear_comment("c2")))
-      before = sync.then { comments.map(&:to_h) }
-      sync
-
-      expect(comments.map(&:to_h)).to eq(before)
-      expect(rows.count).to eq(2)
     end
 
     it "take an edit made on Linear" do
@@ -342,15 +266,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(comments(task).map(&:remote_id)).to eq(%w[c1])
     end
 
-    it "leave my own comments alone" do
-      task = tracked
-      mine = create(:task_comment, task_id: task.id)
-      stub_assigned(discussed(linear_comment("c1")))
-      sync
-
-      expect(comments(task).map(&:id)).to include(mine.id)
-    end
-
     it "reach a task its issue reopens" do
       task = tracked(:done, state: "completed")
       stub_assigned(discussed(linear_comment("c1")))
@@ -362,14 +277,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     it "stop at a task its issue cancels" do
       task = tracked
       stub_known(discussed(linear_comment("c1"), state: "canceled"))
-      sync
-
-      expect(comments(task)).to be_empty
-    end
-
-    it "stop coming to a task I finished" do
-      task = tracked(:done)
-      stub_assigned(discussed(linear_comment("c1")))
       sync
 
       expect(comments(task)).to be_empty
@@ -502,24 +409,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(imported.title).to eq("ABC-1")
-    end
-
-    it "keeps that title while the issue's title stays blank" do
-      stub_assigned(issue(title: "\u0000"))
-      sync
-      stub_assigned(issue(title: " \u0000 ", description: "New body"))
-      sync
-
-      expect(imported).to have_attributes(note: "New body", title: "ABC-1")
-    end
-
-    it "takes a real title once the issue has one" do
-      stub_assigned(issue(title: "\u0000"))
-      sync
-      stub_assigned(issue(title: "Sync Linear"))
-      sync
-
-      expect(imported.title).to eq("Sync Linear")
     end
   end
 
@@ -896,28 +785,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   describe "an issue taken off me" do
-    it "cancels its task" do
-      task = tracked
-      stub_known(issue(assignee: "someone-else"))
-      sync
-
-      expect(status(task)).to eq("canceled")
-    end
-
     it "marks the task done when the issue was also completed" do
       task = tracked
       stub_known(issue(assignee: "someone-else", state: "completed"))
       sync
 
       expect(status(task)).to eq("done")
-    end
-
-    it "reopens the task when the issue is assigned back to me" do
-      task = tracked(:canceled, state: "unassigned")
-      stub_assigned(issue)
-      sync
-
-      expect(status(task)).to eq("open")
     end
   end
 
@@ -959,31 +832,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(linear_request(LinearGraphQL::ISSUES_QUERY, key: "lin_api_two", ids: %w[L_two])).to have_been_made
-    end
-  end
-
-  describe "a tracked task deleted while the run waits on Linear" do
-    before do
-      task = tracked
-      stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
-        Tasks::Slice["operations.delete_task"].call(task.id)
-        linear_assigned(issue(title: "Renamed"), linear_issue("L_two", key: "ABC-2"))
-      end
-    end
-
-    def other = repo.by_id(sources.at("linear", "L_two").pluck(:task_id).first)
-
-    it "lets the rest of the run import" do
-      sync
-
-      expect(other.status).to eq("open")
-    end
-
-    it "lets the run clear a failure the last run left" do
-      sync_state_mutations.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
-      sync
-
-      expect(failure).to be_nil
     end
   end
 
@@ -1208,13 +1056,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     after { elsewhere.disconnect }
-
-    it "leaves the run to the one holding the lock", :aggregate_failures do
-      sync
-
-      expect(linear_request(LinearGraphQL::ASSIGNED_QUERY)).not_to have_been_made
-      expect(failure).to be_nil
-    end
 
     it "leaves the GitHub run free" do
       connect_github_token
