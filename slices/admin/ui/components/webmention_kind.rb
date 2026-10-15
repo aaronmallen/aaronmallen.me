@@ -5,8 +5,8 @@ module Admin
     module Components
       class WebmentionKind < Component
         KINDS = {
-          Blog::Types::WebmentionType["reply"] => [:pink, "fa-solid fa-reply"],
-          Blog::Types::WebmentionType["like"] => [:sand, "fa-solid fa-heart"],
+          Blog::Types::WebmentionType["reply"] => [:sand, "fa-solid fa-reply"],
+          Blog::Types::WebmentionType["like"] => [:pink, "fa-solid fa-heart"],
           Blog::Types::WebmentionType["repost"] => [:green, "fa-solid fa-retweet"],
           Blog::Types::WebmentionType["mention"] => [:blue, "fa-solid fa-at"],
         }.freeze

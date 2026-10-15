@@ -135,7 +135,7 @@ RSpec.describe "Admin webmentions", type: :request do
       get "/admin/webmentions"
 
       expect(page).to have_css(".wm-excerpt", text: "Good one")
-        .and have_css(".wm-kind.pink", text: "reply")
+        .and have_css(".wm-kind.sand", text: "reply")
         .and have_css(".inbox-meta", text: %r{/writing/hello\s*Sep 7, 2026, 12:30})
     end
 
@@ -146,7 +146,7 @@ RSpec.describe "Admin webmentions", type: :request do
       expect(page.find(".inbox-meta time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
     end
 
-    { reply: "pink", like: "sand", repost: "green", mention: "blue" }.each do |type, color|
+    { reply: "sand", like: "pink", repost: "green", mention: "blue" }.each do |type, color|
       it "colors the #{type} label #{color}" do
         create(:webmention, type, post: target)
         get "/admin/webmentions"
