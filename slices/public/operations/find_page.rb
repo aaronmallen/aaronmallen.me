@@ -4,7 +4,6 @@ module Public
   module Operations
     class FindPage
       FEED = ".atom"
-      FIRST = Blog::Structs::Page.new(number: 1, size: 1)
       PAGES = %i[root writing about projects contact].freeze
 
       include Deps[
@@ -29,7 +28,7 @@ module Public
       def tag?(tag)
         return false unless tag == Blog::Types::Normalized::Tag.call(tag) { nil }
 
-        post_queries.published_page_by_tag(tag, FIRST).rows.any? || project_queries.public_by_tag(tag).any?
+        post_queries.published_tag?(tag) || project_queries.public_tag?(tag)
       end
 
       def unescape(value) = ::Rack::Utils.unescape_path(value.to_s)

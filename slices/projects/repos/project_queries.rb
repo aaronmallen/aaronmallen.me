@@ -38,6 +38,8 @@ module Projects
 
       def public_grid(limit = nil) = with_tags.in_public.live.by_stars.limit(limit).to_a
 
+      def public_tag?(tag) = projects.in_public.live.tagged(tag).select(:id).exist?
+
       def tracked = with_tags.tracked.in_order.to_a
 
       private

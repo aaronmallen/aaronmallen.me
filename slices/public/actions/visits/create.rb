@@ -14,6 +14,7 @@ module Public
         REJECTED = 400
         THROTTLED = 429
         TIMING = "timing"
+        VIEW = Blog::Types::VisitKind["view"]
 
         include Deps[
           "operations.find_page",
@@ -31,10 +32,17 @@ module Public
 
         private
 
-        def countable?(visit, route)
-          return false if visit["kind"] == CLICK && !route.params.key?(:slug)
+        def checked(visit, route, status)
+          return status if status == ACCEPTED || find_page.call(route)
 
-          find_page.call(route)
+          uncounted(visit)
+        end
+
+        def countable?(visit, route)
+          return route.params.key?(:slug) if visit["kind"] == CLICK
+          return find_page.call(route) if visit["kind"] == VIEW
+
+          true
         end
 
         def outcome(request, visit)
@@ -78,7 +86,8 @@ module Public
           return REJECTED unless route
           return uncounted(visit) unless countable?(visit, route)
 
-          store(request, visit, route)
+          status = store(request, visit, route)
+          visit["kind"] == VIEW ? status : checked(visit, route, status)
         end
 
         def store(request, visit, route)

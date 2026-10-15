@@ -835,6 +835,52 @@ RSpec.describe "Visits", type: :request do
       expect(last_response.status).to eq(202)
       expect(stored).to have(1).item
     end
+
+    {
+      "a read" => { kind: "read", read_seconds: 42 },
+      "a scroll" => { kind: "scroll", scroll_depth: 50 },
+      "a click" => { kind: "click", link_host: "docs.example", link_path: "/guide" },
+    }.each do |named, visit|
+      it "accepts #{named} for a post that does not exist" do
+        beacon({ path: "/writing/nothing-here", view_token: token("first"), **visit })
+
+        expect(last_response.status).to eq(202)
+      end
+
+      it "accepts #{named} for a post that does not exist past the limit" do
+        lower_throttle_limit(:analytics, to: 1)
+        2.times { view }
+        beacon({ path: "/writing/nothing-here", view_token: token("first"), **visit })
+
+        expect(last_response.status).to eq(202)
+      end
+
+      it "turns away #{named} for a post that exists but was never viewed" do
+        beacon({ path: "/writing/hello", view_token: token("never"), **visit })
+
+        expect(last_response.status).to eq(400)
+      end
+    end
+  end
+
+  describe "the queries a beacon runs" do
+    it "reads no post for a read of a counted view" do
+      view
+
+      expect(logged_sql { read(42) }).not_to include('"posts"')
+    end
+
+    it "reads no post for a scroll of a counted view" do
+      view
+
+      expect(logged_sql { scroll(50) }).not_to include('"posts"')
+    end
+
+    it "loads no post body for a view of a tag page" do
+      sql = logged_sql { beacon({ kind: "view", path: "/writing/tags/ruby" }) }
+
+      expect(sql).not_to include("body_html")
+    end
   end
 
   describe "a beacon another site's page sent" do
