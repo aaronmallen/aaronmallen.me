@@ -73,7 +73,7 @@ module Tasks
         tasks.where(project_id:, number: number.to_i).pluck(:id).first
       end
 
-      def in_progress = all_open.select(&:in_progress?)
+      def in_progress = tasks.in_progress.in_order.to_a
 
       def in_sprint(sprint_id) = with_details.for_sprint(sprint_id).in_order.to_a
 
