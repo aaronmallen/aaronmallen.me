@@ -3,20 +3,15 @@
 module Record
   module Jobs
     class ImportCommits < Blog::ScheduledJob
+      SYNC = Blog::Types::SyncName["commits"]
+
       include Deps[
         commit_mutations: "repos.commit_mutations",
         import_commits: "operations.import_commits",
-        record_sync_outcome: "operations.record_sync_outcome",
+        record_sync_outcome: "operations.record_sync_outcome", # rubocop:disable Hanami/UnusedDeps
       ]
 
-      def perform
-        result = commit_mutations.with_import_lock { import_commits.call }
-
-        case result
-          in Failure(:lock_busy) then nil
-          else record_sync_outcome.call(Blog::Types::SyncName["commits"], result)
-        end
-      end
+      def perform = record_outcome(SYNC, commit_mutations.with_import_lock { import_commits.call })
     end
   end
 end

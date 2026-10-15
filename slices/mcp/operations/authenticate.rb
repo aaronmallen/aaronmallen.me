@@ -3,7 +3,7 @@
 module MCP
   module Operations
     class Authenticate < Blog::Operation
-      BEARER = /\ABearer +(?<token>\S+)\z/i
+      BEARER = Blog::Constants::BEARER
       INVALID_TOKEN = "invalid_token"
       NO_RESOURCE = "the access token names no resource"
       NO_TOKEN = "this endpoint takes a bearer access token"

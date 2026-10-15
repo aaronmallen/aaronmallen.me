@@ -10,14 +10,10 @@ module Admin
 
         def handle(request, response)
           post = post_queries.by_id(record_id(request)) || halt(404)
-          list = { status: Blog::Types::PostFilterParam[request.params[:status]], page: requested(request) }
+          list = { status: Blog::Types::PostFilterParam[request.params[:status]], page: page_number(request) }
 
           response.render(view, post:, list:, tags: tag_queries.all_in(PUBLIC), return_to: back_here(request))
         end
-
-        private
-
-        def requested(request) = Blog::Types::PageParam.call(request.params[:page]) { 1 }
       end
     end
   end

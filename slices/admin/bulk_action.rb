@@ -31,7 +31,7 @@ module Admin
     end
 
     def landing(request)
-      number = Blog::Types::PageParam.call(request.params[:page]) { 1 }
+      number = page_number(request)
       return number if number == 1
 
       page = Blog::Structs::Page.new(number:, size: page_size)

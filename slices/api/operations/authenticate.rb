@@ -3,7 +3,7 @@
 module API
   module Operations
     class Authenticate < Blog::Operation
-      BEARER = /\ABearer +(?<token>\S+)\z/i
+      BEARER = Blog::Constants::BEARER
       INVALID_TOKEN = "invalid_token"
       NO_TOKEN = "this endpoint takes a bearer API token"
       TOUCH_EVERY = Blog::Constants::TOUCH_EVERY

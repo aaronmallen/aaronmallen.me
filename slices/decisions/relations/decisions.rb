@@ -16,8 +16,6 @@ module Decisions
 
       def matching(text) = containing(text, :title, :problem)
 
-      def newest_first = order(self[:created_at].desc, self[:id].desc)
-
       def tagged(name)
         owner = decision_tags[:decision_id].qualified
 

@@ -54,6 +54,20 @@ RSpec.describe Blog::DB::Relation do
     end
   end
 
+  describe "creation order" do
+    let(:decisions) { relation(Decisions::Slice, :decisions) }
+    let!(:old) { create(:decision, created_at: Time.utc(2026, 1, 1)) }
+    let!(:tied) { Array.new(2) { create(:decision, created_at: Time.utc(2026, 2, 1)) } }
+
+    it "lists the newest first, breaking ties by the higher id" do
+      expect(decisions.newest_first.pluck(:id)).to eq([*tied.map(&:id).sort.reverse, old.id])
+    end
+
+    it "lists the oldest first, breaking ties by the lower id" do
+      expect(decisions.oldest_first.pluck(:id)).to eq([old.id, *tied.map(&:id).sort])
+    end
+  end
+
   describe "#tally" do
     let(:decisions) { relation(Decisions::Slice, :decisions) }
 

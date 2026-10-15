@@ -12,8 +12,6 @@ module Tasks
       def for_task(task_id) = where(task_id:)
 
       def local = where(remote_id: nil)
-
-      def oldest_first = order(self[:created_at].asc, self[:id].asc)
     end
   end
 end

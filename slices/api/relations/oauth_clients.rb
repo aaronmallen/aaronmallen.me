@@ -10,8 +10,6 @@ module API
 
         where(id: live.select(:oauth_client_id))
       end
-
-      def newest_first = order(self[:created_at].desc, self[:id].desc)
     end
   end
 end

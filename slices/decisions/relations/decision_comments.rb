@@ -10,8 +10,6 @@ module Decisions
       end
 
       def for_decision(decision_id) = where(decision_id:)
-
-      def oldest_first = order(self[:created_at].asc, self[:id].asc)
     end
   end
 end

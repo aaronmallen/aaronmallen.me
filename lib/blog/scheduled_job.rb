@@ -16,5 +16,12 @@ module Blog
     rescue StandardError => e
       record_and_raise(sync, Failure([reason, e.message]), e)
     end
+
+    def record_outcome(sync, result)
+      case result
+        in Failure(:lock_busy) then nil
+        else record_sync_outcome.call(sync, result)
+      end
+    end
   end
 end

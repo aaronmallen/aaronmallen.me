@@ -47,6 +47,8 @@ module Admin
       halt 404, response.render(not_found_view)
     end
 
+    def page_number(request) = Blog::Types::PageParam.call(request.params[:page]) { 1 }
+
     def page_size = settings.page_size[:admin]
 
     def picked_ids(request) = Array(request.params[:ids]).filter_map { Blog::Types::IdParam[it] }.uniq

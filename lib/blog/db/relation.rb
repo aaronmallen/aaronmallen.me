@@ -59,7 +59,11 @@ module Blog
 
       def lock_until_commit(*keys) = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, table_key, *keys))
 
+      def newest_first = order(self[:created_at].desc, self[:id].desc)
+
       def none = where(false)
+
+      def oldest_first = order(self[:created_at].asc, self[:id].asc)
 
       def paged(page) = limit(page.limit).offset(page.offset)
 

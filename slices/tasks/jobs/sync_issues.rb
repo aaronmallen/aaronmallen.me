@@ -8,7 +8,7 @@ module Tasks
       include Deps[
         github: "github.client",
         linear: "linear.client",
-        record_sync_outcome: "record.operations.record_sync_outcome",
+        record_sync_outcome: "record.operations.record_sync_outcome", # rubocop:disable Hanami/UnusedDeps
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
       ]
@@ -22,10 +22,7 @@ module Tasks
           task_source_mutations.with_sync_lock(provider) { sync_issues.call(provider:, client:) }
         end
 
-        case result
-          in Failure(:lock_busy) then nil
-          else record_sync_outcome.call(SYNCS.fetch(provider), result)
-        end
+        record_outcome(SYNCS.fetch(provider), result)
       end
     end
   end

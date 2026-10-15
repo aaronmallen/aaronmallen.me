@@ -35,8 +35,6 @@ module Suggestions
 
       def latest_ids_by_social_post = latest_ids_by(:social_post_id)
 
-      def newest_first = order(self[:created_at].desc, self[:id].desc)
-
       def without_edits(edited) = exclude(id: edited)
     end
   end

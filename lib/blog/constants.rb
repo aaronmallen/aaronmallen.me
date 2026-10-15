@@ -6,6 +6,7 @@ module Blog
   module Constants
     include Dry::Core::Constants
 
+    BEARER = /\ABearer +(?<token>\S+)\z/i
     CHECKED = "1"
     GAP = :gap
     INTEGER_MAX = (2**31) - 1

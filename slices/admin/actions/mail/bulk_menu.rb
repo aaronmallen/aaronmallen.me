@@ -11,8 +11,8 @@ module Admin
           halt 404 if ids.empty?
 
           list = Helpers::MailList.from(request.params)
-          page = Blog::Types::PageParam.call(request.params[:page]) { 1 }
-          response.render(view, ids:, list:, fields: { **list, **Blog::Structs::Page.query(page) }, labels:, accounts:)
+          fields = { **list, **Blog::Structs::Page.query(page_number(request)) }
+          response.render(view, ids:, list:, fields:, labels:, accounts:)
         end
 
         private
