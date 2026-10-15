@@ -4,12 +4,13 @@ require "socket"
 
 RSpec.describe Admin::Live::Hub do
   subject(:hub) do
-    described_class.new(url:, reporter: agent, heartbeat_seconds:, retry_seconds: 0.1, tick_seconds: 0.05)
+    described_class.new(url:, reporter: agent, heartbeat_seconds:, retry_seconds: 0.1, tick_seconds:)
   end
 
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:heartbeat_seconds) { 30 }
   let(:pairs) { [] }
+  let(:tick_seconds) { 0.05 }
   let(:url) { Blog::Providers::DBProvider.database_url(Hanami.app["settings"].database) }
 
   before { allow(agent).to receive(:notify) }
@@ -45,6 +46,8 @@ RSpec.describe Admin::Live::Hub do
     end
   end
 
+  def tables(sent) = sent.scan(/^data: (.+)$/).flatten
+
   def terminate_listener
     Sequel.connect(url, keep_reference: false) do |db|
       here = { application_name: described_class::APPLICATION_NAME, datname: Sequel.function(:current_database) }
@@ -67,6 +70,19 @@ RSpec.describe Admin::Live::Hub do
     notify("messages")
 
     expect(readers.map { read_until(it, "data: messages\n\n") }).to all(include("event: change\ndata: messages\n\n"))
+  end
+
+  describe "with several notices in one tick" do
+    let(:tick_seconds) { 1 }
+
+    it "sends one event per table" do
+      reader = open_stream
+      %w[messages tasks messages].each { notify(it) }
+      sent = read_until(reader, "data: tasks\n\n")
+      notify("decisions")
+
+      expect(tables(sent + read_until(reader, "data: decisions\n\n"))).to eq(%w[messages tasks decisions])
+    end
   end
 
   it "stamps each change with the hub's clock" do

@@ -12,7 +12,12 @@ module Spec
     class RequestGate
       HOLD_TIMEOUT = 5
 
-      Hold = Data.define(:arrived, :released) do
+      Hold = Data.define(:after, :arrived, :released) do
+        def pass
+          arrived.push(true)
+          released.pop(timeout: HOLD_TIMEOUT)
+        end
+
         def release = released.push(true)
 
         def wait_for_arrival
@@ -31,17 +36,18 @@ module Spec
         env.delete(Blog::RequestTimer::AFTER_REPLY)
         path = env[Rack::PATH_INFO]
         @counts[path] += 1
-        @holds.delete(path)&.then do |hold|
-          hold.arrived.push(true)
-          hold.released.pop(timeout: HOLD_TIMEOUT)
+        hold = @holds.delete(path)
+        hold.pass if hold && !hold.after
+        @app.call(env).tap do
+          hold.pass if hold&.after
+          @answered[path] += 1
         end
-        @app.call(env).tap { @answered[path] += 1 }
       end
 
       def count(path) = @counts[path]
 
-      def hold(path)
-        @holds[path] = Hold.new(arrived: Thread::Queue.new, released: Thread::Queue.new)
+      def hold(path, after: false)
+        @holds[path] = Hold.new(after:, arrived: Thread::Queue.new, released: Thread::Queue.new)
       end
 
       def reset

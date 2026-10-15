@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -50,13 +50,16 @@ Postgres sends a notice only on commit and folds duplicates within one transacti
 notice per table, after the rows are there to read. A table written on every public page view, such as
 `analytics_events`, gets no trigger. A new table the admin draws gets its trigger in the migration that adds it.
 
-**One hub per web process holds every stream.** A hub in `lib/admin`, which an admin slice provider starts on the
-first stream, keeps one Postgres connection outside the Sequel pool in `LISTEN admin_changes`. It writes each
-notice as an SSE event, named `change` with the table as its data, to every open stream. Since #1286 each event's
-`id` holds the time the hub heard the notice, in microseconds on the host's monotonic clock. It writes a comment line
-every 30 seconds as a heartbeat and drops any socket that cannot take a write without blocking. When its own
-connection drops, it reconnects and sends one event, so pages catch up on what they missed. Under Puma's cluster
-mode each fork starts its own hub after the fork.
+**One hub per web process holds every stream.** A hub in `lib/admin`, which an admin slice provider starts on the first
+stream, keeps one Postgres connection outside the Sequel pool in `LISTEN admin_changes`. It writes each notice as an SSE
+event, named `change` with the table as its data, to every open stream. Since #1286 each event's `id` holds the time the
+hub heard the notice, in microseconds on the host's monotonic clock. Since #1403 the hub holds what it hears for one
+tick, a second, from the first notice, then writes one event per table, stamped with the last time it heard that table.
+A sync or backfill that stores each row in its own transaction sends a notice per row, and this turns them into one
+event per table each second. It writes a comment line every 30 seconds as a heartbeat and drops any socket that cannot
+take a write without blocking. When its own connection drops, it reconnects and sends one event, so pages catch up on
+what they missed. That event waits for the tick like the rest. Under Puma's cluster mode each fork starts its own hub
+after the fork.
 
 **Streams cost a socket, not a thread.** `GET /admin/events` runs the GitHub sign-in check like every admin action,
 then takes the socket through Rack's full hijack, writes the status line and headers itself
@@ -80,12 +83,14 @@ skips an event whose table is not on the list, and the catch-up event (`*`) refe
 admin view that renders in the layout lists its tables, an empty list for a page that draws none of its own, so a
 new commit no longer redraws the calendar. A page that lists none would still refetch on every event.
 
-**`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event
-it calls the page's own URL through `setupFetch`, so events within its wait become one request and a new event
-aborts a stale one. It parses the answer with `parse` and morphs `<main>`, the top bar and the palette in place
-with idiomorph, which aube adds and esbuild bundles. idiomorph keeps the focused element, the caret and unsent text,
-and needs no `unsafe-eval`, so the content security policy does not change: `connect-src 'self'` already admits the
-stream. The toast sits outside what the morph touches.
+**`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event it
+calls the page's own URL through `setupFetch`, so events within its wait become one request. Since #1403 an event that
+lands while a refetch is in flight no longer aborts it, since the abort stops only the browser and Puma still renders
+the page. The tab keeps one refetch in flight and one queued, and fetches once more after the answer lands, unless the
+answer already shows every event that came in meanwhile. It parses the answer with `parse` and morphs `<main>`, the top
+bar and the palette in place with idiomorph, which aube adds and esbuild bundles. idiomorph keeps the focused element,
+the caret and unsent text, and needs no `unsafe-eval`, so the content security policy does not change: `connect-src
+'self'` already admits the stream. The toast sits outside what the morph touches.
 
 - **Dialogs hold the morph.** While any modal `dialog` is open, the palette and the task modal among them, `live.js`
   keeps the newest answer and morphs when the dialog closes.
@@ -163,7 +168,9 @@ to report its own errors. rack-test cannot read a hijacked stream, so stream spe
 A Puma restart drops every stream. Each tab reconnects and refetches once.
 
 Every change costs a page render for each open tab, save a tab whose own in-place submit made it and a tab whose
-page does not list the table.
+page does not list the table. Since #1403 that is at most one render a second per tab, however fast the rows land,
+and a change takes up to a second longer to reach the page. A read that writes, such as Today starting its sprint,
+can now reach the stream the page opens a moment later and cost that page one more render.
 
 A page that lists its tables goes stale with no warning when it starts to draw a table it does not list. A change to
 what a view or the top bar reads has to update the list beside it. When the hub hears of

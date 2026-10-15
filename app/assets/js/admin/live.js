@@ -64,6 +64,7 @@ export function setupLive() {
   if (started || !url) return;
 
   started = true;
+  let asked = 0;
   let next = null;
 
   const morph = () => {
@@ -75,10 +76,14 @@ export function setupLive() {
   };
 
   refetch = setupFetch({
-    request: () => ({ url: window.location.href, redirect: "manual" }),
+    queue: true,
+    request: () => {
+      asked = wanted;
+      return { url: window.location.href, redirect: "manual" };
+    },
     done: (html) => {
       next = parse(html);
-      wanted = 0;
+      if (wanted === asked) wanted = 0;
       morph();
     },
   });

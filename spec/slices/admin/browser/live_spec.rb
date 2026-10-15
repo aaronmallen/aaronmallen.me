@@ -140,6 +140,8 @@ RSpec.describe "Admin pages that stay live", type: :feature do
   end
 
   describe "on a page that lists its tables" do
+    before { create(:sprint, sprint_date: today) }
+
     def notify(table) = Tasks::Slice["db.rom"].gateways[:default].connection.notify("admin_changes", payload: table)
 
     def renders(path = "/admin/tasks") = request_gate.count(path)
@@ -182,6 +184,35 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       sleep 1
 
       expect(renders("/admin/calendar")).to eq(1)
+    end
+
+    describe "while a refetch is in flight" do
+      let(:landing) { request_gate.hold("/admin/tasks", after: true) }
+
+      before do
+        live "/admin/tasks"
+        landing
+        notify("task_tags")
+        landing.wait_for_arrival
+        2.times do
+          notify("task_tags")
+          sleep 1.2
+        end
+      end
+
+      after { landing.release }
+
+      it "starts no other" do
+        expect(renders).to eq(2)
+      end
+
+      it "refetches once more after it lands" do
+        landing.release
+        wait_for_renders(3)
+        sleep 1
+
+        expect(renders).to eq(3)
+      end
     end
 
     it "refetches the calendar for a change to its events" do

@@ -61,6 +61,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
   end
 
   before do
+    create(:sprint, sprint_date: today)
     %w[first second third].each_with_index { |title, index| create(:task, title:, position: index + 1) }
     sign_in_to_admin
     visit "/admin/tasks?filter=next"

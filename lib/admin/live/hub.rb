@@ -26,12 +26,12 @@ module Admin
         url:, reporter:, heartbeat_seconds: HEARTBEAT_SECONDS, retry_seconds: RETRY_SECONDS, tick_seconds: TICK_SECONDS
       )
         @heartbeat_seconds = heartbeat_seconds
+        @batch = Batch.new(tick_seconds)
         @lock = Monitor.new
         @ready = @lock.new_cond
         @reporter = reporter
         @retry_seconds = retry_seconds
         @streams = []
-        @tick_seconds = tick_seconds
         @url = url
       end
 
@@ -52,6 +52,7 @@ module Admin
 
       def beat
         throw :stop if @stopping
+        broadcast(@batch.take) if @batch.due?
         return if monotonic - @beaten_at < @heartbeat_seconds
 
         broadcast(HEARTBEAT)
@@ -88,17 +89,15 @@ module Admin
         false
       end
 
-      def event(table) = "id: #{Clock.now}\nevent: change\ndata: #{table}\n\n"
-
       def listen(db)
-        options = { after_listen: ->(_) { listening }, loop: ->(_) { beat }, timeout: @tick_seconds }
+        options = { after_listen: ->(_) { listening }, loop: ->(_) { beat }, timeout: -> { @batch.wait } }
 
-        db.listen(CHANNEL, **options) { |*, table| broadcast(event(table)) }
+        db.listen(CHANNEL, **options) { |*, table| @batch << table }
       end
 
       def listening
         @lock.synchronize do
-          broadcast(event(CATCH_UP)) if @listened
+          @batch << CATCH_UP if @listened
           @beaten_at = monotonic
           @listened = @listening = true
           @reported = false
