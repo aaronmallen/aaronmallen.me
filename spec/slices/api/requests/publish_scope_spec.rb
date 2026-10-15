@@ -102,12 +102,100 @@ RSpec.describe "Changes that show in public", type: :request do
     it "cannot change the webmention settings" do
       expect(call_api(:patch, "/webmention_settings", { auto_approve_known_authors: true })).to be_refused
     end
+
+    it "cannot change the body of a scheduled post", :aggregate_failures do
+      post = create(:post, :scheduled, body: "as it was", published_at: Time.now + 86_400)
+
+      expect(call_api(:patch, "/posts/#{post.id}", { body: "changed" })).to be_refused
+      expect(Posts::Slice["repos.post_queries"].by_id(post.id).body).to eq("as it was")
+    end
+
+    it "cannot tag a published post", :aggregate_failures do
+      post = create(:post, :published)
+
+      expect(call_api(:post, "/posts/bulk/tag",
+                      { ids: [create(:post, :draft).id, post.id], tag: "ruby" })).to be_refused
+      expect(Posts::Slice["repos.post_queries"].by_id(post.id).tags).to be_empty
+    end
+
+    it "still tags a draft" do
+      expect(call_api(:post, "/posts/bulk/tag", { ids: [create(:post, :draft).id], tag: "ruby" }).status).to eq(200)
+    end
+
+    it "cannot change the social card of a published post" do
+      expect(call_api(:patch, "/posts/#{create(:post, :published).id}/seo", { og_title: "Loud" })).to be_refused
+    end
+
+    it "still changes the social card of a draft" do
+      expect(call_api(:patch, "/posts/#{create(:post, :draft).id}/seo", { og_title: "Quiet" }).status).to eq(200)
+    end
+
+    it "cannot approve webmentions", :aggregate_failures do
+      mention = create(:webmention)
+
+      expect(call_api(:post, "/webmentions/bulk/approve", { ids: [mention.id] })).to be_refused
+      expect(Social::Slice["repos.webmention_queries"].by_id(mention.id).status).to eq("pending")
+    end
+
+    it "cannot approve a webmention one at a time" do
+      expect(call_api(:post, "/webmentions/#{create(:webmention).id}/moderate", { verdict: "approved" })).to be_refused
+    end
+
+    it "still ignores a webmention" do
+      expect(call_api(:post, "/webmentions/#{create(:webmention).id}/moderate", { verdict: "ignored" }).status)
+        .to eq(200)
+    end
+
+    it "cannot sync issues while a task rule files into a published board" do
+      Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "", projects: [board.id] })
+
+      expect(call_api(:post, "/tasks/issues/sync")).to be_refused
+    end
+
+    it "cannot sync issues while a synced task sits on a published board" do
+      create(:task_source, task_id: on_board.id)
+
+      expect(call_api(:post, "/tasks/issues/sync")).to be_refused
+    end
+
+    it "cannot sync issues while a published board tracks a repo" do
+      create(:project, name: "Tracked", board_published: true, repo: "aaronmallen/aaronmallen.me")
+
+      expect(call_api(:post, "/tasks/issues/sync")).to be_refused
+    end
+
+    it "still syncs issues when no published board is in reach" do
+      connect_github_token
+      create(:task_source)
+      create(:project, :private, board_published: true, repo: "aaronmallen/aaronmallen.me")
+
+      expect(call_api(:post, "/tasks/issues/sync").status).to eq(200)
+    end
   end
 
   describe "a token with publish" do
     it "adds a public project" do
       expect(call_api(:post, "/projects", { name: "Open", visibility: "public" }, scopes: %w[write publish]).status)
         .to eq(201)
+    end
+
+    it "tags a published post" do
+      body = { ids: [create(:post, :published).id], tag: "ruby" }
+
+      expect(call_api(:post, "/posts/bulk/tag", body, scopes: %w[write publish]).status).to eq(200)
+    end
+
+    it "approves webmentions" do
+      body = { ids: [create(:webmention).id] }
+
+      expect(call_api(:post, "/webmentions/bulk/approve", body, scopes: %w[write publish]).status).to eq(200)
+    end
+
+    it "syncs issues while a synced task sits on a published board" do
+      connect_github_token
+      create(:task_source, task_id: on_board.id)
+
+      expect(call_api(:post, "/tasks/issues/sync", {}, scopes: %w[write publish]).status).to eq(200)
     end
 
     it "changes a task on a published board" do
@@ -125,6 +213,24 @@ RSpec.describe "Changes that show in public", type: :request do
                         "text" => "this project shows in public, so this change needs the publish scope" }],
         "isError" => true,
       )
+    end
+
+    it "is refused an approved webmention, naming publish" do
+      expect(mcp_text("moderate_webmention", id: create(:webmention).id, verdict: "approved"))
+        .to eq("an approved webmention shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused a sync that reaches a published board, naming publish" do
+      create(:task_source, task_id: on_board.id)
+
+      expect(mcp_text("sync_issues")).to eq("a published board shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused a change to a scheduled post, naming publish" do
+      post = create(:post, :scheduled, published_at: Time.now + 86_400)
+
+      expect(mcp_text("update_post", id: post.id, title: "Loud"))
+        .to eq("this blog post shows in public, so this change needs the publish scope")
     end
 
     it "is refused a comment on a task on a published board, naming publish" do

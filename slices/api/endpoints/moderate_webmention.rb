@@ -39,6 +39,10 @@ module API
           else failed("could not moderate the webmention")
         end
       end
+
+      private
+
+      def public_in(fields) = ("an approved webmention" if fields[:verdict] == APPROVED)
     end
   end
 end

@@ -19,7 +19,8 @@ module API
       PUBLISH = Blog::Types::OAuthScope["publish"]
       SUGGEST = Blog::Types::OAuthScope["suggest"]
       SCOPES = {
-        "add_work_entry" => PUBLISH, "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE,
+        "add_work_entry" => PUBLISH, "approve_webmentions" => PUBLISH, "delete_posts" => DELETE,
+        "delete_tasks" => DELETE, "drop_sprint" => WRITE,
         "publish_post" => PUBLISH, "read_health_days" => HEALTH, "send_social_post" => PUBLISH,
         "suggest_edits" => SUGGEST, "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
         "update_post_edit_note" => PUBLISH, "update_webmention_settings" => PUBLISH, "upload_share" => PUBLISH,

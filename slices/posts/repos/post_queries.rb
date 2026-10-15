@@ -85,6 +85,8 @@ module Posts
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
 
+      def shown?(ids) = posts.with_ids(ids).scheduled_or_published.exist?
+
       def sitemap_posts = posts.published.newest_first.select(*SITEMAP).to_a
 
       def slugs(ids) = posts.with_ids(ids).select(:id, :slug).to_a.to_h { [it.id, it.slug] }

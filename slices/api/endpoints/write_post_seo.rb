@@ -25,7 +25,7 @@ module API
         },
       ).freeze
 
-      include Deps[save_post_seo: "posts.operations.save_post_seo"]
+      include Deps[post_queries: "posts.repos.post_queries", save_post_seo: "posts.operations.save_post_seo"]
 
       def handle(id:, **fields)
         case save_post_seo.call(id, fields.slice(*FIELDS))
@@ -35,6 +35,10 @@ module API
           else failed("could not save the social card fields")
         end
       end
+
+      private
+
+      def public_in(fields) = ("this blog post" if post_queries.shown?(fields[:id]))
     end
   end
 end

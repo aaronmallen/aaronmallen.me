@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
-amended: ["#941", "#1335"]
+amended: ["#941", "#1335", "#1441"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 
@@ -28,9 +28,12 @@ on the consent page. The owner wants to grant edits without either power.
 - **`publish`** guards every change that shows something in public. #1335 set this rule in place of "results nobody
   can call back", since an undo comes too late once a page has gone out and sits in the edge cache. It guards
   `publish_post` and `send_social_post`, and every call that uploads a share or a share group, adds a work entry,
-  changes the webmention settings or rewrites the edit note on a published post. It also guards each change whose
-  target is public at the time: a project that is public after the change, a published post, and a task on a
-  published board ([ADR 0160][0160]), which takes in linking a task to such a project.
+  approves webmentions in bulk, changes the webmention settings or rewrites the edit note on a published post. It
+  also guards each change whose target is public at the time: a project that is public after the change, a published
+  or scheduled post and its tags and social card, an approved webmention, and a task on a published board
+  ([ADR 0160][0160]), which takes in linking a task to such a project. #1441 added scheduled posts, since their
+  text goes out with them, and an issue sync that can reach a published board: one a task rule files into, one that
+  tracks a repo, or one that holds a synced task.
 - **`delete`** guards every tool that removes a record for good: each `delete_*` tool and `remove_tag`.
 - **`write`** keeps every other change, those a later call can undo among them: drop, archive, untag, unlink and
   cancel. A change to a draft, a private project or a task on no published board stays here, as do task tags and
@@ -65,7 +68,8 @@ A client that asks only for `write`, as every client did before, now connects wi
 learn why until it calls one.
 
 A client that holds `write` alone can no longer edit a public project, a published post or a task on a published
-board, and has to connect again asking for `publish` to get that back.
+board, and has to connect again asking for `publish` to get that back. Nor can it approve a webmention, or sync
+issues while a published board sits in the sync's reach.
 
 A new tool that removes a record or shows something in public has to name the right scope, or check its target.
 Nothing checks that it does beyond `spec/slices/mcp/requests/scopes_spec.rb`, which lists each tool under the scope it

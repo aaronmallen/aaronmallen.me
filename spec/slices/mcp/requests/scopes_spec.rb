@@ -19,7 +19,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       "suggest" => %w[suggest_edits],
       "write" => %w[
         accept_suggestion_edits add_decision_comment add_decision_option add_task_comment
-        approve_webmentions archive_project cancel_task cancel_tasks capture_task
+        archive_project cancel_task cancel_tasks capture_task
         clear_inbox
         complete_task complete_tasks
         create_journal_entry create_post create_saved_view create_social_post drop_decision drop_sprint edit_decision
@@ -38,8 +38,8 @@ RSpec.describe "MCP tool scopes", type: :request do
         wake_inbox_row write_post_seo
       ],
       "publish" => %w[
-        add_work_entry publish_post send_social_post update_post_edit_note update_webmention_settings upload_share
-        upload_share_group
+        add_work_entry approve_webmentions publish_post send_social_post update_post_edit_note
+        update_webmention_settings upload_share upload_share_group
       ],
       "health" => %w[read_health_days],
       "mail" => %w[
