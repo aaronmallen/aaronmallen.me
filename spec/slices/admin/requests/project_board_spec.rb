@@ -303,7 +303,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         found = tasks.by_id(task.id)
 
         expect([found.stage, found.status, found.list]).to eq(%w[ready open next])
-        expect(tasks.timeline(task.id)).to be_empty
+        expect(Tasks::Slice["repos.task_timeline_queries"].for_task(task.id)).to be_empty
       end
 
       it "moves a ready card back to backlog" do

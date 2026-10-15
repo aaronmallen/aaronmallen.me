@@ -91,6 +91,36 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       expect(items).to eq(["View on source", "Copy text"])
     end
 
+    it "answers 404 for a comment on another task" do
+      comment = create(:task_comment, task_id: create(:task).id)
+      get "/admin/tasks/#{create(:task).id}/comments/#{comment.id}/menu"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "answers 404 for a session asked for as a comment" do
+      task = create(:task)
+      session = create(:work_session, :closed, task_id: task.id)
+      get "/admin/tasks/#{task.id}/comments/#{session.id}/menu"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "answers 404 for a comment asked for as a session" do
+      task = create(:task)
+      comment = create(:task_comment, task_id: task.id)
+      get "/admin/tasks/#{task.id}/sessions/#{comment.id}/menu"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "answers 404 for a comment on another decision" do
+      comment = create(:decision_comment, decision_id: create(:decision).id)
+      get "/admin/decisions/#{create(:decision).id}/comments/#{comment.id}/menu"
+
+      expect(last_response.status).to eq(404)
+    end
+
     describe "a decision comment" do
       let(:decision) { create(:decision) }
       let(:comment) { create(:decision_comment, decision_id: decision.id, body: "Go with A") }

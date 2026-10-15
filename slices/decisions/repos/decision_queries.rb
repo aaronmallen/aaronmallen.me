@@ -34,6 +34,10 @@ module Decisions
 
       def timeline(decision_id) = decision_timeline.for_decision(decision_id).oldest_first.to_a
 
+      def timeline_entry(decision_id, kind, source_id)
+        decision_timeline.for_decision(decision_id).where(kind:, source_id:).one
+      end
+
       private
 
       def narrowed(found, tag:, text:)

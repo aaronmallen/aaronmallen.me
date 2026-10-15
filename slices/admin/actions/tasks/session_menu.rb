@@ -4,12 +4,12 @@ module Admin
   module Actions
     module Tasks
       class SessionMenu < Action
-        include Deps[task_queries: "tasks.repos.task_queries"]
+        include Deps[task_timeline_queries: "tasks.repos.task_timeline_queries"]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)
           task_id = record_id(request)
-          session = task_queries.timeline(task_id).find { it.session? && it.source_id == id } || halt(404)
+          session = task_timeline_queries.entry(task_id, "session", id) || halt(404)
 
           response.render(view, session:, task_id:, return_to: back_here(request))
         end

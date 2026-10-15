@@ -13,6 +13,7 @@ module Admin
         list_record_links: "operations.list_record_links",
         task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
+        task_timeline_queries: "tasks.repos.task_timeline_queries",
       ]
 
       def call(id, query: nil, kind: nil, errors: EMPTY_HASH, records: EMPTY_HASH, **forms)
@@ -20,9 +21,7 @@ module Admin
         task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
-        { task:, note_html: note_html(task.note), timeline: task_queries.timeline(id),
-          edited: task_comment_queries.edited_ids(id),
-          forms: FORMS.merge(forms),
+        { task:, note_html: note_html(task.note), **history(id), forms: FORMS.merge(forms),
           linking: { errors:, kind:, query:, targets: task_queries.link_targets(id, query) },
           records: list_record_links.call(KIND, task.id, **records, except: [KIND]) }
       end
@@ -32,6 +31,8 @@ module Admin
       def find(id)
         found(task_queries.detailed(id))
       end
+
+      def history(id) = { timeline: task_timeline_queries.for_task(id), edited: task_comment_queries.edited_ids(id) }
 
       def note_html(note)
         html = ::Markdown::Note.to_html(note).strip

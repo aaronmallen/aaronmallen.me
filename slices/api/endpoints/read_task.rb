@@ -5,6 +5,8 @@ module API
     class ReadTask < TaskEndpoint
       SCHEMA = Tasks::BY_ID
 
+      include Deps[task_timeline_queries: "tasks.repos.task_timeline_queries"]
+
       TIMELINE = "comments, work sessions, moves, tag and status changes and when a series made the task, oldest first"
 
       ENTRIES = [
@@ -24,7 +26,7 @@ module API
         return missing("task", id) if task.nil?
 
         owner = settings.owner_name
-        timeline = task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it, owner:) }
+        timeline = task_timeline_queries.for_task(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it, owner:) }
 
         task_reply(task, timeline:)
       end

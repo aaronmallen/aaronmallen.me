@@ -138,7 +138,7 @@ RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
 
     complete
 
-    expect(slice("repos.task_queries").timeline(current(series).task_id).map(&:kind).first).to eq("recurred")
+    expect(slice("repos.task_timeline_queries").for_task(current(series).task_id).map(&:kind).first).to eq("recurred")
   end
 
   it "fails to pause or resume a missing series" do

@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
           decision_id = record_id(request)
-          comment = decision_queries.timeline(decision_id).find { it.comment? && it.source_id == id } || halt(404)
+          comment = decision_queries.timeline_entry(decision_id, "comment", id) || halt(404)
 
           response.render(view, comment:, owner: :decision, owner_id: decision_id, return_to: back_here(request))
         end
