@@ -30,9 +30,9 @@ module Tasks
       ]
 
       def call(provider:, client:, now: Time.now)
-        known = tracked(provider)
-        listing, checked, history = step fetch(provider, client, known, now)
-        count = settle(provider, client, known, now, [listing.items, checked, history])
+        run = Structs::IssueSyncRun.new(provider:, client:, now:, known: tracked(provider))
+        listing, checked, history = step fetch(run)
+        count = settle(run, listing.items, checked, history)
 
         listing.cut_short? ? step(Failure(:page_limit)) : count
       end
@@ -45,52 +45,52 @@ module Tasks
         { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
       end
 
-      def fetch(provider, client, known, now)
-        remote(client, provider) do
-          listing = client.assigned_issues
+      def fetch(run)
+        remote(run.client, run.provider) do
+          listing = run.client.assigned_issues
           assigned = listing.items
-          checked = client.issues(unseen(known, assigned, now))
+          checked = run.client.issues(unseen(run, assigned))
 
-          Success([listing, checked, history(client, [*assigned, *checked], known)])
+          Success([listing, checked, history(run, [*assigned, *checked])])
         end
       end
 
-      def follow(source, task, issue, now, history: EMPTY_HASH, reached: false)
+      def follow(run, source, task, issue, history: EMPTY_HASH, reached: false)
         state = observed(task, source, issue.fetch(:remote_state), reached)
         changes = history[issue[:id]]
 
         transaction do
-          task = settle_task.call(task, from: source.remote_state, to: state, at: now, history: changes).value!
+          task = settle_task.call(task, from: source.remote_state, to: state, at: run.now, history: changes).value!
           rewrite(task, issue)
-          restamp(source, state, issue, changes, now)
+          restamp(source, state, issue, changes, run.now)
           sync_comments.call(source, task, issue)
         end
       end
 
-      def follow_all(issues, known, history, now)
-        sources = issues.map { known.fetch(it[:id]) }
+      def follow_all(run, issues, history)
+        sources = issues.map { run.known.fetch(it[:id]) }
         tasks = task_queries.detailed_in_order(sources.map(&:task_id))
 
-        issues.zip(sources, tasks) { |issue, source, task| task && follow(source, task, issue, now, history:) }
+        issues.zip(sources, tasks) { |issue, source, task| task && follow(run, source, task, issue, history:) }
       end
 
-      def history(client, issues, known)
-        return EMPTY_HASH unless client.respond_to?(:transitions)
+      def history(run, issues)
+        return EMPTY_HASH unless run.client.respond_to?(:transitions)
 
-        client.transitions(issues, known.transform_values(&:history_cursor).compact)
+        run.client.transitions(issues, run.known.transform_values(&:history_cursor).compact)
       end
 
-      def import(provider, issue, now, reached: false)
+      def import(run, issue, reached: false)
         transaction do
           task = task_mutations.append(**copy(issue), list: EXTERNAL)
-          label(task, provider, issue, now)
-          fields = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
-          task_source_mutations.create(**fields).tap { follow(it, task, issue, now, reached:) }
+          label(task, run.provider, issue, run.now)
+          fields = { task_id: task.id, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
+          task_source_mutations.create(**fields, provider: run.provider).tap { follow(run, it, task, issue, reached:) }
         end
       end
 
-      def import_all(provider, issues, known, now, reached: false)
-        issues.each { known[it[:id]] = import(provider, it, now, reached:) }
+      def import_all(run, issues, reached: false)
+        issues.each { run.track(import(run, it, reached:)) }
       end
 
       def label(task, provider, issue, now)
@@ -107,13 +107,13 @@ module Tasks
         reached || task_link_queries.synced?(task.id) ? OPEN : state
       end
 
-      def reach(provider, client, assigned, known)
-        remote(client, provider) { Success(reach_issues.call(client, assigned, known)) }
+      def reach(run, assigned)
+        remote(run.client, run.provider) { Success(reach_issues.call(run.client, assigned, run.known)) }
       end
 
-      def relate(provider, client, known, now, (assigned, checked))
-        reached = reach(provider, client, assigned, known).fmap { import_all(provider, it, known, now, reached: true) }
-        sync_links.call(known, [*assigned, *checked, *reached.value_or(EMPTY_ARRAY)])
+      def relate(run, assigned:, checked:)
+        reached = reach(run, assigned).fmap { import_all(run, it, reached: true) }
+        sync_links.call(run.known, [*assigned, *checked, *reached.value_or(EMPTY_ARRAY)])
         reached
       end
 
@@ -133,19 +133,19 @@ module Tasks
         task_mutations.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
       end
 
-      def settle(provider, client, known, now, (assigned, checked, history))
-        held, fresh = assigned.partition { known.key?(it[:id]) }
+      def settle(run, assigned, checked, history)
+        held, fresh = assigned.partition { run.known.key?(it[:id]) }
 
-        follow_all([*held, *checked], known, history, now)
-        import_all(provider, fresh, known, now)
+        follow_all(run, [*held, *checked], history)
+        import_all(run, fresh)
 
-        fresh.size + step(relate(provider, client, known, now, [assigned, checked])).size
+        fresh.size + step(relate(run, assigned:, checked:)).size
       end
 
       def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }
 
-      def unseen(known, assigned, now)
-        known.except(*assigned.map { it[:id] }).values.select { it.due?(now) }.to_h { [it.remote_id, it.url] }
+      def unseen(run, assigned)
+        run.known.except(*assigned.map { it[:id] }).values.select { it.due?(run.now) }.to_h { [it.remote_id, it.url] }
       end
     end
   end
