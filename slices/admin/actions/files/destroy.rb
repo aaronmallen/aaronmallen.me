@@ -10,7 +10,7 @@ module Admin
         include Deps[delete_share: "shares.operations.delete_share"]
 
         def handle(request, response)
-          back = auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_files)
+          back = back_here(request) || routes.path(:admin_files)
 
           case delete_share.call(record_id(request))
             in Failure[:unavailable]

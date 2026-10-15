@@ -14,7 +14,7 @@ module Admin
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
           result = remove_tag.call(record_id(request), scope:)
-          path = auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_tags, scope:)
+          path = back_here(request) || routes.path(:admin_tags, scope:)
 
           case result
             in Failure[:last_tag_of_rules, patterns]

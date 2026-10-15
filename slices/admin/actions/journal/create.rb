@@ -32,13 +32,13 @@ module Admin
           values = values(params)
           return response.render(index_view, **summarize_journal.call, values:, errors:) unless modal?(request)
 
-          written = { body: values[:body], tags: values[:tags], errors:, return_to: wanted_path(request) }
+          written = { body: values[:body], tags: values[:tags], errors:, return_to: back_here(request) }
           response.render(index_view, **summarize_journal.call, written:)
         end
 
         def modal?(request) = Blog::Types::Checkbox[request.params[:modal]]
 
-        def return_path(request) = wanted_path(request) || routes.path(:admin_journal)
+        def return_path(request) = back_here(request) || routes.path(:admin_journal)
 
         def values(params)
           {
@@ -47,8 +47,6 @@ module Admin
             tags: Blog::Types::Text[params[:tags]],
           }
         end
-
-        def wanted_path(request) = auth_session(request).admin_return_path(request.params[:return_to])
       end
     end
   end

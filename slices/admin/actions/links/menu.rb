@@ -8,9 +8,8 @@ module Admin
 
         def handle(request, response)
           link = short_link_queries.find(record_id(request)) || halt(404)
-          return_to = auth_session(request).admin_return_path(request.params[:return_to])
 
-          response.render(view, link:, return_to:)
+          response.render(view, link:, return_to: back_here(request))
         end
       end
     end

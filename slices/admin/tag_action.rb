@@ -9,7 +9,7 @@ module Admin
       tag = Blog::Types::Nullable::Tag[request.params[:tag]]
 
       toast(response, "#{TOASTS}.#{outcome(record_id(request), tag)}", tag:)
-      response.redirect_to(auth_session(request).admin_return_path(request.params[:return_to]) || list_path)
+      response.redirect_to(back_here(request) || list_path)
     end
 
     private

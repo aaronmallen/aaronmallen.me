@@ -29,7 +29,7 @@ module Admin
         private
 
         def back(request, scope)
-          auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_tags, scope:)
+          back_here(request) || routes.path(:admin_tags, scope:)
         end
 
         def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
