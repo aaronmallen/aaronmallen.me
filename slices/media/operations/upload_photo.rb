@@ -30,6 +30,14 @@ module Media
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
+      def discard(keys)
+        keys.each do |key|
+          client.delete(key)
+        rescue ObjectStore::Client::Error
+          next
+        end
+      end
+
       def key_for(type) = "#{SecureRandom.hex(KEY_BYTES)}.#{type}"
 
       def measure(bytes, type)
@@ -50,15 +58,20 @@ module Media
           key: key_for(type), width: processed.width, height: processed.height, byte_size: processed.body.bytesize,
           widths: processed.variants.keys,
         )
-        step store(record.key, processed.body, type)
-        processed.variants.each { |width, body| step store(record.variant_key(width), body, type) }
+        objects = { record.key => processed.body, **processed.variants.transform_keys { record.variant_key(it) } }
+        step store(objects, type)
         record
       end
 
-      def store(key, body, type)
-        client.put(key, body, content_type: Blog::Types::PhotoType.mapping.fetch(type))
-        Success(key)
+      def store(objects, type)
+        stored = []
+        objects.each do |key, body|
+          client.put(key, body, content_type: Blog::Types::PhotoType.mapping.fetch(type))
+          stored << key
+        end
+        Success(stored)
       rescue ObjectStore::Client::Error
+        discard(stored)
         Failure([:unavailable])
       end
 
