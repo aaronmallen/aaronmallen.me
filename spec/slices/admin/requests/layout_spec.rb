@@ -98,6 +98,12 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(reads).to have(1).item
     end
 
+    it "reads the owner identities once for the action and the layout" do
+      reads = counting { get "/admin" }.grep(/owner_identities/)
+
+      expect(reads).to have(1).item
+    end
+
     it "loads no task to draw a page that lists none" do
       reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/).grep_v(/\ASELECT count\(\*\)/)
 

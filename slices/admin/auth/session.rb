@@ -42,6 +42,7 @@ module Admin
         @session.options[:renew] = true
         @session["email"] = email
         @session["signed_in_at"] = @now
+        @signed_in = nil
         path
       end
 
@@ -49,11 +50,14 @@ module Admin
         path = return_path(wanted)
         @session.clear
         @session.options[:drop] = true
+        @signed_in = false
         path
       end
 
       def signed_in?
-        !expired? && !ended? && owner_identity_queries.email?(@session["email"])
+        return @signed_in unless @signed_in.nil?
+
+        @signed_in = !expired? && !ended? && owner_identity_queries.email?(@session["email"])
       end
 
       private
