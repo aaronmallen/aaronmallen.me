@@ -160,6 +160,7 @@ RSpec.describe "MCP reach", type: :app do
       "shares.operations.delete_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.fetch_short_link_title" => "a background job fills a blank short link title",
       "shares.operations.group_shares" => "the admin groups shares; #1453 brings it to MCP",
+      "shares.operations.queue_short_link_check" => "the owner checks a destination again from the admin's Links tab",
       "shares.operations.remove_share_group_file" => "spec #1258 keeps group edits in the admin",
       "shares.operations.retarget_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.save_share" => "spec #1053 keeps MCP tools out of shares",

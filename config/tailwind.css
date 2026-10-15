@@ -5358,11 +5358,15 @@
 }
 
 @utility link-row-meta {
-  @apply mt-1.5 flex flex-wrap gap-x-3.5 gap-y-1 meta;
+  @apply mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 meta;
 
   & > span {
     @apply whitespace-nowrap;
   }
+}
+
+@utility link-row-reason {
+  @apply text-ink;
 }
 
 @utility link-row-acts {

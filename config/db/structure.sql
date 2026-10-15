@@ -7572,6 +7572,13 @@ CREATE TRIGGER short_codes_notify_admin_change AFTER INSERT OR DELETE OR UPDATE 
 
 
 --
+-- Name: short_link_checks short_link_checks_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER short_link_checks_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.short_link_checks FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: short_links short_links_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -8678,4 +8685,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016001468_create_search_attempts.rb'),
 ('20261016001470_create_short_link_checks.rb'),
 ('20261016001471_create_link_check_runs.rb'),
-('20261016001473_notify_admin_changes_on_post_link_checks.rb');
+('20261016001473_notify_admin_changes_on_post_link_checks.rb'),
+('20261016001474_notify_admin_changes_on_short_link_checks.rb');

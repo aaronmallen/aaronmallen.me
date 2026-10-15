@@ -10,7 +10,7 @@ module Admin
           link = short_link_queries.find(record_id(request))
           not_found(response) unless link
 
-          response.render(view, link:)
+          response.render(view, link:, check: short_link_queries.check(link))
         end
       end
     end

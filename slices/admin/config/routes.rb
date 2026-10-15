@@ -138,6 +138,7 @@ module Admin
     get "/links/:id/menu", to: "links.menu", as: :link_menu, id: ID
     post "/links/:id", to: "links.update", as: :update_link, id: ID
     post "/links/:id/delete", to: "links.destroy", as: :delete_link, id: ID
+    post "/links/:id/check", to: "links.check", as: :check_link, id: ID
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/mail", to: "mail.index", as: :mail
     post "/mail/bulk", to: "mail.bulk", as: :bulk_mail

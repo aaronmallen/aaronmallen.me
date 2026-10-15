@@ -8,7 +8,7 @@ module Admin
 
         def handle(request, response)
           page = requested_page(request, response)
-          exposures = build_links_page.call(page:, sort: request.params[:sort], search: request.params[:search])
+          exposures = build_links_page.call(page:, **request.params.to_h.slice(:sort, :filter, :search))
           not_found(response) if exposures[:links].past_end?
 
           response.render(view, **exposures)

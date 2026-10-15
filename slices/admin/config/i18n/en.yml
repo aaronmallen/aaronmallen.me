@@ -137,6 +137,7 @@ en:
       updated: "Entry updated"
   links_page:
     toasts:
+      check: "Checking that link"
       deleted: "Link deleted"
       saved: "Link saved"
       shortened: "Shortened"
@@ -1127,6 +1128,13 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+      link_check_pill:
+        failing: "failing"
+        failing_nights:
+          one: "failing %{count} night"
+          other: "failing %{count} nights"
+        fine: "fine"
+        unchecked: "not checked yet"
       links:
         field_error:
           code:
@@ -1144,6 +1152,7 @@ en:
             other: "%{clicks} clicks"
           code: "Short code"
           code_hint: "The part after %{host}/. Save a new one and the old link stops working at once."
+          check: "Destination check"
           confirm_delete: "Delete %{link}? Anyone following it gets a 404."
           copy_link: "Copy link"
           copy_markdown: "Copy as markdown"
@@ -1686,16 +1695,10 @@ en:
           check_again: "Check again: %{link}"
           check_now: "Check now: %{link}"
           checked: "checked %{at}"
-          failing: "failing"
-          failing_nights:
-            one: "failing %{count} night"
-            other: "failing %{count} nights"
           find: "Find in post: %{link}"
-          fine: "fine"
           first_failed: "first failed %{on}"
           once_live: "checked once the post is live"
           open: "Open %{link}"
-          unchecked: "not checked yet"
         links_drawer:
           all_fine: "all fine"
           check_all: "Check all again"
@@ -3188,13 +3191,22 @@ en:
           destination: "Long link"
           destination_placeholder: "Paste a link to shorten"
           empty: "Nothing shortened yet. Paste a link above."
+          filter: "Show"
+          filters:
+            all: "all %{count}"
+            failing: "failing %{count}"
           heading: "Links"
           lede:
-            one: "%{count} short link on %{host}, %{clicks} in all. Change where one points any time; the short link stays the same."
-            other: "%{count} short links on %{host}, %{clicks} in all. Change where one points any time; the short link stays the same."
+            one: "%{count} short link on %{host}, %{clicks} in all."
+            other: "%{count} short links on %{host}, %{clicks} in all."
+          lede_failing:
+            one: "%{count} destination is failing."
+            other: "%{count} destinations are failing."
+          lede_fine: "Change where one points any time; the short link stays the same."
           matches:
             one: "%{count} match"
             other: "%{count} matches"
+          no_failing: "Every destination answered the last check."
           no_match: "No links match."
           placeholder: "Search by title, destination or short code"
           search: "Search links"

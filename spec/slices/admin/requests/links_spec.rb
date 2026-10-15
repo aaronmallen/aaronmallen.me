@@ -304,6 +304,142 @@ RSpec.describe "Admin links", type: :request do
     end
   end
 
+  describe "the link check" do
+    let!(:made) do
+      %w[Dead Flaky Fine Fresh].each.with_index(1).to_h do |title, day|
+        [title, link("https://#{title.downcase}.example/", title:, at: Time.utc(2026, 9, day))]
+      end
+    end
+
+    def at = Time.utc(2026, 10, 12, 8)
+
+    def checks = Shares::Slice["relations.short_link_checks"]
+
+    def dead = made["Dead"]
+
+    def fail_nights(link, nights, reason: "404 Not Found")
+      nights.times { checks.record(short_link_id: link.id, url: link.destination, reason:, at: at + (it * 86_400)) }
+    end
+
+    def row(title) = page.all(".link-row").find { it.has_css?(".link-row-title", exact_text: title) }
+
+    before do
+      fail_nights(dead, 3)
+      fail_nights(made["Flaky"], 1, reason: "503 Service Unavailable")
+      checks.record(short_link_id: made["Fine"].id, url: made["Fine"].destination, reason: nil, at:)
+    end
+
+    it "counts the failing links in the filter and the lede", :aggregate_failures do
+      get "/admin/links"
+
+      expect(page.all(".file-search .seg-option").map(&:text)).to eq(["all 4", "failing 2"])
+      expect(page.find(".page-head-sub").text).to end_with("2 destinations are failing.")
+    end
+
+    it "lists only the failing links under the filter, longest failing first" do
+      get "/admin/links", filter: "failing"
+
+      expect(titles).to eq(%w[Dead Flaky])
+    end
+
+    it "keeps the filter when sorting and paging", :aggregate_failures do
+      get "/admin/links", filter: "failing"
+
+      expect(page).to have_css("form input[type='hidden'][name='filter'][value='failing']", visible: :all)
+      expect(page).to have_css("input[type='radio'][name='filter'][value='failing'][checked]", visible: :all)
+    end
+
+    it "searches within the failing links" do
+      get "/admin/links", filter: "failing", search: "flaky"
+
+      expect(titles).to eq(%w[Flaky])
+    end
+
+    it "says when no destination is failing" do
+      checks.exclude(reason: nil).delete
+      get "/admin/links", filter: "failing"
+
+      expect(page).to have_css(".empty", text: i18n.t("ui.views.links.index.no_failing"))
+    end
+
+    it "flags a link failing for nights in pink with its reason", :aggregate_failures do
+      get "/admin/links"
+
+      expect(row("Dead")).to have_css(".link-row-meta .pill.pink", text: "failing 3 nights")
+      expect(row("Dead")).to have_css(".link-row-reason", text: "404 Not Found")
+    end
+
+    it "flags a link failing one night in orange" do
+      get "/admin/links"
+
+      expect(row("Flaky")).to have_css(".pill.orange", exact_text: "failing")
+    end
+
+    it "marks a fine link and one not checked yet", :aggregate_failures do
+      get "/admin/links"
+
+      expect(row("Fine")).to have_css(".pill.green", text: "fine")
+      expect(row("Fresh")).to have_css(".pill", text: "not checked yet")
+      expect(row("Fine")).to have_no_css(".link-row-reason")
+    end
+
+    it "forgets a failure once the link points somewhere new" do
+      Shares::Slice["operations.retarget_short_link"].call(dead.id, { destination: "https://new.example/" })
+      get "/admin/links"
+
+      expect(row("Dead")).to have_css(".pill", text: "not checked yet")
+    end
+
+    it "shows the destination's result on the edit page", :aggregate_failures do
+      get "/admin/links/#{dead.id}/edit"
+
+      expect(page).to have_css(".pill.pink", text: "failing 3 nights")
+      expect(page).to have_text("404 Not Found")
+      expect(page).to have_text("first failed Oct 12, 2026")
+    end
+
+    it "offers Check again and no Find in post on the edit page", :aggregate_failures do
+      get "/admin/links/#{dead.id}/edit"
+
+      expect(page).to have_css("form#link-#{dead.id}-check[action='/admin/links/#{dead.id}/check']")
+      expect(page).to have_css("button[form='link-#{dead.id}-check'][type='submit']")
+      expect(page).to have_no_css("[data-find-link]")
+    end
+
+    it "shows the result in the row's drawer" do
+      get "/admin/links"
+
+      expect(page.find("dialog#link-#{dead.id}-drawer", visible: :all))
+        .to have_css("button[form='link-#{dead.id}-check']", visible: :all)
+    end
+
+    it "reloads when a check lands" do
+      get "/admin/links"
+
+      expect(page.find("main")["data-live-tables"].split).to include("short_link_checks")
+    end
+
+    describe "checking again" do
+      def check(id) = post("/admin/links/#{id}/check", {}, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+
+      it "queues a check of the destination and says so", :aggregate_failures do
+        check(dead.id)
+
+        expect(Shares::Jobs::CheckShortLinkAgain.jobs.map { it["args"] }).to eq([[dead.id]])
+        expect(last_response.location).to end_with("/admin/links/#{dead.id}/edit")
+        follow_redirect!
+        expect(page.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Checking that link")
+      end
+
+      it "answers 404 for a missing link", :aggregate_failures do
+        check(0)
+
+        expect(last_response).to be_not_found
+        expect(Shares::Jobs::CheckShortLinkAgain.jobs).to be_empty
+      end
+    end
+  end
+
   describe "the edit page" do
     it "shows the form without scripts", :aggregate_failures do
       made = link(code: "talk")

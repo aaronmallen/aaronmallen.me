@@ -179,6 +179,8 @@ module Blog
     ShareFilterParam = ShareFilter.fallback(ShareFilter.values.first)
     ShortLinkSort = Types::String.enum("recent", "clicks")
     ShortLinkSortParam = ShortLinkSort.fallback(ShortLinkSort.values.first)
+    ShortLinkFilter = Types::String.enum("all", "failing")
+    ShortLinkFilterParam = ShortLinkFilter.fallback(ShortLinkFilter.values.first)
     ShortCode = Types::String.constrained(format: SLUG_FORMAT)
     ServiceProvider = Types::String.enum("bluesky", "github", "google", "linear", "linkedin", "mastodon")
     SocialIntent = Types::String.enum("draft", "send")

@@ -11,7 +11,16 @@ module Shares
         short_links.with_code.where(destination:).order(Sequel[:short_links][:id]).limit(1).one
       end
 
-      def count_listed(search: nil) = listed(search).count
+      def check(link) = checks([link])[link.id]
+
+      def checks(links)
+        destinations = links.to_h { [it.id, it.destination] }
+
+        current = short_link_checks.where(short_link_id: destinations.keys).to_a
+        current.select { destinations[it.short_link_id] == it.url }.to_h { [it.short_link_id, it] }
+      end
+
+      def count_listed(search: nil, failing: false) = listed(search, failing).count
 
       def destinations = short_links.select(:id, :destination).to_a
 
@@ -19,16 +28,26 @@ module Shares
 
       def latest_to(destination) = short_links.with_code.where(destination:).newest_first.limit(1).one
 
-      def page_listed(page, sort:, search: nil)
-        found = listed(search)
-        page.fill((sort == CLICKS ? found.most_clicked : found.newest_first).paged(page).to_a)
+      def page_listed(page, sort:, search: nil, failing: false)
+        page.fill(ordered(listed(search, failing), sort, failing).paged(page).to_a)
       end
 
-      def totals = { count: short_links.count, clicks: short_links.sum(:click_count).to_i }
+      def totals
+        { count: short_links.count, clicks: short_links.sum(:click_count).to_i, failing: short_links.failing.count }
+      end
 
       private
 
-      def listed(search) = search ? short_links.with_code.matching(search) : short_links.with_code
+      def listed(search, failing)
+        found = failing ? short_links.with_code.failing : short_links.with_code
+        search ? found.matching(search) : found
+      end
+
+      def ordered(found, sort, failing)
+        return found.longest_failing if failing
+
+        sort == CLICKS ? found.most_clicked : found.newest_first
+      end
     end
   end
 end

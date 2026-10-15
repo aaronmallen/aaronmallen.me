@@ -10,6 +10,8 @@ module Admin
           prop :check, Blog::Types::Instance(ROM::Struct).optional
           prop :published, Blog::Types::Bool
           prop :quiet, Blog::Types::Bool, default: false
+          prop :form, Blog::Types::String, default: LinksDrawer::FORM
+          prop :find, Blog::Types::Bool, default: true
 
           def view_template
             ListItem(title: @text.empty? ? @url : @text, href: nil, sub: @url) do |item|
@@ -22,10 +24,7 @@ module Admin
 
           def actions
             check_button if @published
-            Button(
-              small: true, variant: :gh, icon: "fa-solid fa-i-cursor", label: t(".find", link: @url),
-              data: { find_link: @url },
-            )
+            find_button if @find
             Button(
               href: @url, small: true, variant: :gh, icon: :outbound, label: t(".open", link: @url),
               target: "_blank", rel: "noopener",
@@ -34,7 +33,7 @@ module Admin
 
           def check_button
             Button(
-              small: true, type: "submit", form: LinksDrawer::FORM, name: "url", value: @url,
+              small: true, type: "submit", form: @form, name: "url", value: @url,
               icon: "fa-solid fa-rotate", label: t(@check ? ".check_again" : ".check_now", link: @url),
             )
           end
@@ -49,23 +48,20 @@ module Admin
 
           def failing? = @check&.reason
 
+          def find_button
+            Button(
+              small: true, variant: :gh, icon: "fa-solid fa-i-cursor", label: t(".find", link: @url),
+              data: { find_link: @url },
+            )
+          end
+
           def first_failed = l(Blog::TimeZone.today(@check.first_failed_at || @check.checked_at), format: :medium)
 
           def meta
             p(class: "li-sub post-link-meta") do
-              pill
+              LinkCheckPill(check: @check)
               detail unless @quiet
             end
-          end
-
-          def nights = @check.failures
-
-          def pill
-            return Pill(color: :green, icon: "fa-solid fa-check") { t(".fine") } if @check && !failing?
-            return Pill(color: nil, icon: "fa-regular fa-clock") { t(".unchecked") } unless @check
-            return Pill(color: :orange, icon: "fa-solid fa-triangle-exclamation") { t(".failing") } if nights < 2
-
-            Pill(color: :pink, icon: "fa-solid fa-link-slash") { t(".failing_nights", count: nights) }
           end
         end
       end

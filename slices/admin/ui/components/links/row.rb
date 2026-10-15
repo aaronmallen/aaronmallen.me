@@ -10,6 +10,7 @@ module Admin
           SCHEME = %r{\Ahttps?://(www\.)?}
 
           prop :link, Blog::Types::Instance(ROM::Struct)
+          prop :check, Blog::Types::Instance(ROM::Struct).optional, default: nil
 
           def self.host(destination) = URI.parse(destination).host.to_s.delete_prefix("www.")
 
@@ -45,6 +46,8 @@ module Admin
           def host = self.class.host(@link.destination)
 
           def meta
+            LinkCheckPill(check: @check)
+            span(class: "link-row-reason") { @check.reason } if @check&.reason
             span { t(".clicks", count: @link.click_count, clicks: Blog::Helpers::Figures.count(@link.click_count)) }
             span { t(".made", on: date(@link.created_at)) }
             span { t(".retargeted", on: date(@link.retargeted_at)) } if @link.retargeted_at

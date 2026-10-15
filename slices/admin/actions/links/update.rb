@@ -29,7 +29,7 @@ module Admin
 
           values = %i[destination code title].to_h { [it, Blog::Types::Text[params[it]]] }
           response.status = 422
-          response.render(edit_view, link:, values:, errors:)
+          response.render(edit_view, link:, check: short_link_queries.check(link), values:, errors:)
         end
       end
     end

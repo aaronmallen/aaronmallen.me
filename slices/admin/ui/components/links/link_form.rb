@@ -6,8 +6,11 @@ module Admin
       module Links
         class LinkForm < Component
           prop :link, Blog::Types::Instance(ROM::Struct)
+          prop :check, Blog::Types::Instance(ROM::Struct).optional, default: nil
           prop :values, Blog::Types::Hash.optional, default: nil
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+
+          def self.check_id(link) = "#{scope(link)}-check"
 
           def self.delete_id(link) = "#{scope(link)}-delete"
 
@@ -18,14 +21,18 @@ module Admin
           def view_template
             p(class: "file-drawer-name") { @link.title || host }
             p(class: "file-drawer-meta") { meta }
+            destination_check
             h3(class: "file-drawer-head") { t(".link") }
             code(class: "file-drawer-link") { short }
             div(class: "file-drawer-copy") { copy }
             edit_form
             delete_form
+            check_form
           end
 
           private
+
+          def check_form = Form(id: self.class.check_id(@link), action: path(:admin_check_link, id: @link.id))
 
           def copy
             Button(
@@ -47,6 +54,14 @@ module Admin
             Form(
               id: self.class.delete_id(@link), action: path(:admin_delete_link, id: @link.id),
               data: { morph: true, confirm: t(".confirm_delete", link: Helpers::ShareLink.bare(short)) },
+            )
+          end
+
+          def destination_check
+            h3(class: "file-drawer-head") { t(".check") }
+            Posts::LinkCheckRow(
+              url: @link.destination, text: host, check: @check, published: true, form: self.class.check_id(@link),
+              find: false,
             )
           end
 
