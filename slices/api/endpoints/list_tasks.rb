@@ -4,7 +4,6 @@ module API
   module Endpoints
     class ListTasks < Endpoint
       BAD_SPRINT_DAY = "give sprint_on as a day, such as 2026-01-01"
-      CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       LISTS = Blog::Types::TaskList.values.freeze
       OPEN = Blog::Types::OpenTaskStatus.values.freeze
       STATUSES = Blog::Types::TaskStatus.values.freeze
@@ -14,18 +13,12 @@ module API
         additionalProperties: false,
         properties: {
           **Helpers::DayWindow::WINDOW,
-          agent: { type: "string", description: "an agent, such as claude-code; only the tasks it worked on" },
-          contributor: {
-            type: "string",
-            enum: CONTRIBUTORS,
-            description: "owner or agent; owner also keeps every task that lists no contributors",
-          },
+          **Helpers::Schema::CREDITS,
           lists: {
             type: "array",
             items: { type: "string", enum: LISTS },
             description: "next, someday or external; open tasks unless you name statuses; every list when left out",
           },
-          model: { type: "string", description: "a model, such as claude-opus-5-5; only the tasks it worked on" },
           page: Helpers::Paging::PAGE,
           query: { type: "string", description: "words to find in the title or note" },
           sprint_on: { type: "string", description: "a sprint day, as YYYY-MM-DD; only the tasks planned into it" },

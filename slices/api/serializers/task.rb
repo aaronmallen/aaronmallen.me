@@ -3,7 +3,7 @@
 module API
   module Serializers
     class Task < Serializer
-      LABELS = %w[blocks blocked_by child_of duplicates duplicated_by parent_of relates].freeze
+      LABELS = ::Tasks::Structs::Link::LABELS.values.flat_map(&:values).uniq.sort.freeze
       LABEL = { type: "string", description: "KEY-n for a task in a project, or n for a task with no project" }.freeze
       SLUG = { type: "string", pattern: "^[a-z0-9]+([.-][a-z0-9]+)*$", maxLength: 64 }.freeze
 

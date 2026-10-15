@@ -3,12 +3,13 @@
 module MCP
   module Tools
     class ReadAnalytics < Base
+      READ_CAP = Analytics::Operations::RecordVisit::MAX_READ_SECONDS / Blog::Helpers::Figures::MINUTE
       DEFINITIONS = "A view is one page load. A visitor is a hash of the address and user agent that changes " \
                     "each day and sets no cookie, so visitors add up day by day and one reader on two days counts " \
                     "twice. A bounce is a visitor with one view that day across the whole site. read_seconds is " \
-                    "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
-                    "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
-                    "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
+                    "the time a page sat on screen in a visible tab, capped at #{READ_CAP} minutes a view. " \
+                    "Nothing counts while the owner is signed in, or from a known bot or a client with no user " \
+                    "agent. Days run on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RAW_DAYS = Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS
       REF = Analytics::Operations::TagRef::KEY
       TOP = API::Helpers::AnalyticsReader::TOP
@@ -71,7 +72,8 @@ module MCP
                   "#{Analytics::Repos::AnalyticsPageQueries::FIRST_DAYS} days, day 1 first, up to today, and " \
                   "median, the middle visitors on each of those days across the posts the site counted from " \
                   "their first day, for comparison. unique_readers gives readers, the people who viewed the post " \
-                  "in the 12 months after it went out, each counted once by a hash kept for those months, and " \
+                  "in the %<reader_window_months>s months after it went out, each counted once by a hash kept " \
+                  "for those months, and " \
                   "final, true once the count can no longer change. readers is null for a post that went out " \
                   "too long before the site began counting. " \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \

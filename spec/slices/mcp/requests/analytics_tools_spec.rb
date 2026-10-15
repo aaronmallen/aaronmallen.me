@@ -240,6 +240,13 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
   end
 
   describe "read_analytics read-throughs" do
+    def described
+      headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
+      post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
+      tools = JSON.parse(last_response.body).dig("result", "tools")
+      tools.find { it.fetch("name") == "read_analytics" }.fetch("description")
+    end
+
     def read(**) = mcp_answer("read_analytics", from: (today - 6).iso8601, to: today.iso8601, **)
 
     def read_through(path)
@@ -277,12 +284,11 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     it "names the site's read-through depth and seconds in the tool's description" do
-      headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-      post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
-      tools = JSON.parse(last_response.body).dig("result", "tools")
-      described = tools.find { it.fetch("name") == "read_analytics" }.fetch("description")
-
       expect(described).to include("scrolled at least 75% down a page and read it for at least 30 seconds")
+    end
+
+    it "names the read cap and the reader window in the tool's description" do
+      expect(described).to include("capped at 20 minutes a view", "in the 12 months after it went out")
     end
   end
 
