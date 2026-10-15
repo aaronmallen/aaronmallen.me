@@ -6,7 +6,7 @@ created: 2026-10-10
 area: [app, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts, projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 supersedes: ["0035"]
 issue: "#916"
-amended: ["#1377"]
+amended: ["#1377", "#1385"]
 tags: [testing, rspec, coverage, capybara, sidekiq, mcp, unit-specs]
 ---
 
@@ -45,12 +45,15 @@ A unit spec is allowed only for code whose edges a behavior spec cannot reach at
 - a parser of text or of a payload from another service;
 - a calculation with many edges, such as a ranking or a count;
 - a race between two writers, or a check the app runs at boot;
-- a tool under `scripts/`, such as a RuboCop cop.
+- a tool under `scripts/`, such as a RuboCop cop;
+- a check that the schema and the code agree, such as each Postgres enum against its `Blog::Types` twin, or each
+  record kind against the trigger that drops its links.
 
 We still write none of these:
 
 - specs of how a gem behaves;
-- specs that restate a config value or the values of an enum;
+- specs that restate a config value or the values of an enum. A spec that reads an enum from the catalog and
+  compares it with the code restates nothing, so it is allowed;
 - specs that scan the source;
 - a unit spec of an operation, query, component or other class whose behavior a request, page, job or tool call
   already covers.
