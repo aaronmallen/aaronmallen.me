@@ -7,6 +7,7 @@ module Admin
         class Show < View
           include Components::Security
 
+          LIVE_TABLES = %w[oauth_clients oauth_tokens sign_ins].freeze
           ROWS = Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           prop :clients, ROWS
@@ -16,6 +17,7 @@ module Admin
           prop :tokens, ROWS
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             SettingsHead(title: t(".heading")) { honeybadger_link if @honeybadger_url }
             p(class: "settings-aside") { t(".sub") }
             div(class: "g-main even") do

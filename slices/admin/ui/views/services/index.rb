@@ -7,6 +7,7 @@ module Admin
         class Index < View
           include Components::Services
 
+          LIVE_TABLES = %w[service_connections sync_states webmention_settings].freeze
           WARNING_ICON = "fa-solid fa-triangle-exclamation"
 
           prop :connect, Blog::Types::Instance(::Services::Structs::Definition).optional
@@ -18,6 +19,7 @@ module Admin
           prop :selected, Blog::Types::Instance(Structs::ServiceRow).optional
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list

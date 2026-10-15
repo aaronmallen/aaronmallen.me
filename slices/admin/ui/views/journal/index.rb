@@ -12,6 +12,7 @@ module Admin
             entry_date: nil,
             tags: Blog::Constants::EMPTY_STRING,
           }.freeze
+          LIVE_TABLES = %w[journal_entries journal_entry_tags record_links saved_views].freeze
 
           prop :days, Blog::Types::Instance(Blog::Structs::DayPaged)
           prop :entries, Blog::Types::Integer
@@ -28,6 +29,7 @@ module Admin
           prop :written, Blog::Types::Hash.optional, default: nil
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             content_for(:journal_write) { capture { WriteDialog(today: @today, **@written) } } if @written
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock") do |head|
               head.tabs_side { SavedViews(**@saved_views) }

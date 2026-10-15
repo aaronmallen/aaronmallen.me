@@ -10,6 +10,11 @@ module Admin
           LABELS = {
             views: ".views", visitors: ".visitors", readers: ".readers", read_throughs: ".read_throughs",
           }.freeze
+          LIVE_TABLES = %w[
+            analytics_rollup_clicks analytics_rollup_devices analytics_rollup_page_countries
+            analytics_rollup_page_referrers analytics_rollup_paths analytics_rollup_scroll_depths
+            analytics_rollup_sources analytics_rollups post_tags posts
+          ].freeze
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
           prop :post, Blog::Types::Instance(ROM::Struct)
@@ -29,6 +34,7 @@ module Admin
           prop :unique_readers, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: @post.title, kicker: t(".kicker"), sub:) { actions }
 
             div(class: "post-analytics") do

@@ -9,6 +9,7 @@ module Admin
 
           ACCOUNTS_SEPARATOR = " and "
           LINKS = "social-links"
+          LIVE_TABLES = %w[service_connections social_post_deliveries social_post_parts social_posts suggestions].freeze
 
           prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(Structs::SocialAccount))
           prop :filter, Blog::Types::SocialQueue
@@ -22,6 +23,7 @@ module Admin
           prop :composer, Blog::Types::Hash, :**
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:)
 
             div(class: "g-main rev") do

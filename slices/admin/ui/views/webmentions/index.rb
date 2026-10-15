@@ -8,6 +8,7 @@ module Admin
           include Components::Webmentions
 
           APPROVED = Blog::Types::WebmentionStatus["approved"]
+          LIVE_TABLES = %w[posts].freeze
           PENDING = Blog::Types::WebmentionStatus["pending"]
 
           EMPTIES = Blog::Types::WebmentionStatus.values.to_h { [it, ".empty.#{it}"] }.freeze
@@ -18,6 +19,7 @@ module Admin
           prop :inbox, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) do
               filter_form
               Button(href: path(:admin_webmention_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }

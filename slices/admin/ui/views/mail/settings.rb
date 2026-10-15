@@ -14,6 +14,7 @@ module Admin
           prop :waiting, Blog::Types::Integer
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             PageHead(title: t(".heading"), sub: t(".sub")) do
               BackLink(href: path(:admin_mail), variant: :gh) { t(".back") }
             end

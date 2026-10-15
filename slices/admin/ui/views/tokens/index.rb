@@ -18,6 +18,7 @@ module Admin
           prop :tokens, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               live

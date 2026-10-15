@@ -7,6 +7,12 @@ module Admin
         class Show < View
           include Components::Analytics
 
+          LIVE_TABLES = %w[
+            analytics_rollup_countries analytics_rollup_devices analytics_rollup_hours analytics_rollup_paths
+            analytics_rollup_referrers analytics_rollup_scroll_depths analytics_rollup_sources analytics_rollups
+            post_tags posts
+          ].freeze
+
           prop :change, Blog::Types::Integer.optional, reader: :private
           prop :countries, Blog::Types::Array.of(Blog::Types::Hash)
           prop :feed, Blog::Types::Hash
@@ -22,6 +28,7 @@ module Admin
           prop :weekday_hours, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:)
             Tabs(current: :traffic, range: @range, action: path(:admin_analytics))
 

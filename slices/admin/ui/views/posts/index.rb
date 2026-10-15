@@ -9,6 +9,7 @@ module Admin
 
           ALL = Blog::Types::PostFilter["all"]
           DRAFT = Blog::Types::PostStatus["draft"]
+          LIVE_TABLES = %w[analytics_rollup_paths post_tags posts saved_views suggestions].freeze
           PUBLISHED = Blog::Types::PostStatus["published"]
           SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
@@ -32,6 +33,7 @@ module Admin
           prop :word_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             content_for(:title, t(".title"))
             PageHead(title: t(".heading"), sub:) do |head|
               head.tabs_side { SavedViews(**@saved_views) }

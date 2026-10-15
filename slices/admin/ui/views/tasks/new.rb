@@ -14,6 +14,7 @@ module Admin
           prop :origin, Blog::Types::TaskOrigin
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             PageHead(title: t(".heading"), sub: t(".sub")) { OriginLink(origin: @origin) }
 
             Card(label: t(".label"), title: t(".title")) do

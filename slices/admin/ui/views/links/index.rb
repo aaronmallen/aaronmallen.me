@@ -7,6 +7,7 @@ module Admin
         class Index < View
           include Components::Links
 
+          LIVE_TABLES = %w[short_codes short_links].freeze
           SEARCH_ID = "links-search"
           SORTS = Blog::Types::ShortLinkSort.values.to_h { [it, "ui.views.links.index.sorts.#{it}"] }.freeze
 
@@ -19,6 +20,7 @@ module Admin
           prop :values, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) { sort_form }
             new_form
             search_form

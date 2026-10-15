@@ -5,6 +5,7 @@ module Admin
     module Views
       class NotFound < View
         def view_template
+          content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
           PageHead(title: t(".heading"), sub: t(".message"), kicker: t(".status")) do
             Button(href: path(:admin_root)) { t(".today") }
           end

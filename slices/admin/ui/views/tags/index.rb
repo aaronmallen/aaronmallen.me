@@ -7,6 +7,7 @@ module Admin
         class Index < View
           include Components::Tags
 
+          LIVE_TABLES = %w[decision_tags journal_entry_tags post_tags project_tags task_rule_tags task_tags].freeze
           PRIVATE = Blog::Types::TagScope["private"]
           PUBLIC = Blog::Types::TagScope["public"]
 
@@ -25,6 +26,7 @@ module Admin
           prop :usage, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               div(class: "settings-main") do

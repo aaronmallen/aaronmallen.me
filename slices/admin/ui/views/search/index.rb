@@ -6,6 +6,9 @@ module Admin
       module Search
         class Index < View
           KINDS_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
+          LIVE_TABLES = %w[
+            commits decisions journal_entries posts projects pull_requests social_posts work_entries
+          ].freeze
           QUERY_ID = "search-q"
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
@@ -14,6 +17,7 @@ module Admin
           prop :results, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:)
 
             search_form

@@ -9,6 +9,7 @@ module Admin
 
           FILTERS = Blog::Types::ShareFilter.values.to_h { [it, "ui.views.files.index.#{it}"] }.freeze
           FILES_ID = "files-upload"
+          LIVE_TABLES = %w[share_group_files share_groups shares short_codes].freeze
           SEARCH_ID = "files-search"
 
           prop :count, Blog::Types::Integer
@@ -18,10 +19,11 @@ module Admin
           prop :totals, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) { filter_form }
             upload_form
             search_form
-            @shares.rows.empty? && @groups.empty? ? Card { Empty { t(empty) } } : grid
+            listing
             Pager(page: @shares, route: :admin_files, params: query)
           end
 
@@ -46,6 +48,8 @@ module Admin
             @groups.each { |group| ShareDrawer(form: GroupForm, record: group, kind: :group) { GroupForm(group:) } }
             @shares.rows.each { |share| ShareDrawer(form: ShareForm, record: share, kind: :file) { ShareForm(share:) } }
           end
+
+          def listing = @shares.rows.empty? && @groups.empty? ? Card { Empty { t(empty) } } : grid
 
           def query = { kind: filter, search: }.compact
 

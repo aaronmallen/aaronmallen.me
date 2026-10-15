@@ -6,12 +6,14 @@ module Admin
       module Commits
         class Show < View
           GITHUB_URL = "https://github.com/%s/commit/%s"
+          LIVE_TABLES = %w[commits record_links].freeze
 
           prop :commit, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String.optional
           prop :records, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: subject, kicker: t(".kicker", sha: short_sha), sub:, sub_icon: "fa-solid fa-code-commit") do
               BackLink(href: path(:admin_activity)) { t(".back") }
               github_link

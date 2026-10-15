@@ -7,6 +7,10 @@ module Admin
         class Show < View
           include Components::Health
 
+          LIVE_TABLES = %w[
+            commits health_days journal_entries oauth_clients oauth_tokens pull_requests work_sessions workouts
+          ].freeze
+
           prop :clients, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :day, Blog::Types::Date
           prop :report, Blog::Types::Instance(::Health::Structs::Report)
@@ -15,6 +19,7 @@ module Admin
           prop :tokens, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) { services_link }
             spans
             div(class: "g-main") do

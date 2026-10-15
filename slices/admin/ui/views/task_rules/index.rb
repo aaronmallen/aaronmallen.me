@@ -14,6 +14,7 @@ module Admin
             tags: Blog::Constants::EMPTY_STRING,
             projects: Blog::Constants::EMPTY_ARRAY,
           }.freeze
+          LIVE_TABLES = %w[projects task_rule_projects task_rule_tags task_rules].freeze
           TYPED = %i[pattern provider tags].freeze
 
           prop :adding, Blog::Types::Hash
@@ -26,6 +27,7 @@ module Admin
           end
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list

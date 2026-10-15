@@ -7,9 +7,12 @@ module Admin
         class Edit < View
           include Components::Decisions
 
+          LIVE_TABLES = %w[decision_options decision_tags decisions].freeze
+
           prop :editor, Blog::Types::Hash, :**
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             decision = @editor[:decision]
 
             PageHead(title: t(".heading"), kicker: decision.title) do

@@ -176,12 +176,19 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       expect { wait_for_renders(2) }.not_to raise_error
     end
 
-    it "refetches for any table on a page that lists none", :aggregate_failures do
-      live "/admin/security"
-      notify("decisions")
+    it "ignores a new commit on the calendar" do
+      live "/admin/calendar"
+      notify("commits")
+      sleep 1
 
-      expect(page).to have_no_css("main[data-live-tables]")
-      expect { wait_for_renders(2, "/admin/security") }.not_to raise_error
+      expect(renders("/admin/calendar")).to eq(1)
+    end
+
+    it "refetches the calendar for a change to its events" do
+      live "/admin/calendar"
+      notify("calendar_events")
+
+      expect { wait_for_renders(2, "/admin/calendar") }.not_to raise_error
     end
   end
 

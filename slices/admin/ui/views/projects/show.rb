@@ -10,6 +10,9 @@ module Admin
           CLOSED = Blog::Types::ClosedTaskStatus.values
           COLUMNS = Blog::Types::TaskColumn.values
           GITHUB = "https://github.com/%s"
+          LIVE_TABLES = %w[
+            project_tags projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
+          ].freeze
           NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
           SCHEME = %r{\Ahttps?://}
@@ -21,6 +24,7 @@ module Admin
           prop :step, Blog::Types::Integer
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
               t(".all_projects")
             end

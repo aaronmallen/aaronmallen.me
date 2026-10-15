@@ -9,6 +9,10 @@ module Admin
 
           CLOSE = { task_close: true }.freeze
           EDIT = "e"
+          LIVE_TABLES = %w[
+            projects record_links sprints task_comments task_contributors task_events task_links task_series task_tags
+            work_sessions
+          ].freeze
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :note_html, Blog::Types::String.optional
@@ -21,6 +25,7 @@ module Admin
           prop :origin, Blog::Types::TaskOrigin
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             article(class: "task-drawer", data: { task_read: @task.id }) do
               DrawerHead(task: @task, filter: @filter, origin: @origin)
               div(class: "task-drawer-body") { body }

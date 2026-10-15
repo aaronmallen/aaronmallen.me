@@ -9,7 +9,10 @@ module Admin
 
           prop :editor, Blog::Types::Hash, :**
 
-          def view_template = Editor(**@editor)
+          def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
+            Editor(**@editor)
+          end
         end
       end
     end

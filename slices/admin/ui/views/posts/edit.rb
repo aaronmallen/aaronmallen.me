@@ -7,10 +7,13 @@ module Admin
         class Edit < View
           include Components::Posts
 
+          LIVE_TABLES = %w[post_tags posts record_links service_connections suggestions webmention_settings].freeze
+
           prop :records, Blog::Types::Hash
           prop :editor, Blog::Types::Hash, :**
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             content_for(:title, @editor[:post].title)
 
             Editor(**@editor)

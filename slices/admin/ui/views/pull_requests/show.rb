@@ -5,11 +5,14 @@ module Admin
     module Views
       module PullRequests
         class Show < View
+          LIVE_TABLES = %w[pull_requests record_links].freeze
+
           prop :pull_request, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String.optional
           prop :records, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(
               title: @pull_request.title, kicker: t(".kicker", number: @pull_request.number), sub: @pull_request.repo,
               sub_icon: "fa-solid fa-code-pull-request",

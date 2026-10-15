@@ -17,6 +17,7 @@ module Admin
           prop :verb, Blog::Types::String.optional
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             head
             Components::Analytics::Tabs(
               current: :performance, range: @range, action: path(:admin_performance_requests),

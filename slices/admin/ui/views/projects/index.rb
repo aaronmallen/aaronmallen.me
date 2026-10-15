@@ -8,6 +8,7 @@ module Admin
           include Components::Projects
 
           LIVE = Blog::Types::ProjectFilter["live"]
+          LIVE_TABLES = %w[project_tags projects].freeze
           WORK = Blog::Types::ProjectFilter["work"]
 
           EMPTY = Blog::Types::ProjectFilter.values.to_h { [it, ".empty.#{it}"] }.freeze
@@ -24,6 +25,7 @@ module Admin
           prop :work_values, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) do
               filter_form
               CreateLink(href: path(:admin_new_project), label: t(".new_project"))

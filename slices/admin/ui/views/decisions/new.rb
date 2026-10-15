@@ -10,6 +10,7 @@ module Admin
           prop :editor, Blog::Types::Hash, :**
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             PageHead(title: t(".heading")) do
               BackLink(href: path(:admin_decisions)) { t(".back") }
             end

@@ -15,6 +15,7 @@ module Admin
           prop :routes, ROWS
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             PageHead(title: t(".heading"), sub: t(".lede", count: @range))
             Components::Analytics::Tabs(current: :performance, range: @range, action: path(:admin_performance))
 

@@ -5,6 +5,10 @@ module Admin
     module Views
       module Tags
         class Show < View
+          LIVE_TABLES = %w[
+            decision_options decision_tags decisions journal_entries journal_entry_tags post_tags posts project_tags
+            projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
+          ].freeze
           PRIVATE = Blog::Types::TagScope["private"]
           PUBLIC = Blog::Types::TagScope["public"]
           PUBLISHED = Blog::Types::PostStatus["published"]
@@ -21,6 +25,7 @@ module Admin
           prop :summary, Blog::Types::Instance(::Tags::Structs::Summary)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             BackLink(href: path(:admin_tags)) { t(".back") }
             PageHead(title: Components::Tag::PREFIX + @summary.name, kicker: t(".kicker"), sub: t(".count", count:))
 

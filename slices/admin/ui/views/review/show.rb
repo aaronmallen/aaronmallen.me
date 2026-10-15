@@ -7,6 +7,10 @@ module Admin
         class Show < View
           include Components::Review
 
+          LIVE_TABLES = %w[
+            commits decision_options decision_tags decisions journal_entries journal_entry_tags post_tags posts projects
+            pull_requests review_notes social_post_parts sprints task_contributors task_tags work_sessions workouts
+          ].freeze
           MONTH = Blog::Types::ReviewPeriod["month"]
           TAG = Blog::Types::ReviewGroup["tag"]
 
@@ -21,6 +25,7 @@ module Admin
           prop :group, Blog::Types::ReviewGroup, default: TAG
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) { actions }
             Heat(
               days: @review.days, period: @review.period, focus: @review.focus, today: @today,

@@ -7,6 +7,11 @@ module Admin
         class Show < View
           include Components::Activity
 
+          LIVE_TABLES = %w[
+            commits decision_options decision_tags decisions health_days journal_entries journal_entry_tags post_tags
+            posts projects pull_requests saved_views social_post_parts sprints task_contributors task_tags workouts
+          ].freeze
+
           prop :events, Blog::Types::Array.of(Blog::Types::Instance(Structs::ActivityEvent))
           prop :filters, Blog::Types::Hash
           prop :health, Blog::Types::Hash
@@ -16,6 +21,7 @@ module Admin
           prop :newer, Blog::Types::Date.optional
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:)
 
             Filters(**@filters, saved_views: @saved_views)

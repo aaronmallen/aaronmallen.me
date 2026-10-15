@@ -10,6 +10,7 @@ module Admin
           prop :editor, Blog::Types::Hash, :**
 
           def view_template
+            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
             content_for(:title, t(".title"))
 
             Editor(**@editor)

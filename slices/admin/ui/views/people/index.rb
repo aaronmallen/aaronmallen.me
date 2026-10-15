@@ -7,11 +7,14 @@ module Admin
         class Index < View
           include Components::People
 
+          LIVE_TABLES = %w[service_connections].freeze
+
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :editor, Blog::Types::Hash
           prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub: t(".sub", count: @people.size)) { new_person }
             div(class: ("g-main" if @searchable.any?)) do
               div(class: "settings-main") { list }

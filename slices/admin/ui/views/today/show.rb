@@ -8,9 +8,9 @@ module Admin
           include Components::Tasks
 
           LIVE_TABLES = %w[
-            attention_snoozes commits health_days journal_entries oauth_clients oauth_tokens posts projects
-            service_connections social_post_deliveries social_posts sprints sync_states task_comments task_links
-            task_tags work_sessions
+            attention_snoozes commits health_days journal_entries journal_entry_tags oauth_clients oauth_tokens
+            post_tags posts projects service_connections social_post_deliveries social_post_parts social_posts sprints
+            sync_states task_comments task_contributors task_links task_series task_tags work_sessions
           ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]

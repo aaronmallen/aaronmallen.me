@@ -8,6 +8,10 @@ module Admin
           include Components::Tasks
 
           CANCEL = { task_open: true, task_cancel: true }.freeze
+          LIVE_TABLES = %w[
+            projects record_links sprints task_comments task_contributors task_events task_links task_series task_tags
+            work_sessions
+          ].freeze
           TAG_SEPARATOR = ", "
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -21,6 +25,7 @@ module Admin
           prop :origin, Blog::Types::TaskOrigin
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             article(class: "task-drawer", data: { task_edit: @task.id }) do
               DrawerHead(task: @task, filter: @filter, origin: @origin)
               div(class: "task-drawer-body") { body }

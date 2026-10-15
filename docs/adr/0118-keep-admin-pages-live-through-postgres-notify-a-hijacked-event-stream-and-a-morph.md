@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -73,12 +73,12 @@ after the commit, refetches nothing. While a `data-morph` form posts, events wai
 only if an event is newer than the answer. Saving from the task panel stops the stream's refetches, since closing the
 panel reloads the page.
 
-**A page may list its tables.** Since #1287 a view can pass the tables it draws to the layout through
+**Each page lists its tables.** Since #1287 a view can pass the tables it draws to the layout through
 `content_for(:live_tables)`, counting the tables behind any view it reads. The layout adds the tables its own top bar
 and palette read, which the inbox count reaches, and draws the list on `<main>` as `data-live-tables`. `live.js`
-skips an event whose table is not on the list. A page that lists none refetches on every event, as before, and the
-catch-up event (`*`) refetches every page. Today, Tasks, Mail and Inbox list theirs, so a new email no longer
-redraws the task board.
+skips an event whose table is not on the list, and the catch-up event (`*`) refetches every page. Since #1400 every
+admin view that renders in the layout lists its tables, an empty list for a page that draws none of its own, so a
+new commit no longer redraws the calendar. A page that lists none would still refetch on every event.
 
 **`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event
 it calls the page's own URL through `setupFetch`, so events within its wait become one request and a new event
@@ -166,7 +166,7 @@ Every change costs a page render for each open tab, save a tab whose own in-plac
 page does not list the table.
 
 A page that lists its tables goes stale with no warning when it starts to draw a table it does not list. A change to
-what Today, Tasks, Mail, Inbox or the top bar reads has to update the list beside it. When the hub hears of
+what a view or the top bar reads has to update the list beside it. When the hub hears of
 that change after the redirect's request began, as a slow notice can, that tab renders twice, as it did before #1286.
 
 The morph sets every attribute back to what the server drew, so state a script holds in markup, such as an open

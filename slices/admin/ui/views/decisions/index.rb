@@ -8,6 +8,7 @@ module Admin
           include Components::Decisions
 
           DROPPED = Blog::Types::DecisionStatus["dropped"]
+          LIVE_TABLES = %w[decision_comments decision_options decision_tags decisions].freeze
           OPEN = Blog::Types::DecisionStatus["open"]
           RESOLVED = Blog::Types::DecisionStatus["resolved"]
 
@@ -18,6 +19,7 @@ module Admin
           prop :filter, Blog::Types::DecisionStatus
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             content_for(:title, t(".title"))
             PageHead(title: t(".heading"), sub:) do
               CreateLink(href: path(:admin_new_decision), label: t(".new_decision"))

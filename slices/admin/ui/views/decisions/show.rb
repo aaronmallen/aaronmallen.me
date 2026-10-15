@@ -8,6 +8,9 @@ module Admin
           include Components::Decisions
 
           DROPPED = Blog::Types::DecisionStatus["dropped"]
+          LIVE_TABLES = %w[
+            decision_comments decision_events decision_options decision_tags decisions record_links
+          ].freeze
           RESOLVED = Blog::Types::DecisionStatus["resolved"]
 
           prop :decision, Blog::Types::Instance(ROM::Struct)
@@ -16,6 +19,7 @@ module Admin
           prop :records, Blog::Types::Hash
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             head
             div(class: "g-main", data: { decision_read: @decision.id }) do
               div(class: "decision-main") { main }
