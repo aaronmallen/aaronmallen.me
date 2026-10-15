@@ -7,6 +7,11 @@ module Public
 
       layout Layouts::Application
 
+      def before_template
+        context[Blog::UI::Components::Icon::INLINE] = true
+        super
+      end
+
       private
 
       def head_wording(**values)

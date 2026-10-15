@@ -7,8 +7,8 @@ module Markdown
   class Document
     ANCHOR = %r{<a [^>]*class="anchor"></a>}
     BREAK_NODES = %i[linebreak softbreak].freeze
-    CAPTION = '<div class="cf"><span class="cf-n"><i class="fa-regular fa-file-code" aria-hidden="true"></i>' \
-              "%s</span>%s</div>"
+    CAPTION = '<div class="cf"><span class="cf-n"><i aria-hidden="true">' \
+              "#{Blog::UI::Components::Icon::SVGS.fetch('regular/file-code')}</i>%s</span>%s</div>".freeze
     FIGURE = '<figure class="fig">\\1 /><figcaption>\\2</figcaption></figure>'
     H2 = %r{<h2 id="([^"]*)">(.*?)</h2>}m
     HIGHLIGHTED_BLOCK = %r{<pre class="syntax-highlighting">.*?</pre>}m

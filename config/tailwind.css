@@ -7914,3 +7914,16 @@
     }
   }
 }
+
+i:has(> svg) {
+  display: var(--fa-display, inline-block);
+  width: var(--fa-width, 1.25em);
+  line-height: 1;
+  text-align: center;
+}
+
+i > svg {
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}

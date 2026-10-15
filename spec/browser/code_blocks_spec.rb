@@ -95,7 +95,7 @@ RSpec.describe "Code blocks", type: :feature do
     end
 
     it "marks the caption with a file icon" do
-      expect(page).to have_css(".cf-n > i.fa-regular.fa-file-code[aria-hidden='true']")
+      expect(page).to have_css(".cf-n > i[aria-hidden='true'] > svg")
     end
 
     it "keeps the highlighted code under the caption" do

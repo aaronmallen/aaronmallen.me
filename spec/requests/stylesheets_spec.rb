@@ -3,7 +3,7 @@
 RSpec.describe "Stylesheets", type: :request do
   def asset(source) = Hanami.app["assets"][source].url
 
-  def stylesheets = Capybara.string(last_response.body).all("link[rel='stylesheet']", visible: :all).map { it[:href] }
+  def sheet(source) = Hanami.app.root.join("public", asset(source).delete_prefix("/")).read
 
   it "links the public sheet alone on a public page" do
     get "/privacy"
@@ -18,9 +18,18 @@ RSpec.describe "Stylesheets", type: :request do
     expect(stylesheets).to eq([asset("admin/app.css")])
   end
 
-  it "leaves the admin's styles out of the public sheet" do
-    public_sheet = Hanami.app.root.join("public", asset("public/app.css").delete_prefix("/")).read
+  def stylesheets = Capybara.string(last_response.body).all("link[rel='stylesheet']", visible: :all).map { it[:href] }
 
-    expect(public_sheet).not_to include(".adm-main")
+  it "leaves the admin's styles out of the public sheet" do
+    expect(sheet("public/app.css")).not_to include(".adm-main")
+  end
+
+  it "leaves Font Awesome's styles and fonts out of the public sheet", :aggregate_failures do
+    expect(sheet("public/app.css")).not_to include("Font Awesome")
+    expect(sheet("public/app.css")).not_to match(/fa-(brands|regular|solid)-\d+/)
+  end
+
+  it "keeps Font Awesome in the admin sheet" do
+    expect(sheet("admin/app.css")).to include("fa-solid-900")
   end
 end

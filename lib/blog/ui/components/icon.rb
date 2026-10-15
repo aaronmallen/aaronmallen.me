@@ -4,6 +4,11 @@ module Blog
   module UI
     module Components
       class Icon < Component
+        INLINE = :inline_icons
+        STYLES = %w[fa-brands fa-regular fa-solid].freeze
+        SVGS = Dir[File.expand_path("../icons/*/*.svg", __dir__)].to_h do |file|
+          [file.split("/").last(2).join("/").delete_suffix(".svg"), File.read(file).strip.freeze]
+        end.freeze
         TOKEN = Blog::Types::String | Blog::Types::Symbol
         NAME = TOKEN | Blog::Types::Array.of(TOKEN)
 
@@ -11,12 +16,19 @@ module Blog
         prop :label, Blog::Types::String.optional, default: nil
 
         def view_template
-          i(class: @name, **labelling)
+          i(class: @name, **labelling) { raw(safe(svg)) if context[INLINE] }
         end
 
         private
 
         def labelling = @label ? { role: "img", aria: { label: @label } } : { aria: { hidden: "true" } }
+
+        def svg
+          tokens = Array(@name).flat_map { it.to_s.split }
+          style = tokens.find { STYLES.include?(it) }
+          glyph = tokens.find { it.start_with?("fa-") && it != style }
+          SVGS.fetch("#{style.delete_prefix('fa-')}/#{glyph.delete_prefix('fa-')}")
+        end
       end
     end
   end
