@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 #MISE description="Run the ruby tests across every core without building assets"
 #MISE alias=["t:rb", "test:rb"]
-#USAGE arg "[filter]..." var=#true help="Spec files, directories, file:line pairs or rspec options. Runs the whole suite when empty. A file:line pair runs in one process."
+#USAGE arg "[filter]..." var=#true help="Spec files, directories, file:line pairs or rspec options. Runs the whole suite and records its runtimes when empty. A file:line pair runs in one process."
 
 set -e
 
@@ -16,6 +16,11 @@ for arg; do
   esac
 done
 
+log=""
+if [ $# -eq 0 ]; then
+  log="--format ParallelTests::RSpec::RuntimeLogger --out tmp/parallel_runtime_rspec.log"
+fi
+
 files=""
 for arg; do
   shift
@@ -27,5 +32,4 @@ for arg; do
 done
 
 # shellcheck disable=SC2086
-exec scripts/util/ensure_postgres bundle exec parallel_rspec -- --require spec_helper --format progress \
-  --format ParallelTests::RSpec::RuntimeLogger --out tmp/parallel_runtime_rspec.log "$@" -- ${files:-spec}
+exec scripts/util/ensure_postgres bundle exec parallel_rspec -- --require spec_helper --format progress $log "$@" -- ${files:-spec}
