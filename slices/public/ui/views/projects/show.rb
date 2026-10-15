@@ -5,9 +5,7 @@ module Public
     module Views
       module Projects
         class Show < View
-          COLUMNS = %w[backlog ready in_progress done canceled].freeze
           GITHUB = "https://github.com/"
-          OPEN = Blog::Types::TaskStatus["open"]
           SCHEME = %r{\A[a-z][a-z0-9+.-]*://}i
 
           prop :project, Blog::Types::Instance(ROM::Struct).optional
@@ -35,8 +33,8 @@ module Public
                         written?(@project.tagline) ? @project.tagline : t(".description", name: @project.name))
 
             board_head
-            columns = @tasks.group_by { it.status == OPEN ? it.stage : it.status }
-            div(class: "board") { COLUMNS.each { column(it, columns.fetch(it, [])) } }
+            columns = @tasks.group_by(&:board_column)
+            div(class: "board") { Blog::Types::TaskColumn.each_value { column(it, columns.fetch(it, [])) } }
           end
 
           def board_head
