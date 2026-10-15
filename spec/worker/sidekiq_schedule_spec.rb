@@ -6,13 +6,7 @@ RSpec.describe "The worker's schedule", type: :app do
   let(:config) { sidekiq_config }
   let(:schedule) { config.dig(:scheduler, :schedule) }
 
-  def jobs
-    Hanami.app.slices.to_a.flat_map do |slice|
-      Dir[slice.root.join("jobs", "*.rb")].map do |path|
-        slice.namespace.const_get(slice.inflector.camelize("jobs/#{File.basename(path, '.rb')}"))
-      end
-    end
-  end
+  def cron(name) = Fugit::Cron.parse(schedule.fetch(name).fetch("cron"))
 
   it "names a scheduled job that exists in every entry" do
     classes = schedule.values.map { it.fetch("class") }
@@ -33,24 +27,42 @@ RSpec.describe "The worker's schedule", type: :app do
     expect(queues).to all(satisfy { |_job, queue| config[:queues].include?(queue) })
   end
 
-  it "syncs issues from GitHub and from Linear every fifteen minutes" do
-    syncs = schedule.values.select { it.fetch("class") == "Tasks::Jobs::SyncIssues" }
-
-    expect(syncs.to_h { [it.fetch("args"), it.fetch("cron")] }).to eq(
-      ["github"] => "*/15 * * * * #{Blog::TimeZone::NAME}", ["linear"] => "*/15 * * * * #{Blog::TimeZone::NAME}",
-    )
+  def jobs
+    Hanami.app.slices.to_a.flat_map do |slice|
+      Dir[slice.root.join("jobs", "*.rb")].map do |path|
+        slice.namespace.const_get(slice.inflector.camelize("jobs/#{File.basename(path, '.rb')}"))
+      end
+    end
   end
 
-  it "syncs Google Calendar every fifteen minutes" do
-    expect(schedule.fetch("sync_calendar")).to include(
-      "class" => "Calendar::Jobs::SyncCalendar", "cron" => "*/15 * * * * #{Blog::TimeZone::NAME}",
+  def quarter_hourly = schedule.keys.select { cron(it).rough_frequency == 15 * 60 }
+
+  it "syncs issues from GitHub and from Linear every fifteen minutes", :aggregate_failures do
+    expect(schedule.slice("sync_issues", "sync_linear_issues").values).to contain_exactly(
+      include("class" => "Tasks::Jobs::SyncIssues", "args" => ["github"]),
+      include("class" => "Tasks::Jobs::SyncIssues", "args" => ["linear"]),
     )
+    expect(quarter_hourly).to include("sync_issues", "sync_linear_issues")
   end
 
-  it "syncs Google Health every fifteen minutes" do
-    expect(schedule.fetch("sync_health")).to include(
-      "class" => "Health::Jobs::SyncHealth", "cron" => "*/15 * * * * #{Blog::TimeZone::NAME}",
-    )
+  it "syncs Google Calendar every fifteen minutes", :aggregate_failures do
+    expect(schedule.fetch("sync_calendar")).to include("class" => "Calendar::Jobs::SyncCalendar")
+    expect(quarter_hourly).to include("sync_calendar")
+  end
+
+  it "syncs Google Health every fifteen minutes", :aggregate_failures do
+    expect(schedule.fetch("sync_health")).to include("class" => "Health::Jobs::SyncHealth")
+    expect(quarter_hourly).to include("sync_health")
+  end
+
+  it "gives each fifteen minute job a minute of its own" do
+    minutes = quarter_hourly.flat_map { cron(it).minutes }
+
+    expect(minutes).to eq(minutes.uniq)
+  end
+
+  it "keeps Gmail out of the minutes the fifteen minute jobs run in" do
+    expect(cron("sync_gmail").minutes & quarter_hourly.flat_map { cron(it).minutes }).to be_empty
   end
 
   describe "the sprint roll-over" do

@@ -13,10 +13,10 @@ production:
       cron: "0 6 * * 1 <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::CheckPostLinks
     import_commits:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "1-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportCommits
     import_pull_requests:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "3-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportPullRequests
     prune_access_records:
       cron: "15 4 * * * <%= Blog::TimeZone::NAME %>"
@@ -70,19 +70,19 @@ production:
       cron: "30 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Media::Jobs::SweepPhotos
     sync_calendar:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "11-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Calendar::Jobs::SyncCalendar
     sync_health:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "13-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Health::Jobs::SyncHealth
     sync_gmail:
       cron: "*/5 * * * * <%= Blog::TimeZone::NAME %>"
       class: Mail::Jobs::SyncGmail
     sync_issues:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "6-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
       args: ["github"]
     sync_linear_issues:
-      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      cron: "8-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
       args: ["linear"]

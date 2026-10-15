@@ -95,6 +95,21 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "several issues already tracked" do
+    before do
+      %w[I_one I_two I_three].each do |id|
+        create(:task_source, remote_id: id, url: "#{url}-#{id}", task: create(:task, list: "external"))
+      end
+      stub_assigned(*%w[I_one I_two I_three].map { github_issue(it) })
+    end
+
+    it "loads their tasks in one query" do
+      tasks = counting { sync }.grep(/\ASELECT "tasks"."id", "tasks"."title"/)
+
+      expect(tasks.size).to eq(1)
+    end
+  end
+
   describe "a search result that is not an issue" do
     it "is skipped while the rest import" do
       stub_assigned({}, issue)

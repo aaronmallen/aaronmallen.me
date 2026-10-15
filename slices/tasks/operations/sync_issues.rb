@@ -55,10 +55,7 @@ module Tasks
         end
       end
 
-      def follow(source, issue, now, history: EMPTY_HASH, reached: false)
-        task = task_queries.by_id(source.task_id)
-        return unless task
-
+      def follow(source, task, issue, now, history: EMPTY_HASH, reached: false)
         state = observed(task, source, issue.fetch(:remote_state), reached)
         changes = history[issue[:id]]
 
@@ -71,7 +68,10 @@ module Tasks
       end
 
       def follow_all(issues, known, history, now)
-        issues.each { follow(known.fetch(it[:id]), it, now, history:) }
+        sources = issues.map { known.fetch(it[:id]) }
+        tasks = task_queries.detailed_in_order(sources.map(&:task_id))
+
+        issues.zip(sources, tasks) { |issue, source, task| task && follow(source, task, issue, now, history:) }
       end
 
       def history(client, issues, known)
@@ -85,7 +85,7 @@ module Tasks
           task = task_mutations.append(**copy(issue), list: EXTERNAL)
           label(task, provider, issue, now)
           fields = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
-          task_source_mutations.create(**fields).tap { follow(it, issue, now, reached:) }
+          task_source_mutations.create(**fields).tap { follow(it, task, issue, now, reached:) }
         end
       end
 
