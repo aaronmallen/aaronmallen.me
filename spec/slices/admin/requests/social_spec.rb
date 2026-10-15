@@ -9,8 +9,14 @@ RSpec.describe "Admin social", type: :request do
 
   def bodies = social_post_queries.drafts.first.parts.map(&:body)
 
+  def cadence = Fugit::Cron.parse(sidekiq_config.dig(:scheduler, :schedule, "send_due_social_posts", "cron"))
+
   def compose(intent: "send", targets: %w[mastodon], **params)
     post "/admin/social", _csrf_token: admin_csrf_token, intent:, social: { accounts: accounts(targets), **params }
+  end
+
+  def composer_hints(mode)
+    Capybara.string(last_response.body).all(".hint[data-social-#{mode}]:not([hidden])").map(&:text)
   end
 
   def counts = page.all("[data-social-count-text]").map(&:text)
@@ -216,6 +222,15 @@ RSpec.describe "Admin social", type: :request do
         expect(social_post_queries.due_scheduled(Time.now)).to have(1).item
       end
 
+      it "says it goes out within a minute" do
+        get "/admin/social"
+        shown = composer_hints("now")
+        compose(parts: ["hello"], mode: "now")
+
+        expect([shown, social_post_queries.due_scheduled(Time.now).size, cadence.rough_frequency])
+          .to eq([[Admin::Slice["i18n"].t("ui.components.social.composer.hint_now")], 1, 60])
+      end
+
       it "takes a mention typed by hand" do
         create(:person, key: "ada-lovelace")
         compose(parts: ["hi @{ada-lovelace}"], mode: "now")
@@ -355,6 +370,20 @@ RSpec.describe "Admin social", type: :request do
     end
 
     describe "scheduling" do
+      it "says it goes out within a minute of the time I pick" do
+        compose(parts: ["hello"], mode: "schedule", schedule_at: "soon")
+
+        expect(composer_hints("later")).to eq([Admin::Slice["i18n"].t("ui.components.social.composer.hint_later")])
+      end
+
+      it "makes the post due at the time I pick, for a job that runs each minute" do
+        compose(parts: ["hello"], mode: "schedule", schedule_at: "2027-03-01T09:30")
+        at = Blog::TimeZone.local_time(2027, 3, 1, 9, 30)
+
+        expect([[at - 1, at].map { social_post_queries.due_scheduled(it).size }, cadence.rough_frequency])
+          .to eq([[0, 1], 60])
+      end
+
       it "saves the post for its Chicago time" do
         compose(parts: ["hello"], mode: "schedule", schedule_at: "2027-03-01T09:30")
 

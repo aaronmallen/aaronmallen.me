@@ -225,6 +225,23 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
       end
     end
 
+    describe "with reads either side of the read-through line" do
+      let(:reads) { { "full" => [75, 30], "short" => [75, 29], "shallow" => [50, 30] } }
+
+      before do
+        reads.each do |reader, (scroll_depth, read_seconds)|
+          visitor_hash = Digest::SHA256.hexdigest(reader)
+          create(:analytics_event, path: "/writing/hello", visitor_hash:, scroll_depth:, read_seconds:)
+        end
+        get "/admin/posts/#{post.id}/analytics", range: "7"
+      end
+
+      it "counts only a read of 75% for 30 seconds, as the note says" do
+        expect(stat("Read-throughs")).to have_css(".stat-value", exact_text: "1")
+          .and have_css(".stat-change", exact_text: i18n.t("ui.views.posts.analytics.read_note"))
+      end
+    end
+
     describe "with a reader before the range" do
       before do
         create(

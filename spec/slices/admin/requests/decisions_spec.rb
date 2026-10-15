@@ -333,6 +333,7 @@ RSpec.describe "Admin decisions", type: :request do
 
       expect(page).to have_no_css("form[action='/admin/decisions/#{decision.id}/resolve']")
         .and have_css(".hint", text: t("ui.components.decisions.closing.no_options"))
+        .and have_css(".hint", text: t("ui.components.decisions.options.empty"))
     end
 
     describe "adding an option" do
@@ -388,7 +389,7 @@ RSpec.describe "Admin decisions", type: :request do
         form = page.find("form[action='/admin/decisions/#{decision.id}/options/#{option.id}']", visible: :all)
         scope = "ui.components.decisions.option_form"
         expect(form).to have_field("option[note]", placeholder: t("note_placeholder", scope:), visible: :all)
-        expect(form).to have_css(".hint", exact_text: t("note_hint", scope:), visible: :all)
+        expect(form).to have_css(".hint", exact_text: t("ui.components.decisions.editor.note_hint"), visible: :all)
       end
 
       it "refuses the save without a note" do
@@ -410,6 +411,13 @@ RSpec.describe "Admin decisions", type: :request do
 
         expect(reload.options.map(&:title)).to eq(["Sidekiq 8"])
         expect(events.last).to include(kind: "option_edited", note: "Renamed it")
+      end
+
+      it "puts the note on the timeline, as the hint says" do
+        edit(title: "Sidekiq 8", body: "Runs today", note: "Renamed it")
+        get "/admin/decisions/#{decision.id}"
+
+        expect(page).to have_css("[data-decision-event='option_edited'] .markdown-body", text: "Renamed it")
       end
     end
 
@@ -491,6 +499,13 @@ RSpec.describe "Admin decisions", type: :request do
 
         expect(reload.problem).to eq("Jobs pile up fast")
         expect(events.last).to include(kind: "edited", note: "Measured it")
+      end
+
+      it "puts the note on the timeline, as the hint says" do
+        update(title: "Pick a queue", problem: "Jobs pile up fast", note: "Measured it")
+        get "/admin/decisions/#{decision.id}"
+
+        expect(page).to have_css("[data-decision-event='edited'] .markdown-body", text: "Measured it")
       end
     end
 

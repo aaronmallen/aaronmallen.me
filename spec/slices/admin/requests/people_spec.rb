@@ -615,6 +615,64 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_css("[data-toast]", text: "Person removed")
       end
     end
+
+    describe "the hints" do
+      def hint(key, **) = i18n.t(key, scope: "ui.components.people", **)
+
+      def hints = page.all(".hint", visible: :all).map { it.text(:all) }
+
+      it "asks for a Mastodon handle, a Bluesky handle or both" do
+        get "/admin/people/new"
+
+        expect(page.find(".page-head-sub").text).to eq(hint("editor.sub"))
+      end
+
+      describe "the key" do
+        let(:person) { create(:person, key: "ada-2", mastodon_handle: "@ada@ruby.social") }
+
+        it "names the mention a social post makes of them" do
+          get "/admin/people/#{person.id}/edit"
+
+          expect(hints).to include(hint("person_form.key_note", key: "ada-2"))
+        end
+
+        it "turns that mention into their handle" do
+          person
+
+          expect(Social::Slice["operations.resolve_mentions"].call(["hi @{ada-2}"], "mastodon").first.text)
+            .to eq("hi @ada@ruby.social")
+        end
+
+        it "refuses a key that is not lowercase words joined by hyphens" do
+          add(name: "Ada", key: "ada_2", mastodon_handle: "@ada@ruby.social")
+
+          expect(last_response.status).to eq(422)
+        end
+      end
+
+      describe "a Bluesky handle" do
+        def person = everyone.first
+
+        before do
+          resolves("ada.bsky.social", "did:plc:ada")
+          add(name: "Ada", key: "ada", bluesky_handle: "ada.bsky.social")
+          WebMock.reset!
+        end
+
+        it "says saving a new handle looks it up and keeps the DID" do
+          get "/admin/people/#{person.id}/edit"
+
+          expect(hints).to include(hint("person_form.bluesky_handle_note"))
+        end
+
+        it "keeps the DID without a lookup when the handle stays the same" do
+          send_to("/admin/people/#{person.id}",
+                  person: { **blank, name: "Ada L", key: "ada", bluesky_handle: "ada.bsky.social" })
+
+          expect(person_queries.by_id(person.id)).to have_attributes(name: "Ada L", bluesky_did: "did:plc:ada")
+        end
+      end
+    end
   end
 
   describe "signed out" do

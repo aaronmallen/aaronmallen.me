@@ -104,6 +104,55 @@ RSpec.describe "Admin health", :frozen_clock, type: :request do
       end
     end
 
+    describe "the hints" do
+      let(:days) { (1..10).to_h { [it, today - it] } }
+      let(:edges) do
+        { minutes_asleep: { 1 => 359, 2 => 360 }, hrv: { 3 => 40, 4 => 44 }, resting_heart_rate: { 5 => 60, 6 => 57 } }
+      end
+      let(:usual) { { minutes_asleep: 420, hrv: 50, resting_heart_rate: 55 } }
+
+      def health_token
+        client = Spec::DB::Factories[:mcp].create(:oauth_client)
+        mcp_connect(client, verifier: Blog::Types::NewSecret[], scope: "health").fetch("access_token")
+      end
+
+      def hint(key) = Admin::Slice["i18n"].t(key, scope: "ui")
+
+      def readings(back) = usual.to_h { |field, value| [field, edges.fetch(field).fetch(back, value)] }
+
+      def tool_patterns
+        params = { name: "read_health_days", arguments: { from: (today - 29).iso8601, to: today.iso8601 } }
+        headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{health_token}" }
+        post "/mcp", JSON.generate({ jsonrpc: "2.0", id: 1, method: "tools/call", params: }), headers
+        JSON.parse(JSON.parse(last_response.body).dig("result", "content", 0, "text")).fetch("patterns")
+      end
+
+      before do
+        days.each do |back, day|
+          create(:health_day, day:, **readings(back), steps: 8421, active_zone_minutes: 22, bed_at: at(day - 1, 23),
+                              woke_at: at(day, 6))
+        end
+        create(:commit, commit_date: days[7], commit_time: "22:00")
+        create(:commit, commit_date: days[8], commit_time: "21:59")
+        visit_health
+      end
+
+      it "flags each day past a line the bar's hint names, and none short of it", :aggregate_failures do
+        expect([0, 1, 2, 6].map { flagged(it) }).to eq([1, 3, 5, 7].map { [days[it].iso8601] })
+        expect(cells(0).size).to eq(30)
+        expect(page.find(".health-bar .hint").text).to eq(hint("views.health.show.hint"))
+      end
+
+      it "gives agents with health the averages the patterns card shows for the same days", :aggregate_failures do
+        card = page.find(".card", text: "Patterns")
+        shown = card.find(".health-pattern", text: "bpm").text.scan(/[\d.]+(?= bpm)/).map(&:to_f)
+        rest = tool_patterns.fetch("resting_heart_rate")
+
+        expect(shown).to eq(%w[subject rest].map { rest.dig(it, "averages", "resting_heart_rate") })
+        expect(card.find(".hint").text).to eq(hint("components.health.patterns_card.hint"))
+      end
+    end
+
     describe "a day's detail" do
       let(:day) { today - 4 }
       let(:body) do

@@ -827,6 +827,13 @@ RSpec.describe "Admin mail", type: :request do
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
       end
 
+      it "says the task keeps a link back to the thread" do
+        get "/admin/mail", thread: thread.id
+
+        expect(page.find("dialog#mail-task-#{thread.id}", visible: :all).text(:all))
+          .to include(Admin::Slice["i18n"].t("ui.components.mail.task_dialog.linked"))
+      end
+
       it "archives the thread when asked" do
         make(list: "next", archive: "1")
 
@@ -962,6 +969,31 @@ RSpec.describe "Admin mail", type: :request do
         expect(page).to have_css("button[data-bulk-toggle='mail-bulk']", text: "Select")
         expect(page.all("form#mail-bulk button[name='act']").map(&:value)).to eq(%w[archive read unread move trash])
         expect(page.all(".mail-row input[name='ids[]'][form='mail-bulk']").size).to eq(2)
+      end
+
+      describe "dragging" do
+        before do
+          threads
+          label(gmail(subject: "Receipt"), "Receipts")
+          get "/admin/mail"
+        end
+
+        it "says rows drag onto a folder or a label" do
+          expect(page.find("form#mail-bulk .bulk-hint", visible: :all).text(:all))
+            .to eq(Admin::Slice["i18n"].t("ui.components.mail.bulk.hint"))
+        end
+
+        it "lets every row drag onto the folders and the label", :aggregate_failures do
+          expect(page.all("[data-mail-drop]", visible: :all).map { it["data-mail-drop"] })
+            .to include("inbox", "star", "archive", "spam", "trash", "label")
+          expect(page.all("[data-mail-drag]", visible: :all).size).to eq(3)
+        end
+
+        it "acts on every ticked row, as a drop does" do
+          bulk("archive")
+
+          expect(threads.map { repo.by_id(it.id).archived }).to eq([true, true])
+        end
       end
 
       it "starts with select mode off, so the list shows Select with scripts off", :aggregate_failures do

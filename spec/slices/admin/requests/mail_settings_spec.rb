@@ -111,6 +111,22 @@ RSpec.describe "Admin mail settings", type: :request do
       end
     end
 
+    describe "the waiting count" do
+      before do
+        create(:message, subject: "First")
+        create(:message, subject: "Second")
+        create(:message, :read, subject: "Read")
+      end
+
+      it "counts the threads that wait now" do
+        waiting = inbox
+        get "/admin/mail/settings"
+
+        expect([waiting.sort, page.find("#mail-waiting .hint").text])
+          .to eq([%w[First Second], Admin::Slice["i18n"].t("ui.views.mail.settings.waiting_hint", count: 2)])
+      end
+    end
+
     describe "the Waiting rules" do
       let(:matches) do
         {

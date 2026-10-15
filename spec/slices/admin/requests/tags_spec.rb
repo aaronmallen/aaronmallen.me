@@ -700,6 +700,24 @@ RSpec.describe "Admin tags", type: :request do
       end
     end
 
+    describe "removing a tag a post and a task rule carry" do
+      let(:article) { create(:post, :published, tags: %w[ruby]) }
+
+      before do
+        article
+        Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "rules" }).value!
+        send_to("/admin/tags/#{named('ruby').id}/delete")
+        send_to("/admin/tags/#{named('rules').id}/delete", scope: "private")
+      end
+
+      it "takes it off the post but keeps a task rule's only tag, as the note says" do
+        get "/admin/tags"
+
+        expect([post_queries.by_id(article.id).tags, named("rules")&.name, page.find(".tag-panel-intro .hint").text])
+          .to eq([[], "rules", i18n.t("ui.views.tags.index.note")])
+      end
+    end
+
     describe "removing the only tag on a task rule" do
       def remove(name) = send_to("/admin/tags/#{named(name).id}/delete", scope: "private")
 

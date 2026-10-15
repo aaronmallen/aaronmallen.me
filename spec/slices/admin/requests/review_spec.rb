@@ -445,7 +445,16 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "asks for a day when none is picked" do
         visit_review(day: "2026-09-16")
 
-        expect(heat.find(".review-heat-foot")).to have_text("Pick a day to scope every card to it")
+        expect(heat.find(".review-heat-foot")).to have_text(Admin::Slice["i18n"].t("ui.components.review.heat.hint"))
+      end
+
+      it "keeps Carried and the note on the whole week once a day is picked, as the hint says", :aggregate_failures do
+        carry(create(:task, :in_sprint, title: "Renew the domain"), Date.new(2026, 9, 14))
+        post "/admin/review/note", _csrf_token: admin_csrf_token, day: "2026-09-20", note: { body: "Good week" }
+        visit_review(day: "2026-09-16", focus: "2026-09-18")
+
+        expect(card("carried")).to have_link("Renew the domain")
+        expect(page.find_by_id("review-notes")).to have_field("Review note", with: "Good week")
       end
     end
 

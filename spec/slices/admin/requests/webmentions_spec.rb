@@ -501,6 +501,39 @@ RSpec.describe "Admin webmentions", type: :request do
           .to eq("ada.example\ngrace.example")
       end
 
+      describe "a known author at a site's root" do
+        def verify(source)
+          stub_request(:get, source).to_return(body: <<~HTML)
+            <div class="h-entry"><a class="p-author h-card" href="https://ada.example/">Ada</a>
+            <a href="https://aaronmallen.me/writing/hello">read</a></div>
+          HTML
+          Social::Jobs::VerifyWebmention.new.perform(source, "https://aaronmallen.me/writing/hello", target.id)
+          Social::Slice["relations.webmentions"].where(source_url: source).one[:status]
+        end
+
+        before do
+          resolves_publicly("ada.example")
+          create(:webmention, :approved, post: target, author_url: "https://ada.example/")
+        end
+
+        it "waits for review from a page on a host not listed" do
+          expect(verify("https://ada.example/notes/1")).to eq("pending")
+        end
+
+        it "auto-approves from any page on a listed host" do
+          save_hosts("ada.example")
+
+          expect(verify("https://ada.example/notes/1")).to eq("approved")
+        end
+
+        it "says so beside the hosts" do
+          get "/admin/webmentions/settings"
+
+          expect(page.find("#webmention-settings .hint").text)
+            .to eq(i18n.t("ui.components.webmentions.settings_card.hosts_hint"))
+        end
+      end
+
       it "names the endpoint" do
         get "/admin/webmentions/settings"
 

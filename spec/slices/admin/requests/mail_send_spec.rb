@@ -106,6 +106,14 @@ RSpec.describe "Admin mail sending", type: :request do
   describe "composing" do
     before { stub_send }
 
+    it "says it sends through Gmail, and it does" do
+      get "/admin/mail"
+      shown = page.find("#mail-compose .mail-compose-hint", visible: :all).text(:all)
+      compose
+
+      expect([shown, sent.size]).to eq([Admin::Slice["i18n"].t("ui.components.mail.compose.hint"), 1])
+    end
+
     it "sends through Gmail from the picked account in a new thread", :aggregate_failures do
       compose(to: "ada@example.com, bob@example.com", cc: "cy@example.com", bcc: "di@example.com")
 

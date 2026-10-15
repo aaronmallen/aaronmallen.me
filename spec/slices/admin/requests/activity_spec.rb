@@ -966,6 +966,39 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
     end
 
+    describe "the terms the search hint names" do
+      before do
+        create(:commit, repo: "aaronmallen/one", commit_date: today, message: "in one")
+        create(:commit, repo: "aaronmallen/two", commit_date: today, message: "in two")
+        create(:journal_entry, entry_date: today, body: "read the docs", tags: %w[ruby])
+        create(:task_contributor, task_id: create(:task, :done, title: "Agent's", completed_at: at(14)).id)
+      end
+
+      def found(query)
+        visit_activity(q: query)
+        Capybara.string(last_response.body).all(".activity-event-name").map(&:text)
+      end
+
+      it "shows the hint" do
+        visit_activity
+
+        expect(page.find_by_id("activity-q-hint").text)
+          .to eq(Admin::Slice["i18n"].t("ui.components.activity.filters.contains_hint"))
+      end
+
+      it "keeps one tag" do
+        expect(found("tag:ruby")).to eq(["read the docs"])
+      end
+
+      it "keeps one repo's commits" do
+        expect(found("repo:aaronmallen/one") & ["in one", "in two"]).to eq(["in one"])
+      end
+
+      it "keeps the tasks by who did them" do
+        expect(%w[contributor:agent agent:claude-code model:claude-opus-5-5].map { found(it) }).to all(eq(["Agent's"]))
+      end
+    end
+
     describe "searching by repo" do
       before do
         create(:commit, repo: "aaronmallen/one", commit_date: today, message: "in one")

@@ -89,6 +89,25 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         expect(toast).to eq("That calendar is read-only")
       end
 
+      describe "with a calendar I can only view" do
+        before do
+          mine
+          shared = create(:calendar, account: mine.account, google_id: "holidays", writable: false)
+          [work, shared].each { send_form("/admin/calendar/events", calendar: it.id, **fields) }
+        end
+
+        it "adds nothing to it or to a work calendar" do
+          expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        end
+
+        it "says work calendars and ones I can only view take no new events" do
+          get "/admin/calendar", day: day.iso8601
+
+          expect(page.find(".cal-event-form .hint", visible: :all).text(:all))
+            .to eq(Admin::Slice["i18n"].t("ui.components.calendar.event_form.read_only"))
+        end
+      end
+
       it "says so when Google refuses it" do
         stub_request(:post, events_url).to_return(status: 403, **google_json)
         send_form("/admin/calendar/events", calendar: mine.id, **fields)

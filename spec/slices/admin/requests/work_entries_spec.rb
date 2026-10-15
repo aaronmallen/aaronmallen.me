@@ -85,6 +85,14 @@ RSpec.describe "Admin work history", type: :request do
         expect(subs).to eq(["Rackspace · 2021–Present"])
       end
 
+      it "reads a role saved with To left empty as current, as the hint says" do
+        add(**fields(to_year: ""))
+        get "/admin/projects", filter: "work"
+
+        note = i18n.t("ui.components.work_entries.entry_form.current_note")
+        expect([subs, page.all(".hint").map(&:text)]).to match([["Rackspace · 2018–Present"], include(note)])
+      end
+
       it "shows the blurb" do
         create(:work_entry, blurb: "Built things")
         get "/admin/projects", filter: "work"

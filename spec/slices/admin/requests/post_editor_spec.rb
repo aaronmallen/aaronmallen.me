@@ -1252,6 +1252,118 @@ RSpec.describe "Admin post editor", type: :request do
         expect([last_response.status, post_queries.all]).to eq([403, []])
       end
     end
+
+    describe "the hints" do
+      def hint(key) = i18n.t(key, scope: "ui.components.posts")
+
+      def read(path)
+        get path
+        Capybara.string(last_response.body)
+      end
+
+      def saved = { title: "Hello", slug: "hello" }
+
+      describe "an edit note saved with a body change" do
+        let(:article) { create(:post, :published, title: "Hello", slug: "hello", body: "one") }
+
+        before do
+          save("/admin/posts/#{article.id}", intent: "save", **saved, body: "two", edit_note: "Fixed it")
+        end
+
+        it "shows readers the note on the post" do
+          expect(read("/writing/hello")).to have_css(".post-edit-note", text: "Fixed it")
+        end
+
+        it "shows readers the note in the feed" do
+          expect(read("/writing.atom").native.to_s).to include("Fixed it")
+        end
+      end
+
+      describe "a post with a blank social card" do
+        let(:article) { create(:post, :published, title: "Hello", slug: "hello") }
+
+        def head(selector, attribute)
+          article
+          read("/writing/hello").find(selector, visible: :all)[attribute]
+        end
+
+        it "names the fallbacks beside the fields" do
+          get "/admin/posts/#{article.id}/edit"
+
+          expect(page.all(".hint").map(&:text))
+            .to include(*%w[canonical_url og_image_url og_title].map { hint("seo.#{it}_note") })
+        end
+
+        it "points the canonical link at this site" do
+          expect(head("link[rel='canonical']", :href)).to end_with("/writing/hello")
+        end
+
+        it "uses the site's share image" do
+          expect(head("meta[property='og:image']", :content)).to match(%r{/share-\w+\.png\z})
+        end
+
+        it "uses the post title" do
+          expect(head("meta[property='og:title']", :content)).to eq("Hello")
+        end
+      end
+
+      describe "publishing a draft with an announcement", :commits do
+        let(:draft) do
+          create(:post, :draft, title: "Hello", slug: "hello", body: "one", syndication_enabled: true,
+                                syndication_targets: %w[mastodon bluesky])
+        end
+
+        def queued_at = Social::Slice["repos.social_post_queries"].queued.map(&:posted_at)
+
+        before do
+          connect_social_networks
+          post("/admin/posts/#{draft.id}/publish", _csrf_token: admin_csrf_token)
+          Social::Jobs::SyndicatePost.drain
+        end
+
+        it "queues it for the moment the post goes live" do
+          expect(queued_at).to match([be_within(1).of(post_queries.by_id(draft.id).published_at)])
+        end
+
+        it "sends what is due every minute" do
+          expect(Fugit::Cron.parse(sidekiq_config.dig(:scheduler, :schedule, "send_due_social_posts", "cron"))
+            .rough_frequency).to eq(60)
+        end
+
+        it "queues nothing more once the post is live" do
+          save("/admin/posts/#{draft.id}", intent: "save", **saved, body: "one", syndication_enabled: "1")
+          Social::Jobs::SyndicatePost.drain
+
+          expect(queued_at.size).to eq(1)
+        end
+      end
+
+      describe "a post with webmentions off" do
+        let(:quiet) { create(:post, :published, slug: "quiet", webmentions_enabled: false) }
+
+        before { create(:webmention, :approved, :reply, post: quiet, author_name: "Ada") }
+
+        it "still shows the approved replies" do
+          expect(read("/writing/quiet")).to have_css(".post-responses", text: "Ada")
+        end
+
+        it "leaves out the webmention link tag" do
+          expect(read("/writing/quiet")).to have_no_css("link[rel='webmention']", visible: :all)
+        end
+
+        it "takes no new ones" do
+          post "/webmention", source: "https://ada.example/notes/1", target: "https://aaronmallen.me/writing/quiet"
+
+          expect(last_response.status).to eq(400)
+        end
+      end
+
+      it "adds the webmention link tag to a post with webmentions on" do
+        create(:post, :published, slug: "loud", webmentions_enabled: true)
+
+        expect(read("/writing/loud")).to have_css("link[rel='webmention']", visible: :all)
+      end
+    end
   end
 
   describe "signed out" do

@@ -656,6 +656,14 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(repo.today.first.tags.map(&:name)).to eq(%w[health])
       end
 
+      it "names the key that saves it" do
+        get "/admin/posts"
+        scope = "ui.components.journal.write_dialog"
+
+        expect(modal.find(".journal-modal-hint", visible: :all).text(:all))
+          .to eq("#{i18n.t('save_key', scope:)} #{i18n.t('save_hint', scope:)}")
+      end
+
       it "returns to the page it was opened on with the toast", :aggregate_failures do
         write(body: "walked")
         follow_redirect!

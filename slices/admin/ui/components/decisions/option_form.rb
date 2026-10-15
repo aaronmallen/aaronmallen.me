@@ -46,7 +46,8 @@ module Admin
 
           def note_props
             { field: :note, name: "option[note]", value: value(:note), errors: @errors, error: FieldError, scope:,
-              renderer: RENDERER, hint: t(".note_hint"), placeholder: t(".note_placeholder") }
+              renderer: RENDERER, hint: t("ui.components.decisions.editor.note_hint"),
+              placeholder: t(".note_placeholder") }
           end
 
           def noted? = @option && @decision.closed?
