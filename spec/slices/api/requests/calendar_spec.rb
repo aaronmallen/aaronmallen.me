@@ -202,7 +202,7 @@ RSpec.describe "API calendar", type: :request do
     end
 
     it "answers the MCP tool with the same events" do
-      expect(mcp_answer("list_calendar", **range)).to eq(read(**range))
+      expect(trusted(mcp_answer("list_calendar", **range))).to eq(read(**range))
     end
   end
 

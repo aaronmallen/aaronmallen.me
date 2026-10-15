@@ -33,7 +33,11 @@ module API
 
       stamps :starts_at, :ends_at
 
+      untrusted :title, :place, :notes
+
       attribute :all_day, &:all_day?
+
+      def attendees(event) = event.attendees.map { untrusted(it) }
 
       def calendar(event) = event.calendar.to_h.slice(:id, :name, :account)
 
