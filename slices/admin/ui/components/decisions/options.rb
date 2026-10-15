@@ -37,7 +37,7 @@ module Admin
             mine = mine?(option)
 
             details(class: "comment-edit", open: mine) do
-              summary(class: "bt sm", title: t(".edit")) do
+              Button(summary: true, small: true, title: t(".edit")) do
                 Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }
               end

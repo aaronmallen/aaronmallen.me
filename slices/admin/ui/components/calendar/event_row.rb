@@ -34,7 +34,11 @@ module Admin
             return p(class: "li-sub") { t(".read_only") } unless @event.calendar.writable
 
             details(class: "cal-event-edit") do
-              summary(class: "bt sm gh") { IconLabel(icon: "fa-regular fa-pen-to-square") { t(".edit") } }
+              Button(summary: true, small: true, variant: :gh) do
+                IconLabel(icon: "fa-regular fa-pen-to-square") do
+                  t(".edit")
+                end
+              end
               EventForm(action: path(:admin_update_calendar_event, id: @event.id), day: @day, event: @event)
             end
             delete_form

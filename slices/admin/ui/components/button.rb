@@ -9,12 +9,14 @@ module Admin
         prop :type, Blog::Types::String.enum("button", "submit", "reset"), default: "button"
         prop :disabled, Blog::Types::Bool, default: false
         prop :href, Blog::Types::String.optional, default: nil
+        prop :summary, Blog::Types::Bool, default: false
         prop :icon, Blog::UI::Components::Icon::NAME.optional, default: nil
         prop :label, Blog::Types::String.optional, default: nil
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template(&)
           return a(**mix(link_attributes, named, @attributes)) { inner(&) } if @href
+          return summary(**mix({ class: classes }, named, @attributes)) { inner(&) } if @summary
 
           button(**mix(button_attributes, named, @attributes)) { inner(&) }
         end

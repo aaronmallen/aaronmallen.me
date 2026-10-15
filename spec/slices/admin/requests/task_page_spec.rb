@@ -493,6 +493,12 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(page).to have_no_css("[data-task-act='start']")
       end
 
+      it "opens the complete from a primary button" do
+        read(create(:task, :in_progress, :in_sprint))
+
+        expect(page).to have_css("details.task-complete > summary.bt.pri.sm")
+      end
+
       it "marks the pause the palette runs on a task in progress" do
         running = create(:task, :in_progress, :in_sprint)
         read(running)

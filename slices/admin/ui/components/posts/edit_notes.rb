@@ -27,7 +27,7 @@ module Admin
 
           def edit_form(edit)
             details(class: "edit-note-edit", open: mine?(edit.id)) do
-              summary(class: "bt sm") { t(".edit") }
+              Button(summary: true, small: true) { t(".edit") }
               div(class: "form-stack") { fields(edit) }
             end
           end

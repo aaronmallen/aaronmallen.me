@@ -117,7 +117,7 @@ module Admin
           def template = t(".picked").sub(TOTAL, @accounts.size.to_s)
 
           def toggle
-            summary(class: "bt sm gh") do
+            Button(summary: true, small: true, variant: :gh) do
               span(data: { social_picked: "", template: }) { template.sub(PICKED, @accounts.count(&:selected).to_s) }
               Icon("fa-solid fa-chevron-down")
             end

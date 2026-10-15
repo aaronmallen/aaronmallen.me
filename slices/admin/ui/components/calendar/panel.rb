@@ -84,7 +84,7 @@ module Admin
             return unless @calendars.any?(&:writable)
 
             details(class: "cal-new-event") do
-              summary(class: "bt sm") { IconLabel(icon: "fa-regular fa-calendar-plus") { t(".new_event") } }
+              Button(summary: true, small: true) { IconLabel(icon: "fa-regular fa-calendar-plus") { t(".new_event") } }
               EventForm(action: path(:admin_create_calendar_event), day: date, calendars: @calendars)
             end
           end

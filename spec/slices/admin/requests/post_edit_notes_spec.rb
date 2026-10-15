@@ -83,6 +83,13 @@ RSpec.describe "Admin post edit notes", type: :request do
         expect([card.has_button?("Delete"), page.has_css?("form[action*='/edits/#{edit.id}/delete']")])
           .to eq([false, false])
       end
+
+      it "opens each note's form from a small button" do
+        create(:post_edit, post: article)
+        read
+
+        expect(card).to have_css("details > summary.bt.sm", text: "Edit")
+      end
     end
 
     describe "the edit form without JavaScript" do

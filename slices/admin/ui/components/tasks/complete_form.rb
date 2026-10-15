@@ -39,10 +39,10 @@ module Admin
           end
 
           def toggle
-            return summary(class: "bt pri sm", **key) { done_label } unless @compact
+            return Button(summary: true, small: true, variant: :pri, **key) { done_label } unless @compact
 
             label = t(".complete")
-            summary(class: "bt sm", title: label, **key(label:)) do
+            Button(summary: true, small: true, title: label, **key(label:)) do
               Icon("fa-solid fa-check")
               span(class: "sr-only") { label }
             end

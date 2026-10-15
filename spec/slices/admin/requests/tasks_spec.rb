@@ -992,6 +992,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".task-acts form[data-task-act='complete'] details.task-complete")
       end
 
+      it "opens the hover bar complete from a small keyed button" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css("details.task-complete > summary.bt.sm[aria-keyshortcuts='x'][data-key='x']")
+      end
+
       it "draws no box on any row" do
         create(:task)
         create(:task, :done)

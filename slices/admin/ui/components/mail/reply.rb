@@ -21,7 +21,7 @@ module Admin
             return if @thread.status == SPAM || @thread.trashed
 
             details(class: "mail-reply", open: (true if kept), data: { mail_reply: "" }) do
-              summary(class: "bt sm") do
+              Button(summary: true, small: true) do
                 Icon("fa-solid fa-reply")
                 plain t(".reply")
               end

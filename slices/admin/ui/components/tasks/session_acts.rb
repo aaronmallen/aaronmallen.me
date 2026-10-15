@@ -36,7 +36,7 @@ module Admin
 
           def edit_form
             details(class: "comment-edit", open: mine?) do
-              summary(class: "bt sm") { t(".edit") }
+              Button(summary: true, small: true) { t(".edit") }
               Form(action: route(:admin_update_task_session)) do
                 return_fields
                 fields.each { |field, label| moment_field(field, label) }
