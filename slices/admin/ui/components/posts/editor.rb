@@ -13,6 +13,7 @@ module Admin
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :counts, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :errors, Blog::Types::Hash
+          prop :links, Blog::Types::Hash
           prop :notes, Blog::Types::Hash
           prop :now, Blog::Types::Time
           prop :preview, Blog::Types::Hash
@@ -64,6 +65,11 @@ module Admin
 
           def form_action = @post ? path(:admin_update_post, id: @post.id) : path(:admin_create_post)
 
+          def links_drawer
+            Form(id: LinksDrawer::FORM, action: path(:admin_check_post_links, id: @post.id), data: { morph: true })
+            LinksDrawer(links: @links[:items], published: published?, open: @links[:open])
+          end
+
           def main
             div(class: "editor-main") do
               MarkdownEditor(**body_editor_props) { Preview(**@preview) }
@@ -75,6 +81,7 @@ module Admin
             if @post
               Posts::DeleteForm(post: @post, received: @webmentions[:received])
               EditNoteForms(post_id: @post.id, edits: @notes[:edits])
+              links_drawer
             end
             return unless suggestions?
 
@@ -87,7 +94,10 @@ module Admin
                        **title_attributes) do |head|
               head.sub { sub_line }
               head.below { summary_block }
-              EditorActions(post: @post, published: published?, scheduling: scheduling?)
+              EditorActions(
+                post: @post, published: published?, scheduling: scheduling?,
+                failing: LinksDrawer.failing(@links[:items]).size,
+              )
             end
           end
 

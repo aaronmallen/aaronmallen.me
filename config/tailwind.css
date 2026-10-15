@@ -5228,6 +5228,50 @@
   @apply flex-1 font-semibold text-ink;
 }
 
+@utility post-links-sum {
+  @apply mb-2 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 meta;
+
+  & b {
+    @apply font-display text-2xl font-bold text-ink;
+  }
+}
+
+@utility post-links-bad {
+  @apply text-mk-pink-text;
+}
+
+@utility post-links-count {
+  @apply ml-1 text-xs text-mk-pink-text;
+}
+
+@utility post-links-fine {
+  @apply mt-2 border-t border-line;
+
+  &[open] .time-caret {
+    @apply rotate-90;
+  }
+}
+
+@utility post-links-fine-head {
+  @apply flex min-h-tap cursor-pointer list-none items-center gap-2 meta;
+
+  &::-webkit-details-marker {
+    @apply hidden;
+  }
+
+  &:focus-visible {
+    @apply accent-outline;
+  }
+}
+
+@utility post-link-meta {
+  @apply mt-1.5 meta-row gap-y-1;
+}
+
+@utility post-link-reason {
+  @apply text-ink;
+}
+
 @utility post-details {
   & .card {
     @apply rounded-none border-0 border-t border-line bg-transparent px-0 pt-5 pb-0 first:border-t-0 first:pt-0;

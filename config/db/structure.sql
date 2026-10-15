@@ -7254,6 +7254,13 @@ CREATE TRIGGER post_link_checks_drop_attention_snoozes AFTER DELETE ON public.po
 
 
 --
+-- Name: post_link_checks post_link_checks_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_link_checks_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.post_link_checks FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: post_tags post_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -8515,4 +8522,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015230200_add_backfill_page_to_mail_accounts.rb'),
 ('20261015231400_add_first_failed_at_to_post_link_checks.rb'),
 ('20261016001000_merge_shares_into_share_group_files.rb'),
-('20261016001466_create_public_search_documents.rb');
+('20261016001466_create_public_search_documents.rb'),
+('20261016001473_notify_admin_changes_on_post_link_checks.rb');

@@ -8,6 +8,7 @@ module Admin
       include Deps[
         announcement: "posts.operations.compose_announcement",
         build_post_preview: "operations.build_post_preview",
+        check_post_links: "posts.operations.check_post_links",
         count_network_lengths: "social.operations.count_network_lengths",
         list_networks: "operations.list_networks",
         person_queries: "social.repos.person_queries",
@@ -22,7 +23,7 @@ module Admin
 
       def call(
         post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, noting: Blog::Constants::EMPTY_HASH, view: nil,
-        now: Time.now, review: false
+        now: Time.now, review: false, links: false
       )
         values = params ? values_from_params(params) : values_from_post(post)
         preview = build_post_preview.call(values:, now:)
@@ -32,6 +33,7 @@ module Admin
           values:,
           counts: counts(values, preview),
           errors:,
+          links: { items: links_in(post), open: links },
           notes: { edits: edits(post), noting: },
           now:,
           preview:,
@@ -52,6 +54,13 @@ module Admin
         return Blog::Constants::EMPTY_ARRAY unless post&.status == PUBLISHED
 
         post_queries.edits_newest_first(post.id)
+      end
+
+      def links_in(post)
+        return Blog::Constants::EMPTY_ARRAY unless post
+
+        checks = post.status == PUBLISHED ? post_queries.link_checks(post.id) : Blog::Constants::EMPTY_HASH
+        check_post_links.links(post.body).map { |url, text| { url:, text:, check: checks[url] } }
       end
 
       def suggestions(post, review)

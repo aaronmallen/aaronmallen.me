@@ -5,6 +5,7 @@ module Admin
     module Posts
       class Edit < Action
         KIND = Blog::Types::RecordKind["post"]
+        OPENED = %i[review links].freeze
 
         include Deps[
           build_post_editor: "operations.build_post_editor",
@@ -17,9 +18,12 @@ module Admin
           not_found(response) unless post
 
           records = list_record_links.call(KIND, post.id, query: request.params[:record_q])
-          review = Blog::Types::Checkbox[request.params[:review]]
-          response.render(view, **build_post_editor.call(post:, review:), records:)
+          response.render(view, **build_post_editor.call(post:, **opened(request)), records:)
         end
+
+        private
+
+        def opened(request) = OPENED.to_h { [it, Blog::Types::Checkbox[request.params[it]]] }
       end
     end
   end

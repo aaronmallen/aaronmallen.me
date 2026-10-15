@@ -25,19 +25,24 @@ module Posts
         post_queries.published_bodies.each { check(it, at) }
       end
 
+      def links(body)
+        anchors(body).each_with_object({}) do |anchor, found|
+          url = outbound(anchor["href"])
+          found[url] ||= anchor.text.strip if url
+        end
+      end
+
       private
 
+      def anchors(body) = Nokogiri::HTML5.parse(Markdown.to_html(body)).css(LINK_SELECTOR)
+
       def check(post, at, only: nil)
-        urls = links_in(post.body)
+        urls = links(post.body).keys
         link_check_mutations.forget_unlinked(post.id, urls)
         (only ? urls & [only] : urls).each { record(post, it, at) }
       end
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
-
-      def links_in(body)
-        Nokogiri::HTML5.parse(Markdown.to_html(body)).css(LINK_SELECTOR).filter_map { outbound(it["href"]) }.uniq
-      end
 
       def outbound(href)
         uri = URI.join(site, href.to_s.strip)

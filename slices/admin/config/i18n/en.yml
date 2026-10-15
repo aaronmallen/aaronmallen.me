@@ -244,6 +244,10 @@ en:
         untagged:
           one: "Took %{tag} off %{count} post"
           other: "Took %{tag} off %{count} posts"
+      check_links:
+        all: "Checking every link in this post"
+        not_published: "Not checked · links get checked once the post is live"
+        one: "Checking that link"
       publish:
         invalid: "Not published · open %{post} to fix it"
         published: "Nothing published · %{post} is not a draft"
@@ -1599,6 +1603,8 @@ en:
         editor_actions:
           analytics: "Analytics"
           details: "Details"
+          links: "Links"
+          links_failing: "%{count} failing"
           publish: "Publish"
           save: "Save"
           save_draft: "Save draft"
@@ -1641,6 +1647,36 @@ en:
           title:
             blank: "Add a title."
             control: "Take out the control characters."
+        link_check_row:
+          added: "added since the last check"
+          check_again: "Check again: %{link}"
+          check_now: "Check now: %{link}"
+          checked: "checked %{at}"
+          failing: "failing"
+          failing_nights:
+            one: "failing %{count} night"
+            other: "failing %{count} nights"
+          find: "Find in post: %{link}"
+          fine: "fine"
+          first_failed: "first failed %{on}"
+          once_live: "checked once the post is live"
+          open: "Open %{link}"
+          unchecked: "not checked yet"
+        links_drawer:
+          all_fine: "all fine"
+          check_all: "Check all again"
+          count:
+            one: "%{count} link"
+            other: "%{count} links"
+          done: "Done"
+          empty: "Nothing in this post links out yet. Links get checked every night once it's live."
+          failing: "%{count} failing"
+          fine: "%{count} fine"
+          hint_draft: "Drafts are not checked overnight. Once this is live, its links join the nightly check."
+          hint_live: "Checked every night at 03:00 Chicago."
+          no_links: "No links"
+          title: "Links in this post"
+          unchecked: "%{count} not checked yet"
         publish_form:
           key: "Publish the highlighted draft"
           publish: "Publish %{title}"

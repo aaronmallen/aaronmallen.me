@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -95,7 +95,9 @@ the caret and unsent text, and needs no `unsafe-eval`, so the content security p
 'self'` already admits the stream. The toast sits outside what the morph touches.
 
 - **Dialogs hold the morph.** While any modal `dialog` is open, the palette and the task modal among them, `live.js`
-  keeps the newest answer and morphs when the dialog closes.
+  keeps the newest answer and morphs when the dialog closes. A dialog marked `data-dialog-live` holds nothing, since it
+  has no field to lose and shows what changes under it. #1473 marked the post editor's links drawer so, so a link check
+  that lands while it is open shows at once.
 - **Edits hold their controls.** The morph skips a control the owner typed in, and a form that holds one. A box
   whose tick differs from what the server drew counts as an edit too, so boxes a script ticked, such as the
   remembered social accounts or "select all", keep their ticks.

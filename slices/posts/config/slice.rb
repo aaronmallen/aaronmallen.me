@@ -15,10 +15,10 @@ module Posts
     ], from: :social
 
     export %w[
-      operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_unpublished_post
-      operations.move_post operations.publish_draft operations.record_post_webmentions operations.revise_edit_note
-      operations.revise_post_body operations.save_post operations.save_post_seo repos.post_figure_queries
-      repos.post_queries
+      operations.act_on_posts operations.check_post_links operations.compose_announcement operations.delete_post
+      operations.lock_unpublished_post operations.move_post operations.publish_draft operations.queue_link_check
+      operations.record_post_webmentions operations.revise_edit_note operations.revise_post_body operations.save_post
+      operations.save_post_seo repos.post_figure_queries repos.post_queries
     ]
   end
 end

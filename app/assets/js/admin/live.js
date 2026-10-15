@@ -11,7 +11,7 @@ const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
 const TYPED = "input, textarea, select, [contenteditable]";
 const WAIT = 1000;
-const HOLD = `dialog:modal, ${ASKING}, ${MENU}`;
+const HOLD = `dialog:modal:not([data-dialog-live]), ${ASKING}, ${MENU}`;
 
 export const MORPHED_PARTS = PARTS.join(", ");
 

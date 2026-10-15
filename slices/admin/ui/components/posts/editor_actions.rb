@@ -12,9 +12,11 @@ module Admin
           prop :post, Blog::Types::Instance(ROM::Struct).optional
           prop :published, Blog::Types::Bool
           prop :scheduling, Blog::Types::Bool
+          prop :failing, Blog::Types::Integer
 
           def view_template
             details_button
+            links_button if @post
             analytics_link if @published
             @published ? save_button : draft_and_publish_buttons
           end
@@ -39,6 +41,16 @@ module Admin
               t(".save_draft")
             end
             publish_button
+          end
+
+          def links_button
+            Button(
+              icon: "fa-solid fa-link", command: "show-modal", commandfor: LinksDrawer::ID,
+              data: { dialog_open: LinksDrawer::ID },
+            ) do
+              plain t(".links")
+              span(class: "post-links-count") { t(".links_failing", count: @failing) } if @failing.positive?
+            end
           end
 
           def publish_button

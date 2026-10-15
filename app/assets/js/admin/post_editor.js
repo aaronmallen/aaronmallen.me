@@ -4,11 +4,40 @@ import { slugify } from "./slug.js";
 const WORD = /[\p{L}\p{N}]/u;
 
 const ready = new WeakSet();
+let finding = false;
 
 export function setupPostEditors() {
   for (const form of fresh(ready, document.querySelectorAll("form[data-post-editor]"))) {
     setupPostEditor(form);
   }
+  setupFindLink();
+}
+
+function setupFindLink() {
+  if (finding) return;
+
+  finding = true;
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-find-link]");
+    const body = document.querySelector("form[data-post-editor] [data-post-body]");
+    if (!button || !body) return;
+
+    button.closest("dialog")?.close();
+    findIn(body, button.dataset.findLink);
+  });
+}
+
+function findIn(body, url) {
+  const pane = body.closest("[data-editor-view]");
+  const radio = body.closest("[data-markdown-editor]")?.querySelector(`input[value="${pane?.dataset.editorView}"]`);
+  if (pane?.hidden && radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event("change"));
+  }
+
+  const at = body.value.indexOf(url);
+  if (at >= 0) body.setSelectionRange(at, at + url.length);
+  body.focus();
 }
 
 function setupPostEditor(form) {

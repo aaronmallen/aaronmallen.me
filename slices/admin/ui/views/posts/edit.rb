@@ -7,7 +7,9 @@ module Admin
         class Edit < View
           include Components::Posts
 
-          LIVE_TABLES = %w[post_tags posts record_links service_connections suggestions webmention_settings].freeze
+          LIVE_TABLES = %w[
+            post_link_checks post_tags posts record_links service_connections suggestions webmention_settings
+          ].freeze
 
           prop :records, Blog::Types::Hash
           prop :editor, Blog::Types::Hash, :**

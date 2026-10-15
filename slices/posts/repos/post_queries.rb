@@ -73,6 +73,8 @@ module Posts
 
       def last_untagged_at = post_tag_removals.last_removed_at
 
+      def link_checks(post_id) = post_link_checks.where(post_id:).to_a.to_h { [it.url, it] }
+
       def next_published(post) = pager(posts.published.newer_than(post).oldest_first)
 
       def next_scheduled = posts.scheduled.oldest_first.select(:id, :published_at).limit(1).one
