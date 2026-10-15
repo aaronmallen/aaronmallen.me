@@ -6,6 +6,7 @@ module API
       SCHEMA = { additionalProperties: false }.freeze
       SOURCES = %w[github linear].freeze
       REPLY = Helpers::Schema.object({ queued: Helpers::Schema.list({ type: "string", enum: SOURCES }) }).freeze
+      UNAVAILABLE = true
       UNCONFIGURED = "no GitHub token or Linear key is set, so no issue sync can run"
 
       include Deps[
@@ -16,7 +17,7 @@ module API
       def handle
         case queue_issue_sync.call
           in Success[*sources] then Success(queued: sources)
-          in Failure(:not_configured) then failed(UNCONFIGURED)
+          in Failure(:not_configured) then Failure(Structs::Refusal.unavailable(UNCONFIGURED))
         end
       end
 

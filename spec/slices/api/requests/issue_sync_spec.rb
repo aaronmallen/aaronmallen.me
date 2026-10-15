@@ -59,11 +59,15 @@ RSpec.describe "API issue sync", type: :request do
     describe "with neither" do
       before { disconnect_github }
 
-      it "refuses with the admin's reason and queues nothing", :aggregate_failures do
-        expect([sync, status]).to eq([{ "error" => "failed", "message" => unconfigured }, 500])
+      it "answers 503 with the admin's reason and queues nothing", :aggregate_failures do
+        expect([sync, status]).to eq([{ "error" => "unavailable", "message" => unconfigured }, 503])
         expect(queued).to eq([0, 0])
       end
     end
+  end
+
+  it "lists 503 in the OpenAPI document" do
+    expect(OpenAPI.document.dig("paths", "/tasks/issues/sync", "post", "responses")).to include("503")
   end
 
   describe "the MCP tool" do
