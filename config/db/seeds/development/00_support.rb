@@ -29,6 +29,8 @@ module Seeds
 
     def for(_connection) = self
 
+    def joiner = nil
+
     def post(_text, idempotency_key:, **)
       id = "#{@name}-#{idempotency_key.part.id}"
 
