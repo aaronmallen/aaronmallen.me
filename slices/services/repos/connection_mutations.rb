@@ -15,6 +15,13 @@ module Services
         update(id, **(credentials ? { credentials: seal(credentials) } : {}), **columns)
       end
 
+      def reseal
+        service_connections.dataset.select_map(%i[id credentials]).sum do |id, sealed|
+          resealed = yield sealed
+          resealed ? service_connections.where(id:, credentials: sealed).dataset.update(credentials: resealed) : 0
+        end
+      end
+
       private
 
       def seal(credentials) = Services::Encryptor.new.seal(JSON.generate(credentials))

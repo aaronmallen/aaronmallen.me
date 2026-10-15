@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#MISE description="Seal every stored credential again under data_key, opening the old ones with previous_data_key"
+
+set -e
+
+exec scripts/util/ensure_postgres bundle exec hanami run '
+  counts = Services::Slice["operations.reseal_credentials"].call
+  puts "Resealed #{counts[:resealed]} credentials."
+  abort "#{counts[:unreadable]} credentials open under neither data_key nor previous_data_key." if counts[:unreadable].positive?
+'

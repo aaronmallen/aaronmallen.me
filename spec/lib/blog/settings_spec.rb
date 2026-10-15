@@ -62,6 +62,31 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "#previous_data_key" do
+    let(:app) { Hanami.app["settings"] }
+
+    def settings_with(**values)
+      described_class.new(Hanami::Settings::CompositeStore.new(values, Hanami.app.config.settings_store))
+    end
+
+    it "is unset unless given" do
+      expect(settings_with(previous_data_key: " ").previous_data_key).to be_nil
+    end
+
+    it "takes a key of 64 characters or more" do
+      expect(settings_with(previous_data_key: "p" * 64).previous_data_key).to eq("p" * 64)
+    end
+
+    it "refuses a key under 64 characters" do
+      expect { settings_with(previous_data_key: "p" * 63) }.to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+
+    it "refuses a key that repeats data_key" do
+      expect { settings_with(previous_data_key: app.data_key) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /must not repeat previous_data_key/)
+    end
+  end
+
   describe "the committed secrets" do
     let(:committed) do
       %w[development test].to_h do |environment|

@@ -144,6 +144,7 @@ RSpec.describe "MCP reach", type: :app do
       "services.operations.add_connection" => "saves a connection the admin's connect flow checked; no tool does",
       "services.operations.change_connection" => "stores a refreshed or revoked token for a client; no tool does",
       "services.operations.remove_connection" => "deletes a connection the admin disconnects; no tool does",
+      "services.operations.reseal_credentials" => "the db:reseal mise task runs it; no tool handles credentials",
       "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
       "shares.operations.change_share_code" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.change_short_link_code" => "spec #1064 keeps MCP tools out of short links",

@@ -98,6 +98,7 @@ page_size:
   admin: 100
   mcp: 100
   public: 25
+previous_data_key: <%= ENV["PREVIOUS_DATA_KEY"].to_json %>
 share_store:
   access_key: <%= ENV["SHARE_STORE_ACCESS_KEY"].to_json %>
   bucket: <%= ENV["SHARE_STORE_BUCKET"].to_json %>

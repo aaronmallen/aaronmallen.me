@@ -5,7 +5,7 @@ status: active
 created: 2026-10-08
 area: [admin, config, db, lib, record, social, tasks]
 issue: "#791"
-amended: ["#831", "#1121", "#1180"]
+amended: ["#831", "#1121", "#1180", "#1379"]
 tags: [services, credentials, encryption, settings, providers, clients, oauth, github, linear, mastodon, bluesky]
 ---
 
@@ -39,6 +39,12 @@ Each row keeps its credentials in one encrypted column. An encryptor holds the k
 `data_key` setting. #1180 moved it from `lib/blog` to `lib/services`, since only `services` uses it.
 `Blog::SecretCheck` guards `data_key` with the other secrets, so it cannot repeat one of them or a committed value.
 
+An optional `previous_data_key` (#1379) lets the key rotate. The same check guards it. While it is set, the
+encryptor seals under `data_key` and opens text sealed under either key. To rotate, set `previous_data_key` to the old
+key and `data_key` to a new one, restart, and run `mise run db:reseal`. The task seals every credential the old key
+opens under the new one, prints how many it changed, and fails if any opens under neither key. Once it passes, unset
+`previous_data_key` and restart.
+
 Clients look up their credentials on each call, not at boot. A provider still registers its client, as ADR 0009
 says, but the client asks the slice for the account it needs when it calls out.
 
@@ -62,7 +68,7 @@ The database checks nothing about the provider. A row whose provider has lost it
 and the slice has to skip it rather than fail.
 
 A stolen database or backup holds credentials nobody can read without `data_key`. Losing `data_key` loses every
-credential, and I reconnect each account by hand. Rotating it means decrypting and encrypting every row again. With
+credential, and I reconnect each account by hand. Rotating it takes one task and two restarts, with no reconnects. With
 the key apart from `app_secret`, rotating the session secret signs me out and leaves the credentials alone.
 
 Each call costs a query and a decryption. A spec that changes credentials writes a row, where it stubbed settings and

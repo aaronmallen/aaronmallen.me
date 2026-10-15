@@ -14,20 +14,17 @@ module Services
     class Invalid < StandardError
     end
 
-    def initialize(data_key = Hanami.app.settings.data_key)
-      @key = OpenSSL::KDF.hkdf(data_key, salt: "", info: INFO, length: KEY_SIZE, hash: "SHA256")
+    def initialize(data_key = settings.data_key, previous_data_key = settings.previous_data_key)
+      @key, *@previous_keys = [data_key, previous_data_key].compact.map { derive(it) }
     end
 
-    def open(sealed)
-      raw = sealed.to_s.unpack1(BASE64)
-      raise Invalid, "sealed text is too short" if raw.bytesize < HEADER_SIZE
+    def open(sealed) = open_under([@key, *@previous_keys], sealed)
 
-      cipher = cipher(:decrypt)
-      cipher.iv = raw.byteslice(0, IV_SIZE)
-      cipher.auth_tag = raw.byteslice(IV_SIZE...HEADER_SIZE)
-      (cipher.update(raw.byteslice(HEADER_SIZE..)) + cipher.final).force_encoding(Encoding::UTF_8)
-    rescue ArgumentError, OpenSSL::Cipher::CipherError
-      raise Invalid, "sealed text was changed or sealed under another key"
+    def reseal(sealed)
+      open_under([@key], sealed)
+      nil
+    rescue Invalid
+      seal(open_under(@previous_keys, sealed))
     end
 
     def seal(text)
@@ -39,8 +36,33 @@ module Services
 
     private
 
-    def cipher(mode)
-      OpenSSL::Cipher.new(CIPHER).public_send(mode).tap { it.key = @key }
+    def cipher(mode, key = @key)
+      OpenSSL::Cipher.new(CIPHER).public_send(mode).tap { it.key = key }
     end
+
+    def decrypt(raw, key)
+      cipher = cipher(:decrypt, key)
+      cipher.iv = raw.byteslice(0, IV_SIZE)
+      cipher.auth_tag = raw.byteslice(IV_SIZE...HEADER_SIZE)
+      (cipher.update(raw.byteslice(HEADER_SIZE..)) + cipher.final).force_encoding(Encoding::UTF_8)
+    end
+
+    def derive(data_key) = OpenSSL::KDF.hkdf(data_key, salt: "", info: INFO, length: KEY_SIZE, hash: "SHA256")
+
+    def open_under(keys, sealed)
+      raw = sealed.to_s.unpack1(BASE64)
+      raise Invalid, "sealed text is too short" if raw.bytesize < HEADER_SIZE
+
+      keys.each do |key|
+        return decrypt(raw, key)
+      rescue OpenSSL::Cipher::CipherError
+        next
+      end
+      raise Invalid, "sealed text was changed or sealed under another key"
+    rescue ArgumentError
+      raise Invalid, "sealed text was changed or sealed under another key"
+    end
+
+    def settings = Hanami.app.settings
   end
 end

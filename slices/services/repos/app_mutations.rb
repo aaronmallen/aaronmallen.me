@@ -10,6 +10,13 @@ module Services
 
         service_apps.store(columns.merge(credentials: sealed), Time.now)
       end
+
+      def reseal
+        service_apps.dataset.select_map(%i[id credentials]).sum do |id, sealed|
+          resealed = yield sealed
+          resealed ? service_apps.where(id:, credentials: sealed).dataset.update(credentials: resealed) : 0
+        end
+      end
     end
   end
 end

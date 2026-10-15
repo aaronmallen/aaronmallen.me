@@ -204,6 +204,8 @@ module Blog
 
     setting :page_size, constructor: Schema.schema(admin: PageSize, mcp: PageSize, public: PageSize)
 
+    setting :previous_data_key, constructor: unless_blank(Secret)
+
     setting :proxy, default: {}, constructor: Schema.schema(
       address_header?: Value,
       trusted_proxies?: TrustedProxies.default([].freeze),
@@ -238,10 +240,8 @@ module Blog
 
     def initialize(...)
       super
-      errors = SecretCheck.call(SECRETS.to_h { [it, public_send(it)] })
-      return if errors.empty?
-
-      raise Hanami::Settings::InvalidSettingsError, errors
+      errors = SecretCheck.call(SECRETS.to_h { [it, public_send(it)] }.merge(previous_data_key:).compact)
+      raise Hanami::Settings::InvalidSettingsError, errors unless errors.empty?
     end
 
     def inspect_values = inspect
