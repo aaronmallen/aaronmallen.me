@@ -21,7 +21,7 @@ module Analytics
         rolled = analytics_rollup_clicks.between(from, to).for_path(path).top_by_clicks.to_a.map(&:to_h)
         rows = rolled + live_rows(:clicks, path, from:, to:)
 
-        combined_clicks(rows).sort_by { [-it.fetch(:clicks), *it.values_at(*LINK)] }
+        rank_rows.call(rows, key: LINK, figures: %i[clicks], by: :clicks)
       end
 
       def devices_between(from:, to:, path: nil)
@@ -70,12 +70,6 @@ module Analytics
       private
 
       def all_live_rows(name, from:, to:) = rollup_queries.unrolled_summaries(from:, to:).flat_map(&name)
-
-      def combined_clicks(rows)
-        rows.group_by { it.values_at(*LINK) }.map do |(link_host, link_path), found|
-          { link_host:, link_path:, clicks: found.sum { it.fetch(:clicks) } }
-        end
-      end
 
       def curves(rows, today)
         visitors = first_day_visitors(rows, today)

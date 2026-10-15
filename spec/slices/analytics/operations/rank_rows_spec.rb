@@ -30,4 +30,32 @@ RSpec.describe Analytics::Operations::RankRows do
     expect(rank_rows.call(rows, key: :host, figures: %i[views visitors]).first.keys)
       .to eq(%i[host views visitors])
   end
+
+  it "keeps an unknown figure unknown and ranks it last" do
+    rows = [{ host: "a.example", views: 9, visitors: nil }, { host: "b.example", views: 1, visitors: 1 }]
+
+    expect(rank_rows.call(rows, key: :host)).to eq(
+      [{ host: "b.example", views: 1, visitors: 1 }, { host: "a.example", views: 9, visitors: nil }],
+    )
+  end
+
+  it "ranks by the figure it is given" do
+    rows = [{ path: "/a", views: 1, visitors: 1 }, { path: "/b", views: 5, visitors: 0 }]
+
+    expect(rank_rows.call(rows, key: :path, by: :views).map { it.fetch(:path) }).to eq(%w[/b /a])
+  end
+
+  it "merges on every column of a compound key" do
+    rows = [["/x", 1], ["/y", 1], ["/x", 2]].map { |link_path, clicks| { link_host: "a.example", link_path:, clicks: } }
+
+    expect(rank_rows.call(rows, key: %i[link_host link_path], figures: %i[clicks], by: :clicks)).to eq(
+      [{ link_host: "a.example", link_path: "/x", clicks: 3 }, { link_host: "a.example", link_path: "/y", clicks: 1 }],
+    )
+  end
+
+  it "names a merged row after its last named row" do
+    rows = ["Old", "New", nil].map { |title| { path: "/a", views: 1, visitors: 1, title: } }
+
+    expect(rank_rows.call(rows, key: :path, named: :title).first.fetch(:title)).to eq("New")
+  end
 end

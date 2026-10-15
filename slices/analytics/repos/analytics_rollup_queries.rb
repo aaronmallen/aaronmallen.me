@@ -4,6 +4,7 @@ module Analytics
   module Repos
     class AnalyticsRollupQueries < Blog::DB::Repo
       KEYS = { countries: :country_code, paths: :path, referrers: :host }.freeze
+      NAMED = { countries: :country_name, paths: :title }.freeze
       RANKS = { countries: :visitors, paths: :views, referrers: :visitors }.freeze
       SUMS = {
         countries: %i[views visitors].freeze,
@@ -16,7 +17,7 @@ module Analytics
       VIEW_DAYS = 90
       ZERO_DAY = { views: 0, visitors: 0 }.freeze
 
-      include Deps[event_queries: "repos.analytics_event_queries"]
+      include Deps[event_queries: "repos.analytics_event_queries", rank_rows: "operations.rank_rows"]
 
       def days(from:, to:) = analytics_rollups.between(from, to).oldest_first.to_a
 
@@ -81,13 +82,6 @@ module Analytics
 
       def by_path(rows, field) = rows.to_a.to_h { [it.path, it.public_send(field)] }
 
-      def combine(rows, key, fields)
-        rows.each_with_object({}) do |row, found|
-          held = found[row[key]]
-          found[row[key]] = held ? held.merge(row, fields.to_h { [it, sum(held[it], row[it])] }) : row
-        end.values
-      end
-
       def live_views(from, to, paths: nil) = event_queries.views_on(unrolled_days(from:, to:), paths:)
 
       def months(from, to) = (from..to).slice_when { |day, after| day.month != after.month }.map { it.first..it.last }
@@ -99,11 +93,9 @@ module Analytics
       end
 
       def ranked(name, rolled, live)
-        key = KEYS.fetch(name)
-        rank = RANKS.fetch(name)
-        so_far = live.flat_map { it.public_send(name) }
+        rows = (rolled + live.flat_map { it.public_send(name) }).map(&:to_h)
 
-        combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
+        rank_rows.call(rows, key: KEYS.fetch(name), figures: SUMS.fetch(name), named: NAMED[name], by: RANKS[name])
       end
 
       def reach(days, path, complete)
@@ -113,10 +105,6 @@ module Analytics
         rolled = by_path(analytics_rollup_reach.in_month(days.first), :reach)
         rolled.fetch(path, 0) unless rolled.empty?
       end
-
-      def standing(row, rank, key) = [row[rank] ? 0 : 1, -row[rank].to_i, -row[:views], row[key].to_s]
-
-      def sum(held, found) = held && found ? held + found : held || found
 
       def summary_days(from, to, live)
         found = days(from:, to:).to_h { [it.day, { views: it.views, visitors: it.visitors }] }

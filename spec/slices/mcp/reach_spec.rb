@@ -67,7 +67,7 @@ RSpec.describe "MCP reach", type: :app do
       "analytics.operations.parse_aggregator" => "reads a feed aggregator's subscribers as record_feed_fetch counts",
       "analytics.operations.prune_analytics_events" => "a background job prunes old visits after the roll up",
       "analytics.operations.queue_country_database" => "the worker queues the country database refresh at boot",
-      "analytics.operations.rank_rows" => "ranks rows as the page queries repo reads them; read_analytics reads it",
+      "analytics.operations.rank_rows" => "ranks rows as the analytics repos read them; read_analytics reads it",
       "analytics.operations.record_feed_fetch" => "counts a feed fetch as a feed reader polls",
       "analytics.operations.record_visit" => "records a visit as a reader's browser reports it",
       "analytics.operations.refresh_country_database" => "a background job refreshes the country database",
