@@ -60,7 +60,7 @@ module Public
           end
 
           def facts
-            dl(class: "task-facts") do
+            dl(class: "task-page-facts") do
               fact(:status, t([".statuses", @task.status].join(".")))
               fact(:column, t([".columns", @task.board_column].join(".")))
               closed if @task.completed_at

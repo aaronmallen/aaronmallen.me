@@ -874,7 +874,7 @@
   }
 }
 
-@utility task-facts {
+@utility task-page-facts {
   @apply mt-4.5 mb-0 grid grid-cols-[max-content_1fr] gap-x-5 gap-y-1.5 meta;
 
   & dd {

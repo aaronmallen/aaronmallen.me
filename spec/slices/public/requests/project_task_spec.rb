@@ -43,20 +43,22 @@ RSpec.describe "Project task page", type: :request do
     it "shows the status and column", :aggregate_failures do
       visit_task(link(create(:task, stage: "ready"), project))
 
-      expect(page).to have_css(".task-facts dt + dd", exact_text: "open")
-      expect(page).to have_css(".task-facts dd", exact_text: "ready")
+      expect(page).to have_css(".task-page-facts dt + dd", exact_text: "open")
+      expect(page).to have_css(".task-page-facts dd", exact_text: "ready")
     end
 
     it "shows the day a task was done" do
       visit_task(link(create(:task, :done, completed_at: Time.utc(2026, 10, 3, 18)), project))
 
-      expect(page.all(".task-facts > *").map(&:text)).to eq(["Status", "done", "Column", "done", "Done", "Oct 3, 2026"])
+      facts = page.all(".task-page-facts > *").map(&:text)
+
+      expect(facts).to eq(["Status", "done", "Column", "done", "Done", "Oct 3, 2026"])
     end
 
     it "shows the day a task was canceled" do
       visit_task(link(create(:task, :canceled, completed_at: Time.utc(2026, 10, 4, 18)), project))
 
-      expect(page).to have_css(".task-facts dt", exact_text: "Canceled")
+      expect(page).to have_css(".task-page-facts dt", exact_text: "Canceled")
     end
 
     it "links the source issue" do
@@ -98,7 +100,7 @@ RSpec.describe "Project task page", type: :request do
       visit_task(task)
 
       expect(page).to have_no_text("private-tag")
-      expect(page.all(".task-facts dt").map(&:text)).to eq(%w[Status Column])
+      expect(page.all(".task-page-facts dt").map(&:text)).to eq(%w[Status Column])
     end
 
     it "names each related task on a published board by how it relates", :aggregate_failures do
