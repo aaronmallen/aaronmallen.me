@@ -1071,6 +1071,15 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=upcoming&origin=tasks")
       end
 
+      it "offers a waiting task the moves into today and to next, keyed on today", :aggregate_failures do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
+          .to eq(%W[/admin/tasks/#{task.id}/move/today /admin/tasks/#{task.id}/move/next])
+        expect(move_keys).to eq(["/admin/tasks/#{task.id}/move/today"])
+      end
+
       it "sends an archived task's pen back to the archive" do
         task = create(:task, :done)
         get "/admin/tasks", filter: "completed"

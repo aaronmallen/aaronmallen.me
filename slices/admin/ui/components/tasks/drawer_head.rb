@@ -13,7 +13,7 @@ module Admin
             header(class: "task-drawer-head") do
               RecordKey(kind: "task", label: @task.label)
               Status(status: @task.status)
-              span(class: "read-meta-list") { t(Helpers::TaskLists.name(@task.place)) }
+              span(class: "read-meta-list") { place }
               SourceLink(source: @task.source)
               close
             end
@@ -28,6 +28,12 @@ module Admin
               origin: @origin, filter: @filter, variant: :gh, small: true, data: { task_close: true }, label:,
               icon: "fa-solid fa-xmark", class: "task-drawer-close",
             ) { label }
+          end
+
+          def place
+            return l(@task.sprint.sprint_date, format: :short) if @task.ahead?(Blog::TimeZone.today)
+
+            t(Helpers::TaskLists.name(@task.place))
           end
         end
       end

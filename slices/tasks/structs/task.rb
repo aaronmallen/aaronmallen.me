@@ -5,6 +5,8 @@ module Tasks
     class Task < Blog::DB::Struct
       OWNER = { kind: Blog::Types::ContributorKind["owner"] }.freeze
 
+      def ahead?(today) = in_sprint? && sprint.sprint_date > today
+
       def blocked? = links.any?(&:blocker?)
 
       def board_column = in_progress? || closed? ? status : stage

@@ -28,7 +28,7 @@ module Admin
           def held = @task.sprint&.sprint_date
 
           def move(list)
-            here = @task.place == list
+            here = !@task.ahead?(@today) && @task.place == list
             label = t(Helpers::TaskLists.title(list))
 
             @menu.post(label, action: act(:admin_move_task, filter: list), icon: (CHECK if here), disabled: here)

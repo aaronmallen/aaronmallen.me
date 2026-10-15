@@ -89,6 +89,23 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       end
     end
 
+    describe "a task on today's sprint" do
+      it "disables Today" do
+        menu(create(:task, :in_sprint, sprint_id: sprint.id))
+
+        expect(page).to have_css("button.ctx-item[disabled]", text: "Today", visible: :all)
+      end
+    end
+
+    describe "a task on a later sprint" do
+      before { menu(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today + 1).id)) }
+
+      it "lets it move to Today", :aggregate_failures do
+        expect(page).to have_css("button.ctx-item:not([disabled])", text: "Today", visible: :all)
+        expect(page).to have_no_css("button.ctx-item[disabled]", visible: :all)
+      end
+    end
+
     describe "a running task" do
       it "offers pause in place of start", :aggregate_failures do
         menu(create(:task, :in_sprint, :in_progress, sprint_id: sprint.id))

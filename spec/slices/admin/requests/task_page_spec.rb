@@ -93,6 +93,19 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(head).to have_css(".read-meta-list", exact_text: i18n.t(Admin::Helpers::TaskLists.name("someday")))
       end
 
+      it "shows Today in the header for a task on today's sprint" do
+        read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id))
+
+        expect(head).to have_css(".read-meta-list", exact_text: i18n.t(Admin::Helpers::TaskLists.name("today")))
+      end
+
+      it "shows a later sprint's date in the header in place of Today" do
+        tomorrow = Blog::TimeZone.today + 1
+        read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: tomorrow).id))
+
+        expect(head).to have_css(".read-meta-list", exact_text: i18n.l(tomorrow, format: :short))
+      end
+
       it "closes from the header" do
         read(task, filter: "next")
 
@@ -192,6 +205,19 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         read(create(:task, list: "someday"))
 
         expect(facts[fact(:list)]).to eq(i18n.t(Admin::Helpers::TaskLists.name("someday")))
+      end
+
+      it "shows Today for a task on today's sprint" do
+        read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id))
+
+        expect(facts[fact(:list)]).to eq(i18n.t(Admin::Helpers::TaskLists.name("today")))
+      end
+
+      it "shows a later sprint's date in place of Today" do
+        tomorrow = Blog::TimeZone.today + 1
+        read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: tomorrow).id))
+
+        expect(facts[fact(:list)]).to eq(i18n.l(tomorrow, format: :medium))
       end
 
       it "says when there are no tags" do

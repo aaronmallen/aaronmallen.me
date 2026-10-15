@@ -41,10 +41,16 @@ module Admin
           end
 
           def filing
-            fact(".list") { t(Helpers::TaskLists.name(@task.place)) }
+            fact(".list") { place }
             fact(".sprint") { sprint_day }
             fact(".tags") { tags }
             fact(".contributors") { credits }
+          end
+
+          def place
+            return l(@task.sprint.sprint_date, format: :medium) if @task.ahead?(Blog::TimeZone.today)
+
+            t(Helpers::TaskLists.name(@task.place))
           end
 
           def sprint_day

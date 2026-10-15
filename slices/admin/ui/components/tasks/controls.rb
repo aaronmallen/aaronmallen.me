@@ -9,7 +9,9 @@ module Admin
           MOVE = "m"
           RIGHT = "fa-solid fa-arrow-right"
           TODAY, NEXT, SOMEDAY, EXTERNAL = %w[today next someday external].map { Blog::Types::TaskFilter[it] }
+          AHEAD = :ahead
           MOVES = {
+            AHEAD => [[TODAY, LEFT, MOVE], [NEXT, RIGHT, nil]],
             TODAY => [[NEXT, RIGHT, MOVE]],
             NEXT => [[TODAY, LEFT, MOVE], [SOMEDAY, RIGHT, nil]],
             SOMEDAY => [[NEXT, LEFT, MOVE]],
@@ -23,6 +25,7 @@ module Admin
           prop :origin, Blog::Types::String
           prop :moves, Blog::Types::Bool, default: true
           prop :row, Blog::Types::Bool, default: false
+          prop :ahead, Blog::Types::Bool, default: false
 
           def view_template
             @task.closed? ? reopen : progress
@@ -65,7 +68,7 @@ module Admin
             running? ? { confirm: t(".confirm_move", task: @task.title, list:) } : Blog::Constants::EMPTY_HASH
           end
 
-          def moves = MOVES.fetch(@task.place).each { |place, side, key| move(place, side, key:) }
+          def moves = MOVES.fetch(@ahead ? AHEAD : @task.place).each { |place, side, key| move(place, side, key:) }
 
           def origin_field = input(type: "hidden", name: "origin", value: @origin)
 

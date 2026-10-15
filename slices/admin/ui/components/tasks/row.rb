@@ -82,7 +82,7 @@ module Admin
           def side
             div(class: "task-acts hov") do
               Grip(task: @task, lead: @lead) if ordered?
-              Controls(task: @task, filter: @filter, origin: @origin, row: true) unless @task.closed?
+              Controls(task: @task, filter: @filter, origin: @origin, row: true, ahead: waiting?) unless @task.closed?
               edit
             end
           end
