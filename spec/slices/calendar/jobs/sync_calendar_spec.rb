@@ -312,6 +312,20 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
     expect(calendars).to be_empty
   end
 
+  describe "when Google sign-in is not set up" do
+    before do
+      connect("me@example.com", "ya29.me")
+      create(:calendar, account: "me@example.com")
+      create(:calendar, account: "me@example.com", hidden: true)
+      set_up_google_client({})
+      run
+    end
+
+    it("keeps every calendar") { expect(calendars.size).to eq(2) }
+
+    it("keeps the one I hid hidden") { expect(calendars.map(&:hidden)).to contain_exactly(false, true) }
+  end
+
   describe "with a revoked account" do
     before do
       connect("me@example.com", "ya29.me")
