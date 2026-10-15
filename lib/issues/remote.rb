@@ -8,9 +8,9 @@ module Issues
       return Failure(:not_configured) unless client.configured?
 
       yield
-    rescue GitHub::RateLimited, Linear::RateLimited
+    rescue Blog::RateLimited
       Failure(:rate_limited)
-    rescue GitHub::Error, Linear::Error => e
+    rescue Blog::ServiceError => e
       Failure([:"#{provider}_failed", e.message])
     end
   end

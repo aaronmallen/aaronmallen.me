@@ -110,7 +110,7 @@ module Social
         Success(settle(social_post.id))
       rescue *FINAL => e
         refuse(social_post, account, GAVE_UP, e.message)
-      rescue Social::Error, Bluesky::Error, LinkedIn::Error, Mastodon::Error => e
+      rescue Blog::ServiceError => e
         social_post_mutations.record_delivery(social_post.id, account, error: e.message)
         Failure(SEND_FAILED)
       end
