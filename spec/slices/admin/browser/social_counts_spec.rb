@@ -26,7 +26,7 @@ RSpec.describe "Admin social counts", type: :feature do
   end
 
   def measured(texts)
-    texts.map { Admin::Slice["operations.count_network_lengths"].call([it]).first.transform_values(&:count) }
+    texts.map { Social::Slice["operations.count_network_lengths"].call([it]).first.transform_values(&:count) }
   end
 
   it "counts each sample the way the server does" do

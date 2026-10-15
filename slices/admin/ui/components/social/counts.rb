@@ -20,7 +20,7 @@ module Admin
           private
 
           def counter(network)
-            measured = @counts.fetch(network.name, Structs::NetworkCount::NONE)
+            measured = @counts.fetch(network.name, ::Social::Structs::NetworkCount::NONE)
             template = template(network)
 
             span(class: counter_class(network, measured), data: counter_data(network, template)) do

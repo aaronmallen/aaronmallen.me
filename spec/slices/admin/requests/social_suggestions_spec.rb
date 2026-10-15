@@ -472,6 +472,39 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
     end
 
+    describe "an edit that would pass LinkedIn's limit once the thread joins" do
+      let(:social_post) { compose("teh #{'a' * 1496}", "b" * 1498, targets: %w[linkedin]) }
+
+      before { suggest(social_post, typo("teh", "their")) }
+
+      it "says which limit it would pass" do
+        open_item(social_post)
+
+        expect(page).to have_css(".sg-edit .pill", text: "Over the LinkedIn limit of 3000")
+      end
+
+      it "leaves the thread alone on Accept all", :aggregate_failures do
+        accept(social_post)
+
+        expect(bodies(social_post)).to eq(["teh #{'a' * 1496}", "b" * 1498])
+        expect(statuses(social_post)).to eq(%w[pending])
+      end
+
+      it "says why in a toast" do
+        accept(social_post)
+        follow_redirect!
+
+        expect(toast).to eq("Not applied · part 1 would pass the LinkedIn limit of 3000")
+      end
+
+      it "applies an edit that keeps the joined thread in the limit" do
+        suggest(social_post, typo("teh", "the"))
+        accept(social_post)
+
+        expect(bodies(social_post).first).to eq("the #{'a' * 1496}")
+      end
+    end
+
     describe "edits that would leave a part empty" do
       let(:social_post) { compose("teh cat sat", "teh") }
 

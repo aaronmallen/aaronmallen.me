@@ -8,7 +8,7 @@ module Admin
       include Deps[
         announcement: "posts.operations.compose_announcement",
         build_post_preview: "operations.build_post_preview",
-        count_network_lengths: "operations.count_network_lengths",
+        count_network_lengths: "social.operations.count_network_lengths",
         list_networks: "operations.list_networks",
         person_queries: "social.repos.person_queries",
         post_queries: "posts.repos.post_queries",

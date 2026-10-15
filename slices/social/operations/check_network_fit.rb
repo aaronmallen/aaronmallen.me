@@ -3,13 +3,10 @@
 module Social
   module Operations
     class CheckNetworkFit
-      include Deps[expand_for_network: "operations.expand_for_network", networks: "networks.all"]
+      include Deps[measure_parts: "operations.measure_parts"]
 
       def call(bodies, targets)
-        targets.to_a.all? do |name|
-          client = networks.fetch(name)
-          expand_for_network.call(bodies, name).all? { client.within_limit?(it.text) }
-        end
+        measure_parts.call(bodies, targets.to_a).none? { it.each_value.any?(&:over) }
       end
     end
   end

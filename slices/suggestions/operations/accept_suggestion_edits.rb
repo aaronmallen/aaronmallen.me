@@ -49,10 +49,10 @@ module Suggestions
         body = bodies[index]
         return :stale unless body && edit.applies_to?(body)
 
-        replaced = edit.apply_to(body)
-        return :refused unless check_network_fit.call([replaced], targets)
+        replaced = bodies.dup.tap { it[index] = edit.apply_to(body) }
+        return :refused unless check_network_fit.call(replaced, targets)
 
-        bodies[index] = replaced
+        bodies[index] = replaced[index]
         :accepted
       end
 

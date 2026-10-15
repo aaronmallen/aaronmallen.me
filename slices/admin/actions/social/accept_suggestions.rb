@@ -11,7 +11,7 @@ module Admin
 
         include Deps[
           accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
-          find_over_limit_network: "operations.find_over_limit_network",
+          find_over_limit_network: "social.operations.find_over_limit_network",
           social_post_queries: "social.repos.social_post_queries",
           suggestion_queries: "suggestions.repos.suggestion_queries",
         ]
@@ -42,10 +42,11 @@ module Admin
 
         def applied(response, social_post, accepted, refused)
           blocked = refused.first if accepted.empty?
-          network = blocked && find_over_limit_network.call(social_post, blocked)
-          return toast(response, APPLIED, count: accepted.length) unless network
+          over = blocked && find_over_limit_network.call(social_post, blocked)
+          return toast(response, APPLIED, count: accepted.length) unless over
 
-          toast(response, OVER_LIMIT, limit: network.limit, network: network.label, part: blocked.part_number)
+          network = i18n.t(Structs::Network::LABELS.fetch(over.network))
+          toast(response, OVER_LIMIT, limit: over.limit, network:, part: blocked.part_number)
         end
 
         def back_to(request, id)

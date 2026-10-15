@@ -100,7 +100,7 @@ module Admin
             end
           end
 
-          def preview_text(network) = @counts.fetch(network.name, Structs::NetworkCount::NONE).text
+          def preview_text(network) = @counts.fetch(network.name, ::Social::Structs::NetworkCount::NONE).text
 
           def previewing?
             (@photos.any? || @body.match?(::Social::Operations::ResolveMentions::TOKEN)) && @networks.any?(&:selected)

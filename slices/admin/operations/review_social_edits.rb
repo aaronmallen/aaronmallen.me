@@ -4,7 +4,7 @@ module Admin
   module Operations
     class ReviewSocialEdits
       include Deps[
-        find_over_limit_network: "operations.find_over_limit_network",
+        find_over_limit_network: "social.operations.find_over_limit_network",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 

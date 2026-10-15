@@ -15,7 +15,7 @@ module Admin
       KIND = Blog::Types::RecordKind["social_post"]
 
       include Deps[
-        count_network_lengths: "operations.count_network_lengths",
+        count_network_lengths: "social.operations.count_network_lengths",
         list_networks: "operations.list_networks",
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",

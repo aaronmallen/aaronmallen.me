@@ -40,7 +40,9 @@ module Admin
           def part_label(edit) = (t(".part", number: edit[:part]) if @parts > 1)
 
           def refusal(edit)
-            Pill(color: :orange) { t(".over_limit", limit: edit[:over].limit, network: edit[:over].label) }
+            network = t(Structs::Network::LABELS.fetch(edit[:over].network))
+
+            Pill(color: :orange) { t(".over_limit", limit: edit[:over].limit, network:) }
             Button(small: true, **submit(edit, reject: true)) { t(".reject") }
           end
 
