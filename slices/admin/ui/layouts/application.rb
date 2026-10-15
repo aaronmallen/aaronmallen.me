@@ -9,18 +9,26 @@ module Admin
         include Navigated
         include Deps["settings"]
 
+        DRAWER_HEADER = "HTTP_X_DRAWER"
         LIVE_TABLES = %w[
           mail_accounts mail_labels mail_messages mail_settings mail_thread_labels mail_thread_tags mail_threads people
           tags task_sources tasks webmentions
         ].freeze
 
         def view_template(&)
+          return drawn(&) if request.get_header(DRAWER_HEADER)
+
           document do
             body(class: "adm") { render_body(&) }
           end
         end
 
         private
+
+        def drawn
+          yield
+          Toast(message: toast_message) if toast_message
+        end
 
         def journal_dialog
           written = content_for(:journal_write)

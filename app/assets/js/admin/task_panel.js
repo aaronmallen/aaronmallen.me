@@ -10,6 +10,7 @@ import { setupTaskOrder } from "./task_order.js";
 import { showToast } from "./toast.js";
 
 const CANCEL = "a[data-task-cancel]";
+const DRAWER = { headers: { "X-Drawer": "1" } };
 const EDIT = "[data-task-edit]";
 const EDIT_KEY = "e";
 const EDIT_LINK = "footer a[data-task-open-edit]";
@@ -65,7 +66,7 @@ function typing(event) {
 
 function setupPanel(panel) {
   const panelBody = panel.querySelector("[data-task-panel-body]");
-  const visit = setupVisit();
+  const visit = setupVisit(DRAWER);
   let opener = null;
   let saved = false;
 
@@ -88,7 +89,7 @@ function setupPanel(panel) {
   };
 
   const reread = async (url) => {
-    const response = await fetch(url).catch(() => null);
+    const response = await fetch(url, DRAWER).catch(() => null);
     const page = response?.ok ? parse(await response.text()) : null;
     const task = page?.querySelector(TASK);
     if (!task) return window.location.assign(here());
@@ -111,6 +112,7 @@ function setupPanel(panel) {
     },
     invalid: (task) => show(task),
     live: (form) => panel.contains(form),
+    ...DRAWER,
   });
 
   const click = (event) => {

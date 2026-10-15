@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
-amended: ["#41", "#90", "#745", "#1102", "#1106"]
+amended: ["#41", "#90", "#745", "#1102", "#1106", "#1395"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -49,6 +49,10 @@ action. A 422 swaps the edit page's form in, errors and all. Any other answer, o
 posting the form. With scripts off, the form posts as before, and the server needs no second way to answer.
 Since #1106 the form sits in the drawer: a redirect loads the task's read page back into the drawer and shows the
 toast it carries, and the list behind reloads when the drawer closes.
+
+Since #1395 the drawer's fetches send an `X-Drawer` header, and the admin layout answers it with the task's part and
+the toast alone, leaving out the navigation and dialogs it would draw around them. A request without the header still
+gets the full page.
 
 ## Alternatives
 

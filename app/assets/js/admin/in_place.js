@@ -1,5 +1,5 @@
-export async function load(url, selector) {
-  const response = await fetch(url);
+export async function load(url, selector, init) {
+  const response = await fetch(url, init);
   if (!response.ok) return null;
 
   return part(await response.text(), selector);
@@ -17,7 +17,14 @@ export function plain(event) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-export function setupPost({ selector, saved, invalid, body = (form) => new FormData(form), live = () => true }) {
+export function setupPost({
+  selector,
+  saved,
+  invalid,
+  body = (form) => new FormData(form),
+  live = () => true,
+  headers = {},
+}) {
   let saving = false;
 
   const save = async (form) => {
@@ -26,6 +33,7 @@ export function setupPost({ selector, saved, invalid, body = (form) => new FormD
       response = await fetch(form.action, {
         method: "POST",
         body: new URLSearchParams(body(form)),
+        headers,
         redirect: "manual",
       });
     } catch {
@@ -50,14 +58,14 @@ export function setupPost({ selector, saved, invalid, body = (form) => new FormD
   };
 }
 
-export function setupVisit() {
+export function setupVisit(init) {
   let latest = 0;
 
   return (url, selector, show) => {
     const ticket = ++latest;
     const current = () => ticket === latest;
 
-    load(url, selector)
+    load(url, selector, init)
       .then((found) => {
         if (!current()) return true;
         if (!found) return false;

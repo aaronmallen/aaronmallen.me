@@ -140,6 +140,49 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       end
     end
 
+    describe "in the drawer" do
+      def drawer = { "HTTP_X_DRAWER" => "1" }
+
+      def drawer_page = counting { get("/admin/tasks/#{task.id}", {}, drawer) }
+
+      def plain_page = counting { read }
+
+      it "sends the task without the layout", :aggregate_failures do
+        drawer_page
+
+        expect(page).to have_css("article.task-drawer[data-task-read]")
+        expect(last_response.body).not_to include("<nav", "<html")
+      end
+
+      it "makes fewer queries than the page" do
+        task
+        read
+
+        expect(drawer_page.size).to be < plain_page.size
+      end
+
+      it "still draws the whole page without the header" do
+        read
+
+        expect(last_response.body).to include("<nav")
+      end
+
+      it "sends the toast a save leaves" do
+        send_to("/admin/tasks/#{task.id}", task: { title: "Changed" })
+        get("/admin/tasks/#{task.id}", {}, drawer)
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "Task saved", visible: :all)
+      end
+
+      it "sends a failed save's form without the layout", :aggregate_failures do
+        post "/admin/tasks/#{task.id}", { _csrf_token: admin_csrf_token, task: { title: "" } }, drawer
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css("article.task-drawer[data-task-edit]")
+        expect(last_response.body).not_to include("<nav")
+      end
+    end
+
     it "titles the tab with the task" do
       read
 
