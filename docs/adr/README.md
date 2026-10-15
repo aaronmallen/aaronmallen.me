@@ -176,6 +176,7 @@ one.
 | [0176][0176] | Draw public icons as inline Font Awesome SVGs and keep the font for admin and MCP | ![Active][active] | 2026-10-14 |
 | [0177][0177] | Keep single shares and group files in one table, each with a code or a group | ![Active][active] | 2026-10-15 |
 | [0178][0178] | Give each new short code the shortest length with a free code | ![Active][active] | 2026-10-15 |
+| [0179][0179] | Fetch every outside page through one guarded app-level client | ![Active][active] | 2026-10-15 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -348,6 +349,7 @@ one.
 [0176]: 0176-draw-public-icons-as-inline-font-awesome-svgs-and-keep-the-font-for-admin-and-mcp.md
 [0177]: 0177-keep-single-shares-and-group-files-in-one-table-with-a-code-or-a-group.md
 [0178]: 0178-give-each-new-short-code-the-shortest-length-with-a-free-code.md
+[0179]: 0179-fetch-every-outside-page-through-one-guarded-app-level-client.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
