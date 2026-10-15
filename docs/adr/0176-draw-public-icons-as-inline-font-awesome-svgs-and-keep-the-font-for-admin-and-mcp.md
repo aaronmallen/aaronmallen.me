@@ -6,6 +6,7 @@ created: 2026-10-14
 area: [assets, config, lib, public, admin, mcp]
 supersedes: ["0033"]
 issue: "#1305"
+amended: ["#1282"]
 tags: [icons, font-awesome, svg, css, tailwind, accessibility, performance]
 ---
 
@@ -43,6 +44,12 @@ Public pages draw each icon as an inline SVG from Font Awesome Free. Admin and M
 
 ADR 0033's other rules stand: an icon beside text is `aria-hidden`, one that stands alone takes `role: "img"` and an
 `aria-label`, no icon comes from stored data, and the date field's calendar stays a mask.
+
+A brand mark that Font Awesome Free lacks is a second mask, since #1282. Linear is the one case.
+`config/tailwind.css` holds Linear's own SVG in the `linear-mark` utility and paints `bg-current` through it, so the
+mark takes the text colour in both themes. The utility gives the `<i>` Font Awesome's box, `1.25em` by `1em`, and its
+display goes through `--fa-display`. `Icon` draws it from the class name like any other icon, so the label rules
+hold. Every other brand keeps its Font Awesome class.
 
 ## Alternatives
 

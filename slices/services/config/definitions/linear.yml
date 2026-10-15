@@ -1,5 +1,5 @@
 name: Linear
-icon: fa-solid fa-circle-nodes
+icon: linear-mark
 group: code
 auth: credentials
 multiple: true

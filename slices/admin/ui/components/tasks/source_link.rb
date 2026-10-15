@@ -7,7 +7,7 @@ module Admin
         class SourceLink < Component
           ICONS = {
             Blog::Types::TaskSourceProvider["github"] => "fa-brands fa-github",
-            Blog::Types::TaskSourceProvider["linear"] => "fa-solid fa-circle-half-stroke",
+            Blog::Types::TaskSourceProvider["linear"] => "linear-mark",
           }.freeze
 
           prop :source, Blog::Types::Instance(ROM::Struct).optional

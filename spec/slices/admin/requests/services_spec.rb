@@ -264,6 +264,14 @@ RSpec.describe "Admin connected services", type: :request do
       expect(page).to have_css(".settings-side form[action='/admin/services/linear'] input[type='password']")
     end
 
+    it "draws Linear's own mark on its tile", :aggregate_failures do
+      get "/admin/services"
+      tile = page.find("#connect-service a.svc-pick[href='/admin/services?connect=linear'] .svc-tile", visible: :all)
+
+      expect(tile).to have_css("i.linear-mark[aria-hidden='true']", visible: :all)
+      expect(tile).to have_no_css("i.fa-circle-nodes", visible: :all)
+    end
+
     describe "with a key Linear accepts" do
       before do
         stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")

@@ -375,11 +375,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_link("globex/ABC-124", href: url)
       end
 
-      it "marks a Linear issue with a Font Awesome Free solid icon", :aggregate_failures do
+      it "marks a Linear issue with Linear's own mark", :aggregate_failures do
         import_linear
         get "/admin/tasks", filter: "external"
 
-        expect(linear_link).to have_css("i.fa-solid.fa-circle-half-stroke[aria-hidden='true']", visible: :all)
+        expect(linear_link).to have_css("i.linear-mark[aria-hidden='true']", visible: :all)
         expect(linear_link).to have_no_css("i.fa-github", visible: :all)
       end
 
