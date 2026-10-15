@@ -14,13 +14,8 @@ module Posts
       root :posts
 
       stamped_commands :create, :update
+      tagged_by :post_tags
       commands delete: :by_pk
-
-      def add_tag(id, name)
-        update(id, {}) unless post_tags.tag(id, [name], tags).empty?
-      end
-
-      def by_id_for_update(id) = posts.by_pk(id).lock.one
 
       def hold_follow_up(**) = held_post_follow_ups.hold(**)
 
@@ -33,12 +28,6 @@ module Posts
       end
 
       def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
-
-      def remove_tag(id, name)
-        update(id, {}) if post_tags.untag(id, [name], tags).positive?
-      end
-
-      def replace_tags(id, names) = post_tags.retag(id, names, tags)
 
       def rerender
         rerender_rows(posts, :body, Helpers::Rendering::BODY) { Helpers::Rendering.body(it) } +

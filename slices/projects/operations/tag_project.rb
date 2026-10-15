@@ -2,20 +2,15 @@
 
 module Projects
   module Operations
-    class TagProject < Blog::Operation
-      include Deps[project_mutations: "repos.project_mutations", project_queries: "repos.project_queries"]
-
-      def call(id, name)
-        transaction do
-          step find(id)
-          project_mutations.add_tag(id, name)
-          project_queries.by_id(id)
-        end
-      end
+    class TagProject < Blog::TagOperation
+      include Deps[
+        mutations: "repos.project_mutations",
+        queries: "repos.project_queries", # rubocop:disable Hanami/UnusedDeps
+      ]
 
       private
 
-      def find(id) = found(project_queries.by_id(id) && id)
+      def change(id, name) = mutations.add_tag(id, name)
     end
   end
 end

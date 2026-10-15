@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [contact, db, decisions, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76", "#718", "#954", "#992", "#957"]
+amended: [AA-809, "#76", "#718", "#954", "#992", "#957", "#1200"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -37,12 +37,14 @@ relation does: `by_names`, `claim`, `next_color` and the rest. Each join relatio
 (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins into ROM relation plugins that a
 relation opts into with `use` (ADR 0126).
 
-A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` in `PostMutations#replace_tags` does, and
-the same in every other tagging repo. `claim` inserts each missing name with the least used colour and does nothing
-for a name that exists. Since #76 it claims within a scope (ADR 0074): `posts` and `projects` claim public tags,
-`record` and `tasks` private ones. Since #992 the join relation's `retag`, `tag` and `untag` claim and write the tags,
-and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's scope once, for the owner slice and for the tags
-slice's counts.
+A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` does. Since #1200 the decisions, posts,
+projects and journal entry repos name their join relation with `tagged_by`, which `Blog::DB::Repo` turns into one shared
+`add_tag`, `remove_tag`, `replace_tags` and a locking `by_id_for_update`, and their tag and untag operations inherit
+`Blog::TagOperation`. Tasks and task rules keep their own. `claim` inserts each missing name with the least used colour
+and does nothing for a name that exists. Since #76 it claims within a scope (ADR 0074): `posts` and `projects` claim
+public tags, `record` and `tasks` private ones. Since #992 the join relation's `retag`, `tag` and `untag` claim and
+write the tags, and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's scope once, for the owner slice and
+for the tags slice's counts.
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.
@@ -60,9 +62,9 @@ A tagged list loads its tags in the same `combine` that loads the records.
 One schema block has seven copies (#957), kept in step only by the mixin. A scope added to one relation and not to
 `Blog::DB::Tags` leaves the other six behind, which is the cost the record on exports names.
 
-A new tagged kind needs a tags relation and a join relation in its own slice, a `replace_tags` repo method, and a
-`JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its join
-table holds a `tag_scope` column pinned to that scope (ADR 0074). Since #992 that scope goes in `Taggings::SCOPES`.
+A new tagged kind needs a tags relation and a join relation in its own slice, a `tagged_by` line in its mutations repo,
+and a `JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its
+join table holds a `tag_scope` column pinned to that scope (ADR 0074). Since #992 that scope goes in `Taggings::SCOPES`.
 
 A tag that `claim` writes runs none of `Tags::Contracts::TagContract`. Its name passes only the tagged record's
 contract, through `Blog::Types::TagList` and the `tag_slugs` rule, and the `tag_name` domain in Postgres.

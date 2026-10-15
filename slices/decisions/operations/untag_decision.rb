@@ -2,20 +2,15 @@
 
 module Decisions
   module Operations
-    class UntagDecision < Blog::Operation
-      include Deps[decision_mutations: "repos.decision_mutations", decision_queries: "repos.decision_queries"]
-
-      def call(id, name)
-        transaction do
-          step find(id)
-          decision_mutations.remove_tag(id, name)
-          decision_queries.by_id(id)
-        end
-      end
+    class UntagDecision < Blog::TagOperation
+      include Deps[
+        mutations: "repos.decision_mutations",
+        queries: "repos.decision_queries", # rubocop:disable Hanami/UnusedDeps
+      ]
 
       private
 
-      def find(id) = found(decision_mutations.by_id_for_update(id) && id)
+      def change(id, name) = mutations.remove_tag(id, name)
     end
   end
 end
