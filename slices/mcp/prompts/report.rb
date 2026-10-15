@@ -62,9 +62,9 @@ module MCP
             #{from} and to #{to} for views and visitors, and, when you hold it, list_mail_threads with from #{from}
             and to #{to} for the mail that came in.
 
-            The feed counts only tasks marked done. Call list_tasks with the status canceled and from #{from} and to
-            #{to} for the tasks dropped in the range, and report them apart from the done ones, since they are not
-            work done.
+            The feed counts only tasks marked done. Call list_tasks with the status canceled, window_by closed and
+            from #{from} and to #{to} for the tasks dropped in the range, and report them apart from the done ones,
+            since they are not work done.
           TEXT
         end
 

@@ -43,8 +43,9 @@ module Tasks
 
       def exist?(id) = tasks.by_pk(id).exist?
 
-      def filtered(page:, **filters)
+      def filtered(page:, closed_in_window: false, **filters)
         found = tasks.narrowed(**by_project(**filters))
+        found = found.closed(filters[:from]..filters[:to]) if closed_in_window && (filters[:from] || filters[:to])
         rows = found.detailed.combine(:sprint).newest_first.paged(page).to_a
 
         Structs::FoundTasks.new(paged: page.fill(rows), total: found.count)

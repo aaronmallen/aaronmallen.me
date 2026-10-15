@@ -8,6 +8,7 @@ module API
       LISTS = Blog::Types::TaskList.values.freeze
       OPEN = Blog::Types::OpenTaskStatus.values.freeze
       STATUSES = Blog::Types::TaskStatus.values.freeze
+      WINDOW_BY = %w[touched closed].freeze
 
       SCHEMA = {
         additionalProperties: false,
@@ -34,6 +35,11 @@ module API
             description: "open, in_progress (started), done or canceled; every status when you leave it out",
           },
           tag: { type: "string", description: "a tag the task carries; any tag when you leave it out" },
+          window_by: {
+            type: "string",
+            enum: WINDOW_BY,
+            description: "touched (the default) keeps a task made or finished in the window, closed one finished in it",
+          },
         },
       }.freeze
 
@@ -77,10 +83,14 @@ module API
 
       def named(value) = [value.to_s.strip.downcase].reject(&:empty?)
 
-      def narrowed(lists: [], query: nil, sprint_on: nil, statuses: [], tag: nil, **credited)
+      def narrowed(lists: [], query: nil, sprint_on: nil, statuses: [], tag: nil, window_by: nil, **credited)
         kept = statuses.empty? && lists.any? ? OPEN : statuses
+        closed_in_window = window_by == "closed"
 
-        { lists:, sprint_on:, statuses: kept, tags: named(tag), text: query.to_s.strip, **credits(**credited) }
+        {
+          closed_in_window:, lists:, sprint_on:, statuses: kept, tags: named(tag), text: query.to_s.strip,
+          **credits(**credited),
+        }
       end
     end
   end

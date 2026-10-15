@@ -1954,6 +1954,15 @@ RSpec.describe "MCP endpoint", type: :request do
   end
 
   describe "report" do
+    def canceled_call
+      called = /status (\w+), window_by (\w+) and from (\S+) and to (\S+)/
+      status, window_by, from, to = prompt_text.match(called).captures
+
+      { statuses: [status], window_by:, from:, to: }
+    end
+
+    def drop(title, made, closed) = create(:task, :canceled, title:, created_at: made, completed_at: closed)
+
     def named_tools = prompt_text.scan(/\b(?:list|read|summarize)_[a-z_]+\b/).uniq
 
     def scopes = "read mail"
@@ -1989,8 +1998,17 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "asks for the canceled tasks and counts them apart from the done ones", :aggregate_failures do
-      expect(prompt_text).to include("list_tasks with the status canceled and from 2026-01-01 and to 2026-03-31")
+      expect(prompt_text)
+        .to include("list_tasks with the status canceled, window_by closed and from 2026-01-01 and to 2026-03-31")
       expect(prompt_text).to include("report them apart from the done ones")
+    end
+
+    it "asks for only the tasks canceled in the range" do
+      drop("dropped", Time.utc(2026, 1, 5), Time.utc(2026, 2, 10))
+      drop("dropped later", Time.utc(2026, 2, 10), Time.utc(2026, 4, 5))
+      call_tool("list_tasks", **canceled_call)
+
+      expect(content.fetch("tasks").map { it.fetch("title") }).to eq(["dropped"])
     end
 
     it "names only tools the server offers" do

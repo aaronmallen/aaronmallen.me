@@ -182,6 +182,27 @@ RSpec.describe "API tasks", type: :request do
       expect(titles(list(from: (today - 5).iso8601, to: today.iso8601))).to eq(["finished inside"])
     end
 
+    it "keeps only a task finished inside the window when the window goes by close" do
+      create(:task, :done, title: "finished inside", created_at: at(today - 30), completed_at: at(today - 2))
+      create(:task, :canceled, title: "made inside", created_at: at(today - 3), completed_at: at(today + 2))
+      create(:task, title: "still open", created_at: at(today - 1))
+
+      expect(titles(list(window_by: "closed", from: (today - 5).iso8601, to: today.iso8601))).to eq(["finished inside"])
+    end
+
+    it "leaves the end of a close window open when it names no to" do
+      create(:task, :done, title: "finished", created_at: at(today - 30), completed_at: at(today))
+      create(:task, title: "open", created_at: at(today))
+
+      expect(titles(list(window_by: "closed", from: (today - 1).iso8601))).to eq(["finished"])
+    end
+
+    it "refuses a window_by it does not know with a 422" do
+      list(window_by: "made")
+
+      expect(status).to eq(422)
+    end
+
     it "leaves the end of the window open when it names no to" do
       create(:task, title: "new", created_at: at(today))
       create(:task, title: "old", created_at: at(today - 30))
