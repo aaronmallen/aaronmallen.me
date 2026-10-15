@@ -37,7 +37,7 @@ one.
 | [0030][0030] | Keep a component in the slice that draws it | ![Active][active] | 2026-09-28 |
 | [0031][0031] | Give each element one class named for what it is, defined as a Tailwind utility | ![Active][active] | 2026-09-28 |
 | [0032][0032] | Keep the theme in a site_theme cookie the browser sets, and draw it with light-dark() | ![Active][active] | 2026-09-28 |
-| [0033][0033] | Draw every icon as a Font Awesome Free class | ![Active][active] | 2026-09-28 |
+| [0033][0033] | Draw every icon as a Font Awesome Free class | ![Superseded][superseded-0176] | 2026-09-28 |
 | [0034][0034] | Hold every page to a 1040px column and prose to its own measure | ![Superseded][superseded-0136] | 2026-09-28 |
 | [0035][0035] | Test the app only through requests, the browser, jobs and MCP | ![Superseded][superseded-0139] | 2026-09-28 |
 | [0036][0036] | Check every route with axe-core in the browser suite | ![Active][active] | 2026-09-28 |
@@ -173,6 +173,7 @@ one.
 | [0166][0166] | Give each task one project, and a number Postgres gives out within it | ![Active][active] | 2026-10-14 |
 | [0167][0167] | Tie a decision to its task with a sourced from record link the tasks slice writes | ![Active][active] | 2026-10-14 |
 | [0172][0172] | Run Puma as two preloaded workers, with YJIT and two malloc arenas | ![Active][active] | 2026-10-14 |
+| [0176][0176] | Draw public icons as inline Font Awesome SVGs and keep the font for admin and MCP | ![Active][active] | 2026-10-14 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -342,6 +343,7 @@ one.
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
 [0172]: 0172-run-puma-as-two-preloaded-workers-with-yjit-and-two-malloc-arenas.md
+[0176]: 0176-draw-public-icons-as-inline-font-awesome-svgs-and-keep-the-font-for-admin-and-mcp.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -358,4 +360,5 @@ one.
 [superseded-0153]: https://img.shields.io/badge/0153-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0158]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0159]: https://img.shields.io/badge/0159-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0176]: https://img.shields.io/badge/0176-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

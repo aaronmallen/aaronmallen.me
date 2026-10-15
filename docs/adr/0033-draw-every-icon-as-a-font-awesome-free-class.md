@@ -1,17 +1,18 @@
 ---
 id: "0033"
 title: Draw every icon as a Font Awesome Free class
-status: active
+status: superseded
 created: 2026-09-28
 area: [assets, config, db, lib, admin, public, tasks]
+superseded-by: "0176"
 issue: AA-685
-amended: [AA-801, "#17", "#19", "#1030"]
+amended: [AA-801, "#17", "#19", "#1030", "#1305"]
 tags: [icons, font-awesome, svg, css, tailwind, accessibility, enums]
 ---
 
 # ADR 0033: Draw every icon as a Font Awesome Free class
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -79,4 +80,4 @@ hides one has to go through `--fa-display`.
 The calendar mask is a copy. Upgrading the package leaves `--glyph-calendar` as it was, while the task rows and the
 Upcoming tab draw `fa-regular fa-calendar` from the package, so the two calendars can drift apart.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0176-black?style=for-the-badge&label=Superseded&labelColor=orange
