@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+#MISE description="Fetch the GitHub and Linear GraphQL schemas the query specs check against"
+
+set -e
+
+dir=spec/fixtures/graphql
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+fetch() {
+  curl -fsSL "$2" -o "$tmp/$1.graphql"
+  gzip -9n <"$tmp/$1.graphql" >"$dir/$1.graphql.gz"
+}
+
+fetch github https://docs.github.com/public/fpt/schema.docs.graphql
+fetch linear https://raw.githubusercontent.com/linear/linear/master/packages/sdk/src/schema.graphql

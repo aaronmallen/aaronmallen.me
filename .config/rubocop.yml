@@ -118,6 +118,7 @@ RSpec/NestedGroups:
 RSpec/SpecFilePathFormat:
   CustomTransform:
     GitHub: github
+    LinkedIn: linkedin
     OAuth: oauth
     OAuthClientRepo: oauth_client_repo
     OAuthCodeRepo: oauth_code_repo
