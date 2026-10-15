@@ -24,7 +24,7 @@ module Public
 
       private
 
-      def post?(slug) = Blog::Types::Slug.valid?(slug) && !post_queries.published_by_slug(slug).nil?
+      def post?(slug) = Blog::Types::Slug.valid?(slug) && post_queries.published_slug?(slug)
 
       def tag?(tag)
         return false unless tag == Blog::Types::Normalized::Tag.call(tag) { nil }

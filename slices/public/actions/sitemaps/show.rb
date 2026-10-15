@@ -17,10 +17,10 @@ module Public
         share_with_caches
 
         def handle(_request, response)
-          posts = post_queries.published
+          posts = post_queries.sitemap_posts
           edited_at = post_queries.edited_at(posts.map(&:id))
 
-          response.body = render(pages + post_entries(posts, edited_at) + tag_pages(posts))
+          response.body = render(pages + post_entries(posts, edited_at) + tag_pages)
         end
 
         private
@@ -44,7 +44,7 @@ module Public
           end
         end
 
-        def tag_pages(posts) = posts.flat_map { it.tags.map(&:name) }.uniq.sort.map { [routes.url(:tag, tag: it)] }
+        def tag_pages = post_queries.published_tag_names.map { [routes.url(:tag, tag: it)] }
       end
     end
   end

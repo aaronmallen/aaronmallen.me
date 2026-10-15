@@ -5,6 +5,7 @@ module Posts
     class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
       PAGER = %i[title slug published_at].freeze
+      SITEMAP = %i[id slug published_at updated_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
 
       def all = with_tags.newest_first.to_a
@@ -74,7 +75,17 @@ module Posts
 
       def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
 
+      def published_slug?(slug) = posts.published.with_slug(slug).exist?
+
+      def published_tag_names
+        tagged = post_tags.where(post_id: posts.published.select(:id).dataset).select(:tag_id)
+
+        tags.where(id: tagged.dataset).pluck(:name).sort
+      end
+
       def scheduled = with_tags.scheduled.oldest_first.to_a
+
+      def sitemap_posts = posts.published.newest_first.select(*SITEMAP).to_a
 
       def slugs(ids) = posts.with_ids(ids).select(:id, :slug).to_a.to_h { [it.id, it.slug] }
 

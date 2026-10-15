@@ -13,4 +13,13 @@ RSpec.describe Posts::Repos::PostQueries do
       expect(post_queries.next_published(posts[1]).to_h.keys).to contain_exactly(:title, :slug, :published_at)
     end
   end
+
+  describe "the sitemap" do
+    it "reads only the columns it prints" do
+      posts
+      read = post_queries.sitemap_posts.map(&:to_h)
+
+      expect(read.map(&:keys)).to all(contain_exactly(:id, :slug, :published_at, :updated_at))
+    end
+  end
 end
