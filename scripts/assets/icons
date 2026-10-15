@@ -3,6 +3,13 @@
 
 set -e
 
+for tool in rsvg-convert magick; do
+  if ! command -v "$tool" >/dev/null; then
+    echo "$tool is missing. Install it and run this again." >&2
+    exit 1
+  fi
+done
+
 images=app/assets/images
 svg="$images/favicon.svg"
 tmp=$(mktemp -d)

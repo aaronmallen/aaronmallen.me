@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+#MISE description="Check the error pages in public/ against config/error_page.html"
+
+set -e
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+scripts/assets/error-pages "$tmp"
+
+for page in "$tmp"/*.html; do
+  if ! diff -u "public/${page##*/}" "$page"; then
+    echo "public/${page##*/} is stale. Run mise run assets:error-pages." >&2
+    exit 1
+  fi
+done
