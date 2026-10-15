@@ -6253,6 +6253,20 @@ CREATE INDEX projects_search_vector_index ON public.projects USING gin (search_v
 
 
 --
+-- Name: pull_requests_finished_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pull_requests_finished_on_index ON public.pull_requests USING btree ((((COALESCE(merged_at, closed_at) AT TIME ZONE 'America/Chicago'::text))::date));
+
+
+--
+-- Name: pull_requests_ready_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pull_requests_ready_on_index ON public.pull_requests USING btree ((((ready_at AT TIME ZONE 'America/Chicago'::text))::date));
+
+
+--
 -- Name: pull_requests_repo_number_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6341,6 +6355,13 @@ CREATE INDEX sightings_oauth_client_id_index ON public.sightings USING btree (oa
 --
 
 CREATE INDEX sign_ins_created_at_index ON public.sign_ins USING btree (created_at);
+
+
+--
+-- Name: social_post_deliveries_connection_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX social_post_deliveries_connection_id_index ON public.social_post_deliveries USING btree (connection_id);
 
 
 --
@@ -6481,6 +6502,13 @@ CREATE INDEX task_comments_task_id_index ON public.task_comments USING btree (ta
 --
 
 CREATE UNIQUE INDEX task_contributors_task_id_agent_model_index ON public.task_contributors USING btree (task_id, agent, model) NULLS NOT DISTINCT;
+
+
+--
+-- Name: task_events_moved_from_sprint_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX task_events_moved_from_sprint_on_index ON public.task_events USING btree (from_sprint_on) WHERE (kind = 'moved'::public.task_event_kind);
 
 
 --
@@ -6733,6 +6761,13 @@ CREATE INDEX work_sessions_task_id_started_at_index ON public.work_sessions USIN
 --
 
 CREATE INDEX workouts_started_at_index ON public.workouts USING btree (started_at);
+
+
+--
+-- Name: workouts_started_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX workouts_started_on_index ON public.workouts USING btree ((((started_at AT TIME ZONE 'America/Chicago'::text))::date));
 
 
 --
@@ -8263,4 +8298,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015003000_add_sync_token_to_calendars.rb'),
 ('20261015010000_add_number_to_tasks.rb'),
 ('20261015080000_add_rendered_body_to_posts.rb'),
-('20261015090000_add_widths_to_photos.rb');
+('20261015090000_add_widths_to_photos.rb'),
+('20261015100000_index_activity_dates_moved_task_events_and_delivery_connections.rb');
