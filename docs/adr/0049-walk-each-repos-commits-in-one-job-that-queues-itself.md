@@ -117,7 +117,7 @@ month without one every run lists a month of pushes and walks each repository in
 reads only down to its forward edge.
 
 **The forward edge trails the walk by a day**, so every walk reads that day again to catch a late push. The
-`commits` upsert keys on the sha, so a commit read twice stays one row.
+`commits` insert skips a sha it already holds, so a commit read twice stays one row and its first write stands.
 
 **A gap in history costs one chunk per hour of it**, since an empty chunk can only step back an hour.
 

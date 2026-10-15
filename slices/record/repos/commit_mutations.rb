@@ -18,7 +18,13 @@ module Record
 
       def hold_walk(repo) = sync_states.of(BACKFILL_KIND, repo:).update(updated_at: Time.now)
 
-      def import(**attrs) = commits.command(:import).call(attrs)
+      def import(rows, now: Time.now)
+        return Blog::Constants::EMPTY_ARRAY if rows.empty?
+
+        stamped = rows.map { { **it, created_at: now, updated_at: now } }
+
+        commits.dataset.insert_conflict(target: :sha).returning(:sha).multi_insert(stamped)
+      end
 
       def reap_walks(keep:)
         walks = sync_states.of_kind(BACKFILL_KIND)

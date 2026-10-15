@@ -521,12 +521,27 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       expect(Record::Slice["relations.commits"].count).to eq(1)
     end
 
-    it "restates the message GitHub sends now, and keeps the branch that first claimed it", :aggregate_failures do
+    it "writes nothing the second time", :aggregate_failures do
+      walk
+      written = stored(sha).updated_at
+      commit_mutations.record_backfilled_to(repo, at: edge)
+
+      expect(counting { walk }.grep(/\A(INSERT INTO|UPDATE) "commits"/)).to be_empty
+      expect(stored(sha).updated_at).to eq(written)
+    end
+
+    it "keeps the row it first stored, branch and message alike" do
       create(:commit, sha:, branch: "topic", message: "lib: an older commit")
       stub_refs(github_branch("main", commit(sha, message: "lib: an older commit\n\nand say why")))
       walk
 
-      expect(stored(sha)).to have_attributes(branch: "topic", message: "lib: an older commit\n\nand say why")
+      expect(stored(sha)).to have_attributes(branch: "topic", message: "lib: an older commit")
+    end
+
+    it "stores the new commits of a page in one statement" do
+      stub_refs(github_branch("main", commit(sha), commit(old_sha)))
+
+      expect(counting { walk }.grep(/\AINSERT INTO "commits"/).size).to eq(1)
     end
   end
 

@@ -15,10 +15,10 @@ module Record
         commits = first_sightings(branches)
         known = commit_queries.known_shas(commits.keys)
 
-        commits.each_value { |branch, commit| store(repo, branch, commit) }
-        found = commits.except(*known)
-        found.each_value { |_, commit| credit(repo, commit[:message]) }
-        found.size
+        rows = commits.except(*known).values.map { |branch, commit| row(repo, branch, commit) }
+        stored = commit_mutations.import(rows)
+        stored.each { credit(repo, commits.dig(it, 1, :message)) }
+        stored.size
       end
 
       private
@@ -36,14 +36,14 @@ module Record
         end
       end
 
-      def store(repo, branch, commit)
+      def row(repo, branch, commit)
         at = Blog::TimeZone.local(commit[:authored_at])
 
-        commit_mutations.import(
+        {
           branch:, repo:, sha: commit[:sha], message: commit[:message],
           additions: commit[:additions], deletions: commit[:deletions],
           commit_date: at.to_date, commit_time: at.strftime(TIME_FORMAT),
-        )
+        }
       end
     end
   end
