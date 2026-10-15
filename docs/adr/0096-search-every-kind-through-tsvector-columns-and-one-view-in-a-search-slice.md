@@ -6,7 +6,7 @@ created: 2026-10-03
 area: [db, admin, api, mcp, assets, posts, projects, record, social, tasks, contact]
 supersedes: ["0091"]
 issue: "#299"
-amended: ["#773", "#818", "#911"]
+amended: ["#773", "#818", "#911", "#1302"]
 tags: [search, postgres, full-text, tsvector, gin, view, palette, slices]
 ---
 
@@ -83,8 +83,9 @@ that drops and adds it, and replaces the view with it.
 The vectors hold `english` as a literal, since Postgres builds a generated column only from an immutable
 expression. Every word stems by English rules, whatever its language.
 
-Every owner's relation infers `search_vector` and never uses it. Postgres refuses to drop or change a column the
-vector or the view reads, so a migration that touches one in an owner's table has to rebuild both.
+No relation selects `search_vector`: `Blog::DB::SchemaInferrer` leaves it out of every inferred schema, so only the view
+reads it. Postgres refuses to drop or change a column the vector or the view reads, so a migration that touches one in
+an owner's table has to rebuild both.
 
 The palette costs a round trip per search rather than one per page, so the route has to stay fast and the script
 has to drop a reply that a newer one has overtaken.

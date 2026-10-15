@@ -2,6 +2,7 @@
 
 require "hanami/db/relation"
 require "blog/db/plugins"
+require "blog/db/schema_inferrer"
 
 module Blog
   module DB
@@ -10,6 +11,8 @@ module Blog
       LOCK_BUSY = Dry::Monads::Failure(:lock_busy)
       NUL = "\0"
       STAMPS = { create: %i[created_at updated_at], update: %i[updated_at] }.freeze
+
+      schema_inferrer SchemaInferrer.new.freeze
 
       def self.lock_key(name) = Sequel.function(:hashtext, name)
 

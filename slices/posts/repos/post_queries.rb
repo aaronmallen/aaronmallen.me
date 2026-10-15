@@ -4,6 +4,7 @@ module Posts
   module Repos
     class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
+      PAGER = %i[title slug published_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
 
       def all = with_tags.newest_first.to_a
@@ -61,9 +62,9 @@ module Posts
 
       def last_untagged_at = post_tag_removals.last_removed_at
 
-      def next_published(post) = with_tags.published.newer_than(post).oldest_first.limit(1).one
+      def next_published(post) = pager(posts.published.newer_than(post).oldest_first)
 
-      def previous_published(post) = with_tags.published.older_than(post).newest_first.limit(1).one
+      def previous_published(post) = pager(posts.published.older_than(post).newest_first)
 
       def published(limit = nil) = with_tags.published.newest_first.limit(limit).to_a
 
@@ -80,6 +81,8 @@ module Posts
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
+
+      def pager(found) = found.select(*PAGER).limit(1).one
 
       def with_tags = posts.combine(:tags)
     end

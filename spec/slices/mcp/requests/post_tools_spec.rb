@@ -188,7 +188,7 @@ RSpec.describe "MCP post tools", type: :request do
       before_update = stored(draft.id).to_h
       call_tool("update_post", id: draft.id, body: "two")
 
-      changed = %i[body body_html first_paragraph search_vector updated_at]
+      changed = %i[body body_html first_paragraph updated_at]
 
       expect(stored(draft.id).to_h.except(*changed)).to eq(before_update.except(*changed))
     end

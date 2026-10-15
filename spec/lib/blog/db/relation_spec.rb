@@ -12,6 +12,22 @@ RSpec.describe Blog::DB::Relation do
 
   def relation(slice, name) = slice["db.rom"].relations[name]
 
+  describe "the default select" do
+    let(:selects) do
+      Hanami.app.slices.with_nested.select { it.key?("db.rom") }.flat_map do |slice|
+        slice["db.rom"].relations.elements.map { |name, relation| [name, relation.dataset.sql] }
+      end
+    end
+
+    it "reads tables that carry a search vector" do
+      expect(selects.map(&:first)).to include(:posts, :tasks, :mail_messages, :search_documents)
+    end
+
+    it "leaves out the search vector" do
+      expect(selects.select { |_, sql| sql.include?("search_vector") }).to be_empty
+    end
+  end
+
   describe "#lock_until_commit" do
     let(:events) { relation(Analytics::Slice, :analytics_events) }
     let(:receipts) { relation(Social::Slice, :webmention_receipts) }
