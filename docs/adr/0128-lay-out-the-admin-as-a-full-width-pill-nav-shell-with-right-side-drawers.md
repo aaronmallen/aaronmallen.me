@@ -44,6 +44,7 @@ morphs the top bar where it morphed the context bar ([ADR 0118][0118]).
 Journal, Publish, Inbox, Insights and Settings) and Search, in that order. Each screen sits under its category's
 header and keeps its jump letter, and Settings holds every Settings tab. A search hides each header whose rows it
 filters out, and a category's name finds its screens. Records search works as it does today ([ADR 0096][0096]).
+The search page has no nav entry: it opens only from the palette's "See all results" row.
 Actions keep `ListActions::ALL` and its `needs` and `from` rules, and a new action joins as an entry there.
 
 **Drawers open from the right.** A drawer is `min(620px, 100%)` wide, or 760px for the wide variant, with a header,

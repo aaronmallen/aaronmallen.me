@@ -54,7 +54,7 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       expect(page).to have_title("Performance | Admin | #{Hanami.app.settings.owner_name}")
       expect(page).to have_css("a.pill-nav-link[aria-current='page']", text: "Insights")
       expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "analytics")
-      expect(page.all("a.screen-tab").map(&:text)).to eq(["analytics", "activity", "health", "time report", "search"])
+      expect(page.all("a.screen-tab").map(&:text)).to eq(["analytics", "activity", "health", "time report"])
     end
 
     it "marks analytics current on the requests page" do

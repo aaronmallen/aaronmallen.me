@@ -210,6 +210,13 @@ RSpec.describe "Admin search", type: :request do
       expect(page).to have_css(".empty", text: says(:empty))
     end
 
+    it "marks no pill current and shows no screen-tabs", :aggregate_failures do
+      get "/admin/search", q: "zeppelin"
+
+      expect(page).to have_no_css("a.pill-nav-link[aria-current]")
+      expect(page).to have_no_css(".screen-tabs")
+    end
+
     it "says so when nothing matches" do
       get "/admin/search", q: "zeppelin"
 
