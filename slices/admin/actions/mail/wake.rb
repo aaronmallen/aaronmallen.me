@@ -8,7 +8,7 @@ module Admin
 
         include Redirect
         include Deps[
-          thread_queries: "mail.repos.thread_queries", # rubocop:disable Hanami/UnusedDeps
+          thread_queries: "mail.repos.thread_queries",
           wake_message: "mail.operations.wake_message",
         ]
 

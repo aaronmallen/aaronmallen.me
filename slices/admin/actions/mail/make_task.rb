@@ -13,7 +13,7 @@ module Admin
         include Redirect
         include Deps[
           make_mail_task: "operations.make_mail_task",
-          thread_queries: "mail.repos.thread_queries", # rubocop:disable Hanami/UnusedDeps
+          thread_queries: "mail.repos.thread_queries",
         ]
 
         def handle(request, response)

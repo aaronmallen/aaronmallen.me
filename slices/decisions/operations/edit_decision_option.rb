@@ -6,7 +6,7 @@ module Decisions
       OPTION_EDITED = Blog::Types::DecisionEventKind["option_edited"]
 
       include Deps[
-        contract: "contracts.decision_option_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.decision_option_contract",
         decision_mutations: "repos.decision_mutations",
         decision_option_mutations: "repos.decision_option_mutations",
         decision_queries: "repos.decision_queries",

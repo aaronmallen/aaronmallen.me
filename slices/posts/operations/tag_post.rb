@@ -5,7 +5,7 @@ module Posts
     class TagPost < Blog::TagOperation
       include Deps[
         mutations: "repos.post_mutations",
-        queries: "repos.post_queries", # rubocop:disable Hanami/UnusedDeps
+        queries: "repos.post_queries",
       ]
 
       private

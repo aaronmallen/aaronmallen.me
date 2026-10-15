@@ -8,7 +8,7 @@ module Tasks
       include Deps[
         github: "github.client",
         linear: "linear.client",
-        record_sync_outcome: "record.operations.record_sync_outcome", # rubocop:disable Hanami/UnusedDeps
+        record_sync_outcome: "record.operations.record_sync_outcome",
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
       ]

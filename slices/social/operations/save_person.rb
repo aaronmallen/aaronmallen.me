@@ -10,7 +10,7 @@ module Social
       UNRESOLVED = "unresolved"
 
       include Deps[
-        contract: "contracts.person_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.person_contract",
         networks: "networks.all",
         person_mutations: "repos.person_mutations",
         person_queries: "repos.person_queries",

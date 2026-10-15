@@ -6,7 +6,7 @@ module Calendar
       include EventWrites
       include Deps[
         calendar_queries: "repos.calendar_queries",
-        contract: "contracts.event_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.event_contract",
         google: "google.client",
       ]
 

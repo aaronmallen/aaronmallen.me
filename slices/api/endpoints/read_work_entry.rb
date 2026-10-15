@@ -8,7 +8,7 @@ module API
       REPLY = Helpers::Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
       include Deps[
-        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
+        record_link_queries: "links.repos.record_link_queries",
         work_entry_queries: "projects.repos.work_entry_queries",
       ]
 

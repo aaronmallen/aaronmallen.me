@@ -8,7 +8,7 @@ module Record
       include Deps[
         commit_mutations: "repos.commit_mutations",
         import_commits: "operations.import_commits",
-        record_sync_outcome: "operations.record_sync_outcome", # rubocop:disable Hanami/UnusedDeps
+        record_sync_outcome: "operations.record_sync_outcome",
       ]
 
       def perform

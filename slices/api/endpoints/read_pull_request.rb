@@ -9,7 +9,7 @@ module API
 
       include Deps[
         pull_request_queries: "record.repos.pull_request_queries",
-        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
+        record_link_queries: "links.repos.record_link_queries",
       ]
 
       def handle(id:)

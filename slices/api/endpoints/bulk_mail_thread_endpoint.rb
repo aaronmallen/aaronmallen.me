@@ -11,7 +11,7 @@ module API
       SCHEMA = MailThreads::BULK
 
       include Deps[
-        act_on: "mail.operations.act_on_messages", # rubocop:disable Hanami/UnusedDeps
+        act_on: "mail.operations.act_on_messages",
         message_queries: "mail.repos.message_queries",
       ]
 

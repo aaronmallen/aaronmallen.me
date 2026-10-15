@@ -11,7 +11,7 @@ module API
       REPLY = Helpers::Schema.object({ posts: Helpers::Schema.list(Serializers::Post.reference) }).freeze
       SCHEMA = Posts::BULK
 
-      include Deps[act_on: "posts.operations.act_on_posts"] # rubocop:disable Hanami/UnusedDeps
+      include Deps[act_on: "posts.operations.act_on_posts"]
 
       private
 

@@ -13,7 +13,7 @@ module Tasks
       }.freeze
 
       include Deps[
-        contract: "contracts.task_link_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.task_link_contract",
         task_mutations: "repos.task_mutations",
         task_queries: "repos.task_queries",
       ]

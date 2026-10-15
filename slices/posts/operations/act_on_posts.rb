@@ -8,7 +8,7 @@ module Posts
       UNTAG = Blog::Types::PostBulkAction["untag"]
 
       include Deps[
-        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.bulk_contract",
         delete_post: "operations.delete_post",
         post_mutations: "repos.post_mutations",
         tag_post: "operations.tag_post",

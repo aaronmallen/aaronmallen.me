@@ -9,7 +9,7 @@ module API
       REPLY = Helpers::Schema.object({ webmentions: Helpers::Schema.list(Serializers::Webmention.reference) }).freeze
       SCHEMA = Webmentions::BULK
 
-      include Deps[act_on: "social.operations.act_on_webmentions"] # rubocop:disable Hanami/UnusedDeps
+      include Deps[act_on: "social.operations.act_on_webmentions"]
 
       private
 

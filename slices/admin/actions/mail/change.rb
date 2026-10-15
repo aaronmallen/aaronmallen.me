@@ -10,7 +10,7 @@ module Admin
         include Redirect
         include Deps[
           change_thread: "mail.operations.change_thread",
-          thread_queries: "mail.repos.thread_queries", # rubocop:disable Hanami/UnusedDeps
+          thread_queries: "mail.repos.thread_queries",
         ]
 
         def handle(request, response)

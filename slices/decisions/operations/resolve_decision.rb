@@ -9,7 +9,7 @@ module Decisions
 
       include Deps[
         close_decision_task: "tasks.operations.close_decision_task",
-        contract: "contracts.resolution_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.resolution_contract",
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
       ]

@@ -12,7 +12,7 @@ module API
       REPLY = Helpers::Schema.object({ tasks: Helpers::Schema.list(Serializers::Task.reference) }).freeze
       SCHEMA = Tasks::BULK
 
-      include Deps[act_on: "tasks.operations.act_on_tasks"] # rubocop:disable Hanami/UnusedDeps
+      include Deps[act_on: "tasks.operations.act_on_tasks"]
 
       private
 

@@ -4,7 +4,7 @@ module Projects
   module Operations
     class AddWorkEntry < Blog::Operation
       include Deps[
-        contract: "contracts.work_entry_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.work_entry_contract",
         work_entry_mutations: "repos.work_entry_mutations",
       ]
 

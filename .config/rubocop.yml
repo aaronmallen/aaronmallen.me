@@ -6,6 +6,9 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
 
+require:
+  - ./rubocop/unused_deps.rb
+
 inherit_mode:
   merge:
     - Include
@@ -15,8 +18,22 @@ AllCops:
     - .config/Guardfile
     - .config/config.ru
     - .config/i18n/*.rb
+    - .config/rubocop/*.rb
   NewCops: enable
   TargetRubyVersion: 4
+
+Blog/UnusedDeps:
+  Enabled: true
+  AllowedNames:
+    - act_on
+    - contract
+    - queries
+    - record_link_queries
+    - record_sync_outcome
+    - thread_queries
+  Include:
+    - app/**/*.rb
+    - slices/**/*.rb
 
 Hanami/AppReferenceInSlice:
   Enabled: true
@@ -36,6 +53,9 @@ Hanami/SliceNamespace:
   Inflections:
     api: API
     mcp: MCP
+
+Hanami/UnusedDeps:
+  Enabled: false
 
 Hanami/UnvalidatedParams:
   Enabled: false

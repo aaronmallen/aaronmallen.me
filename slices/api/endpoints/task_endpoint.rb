@@ -13,7 +13,7 @@ module API
       ).freeze
 
       include Deps[
-        record_link_queries: "links.repos.record_link_queries", # rubocop:disable Hanami/UnusedDeps
+        record_link_queries: "links.repos.record_link_queries",
         task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
       ]

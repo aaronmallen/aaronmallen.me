@@ -12,7 +12,7 @@ module Tasks
       INPUTS = { MOVE => :to, TAG => :tag, UNTAG => :tag }.freeze
 
       include Deps[
-        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.bulk_contract",
         cancel_task: "operations.cancel_task",
         complete_task: "operations.complete_task",
         delete_task: "operations.delete_task",

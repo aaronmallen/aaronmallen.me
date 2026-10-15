@@ -5,7 +5,7 @@ module Decisions
     class TagDecision < Blog::TagOperation
       include Deps[
         mutations: "repos.decision_mutations",
-        queries: "repos.decision_queries", # rubocop:disable Hanami/UnusedDeps
+        queries: "repos.decision_queries",
       ]
 
       private

@@ -4,7 +4,7 @@ module Social
   module Operations
     class ActOnWebmentions < Blog::Operation
       include Deps[
-        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.bulk_contract",
         moderate_webmention: "operations.moderate_webmention",
       ]
 

@@ -5,7 +5,7 @@ module Record
     class UntagJournalEntry < Blog::TagOperation
       include Deps[
         mutations: "repos.journal_entry_mutations",
-        queries: "repos.journal_entry_queries", # rubocop:disable Hanami/UnusedDeps
+        queries: "repos.journal_entry_queries",
       ]
 
       private

@@ -10,7 +10,7 @@ module Mail
 
       include Deps[
         change_thread: "operations.change_thread",
-        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.bulk_contract",
         delete_message: "operations.delete_message",
         message_queries: "repos.message_queries",
         message_tag_mutations: "repos.message_tag_mutations",

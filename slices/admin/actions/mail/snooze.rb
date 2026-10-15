@@ -5,7 +5,7 @@ module Admin
     module Mail
       class Snooze < Inbox::Snooze
         include Redirect
-        include Deps[thread_queries: "mail.repos.thread_queries"] # rubocop:disable Hanami/UnusedDeps
+        include Deps[thread_queries: "mail.repos.thread_queries"]
 
         private
 

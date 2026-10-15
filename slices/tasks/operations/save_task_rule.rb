@@ -11,7 +11,7 @@ module Tasks
       GITHUB = Blog::Types::TaskSourceProvider["github"]
 
       include Deps[
-        contract: "contracts.task_rule_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.task_rule_contract",
         task_event_mutations: "repos.task_event_mutations",
         task_rule_mutations: "repos.task_rule_mutations",
         task_rule_queries: "repos.task_rule_queries",

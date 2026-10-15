@@ -12,7 +12,7 @@ module Links
 
       include Deps[
         records: "repos.record_link_queries",
-        contract: "contracts.record_link_contract", # rubocop:disable Hanami/UnusedDeps
+        contract: "contracts.record_link_contract",
         record_link_mutations: "repos.record_link_mutations",
         set_task_project: "tasks.operations.set_task_project",
       ]

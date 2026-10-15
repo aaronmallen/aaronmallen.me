@@ -5,7 +5,7 @@ module Projects
     class UntagProject < Blog::TagOperation
       include Deps[
         mutations: "repos.project_mutations",
-        queries: "repos.project_queries", # rubocop:disable Hanami/UnusedDeps
+        queries: "repos.project_queries",
       ]
 
       private
