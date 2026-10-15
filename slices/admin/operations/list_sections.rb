@@ -22,7 +22,6 @@ module Admin
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[health insights fa-heart-pulse admin_health].freeze,
-        %i[performance insights fa-gauge-high admin_performance].freeze,
         %i[time insights fa-clock admin_time].freeze,
         %i[search insights fa-magnifying-glass admin_search].freeze,
         %i[tags settings fa-tag admin_tags].freeze,
@@ -35,6 +34,7 @@ module Admin
         %i[security settings fa-shield-halved admin_security].freeze,
       ].freeze
 
+      ALSO = { analytics: { performance: :admin_performance } }.freeze
       JUMPS = { today: "t", tasks: "k", journal: "j", posts: "p", activity: "a" }.freeze
       ROOT = :today
 
@@ -49,6 +49,7 @@ module Admin
 
           Structs::Section.new(
             name:, group:, icon: icon.to_s, path:, count:, current: path == current, jump: JUMPS[name],
+            also: ALSO.fetch(name, Blog::Constants::EMPTY_HASH).keys,
           )
         end
       end
@@ -58,7 +59,9 @@ module Admin
       def covers?(name, path, current_path)
         return current_path == path if name == ROOT
 
-        current_path == path || current_path.start_with?("#{path}/")
+        [path, *ALSO.fetch(name, Blog::Constants::EMPTY_HASH).values.map { routes.path(it) }].any? do |covered|
+          current_path == covered || current_path.start_with?("#{covered}/")
+        end
       end
 
       def located = ALL.map { |(name, group, icon, route)| [name, group, icon, routes.path(route)] }

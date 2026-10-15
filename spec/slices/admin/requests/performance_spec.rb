@@ -48,18 +48,32 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "answers with the page titled Performance under Insights", :aggregate_failures do
+    it "answers with the page titled Performance under Insights, as part of analytics", :aggregate_failures do
       get "/admin/performance"
 
       expect(page).to have_title("Performance | Admin | #{Hanami.app.settings.owner_name}")
       expect(page).to have_css("a.pill-nav-link[aria-current='page']", text: "Insights")
-      expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "performance")
+      expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "analytics")
+      expect(page.all("a.screen-tab").map(&:text)).to eq(["analytics", "activity", "health", "time report", "search"])
     end
 
-    it "offers the screen in the command palette" do
+    it "marks analytics current on the requests page" do
+      get "/admin/performance/requests", route: "/writing/:slug", verb: "GET"
+
+      expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "analytics")
+    end
+
+    it "finds the screen in the command palette through analytics", :aggregate_failures do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/performance']", text: "performance")
+      expect(page).to have_no_css("[data-palette-href='/admin/performance']")
+      expect(page.find_by_id("command-palette-analytics")["data-palette-text"]).to include("performance")
+    end
+
+    it "opens from the Performance tab on the Analytics page" do
+      get "/admin/analytics"
+
+      expect(page).to have_link("Performance", href: %r{\A/admin/performance})
     end
 
     it "says so when nothing ran", :aggregate_failures do

@@ -133,11 +133,11 @@ module Admin
 
           def section_row(section)
             label = t(section.label_key)
+            text = [label, t(section.group_key), *section.also_keys.map { t(it) }].join(" ").downcase
 
             PaletteRow(
-              id: "command-palette-#{section.name}", icon: section.icon, label:, href: section.path,
-              text: "#{label} #{t(section.group_key)}".downcase, sub: section_sub(section), warn: section.waiting?,
-              jump: section.jump,
+              id: "command-palette-#{section.name}", icon: section.icon, label:, href: section.path, text:,
+              sub: section_sub(section), warn: section.waiting?, jump: section.jump,
             )
           end
 
