@@ -15,7 +15,7 @@ module API
           "taken" => "these two records are already linked",
           "task_pair" => "two tasks take link_tasks, which gives the link a type",
         },
-        other_kind: { Blog::Contract::FORMAT => "pick one of the eight kinds" },
+        other_kind: { Blog::Contract::FORMAT => "pick one of #{Serializers::Link::KINDS.join(', ')}" },
       }.freeze
 
       module_function

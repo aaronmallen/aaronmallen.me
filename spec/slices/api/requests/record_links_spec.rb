@@ -101,6 +101,15 @@ RSpec.describe "API record links", type: :request do
         .to eq([%w[other_kind], 422])
     end
 
+    it "names every kind it links when it refuses a mail thread" do
+      thread = create(:message)
+
+      message = link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id).fetch("message")
+
+      expect(message.scan(/"(\w+)"/).flatten)
+        .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request])
+    end
+
     it "answers an unknown record with a 404" do
       expect([link("journal_entry", 999_999, other_kind: "commit", other_id: commit.id).fetch("message"), status])
         .to eq(["no journal entry has the ID 999999", 404])
