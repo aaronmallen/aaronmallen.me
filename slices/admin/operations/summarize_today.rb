@@ -18,7 +18,6 @@ module Admin
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
         health_queries: "health.repos.health_queries",
-        inbox_queries: "api.repos.inbox_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         oauth_client_queries: "mcp.repos.oauth_client_queries",
         post_queries: "posts.repos.post_queries",
@@ -27,13 +26,13 @@ module Admin
         webmention_queries: "social.repos.webmention_queries",
       ]
 
-      def call(page:, now: Time.now, pool: nil)
+      def call(page:, inbox:, now: Time.now, pool: nil)
         sprint = step summarize_sprint.call(page:, now:, pool:)
 
         {
           **publishing(now),
           **counts(now),
-          attention: attention(now),
+          attention: attention(now, inbox),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
@@ -44,7 +43,7 @@ module Admin
 
       private
 
-      def attention(now)
+      def attention(now, inbox)
         failures = self.failures
 
         {
@@ -52,7 +51,7 @@ module Admin
           failures:,
           dead_jobs: unshown(attention_queries.dead_jobs, failures),
           failed_social_posts: social_post_queries.failed_statuses,
-          inbox: inbox_queries.unseen_count,
+          inbox:,
           webmentions: webmention_queries.pending_count,
         }
       end

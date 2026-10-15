@@ -15,8 +15,12 @@ module API
 
       def unseen = unseen_rows.sort_by { [it.at, it.kind, it.record.id] }.last(LIMIT).reverse
 
-      def unseen_count
-        message_queries.unread_count + webmention_queries.unseen_count + task_source_queries.unseen_task_count
+      def unseen_counts
+        {
+          messages: message_queries.unread_count,
+          webmentions: webmention_queries.unseen_count,
+          tasks: task_source_queries.unseen_task_count,
+        }
       end
 
       private

@@ -65,6 +65,13 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page).to have_css(".page-head-sub", exact_text: "2 waiting")
     end
 
+    it "counts the rows once for the nav and the heading" do
+      create(:message)
+      statements = counting { get "/admin/inbox" }
+
+      expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+    end
+
     it "lists only the newest rows past its limit and still counts them all", :aggregate_failures do
       stub_const("API::Repos::InboxQueries::LIMIT", 2)
       [120, 60, 0].each { create(:message, subject: "#{it}s ago", received_at: Time.now - it) }
@@ -271,6 +278,13 @@ RSpec.describe "Admin inbox", type: :request do
 
         expect(page).to have_css(".inbox-row", text: /mention on \S+/)
         expect(page).to have_css(".wm-excerpt.inbox-row-body", text: mention.excerpt)
+      end
+
+      it "reads only the post it mentions" do
+        create(:post, title: "Quiet")
+        statements = counting { get "/admin/inbox" }
+
+        expect(statements.grep(/FROM "posts"/)).to contain_exactly(/WHERE \("id" IN \(#{mention.post_id}\)\)/)
       end
 
       it "says a like carries no content" do

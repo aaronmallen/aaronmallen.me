@@ -120,6 +120,13 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
       expect(card).to have_link(href: "/admin/inbox")
     end
 
+    it "counts the inbox once for the nav and the card" do
+      create(:message)
+      statements = counting { get "/admin" }
+
+      expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+    end
+
     it "leaves the row out with nothing waiting" do
       create(:post, :draft, title: "Old draft", updated_at: days_ago(60))
       get "/admin"

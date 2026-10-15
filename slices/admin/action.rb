@@ -4,7 +4,10 @@
 module Admin
   class Action < Blog::Action
     include CSRFToken
-    include Deps["settings", not_found_view: "ui.views.not_found", rejected_view: "ui.views.forms.rejected"]
+    include Deps[
+      "operations.build_navigation", "settings",
+      not_found_view: "ui.views.not_found", rejected_view: "ui.views.forms.rejected",
+    ]
 
     config.formats.accept :html
     config.handle_exception BodyParsingError => 400
@@ -36,6 +39,8 @@ module Admin
     def handle_invalid_csrf_token(_request, response)
       halt 403, response.render(rejected_view)
     end
+
+    def navigation(request) = request.env[UI::Navigated::KEY] ||= build_navigation.call(current_path: request.path)
 
     def not_found(response)
       response.format = :html

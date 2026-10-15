@@ -38,22 +38,22 @@ module Admin
       JUMPS = { today: "t", tasks: "k", journal: "j", posts: "p", activity: "a" }.freeze
       ROOT = :today
 
-      include Deps["routes", inbox_queries: "api.repos.inbox_queries"]
+      include Deps["routes"]
 
-      def call(current_path:)
+      def call(current_path:, inbox:)
         found = located
         current = found.select { |(name, _, _, path)| covers?(name, path, current_path) }.map(&:last).max_by(&:length)
 
         found.map do |(name, group, icon, path)|
+          count = name == :inbox ? inbox : 0
+
           Structs::Section.new(
-            name:, group:, icon: icon.to_s, path:, count: count_for(name), current: path == current, jump: JUMPS[name],
+            name:, group:, icon: icon.to_s, path:, count:, current: path == current, jump: JUMPS[name],
           )
         end
       end
 
       private
-
-      def count_for(name) = name == :inbox ? inbox_queries.unseen_count : 0
 
       def covers?(name, path, current_path)
         return current_path == path if name == ROOT

@@ -33,8 +33,9 @@ module Admin
 
         def show_page(request, response, screen)
           filters = { **screen[:filters], saved_views: list_saved_views.call(SCREEN, request.params) }
+          counts = { **screen[:counts], unseen: navigation(request).inbox[:tasks] }
 
-          response.render(view, **screen, filters:)
+          response.render(view, **screen, counts:, filters:)
         end
       end
     end

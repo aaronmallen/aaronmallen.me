@@ -75,6 +75,8 @@ module Posts
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
 
+      def slugs(ids) = posts.with_ids(ids).select(:id, :slug).to_a.to_h { [it.id, it.slug] }
+
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private

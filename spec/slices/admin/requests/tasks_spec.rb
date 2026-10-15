@@ -324,6 +324,12 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page.find(".task-tabs .screen-tab", text: "external")).to have_css(".task-tab-count.w")
       end
 
+      it "counts the inbox once for the nav and the tint" do
+        statements = counting { get "/admin/tasks", filter: "next" }
+
+        expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+      end
+
       it "leaves the external count plain once every issue is seen" do
         Tasks::Slice["relations.task_sources"].see([imported.id], Time.now)
         get "/admin/tasks", filter: "next"

@@ -14,7 +14,6 @@ module Admin
       TODAY = Blog::Types::TaskTab["today"]
       UPCOMING = Blog::Types::TaskTab["upcoming"]
       UNORDERED = [COMPLETED, RECURRING, UPCOMING].freeze
-      UNSEEN = :unseen
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
@@ -23,7 +22,6 @@ module Admin
         sprint_queries: "tasks.repos.sprint_queries",
         task_queries: "tasks.repos.task_queries",
         task_series_queries: "tasks.repos.task_series_queries",
-        task_source_queries: "tasks.repos.task_source_queries",
       ]
 
       def call(page:, tab: TODAY, pool: nil, query: nil, from: nil, to: nil, now: Time.now)
@@ -54,7 +52,7 @@ module Admin
 
         task_queries.open_counts(sprint:, planned:).merge(
           COMPLETED => finished.fetch(:total), FINISHED_TODAY => finished.fetch(:on_day), CARRIED => sprint.carried_in,
-          UNSEEN => task_source_queries.unseen_task_count, RECURRING => task_series_queries.count,
+          RECURRING => task_series_queries.count,
         )
       end
 

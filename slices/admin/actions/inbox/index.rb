@@ -13,16 +13,18 @@ module Admin
           record_link_queries: "links.repos.record_link_queries",
         ]
 
-        def handle(_request, response)
+        def handle(request, response)
           rows = inbox_queries.unseen
           response[:rows] = rows
-          response[:count] = inbox_queries.unseen_count
+          response[:count] = navigation(request).inbox_count
           response[:snoozed] = inbox_queries.snoozed
-          response[:slugs] = post_queries.summaries.to_h { [it.id, it.slug] }
+          response[:slugs] = slugs(rows)
           response[:tasks] = tasks(rows)
         end
 
         private
+
+        def slugs(rows) = post_queries.slugs(rows.filter_map { it.record.post_id if it.kind == :webmention })
 
         def tasks(rows)
           record_link_queries.partner_ids(THREAD, rows.filter_map { it.record.id if it.kind == :message }, TASK)
