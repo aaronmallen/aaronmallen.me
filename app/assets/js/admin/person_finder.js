@@ -12,11 +12,13 @@ const HANDLES = { bluesky: "bluesky_handle", mastodon: "mastodon_handle" };
 const ready = new WeakSet();
 
 export function setupPersonFinder() {
-  for (const finder of fresh(ready, document.querySelectorAll("[data-person-finder]"))) setup(finder);
+  const finders = document.querySelectorAll("[data-person-finder]");
+
+  for (const finder of fresh(ready, finders)) setup(finder);
+  for (const finder of finders) finder.hidden = false;
 }
 
 function setup(finder) {
-  finder.hidden = false;
   const form = finder.querySelector("[data-person-finder-form]");
   const input = finder.querySelector("[data-person-finder-input]");
   const label = finder.querySelector("label[data-person-finder-label]");

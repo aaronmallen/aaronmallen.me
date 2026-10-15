@@ -3,14 +3,13 @@ import { fresh } from "./fresh.js";
 const ready = new WeakSet();
 
 export function setupCommentAdds(root = document) {
-  for (const form of fresh(ready, root.querySelectorAll("form[data-comment-add]"))) {
-    const body = form.querySelector("[data-editor-body]");
-    const button = form.querySelector("button[type='submit']");
-    const show = () => {
-      button.hidden = !body.value.trim();
-    };
+  const forms = root.querySelectorAll("form[data-comment-add]");
 
-    body.addEventListener("input", show);
-    show();
-  }
+  for (const form of fresh(ready, forms))
+    form.querySelector("[data-editor-body]").addEventListener("input", () => show(form));
+  for (const form of forms) show(form);
+}
+
+function show(form) {
+  form.querySelector("button[type='submit']").hidden = !form.querySelector("[data-editor-body]").value.trim();
 }

@@ -64,6 +64,48 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("button[data-bulk-toggle][aria-pressed='false']", text: "Select")
   end
 
+  describe "on a decision page with an empty comment box" do
+    before do
+      live "/admin/decisions/#{create(:decision).id}"
+      create(:message, subject: "Hello there")
+      find(".top-bar .pill-nav-dot")
+    end
+
+    it "keeps the Add button hidden after a live update" do
+      expect(page).to have_no_button(Admin::Slice["i18n"].t("ui.components.comment_thread.add"))
+    end
+  end
+
+  describe "on the mail page after a live update" do
+    before do
+      connect_google(account_id: "aaron@work.example", scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+      live "/admin/mail"
+      click_link "Compose"
+      find("#mail-compose .mail-editor-surface").send_keys(:escape)
+      find("#thread-#{create(:message, subject: 'Hello there').id}")
+      click_link "Compose"
+    end
+
+    it "keeps the rich editor in place of the plain box", :aggregate_failures do
+      expect(page).to have_css("#mail-compose .mail-editor-surface")
+      expect(page).to have_no_css("#mail-compose [data-mail-text]")
+    end
+
+    it "keeps Cc and Bcc behind their buttons", :aggregate_failures do
+      expect(page).to have_button("cc")
+      expect(page).to have_no_field("mail-compose-cc")
+    end
+  end
+
+  it "keeps the people finder on screen after a live update" do
+    connect_social_networks
+    live "/admin/people"
+    create(:message, subject: "Hello there")
+    find(".top-bar .pill-nav-dot")
+
+    expect(find_by_id("person-finder")).to have_field("Search Mastodon")
+  end
+
   it "shows a new webmention in the open inbox" do
     live "/admin/inbox"
     mention = create(:webmention, author_name: "A neighbour")

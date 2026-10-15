@@ -15,10 +15,15 @@ const STATES = ["bold", "italic", "underline", "strikeThrough", "insertUnordered
 const WRAPS = { quote: "BLOCKQUOTE", code: "CODE", link: "A" };
 
 const ready = new WeakSet();
+const shows = new WeakMap();
 
 export function setupMailEditors() {
-  for (const editor of fresh(ready, document.querySelectorAll("[data-mail-editor]"))) setupEditor(editor);
-  for (const form of fresh(ready, document.querySelectorAll("[data-mail-form]"))) setupForm(form);
+  const editors = document.querySelectorAll("[data-mail-editor]");
+  const forms = document.querySelectorAll("[data-mail-form]");
+
+  for (const editor of fresh(ready, editors)) shows.set(editor, setupEditor(editor));
+  for (const form of fresh(ready, forms)) shows.set(form, setupForm(form));
+  for (const element of [...editors, ...forms]) shows.get(element)?.();
 }
 
 function cleanHtml(html) {
@@ -54,10 +59,6 @@ function setupEditor(editor) {
   for (const name of ["aria-describedby", "aria-invalid"]) {
     if (text.hasAttribute(name)) surface.setAttribute(name, text.getAttribute(name));
   }
-  surface.innerHTML = html.value ? cleanHtml(html.value) : escapeHtml(text.value).replace(/\n/g, "<br>");
-  text.hidden = true;
-  tools.hidden = false;
-  text.after(surface);
 
   const within = (tag) => {
     for (let node = document.getSelection().anchorNode; node && node !== surface; node = node.parentNode) {
@@ -149,7 +150,10 @@ function setupEditor(editor) {
     }
   });
 
-  surface.addEventListener("input", sync);
+  surface.addEventListener("input", () => {
+    sync();
+    text.dispatchEvent(new Event("input"));
+  });
   surface.addEventListener("keyup", refresh);
   surface.addEventListener("mouseup", refresh);
   surface.addEventListener("keydown", (event) => {
@@ -178,7 +182,16 @@ function setupEditor(editor) {
   editor.closest("details")?.addEventListener("toggle", (event) => {
     if (event.target.open) surface.focus();
   });
-  sync();
+
+  return () => {
+    text.hidden = true;
+    tools.hidden = false;
+    if (surface.isConnected) return;
+
+    surface.innerHTML = html.value ? cleanHtml(html.value) : escapeHtml(text.value).replace(/\n/g, "<br>");
+    text.after(surface);
+    sync();
+  };
 }
 
 function setupAttach(form) {
@@ -256,19 +269,30 @@ function setupForm(form) {
     }
   });
 
-  if (!reveals) return;
+  if (!reveals) return undefined;
 
-  reveals.hidden = false;
-  for (const button of reveals.querySelectorAll("[data-mail-reveal]")) {
+  const opened = new WeakSet();
+  const pairs = [...reveals.querySelectorAll("[data-mail-reveal]")].map((button) => {
     const field = document.getElementById(button.dataset.mailReveal);
-    const row = field.closest("[data-mail-extra]");
-    const shown = Boolean(field.value);
-    row.hidden = !shown;
-    button.hidden = shown;
+    return { button, field, row: field.closest("[data-mail-extra]") };
+  });
+
+  const show = () => {
+    reveals.hidden = false;
+    for (const { button, field, row } of pairs) {
+      const shown = opened.has(row) || Boolean(field.value);
+      row.hidden = !shown;
+      button.hidden = shown;
+    }
+  };
+
+  for (const { button, field, row } of pairs) {
     button.addEventListener("click", () => {
-      row.hidden = false;
-      button.hidden = true;
+      opened.add(row);
+      show();
       field.focus();
     });
   }
+
+  return show;
 }
