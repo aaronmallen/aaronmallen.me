@@ -13,6 +13,7 @@ module Admin
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String | Blog::Types::Symbol, Blog::Types::Integer)
           prop :lead, Blog::Types::Integer.optional
+          prop :pool, Blog::Types::String
           prop :query, Blog::Types::String
           prop :tab, Blog::Types::TaskTab
           prop :tasks, Blog::Types::Instance(Blog::Structs::Paged)
@@ -54,7 +55,7 @@ module Admin
           def rows
             return Empty { t(filtering? ? ".empty.no_match" : empty_key) } if @tasks.rows.empty?
 
-            Bulk(filter: @tab, page: @tasks.number, query: @query)
+            Bulk(filter: @tab, page: @tasks.number, pool: (@pool if today?), query: @query)
             @tasks.rows.each { row(it) }
             Pager(page: @tasks, route: :admin_tasks, params: { filter: @tab, q: (@query unless @query.empty?) }.compact)
           end

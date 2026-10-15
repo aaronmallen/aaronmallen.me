@@ -15,6 +15,7 @@ module Admin
 
           prop :filter, Blog::Types::String
           prop :page, Blog::Types::Integer
+          prop :pool, Blog::Types::String.optional, default: nil
           prop :query, Blog::Types::String
 
           def view_template
@@ -33,7 +34,9 @@ module Admin
           def confirm = { confirm: t(".confirm_delete") }
 
           def fields
-            { filter: @filter, **(@query.empty? ? {} : { q: @query }), **Blog::Structs::Page.query(@page) }
+            picked = { pool: @pool, q: @query }.reject { |_, value| value.nil? || value.empty? }
+
+            { filter: @filter, **picked, **Blog::Structs::Page.query(@page) }
           end
 
           def move(bar)

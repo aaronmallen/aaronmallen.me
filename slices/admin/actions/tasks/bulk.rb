@@ -39,8 +39,10 @@ module Admin
           query = Blog::Types::TrimmedText[request.params[:q]]
           tab = task_tab(request)
           page = landing(request) { build_tasks_page.call(page: it, tab:, query:).failure? }
+          pool = request.params[:pool]&.then { { pool: Blog::Types::TaskListParam[it] } }
 
-          routes.path(:admin_tasks, filter: tab, **(query.empty? ? {} : { q: query }), **Blog::Structs::Page.query(page))
+          routes.path(:admin_tasks, filter: tab, **pool, **(query.empty? ? {} : { q: query }),
+                                    **Blog::Structs::Page.query(page))
         end
 
         def named(id)

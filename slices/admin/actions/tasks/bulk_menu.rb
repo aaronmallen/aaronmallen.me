@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Tasks
       class BulkMenu < Action
-        FIELDS = %i[filter q page].freeze
+        FIELDS = %i[filter pool q page].freeze
         PRIVATE = Blog::Types::TagScope["private"]
 
         include Deps[tag_queries: "tags.repos.tag_queries", task_queries: "tasks.repos.task_queries"]

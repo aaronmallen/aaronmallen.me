@@ -21,6 +21,8 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
 
   def place(task) = repo.by_id(task.id).place
 
+  def sprint_task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+
   def status(task) = repo.by_id(task.id)&.status
 
   def tag_names(task) = Tasks::Slice["relations.task_tags"].names_by_task([task.id]).fetch(task.id, [])
@@ -104,6 +106,19 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
 
         expect(page).to have_css("form#task-bulk input[name='q'][value='a']", visible: :all)
         expect(page).to have_css("form#task-bulk input[name='page'][value='2']", visible: :all)
+      end
+
+      it "keeps the pull column's pool in the bar on Today" do
+        sprint_task
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(page).to have_css("form#task-bulk input[name='pool'][value='someday']", visible: :all)
+      end
+
+      it "leaves the pool out of the bar off Today" do
+        get "/admin/tasks", filter: "next", pool: "someday"
+
+        expect(page).to have_no_css("form#task-bulk input[name='pool']", visible: :all)
       end
 
       it "draws no bar on the archive" do
@@ -420,6 +435,12 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
         act("complete", [create(:task)], q: "tag:site")
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next&q=tag:site")
+      end
+
+      it "keeps the pull column's pool" do
+        act("complete", [sprint_task], filter: "today", pool: "someday")
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=today&pool=someday")
       end
 
       it "keeps the page while it still has rows" do
