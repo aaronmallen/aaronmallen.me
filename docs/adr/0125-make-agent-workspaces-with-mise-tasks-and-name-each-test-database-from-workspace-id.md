@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [config]
 issue: "#711"
-amended: ["#1082"]
+amended: ["#1082", "#1393"]
 tags: [mise, tasks, jj, workspaces, agents, orchestrate, database, testing, settings]
 ---
 
@@ -61,7 +61,9 @@ workspace, nothing needs the cap.
 `/orchestrate` and `.claude/vcs.md` shrink to two commands per workspace, and every workspace looks the same.
 
 Each workspace holds a test database of its own until `dev:remove-workspace` drops it. A directory deleted by hand
-leaves that database behind.
+leaves that database behind until `mise run dev:prune-workspaces` drops it. Since #1393, that task drops every
+`<DATABASE_NAME or blog>_test_<id>` database, workers' too, whose `ws<id>` has no directory under `.claude/worktrees`,
+and never touches the root test databases.
 
 Workspaces share one Redis. A later spec that tests against Redis has to give each workspace its own db first.
 

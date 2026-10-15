@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+#MISE description="Drop the test databases of workspaces whose directory is gone"
+
+set -e
+
+export HANAMI_ENV="test"
+
+worktrees="${WORKTREES_DIR:-}"
+if [ -z "$worktrees" ]; then
+  git_dir="$(jj git root)"
+  worktrees="$(dirname "$git_dir")/.claude/worktrees"
+fi
+
+prefix="${DATABASE_NAME:-blog}_test_"
+names="$(scripts/util/psql -d postgres -Atc "select datname from pg_database order by datname")"
+
+set --
+for name in $(echo "$names" | grep -E "^${prefix}[0-9]+(_w[0-9]+)?\$" || true); do
+  id="${name#"$prefix"}"
+  [ -d "${worktrees}/ws${id%%_*}" ] && continue
+  echo "$name"
+  set -- "$@" -c "drop database \"${name}\""
+done
+
+[ "$#" -eq 0 ] || scripts/util/psql -d postgres -q "$@"

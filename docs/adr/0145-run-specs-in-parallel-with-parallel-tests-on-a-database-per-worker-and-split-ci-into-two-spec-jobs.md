@@ -5,6 +5,7 @@ status: active
 created: 2026-10-10
 area: [config]
 issue: "#1082"
+amended: ["#1393"]
 tags: [testing, rspec, parallel_tests, coverage, simplecov, ci, database, workspaces]
 ---
 
@@ -58,7 +59,7 @@ stays the sum of both. Two jobs run side by side.
 A run uses every core, so it finishes in a fraction of the time, and a push gets an answer sooner.
 
 Each workspace now holds a test database per worker, not one. `dev:remove-workspace` has to drop all of them, and a
-directory deleted by hand leaves more behind.
+directory deleted by hand leaves more behind. `mise run dev:prune-workspaces` drops those, as [ADR 0125][0125] says.
 
 A spec that leans on shared state outside its database now races its neighbours. Shared paths such as
 `log/spec_examples.txt` need a name per worker, and the `:commits` specs that race threads under a timeout have to
