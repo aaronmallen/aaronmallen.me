@@ -133,6 +133,15 @@ RSpec.describe "API bulk post actions", type: :request do
     end
   end
 
+  it "answers a failure it did not expect with a 500 that names the post" do
+    id = create(:post, :draft).id
+    failing = instance_double(Posts::Operations::ActOnPosts, call: Dry::Monads::Failure[:record, id, :unexpected])
+    replace_component("posts.operations.act_on_posts", failing)
+
+    expect([act("delete", [id]), status])
+      .to eq([{ "error" => "failed", "message" => "could not change blog post #{id}" }, 500])
+  end
+
   describe "the MCP tools" do
     it "tag as tag_posts does" do
       first = tagged("rails", title: "same", slug: "same-one")

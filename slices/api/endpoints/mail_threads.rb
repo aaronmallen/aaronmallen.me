@@ -7,7 +7,6 @@ module API
       BULK = Helpers::Schema.bulk("mail threads")
       COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
       TAG = Helpers::Tags.schema("private")
-      UNCHANGED = "could not change mail thread %s"
 
       THREAD = Serializers::MailThread::SCHEMA
       HEAD = THREAD.merge(

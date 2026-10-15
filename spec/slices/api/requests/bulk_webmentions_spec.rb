@@ -118,6 +118,14 @@ RSpec.describe "API bulk webmention actions", type: :request do
     end
   end
 
+  it "answers a failure it did not expect with a 500 that names the webmention" do
+    failing = instance_double(Social::Operations::ActOnWebmentions, call: Dry::Monads::Failure[:record, 7, :unexpected])
+    replace_component("social.operations.act_on_webmentions", failing)
+
+    expect([act("approve", [7]), status])
+      .to eq([{ "error" => "failed", "message" => "could not change webmention 7" }, 500])
+  end
+
   describe "the MCP tools" do
     {
       "approve" => "approve_webmentions",

@@ -8,9 +8,6 @@ module API
         { id: Helpers::Schema::INTEGER, title: Helpers::Schema::STRING, deleted: Helpers::Schema::BOOLEAN },
       ).freeze
       REPLY = Helpers::Schema.object({ posts: Helpers::Schema.list(DELETED) }).freeze
-      SCHEMA = Posts::BULK
-
-      def handle(ids:) = acted(ids)
 
       private
 

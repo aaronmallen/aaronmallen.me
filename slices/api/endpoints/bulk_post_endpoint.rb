@@ -3,33 +3,19 @@
 
 module API
   module Endpoints
-    class BulkPostEndpoint < Endpoint
-      NOT_DRAFT = "blog post %s is not a draft"
+    class BulkPostEndpoint < BulkEndpoint
+      COMPLAINTS = Posts::COMPLAINTS
+      KEY = :posts
+      NOUN = "blog post"
+      REFUSALS = { not_draft: "blog post %s is not a draft" }.freeze
       REPLY = Helpers::Schema.object({ posts: Helpers::Schema.list(Serializers::Post.reference) }).freeze
-      UNCHANGED = "could not change blog post %s"
+      SCHEMA = Posts::BULK
 
-      include Deps[act_on_posts: "posts.operations.act_on_posts"]
+      include Deps[act_on: "posts.operations.act_on_posts"] # rubocop:disable Hanami/UnusedDeps
 
       private
 
-      def acted(ids, **input)
-        case act_on_posts.call({ act: self.class::ACT, ids:, **input })
-          in Success[*posts] then Success(posts: answered(posts))
-          in Failure[:record, id, reason] then refused(id, reason)
-          in Failure[:invalid, errors] then rejected(flat(errors), Posts::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
-        end
-      end
-
       def answered(posts) = serialized(Serializers::Post, posts)
-
-      def refused(id, reason)
-        case reason
-          when :not_found then invalid(ids: [Helpers::Wording.missing("blog post", id)])
-          when :not_draft then invalid(ids: [format(NOT_DRAFT, id)])
-          else failed(format(UNCHANGED, id))
-        end
-      end
     end
   end
 end

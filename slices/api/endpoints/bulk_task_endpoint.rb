@@ -3,35 +3,22 @@
 
 module API
   module Endpoints
-    class BulkTaskEndpoint < Endpoint
+    class BulkTaskEndpoint < BulkEndpoint
+      COMPLAINTS = Tasks::COMPLAINTS
       FIELDS = { to: :list }.freeze
+      KEY = :tasks
+      NOUN = "task"
+      REFUSALS = { closed: Tasks::CLOSED }.freeze
       REPLY = Helpers::Schema.object({ tasks: Helpers::Schema.list(Serializers::Task.reference) }).freeze
-      UNCHANGED = "could not change task %s"
+      SCHEMA = Tasks::BULK
 
-      include Deps[act_on_tasks: "tasks.operations.act_on_tasks", task_queries: "tasks.repos.task_queries"]
+      include Deps[act_on: "tasks.operations.act_on_tasks"] # rubocop:disable Hanami/UnusedDeps
 
       private
 
-      def acted(ids, **input)
-        case act_on_tasks.call({ act: self.class::ACT, ids:, **input })
-          in Success[*tasks] then Success(tasks: answered(ids.uniq, tasks))
-          in Failure[:record, id, reason] then refused(id, reason)
-          in Failure[:invalid, errors] then rejected(keyed(errors), Tasks::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
-        end
-      end
+      def answered(tasks) = serialized(Serializers::Task, task_queries.detailed_in_order(tasks.map(&:id).uniq))
 
-      def answered(ids, _tasks) = serialized(Serializers::Task, task_queries.detailed_in_order(ids))
-
-      def keyed(errors) = flat(errors).transform_keys { FIELDS.fetch(it, it) }
-
-      def refused(id, reason)
-        case reason
-          when :not_found then invalid(ids: [Helpers::Wording.missing("task", id)])
-          when :closed then invalid(ids: [format(Tasks::CLOSED, id)])
-          else failed(format(UNCHANGED, id))
-        end
-      end
+      def keyed(errors) = super.transform_keys { FIELDS.fetch(it, it) }
     end
   end
 end

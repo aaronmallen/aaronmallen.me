@@ -260,6 +260,15 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     end
   end
 
+  it "answers a failure it did not expect with a 500 that names the mail thread" do
+    id = 7
+    failing = instance_double(Mail::Operations::ActOnMessages, call: Dry::Monads::Failure[:record, id, :unexpected])
+    replace_component("mail.operations.act_on_messages", failing)
+
+    expect([act("read", [id]), status])
+      .to eq([{ "error" => "failed", "message" => "could not change mail thread #{id}" }, 500])
+  end
+
   describe "the MCP tools" do
     it "mark read as mark_mail_threads_read does" do
       message = create(:message)
