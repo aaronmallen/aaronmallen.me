@@ -505,6 +505,26 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
     end
 
+    describe "an edit to one part of a thread with another part over the limit" do
+      let(:social_post) { compose("teh cat", "b" * 301, targets: %w[bluesky]) }
+
+      before { suggest(social_post, typo) }
+
+      it "applies the edit", :aggregate_failures do
+        accept(social_post, edit_id: first_edit_id(social_post))
+
+        expect(bodies(social_post)).to eq(["the cat", "b" * 301])
+        expect(statuses(social_post)).to eq(%w[accepted])
+      end
+
+      it "says it applied in a toast" do
+        accept(social_post, edit_id: first_edit_id(social_post))
+        follow_redirect!
+
+        expect(toast).to eq("Suggestion applied")
+      end
+    end
+
     describe "edits that would leave a part empty" do
       let(:social_post) { compose("teh cat sat", "teh") }
 
