@@ -42,8 +42,6 @@ prints `0`.
 
 ## Development
 
-## Development
-
 `mise run dev` starts RustFS from `.config/compose.yml` and makes the `blog-development` bucket in it.
 `mise run setup:environment` writes the root key to `.env` as `MEDIA_STORE_ACCESS_KEY` and
 `MEDIA_STORE_SECRET_KEY`, and `config/settings/development.yml` points the app at it, so a laptop needs none of the

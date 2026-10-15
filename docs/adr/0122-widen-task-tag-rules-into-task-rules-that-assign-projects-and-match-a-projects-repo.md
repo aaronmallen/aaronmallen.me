@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, mcp, projects, record, tasks]
 issue: "#660"
-amended: ["#1315"]
+amended: ["#1315", "#1391"]
 tags: [tasks, projects, tags, rules, imports, sync, github, linear, providers, repos, links]
 ---
 
@@ -63,7 +63,9 @@ Only GitHub issues match a project's repo, since a project names a GitHub repo a
 Linear issues reach a project only through a rule.
 
 The one pass on create now runs from two places, a rule and a project, and both read `task_sources.url` while imports
-read `origin`. The two can still disagree, and nothing checks them against each other.
+read `origin`. Since #1391 one regex pair in `lib/issues.rb` holds the shared parse: the create pass matches
+`task_sources.url` against it, and the Linear client takes the workspace in `origin` from it. A GitHub `origin` still
+comes from the repository's `nameWithOwner`, so a GitHub issue whose URL names a moved repo can still disagree.
 
 Nothing records whether a project link came from the repo, a rule or the owner, so no later change can tell them
 apart. A project added to a rule after it was created never reaches past imports, so the owner links those by hand.
