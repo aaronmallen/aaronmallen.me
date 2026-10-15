@@ -363,6 +363,8 @@ RSpec.describe "Admin Google connection", type: :request do
     end
 
     describe "when Google has revoked the refresh token" do
+      def revoked_hint = Admin::Slice["i18n"].t("ui.components.services.detail.revoked", name: "Google")
+
       before do
         connect_account(expires_at: Time.now.to_i - 60)
         stub_token({ error: "invalid_grant" }, status: 400)
@@ -381,10 +383,26 @@ RSpec.describe "Admin Google connection", type: :request do
         expect(page.find(".svc-actions")).to have_css(reconnect_field, visible: :all)
       end
 
+      it "says a reconnect lets its jobs resume", :aggregate_failures do
+        expect { read("me") }.to raise_error(Google::Error)
+        get "/admin/services", selected: connection.id.to_s
+
+        expect(page.find(".settings-side")).to have_css(".hint", text: revoked_hint)
+      end
+
       it "asks Google nothing more until I reconnect", :aggregate_failures do
         2.times { expect { read("me") }.to raise_error(Google::Error, "me needs a reconnect") }
 
         expect(a_request(:post, token_url)).to have_been_made.once
+      end
+
+      it "lets its jobs read again once I reconnect", :aggregate_failures do
+        expect { read("me") }.to raise_error(Google::Error)
+        grant("aaron@example.com", [sleep_scope], access_token: "ya29.again")
+        callback(code: "code", state: start_connect(connection: connection.id))
+        stub_steps("ya29.again")
+
+        expect(read("aaron@example.com")).to eq({})
       end
 
       it "clears the mark on the same account when I reconnect", :aggregate_failures do

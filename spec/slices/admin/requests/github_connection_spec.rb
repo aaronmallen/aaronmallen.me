@@ -22,6 +22,18 @@ RSpec.describe "Admin GitHub connection", type: :request do
 
   def connections = Services::Slice["repos.connection_queries"].for(:github)
 
+  def dialog_hints
+    get "/admin/services"
+    page.find_by_id("connect-service-github", visible: :all).all(".hint", visible: :all).map { it.text(:all) }
+  end
+
+  def form_hints
+    get "/admin/services", connect: "github"
+    page.all(".settings-side .hint").map(&:text)
+  end
+
+  def hint(key, **) = Admin::Slice["i18n"].t(["ui.components.services", key].join("."), name: "GitHub", **)
+
   def page = Capybara.string(last_response.body)
 
   def start_connect
@@ -42,6 +54,14 @@ RSpec.describe "Admin GitHub connection", type: :request do
       expect(authorize_query.fetch("code_challenge")).to match(/\A[\w-]{43}\z/)
       expect(authorize_query.fetch("redirect_uri")).to end_with("/admin/auth/github/callback")
     end
+  end
+
+  it "says I approve access on GitHub, then come back here" do
+    shown = dialog_hints
+    callback(code: "code", state: start_connect)
+
+    expect([last_response.location, shown]).to match([end_with("/admin/services?selected=#{connections.first.id}"),
+                                                      include(hint("connect_dialog.away"))])
   end
 
   describe "when GitHub grants access" do
@@ -242,6 +262,14 @@ RSpec.describe "Admin GitHub connection", type: :request do
       expect(page).to have_no_css(".svc-line", text: "Read repositories and issues")
     end
 
+    it "says GitHub takes a fine-grained token" do
+      shown = [dialog_hints, form_hints]
+      stub_user("github_pat_new", scopes: "")
+      connect_token("github_pat_new")
+
+      expect([connections.size, *shown]).to match([1, *[include(hint("connect.token_hint"))] * 2])
+    end
+
     it "saves nothing for a token GitHub refuses and shows why", :aggregate_failures do
       stub_user("ghp_bad", status: 401, body: { message: "Bad credentials" })
       connect_token("ghp_bad")
@@ -293,6 +321,14 @@ RSpec.describe "Admin GitHub connection", type: :request do
         expect(toast).to include("GitHub isn't answering", "Bad credentials")
       end
 
+      it "says the site can't revoke a pasted token", :aggregate_failures do
+        shown = form_hints
+        post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token
+
+        expect(a_request(:delete, revoke_url)).not_to have_been_made
+        expect(shown).to include(hint("connect.token_hint"))
+      end
+
       it "deletes the row and asks me to revoke the token on GitHub", :aggregate_failures do
         post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token
         follow_redirect!
@@ -308,6 +344,15 @@ RSpec.describe "Admin GitHub connection", type: :request do
     let(:connection) { connect_github_account }
 
     def disconnect = post("/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token)
+
+    it "says a disconnect revokes the token on GitHub", :aggregate_failures do
+      shown = dialog_hints
+      stub_request(:delete, revoke_url).to_return(status: 204)
+      disconnect
+
+      expect(revoke).to have_been_made
+      expect(shown).to include(hint("connect_dialog.revoke"))
+    end
 
     it "revokes the token on GitHub and deletes the row", :aggregate_failures do
       stub_request(:delete, revoke_url).to_return(status: 204)

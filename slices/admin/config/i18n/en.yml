@@ -856,10 +856,9 @@ en:
           add: "Add"
           add_label: "Add files to this group"
           alt_text: "Alt text"
-          alt_text_hint: "The group's page shows it with the image."
+          alt_text_hint: "The group's page uses it for the image."
           alt_text_placeholder: "What the image shows"
           code: "Short code"
-          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
           confirm_delete:
             one: "Delete this group and its file? Its link stops working at once."
             other: "Delete this group and its %{count} files? Its link stops working at once."
@@ -894,10 +893,9 @@ en:
             other: "%{views} views"
         share_form:
           alt_text: "Alt text"
-          alt_text_hint: "Used when you copy it as markdown."
+          alt_text_hint: "The markdown you copy uses it."
           alt_text_placeholder: "What the image shows"
           code: "Short code"
-          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
           confirm_delete: "Delete %{name}? Its link stops working at once."
           copy_link: "Copy link"
           copy_markdown: "Copy as markdown"
@@ -1106,7 +1104,7 @@ en:
             one: "%{clicks} click"
             other: "%{clicks} clicks"
           code: "Short code"
-          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
+          code_hint: "The part after %{host}/. Save a new one and the old link stops working at once."
           confirm_delete: "Delete %{link}? Anyone following it gets a 404."
           copy_link: "Copy link"
           copy_markdown: "Copy as markdown"
@@ -1118,7 +1116,7 @@ en:
           made: "made %{on}"
           markdown_copied: "Markdown copied"
           title: "Title"
-          title_hint: "Only you see this. Used for search and markdown."
+          title_hint: "Only you see it. Search and the markdown you copy use it."
         row:
           clicks:
             one: "%{clicks} click"
@@ -2023,20 +2021,19 @@ en:
             app_password: "App password"
             handle: "Handle"
           heading: "Connect %{name}"
-          hint: "The site checks these with %{name} before it saves them, and keeps them encrypted."
-          token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes; an organization may still have to approve a fine-grained one. The site can't revoke a token, so revoke it on GitHub once you disconnect."
+          hint: "The site checks these with %{name}, then keeps them encrypted."
+          token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes, and an organization may have to approve a fine-grained one. The site can't revoke a pasted token, so revoke it on GitHub when you disconnect."
         connect_dialog:
           asks: "The site will ask for"
-          away: "You'll approve access on %{name}, then come straight back here."
+          away: "You approve access on %{name}, then come back here."
           change: "Change access for %{account}"
           connect: "Connect %{name}"
           continue: "Continue to %{name}"
           or_token: "Or paste a personal access token"
           required: "Required · %{why}"
           server: "Your server"
-          revoke: "Read-only unless it says otherwise. You can disconnect any time; the site revokes its token on %{name} too."
+          revoke: "Disconnect any time and the site revokes its token on %{name}."
           token: "Personal access token"
-          token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes; an organization may still have to approve a fine-grained one. The site can't revoke a token, so revoke it on GitHub once you disconnect."
         detail:
           access: "Access"
           app_credentials: "App credentials"
@@ -2055,13 +2052,13 @@ en:
           not_granted: "not granted"
           oauth: "OAuth"
           powers: "Powers"
-          revoked: "%{name} stopped taking the site's token. Reconnect to pick up where it left off."
+          revoked: "%{name} stopped taking the site's token. Reconnect and its jobs resume."
           save: "Save"
           set: "set"
           token: "personal access token"
           way: "Signed in with"
           work: "Work account"
-          work_hint: "The site reads a work account's calendars and never changes them."
+          work_hint: "The site never changes a work account's calendars."
         field_error:
           access_token:
             blank: "Paste a token first."
@@ -2074,7 +2071,7 @@ en:
         head:
           close: "Close"
         picker:
-          hint: "Storage, MaxMind and Honeybadger read their keys from the server environment, so they aren't listed here."
+          hint: "The media and backup stores, MaxMind and Honeybadger take their keys from the server environment, so they aren't here."
           title: "Connect a service"
         row:
           used: "used %{time}"
@@ -2756,7 +2753,7 @@ en:
           scopes:
             blank: "Pick at least one permission."
         mint:
-          expires_hint: "The token stops working at midnight that day. Leave it blank and the token never expires."
+          expires_hint: "The token stops working when that day starts. Leave it blank and it never expires."
           expires_on: "Expires on"
           label: "Token name"
           mint: "Mint token"
@@ -2771,7 +2768,7 @@ en:
             write: "Make changes short of publishing and deleting"
           scopes: "Permissions"
         minted:
-          hint: "Copy it now. The site keeps only a digest, so this page can't show it again."
+          hint: "Copy it now. The site can't show it again."
           title: "Your new token"
         row:
           confirm_revoke: "Revoke %{token}? Any client using it loses the API at once."
@@ -3060,7 +3057,7 @@ en:
         edit:
           all_links: "All links"
         index:
-          again: "Already shortened as %{link}. Shorten again to get a second code."
+          again: "Already shortened as %{link}. Shorten again for a second code."
           clicks:
             one: "%{clicks} click"
             other: "%{clicks} clicks"
@@ -3437,8 +3434,8 @@ en:
             personal: "Personal"
             social: "Social"
           heading: "Connected services"
-          hint: "Every outside service the site talks to. Services you sign in to keep an encrypted token in the database; the rest read keys from the server environment."
-          pick_hint: "Click a service to see what it powers, what it can access, and when its jobs last ran."
+          hint: "Services you connect keep their tokens encrypted in the database. The rest take keys from the server environment, if they need any."
+          pick_hint: "Click a service to see what it powers and how often its jobs run."
         menu:
           another: "Connect another"
           confirm_disconnect: "Click again to disconnect"

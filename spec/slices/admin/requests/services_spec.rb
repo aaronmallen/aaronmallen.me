@@ -174,13 +174,51 @@ RSpec.describe "Admin connected services", type: :request do
       end
     end
 
-    describe "the detail panel" do
-      it "says what to do while nothing is picked" do
-        get "/admin/services"
+    describe "the hints" do
+      def every(job) = Fugit::Cron.parse(sidekiq_config.dig(:scheduler, :schedule, job, "cron")).rough_frequency
 
-        expect(page).to have_css(".settings-side", text: "Click a service to see what it powers")
+      def hint(key) = Admin::Slice["i18n"].t(["ui", key].join("."))
+
+      def hints(scope) = page.all("#{scope} .hint", visible: :all).map { it.text(:all) }
+
+      def raw(connection)
+        Services::Slice["relations.service_connections"].by_pk(connection.id).dataset.get(:credentials)
       end
 
+      it "says connected services keep their tokens encrypted and the rest read the server environment" do
+        connection = add_connection("linear", "ws-1", "ROOT workspace")
+        get "/admin/services"
+
+        expect([raw(connection).include?("lin_api_secret"), row("Honeybadger").text, hints(".svc-list")])
+          .to match([false, include("not set up"), include(hint("views.services.index.hint"))])
+      end
+
+      it "says a picked service shows what it powers and how often its jobs run" do
+        shown = get("/admin/services").then { hints(".settings-side") }
+        get "/admin/services?selected=maxmind"
+
+        expect([page.find(".svc-line", text: "GeoIP database download").text, every("refresh_country_database"), shown])
+          .to match([include("weekly"), 7 * 86_400, include(hint("views.services.index.pick_hint"))])
+      end
+
+      it "says the picker leaves out the services set in the server environment" do
+        get "/admin/services"
+        env_only = ["Media store", "Backup store", "MaxMind", "Honeybadger"]
+
+        expect([pickable & env_only, hints("#connect-service")])
+          .to match([[], include(hint("components.services.picker.hint"))])
+      end
+
+      it "says an environment service's keys live in the server environment", :aggregate_failures do
+        allow(Hanami.app["settings"]).to receive(:maxmind).and_return(account_id: "acct-31337", license_key: nil)
+        get "/admin/services?selected=maxmind"
+
+        expect(page.all(".svc-env").map(&:text)).to eq(%w[MAXMIND_ACCOUNT_ID MAXMIND_LICENSE_KEY])
+        expect(hints(".settings-side")).to include(hint("components.services.detail.environment"))
+      end
+    end
+
+    describe "the detail panel" do
       it "opens a picked service and closes it from its row", :aggregate_failures do
         get "/admin/services?selected=maxmind"
 
@@ -243,6 +281,14 @@ RSpec.describe "Admin connected services", type: :request do
         expect(toast).to include("Linear connected as ROOT")
         expect(page).to have_css(".settings-side .svc-account", text: "ROOT")
       end
+    end
+
+    it "says it checks the key with Linear before it keeps it, encrypted" do
+      stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_errors("AUTHENTICATION_ERROR", "Authentication required"))
+      connect(api_key: "lin_api_bad")
+
+      expect([connections, page.all(".settings-side .hint").map(&:text)])
+        .to match([[], include(Admin::Slice["i18n"].t("ui.components.services.connect.hint", name: "Linear"))])
     end
 
     it "saves nothing for a key Linear refuses and says why", :aggregate_failures do

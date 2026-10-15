@@ -67,7 +67,8 @@ module Admin
           end
 
           def fields
-            field(:code, t(".code"), t(".code_hint", host: Helpers::ShareLink.host), spellcheck: "false")
+            code_hint = t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host)
+            field(:code, t(".code"), code_hint, spellcheck: "false")
             return unless image?
 
             field(:alt_text, t(".alt_text"), t(".alt_text_hint"), placeholder: t(".alt_text_placeholder"))

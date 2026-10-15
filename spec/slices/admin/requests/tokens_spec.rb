@@ -191,11 +191,52 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(stored.one[:expires_at]).to be_nil
     end
 
-    it "expires the token at local midnight on the day I pick" do
+    it "expires the token when the day I pick starts" do
       day = Blog::TimeZone.today + 7
       mint("Terminal", scopes: checked("read"), expires_on: day.iso8601)
 
       expect(stored.one[:expires_at]).to eq(Blog::TimeZone.day_start(day))
+    end
+
+    describe "the hints" do
+      def hint(key) = Admin::Slice["i18n"].t(["ui.components.tokens", key].join("."))
+
+      def hints = page.all(".hint").map(&:text)
+
+      def mint_and_reveal(**)
+        mint("Terminal", scopes: checked("read"), **)
+        follow_redirect!
+        [revealed, hints]
+      end
+
+      def status_at(value, time)
+        allow(Time).to receive(:now).and_return(time)
+        call_api(value)
+        last_response.status
+      end
+
+      it "says the token stops working when the chosen day starts" do
+        day = Blog::TimeZone.today + 7
+        value, shown = mint_and_reveal(expires_on: day.iso8601)
+        start = Blog::TimeZone.day_start(day)
+
+        expect([status_at(value, start - 1), status_at(value, start), shown])
+          .to match([200, 401, include(hint("mint.expires_hint"))])
+      end
+
+      it "says a token with no day never expires" do
+        value, shown = mint_and_reveal(expires_on: "")
+
+        expect([status_at(value, Time.now + (10 * 365 * 86_400)), shown])
+          .to match([200, include(hint("mint.expires_hint"))])
+      end
+
+      it "says to copy the token now because the page can't show it again" do
+        value, shown = mint_and_reveal
+        get "/admin/tokens"
+
+        expect([shown, last_response.body.include?(value)]).to match([include(hint("minted.hint")), false])
+      end
     end
 
     it "refuses an expiry of today and says why", :aggregate_failures do

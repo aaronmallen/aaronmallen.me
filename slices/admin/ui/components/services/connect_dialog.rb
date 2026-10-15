@@ -91,7 +91,7 @@ module Admin
             TokenForm(definition: @definition) do
               p(class: "svc-group-label") { t(".or_token") }
               @definition.fields.each { token_field(it) }
-              Hint { t(".token_hint") }
+              Hint { t("ui.components.services.connect.token_hint") }
             end
           end
 

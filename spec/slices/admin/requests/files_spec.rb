@@ -326,6 +326,14 @@ RSpec.describe "Admin files", type: :request do
 
         expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
       end
+
+      it "says the markdown I copy uses the alt text" do
+        markdown = "![A cat](http://shares.localhost/#{file.code})"
+        hint = i18n.t("ui.components.files.share_form.alt_text_hint")
+
+        expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
+          .and have_css(".hint", text: hint, visible: :all)
+      end
     end
 
     it "escapes brackets and backslashes in the alt text it copies as markdown" do
@@ -379,6 +387,15 @@ RSpec.describe "Admin files", type: :request do
 
         expect(server.get("/resume").status).to eq(200)
         expect(server.get("/#{old}").status).to eq(404)
+      end
+
+      it "says a new code moves the link and the old one stops working" do
+        old = file.code
+        save(code: "resume", alt_text: "")
+        get "/admin/files/#{file.id}/edit"
+
+        expect([server.get("/#{old}").status, page.all(".hint").map(&:text)])
+          .to match([404, include(i18n.t("ui.components.links.link_form.code_hint", host: "shares.localhost"))])
       end
 
       it "saves the alt text" do

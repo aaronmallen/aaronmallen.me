@@ -62,7 +62,7 @@ module Admin
 
             Field(label: t(".code"), name: :code, errors: @errors, error: FieldError, scope:) do |control, field|
               Input(**control, name: "group[code]", value:, autocomplete: "off", spellcheck: "false")
-              field.after { Hint { t(".code_hint", host: Helpers::ShareLink.host) } }
+              field.after { Hint { t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host) } }
             end
           end
 

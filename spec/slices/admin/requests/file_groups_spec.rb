@@ -237,6 +237,29 @@ RSpec.describe "Admin file groups", type: :request do
       expect(page).to have_css("[data-toast]", text: "Group saved")
     end
 
+    describe "the hints" do
+      def hints
+        get "/admin/files/groups/#{group.id}/edit"
+        Capybara.string(last_response.body).all(".hint").map(&:text)
+      end
+
+      it "says a new code moves the page and the old one stops working" do
+        old = group.code
+        save(code: "trip")
+        hint = i18n.t("ui.components.links.link_form.code_hint", host: "shares.localhost")
+
+        expect([server.get("/trip").status, server.get("/#{old}").status, hints]).to match([200, 404, include(hint)])
+      end
+
+      it "says the group's page uses the alt text for the image" do
+        save(code: group.code, files: { image[:id].to_s => { alt_text: "A cat" } })
+        shown = Capybara.string(server.get("/#{group.code}").body).all("img").map { it[:alt] }
+
+        expect([shown,
+                hints]).to match([include("A cat"), include(i18n.t("ui.components.files.group_form.alt_text_hint"))])
+      end
+    end
+
     it "sets the alt text on an image" do
       save(code: group.code, files: { image[:id].to_s => { alt_text: "A cat" } })
 

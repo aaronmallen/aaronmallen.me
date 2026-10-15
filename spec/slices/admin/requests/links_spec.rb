@@ -379,6 +379,40 @@ RSpec.describe "Admin links", type: :request do
 
       expect(%w[code title].map { page.find("#link-#{made.id}-#{it}").value }).to eq(["no--way", "My talk"])
     end
+
+    describe "the hints" do
+      def copies?(markdown) = page.has_css?("[data-record-key='#{markdown}']", visible: :all)
+
+      def hint(key, **) = i18n.t(key, scope: "ui.components.links.link_form", **)
+
+      def hints
+        get "/admin/links/#{made.id}/edit"
+        page.all(".hint").map(&:text)
+      end
+
+      it "says where the link sends people" do
+        save(destination: "https://example.org/talk")
+
+        expect([server.get("/talk").headers["Location"], hints])
+          .to match(["https://example.org/talk", include(hint("destination_hint", link: "shares.localhost/talk"))])
+      end
+
+      it "says a new code moves the link and the old one stops working" do
+        save(code: "keynote")
+
+        expect([server.get("/keynote").headers["Location"], server.get("/talk").status, hints])
+          .to match(["https://example.com/talk", 404, include(hint("code_hint", host: "shares.localhost"))])
+      end
+
+      it "says only I see the title, and search and markdown use it" do
+        save(title: "My talk")
+        shown = hints
+        get "/admin/links", search: "my talk"
+
+        expect([titles, copies?("[My talk](http://shares.localhost/talk)"), shown])
+          .to match([["My talk"], true, include(hint("title_hint"))])
+      end
+    end
   end
 
   describe "deleting" do
