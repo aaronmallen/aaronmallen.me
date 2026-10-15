@@ -7,7 +7,7 @@ module SavedViews
         Blog::Types::SavedViewScreen["activity"] => %w[from to types q day],
         Blog::Types::SavedViewScreen["journal"] => %w[q to],
         Blog::Types::SavedViewScreen["posts"] => %w[status],
-        Blog::Types::SavedViewScreen["tasks"] => %w[filter pool q],
+        Blog::Types::SavedViewScreen["tasks"] => %w[filter pool q from to],
       }.freeze
 
       params do

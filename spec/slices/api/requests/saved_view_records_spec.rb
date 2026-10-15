@@ -349,6 +349,15 @@ RSpec.describe "API saved view records", type: :request do
       end
     end
 
+    it "keeps a completed view to its range of days" do
+      day = today - 3
+      inside = create(:task, :done, completed_at: at(day))
+      create(:task, :done, completed_at: at(day + 2))
+      view = create(:saved_view, filters: { filter: "completed", from: (day - 1).iso8601, to: day.iso8601 })
+
+      expect(ids(trusted(mcp_answer("read_saved_view", id: view.id)))).to eq([inside.id])
+    end
+
     it "pages as the endpoint does" do
       2.times { create(:task) }
       lower_page_size(:mcp, to: 2)

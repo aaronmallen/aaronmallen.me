@@ -119,6 +119,27 @@ RSpec.describe "Admin saved views", type: :request do
     end
   end
 
+  describe "a view saved from the Completed tab over a range of days" do
+    let(:day) { Blog::TimeZone.today - 3 }
+    let(:filters) { { "filter" => "completed", "from" => (day - 1).iso8601, "to" => day.iso8601 } }
+
+    before do
+      sign_in_to_admin
+      [["In range", day], ["Out of range", day + 2]].each do |title, on|
+        create(:task, :done, title:, completed_at: Blog::TimeZone.local_time(on.year, on.month, on.day, 12))
+      end
+    end
+
+    it "opens at its range and leaves out a task closed outside it" do
+      form = { screen: "tasks", filters:, saved_view: { name: "Done last week" }, return_to: "/admin/tasks" }
+      post "/admin/saved-views", _csrf_token: admin_csrf_token, **form
+      get "/admin/tasks"
+      get Capybara.string(last_response.body).find_link("Done last week")[:href]
+
+      expect(page.all(".task-title").map(&:text)).to eq(["In range"])
+    end
+  end
+
   describe "a view holding filters the screen no longer knows" do
     before do
       sign_in_to_admin

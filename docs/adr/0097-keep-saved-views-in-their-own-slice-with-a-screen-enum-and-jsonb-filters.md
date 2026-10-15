@@ -21,8 +21,8 @@ list, create, change, delete and read them (#322, #324).
 
 Each screen reads its filters from params, and each param falls back to its default when the value is one the
 screen does not take (`Blog::Types::TaskTabParam`, `PostFilterParam`). Activity reads `from`, `to`, `q`, `day` and
-`types`, and `types` comes as a hash, `types[post]=1`. Posts read `status`. Tasks read `filter`, `pool` and `q`.
-The journal reads `q`, `to` and `write`.
+`types`, and `types` comes as a hash, `types[post]=1`. Posts read `status`. Tasks read `filter`, `pool` and `q`, and
+the Completed tab reads `from` and `to` too. The journal reads `q`, `to` and `write`.
 
 Three things are hard to change once rows exist: which slice owns the table, how the screen is typed, and how the
 filters are kept. The schema has no `jsonb` column yet.

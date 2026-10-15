@@ -50,8 +50,14 @@ module API
 
       def activity_window(picked) = ::Activity::Contracts::FiltersContract.new.call(picked).to_h
 
-      def finished(page, search)
-        found = task_queries.finished(page:, **search)
+      def closed_range(filters)
+        range = ::Tasks::Contracts::ClosedRangeContract.new.call(from: filters["from"], to: filters["to"])
+
+        range.success? ? range.to_h : Blog::Constants::EMPTY_HASH
+      end
+
+      def finished(page, filters, search)
+        found = task_queries.finished(page:, **closed_range(filters), **search)
 
         listed(found, found.rows.to_h { [it.id, it.sprint&.sprint_date] })
       end
@@ -94,7 +100,7 @@ module API
         search = search_query.call(query: filters["q"], fields: TASK_FIELDS).to_h
 
         case tab
-          when COMPLETED then finished(page, search)
+          when COMPLETED then finished(page, filters, search)
           when UPCOMING then upcoming(Blog::TimeZone.today(now), search)
           when RECURRING then recurring
           else open_tasks(tab, step(current_sprint.call(now:)), page, search)
