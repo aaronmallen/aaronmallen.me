@@ -42,12 +42,10 @@ module Admin
           def data = { key_row: true, menu: path(:admin_task_rule_menu, id: @rule.id) }
 
           def delete
-            Form(
-              action: path(:admin_delete_task_rule, id: @rule.id),
-              data: { confirm: t(".confirm_delete", pattern: @rule.pattern, provider:) },
-            ) do
-              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".delete") }
-            end
+            DeleteForm(
+              action: path(:admin_delete_task_rule, id: @rule.id), label: t(".delete"),
+              confirm: t(".confirm_delete", pattern: @rule.pattern, provider:),
+            )
           end
 
           def editing? = @editing&.fetch(:id) == @rule.id

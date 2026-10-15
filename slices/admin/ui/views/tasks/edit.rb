@@ -44,13 +44,10 @@ module Admin
           end
 
           def delete
-            Form(
+            DeleteForm(
               action: path(:admin_delete_task, id: @task.id), class: "task-drawer-delete",
-              data: { confirm: t(".confirm_delete", task: @task.title) },
-            ) do
-              HiddenFields(values: returns)
-              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".delete") }
-            end
+              confirm: t(".confirm_delete", task: @task.title), label: t(".delete"),
+            ) { HiddenFields(values: returns) }
           end
 
           def foot

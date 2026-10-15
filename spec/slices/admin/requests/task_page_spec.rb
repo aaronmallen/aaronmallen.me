@@ -132,6 +132,12 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(form["data-confirm"]).to eq(label(:confirm_delete, key: task.number.to_s))
         expect(form.find("input[name='filter']", visible: :all).value).to eq("next")
       end
+
+      it "posts Delete from a small warn button with a trash icon" do
+        read
+
+        expect(foot).to have_css("form.task-drawer-delete button.bt.warn.sm[type=submit] i.fa-regular.fa-trash-can")
+      end
     end
 
     it "titles the tab with the task" do

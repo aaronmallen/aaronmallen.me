@@ -46,13 +46,10 @@ module Admin
           def close(&) = OriginLink(origin: @origin, filter: @filter, variant: :gh, small: true, data: CLOSE, &)
 
           def delete
-            Form(
+            DeleteForm(
               action: path(:admin_delete_task, id: @task.id), class: "task-drawer-delete",
-              data: { confirm: t(".confirm_delete", key:) },
-            ) do
-              HiddenFields(values: { filter: @filter, origin: @origin })
-              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".delete") }
-            end
+              confirm: t(".confirm_delete", key:), label: t(".delete"),
+            ) { HiddenFields(values: { filter: @filter, origin: @origin }) }
           end
 
           def edit

@@ -75,17 +75,10 @@ module Admin
           def page_field = @page > 1 && input(type: "hidden", name: "page", value: @page)
 
           def remove
-            Form(**remove_attributes) do
-              scope_field
-              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".remove") }
-            end
-          end
-
-          def remove_attributes
-            {
-              action: path(:admin_delete_tag, id: @tag.id),
-              data: { confirm: t(".confirm_remove", tag: @tag.name, count: held, uses: losers) },
-            }
+            DeleteForm(
+              action: path(:admin_delete_tag, id: @tag.id), label: t(".remove"),
+              confirm: t(".confirm_remove", tag: @tag.name, count: held, uses: losers),
+            ) { scope_field }
           end
 
           def rename_form

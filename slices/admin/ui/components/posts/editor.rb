@@ -73,7 +73,7 @@ module Admin
 
           def outside_forms
             if @post
-              DeleteForm(post: @post, received: @webmentions[:received])
+              Posts::DeleteForm(post: @post, received: @webmentions[:received])
               EditNoteForms(post_id: @post.id, edits: @notes[:edits])
             end
             return unless suggestions?

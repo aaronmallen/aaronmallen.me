@@ -2960,6 +2960,8 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "planning a sprint ahead" do
       def drop(sprint) = send_to("/admin/tasks/sprints/#{sprint.id}/delete")
 
+      def drop_form(sprint) = upcoming && page.find("form[action='/admin/tasks/sprints/#{sprint.id}/delete']")
+
       def edit(task, **fields)
         send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, **fields })
       end
@@ -2989,6 +2991,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         plan(tomorrow.iso8601)
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=upcoming")
+      end
+
+      it "asks before it drops a planned sprint and morphs the tab after", :aggregate_failures do
+        form = drop_form(create(:sprint, sprint_date: tomorrow))
+
+        expect(form["data-morph"]).not_to be_nil
+        expect(form["data-confirm"]).to include(tomorrow.strftime("%b %-d, %Y"))
+        expect(form).to have_css("button.bt.warn.sm[type=submit] i.fa-trash-can")
       end
 
       it "says so rather than making a second sprint for the same day" do

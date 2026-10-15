@@ -52,13 +52,12 @@ module Admin
           end
 
           def delete_form
-            Form(
+            DeleteForm(
               action: path(:admin_delete_calendar_event, id: @event.id), class: "cal-event-delete",
-              data: { confirm: t(".confirm_delete", title:) },
+              confirm: t(".confirm_delete", title:), label: t(".delete"),
             ) do
               input(type: "hidden", name: "day", value: @day.iso8601)
               Scope(label: t(".delete_which")) if @event.recurring_id
-              Button(type: "submit", small: true, variant: :warn, icon: "fa-regular fa-trash-can") { t(".delete") }
             end
           end
 

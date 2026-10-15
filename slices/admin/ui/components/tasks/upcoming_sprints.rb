@@ -21,17 +21,11 @@ module Admin
 
           private
 
-          def drop_attributes(sprint)
-            {
-              action: path(:admin_drop_sprint, id: sprint.id),
-              data: { morph: true, confirm: t(".confirm_drop", date: l(sprint.sprint_date, format: :medium)) },
-            }
-          end
-
           def drop_form(sprint)
-            Form(**drop_attributes(sprint)) do
-              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".drop") }
-            end
+            DeleteForm(
+              action: path(:admin_drop_sprint, id: sprint.id), morph: true, label: t(".drop"),
+              confirm: t(".confirm_drop", date: l(sprint.sprint_date, format: :medium)),
+            )
           end
 
           def plan_form
