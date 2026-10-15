@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+#MISE description="Restore a dump into a scratch database, check that its key tables hold rows, then drop it"
+#USAGE arg "<dump>" help="A local dump file, or the name of a dump in the backups bucket"
+
+set -e
+
+BACKUP_DUMP="$1" exec scripts/util/ensure_postgres bundle exec hanami run '
+  Backups::Slice["operations.restore_database"].call(ENV.fetch("BACKUP_DUMP")).either(
+    ->(counts) { counts.each { |table, count| puts "#{table}: #{count}" } },
+    ->(failure) { abort "The restore failed: #{Array(failure).join(": ")}" },
+  )
+'

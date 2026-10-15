@@ -77,6 +77,7 @@ RSpec.describe "MCP reach", type: :app do
       "api.operations.mint_token" => "the owner mints an API token in the admin, which no client should do",
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
       "backups.operations.back_up_database" => "a background job dumps the database each night",
+      "backups.operations.restore_database" => "the db:restore mise task runs it",
       "calendar.operations.create_event" => "the owner makes Google events in the admin; agents only read them",
       "calendar.operations.delete_event" => "the owner deletes Google events in the admin; agents only read them",
       "calendar.operations.edit_event" => "the owner edits Google events in the admin; agents only read them",

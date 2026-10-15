@@ -113,9 +113,36 @@ Production reads every value from the environment. Set these where the worker ru
 
 Restart the worker. It reads the settings once, at boot.
 
+## Restore
+
+`mise run db:restore` proves a dump loads. Give it a local dump file or the name of a dump in the bucket:
+
+```sh
+mise run db:restore database-20261004T053000Z.dump
+```
+
+The task makes a new database named for the one the settings name plus `_restore_` and a random suffix, loads the
+dump into it with `pg_restore`, and counts the rows in `schema_migrations`, `posts` and `tasks`. It prints each
+count, then drops the scratch database. It fails when any of those tables comes back empty or the dump does not
+load. It never writes to the database the settings name.
+
+Run it where the worker runs, with the same settings. It needs `pg_restore`, `psql`, `createdb` and `dropdb` from the
+same client as `pg_dump`, a database user that may create databases, and `s3:GetObject` on the bucket to fetch a dump
+by name.
+
+A dump holds the OAuth tokens sealed under `data_key` ([ADR 0130][0130]). A restore under any other `data_key`
+brings back the rows but no working credentials, so keep `data_key` somewhere apart from the site, and set the same
+one on any server you restore to.
+
+Run the task against the newest dump once a month, and after any change to Postgres, the schema or the job.
+
+The dumps sit on the same NAS as the database, so a lost NAS takes both. Once a month, copy the newest dump off the
+NAS by hand, such as with `rc cp nas/backups/<dump> .`, and keep it on a machine away from it.
+
 ## Development
 
-Development and test reach no backups bucket. The suite fakes the store and runs `pg_dump` against the test
-database.
+Development and test reach no backups bucket. The suite fakes the store and runs `pg_dump` and `pg_restore` against
+the test database.
 
 [0105]: adr/0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
+[0130]: adr/0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md

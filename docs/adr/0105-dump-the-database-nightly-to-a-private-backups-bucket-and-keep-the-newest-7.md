@@ -72,7 +72,8 @@ the NAS. An older one refuses to dump. Each dump also crosses the LAN twice, fro
 
 The key has to list the bucket to find the dumps past 7, which the photo key does not need.
 
-Nothing restores a dump yet, and nothing checks that one restores.
+`mise run db:restore` (#1371) loads a dump into a scratch database, checks that its key tables hold rows, then
+drops it. Nothing runs it on a schedule.
 
 [0009]: 0009-register-every-service-client-with-or-without-its-credentials.md
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md
