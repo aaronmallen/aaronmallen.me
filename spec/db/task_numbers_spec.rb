@@ -59,6 +59,34 @@ RSpec.describe "Task numbers", type: :app do
     expect(number(id)).to eq(2)
   end
 
+  it "never gives a deleted task's number to a new task in its project" do
+    task(pod)
+    db[:tasks].where(id: task(pod)).delete
+
+    expect(number(task(pod))).to eq(3)
+  end
+
+  it "never gives a moved task's number to a new task in its old project" do
+    task(pod)
+    db[:tasks].where(id: task(pod)).update(project_id: com)
+
+    expect(number(task(pod))).to eq(3)
+  end
+
+  it "never gives a deleted task's number to a new task with no project" do
+    task
+    db[:tasks].where(id: task).delete
+
+    expect(number(task)).to eq(3)
+  end
+
+  it "never gives a moved task's number to a new task with no project" do
+    task
+    db[:tasks].where(id: task).update(project_id: pod)
+
+    expect(number(task)).to eq(3)
+  end
+
   describe "the migration" do
     let(:at) { Time.utc(2026, 1, 1) }
 

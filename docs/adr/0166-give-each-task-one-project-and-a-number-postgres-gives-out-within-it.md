@@ -40,8 +40,10 @@ when that one is taken or too short. The label reads the key at render time, so 
 in the project and writes no task row.
 
 **A `tasks.number` column holds the number, and a Postgres trigger gives it out** as the next number in the task's
-scope: its project, or tasks with no project. A unique index on the scope and the number holds it. A task that
-gains, loses or changes its project takes the next number in its new scope, and its old label stops working.
+scope: its project, or tasks with no project. Each scope keeps a counter in `task_number_counters` that only climbs,
+so a number freed by a deleted or moved task never goes to another. A unique index on the scope and the number holds
+it. A task that gains, loses or changes its project takes the next number in its new scope, and its old label stops
+working.
 
 **Lookups take the label.** The public page reads `:number` within the project in its URL. MCP and API tools take
 an internal id, a `KEY-n` label, or a plain number for a task with no project.
