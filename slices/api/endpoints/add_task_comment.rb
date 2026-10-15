@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class AddTaskComment < TaskEndpoint
+      SHOWS_TASKS = true
+
       SCHEMA = {
         additionalProperties: false,
         properties: {

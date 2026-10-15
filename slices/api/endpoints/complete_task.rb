@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class CompleteTask < TaskEndpoint
+      SHOWS_TASKS = true
+
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Tasks::TASK, **Tasks::WORKED },

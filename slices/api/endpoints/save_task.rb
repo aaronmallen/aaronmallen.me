@@ -5,6 +5,7 @@ module API
     class SaveTask < TaskEndpoint
       RECUR = "#{Tasks::RECUR.fetch(:description)}; a new cadence replaces the old one and keeps a paused series " \
               "paused; null stops it".freeze
+      SHOWS_TASKS = true
 
       SCHEMA = {
         additionalProperties: false,

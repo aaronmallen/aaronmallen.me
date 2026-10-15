@@ -12,6 +12,7 @@ module API
         "publish_at needs a time still to come on a scheduled post, which update_post never publishes;",
         "publish_post is the tool that publishes a post",
       ].join(" ").freeze
+      PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
       SCHEMA = {
@@ -47,6 +48,8 @@ module API
         time = given.key?(:publish_at) ? Blog::Types::LocalTime[given[:publish_at]] : post.published_at
         time.nil? || (time.is_a?(Time) && time <= now)
       end
+
+      def public_in(fields) = ("this blog post" if post_queries.by_id(fields[:id])&.status == PUBLISHED)
     end
   end
 end

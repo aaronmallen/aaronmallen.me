@@ -341,8 +341,8 @@ RSpec.describe "MCP endpoint", type: :request do
           { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
       expect(result.fetch("instructions"))
-        .to include("publish grants publishing posts and sending social posts")
-        .and(include("delete grants every tool that removes a record for good"))
+        .to include("publish grants publishing posts and sending social posts, and every change that shows in public")
+        .and(include("Delete grants every tool that removes a record for good"))
     end
 
     it "names a kind in the instructions for every read tool" do

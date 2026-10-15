@@ -18,7 +18,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "suggest" => %w[suggest_edits],
       "write" => %w[
-        accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_entry
+        accept_suggestion_edits add_decision_comment add_decision_option add_task_comment
         approve_webmentions archive_project cancel_task cancel_tasks capture_task
         clear_inbox
         complete_task complete_tasks
@@ -33,12 +33,14 @@ RSpec.describe "MCP tool scopes", type: :request do
         snooze_inbox
         snooze_inbox_row
         stage_task start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task
-        untag_decision untag_tasks update_journal_entry update_post update_post_edit_note update_saved_view
-        update_social_post update_webmention_settings update_work_session upload_photo
-        upload_share upload_share_group
+        untag_decision untag_tasks update_journal_entry update_post update_saved_view update_social_post
+        update_work_session upload_photo
         wake_inbox_row write_post_seo
       ],
-      "publish" => %w[publish_post send_social_post],
+      "publish" => %w[
+        add_work_entry publish_post send_social_post update_post_edit_note update_webmention_settings upload_share
+        upload_share_group
+      ],
       "health" => %w[read_health_days],
       "mail" => %w[
         delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread

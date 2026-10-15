@@ -19,10 +19,10 @@ en:
             delete: "Delete posts, social posts and any other record for good"
             health: "Read your health data: sleep, heart rate, HRV, steps and workouts, day by day beside your work"
             mail: "Read, mark, tag, snooze and delete your mail from every account, contact form messages included"
-            publish: "Publish posts and send social posts"
+            publish: "Publish posts, send social posts and make any change that shows in public: shares, public projects and their boards, published posts, work history and webmention settings"
             read: "Read everything the site keeps but your health data and mail: posts, drafts and all, social posts, your journal, tasks, projects, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
             suggest: "Send you suggested edits to accept or reject"
-            write: "Make any change the admin makes short of publishing, sending and deleting: write and edit posts and drafts, and change any record"
+            write: "Make any change the admin makes short of publishing, sending and deleting: write and edit drafts, and change any record the public cannot see"
           unnamed: "It gave no name."
         refused:
           back: "Go back to %{host}"

@@ -2755,7 +2755,7 @@ en:
             delete: "Delete records for good"
             health: "Read health data"
             mail: "Read and sort mail"
-            publish: "Publish posts and send social posts"
+            publish: "Publish, send and change what the public sees"
             read: "Read every record but health data and mail"
             suggest: "Suggest edits"
             write: "Make changes short of publishing and deleting"

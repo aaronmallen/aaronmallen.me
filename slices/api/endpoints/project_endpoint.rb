@@ -9,6 +9,7 @@ module API
       FIELDS = %i[board_published key name og_image_url repo started_on tagline tags url visibility].freeze
       LINK = "enter a link that starts with http:// or https://"
       MONTH = "%Y-%m"
+      PUBLIC = Blog::Types::ProjectVisibility["public"]
       UNCHECKED = "0"
       UNSAVED = "could not save the project"
 
@@ -86,6 +87,13 @@ module API
           url: project.url,
           visibility: project.visibility,
         }
+      end
+
+      def public_in(fields)
+        current = project_queries.by_id(fields[:id]) if fields.key?(:id)
+        return if fields.key?(:id) && current.nil?
+
+        "this project" if fields.fetch(:visibility) { current&.visibility } == PUBLIC
       end
 
       def saved(fields, current: nil)

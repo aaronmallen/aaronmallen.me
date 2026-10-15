@@ -11,6 +11,8 @@ module API
 
       def self.unavailable(message) = new(error: :unavailable, message:, errors: {})
 
+      def self.unpublished(message) = new(error: :unpublished, message:, errors: {})
+
       def to_h = { error: error.to_s, message:, errors: }.reject { |_, value| value == {} }
     end
   end

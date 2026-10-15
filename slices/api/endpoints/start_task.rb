@@ -4,6 +4,7 @@ module API
   module Endpoints
     class StartTask < TaskEndpoint
       SCHEMA = Tasks::BY_ID
+      SHOWS_TASKS = true
 
       include Deps[start_task: "tasks.operations.start_task"]
 

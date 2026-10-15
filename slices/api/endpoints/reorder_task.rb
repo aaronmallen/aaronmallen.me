@@ -5,6 +5,7 @@ module API
     class ReorderTask < TaskEndpoint
       APART = "task %s is not in task %s's list or sprint"
       EITHER = "give either direction or after_id, not both"
+      SHOWS_TASKS = true
 
       SCHEMA = {
         additionalProperties: false,

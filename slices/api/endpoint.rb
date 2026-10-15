@@ -12,9 +12,13 @@ module API
     MAIL = Blog::Types::OAuthScope["mail"]
     MAIL_ROW = "message"
     MAIL_ROWS = "message rows need the mail scope"
+    PUBLISH = Blog::Types::OAuthScope["publish"]
+    PUBLIC_TASK = "a task on a published board"
     ROOT = :input
     SCOPED = false
+    SHOWS_TASKS = false
     UNAVAILABLE = false
+    UNPUBLISHED = "%s shows in public, so this change needs the publish scope"
     WORKOUT = Blog::Types::ActivityKind["workout"]
 
     include Dry::Monads[:result]
@@ -56,7 +60,9 @@ module API
 
     def flat(errors) = errors.transform_values { it.is_a?(Hash) ? it.values.flatten.uniq : it }
 
-    def handled(fields, scopes) = self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields)
+    def handled(fields, scopes)
+      unpublished(fields, scopes) || (self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields))
+    end
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
 
@@ -77,6 +83,13 @@ module API
 
     def page_of(number) = Helpers::Page.of(number, settings)
 
+    def public_in(fields)
+      return unless self.class::SHOWS_TASKS
+
+      ids = self.class.task_fields.flat_map { Array(fields[it]) }
+      PUBLIC_TASK if task_queries.public_board_slugs(ids).any?
+    end
+
     def refuse_mail(field, wanted, scopes) = (invalid(field => [MAIL_ROWS]) if wanted && !mail?(scopes))
 
     def rejected(errors, table)
@@ -96,6 +109,11 @@ module API
     end
 
     def task_id(reference) = reference.is_a?(Integer) ? reference : task_queries.id_by_label(reference)
+
+    def unpublished(fields, scopes)
+      shown = public_in(fields) unless scopes.include?(PUBLISH)
+      Failure(Structs::Refusal.unpublished(format(UNPUBLISHED, shown))) if shown
+    end
 
     def with_tasks(fields)
       self.class.task_fields.select { fields.key?(it) }.each do |name|

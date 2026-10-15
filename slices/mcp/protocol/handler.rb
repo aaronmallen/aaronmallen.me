@@ -24,11 +24,12 @@ module MCP
         "reject_suggestion_edits or",
         "leave them for the owner in the admin. Make any change the admin makes, save minting and revoking API tokens",
         "and MCP clients. The write permission grants edits, publish grants publishing posts and sending social posts,",
-        "and delete grants every tool that removes a record for good. A published post or a sent social post cannot be",
-        "called back. Only the health permission grants the owner's health days, workouts and their patterns. Only",
-        "the mail permission grants mail from every account, contact form messages included: it reads, marks, tags,",
-        "snoozes and deletes threads, and lets search and the inbox show them. The tool list holds only what this",
-        "connection was granted.",
+        "and every change that shows in public: shares, public projects, tasks on a published board, published posts,",
+        "work history and webmention settings. Delete grants every tool that removes a record for good. A published",
+        "post or a sent social post cannot be called back. Only the health permission grants the owner's health days,",
+        "workouts and their patterns. Only the mail permission grants mail from every account, contact form messages",
+        "included: it reads, marks, tags, snoozes and deletes threads, and lets search and the inbox show them. The",
+        "tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze

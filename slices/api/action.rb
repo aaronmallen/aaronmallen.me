@@ -37,6 +37,12 @@ module API
 
     def bearer(error) = error.key?(:error) ? %(Bearer error="#{error[:error]}") : "Bearer"
 
+    def insufficient(response, scope, description = format(MISSING_SCOPE, scope))
+      response.format = :json
+      response.headers[CHALLENGE] = %(Bearer error="#{INSUFFICIENT_SCOPE}", scope="#{scope}")
+      halt FORBIDDEN, JSON.generate({ error: INSUFFICIENT_SCOPE, error_description: description })
+    end
+
     def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: BAD_REQUEST)
 
     def refuse_token(response, error)
@@ -53,11 +59,7 @@ module API
 
     def require_scope(request, response, token)
       scope = required_scope(request)
-      return if token.scopes.include?(scope)
-
-      response.format = :json
-      response.headers[CHALLENGE] = %(Bearer error="#{INSUFFICIENT_SCOPE}", scope="#{scope}")
-      halt FORBIDDEN, JSON.generate({ error: INSUFFICIENT_SCOPE, error_description: format(MISSING_SCOPE, scope) })
+      insufficient(response, scope) unless token.scopes.include?(scope)
     end
 
     def require_token(request, response)

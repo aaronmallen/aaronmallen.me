@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class UnlinkTask < TaskEndpoint
+      SHOWS_TASKS = true
+
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Tasks::TASK, other_id: Tasks::TASK },

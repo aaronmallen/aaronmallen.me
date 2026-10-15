@@ -4,6 +4,7 @@ module API
   module Endpoints
     class ReopenTask < TaskEndpoint
       SCHEMA = Tasks::BY_ID
+      SHOWS_TASKS = true
 
       include Deps[reopen_task: "tasks.operations.reopen_task"]
 

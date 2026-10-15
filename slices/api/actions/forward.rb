@@ -19,10 +19,11 @@ module API
       PUBLISH = Blog::Types::OAuthScope["publish"]
       SUGGEST = Blog::Types::OAuthScope["suggest"]
       SCOPES = {
-        "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE, "publish_post" => PUBLISH,
-        "read_health_days" => HEALTH, "send_social_post" => PUBLISH, "suggest_edits" => SUGGEST,
-        "unlink_records" => WRITE, "unlink_task" => WRITE,
-        "untag_decision" => WRITE, **MAIL_ENDPOINTS.to_h { [it, MAIL] },
+        "add_work_entry" => PUBLISH, "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE,
+        "publish_post" => PUBLISH, "read_health_days" => HEALTH, "send_social_post" => PUBLISH,
+        "suggest_edits" => SUGGEST, "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
+        "update_post_edit_note" => PUBLISH, "update_webmention_settings" => PUBLISH, "upload_share" => PUBLISH,
+        "upload_share_group" => PUBLISH, **MAIL_ENDPOINTS.to_h { [it, MAIL] },
       }.freeze
 
       include Deps[build_document: "operations.build_document"]
@@ -38,6 +39,7 @@ module API
       def handle(request, response)
         case endpoint.call(input(request, response), scopes: response[:token].scopes)
           in Success(payload) then render_json(response, payload, status: descriptor.status)
+          in Failure(Structs::Refusal[error: :unpublished, message:]) then insufficient(response, PUBLISH, message)
           in Failure(Structs::Refusal => refusal)
             render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
         end

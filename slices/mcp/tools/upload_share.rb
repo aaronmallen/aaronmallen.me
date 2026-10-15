@@ -6,7 +6,7 @@ module MCP
       description "Share one file under its own link on the share host, as the admin's upload does, and get the " \
                   "share's ID, code, link and size. Send its bytes in base64 with the name the link hands it out " \
                   "under, and its media type if you know it. The link returns the raw file"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint scope: Blog::Types::OAuthScope["publish"]
     end
   end
 end

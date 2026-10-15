@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class StageTask < TaskEndpoint
+      SHOWS_TASKS = true
+
       SCHEMA = {
         additionalProperties: false,
         properties: {
