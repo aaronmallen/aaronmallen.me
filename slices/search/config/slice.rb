@@ -2,6 +2,8 @@
 
 module Search
   class Slice < Hanami::Slice
-    export %w[repos.search_queries]
+    autoloader.push_dir(Hanami.app.root.join("lib/search"), namespace: Search)
+
+    export %w[repos.public_search_queries repos.search_queries]
   end
 end

@@ -91,8 +91,14 @@ RSpec.describe "Task numbers", type: :app do
     let(:at) { Time.utc(2026, 1, 1) }
 
     def migrate_again
-      ROM::SQL.with_gateway(Hanami.app["db.rom"].gateways[:default]) { load path.to_s }
-      %i[down up].each { Sequel::Migration.descendants.last.apply(db, it) }
+      view = migration(Hanami.app.root.join("config/db/migrate/20261016001466_create_public_search_documents.rb"))
+      numbers = migration(path)
+      [[view, :down], [numbers, :down], [numbers, :up], [view, :up]].each { |m, dir| m.apply(db, dir) }
+    end
+
+    def migration(file)
+      ROM::SQL.with_gateway(Hanami.app["db.rom"].gateways[:default]) { load file.to_s }
+      Sequel::Migration.descendants.last
     end
 
     it "numbers every task from 1 in each scope by created_at, ties to the lower id" do
