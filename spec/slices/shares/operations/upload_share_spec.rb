@@ -28,7 +28,7 @@ RSpec.describe Shares::Operations::UploadShare do
       it "stores #{name} byte for byte under a five character code", :aggregate_failures do
         share = upload_share(bytes, filename, type).value!
 
-        expect(share.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{5}\z/)
+        expect(share.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{16}\z/)
         expect(share).to have_attributes(filename:, content_type: type, byte_size: bytes.bytesize, download_count: 0)
         expect(stored.fetch(share.key)).to eq(body: bytes, content_type: type)
       end

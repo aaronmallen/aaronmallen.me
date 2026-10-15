@@ -28,7 +28,7 @@ module Shares
 
       def create(fields, attempts = Code::ATTEMPTS)
         share_mutations.create(
-          code: Code.random, key: SecureRandom.hex(KEY_BYTES),
+          code: Code.secret, key: SecureRandom.hex(KEY_BYTES),
           filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
         )
       rescue ROM::SQL::UniqueConstraintError => e

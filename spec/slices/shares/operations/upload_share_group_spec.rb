@@ -28,7 +28,7 @@ RSpec.describe Shares::Operations::UploadShareGroup do
       end
 
       it "makes one group under one five character code", :aggregate_failures do
-        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{5}\z/)
+        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{16}\z/)
         expect(group).to have_attributes(view_count: 0, zip_download_count: 0)
         expect(Shares::Slice["relations.shares"].count).to eq(0)
       end

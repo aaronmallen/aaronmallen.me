@@ -53,6 +53,15 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  it "still serves a share under a 5-letter code", :aggregate_failures do
+    file = Shares::Slice["operations.change_share_code"].call(share.id, code: "abcde").value!
+    stub_object(file)
+    fetch("/abcde")
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq(bytes)
+  end
+
   it "waits 300 seconds for the store to answer" do
     expect(Shares::Slice["share_store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(300)
   end

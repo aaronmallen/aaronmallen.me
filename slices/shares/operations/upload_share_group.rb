@@ -23,7 +23,7 @@ module Shares
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
       def create(attempts = Code::ATTEMPTS)
-        group_mutations.create(code: Code.random)
+        group_mutations.create(code: Code.secret)
       rescue ROM::SQL::UniqueConstraintError => e
         raise unless group_mutations.violated_constraint(e) == Code::KEY && attempts > 1
 

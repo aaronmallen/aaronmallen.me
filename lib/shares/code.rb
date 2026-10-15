@@ -8,8 +8,11 @@ module Shares
     ATTEMPTS = 5
     KEY = "short_codes_code_key"
     LENGTH = 5
+    SECRET_LENGTH = 16
     TAKEN = "taken"
 
-    def self.random = SecureRandom.alphanumeric(LENGTH, chars: ALPHABET)
+    def self.random(length = LENGTH) = SecureRandom.alphanumeric(length, chars: ALPHABET)
+
+    def self.secret = random(SECRET_LENGTH)
   end
 end
