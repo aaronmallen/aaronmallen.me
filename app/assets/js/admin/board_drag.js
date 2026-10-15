@@ -1,13 +1,11 @@
-import { followPointer } from "./pointer.js";
+import { followPointer, GHOST_OFFSET, menu, still, swallowClick, waitForDrag } from "./pointer.js";
 
 const CARD = "[data-board-card]";
 const COLUMN = "[data-board-column]";
 const DRAGGING = "kc-dragging";
-const HOLD = 300;
 const MOVE = "form[data-morph]";
 const OVER = "kcol-over";
 const PRESS = "button, form, input, label";
-const SLOP = 6;
 const TITLE = ".kc-title";
 
 let bound = false;
@@ -18,40 +16,8 @@ export function setupBoardDrag() {
   bound = true;
   document.addEventListener("pointerdown", (event) => {
     const card = event.target.closest(CARD);
-    if (card && !event.target.closest(PRESS)) wait(card, event);
+    if (card && !event.target.closest(PRESS)) waitForDrag(event, (at) => drag(card, event, at));
   });
-}
-
-function wait(card, press) {
-  const touch = press.pointerType === "touch";
-  let latest = press;
-
-  const stop = () => {
-    clearTimeout(timer);
-    document.removeEventListener("pointermove", moved);
-    document.removeEventListener("pointerup", stop);
-    document.removeEventListener("pointercancel", stop);
-  };
-
-  const start = () => {
-    stop();
-    drag(card, press, latest);
-  };
-
-  const moved = (event) => {
-    if (event.pointerId !== press.pointerId) return;
-
-    latest = event;
-    if (Math.hypot(event.clientX - press.clientX, event.clientY - press.clientY) <= SLOP) return;
-    if (touch) return stop();
-
-    start();
-  };
-
-  const timer = touch ? setTimeout(start, HOLD) : null;
-  document.addEventListener("pointermove", moved);
-  document.addEventListener("pointerup", stop);
-  document.addEventListener("pointercancel", stop);
 }
 
 function drag(card, press, at) {
@@ -60,7 +26,7 @@ function drag(card, press, at) {
   let over = null;
 
   const move = (moved) => {
-    ghost.style.translate = `${moved.clientX + 14}px ${moved.clientY + 14}px`;
+    ghost.style.translate = `${moved.clientX + GHOST_OFFSET}px ${moved.clientY + GHOST_OFFSET}px`;
     over?.classList.remove(OVER);
     over = columnAt(moved, from);
     over?.classList.add(OVER);
@@ -98,18 +64,9 @@ function floating(card, start) {
   ghost.textContent = card.querySelector(TITLE)?.textContent ?? "";
   ghost.style.left = "0";
   ghost.style.top = "0";
-  ghost.style.translate = `${start.clientX + 14}px ${start.clientY + 14}px`;
+  ghost.style.translate = `${start.clientX + GHOST_OFFSET}px ${start.clientY + GHOST_OFFSET}px`;
   document.body.append(ghost);
   return ghost;
-}
-
-function menu(event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-function still(event) {
-  if (event.cancelable) event.preventDefault();
 }
 
 function submitTo(card, column) {
@@ -120,14 +77,4 @@ function submitTo(card, column) {
   to.value = column;
   form.requestSubmit();
   to.value = was;
-}
-
-function swallowClick() {
-  const swallow = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  document.addEventListener("click", swallow, true);
-  setTimeout(() => document.removeEventListener("click", swallow, true));
 }

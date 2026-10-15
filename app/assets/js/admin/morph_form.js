@@ -33,11 +33,25 @@ export function setupMorphForms() {
   });
 }
 
-async function landing(form, submitter) {
-  const body = new URLSearchParams(new FormData(form, submitter));
-  const response = await fetch(form.action, { method: "POST", body });
-  if (response.status === UNPROCESSABLE && form.id) {
-    const refused = parse(await response.text()).getElementById(form.id);
+export async function postAndMorph(url, body, form = null) {
+  const landed = await landing(url, body, form?.id).catch(() => null);
+  if (!landed) return showToast(document.querySelector(FAILED)?.dataset.morphFailed ?? "", { failed: true });
+  if (landed.refused) return refuse(form, landed.refused);
+
+  form?.reset();
+  form?.closest("dialog")?.close();
+  if (landed.url !== window.location.href) history.replaceState(history.state, "", landed.url);
+  morphPage(landed.page);
+  if (form) refocus(form);
+
+  const toast = landed.page.querySelector(TOAST);
+  if (toast) showToast(toast.textContent.trim());
+}
+
+async function landing(url, body, id) {
+  const response = await fetch(url, { method: "POST", body });
+  if (response.status === UNPROCESSABLE && id) {
+    const refused = parse(await response.text()).getElementById(id);
     return refused && { refused };
   }
   if (!response.ok) return null;
@@ -45,19 +59,8 @@ async function landing(form, submitter) {
   return { url: response.url, page: parse(await response.text()) };
 }
 
-async function post(form, submitter) {
-  const landed = await landing(form, submitter).catch(() => null);
-  if (!landed) return showToast(document.querySelector(FAILED)?.dataset.morphFailed ?? "", { failed: true });
-  if (landed.refused) return refuse(form, landed.refused);
-
-  form.reset();
-  form.closest("dialog")?.close();
-  if (landed.url !== window.location.href) history.replaceState(history.state, "", landed.url);
-  morphPage(landed.page);
-  refocus(form);
-
-  const toast = landed.page.querySelector(TOAST);
-  if (toast) showToast(toast.textContent.trim());
+function post(form, submitter) {
+  return postAndMorph(form.action, new URLSearchParams(new FormData(form, submitter)), form);
 }
 
 function refuse(form, refused) {

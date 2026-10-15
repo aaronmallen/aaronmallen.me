@@ -1,21 +1,16 @@
-import { parse } from "./in_place.js";
-import { morphPage, whilePosting } from "./live.js";
-import { followPointer } from "./pointer.js";
-import { showToast } from "./toast.js";
+import { whilePosting } from "./live.js";
+import { postAndMorph } from "./morph_form.js";
+import { followPointer, GHOST_OFFSET, menu, still, swallowClick, waitForDrag } from "./pointer.js";
 
 const BULK = "#mail-bulk";
 const DRAGGING = "mail-dragging";
 const DROP = "a[data-mail-drop]";
-const FAILED = "[data-morph-failed]";
 const FIELD = "ids[]";
 const FOLDERS = "[data-mail-many]";
-const HOLD = 300;
 const OVER = "mail-over";
 const PICK = "input, label";
 const ROW = "[data-mail-drag]";
-const SLOP = 6;
 const TARGET = "mail-drop";
-const TOAST = "[data-toast]";
 
 let bound = false;
 let busy = false;
@@ -26,40 +21,8 @@ export function setupMailDrag() {
   bound = true;
   document.addEventListener("pointerdown", (event) => {
     const row = event.target.closest(ROW);
-    if (row && !busy && !event.target.closest(PICK) && droppable()) wait(row, event);
+    if (row && !busy && !event.target.closest(PICK) && droppable()) waitForDrag(event, (at) => drag(row, event, at));
   });
-}
-
-function wait(row, press) {
-  const touch = press.pointerType === "touch";
-  let latest = press;
-
-  const stop = () => {
-    clearTimeout(timer);
-    document.removeEventListener("pointermove", moved);
-    document.removeEventListener("pointerup", stop);
-    document.removeEventListener("pointercancel", stop);
-  };
-
-  const start = () => {
-    stop();
-    drag(row, press, latest);
-  };
-
-  const moved = (event) => {
-    if (event.pointerId !== press.pointerId) return;
-
-    latest = event;
-    if (Math.hypot(event.clientX - press.clientX, event.clientY - press.clientY) <= SLOP) return;
-    if (touch) return stop();
-
-    start();
-  };
-
-  const timer = touch ? setTimeout(start, HOLD) : null;
-  document.addEventListener("pointermove", moved);
-  document.addEventListener("pointerup", stop);
-  document.addEventListener("pointercancel", stop);
 }
 
 function drag(row, press, at) {
@@ -71,7 +34,7 @@ function drag(row, press, at) {
   let over = null;
 
   const move = (moved) => {
-    ghost.style.translate = `${moved.clientX + 14}px ${moved.clientY + 14}px`;
+    ghost.style.translate = `${moved.clientX + GHOST_OFFSET}px ${moved.clientY + GHOST_OFFSET}px`;
     over?.classList.remove(OVER);
     over = dropAt(moved);
     over?.classList.add(OVER);
@@ -128,7 +91,7 @@ function floating(text, start) {
   ghost.textContent = text;
   ghost.style.left = "0";
   ghost.style.top = "0";
-  ghost.style.translate = `${start.clientX + 14}px ${start.clientY + 14}px`;
+  ghost.style.translate = `${start.clientX + GHOST_OFFSET}px ${start.clientY + GHOST_OFFSET}px`;
   document.body.append(ghost);
   return ghost;
 }
@@ -137,45 +100,12 @@ function many(count) {
   return document.querySelector(FOLDERS).dataset.mailMany.replace("%{count}", count);
 }
 
-function menu(event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-function still(event) {
-  if (event.cancelable) event.preventDefault();
-}
-
-function swallowClick() {
-  const swallow = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  document.addEventListener("click", swallow, true);
-  setTimeout(() => document.removeEventListener("click", swallow, true));
-}
-
-async function send(form, ids, target) {
+function send(form, ids, target) {
   const body = new URLSearchParams(new FormData(form));
   body.delete(FIELD);
   for (const id of ids) body.append(FIELD, id);
   body.set("act", target.dataset.mailDrop);
   if (target.dataset.mailLabel) body.set("label", target.dataset.mailLabel);
 
-  let landed = null;
-  try {
-    const response = await fetch(form.action, { method: "POST", body });
-    if (response.ok) landed = { url: response.url, page: parse(await response.text()) };
-  } catch {
-    landed = null;
-  }
-
-  if (!landed) return showToast(document.querySelector(FAILED)?.dataset.morphFailed ?? "", { failed: true });
-
-  if (landed.url !== window.location.href) history.replaceState(history.state, "", landed.url);
-  morphPage(landed.page);
-
-  const toast = landed.page.querySelector(TOAST);
-  if (toast) showToast(toast.textContent.trim());
+  return postAndMorph(form.action, body);
 }
