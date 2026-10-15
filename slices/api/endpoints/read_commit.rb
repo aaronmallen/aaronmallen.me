@@ -14,7 +14,7 @@ module API
 
       def handle(id:)
         commit = commit_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("commit", id)) if commit.nil?
+        return missing("commit", id) if commit.nil?
 
         record_links = linked(record_link_queries.for_record(KIND, commit.id))
         Success(serialized(Serializers::Commit, commit).merge(record_links:))

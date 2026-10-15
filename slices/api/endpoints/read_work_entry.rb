@@ -14,7 +14,7 @@ module API
 
       def handle(id:)
         entry = work_entry_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("work entry", id)) if entry.nil?
+        return missing("work entry", id) if entry.nil?
 
         record_links = linked(record_link_queries.for_record(KIND, entry.id))
         Success(serialized(Serializers::WorkEntry, entry).merge(record_links:))

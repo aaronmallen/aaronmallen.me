@@ -88,8 +88,6 @@ module API
         }
       end
 
-      def missing(id, noun = "project") = not_found(Helpers::Wording.missing(noun, id))
-
       def saved(fields, current: nil)
         id = current&.id
         result = save_project.call(form(current, fields), id:).fmap { link_repo_tasks.call(it, was: current&.repo) }
@@ -97,7 +95,7 @@ module API
         case result
           in Success(project) then Success(serialized(Serializers::Project, project))
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
-          in Failure(:not_found) then missing(id)
+          in Failure(:not_found) then missing("project", id)
           else failed(UNSAVED)
         end
       end

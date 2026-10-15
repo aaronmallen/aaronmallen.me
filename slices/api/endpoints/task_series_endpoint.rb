@@ -35,7 +35,7 @@ module API
       def shown(result, id)
         case result
           in Success(*) then Success(row(task_series_queries.shown(id)))
-          in Failure(:not_found) then not_found(Helpers::Wording.missing(Tasks::SERIES, id))
+          in Failure(:not_found) then missing(Tasks::SERIES, id)
           else failed(Helpers::Wording::UNSAVED)
         end
       end

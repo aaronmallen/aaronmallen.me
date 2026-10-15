@@ -13,7 +13,7 @@ module API
 
       def handle(id:)
         post = post_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("blog post", id)) if post.nil?
+        return missing("blog post", id) if post.nil?
 
         Success(id: post.id, announcement: compose_announcement.call(post))
       end

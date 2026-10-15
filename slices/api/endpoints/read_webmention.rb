@@ -16,7 +16,7 @@ module API
       def handle(id:)
         mention = webmention_queries.by_id(id)
         post = mention && post_queries.by_id(mention.post_id)
-        return not_found(Helpers::Wording.missing("webmention", id)) if post.nil?
+        return missing("webmention", id) if post.nil?
 
         Success(answered(mention, post))
       end

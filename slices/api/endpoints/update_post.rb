@@ -33,7 +33,7 @@ module API
 
       def handle(id:, **given)
         post = post_queries.by_id(id)
-        return missing(id) unless post
+        return missing("blog post", id) unless post
 
         now = Time.now
         return invalid(publish_at: [PAST]) if post.status == SCHEDULED && past?(post, given, now)

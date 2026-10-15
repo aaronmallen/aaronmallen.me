@@ -31,7 +31,7 @@ module API
         case save_post_seo.call(id, fields.slice(*FIELDS))
           in Success(post) then Success(SHOWN.to_h { [it, post.public_send(it)] })
           in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("blog post", id))
+          in Failure(:not_found) then missing("blog post", id)
           else failed("could not save the social card fields")
         end
       end

@@ -32,7 +32,7 @@ module API
       def settled(result, id)
         case result
           in Success(*) then answered(id)
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("task", id))
+          in Failure(:not_found) then missing("task", id)
           in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
           else failed(Helpers::Wording::UNSAVED)
         end

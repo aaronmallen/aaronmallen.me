@@ -13,7 +13,7 @@ module API
 
       def handle(id:, scope:, name: nil, color: nil)
         current = tag_queries.find_in(scope, id)
-        return missing(id) if current.nil?
+        return missing("tag", id) if current.nil?
 
         saved(save_tag.call({ name: name || current.name, color: }, scope:, id:), id)
       end

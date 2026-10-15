@@ -12,7 +12,7 @@ module API
         case archive_project.call(id)
           in Success(_) then answered(id)
           in Failure(:not_started) then invalid(id: [NOT_STARTED])
-          in Failure(:not_found) then missing(id)
+          in Failure(:not_found) then missing("project", id)
           else failed("could not archive the project")
         end
       end

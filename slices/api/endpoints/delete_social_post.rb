@@ -12,7 +12,7 @@ module API
         case delete_social_post.call(id)
           in Success(_) then Success(id:, deleted: true)
           in Failure(:already_posted) then gone(id, "removed")
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("social post", id))
+          in Failure(:not_found) then missing("social post", id)
           else failed("could not delete the social post")
         end
       end

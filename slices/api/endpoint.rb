@@ -69,6 +69,8 @@ module API
 
     def mail?(scopes) = scopes.include?(MAIL)
 
+    def missing(noun, id, by: "ID") = not_found(Helpers::Wording.missing(noun, id, by:))
+
     def not_found(message) = Failure(Structs::Refusal.not_found(message))
 
     def page_of(number) = Helpers::Page.of(number, settings)

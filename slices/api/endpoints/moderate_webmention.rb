@@ -35,7 +35,7 @@ module API
       def handle(id:, verdict:, reason: nil)
         case moderate_webmention.call(id, verdict, reason:)
           in Success(mention) then Success(id: mention.id, status: mention.status)
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("webmention", id))
+          in Failure(:not_found) then missing("webmention", id)
           else failed("could not moderate the webmention")
         end
       end

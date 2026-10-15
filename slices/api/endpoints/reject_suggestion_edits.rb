@@ -27,7 +27,7 @@ module API
 
         case reject_suggestion_edits.call(id, ids: edit_ids)
           in Success(*rejected) then Success(suggestion_id: id, rejected: rejected.map(&:id))
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("suggestion", id))
+          in Failure(:not_found) then missing("suggestion", id)
           in Failure(:nothing_open) then invalid(edit_ids: ["suggestion #{id} has no open edit with those IDs"])
           in Failure(:already_posted) then invalid(suggestion_id: [format(Suggestions::SENT, id)])
           else failed("could not reject the edits")

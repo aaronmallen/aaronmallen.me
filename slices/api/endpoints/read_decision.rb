@@ -33,7 +33,7 @@ module API
 
       def handle(id:)
         decision = decision_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("decision", id)) if decision.nil?
+        return missing("decision", id) if decision.nil?
 
         Success(answered(decision, decision_queries.timeline(decision.id)))
       end

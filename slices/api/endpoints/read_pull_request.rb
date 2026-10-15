@@ -14,7 +14,7 @@ module API
 
       def handle(id:)
         pull_request = pull_request_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("pull request", id)) if pull_request.nil?
+        return missing("pull request", id) if pull_request.nil?
 
         record_links = linked(record_link_queries.for_record(KIND, pull_request.id))
         Success(serialized(Serializers::PullRequest, pull_request).merge(record_links:))

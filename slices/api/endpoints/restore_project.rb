@@ -10,7 +10,7 @@ module API
       def handle(id:)
         case restore_project.call(id)
           in Success(_) then answered(id)
-          in Failure(:not_found) then missing(id, "archived project")
+          in Failure(:not_found) then missing("archived project", id)
           else failed("could not restore the project")
         end
       end

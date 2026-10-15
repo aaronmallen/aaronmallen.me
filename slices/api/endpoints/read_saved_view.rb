@@ -51,7 +51,7 @@ module API
         return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
 
         view = saved_view_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("saved view", id)) if view.nil?
+        return missing("saved view", id) if view.nil?
 
         case list_saved_view_records.call(view, page:, continue_to: cursor, kinds: activity_kinds(scopes))
           in Success(found) then Success(answered(view, found))

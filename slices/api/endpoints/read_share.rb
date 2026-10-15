@@ -10,7 +10,7 @@ module API
 
       def handle(id:)
         share = share_queries.find(id)
-        return not_found(Helpers::Wording.missing("share", id)) unless share
+        return missing("share", id) unless share
 
         Success(serialized(Serializers::Share, share, origin: share_origin))
       end

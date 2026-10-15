@@ -11,7 +11,7 @@ module API
       def handle(id:)
         person = person_queries.by_id(id)
 
-        person ? Success(serialized(Serializers::Person, person)) : not_found(Helpers::Wording.missing("person", id))
+        person ? Success(serialized(Serializers::Person, person)) : missing("person", id)
       end
     end
   end

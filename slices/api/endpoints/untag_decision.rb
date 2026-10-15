@@ -11,7 +11,7 @@ module API
 
       def handle(id:, tag:)
         decision = decision_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("decision", id)) if decision.nil?
+        return missing("decision", id) if decision.nil?
 
         names = decision.tags.map(&:name)
         name = Blog::Types::TagList[tag].first

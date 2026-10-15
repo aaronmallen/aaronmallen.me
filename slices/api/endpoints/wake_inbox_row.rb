@@ -28,7 +28,7 @@ module API
       def woken(kind, id)
         case wake_inbox_row.call(kind, id)
           in Success(row) then Success(serialized(Serializers::InboxRow, row))
-          in Failure(:not_found) then not_found(Helpers::Wording.missing(kind, id))
+          in Failure(:not_found) then missing(kind, id)
           in Failure(:not_snoozed) then invalid(id: [format(NOT_SNOOZED, kind, id)])
         end
       end

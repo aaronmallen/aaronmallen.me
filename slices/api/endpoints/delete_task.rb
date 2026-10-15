@@ -13,7 +13,7 @@ module API
       def handle(id:)
         case delete_task.call(id)
           in Success(task) then Success(id: task.id, title: task.title, deleted: true)
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("task", id))
+          in Failure(:not_found) then missing("task", id)
           else failed(Helpers::Wording::UNSAVED)
         end
       end

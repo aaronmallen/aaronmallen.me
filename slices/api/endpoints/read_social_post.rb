@@ -23,7 +23,7 @@ module API
 
       def handle(id:)
         social_post = social_post_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("social post", id)) if social_post.nil?
+        return missing("social post", id) if social_post.nil?
 
         Success(read(social_post))
       end

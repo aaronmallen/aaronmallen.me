@@ -19,7 +19,7 @@ module API
           in Success(_) then Success(id:, removed: true)
           in Failure[:last_tag_of_rules, patterns]
             invalid(id: [format(LAST_TAG, id, RULES.fetch(patterns.one?), patterns.join(", "))])
-          in Failure(:not_found) then missing(id)
+          in Failure(:not_found) then missing("tag", id)
           else failed("could not remove the tag")
         end
       end

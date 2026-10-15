@@ -21,7 +21,7 @@ module API
 
       def handle(id:)
         task = task_queries.detailed(id)
-        return not_found(Helpers::Wording.missing("task", id)) if task.nil?
+        return missing("task", id) if task.nil?
 
         owner = settings.owner_name
         timeline = task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it, owner:) }

@@ -13,7 +13,7 @@ module API
 
       def handle(id:)
         thread = message_queries.thread(id)
-        return not_found(Helpers::Wording.missing("mail thread", id)) if thread.nil?
+        return missing("mail thread", id) if thread.nil?
 
         Success(
           serialized(Serializers::MailThread, thread).except("body", "reply_to")

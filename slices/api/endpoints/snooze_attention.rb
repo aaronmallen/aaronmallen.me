@@ -23,14 +23,14 @@ module API
       def handle(kind:, record_id: nil)
         case snooze_attention.call(kind, record_id)
           in Success(snooze) then Success(serialized(Serializers::AttentionSnooze, snooze))
-          in Failure(:not_found) then not_found(missing(kind, record_id))
+          in Failure(:not_found) then not_found(empty_row(kind, record_id))
           else failed("could not snooze the row")
         end
       end
 
       private
 
-      def missing(kind, record_id)
+      def empty_row(kind, record_id)
         record_id ? "no #{kind} row on the card has the record_id #{record_id}" : "no #{kind} row is on the card"
       end
     end

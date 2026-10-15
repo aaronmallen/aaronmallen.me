@@ -31,7 +31,7 @@ module API
 
       def handle(suggestion_id:, edit_ids: nil)
         id = suggestion_id
-        return not_found(Helpers::Wording.missing("suggestion", id)) if suggestion_queries.by_id(id).nil?
+        return missing("suggestion", id) if suggestion_queries.by_id(id).nil?
 
         case accept_suggestion_edits.call(id, ids: edit_ids)
           in Success(accepted:, refused:, stale:)

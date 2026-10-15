@@ -40,7 +40,7 @@ module API
           in Success[_, social_post] then Success(answered(social_post))
           in Failure[:invalid, errors] then invalid(refusals(errors, params))
           in Failure(:already_posted) then gone(id, "saved")
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("social post", id))
+          in Failure(:not_found) then missing("social post", id)
           else failed(UNSAVED)
         end
       end

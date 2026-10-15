@@ -16,7 +16,7 @@ module API
       def handle(id:, status:)
         case mark_message.call(id, status)
           in Success(thread) then Success(id: thread.id, status: thread.status)
-          in Failure(:not_found) then not_found(Helpers::Wording.missing("mail thread", id))
+          in Failure(:not_found) then missing("mail thread", id)
           else failed("could not mark the mail thread")
         end
       end

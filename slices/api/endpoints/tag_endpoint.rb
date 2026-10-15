@@ -32,13 +32,11 @@ module API
 
       private
 
-      def missing(id) = not_found(Helpers::Wording.missing("tag", id))
-
       def saved(result, id = nil)
         case result
           in Success(tag) then Success(id: tag.id, name: tag.name, color: tag.color)
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
-          in Failure(:not_found) then missing(id)
+          in Failure(:not_found) then missing("tag", id)
           else failed("could not save the tag")
         end
       end

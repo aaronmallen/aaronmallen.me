@@ -14,7 +14,7 @@ module API
 
       def handle(id:)
         project = project_queries.by_id(id)
-        return not_found(Helpers::Wording.missing("project", id)) if project.nil?
+        return missing("project", id) if project.nil?
 
         record_links = linked(record_link_queries.for_record(KIND, project.id))
         Success(serialized(Serializers::Project, project).merge(record_links:))

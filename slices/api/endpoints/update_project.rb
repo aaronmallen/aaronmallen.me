@@ -11,7 +11,7 @@ module API
 
       def handle(id:, **fields)
         current = project_queries.by_id(id)
-        current ? saved(fields, current:) : missing(id)
+        current ? saved(fields, current:) : missing("project", id)
       end
     end
   end

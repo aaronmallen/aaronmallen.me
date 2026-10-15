@@ -29,7 +29,7 @@ module API
 
       def handle(id:, **fields)
         task = task_queries.detailed(id)
-        return not_found(Helpers::Wording.missing("task", id)) if task.nil?
+        return missing("task", id) if task.nil?
 
         case save_task.call(id, form(task, fields))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)

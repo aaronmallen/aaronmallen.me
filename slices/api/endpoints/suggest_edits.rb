@@ -81,7 +81,7 @@ module API
       end
 
       def for_post(id, edits)
-        return not_found(Helpers::Wording.missing("blog post", id)) if post_queries.by_id(id).nil?
+        return missing("blog post", id) if post_queries.by_id(id).nil?
 
         case replace_post_edits.call(id, edits: edits.map { it.except(:part) })
           in Failure(:published) then invalid(id: [format(PUBLISHED, id)])
@@ -114,7 +114,7 @@ module API
         end
       end
 
-      def unsent_missing(id) = not_found(Helpers::Wording.missing("unsent social post", id))
+      def unsent_missing(id) = missing("unsent social post", id)
     end
   end
 end
