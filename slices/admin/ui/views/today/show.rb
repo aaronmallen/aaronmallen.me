@@ -8,9 +8,10 @@ module Admin
           include Components::Tasks
 
           LIVE_TABLES = %w[
-            attention_snoozes commits health_days journal_entries journal_entry_tags oauth_clients oauth_tokens posts
-            projects service_connections social_post_deliveries social_posts sprints sync_states task_comments
-            task_contributors task_links task_series task_tags work_sessions
+            attention_snoozes commits health_days journal_entries journal_entry_tags link_check_runs oauth_clients
+            oauth_tokens post_link_checks posts projects service_connections short_link_checks short_links
+            social_post_deliveries social_posts sprints sync_states task_comments task_contributors task_links
+            task_series task_tags work_sessions
           ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -21,6 +22,7 @@ module Admin
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :last_night, Blog::Types::Instance(ROM::Struct).optional, default: nil
+          prop :link_check_run, Blog::Types::Instance(ROM::Struct).optional
           prop :publishing, Blog::Types::Hash
           prop :sprint, Blog::Types::Hash
           prop :visitors, Blog::Types::Integer
@@ -32,6 +34,7 @@ module Admin
 
             div(class: "today") do
               PageHead(title: headline, kicker:, sub: lede) { head_actions }
+              LinkCheckBanner(run: @link_check_run, return_to: path(:admin_root))
               columns
             end
           end

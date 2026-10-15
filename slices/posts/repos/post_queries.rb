@@ -73,12 +73,14 @@ module Posts
 
       def last_deleted_at = post_deletions.last_deleted_at
 
+      def last_link_check_run = link_check_runs.order(Sequel.desc(:started_at)).limit(1).one
+
       def last_untagged_at = post_tag_removals.last_removed_at
 
       def link_check_tally
         post_ids = failing_checks.pluck(:post_id)
 
-        { links: post_ids.size, posts: post_ids.uniq.size, checked_at: post_link_checks.unordered.max(:checked_at) }
+        { links: post_ids.size, posts: post_ids.uniq.size }
       end
 
       def link_checks(post_id) = post_link_checks.where(post_id:).to_a.to_h { [it.url, it] }

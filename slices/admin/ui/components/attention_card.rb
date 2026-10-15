@@ -10,6 +10,7 @@ module Admin
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
         prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
         prop :dead_jobs, Blog::Types::Array.of(Blog::Types::Instance(Data))
+        prop :broken_links, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
         prop :failed_social_posts, Blog::Types::Array.of(Blog::Types::SocialPostStatus)
         prop :inbox, Blog::Types::Integer
         prop :webmentions, Blog::Types::Integer
@@ -21,7 +22,10 @@ module Admin
             card.side { span(class: "meta") { total.to_s } }
             SyncFailures(failures: @failures)
             DeadJobs(dead_jobs: @dead_jobs)
-            AttentionLines(failed_social_posts: @failed_social_posts, inbox: @inbox, webmentions: @webmentions)
+            AttentionLines(
+              broken_links: @broken_links, failed_social_posts: @failed_social_posts, inbox: @inbox,
+              webmentions: @webmentions,
+            )
             @rows.each { row(it) }
           end
         end
@@ -124,7 +128,7 @@ module Admin
         end
 
         def total
-          lines = [@inbox, @failed_social_posts.size, @webmentions].count(&:positive?)
+          lines = [@inbox, @failed_social_posts.size, @webmentions, @broken_links.values.sum].count(&:positive?)
 
           @rows.size + @failures.size + @dead_jobs.size + lines
         end

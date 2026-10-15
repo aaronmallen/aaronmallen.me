@@ -5574,6 +5574,14 @@
   }
 }
 
+@utility link-check-banner {
+  border-color: color-mix(in oklab, var(--color-mk-orange) 45%, var(--color-line));
+
+  & > i {
+    @apply text-mk-orange-text;
+  }
+}
+
 @utility post-banner-text {
   @apply flex-1 font-semibold text-ink;
 }

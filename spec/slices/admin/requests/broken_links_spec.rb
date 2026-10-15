@@ -19,6 +19,10 @@ RSpec.describe "Admin broken links", type: :request do
     end
   end
 
+  def finish_run(checked:, due:, finished_at: at + 86_400)
+    runs.insert(started_at: finished_at - 600, finished_at:, links_checked: checked, links_due: due)
+  end
+
   def live = "https://ada.example/notes/1"
 
   def post_row(title) = page.find(".post-list .li", text: title)
@@ -26,6 +30,8 @@ RSpec.describe "Admin broken links", type: :request do
   def post_with(*urls, status: :published, title: "Linked")
     create(:post, status, title:, body: ["intro", *urls.map { "See [note #{it}](#{it})." }].join("\n\n"))
   end
+
+  def runs = Posts::Slice["relations.link_check_runs"]
 
   def short_checks = Shares::Slice["relations.short_link_checks"]
 
@@ -66,6 +72,7 @@ RSpec.describe "Admin broken links", type: :request do
         fail_nights(post_with(dead, slow), dead, 1)
         fail_nights(post_with(slow, title: "Other"), slow, 2)
         fail_short(short_link(slow), 1)
+        finish_run(checked: 3, due: 3)
         get "/admin/posts", status: "broken"
       end
 
@@ -76,6 +83,23 @@ RSpec.describe "Admin broken links", type: :request do
       it "says when the last check finished" do
         expect(page).to have_css(".page-head-sub", text: "The last check finished Oct 13 · 03:12")
       end
+    end
+
+    it "takes the finish time from the latest run, not the latest check" do
+      fail_nights(post_with(dead), dead, 3)
+      finish_run(checked: 1, due: 1, finished_at: at)
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_css(".page-head-sub", text: "The last check finished Oct 12 · 03:12")
+    end
+
+    it "leaves the finish time out while the latest run is still going" do
+      fail_nights(post_with(dead), dead, 1)
+      finish_run(checked: 1, due: 1, finished_at: at)
+      runs.insert(started_at: at + 60, links_due: 1)
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_no_css(".page-head-sub", text: "finished")
     end
 
     it "says nothing is broken" do
@@ -227,6 +251,88 @@ RSpec.describe "Admin broken links", type: :request do
       post "/admin/links/0/check", _csrf_token: admin_csrf_token
 
       expect(last_response.status).to eq(404)
+    end
+  end
+
+  describe "the stopped early banner" do
+    def banner = page.find(".link-check-banner")
+
+    def stopped = t("ui.components.link_check_banner.stopped", at: "Oct 13 · 03:12", checked: 290, due: 473)
+
+    def t(...) = Admin::Slice["i18n"].t(...)
+
+    context "when the last run stopped early" do
+      before { finish_run(checked: 290, due: 473) }
+
+      it "says how far it got on Posts, with Run it now", :aggregate_failures do
+        get "/admin/posts", status: "broken"
+
+        expect(banner).to have_text(stopped)
+        expect(banner).to have_button("Run it now")
+      end
+
+      it "says how far it got on Today" do
+        get "/admin"
+
+        expect(banner).to have_text(stopped)
+      end
+    end
+
+    it "keeps to the broken links filter on Posts" do
+      finish_run(checked: 290, due: 473)
+      get "/admin/posts"
+
+      expect(page).to have_no_css(".link-check-banner")
+    end
+
+    it "stays away after a run that checked every link" do
+      finish_run(checked: 290, due: 473, finished_at: at)
+      finish_run(checked: 473, due: 473)
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_no_css(".link-check-banner")
+    end
+
+    it "stays away while a run is still going" do
+      finish_run(checked: 290, due: 473, finished_at: at)
+      runs.insert(started_at: at + 60, links_due: 473)
+      get "/admin"
+
+      expect(page).to have_no_css(".link-check-banner")
+    end
+
+    it "comes back to the page it was on" do
+      finish_run(checked: 290, due: 473)
+      get "/admin/posts", status: "broken"
+
+      expect(banner.find("input[name=return_to]", visible: :all).value).to eq("/admin/posts?status=broken")
+    end
+  end
+
+  describe "running it now" do
+    let(:back) { "/admin/posts?status=broken" }
+
+    it "starts a new run and comes back", :aggregate_failures do
+      post "/admin/posts/links/check", _csrf_token: admin_csrf_token, return_to: back
+
+      expect(Posts::Jobs::CheckPostLinks.jobs.size).to eq(1)
+      expect(last_response.location).to end_with(back)
+    end
+
+    it "records the new run once the job runs", :aggregate_failures do
+      post_with(live)
+      stub_request(:get, live).to_return(status: 200)
+      post "/admin/posts/links/check", _csrf_token: admin_csrf_token
+      Posts::Jobs::CheckPostLinks.drain
+
+      expect(runs.to_a.map { it[:links_checked] }).to eq([1])
+    end
+
+    it "says so once it lands" do
+      post "/admin/posts/links/check", _csrf_token: admin_csrf_token, return_to: back
+      follow_redirect!
+
+      expect(page.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Checking every link")
     end
   end
 end

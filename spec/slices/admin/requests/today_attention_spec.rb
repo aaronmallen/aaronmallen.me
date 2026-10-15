@@ -163,6 +163,49 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
     end
   end
 
+  describe "broken links" do
+    def checks = Posts::Slice["relations.post_link_checks"]
+
+    def fail_post(url)
+      checks.record(post_id: create(:post, :published).id, url:, reason: "404 Not Found", at: Time.now)
+    end
+
+    def fail_short
+      link = Shares::Slice["operations.create_short_link"].call(destination: "https://cy.example/slow").value!
+      Shares::Slice["relations.short_link_checks"].record(
+        short_link_id: link.id, url: link.destination, reason: "Timed out after 10 seconds", at: Time.now,
+      )
+    end
+
+    def line = card.find(".today-line", text: "Broken links")
+
+    it "counts links in posts and short links and opens the Posts filter", :aggregate_failures do
+      2.times { fail_post("https://bob.example/gone") }
+      fail_short
+      get "/admin"
+
+      expect(line).to have_text("2 in posts · 1 short →")
+      expect(line["href"]).to eq("/admin/posts?status=broken")
+    end
+
+    it "gives one count when only one kind fails", :aggregate_failures do
+      fail_short
+      get "/admin"
+
+      expect(line).to have_text("1 failing →")
+      expect(card.find(".card-side")).to have_text("1")
+    end
+
+    it "leaves out links that answered and links in drafts" do
+      checks.record(post_id: create(:post, :published).id, url: "https://ada.example", reason: nil, at: Time.now)
+      checks.record(post_id: create(:post, :draft).id, url: "https://bob.example/gone", reason: "404 Not Found",
+                    at: Time.now)
+      get "/admin"
+
+      expect(page).to have_no_css(".today-line", text: "Broken links")
+    end
+  end
+
   it "opens security from a new device row" do
     database = Security::Slice["db.rom"].gateways[:default].connection
     %w[Paris London].each { database[:known_devices].insert(browser: "Chrome", os: "macOS", city: it, country: "GB") }

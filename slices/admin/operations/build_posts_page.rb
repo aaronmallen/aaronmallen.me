@@ -36,12 +36,9 @@ module Admin
       end
 
       def link_check
-        posts = post_queries.link_check_tally
-        finished_at = [posts[:checked_at], short_link_queries.last_checked_at].compact.max
-
         {
-          **posts.slice(:links, :posts),
-          finished_at:,
+          **post_queries.link_check_tally,
+          run: post_queries.last_link_check_run,
           short_links: short_link_queries.failing,
           short_total: short_link_queries.totals[:count],
         }

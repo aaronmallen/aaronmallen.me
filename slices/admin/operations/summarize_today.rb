@@ -22,6 +22,7 @@ module Admin
         journal_entry_queries: "record.repos.journal_entry_queries",
         oauth_client_queries: "mcp.repos.oauth_client_queries",
         post_queries: "posts.repos.post_queries",
+        short_link_queries: "shares.repos.short_link_queries",
         social_post_queries: "social.repos.social_post_queries",
         sync_state_queries: "record.repos.sync_state_queries",
         webmention_queries: "social.repos.webmention_queries",
@@ -37,6 +38,7 @@ module Admin
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
           last_night: last_night(now),
+          link_check_run: post_queries.last_link_check_run,
           publishing:,
           sprint:,
         }
@@ -49,12 +51,17 @@ module Admin
 
         {
           rows: attention_queries.stalled(now:),
+          broken_links:,
           failures:,
           dead_jobs: unshown(attention_queries.dead_jobs, failures),
           failed_social_posts: social_post_queries.failed_statuses,
           inbox:,
           webmentions: webmention_queries.pending_count,
         }
+      end
+
+      def broken_links
+        { posts: post_queries.link_check_tally[:links], short: short_link_queries.count_listed(failing: true) }
       end
 
       def commits(now)

@@ -4,11 +4,13 @@ module Admin
   module UI
     module Components
       class AttentionLines < Component
+        BROKEN = Blog::Types::PostFilter["broken"]
         PENDING = Blog::Types::WebmentionStatus["pending"]
         POSTED = Blog::Types::SocialQueue["posted"]
         QUEUED = Blog::Types::SocialQueue["queued"]
         SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
+        prop :broken_links, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
         prop :failed_social_posts, Blog::Types::Array.of(Blog::Types::SocialPostStatus)
         prop :inbox, Blog::Types::Integer
         prop :webmentions, Blog::Types::Integer
@@ -17,9 +19,25 @@ module Admin
           line(".inbox", path(:admin_inbox), ".waiting", @inbox)
           line(".cross_posts", path(:admin_social, filter: failed_queue), ".failed", @failed_social_posts.size)
           line(".webmentions", path(:admin_webmentions, status: PENDING), ".waiting", @webmentions)
+          broken_links
         end
 
         private
+
+        def broken_count(posts, short)
+          return t(".failing", count: posts + short) unless posts.positive? && short.positive?
+
+          t(".broken_split", posts:, short:)
+        end
+
+        def broken_links
+          posts, short = @broken_links.values_at(:posts, :short)
+          return if (posts + short).zero?
+
+          TodayLine(label: t(".broken_links"), href: path(:admin_posts, status: BROKEN), warn: true) do
+            broken_count(posts, short)
+          end
+        end
 
         def failed_queue = @failed_social_posts.include?(SCHEDULED) ? QUEUED : POSTED
 

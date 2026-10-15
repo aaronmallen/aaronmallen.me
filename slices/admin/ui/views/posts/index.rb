@@ -11,7 +11,8 @@ module Admin
           BROKEN = Blog::Types::PostFilter["broken"]
           DRAFT = Blog::Types::PostStatus["draft"]
           LIVE_TABLES = %w[
-            analytics_rollup_paths post_link_checks post_tags posts saved_views short_link_checks suggestions
+            analytics_rollup_paths link_check_runs post_link_checks post_tags posts saved_views short_link_checks
+            suggestions
           ].freeze
           PUBLISHED = Blog::Types::PostStatus["published"]
           SCHEDULED = Blog::Types::PostStatus["scheduled"]
@@ -91,11 +92,12 @@ module Admin
           end
 
           def finished
-            at = @link_check[:finished_at]
+            at = @link_check[:run]&.finished_at
             t(".finished", at: l(Blog::TimeZone.local(at), format: :short)) if at
           end
 
           def list
+            LinkCheckBanner(run: @link_check[:run], return_to: path(:admin_posts, **list_query)) if broken?
             check_form if broken?
             @posts.rows.empty? ? Empty { t(empty) } : rows
             Pager(page: @posts, route: :admin_posts, params: { status: @filter })

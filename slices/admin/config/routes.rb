@@ -170,6 +170,7 @@ module Admin
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post
     post "/posts/bulk", to: "posts.bulk", as: :bulk_posts
+    post "/posts/links/check", to: "posts.run_link_check", as: :run_link_check
     get "/posts/bulk/menu", to: "posts.bulk_menu", as: :posts_bulk_menu
     get "/posts/new", to: "posts.new", as: :new_post
     get "/posts/:id/analytics", to: "posts.analytics", as: :post_analytics, id: ID

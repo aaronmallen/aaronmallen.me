@@ -32,8 +32,6 @@ module Shares
 
       def find(id) = short_links.with_code.by_pk(id).one
 
-      def last_checked_at = short_link_checks.unordered.max(:checked_at)
-
       def latest_to(destination) = short_links.with_code.where(destination:).newest_first.limit(1).one
 
       def page_listed(page, sort:, search: nil, failing: false)

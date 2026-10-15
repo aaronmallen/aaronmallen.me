@@ -258,6 +258,7 @@ RSpec.describe "Admin screens", type: :feature do
   def post_screens
     {
       "post analytics" => "/admin/posts/#{published.id}/analytics",
+      "posts broken links" => "/admin/posts?status=broken",
       "post details" => lambda do
         visit "/admin/posts/#{published.id}/edit"
         click_button "Details"
@@ -461,6 +462,9 @@ RSpec.describe "Admin screens", type: :feature do
     social_post
     create(:post, :scheduled, title: "A post scheduled for tomorrow")
     create(:social_post, :scheduled)
+    Posts::Slice["relations.link_check_runs"].insert(
+      started_at: at(3, 0), finished_at: at(3, 4), links_checked: 290, links_due: 473,
+    )
   end
 
   def selections

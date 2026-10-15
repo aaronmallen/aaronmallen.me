@@ -265,6 +265,7 @@ en:
       publish:
         invalid: "Not published · open %{post} to fix it"
         published: "Nothing published · %{post} is not a draft"
+      run_link_check: "Checking every link"
   projects_page:
     toasts:
       archived: "Archived · removed from /projects"
@@ -618,10 +619,13 @@ en:
           other: "Untouched for %{count} days"
         write: "Write"
       attention_lines:
+        broken_links: "Broken links"
+        broken_split: "%{posts} in posts · %{short} short →"
         cross_posts: "Cross-posts"
         failed:
           one: "%{count} failed →"
           other: "%{count} failed →"
+        failing: "%{count} failing →"
         inbox: "Inbox"
         waiting:
           one: "%{count} waiting →"
@@ -1128,6 +1132,9 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+      link_check_banner:
+        run: "Run it now"
+        stopped: "The last check stopped early %{at}, after %{checked} of %{due} links. The rest keep their earlier results."
       link_check_pill:
         failing: "failing"
         failing_nights:

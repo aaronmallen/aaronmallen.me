@@ -78,8 +78,8 @@ module Admin
 
     import keys: %w[
       operations.act_on_posts operations.check_post_links operations.compose_announcement operations.delete_post
-      operations.move_post operations.publish_draft operations.queue_link_check operations.revise_edit_note
-      operations.save_post repos.post_figure_queries repos.post_queries
+      operations.move_post operations.publish_draft operations.queue_link_check operations.queue_link_check_run
+      operations.revise_edit_note operations.save_post repos.post_figure_queries repos.post_queries
     ], from: :posts
 
     import keys: %w[operations.remove_tag operations.save_tag repos.tag_queries], from: :tags
