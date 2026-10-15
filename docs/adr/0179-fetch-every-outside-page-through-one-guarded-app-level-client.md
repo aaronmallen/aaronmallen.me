@@ -5,6 +5,7 @@ status: active
 created: 2026-10-15
 area: [config, lib, posts, shares, social]
 issue: "#1455"
+amended: ["#1470"]
 tags: [http, fetch, security, webmentions, short-links, providers, clients]
 ---
 
@@ -37,8 +38,9 @@ fetches such a page through `http` or a Faraday connection of its own.
   more than one slice does. The folder holds the client, its errors and its provider builder.
 - **It registers in `config/providers`**, and a slice takes it through `shared_app_component_keys`. Each caller may
   set its own user agent; the checks and limits stay the same for all of them.
-- **`social` uses it** for webmention sending, verifying and link checks, and `posts` keeps reaching link checks
-  through `social`. **`shares` uses it** to fetch short link titles.
+- **`social` uses it** for webmention sending and verifying. **`shares` uses it** to fetch short link titles.
+- **The link check rule lives at app level too.** #1470 moved `CheckLink` out of `social` into `app/operations`, shared
+  as `operations.check_link`, so `posts` checks post links and `shares` checks short link destinations with one rule.
 
 `http` stays for service APIs at hosts the code names, such as GitHub and Linear.
 

@@ -9,8 +9,8 @@ module Posts
       LINK_SELECTOR = "a[href]"
 
       include Deps[
+        "operations.check_link",
         "settings",
-        check_link: "social.operations.check_link",
         link_check_mutations: "repos.post_link_check_mutations",
         post_queries: "repos.post_queries",
       ]

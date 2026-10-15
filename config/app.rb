@@ -60,7 +60,7 @@ module Blog
     config.shared_app_component_keys += %w[
       backup_store.client contracts.contributor_terms_contract contracts.review_range_contract
       contracts.search_query_contract github.auth github.client google.auth google.client linear.client
-      linkedin.auth mastodon.auth media_store.client networks.all operations.read_visitor_address
+      linkedin.auth mastodon.auth media_store.client networks.all operations.check_link operations.read_visitor_address
       page_fetcher.link_check page_fetcher.link_title page_fetcher.webmention share_store.client
     ]
 

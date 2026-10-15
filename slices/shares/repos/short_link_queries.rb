@@ -13,6 +13,8 @@ module Shares
 
       def count_listed(search: nil) = listed(search).count
 
+      def destinations = short_links.select(:id, :destination).to_a
+
       def find(id) = short_links.with_code.by_pk(id).one
 
       def latest_to(destination) = short_links.with_code.where(destination:).newest_first.limit(1).one

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375", "#1469"]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375", "#1469", "#1470"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures, check-ins]
 ---
 
@@ -55,7 +55,8 @@ and the finder's next run starts it again, so a walk never waits on Sidekiq's re
 cover only an exception, and a walk whose retries run out stalls until the finder starts it again (ADR 0049).
 `BackfillHealth`, which walks Google Health's history 90 days at a time, takes 3 retries and raises for every
 `Failure` (#1114). `CheckPostLinksAgain`, which checks one post's links on demand, takes 3 and raises for nothing
-it returns, since the nightly run checks the same links again (#1469).
+it returns, since the nightly run checks the same links again (#1469). `CheckShortLinkAgain` does the same for one
+short link's destination (#1470).
 
 **A scheduled failure the operator has to act on goes to `sync_states`,** where Today shows it with its reason.
 

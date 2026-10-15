@@ -3,9 +3,11 @@
 module Posts
   module Jobs
     class CheckPostLinks < Blog::ScheduledJob
-      include Deps[check_post_links: "operations.check_post_links"]
+      include Deps[
+        check_post_links: "operations.check_post_links", check_short_links: "shares.operations.check_short_links",
+      ]
 
-      def perform = check_post_links.call
+      def perform = [check_post_links, check_short_links].each(&:call)
     end
   end
 end

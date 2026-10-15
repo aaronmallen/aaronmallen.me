@@ -26,6 +26,15 @@ RSpec.describe "A short link on the share host", type: :request do
     expect(last_response.headers["Location"]).to eq("https://example.org")
   end
 
+  it "still sends people to a destination the link check marks as failing" do
+    resolves_publicly("example.com")
+    stub_request(:get, "https://example.com/talk").to_return(status: 404)
+    Shares::Slice["operations.check_short_links"].again(link.id)
+    fetch(link.code)
+
+    expect(last_response.headers["Location"]).to eq("https://example.com/talk")
+  end
+
   it "still sends a link made under an older, longer code" do
     Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "ab2cd")
     fetch("ab2cd")

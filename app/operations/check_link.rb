@@ -2,7 +2,7 @@
 
 require "rack/utils"
 
-module Social
+module Blog
   module Operations
     class CheckLink
       BROKEN_STATUSES = [404, 410, *500..599].freeze

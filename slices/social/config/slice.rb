@@ -22,7 +22,7 @@ module Social
     import keys: %w[operations.shorten_link repos.short_link_queries], from: :shares
 
     export %w[
-      operations.act_on_webmentions operations.check_link operations.check_network_fit
+      operations.act_on_webmentions operations.check_network_fit
       operations.compose_social_post operations.count_network_lengths operations.delete_person
       operations.delete_social_post operations.expand_for_network operations.find_over_limit_network
       operations.list_target_accounts operations.lock_editable_social_post
