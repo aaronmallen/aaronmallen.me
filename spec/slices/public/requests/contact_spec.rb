@@ -174,6 +174,11 @@ RSpec.describe "Contact", type: :request do
       expect(slot["cf-message-error"][:"data-blank"]).to eq(error("body.blank"))
     end
 
+    it "hands the browser no format copy for a field the form words no format error for", :aggregate_failures do
+      expect(page.find_by_id("cf-subject-error", visible: :hidden)[:"data-format"]).to be_nil
+      expect(page.find_by_id("cf-message-error", visible: :hidden)[:"data-format"]).to be_nil
+    end
+
     it "reads out no address to write to but the placeholder's", :aggregate_failures do
       expect(last_response.body).not_to include("mailto:")
       expect(last_response.body.scan(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i).uniq)

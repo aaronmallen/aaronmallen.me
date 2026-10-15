@@ -6,16 +6,6 @@ module Public
       class ContactFieldError < Blog::UI::FieldError
         SCOPE = "cf"
         SLUGS = { body: "message", reply_to: "email" }.freeze
-        MESSAGES = {
-          body: { "blank" => ".body.blank", "control" => ".body.control", "long" => ".body.long" },
-          reply_to: {
-            "blank" => ".reply_to.blank",
-            "control" => ".reply_to.control",
-            "format" => ".reply_to.format",
-            "long" => ".reply_to.long",
-          },
-          subject: { "blank" => ".subject.blank", "control" => ".subject.control", "long" => ".subject.long" },
-        }.freeze
         BROWSER_CODES = %w[blank format].freeze
 
         def self.field_slug(field) = SLUGS.fetch(field) { super.tr("_", "-") }
@@ -29,9 +19,10 @@ module Public
         private
 
         def browser_messages
-          MESSAGES.fetch(@field, Blog::Constants::EMPTY_HASH)
-                  .slice(*BROWSER_CODES)
-                  .to_h { |code, key| [code.to_sym, t(key)] }
+          BROWSER_CODES.filter_map do |code|
+            text = t(convention_key(code), default: nil)
+            [code.to_sym, text] if text
+          end.to_h
         end
 
         def error_attributes(code)

@@ -6,6 +6,7 @@ created: 2026-10-10
 area: [lib, admin, api, public, mcp]
 supersedes: ["0027"]
 issue: "#1002"
+amended: ["#1435"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -64,8 +65,9 @@ first (#1390). It reads the codes each contract can return, from its schema, `co
 calls in its rules and macros, and wants a key for each field the form shows. `mise run lint` fails on a locale key
 no code reads; `.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
 
-`Public::UI::Components::ContactFieldError` words its codes the same way, but keeps a `MESSAGES` table, since it
-hands the browser the copy for `blank` and `format` before any code arrives.
+`Public::UI::Components::ContactFieldError` words its codes the same way. It also hands the browser the copy for
+`blank` and `format` before any code arrives, and finds those by the same `.<field>.<code>` key, so a field with no
+such key hands the browser nothing for that code (#1435).
 
 A field shows only its first code, as before.
 
