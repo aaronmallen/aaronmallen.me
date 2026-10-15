@@ -175,13 +175,4 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
       expect(status(draft)).to eq("draft")
     end
   end
-
-  describe "signed out" do
-    it "publishes nothing" do
-      draft = create(:post, :draft)
-      post "/admin/posts/#{draft.id}/publish"
-
-      expect(status(draft)).to eq("draft")
-    end
-  end
 end

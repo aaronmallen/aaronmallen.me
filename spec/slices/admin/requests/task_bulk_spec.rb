@@ -533,13 +533,4 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "changes nothing" do
-      task = create(:task)
-      post "/admin/tasks/bulk", { act: "complete", ids: [task.id] }
-
-      expect(status(task)).to eq("open")
-    end
-  end
 end

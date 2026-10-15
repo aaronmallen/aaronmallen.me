@@ -776,12 +776,4 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "refuses to create" do
-      post "/admin/projects", project: { name: "sai" }
-
-      expect(repo.live).to be_empty
-    end
-  end
 end

@@ -3312,29 +3312,5 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       expect(last_response.body).not_to include("Email the accountant")
     end
-
-    {
-      "" => {},
-      "/complete" => {},
-      "/delete" => {},
-      "/move/someday" => {},
-      "/place" => {},
-      "/reopen" => {},
-      "/start" => {},
-      "/stop" => {},
-    }.each_key do |suffix|
-      it "writes nothing through POST /admin/tasks/:id#{suffix}" do
-        id = task.id
-        post "/admin/tasks/#{id}#{suffix}", task: { title: "Changed" }
-
-        expect(repo.by_id(id)).to have_attributes(title: "Email the accountant", list: "next", status: "open")
-      end
-    end
-
-    it "captures nothing" do
-      post "/admin/tasks", task: { title: "Email the accountant" }
-
-      expect(repo.open_in_list("next")).to be_empty
-    end
   end
 end

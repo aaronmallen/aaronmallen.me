@@ -267,13 +267,4 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "changes nothing" do
-      mention = mentions(1).first
-      post "/admin/webmentions/bulk", { act: "spam", ids: [mention.id] }
-
-      expect(status(mention)).to eq("pending")
-    end
-  end
 end

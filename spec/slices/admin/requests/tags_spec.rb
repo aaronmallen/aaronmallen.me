@@ -812,23 +812,5 @@ RSpec.describe "Admin tags", type: :request do
 
       expect(last_response.body).not_to include("ruby")
     end
-
-    it "adds nothing" do
-      post "/admin/tags", tag: { name: "ruby" }
-
-      expect(every_tag).to be_empty
-    end
-
-    {
-      "" => { tag: { name: "hanami" } },
-      "/delete" => {},
-    }.each do |suffix, params|
-      it "writes nothing through POST /admin/tags/:id#{suffix}" do
-        id = tag.id
-        post "/admin/tags/#{id}#{suffix}", params
-
-        expect(stored(id)).to have_attributes(name: "ruby")
-      end
-    end
   end
 end

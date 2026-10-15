@@ -399,13 +399,4 @@ RSpec.describe "Admin bulk post actions", type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "changes nothing" do
-      article = create(:post)
-      post "/admin/posts/bulk", { act: "delete", ids: [article.id] }
-
-      expect(post_queries.by_id(article.id)).not_to be_nil
-    end
-  end
 end

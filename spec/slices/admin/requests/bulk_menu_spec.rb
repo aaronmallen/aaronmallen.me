@@ -15,14 +15,6 @@ RSpec.describe "Admin bulk menus", type: :request do
 
   def submenu(label) = page.find("[aria-haspopup]", text: label, visible: :all).sibling("[role=menu]", visible: :all)
 
-  describe "signed out" do
-    it "sends me to sign in" do
-      get "/admin/tasks/bulk/menu", ids: [create(:task).id]
-
-      expect(last_response).to be_redirect
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

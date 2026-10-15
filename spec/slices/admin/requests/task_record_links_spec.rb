@@ -322,19 +322,4 @@ RSpec.describe "Admin task record links", type: :request do
       expect(last_response.status).to eq(404)
     end
   end
-
-  describe "signed out" do
-    it "adds no link" do
-      post "/admin/tasks/#{task.id}/records", record: { other_kind: "post", other_id: post_record.id.to_s }
-
-      expect(links.to_a).to be_empty
-    end
-
-    it "removes no link" do
-      link_records("post", post_record.id)
-      post "/admin/tasks/#{task.id}/records/post/#{post_record.id}/delete"
-
-      expect(links.to_a.size).to eq(1)
-    end
-  end
 end

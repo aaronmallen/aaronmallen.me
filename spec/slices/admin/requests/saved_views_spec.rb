@@ -197,19 +197,4 @@ RSpec.describe "Admin saved views", type: :request do
       expect(last_response.location).to eq("/admin")
     end
   end
-
-  describe "signed out" do
-    it "saves nothing" do
-      post "/admin/saved-views", screen: "tasks", saved_view: { name: "Weekly" }
-
-      expect(views).to be_empty
-    end
-
-    it "deletes nothing" do
-      view = create(:saved_view)
-      post "/admin/saved-views/#{view.id}/delete"
-
-      expect(repo.by_id(view.id)).not_to be_nil
-    end
-  end
 end

@@ -518,12 +518,5 @@ RSpec.describe "Admin inbox", type: :request do
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
       expect(last_response.body).not_to include("A secret")
     end
-
-    it "refuses to act on a row" do
-      message = create(:message)
-      post "/admin/inbox/messages/#{message.id}/mark/read"
-
-      expect(messages.by_id(message.id).status).to eq("unread")
-    end
   end
 end

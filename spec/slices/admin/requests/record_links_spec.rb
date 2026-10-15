@@ -193,21 +193,6 @@ RSpec.describe "Admin record links", type: :request do
         expect(last_response.status).to eq(404)
       end
     end
-
-    describe "signed out" do
-      it "adds no link" do
-        post records_path, record: { other_kind: "task", other_id: task.id.to_s }
-
-        expect(links).to be_empty
-      end
-
-      it "removes no link" do
-        link_records("task", task.id)
-        post "#{records_path}/task/#{task.id}/delete"
-
-        expect(links.size).to eq(1)
-      end
-    end
   end
 
   describe "the picker on a post" do

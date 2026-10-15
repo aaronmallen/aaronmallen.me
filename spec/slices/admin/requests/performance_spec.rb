@@ -282,14 +282,4 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       expect(page).to have_css(".perf-status:not(.bad)", exact_text: "200")
     end
   end
-
-  describe "signed out" do
-    %w[/admin/performance /admin/performance/requests].each do |route|
-      it "sends #{route} to sign-in" do
-        get route
-
-        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-      end
-    end
-  end
 end

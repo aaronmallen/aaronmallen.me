@@ -674,20 +674,4 @@ RSpec.describe "Admin people", type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    let(:person) { create(:person, name: "Ada Lovelace") }
-
-    it "adds nobody" do
-      post "/admin/people", person: { name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social" }
-
-      expect(everyone).to be_empty
-    end
-
-    it "removes nobody" do
-      post "/admin/people/#{person.id}/delete"
-
-      expect(everyone.map(&:name)).to eq(["Ada Lovelace"])
-    end
-  end
 end

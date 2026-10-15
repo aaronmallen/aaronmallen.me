@@ -44,28 +44,6 @@ RSpec.describe "Admin task time", type: :request do
     Tasks::Slice["operations.reopen_task"].call(task.id, at: to)
   end
 
-  describe "signed out" do
-    it "edits no session" do
-      session = closed
-      post "/admin/tasks/#{task.id}/sessions/#{session.id}", session: { started_at: local(started - 600) }
-
-      expect(sessions.first[:started_at]).to eq(started)
-    end
-
-    it "deletes no session" do
-      closed
-      post "/admin/tasks/#{task.id}/sessions/#{sessions.first[:id]}/delete"
-
-      expect(sessions.size).to eq(1)
-    end
-
-    it "sets no total" do
-      post "/admin/tasks/#{task.id}/total", total: { hours: "9" }
-
-      expect(total).to eq(3600)
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

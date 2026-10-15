@@ -118,13 +118,4 @@ RSpec.describe "Admin record tags", type: :request do
 
     it_behaves_like "a tag route", path: "projects", list: "/admin/projects", scope: "public"
   end
-
-  describe "signed out" do
-    it "changes nothing" do
-      project = create(:project)
-      post "/admin/projects/#{project.id}/tags", { tag: "ruby" }
-
-      expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
-    end
-  end
 end

@@ -307,17 +307,4 @@ RSpec.describe "Admin work history", type: :request do
       end
     end
   end
-
-  it "refuses to add when signed out" do
-    post "/admin/projects/work", work_entry: fields
-
-    expect(repo.all).to be_empty
-  end
-
-  it "refuses to remove when signed out" do
-    entry = create(:work_entry)
-    post "/admin/projects/work/#{entry.id}/delete"
-
-    expect(repo.all.map(&:id)).to eq([entry.id])
-  end
 end

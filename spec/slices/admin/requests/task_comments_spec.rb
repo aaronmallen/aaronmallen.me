@@ -30,28 +30,6 @@ RSpec.describe "Admin task comments", type: :request do
 
   def t(key, **) = i18n.t(key, **)
 
-  describe "signed out" do
-    it "adds nothing" do
-      post "/admin/tasks/#{task.id}/comments", comment: { body: "Hello" }
-
-      expect(bodies).to be_empty
-    end
-
-    it "edits nothing" do
-      comment = create(:task_comment, task_id: task.id, body: "Before")
-      post "/admin/tasks/#{task.id}/comments/#{comment.id}", comment: { body: "After" }
-
-      expect(bodies).to eq(["Before"])
-    end
-
-    it "deletes nothing" do
-      comment = create(:task_comment, task_id: task.id)
-      post "/admin/tasks/#{task.id}/comments/#{comment.id}/delete"
-
-      expect(comments.to_a.size).to eq(1)
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

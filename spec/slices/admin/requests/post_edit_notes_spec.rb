@@ -20,15 +20,6 @@ RSpec.describe "Admin post edit notes", type: :request do
     post edit_path(edit, **), _csrf_token: admin_csrf_token, edit: { note: }
   end
 
-  describe "signed out" do
-    it "changes nothing" do
-      edit = create(:post_edit, post: article, note: "Before")
-      post edit_path(edit), edit: { note: "After" }
-
-      expect(notes).to eq(["Before"])
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

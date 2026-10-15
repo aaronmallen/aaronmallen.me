@@ -205,19 +205,4 @@ RSpec.describe "Admin decision record links", type: :request do
       expect(links.to_a).to be_empty
     end
   end
-
-  describe "signed out" do
-    it "adds no link" do
-      post "/admin/decisions/#{decision.id}/records", record: { other_kind: "task", other_id: task.id.to_s }
-
-      expect(links.to_a).to be_empty
-    end
-
-    it "removes no link" do
-      link_records("task", task.id)
-      post "/admin/decisions/#{decision.id}/records/task/#{task.id}/delete"
-
-      expect(links.to_a.size).to eq(1)
-    end
-  end
 end

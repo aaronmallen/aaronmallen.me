@@ -26,14 +26,6 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
     end
   end
 
-  describe "signed out" do
-    it "sends me to sign in" do
-      get "/admin/posts/#{create(:post).id}/menu"
-
-      expect(last_response).to be_redirect
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

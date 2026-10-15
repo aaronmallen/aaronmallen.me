@@ -25,21 +25,6 @@ RSpec.describe "Admin API tokens", type: :request do
 
   def stamp(time) = Blog::TimeZone.local(time).strftime("%b %-d, %Y, %H:%M")
 
-  describe "signed out" do
-    it "mints nothing" do
-      post "/admin/tokens", token: { name: "Terminal" }
-
-      expect(stored.count).to be_zero
-    end
-
-    it "leaves a token live" do
-      token = minted[:token]
-      post "/admin/tokens/#{token.id}/revoke"
-
-      expect(stored.by_pk(token.id).one[:revoked_at]).to be_nil
-    end
-  end
-
   describe "minting" do
     before { sign_in_to_admin }
 

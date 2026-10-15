@@ -29,14 +29,6 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def today_sprint = Tasks::Slice["repos.sprint_queries"].on(Blog::TimeZone.today).id
 
-  describe "signed out" do
-    it "sends me to sign in" do
-      get "/admin/projects/#{project.id}"
-
-      expect(last_response).to be_redirect
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

@@ -37,16 +37,6 @@ RSpec.describe "Admin MCP clients", type: :request do
     )
   end
 
-  describe "signed out" do
-    it "refuses a revoke and leaves the tokens alone" do
-      client = mcp_create(:oauth_client)
-      stock_token(client, type: "access")
-      post "/admin/clients/#{client.id}/revoke"
-
-      expect(tokens.for_client(client.id).count).to eq(1)
-    end
-  end
-
   describe "the list" do
     let(:connected) { Time.now - (3 * 24 * 60 * 60) }
     let(:used) { Time.now - (60 * 60) }

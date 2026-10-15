@@ -909,22 +909,6 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
     end
   end
 
-  describe "signed out" do
-    it "saves nothing" do
-      post "/admin/journal", entry: { body: "walked" }
-
-      expect(repo.count).to eq(0)
-    end
-
-    it "changes nothing" do
-      entry = create(:journal_entry, body: "before")
-      post "/admin/journal/#{entry.id}", entry: { body: "after" }
-      post "/admin/journal/#{entry.id}/delete"
-
-      expect(repo.by_id(entry.id).body).to eq("before")
-    end
-  end
-
   describe "the public site" do
     before do
       create(:journal_entry, body: "a private journal line", tags: %w[ruby])

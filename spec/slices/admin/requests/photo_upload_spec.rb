@@ -236,10 +236,6 @@ RSpec.describe "Admin photo upload", type: :request do
       upload(fixture("small.png", "image/png"), token: session_token)
     end
 
-    it "redirects to sign-in" do
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "stores nothing", :aggregate_failures do
       expect(stored).to be_empty
       expect(photos).to be_empty

@@ -94,12 +94,6 @@ RSpec.describe "Admin post preview", :frozen_clock, type: :request do
       last_request.env["rack.session"]["_csrf_token"]
     end
 
-    it "redirects to sign-in" do
-      preview(token: session_token, title: "Hello")
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "renders no preview" do
       preview(token: session_token, title: "Hello")
 

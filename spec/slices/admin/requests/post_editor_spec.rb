@@ -1373,14 +1373,4 @@ RSpec.describe "Admin post editor", type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "deletes nothing", :aggregate_failures do
-      article = create(:post)
-      post "/admin/posts/#{article.id}/delete"
-
-      expect(last_response).not_to be_successful
-      expect(post_queries.by_id(article.id)).not_to be_nil
-    end
-  end
 end

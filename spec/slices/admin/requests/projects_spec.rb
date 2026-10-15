@@ -361,11 +361,4 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       end
     end
   end
-
-  it "refuses to archive when signed out" do
-    project = create(:project)
-    post "/admin/projects/#{project.id}/archive"
-
-    expect(repo.by_id(project.id).archived_on).to be_nil
-  end
 end

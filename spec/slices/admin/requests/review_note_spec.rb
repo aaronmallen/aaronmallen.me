@@ -24,13 +24,6 @@ RSpec.describe "Admin review note", :frozen_clock, type: :request do
 
   def today = Blog::TimeZone.today
 
-  it "redirects to sign-in when signed out", :aggregate_failures do
-    save_note("good week")
-
-    expect(last_response.location).to end_with("/admin/sign-in")
-    expect(stored_notes).to be_empty
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

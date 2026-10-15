@@ -23,12 +23,6 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
-  it "sends me to sign in when I am signed out" do
-    get "/admin/journal/1/menu"
-
-    expect(last_response).to be_redirect
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

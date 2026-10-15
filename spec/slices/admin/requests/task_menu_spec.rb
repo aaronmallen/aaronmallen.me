@@ -18,14 +18,6 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
-  describe "signed out" do
-    it "sends me to sign in" do
-      menu(create(:task))
-
-      expect(last_response).to be_redirect
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

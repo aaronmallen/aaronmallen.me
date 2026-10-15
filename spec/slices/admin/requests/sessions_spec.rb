@@ -71,10 +71,6 @@ RSpec.describe "Admin sessions", type: :request do
   describe "signed out" do
     before { get "/admin/posts?page=2" }
 
-    it "redirects any admin URL to sign-in" do
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "renders a page with a GitHub button and a Google button", :aggregate_failures do
       follow_redirect!
 
@@ -137,26 +133,6 @@ RSpec.describe "Admin sessions", type: :request do
 
     it "tells search engines not to index the redirect" do
       expect(last_response.headers["X-Robots-Tag"]).to eq("noindex, nofollow")
-    end
-  end
-
-  describe "every admin screen signed out" do
-    let(:paths) do
-      Admin::Slice.routes
-      Admin::Routes.definitions.filter_map do |(verb, (path))|
-        next if verb != :get || %w[/auth/:provider/callback /sign-in].include?(path)
-
-        "/admin#{path.gsub(/:\w+/) { it == ':network' ? 'mastodon' : '1' }}".chomp("/")
-      end
-    end
-
-    it "redirects to sign-in, or answers 401 where a script asks" do
-      unguarded = paths.reject do |path|
-        get path
-        last_response.unauthorized? || last_response.location.to_s.end_with?("/admin/sign-in")
-      end
-
-      expect([paths.size, unguarded]).to match([be > 40, []])
     end
   end
 

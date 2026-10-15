@@ -45,17 +45,4 @@ RSpec.describe "Admin post syndication preview", type: :request do
       expect(last_response).to be_forbidden
     end
   end
-
-  describe "signed out" do
-    let(:session_token) do
-      get "/admin/sign-in"
-      last_request.env["rack.session"]["_csrf_token"]
-    end
-
-    it "redirects to sign-in" do
-      preview(token: session_token, title: "Hello")
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-  end
 end

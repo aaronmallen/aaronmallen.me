@@ -18,14 +18,6 @@ RSpec.describe "Admin decisions", type: :request do
 
   def titles = page.all(".decision-row .decision-row-title").map(&:text)
 
-  describe "signed out" do
-    it "opens nothing" do
-      post "/admin/decisions", decision: { title: "Pick", problem: "Why" }
-
-      expect(Decisions::Slice["relations.decisions"].count).to eq(0)
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

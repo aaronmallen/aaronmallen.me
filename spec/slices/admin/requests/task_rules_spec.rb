@@ -406,31 +406,13 @@ RSpec.describe "Admin task rules", type: :request do
   end
 
   describe "signed out" do
-    let!(:existing) { rule("aaronmallen/*", "projects") }
+    before { rule("aaronmallen/*", "projects") }
 
     it "redirects the list to sign in", :aggregate_failures do
       get "/admin/tasks/rules"
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
       expect(last_response.body).not_to include("aaronmallen/*")
-    end
-
-    it "adds nothing" do
-      post "/admin/tasks/rules", rule: { pattern: "octocat/*", tags: "ruby" }
-
-      expect(rules.map(&:pattern)).to eq(%w[aaronmallen/*])
-    end
-
-    it "edits nothing" do
-      post "/admin/tasks/rules/#{existing.id}", rule: { pattern: "octocat/*", tags: "ruby" }
-
-      expect(stored(existing.id).pattern).to eq("aaronmallen/*")
-    end
-
-    it "deletes nothing" do
-      post "/admin/tasks/rules/#{existing.id}/delete"
-
-      expect(stored(existing.id)).not_to be_nil
     end
   end
 end

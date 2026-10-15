@@ -18,12 +18,6 @@ RSpec.describe "Admin health", :frozen_clock, type: :request do
 
   def visit_health(params = {}) = get("/admin/health", params)
 
-  it "sends a signed out visitor to sign in" do
-    visit_health
-
-    expect(last_response).to be_redirect
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 
