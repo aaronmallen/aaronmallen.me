@@ -309,11 +309,29 @@ RSpec.describe "Admin file groups", type: :request do
       expect(page).to have_css("[data-toast]", text: "Group deleted")
     end
 
-    it "keeps the group when the store fails", :aggregate_failures do
-      stub_request(:delete, %r{\A#{share_store_url}/}).to_return(status: 500)
-      delete_group
+    describe "when the store fails on one object" do
+      def fail_on(index)
+        files.map.with_index do |file, at|
+          stub = stub_request(:delete, share_store_url(file[:key]))
+          at == index ? stub.to_return(status: 500) : stub
+        end
+      end
 
-      expect([Shares::Slice["relations.share_groups"].count, files.size]).to eq([1, 2])
+      it "removes the group when the second fails", :aggregate_failures do
+        fail_on(1)
+        delete_group
+        follow_redirect!
+
+        expect([Shares::Slice["relations.share_groups"].count, files.size]).to eq([0, 0])
+        expect(page).to have_css("[data-toast]", text: "Group deleted")
+      end
+
+      it "still deletes the others when the first fails" do
+        kept = fail_on(0).last
+        delete_group
+
+        expect(kept).to have_been_requested
+      end
     end
   end
 end
