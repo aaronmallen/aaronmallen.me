@@ -13,7 +13,7 @@ module API
 
       def snoozed = snoozed_rows.sort_by { [it.at, it.kind, it.record.id] }
 
-      def unseen = unseen_rows.sort_by { [it.at, it.kind, it.record.id] }.last(LIMIT).reverse
+      def unseen(mail: true) = unseen_rows(mail).sort_by { [it.at, it.kind, it.record.id] }.last(LIMIT).reverse
 
       def unseen_counts
         {
@@ -41,9 +41,9 @@ module API
         ]
       end
 
-      def unseen_rows
+      def unseen_rows(mail)
         [
-          *message_queries.unread.map { row(:message, it.received_at, it) },
+          *(mail ? message_queries.unread : []).map { row(:message, it.received_at, it) },
           *webmention_queries.unseen.map { row(:webmention, it.received_at, it) },
           *task_source_queries.unseen_tasks.map { row(:task, it.created_at, it, it.source) },
         ]

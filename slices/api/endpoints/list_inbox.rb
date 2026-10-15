@@ -10,10 +10,7 @@ module API
       include Deps["repos.inbox_queries"]
 
       def handle(scopes:)
-        rows = inbox_queries.unseen
-        rows = rows.reject { it.kind == :message } unless mail?(scopes)
-
-        Success(inbox: serialized(Serializers::InboxRow, rows))
+        Success(inbox: serialized(Serializers::InboxRow, inbox_queries.unseen(mail: mail?(scopes))))
       end
     end
   end

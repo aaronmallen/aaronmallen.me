@@ -5,8 +5,8 @@ RSpec.describe "API inbox", type: :request do
 
   def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/1"
 
-  def read
-    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
+  def read(token = api_token)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
     get "/api/v1/inbox", {}, headers
     JSON.parse(last_response.body)
   end
@@ -78,6 +78,27 @@ RSpec.describe "API inbox", type: :request do
 
     it "lists the rows the Inbox screen shows, in the same order" do
       expect(rows.map { it.fetch("title") }).to eq(screen_titles)
+    end
+  end
+
+  describe "with more unread threads than the inbox holds" do
+    let!(:webmention) { create(:webmention, received_at: Time.now - 3600) }
+
+    before { 101.times { create(:message, received_at: Time.now - it) } }
+
+    def no_mail_token
+      scopes = Blog::Types::OAuthScope.values - %w[mail]
+      API::Slice["operations.mint_token"].call(name: "Terminal", scopes:).value!.fetch(:value)
+    end
+
+    it "still lists the older webmention for a token without mail" do
+      kinds = read(no_mail_token).fetch("inbox").map { it.values_at("kind", "id") }
+
+      expect(kinds).to eq([["webmention", webmention.id]])
+    end
+
+    it "gives a token with mail the newest 100 rows of every kind" do
+      expect(rows.map { it.fetch("kind") }).to eq(["message"] * 100)
     end
   end
 
