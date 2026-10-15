@@ -43,9 +43,9 @@ module API
 
       def unseen_rows(mail)
         [
-          *(mail ? message_queries.unread : []).map { row(:message, it.received_at, it) },
-          *webmention_queries.unseen.map { row(:webmention, it.received_at, it) },
-          *task_source_queries.unseen_tasks.map { row(:task, it.created_at, it, it.source) },
+          *(mail ? message_queries.unread(limit: LIMIT) : []).map { row(:message, it.received_at, it) },
+          *webmention_queries.unseen(LIMIT).map { row(:webmention, it.received_at, it) },
+          *task_source_queries.unseen_tasks(LIMIT).map { row(:task, it.created_at, it, it.source) },
         ]
       end
     end

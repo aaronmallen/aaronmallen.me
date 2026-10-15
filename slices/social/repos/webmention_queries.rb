@@ -61,7 +61,7 @@ module Social
 
       def snoozed = webmentions.with_status(PENDING).unseen.asleep.to_a
 
-      def unseen = unseen_pending.newest_first.to_a
+      def unseen(limit) = unseen_pending.latest_first(:received_at).limit(limit).to_a
 
       def unseen_count = unseen_pending.count
 

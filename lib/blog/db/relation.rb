@@ -51,6 +51,10 @@ module Blog
         (text ? matching(text) : where(id: ids)).limit(limit).linkable
       end
 
+      def latest_first(arrived, snoozed = self[:snoozed_until].qualified)
+        order(Sequel.function(:greatest, self[arrived].qualified, snoozed).desc, self[:id].qualified.desc)
+      end
+
       def like_pattern(text) = "%#{dataset.escape_like(text)}%"
 
       def linkables(title:, day:)

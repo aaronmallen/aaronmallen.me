@@ -23,9 +23,13 @@ module Tasks
 
       def unseen_task_count = unseen.count
 
-      def unseen_tasks = unseen.combine(:source, :tags).newest_first.to_a
+      def unseen_tasks(limit)
+        unseen.latest_first(:created_at, snoozed_until).limit(limit).combine(:source, :tags).to_a
+      end
 
       private
+
+      def snoozed_until = task_sources.where(task_id: tasks[:id].qualified).dataset.unordered.select(:snoozed_until)
 
       def unseen = tasks.open.where(id: task_sources.unseen.awake.task_ids)
     end

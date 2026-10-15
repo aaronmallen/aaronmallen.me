@@ -64,7 +64,7 @@ module Mail
                     .node(:mail_messages) { it.order(:received_at, :id) }.by_pk(id).one
       end
 
-      def unread = waiting.awake.with_preview.with_account.newest_first.to_a
+      def unread(limit: nil) = waiting.awake.with_preview.with_account.latest_first(:received_at).limit(limit).to_a
 
       def unread_count = waiting.awake.count
 

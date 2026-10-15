@@ -87,6 +87,30 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page).to have_css(".page-head-sub", exact_text: "3 waiting")
     end
 
+    it "limits the thread query past a large backlog" do
+      150.times { create(:message, received_at: Time.now - it) }
+
+      expect(logged_sql { get "/admin/inbox" }).to match(/FROM "mail_threads" .*ORDER BY .* LIMIT 100\b/)
+    end
+
+    {
+      message: ->(title, **at) { create(:message, subject: title, **at) },
+      webmention: ->(title, **at) { create(:webmention, author_name: title, **at) },
+      task: lambda do |title, received_at:, snoozed_until: nil|
+        create(:task, :external, title:, created_at: received_at).tap do |task|
+          create(:task_source, task:, snoozed_until:)
+        end
+      end,
+    }.each do |kind, make|
+      it "keeps a woken #{kind} ahead of a newer one past its limit" do
+        stub_const("API::Repos::InboxQueries::LIMIT", 1)
+        instance_exec("Newer", received_at: Time.now - 60, &make)
+        instance_exec("Woken", received_at: Time.now - 600, snoozed_until: Time.now - 1, &make)
+
+        expect(inbox).to eq(["Woken"])
+      end
+    end
+
     it "leaves out what no longer waits" do
       create(:message, :read)
       create(:webmention, :approved)
