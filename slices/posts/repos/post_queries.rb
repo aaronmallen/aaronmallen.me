@@ -4,6 +4,7 @@ module Posts
   module Repos
     class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
+      BROKEN = Blog::Types::PostFilter["broken"]
       FEED_VERSION = %i[id published_at updated_at].freeze
       LINKS = %i[id body].freeze
       LIST = %i[id title slug published_at read_time summary first_paragraph].freeze
@@ -16,11 +17,7 @@ module Posts
 
       def all = with_tags.newest_first.to_a
 
-      def by_filter(filter, page)
-        listed = filter == ALL ? with_tags : with_tags.with_status(filter)
-
-        page.fill(listed.newest_first.paged(page).to_a)
-      end
+      def by_filter(filter, page) = page.fill(filtered(filter).newest_first.paged(page).to_a)
 
       def by_id(id) = with_tags.by_pk(id).one
 
@@ -63,6 +60,10 @@ module Posts
 
       def edits_newest_first(post_id) = edits_for_post(post_id).reverse
 
+      def failing_links(post_ids)
+        post_link_checks.failing.where(post_id: post_ids).order(Sequel.desc(:failures), :url).to_a.group_by(&:post_id)
+      end
+
       def held_follow_ups = held_post_follow_ups.oldest_first.to_a
 
       def last_changed_published_at(tag = nil)
@@ -73,6 +74,12 @@ module Posts
       def last_deleted_at = post_deletions.last_deleted_at
 
       def last_untagged_at = post_tag_removals.last_removed_at
+
+      def link_check_tally
+        post_ids = failing_checks.pluck(:post_id)
+
+        { links: post_ids.size, posts: post_ids.uniq.size, checked_at: post_link_checks.unordered.max(:checked_at) }
+      end
 
       def link_checks(post_id) = post_link_checks.where(post_id:).to_a.to_h { [it.url, it] }
 
@@ -133,6 +140,16 @@ module Posts
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
+
+      def failing_checks = post_link_checks.failing.where(post_id: posts.published.select(:id).dataset.unordered)
+
+      def filtered(filter)
+        case filter
+          when ALL then with_tags
+          when BROKEN then with_tags.published.with_ids(failing_checks.select(:post_id).dataset.unordered)
+          else with_tags.with_status(filter)
+        end
+      end
 
       def listed = posts.select(*LIST).combine(:tags)
 

@@ -122,7 +122,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       it "labels the filters" do
         get "/admin/posts"
 
-        expect(page.all(".seg-option").map(&:text)).to eq(%w[all published drafts scheduled])
+        expect(page.all(".seg-option").map(&:text)).to eq(%w[all published drafts scheduled broken])
       end
 
       it "submits the filter to the list" do

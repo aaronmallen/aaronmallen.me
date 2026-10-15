@@ -7,6 +7,8 @@ module Posts
 
       schema :post_link_checks, infer: true
 
+      def failing = exclude(reason: nil)
+
       def outside(post_ids) = exclude(post_id: post_ids)
 
       def record(post_id:, url:, reason:, at:)

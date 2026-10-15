@@ -130,7 +130,7 @@ module Blog
     )
     PostBulkAction = Types::String.enum("tag", "untag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")
-    PostFilter = Types::String.enum("all", *PostStatus.values)
+    PostFilter = Types::String.enum("all", *PostStatus.values, "broken")
     PostFilterParam = PostFilter.fallback(PostFilter.values.first)
     PostFollowUp = Types::String.enum("syndicate_post", "send_webmentions")
     PostIntent = Types::String.enum("draft", "publish", "save")

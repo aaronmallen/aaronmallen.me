@@ -24,7 +24,15 @@ module Shares
 
       def destinations = short_links.select(:id, :destination).to_a
 
+      def failing
+        failing = short_links.with_check.exclude(Sequel[:short_link_checks][:reason] => nil)
+
+        failing.order(Sequel[:short_link_checks][:failures].desc, Sequel[:short_links][:id]).to_a
+      end
+
       def find(id) = short_links.with_code.by_pk(id).one
+
+      def last_checked_at = short_link_checks.unordered.max(:checked_at)
 
       def latest_to(destination) = short_links.with_code.where(destination:).newest_first.limit(1).one
 

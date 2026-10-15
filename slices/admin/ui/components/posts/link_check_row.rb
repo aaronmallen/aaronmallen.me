@@ -11,29 +11,22 @@ module Admin
           prop :published, Blog::Types::Bool
           prop :quiet, Blog::Types::Bool, default: false
           prop :form, Blog::Types::String, default: LinksDrawer::FORM
-          prop :find, Blog::Types::Bool, default: true
+          prop :action, Blog::Types::String.optional, default: nil
 
-          def view_template
+          def view_template(&)
             ListItem(title: @text.empty? ? @url : @text, href: nil, sub: @url) do |item|
               item.meta { meta }
-              actions
+              check_button if @published
+              yield if block_given?
+              open_button
             end
           end
 
           private
 
-          def actions
-            check_button if @published
-            find_button if @find
-            Button(
-              href: @url, small: true, variant: :gh, icon: :outbound, label: t(".open", link: @url),
-              target: "_blank", rel: "noopener",
-            )
-          end
-
           def check_button
             Button(
-              small: true, type: "submit", form: @form, name: "url", value: @url,
+              small: true, type: "submit", form: @form, formaction: @action, name: "url", value: @url,
               icon: "fa-solid fa-rotate", label: t(@check ? ".check_again" : ".check_now", link: @url),
             )
           end
@@ -48,13 +41,6 @@ module Admin
 
           def failing? = @check&.reason
 
-          def find_button
-            Button(
-              small: true, variant: :gh, icon: "fa-solid fa-i-cursor", label: t(".find", link: @url),
-              data: { find_link: @url },
-            )
-          end
-
           def first_failed = l(Blog::TimeZone.today(@check.first_failed_at || @check.checked_at), format: :medium)
 
           def meta
@@ -62,6 +48,13 @@ module Admin
               LinkCheckPill(check: @check)
               detail unless @quiet
             end
+          end
+
+          def open_button
+            Button(
+              href: @url, small: true, variant: :gh, icon: :outbound, label: t(".open", link: @url),
+              target: "_blank", rel: "noopener",
+            )
           end
         end
       end

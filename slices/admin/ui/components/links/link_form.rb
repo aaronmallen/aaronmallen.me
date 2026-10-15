@@ -61,7 +61,6 @@ module Admin
             h3(class: "file-drawer-head") { t(".check") }
             Posts::LinkCheckRow(
               url: @link.destination, text: host, check: @check, published: true, form: self.class.check_id(@link),
-              find: false,
             )
           end
 

@@ -13,7 +13,7 @@ module Admin
           url = Blog::Types::OptionalText[request.params[:url]]
 
           toast(response, "#{TOASTS}.#{queue(id, url)}")
-          response.redirect_to(routes.path(:admin_edit_post, id:, links: Blog::Constants::CHECKED))
+          response.redirect_to(back_here(request) || routes.path(:admin_edit_post, id:, links: Blog::Constants::CHECKED))
         end
 
         private

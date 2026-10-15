@@ -8,8 +8,11 @@ module Admin
           include Components::Posts
 
           ALL = Blog::Types::PostFilter["all"]
+          BROKEN = Blog::Types::PostFilter["broken"]
           DRAFT = Blog::Types::PostStatus["draft"]
-          LIVE_TABLES = %w[analytics_rollup_paths post_tags posts saved_views suggestions].freeze
+          LIVE_TABLES = %w[
+            analytics_rollup_paths post_link_checks post_tags posts saved_views short_link_checks suggestions
+          ].freeze
           PUBLISHED = Blog::Types::PostStatus["published"]
           SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
@@ -21,6 +24,8 @@ module Admin
           }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :failing_links, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Array)
+          prop :link_check, Blog::Types::Hash
           prop :filter, Blog::Types::PostFilter
           prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
           prop :read_through_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
@@ -46,28 +51,73 @@ module Admin
 
           private
 
+          def broken? = @filter == BROKEN
+
+          def broken_count = @link_check[:links] + @link_check[:short_links].size
+
+          def broken_sub
+            return t(".nothing_broken") if broken_count.zero?
+
+            [
+              t(
+                ".broken_lede",
+                count: broken_count, in_posts: @link_check[:links],
+                posts: t(".post_count", count: @link_check[:posts]),
+                short_links: t(".short_link_count", count: @link_check[:short_links].size),
+              ),
+              finished,
+            ].compact.join(" ")
+          end
+
+          def check_form
+            Form(id: FailingLinks::FORM, action: path(:admin_posts), data: { morph: true }) do
+              input(type: "hidden", name: "return_to", value: path(:admin_posts, **list_query))
+            end
+          end
+
           def count(status) = @counts.fetch(status, 0)
 
+          def empty = broken? ? ".no_broken_posts" : ".empty"
+
           def filter_form
-            FilterSwitch(
-              action: path(:admin_posts),
-              name: "status",
-              options: FILTERS,
-              selected: @filter,
-              label: t(".filter"),
-            )
+            AutoForm(action: path(:admin_posts)) do
+              SegmentedControl(label: t(".filter"), name: "status", options: filters, selected: @filter)
+            end
+          end
+
+          def filters
+            labels = FILTERS.transform_values { t(it) }
+            labels.merge(BROKEN => broken_count.zero? ? t(".broken") : t(".broken_count", count: broken_count))
+          end
+
+          def finished
+            at = @link_check[:finished_at]
+            t(".finished", at: l(Blog::TimeZone.local(at), format: :short)) if at
           end
 
           def list
-            @posts.rows.empty? ? Empty { t(".empty") } : rows
+            check_form if broken?
+            @posts.rows.empty? ? Empty { t(empty) } : rows
             Pager(page: @posts, route: :admin_posts, params: { status: @filter })
+            short_links if broken?
           end
+
+          def list_query = { status: @filter, **Blog::Structs::Page.query(@posts.number) }
 
           def rows
             Card(class: "post-list", data: { key_list: true }) do
               Bulk(filter: @filter, page: @posts.number)
-              @posts.rows.each { |post| Row(post:, filter: @filter, page: @posts.number, stats: stats(post)) }
+              @posts.rows.each do |post|
+                failing = @failing_links.fetch(post.id, Blog::Constants::EMPTY_ARRAY)
+                Row(post:, filter: @filter, page: @posts.number, stats: stats(post), failing:)
+                FailingLinks(post_id: post.id, links: failing) if broken? && failing.any?
+              end
             end
+          end
+
+          def short_links
+            links = @link_check[:short_links]
+            BrokenShortLinks(links:, total: @link_check[:short_total]) if links.any?
           end
 
           def stats(post)
@@ -85,6 +135,8 @@ module Admin
           end
 
           def sub
+            return broken_sub if broken?
+
             drafts = t(".draft_count", count: count(DRAFT))
 
             t(".lede", drafts:, published: count(PUBLISHED), scheduled: count(SCHEDULED))

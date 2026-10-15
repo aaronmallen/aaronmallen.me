@@ -1690,12 +1690,18 @@ en:
           title:
             blank: "Add a title."
             control: "Take out the control characters."
+        broken_short_links:
+          all: "all short links"
+          change: "Change destination: %{link}"
+          failing: "%{count} of %{total} failing"
+          title: "Short links"
+        failing_links:
+          fix: "Fix in post: %{link}"
         link_check_row:
           added: "added since the last check"
           check_again: "Check again: %{link}"
           check_now: "Check now: %{link}"
           checked: "checked %{at}"
-          find: "Find in post: %{link}"
           first_failed: "first failed %{on}"
           once_live: "checked once the post is live"
           open: "Open %{link}"
@@ -1708,6 +1714,7 @@ en:
           done: "Done"
           empty: "Nothing in this post links out yet. Links get checked every night once it's live."
           failing: "%{count} failing"
+          find: "Find in post: %{link}"
           fine: "%{count} fine"
           hint_draft: "Drafts are not checked overnight. Once this is live, its links join the nightly check."
           hint_live: "Checked every night at 03:00 Chicago."
@@ -1730,6 +1737,9 @@ en:
           final_unique_readers:
             one: "%{count} unique reader, final"
             other: "%{count} unique readers, final"
+          links_failing:
+            one: "%{count} link failing"
+            other: "%{count} links failing"
           mentions: "@%{count}"
           mentions_label:
             one: "%{count} webmention"
@@ -3413,17 +3423,31 @@ en:
             other: "%{count} posts picked"
         index:
           all: "all"
+          broken: "broken"
+          broken_count: "broken · %{count}"
+          broken_lede:
+            one: "%{count} broken link: %{in_posts} in %{posts} and %{short_links}."
+            other: "%{count} broken links: %{in_posts} in %{posts} and %{short_links}."
           draft_count:
             one: "%{count} draft"
             other: "%{count} drafts"
           drafts: "drafts"
           empty: "No posts"
           filter: "Status"
+          finished: "The last check finished %{at}."
           heading: "Publish"
           lede: "%{drafts} in progress. %{published} published, %{scheduled} scheduled."
           new_post: "New post"
+          no_broken_posts: "No broken links in posts."
+          nothing_broken: "Nothing broken. Every link answered the last check."
+          post_count:
+            one: "%{count} post"
+            other: "%{count} posts"
           published: "published"
           scheduled: "scheduled"
+          short_link_count:
+            one: "%{count} short link"
+            other: "%{count} short links"
           title: "Posts"
         menu:
           analytics: "Analytics"

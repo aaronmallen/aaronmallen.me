@@ -13,6 +13,7 @@ module Admin
           prop :filter, Blog::Types::String
           prop :page, Blog::Types::Integer
           prop :stats, Blog::Types::Hash
+          prop :failing, Blog::Types::Array.of(Blog::Types::Hash), default: -> { Blog::Constants::EMPTY_ARRAY }
 
           def view_template
             ListItem(title: @post.title, href: path(:admin_edit_post, id: @post.id), sub:, pick:, data:) do |item|
@@ -36,6 +37,13 @@ module Admin
 
           def data = { menu: path(:admin_post_menu, id: @post.id, status: @filter, **Blog::Structs::Page.query(@page)) }
 
+          def failing_links
+            return if @failing.empty?
+
+            color = @failing.first[:check].failures < 2 ? :orange : :pink
+            Pill(color:, icon: "fa-solid fa-link-slash") { t(".links_failing", count: @failing.size) }
+          end
+
           def mentions
             count = @stats.fetch(:mentions)
             return unless count.positive?
@@ -48,6 +56,7 @@ module Admin
 
           def meta
             div(class: "post-row-meta") do
+              failing_links
               mentions
               suggestions
               @post.tags.each { Tag(tag: it) }

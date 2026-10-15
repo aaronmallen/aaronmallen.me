@@ -60,7 +60,8 @@ async function landing(url, body, id) {
 }
 
 function post(form, submitter) {
-  return postAndMorph(form.action, new URLSearchParams(new FormData(form, submitter)), form);
+  const url = submitter?.hasAttribute("formaction") ? submitter.formAction : form.action;
+  return postAndMorph(url, new URLSearchParams(new FormData(form, submitter)), form);
 }
 
 function refuse(form, refused) {

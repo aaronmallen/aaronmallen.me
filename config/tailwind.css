@@ -5507,6 +5507,18 @@
   }
 }
 
+@utility post-broken-links {
+  @apply mb-2 border-l-2 border-line pl-4;
+
+  & .li-title {
+    @apply text-base;
+  }
+}
+
+@utility post-broken-short {
+  @apply mt-stack;
+}
+
 @utility post-row-meta {
   @apply meta-row gap-y-1 empty:hidden;
 }
@@ -7465,7 +7477,7 @@
   }
 
   @media (width < 43.75rem) {
-    @apply tap-target;
+    @apply tap-target px-2.5;
   }
 }
 

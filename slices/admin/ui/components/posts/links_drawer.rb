@@ -41,6 +41,13 @@ module Admin
 
           def failing = @failing ||= self.class.failing(@links)
 
+          def find(url)
+            Button(
+              small: true, variant: :gh, icon: "fa-solid fa-i-cursor", label: t(".find", link: url),
+              data: { find_link: url },
+            )
+          end
+
           def fine = @links.select { it[:check] && !it[:check].reason }
 
           def fine_rows
@@ -49,7 +56,7 @@ module Admin
                 Icon("fa-solid fa-chevron-right time-caret")
                 plain t(".fine", count: fine.size)
               end
-              fine.each { LinkCheckRow(**it, published: @published, quiet: true) }
+              fine.each { |link| LinkCheckRow(**link, published: @published, quiet: true) { find(link[:url]) } }
             end
           end
 
@@ -61,7 +68,7 @@ module Admin
           def listed
             summary_line
             Hint { t(@published ? ".hint_live" : ".hint_draft") }
-            (failing + unchecked).each { LinkCheckRow(**it, published: @published) }
+            (failing + unchecked).each { |link| LinkCheckRow(**link, published: @published) { find(link[:url]) } }
             fine_rows if fine.any?
           end
 

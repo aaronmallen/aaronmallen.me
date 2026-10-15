@@ -1,0 +1,232 @@
+# frozen_string_literal: true
+
+RSpec.describe "Admin broken links", type: :request do
+  let(:page) { Capybara.string(last_response.body) }
+
+  def at = Time.utc(2026, 10, 12, 8, 12)
+
+  def checks = Posts::Slice["relations.post_link_checks"]
+
+  def dead = "https://bob.example/gone"
+
+  def fail_nights(post, url, nights)
+    nights.times { checks.record(post_id: post.id, url:, reason: "404 Not Found", at: at + (it * 86_400)) }
+  end
+
+  def fail_short(link, nights, reason = "503 Service Unavailable")
+    nights.times do |night|
+      short_checks.record(short_link_id: link.id, url: link.destination, reason:, at: at + (night * 86_400))
+    end
+  end
+
+  def live = "https://ada.example/notes/1"
+
+  def post_row(title) = page.find(".post-list .li", text: title)
+
+  def post_with(*urls, status: :published, title: "Linked")
+    create(:post, status, title:, body: ["intro", *urls.map { "See [note #{it}](#{it})." }].join("\n\n"))
+  end
+
+  def short_checks = Shares::Slice["relations.short_link_checks"]
+
+  def short_link(destination) = Shares::Slice["operations.create_short_link"].call(destination:).value!
+
+  def slow = "https://cy.example/slow"
+
+  before { sign_in_to_admin }
+
+  describe "the filter" do
+    it "counts broken links in posts and short links" do
+      fail_nights(post_with(dead, slow), dead, 1)
+      fail_short(short_link(slow), 1)
+      get "/admin/posts"
+
+      expect(page).to have_css(".seg-option", exact_text: "broken · 2")
+    end
+
+    it "lists only published posts with a failing link", :aggregate_failures do
+      fail_nights(post_with(dead, title: "Broken"), dead, 1)
+      checks.record(post_id: post_with(live, title: "Fine").id, url: live, reason: nil, at:)
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_css(".post-list .li-title", text: "Broken")
+      expect(page).to have_no_css(".post-list .li-title", text: "Fine")
+    end
+
+    it "checks the broken links filter" do
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_css(".seg input[name='status'][value='broken'][checked]")
+    end
+  end
+
+  describe "the header line" do
+    context "with broken links" do
+      before do
+        fail_nights(post_with(dead, slow), dead, 1)
+        fail_nights(post_with(slow, title: "Other"), slow, 2)
+        fail_short(short_link(slow), 1)
+        get "/admin/posts", status: "broken"
+      end
+
+      it "counts the links, the posts and the short links" do
+        expect(page).to have_css(".page-head-sub", text: "3 broken links: 2 in 2 posts and 1 short link.")
+      end
+
+      it "says when the last check finished" do
+        expect(page).to have_css(".page-head-sub", text: "The last check finished Oct 13 · 03:12")
+      end
+    end
+
+    it "says nothing is broken" do
+      checks.record(post_id: post_with(live).id, url: live, reason: nil, at:)
+      get "/admin/posts", status: "broken"
+
+      expect(page).to have_css(".page-head-sub", text: "Every link answered the last check")
+    end
+
+    it "keeps the drafts line on the other filters" do
+      fail_nights(post_with(dead), dead, 1)
+      get "/admin/posts"
+
+      expect(page).to have_css(".page-head-sub", text: "0 drafts in progress.")
+    end
+  end
+
+  describe "a post's failing links" do
+    let(:post) { post_with(live, dead, slow) }
+    let(:rows) { page.all(".post-broken-links .li") }
+
+    before do
+      fail_nights(post, slow, 1)
+      fail_nights(post, dead, 3)
+      checks.record(post_id: post.id, url: live, reason: nil, at:)
+      get "/admin/posts", status: "broken"
+    end
+
+    it "lists the failing links, longest failing first" do
+      expect(rows.map { it.first(".li-sub").text }).to eq([dead, slow])
+    end
+
+    it "gives each link its reason, last checked and first failed", :aggregate_failures do
+      expect(rows.first).to have_css(".pill.pink", text: "failing 3 nights")
+      expect(rows.first).to have_css(".post-link-reason", text: "404 Not Found")
+      expect(rows.first).to have_text("first failed Oct 12, 2026")
+      expect(rows.first).to have_css("time")
+    end
+
+    it "offers Check again, Fix in post and Open link", :aggregate_failures do
+      expect(rows.first).to have_css(
+        "button[form='broken-links-check'][formaction='/admin/posts/#{post.id}/links/check'][value='#{dead}']",
+      )
+      expect(rows.first).to have_css("a[href='/admin/posts/#{post.id}/edit?links=1'][title='Fix in post: #{dead}']")
+      expect(rows.first).to have_css("a[href='#{dead}'][target='_blank']")
+    end
+
+    it "sends Check again back to the list" do
+      expect(page).to have_css(
+        "form#broken-links-check input[name='return_to'][value='/admin/posts?status=broken']", visible: :all,
+      )
+    end
+
+    it "reloads when a check lands" do
+      tables = "[data-live-tables~='post_link_checks'][data-live-tables~='short_link_checks']"
+
+      expect(page).to have_css(tables, visible: :all)
+    end
+  end
+
+  describe "the failing tag" do
+    it "tags a post failing one night in orange" do
+      fail_nights(post_with(dead, title: "Once"), dead, 1)
+      get "/admin/posts"
+
+      expect(post_row("Once")).to have_css(".post-row-meta .pill.orange", text: "1 link failing")
+    end
+
+    it "tags a post failing two nights or more in pink" do
+      post = post_with(dead, slow, title: "Twice")
+      fail_nights(post, dead, 2)
+      fail_nights(post, slow, 1)
+      get "/admin/posts"
+
+      expect(post_row("Twice")).to have_css(".post-row-meta .pill.pink", text: "2 links failing")
+    end
+
+    it "leaves a post with fine links untagged" do
+      checks.record(post_id: post_with(live, title: "Fine").id, url: live, reason: nil, at:)
+      get "/admin/posts"
+
+      expect(post_row("Fine")).to have_no_css(".pill", text: "failing")
+    end
+  end
+
+  describe "the short links card" do
+    let(:link) { short_link(slow) }
+    let(:card) { page.find(".post-broken-short") }
+
+    before do
+      short_link(live)
+      fail_short(link, 1)
+      get "/admin/posts", status: "broken"
+    end
+
+    it "counts the failing short links" do
+      expect(card).to have_css(".card-side", text: "1 of 2 failing")
+    end
+
+    it "lists the failing destination with its reason", :aggregate_failures do
+      expect(card).to have_css(".li-sub", exact_text: slow)
+      expect(card).to have_css(".pill.orange", text: "failing")
+      expect(card).to have_css(".post-link-reason", text: "503 Service Unavailable")
+    end
+
+    it "offers Check again, Change destination and Open link", :aggregate_failures do
+      expect(card).to have_css("button[form='broken-links-check'][formaction='/admin/links/#{link.id}/check']")
+      expect(card).to have_css("a[href='/admin/links/#{link.id}/edit'][title='Change destination: #{slow}']")
+      expect(card).to have_css("a[href='#{slow}'][target='_blank']")
+    end
+
+    it "skips a failure checked against a link's old destination", :aggregate_failures do
+      moved = short_link(dead)
+      short_checks.record(short_link_id: moved.id, url: "https://old.example/", reason: "404 Not Found", at:)
+      get "/admin/posts", status: "broken"
+
+      expect(card).to have_css(".card-side", text: "1 of 3 failing")
+      expect(card).to have_no_css(".li-sub", exact_text: dead)
+    end
+  end
+
+  describe "checking again" do
+    let(:back) { "/admin/posts?status=broken" }
+
+    it "queues a post link and comes back to the list", :aggregate_failures do
+      post = post_with(dead)
+      post "/admin/posts/#{post.id}/links/check", _csrf_token: admin_csrf_token, url: dead, return_to: back
+
+      expect(Posts::Jobs::CheckPostLinksAgain.jobs.map { it["args"] }).to eq([[post.id, dead]])
+      expect(last_response.location).to end_with(back)
+    end
+
+    it "queues a short link and comes back to the list", :aggregate_failures do
+      link = short_link(slow)
+      post "/admin/links/#{link.id}/check", _csrf_token: admin_csrf_token, return_to: back
+
+      expect(Shares::Jobs::CheckShortLinkAgain.jobs.map { it["args"] }).to eq([[link.id]])
+      expect(last_response.location).to end_with(back)
+    end
+
+    it "says so once it lands" do
+      post "/admin/links/#{short_link(slow).id}/check", _csrf_token: admin_csrf_token
+      follow_redirect!
+
+      expect(page.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Checking that link")
+    end
+
+    it "finds no short link that is gone" do
+      post "/admin/links/0/check", _csrf_token: admin_csrf_token
+
+      expect(last_response.status).to eq(404)
+    end
+  end
+end
