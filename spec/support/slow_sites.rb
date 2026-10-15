@@ -18,8 +18,8 @@ module SlowSites
 
   def shorten_webmention_budget(budget)
     stub_const("Blog::PublicAddress::BLOCKED_RANGES", [])
-    stub_const("Social::Webmentions::Client::BUDGET", budget)
-    stub_const("Social::Webmentions::Client::PORTS", 1..65_535)
+    stub_const("PageFetcher::Client::BUDGET", budget)
+    stub_const("PageFetcher::Client::PORTS", 1..65_535)
     stub_const("Blog::PublicAddress::SPECIAL", [])
     allow(Socket).to receive(:getifaddrs).and_return([])
   end

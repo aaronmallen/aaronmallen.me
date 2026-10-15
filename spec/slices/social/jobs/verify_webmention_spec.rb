@@ -130,7 +130,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     end
 
     it "reads no further than the first megabyte" do
-      verify_page("#{'x' * Social::Webmentions::Client::MAX_BODY}#{entry}")
+      verify_page("#{'x' * PageFetcher::Client::MAX_BODY}#{entry}")
 
       expect(stored).to be_nil
     end
@@ -304,7 +304,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       "redirects to somewhere that isn't a URL" =>
         ->(url) { stub_request(:get, url).to_return(status: 302, headers: { "Location" => "http://[" }) },
       "declares a body over the limit" => lambda { |url|
-        stub_request(:get, url).to_return(headers: { "Content-Length" => Social::Webmentions::Client::MAX_BODY + 1 },
+        stub_request(:get, url).to_return(headers: { "Content-Length" => PageFetcher::Client::MAX_BODY + 1 },
                                           body: "x")
       },
       "answers 400" => ->(url) { stub_request(:get, url).to_return(status: 400) },

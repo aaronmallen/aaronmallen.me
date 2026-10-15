@@ -19,7 +19,7 @@ module Social
 
       include Deps[
         "routes",
-        "webmentions.client",
+        client: "page_fetcher.webmention",
         post_queries: "posts.repos.post_queries",
         record_post_webmentions: "posts.operations.record_post_webmentions",
         webmention_queries: "repos.webmention_queries",
@@ -51,12 +51,12 @@ module Social
 
       def deliver(source, target)
         page = client.fetch(target)
-        return FAILED if Webmentions::Client::RETRY_STATUSES.include?(page.status)
+        return FAILED if PageFetcher::Client::RETRY_STATUSES.include?(page.status)
 
         mention(endpoint_in(page), source, target)
-      rescue Webmentions::Client::Unreachable
+      rescue PageFetcher::Client::Unreachable
         FAILED
-      rescue Webmentions::Client::Error
+      rescue PageFetcher::Client::Error
         SKIPPED
       end
 
@@ -81,7 +81,7 @@ module Social
       end
 
       def endpoint_in(page)
-        return nil unless Webmentions::Client::OK_STATUSES.cover?(page.status)
+        return nil unless PageFetcher::Client::OK_STATUSES.cover?(page.status)
 
         endpoint_in_headers(page) || endpoint_in_markup(page)
       end
@@ -108,16 +108,16 @@ module Social
         return SKIPPED unless endpoint
 
         outcome(client.post(endpoint, source:, target:).status)
-      rescue Webmentions::Client::Refused
+      rescue PageFetcher::Client::Refused
         REJECTED
-      rescue Webmentions::Client::Error
+      rescue PageFetcher::Client::Error
         FAILED
       end
 
       def outcome(status)
-        return SENT if Webmentions::Client::OK_STATUSES.cover?(status)
+        return SENT if PageFetcher::Client::OK_STATUSES.cover?(status)
 
-        Webmentions::Client::RETRY_STATUSES.include?(status) ? FAILED : REJECTED
+        PageFetcher::Client::RETRY_STATUSES.include?(status) ? FAILED : REJECTED
       end
 
       def resolve(response, href)

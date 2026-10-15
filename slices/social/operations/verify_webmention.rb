@@ -6,7 +6,7 @@ module Social
       GONE_STATUSES = [404, 410].freeze
 
       include Deps[
-        "webmentions.client",
+        client: "page_fetcher.webmention",
         check_author_scope: "operations.check_author_scope",
         post_queries: "posts.repos.post_queries",
         webmention_mutations: "repos.webmention_mutations",
@@ -44,11 +44,11 @@ module Social
       def fetch(post, source)
         response = client.fetch(source)
         GONE_STATUSES.include?(response.status) ? forget(post, source, :source_gone) : read(response)
-      rescue Webmentions::Client::Refused
+      rescue PageFetcher::Client::Refused
         Failure(:source_refused)
-      rescue Webmentions::Client::Unreachable
+      rescue PageFetcher::Client::Unreachable
         Failure(:source_unreachable)
-      rescue Webmentions::Client::Error
+      rescue PageFetcher::Client::Error
         Failure(:fetch_failed)
       end
 
@@ -67,9 +67,9 @@ module Social
       end
 
       def read(response)
-        return Failure(:source_unreachable) if Webmentions::Client::RETRY_STATUSES.include?(response.status)
+        return Failure(:source_unreachable) if PageFetcher::Client::RETRY_STATUSES.include?(response.status)
 
-        Webmentions::Client::OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
+        PageFetcher::Client::OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
       end
 
       def status(page, source, settings)

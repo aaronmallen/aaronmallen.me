@@ -29,6 +29,7 @@ require "linkedin"
 require "markdown"
 require "mastodon"
 require "object_store"
+require "page_fetcher"
 
 module Blog
   class App < Hanami::App
@@ -41,6 +42,7 @@ module Blog
     autoloader.push_dir(root.join("lib/markdown"), namespace: Markdown)
     autoloader.push_dir(root.join("lib/mastodon"), namespace: Mastodon)
     autoloader.push_dir(root.join("lib/object_store"), namespace: ObjectStore)
+    autoloader.push_dir(root.join("lib/page_fetcher"), namespace: PageFetcher)
 
     config.inflections do |inflections|
       inflections.acronym "CLI", "GitHub", "LinkedIn", "MCP", "OAuth", "PKCE", "UI", "URI"
@@ -58,7 +60,8 @@ module Blog
     config.shared_app_component_keys += %w[
       backup_store.client contracts.contributor_terms_contract contracts.review_range_contract
       contracts.search_query_contract github.auth github.client google.auth google.client linear.client
-      linkedin.auth mastodon.auth media_store.client networks.all operations.read_visitor_address share_store.client
+      linkedin.auth mastodon.auth media_store.client networks.all operations.read_visitor_address
+      page_fetcher.link_check page_fetcher.webmention share_store.client
     ]
 
     config.middleware.use RequestTimer, ->(**row) { Performance::Slice["operations.record_timing"].call(:request, **row) }

@@ -50,7 +50,7 @@ module Seeds
     end
 
     def fetch(url)
-      Social::Webmentions::Client::Response.new(body: @pages.fetch(url), headers: {}, status: OK, url:)
+      PageFetcher::Client::Response.new(body: @pages.fetch(url), headers: {}, status: OK, url:)
     end
   end
 
