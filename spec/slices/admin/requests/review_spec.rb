@@ -188,7 +188,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "notes that a task with two tags counts in both" do
         visit_review(day: "2026-09-16")
 
-        expect(card("done")).to have_css(".review-foot .hint", text: "two tags count in both")
+        expect(card("done")).to have_css(".review-foot .hint", text: "A task with two tags counts under both")
       end
 
       it "opens Tasks › Completed for the period from the card" do

@@ -5,7 +5,7 @@ module Admin
     module Components
       module TimeReport
         class Groups < Component
-          SHARED = { "project" => ".shared_project", "tag" => ".shared_tag" }.freeze
+          HINTS = { "tag" => ".over_tag" }.freeze
           TITLES = { "project" => ".by_project", "tag" => ".by_tag", "day" => ".by_day" }.freeze
 
           prop :report, Blog::Types::Instance(::Tasks::Structs::TimeReport)
@@ -19,12 +19,13 @@ module Admin
 
           private
 
+          def over? = @report.groups.sum(&:seconds) > @report.seconds || @report.groups.any?(&:overlapped)
+
           def rows
             return Empty { t(".empty") } if @report.groups.empty?
 
             @report.groups.each { Row(group: it, by: @report.by, top:) }
-            Hint { t(SHARED.fetch(@report.by)) } if @report.groups.any?(&:shared)
-            Hint { t(".overlapped") } if @report.groups.any?(&:overlapped)
+            Hint { t(HINTS.fetch(@report.by, ".over")) } if over?
           end
 
           def top = @top ||= @report.groups.map(&:seconds).max

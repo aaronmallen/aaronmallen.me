@@ -59,8 +59,8 @@ count has to land in both, and the view's half takes a migration.
 
 Window functions over every session in a range cost more than a plain sum, and the cost grows with the range.
 
-A group's rows can add up to more than its total for a second reason. A task in two projects already did that, and
-the hint under the group now covers both.
+A group's rows can add up to more than its total for a second reason. A task under two tags already did that, and
+the hint under the card now covers both.
 
 Manual time never merges. Two tasks given an hour by hand for the same hour still count two.
 

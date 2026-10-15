@@ -10,6 +10,10 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
 
   def group(name) = page.find(".time-group", text: name)
 
+  def hint(key) = Admin::Slice["i18n"].t(key, scope: "ui.components.time_report.groups")
+
+  def hints = page.all("#time-groups .hint").map(&:text)
+
   def link(task, *projects)
     projects.each do |project|
       Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
@@ -100,6 +104,10 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         expect(page).to have_no_css(".time-row .pill", text: "shared")
       end
 
+      it "leaves out the hint, since the rows add up to the total" do
+        expect(page).to have_no_css("#time-groups .hint")
+      end
+
       it "lists the tasks behind a row with their time, each linked to its page" do
         gem, alone = tasks.values_at(:gem, :alone).map { "/admin/tasks/#{it.id}" }
 
@@ -144,8 +152,8 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         expect(page.find_field("Tag")).to be_checked
       end
 
-      it "explains why the rows add up to more than the total" do
-        expect(page).to have_css(".hint", text: "counts under both")
+      it "explains in one hint why the rows add up to more than the total" do
+        expect(hints).to eq([hint(:over_tag)])
       end
 
       it "flags no row, since most tasks carry more than one tag" do
@@ -193,8 +201,28 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: "Mar 2, 2026 → Mar 8, 2026 · 1h 00m")
       end
 
-      it "explains why the rows add up to more than the total" do
-        expect(page).to have_css(".hint", text: "ran at the same time count once")
+      it "explains in one hint why the tasks add up to more than their row" do
+        expect(hints).to eq([hint(:over)])
+      end
+    end
+
+    describe "tasks in different projects that ran at the same time" do
+      before do
+        link(worked("Ship the gem", at(2, 9), at(2, 10)), gem)
+        link(worked("Polish the site", at(2, 9), at(2, 10)), site)
+        visit_time(from: "2026-03-02", to: "2026-03-08", by: "project")
+      end
+
+      it "counts the hour in each project" do
+        expect(rows).to eq([["gem", "1h 00m"], ["site", "1h 00m"]])
+      end
+
+      it "counts the hour once in the total" do
+        expect(page).to have_css(".page-head-sub", text: "Mar 2, 2026 → Mar 8, 2026 · 1h 00m")
+      end
+
+      it "explains in one hint why the rows add up to more than the total" do
+        expect(hints).to eq([hint(:over)])
       end
     end
 

@@ -53,8 +53,6 @@ task action. The owner picked five fixed columns in #1162.
 
 The board needs no table of its own: a task's column comes from its status and stage.
 
-The stage lives on the task, so a task linked to two projects sits in the same column on both boards.
-
 The stage stays on a task once it leaves the open status, and means nothing until the task reopens. Reopening sets
 it again.
 

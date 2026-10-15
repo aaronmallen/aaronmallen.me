@@ -1887,7 +1887,7 @@ en:
           me: "Me"
         done_card:
           all: "All %{count} in Tasks →"
-          both: "Tasks with two tags count in both."
+          both: "A task with two tags counts under both."
           by_project: "by project"
           by_tag: "by tag"
           empty: "Nothing done yet."
@@ -2738,9 +2738,8 @@ en:
           by_project: "By project"
           by_tag: "By tag"
           empty: "No time logged in this range."
-          overlapped: "Tasks that ran at the same time count once, so the rows add up to more than the total."
-          shared_project: "A shared task counts in each of its projects, so the rows add up to more than the total."
-          shared_tag: "A task with two tags counts under both, so the rows add up to more than the total."
+          over: "Overlapping time counts once in each row and once in the total, so tasks can add up to more than their row and rows more than the total."
+          over_tag: "Overlapping time counts once in each row and once in the total, and a task with two tags counts under both, so tasks can add up to more than their row and rows more than the total."
         row:
           no_project: "No project"
           no_tag: "No tag"
