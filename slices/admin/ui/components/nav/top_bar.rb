@@ -15,7 +15,7 @@ module Admin
           def view_template
             header(class: "top-bar") do
               a(class: "top-bar-skip", href: "#main") { t(".skip_link") }
-              Wordmark(placement: "top-bar-wordmark")
+              Wordmark()
               @navigation ? signed_in : SettingsMenu(session: @session)
             end
           end

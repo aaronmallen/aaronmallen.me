@@ -7,13 +7,11 @@ module Blog
         SLASH = "/"
         SPLIT = " "
 
-        prop :placement, Blog::Types::String
-
         def view_template
           href = path(:root)
           owner = Hanami.app.settings.owner_name
 
-          a(class: ["wordmark", @placement], href:, aria: { label: t(".label", owner:), current: current(href) }) do
+          a(class: "wordmark", href:, aria: { label: t(".label", owner:), current: current(href) }) do
             name(owner)
           end
         end

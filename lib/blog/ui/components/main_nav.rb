@@ -16,7 +16,7 @@ module Blog
         def view_template
           header(class: "site-header") do
             a(class: "skip-link", href: "#main") { t(".skip_link") }
-            Wordmark(placement: "main-nav-brand")
+            Wordmark()
             nav(class: "main-nav", aria: { label: t(".label") }) do
               PAGES.each { |(route, label_key)| nav_item(route:, label_key:) }
             end

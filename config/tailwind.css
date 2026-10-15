@@ -172,7 +172,6 @@
   --container-drawer-wide: 760px;
   --container-menu: 250px;
   --container-lede: 62ch;
-  --text-wordmark: 1.0625rem;
   --text-pill: 0.90625rem;
   --text-tab: 0.78125rem;
   --text-tab--letter-spacing: 0.12em;
@@ -522,20 +521,6 @@
 
   @media (width < 43.75rem) {
     @apply flex-wrap;
-  }
-}
-
-@utility main-nav-brand {
-  @apply mr-[clamp(4px,1vw,16px)] text-brand pub-focus;
-  --cy0: var(--color-mk-pink-text);
-  --cy1: var(--color-mk-orange-text);
-  --cy2: var(--color-mk-sand-text);
-  --cy3: var(--color-mk-green-text);
-  --cy4: var(--color-mk-blue-text);
-  --cy5: var(--color-mk-violet-text);
-
-  @media (width < 43.75rem) {
-    @apply min-h-tap;
   }
 }
 
@@ -1459,23 +1444,19 @@
   @apply focus:bg-ink focus:px-3.5 focus:py-2.5 focus:text-ground;
 }
 
-@utility top-bar-wordmark {
-  @apply mr-3 text-wordmark admin-focus;
-  --cy0: var(--color-mk-green-text);
-  --cy1: var(--color-mk-blue-text);
-  --cy2: var(--color-mk-violet-text);
-  --cy3: var(--color-mk-pink-text);
-  --cy4: var(--color-mk-orange-text);
-  --cy5: var(--color-mk-sand-text);
+@utility wordmark {
+  @apply inline-flex items-center font-display font-extrabold uppercase whitespace-nowrap;
+  @apply mr-[clamp(4px,1vw,16px)] text-brand text-ink no-underline hover:text-ink accent-focus;
+  --cy0: var(--color-mk-pink-text);
+  --cy1: var(--color-mk-orange-text);
+  --cy2: var(--color-mk-sand-text);
+  --cy3: var(--color-mk-green-text);
+  --cy4: var(--color-mk-blue-text);
+  --cy5: var(--color-mk-violet-text);
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
   }
-}
-
-@utility wordmark {
-  @apply inline-flex items-center font-display font-extrabold uppercase whitespace-nowrap;
-  @apply text-ink no-underline hover:text-ink;
 }
 
 @utility wordmark-slash {

@@ -7,6 +7,15 @@ RSpec.describe "The wordmark", type: :feature do
     JS
   end
 
+  def cycle
+    evaluate_script(<<~JS)
+      (() => {
+        const style = getComputedStyle(document.querySelector("a.wordmark"))
+        return [0, 1, 2, 3, 4, 5].map((step) => style.getPropertyValue(`--cy${step}`).trim())
+      })()
+    JS
+  end
+
   def emulate_reduced_motion
     page.driver.browser.page.command(
       "Emulation.setEmulatedMedia",
@@ -14,7 +23,51 @@ RSpec.describe "The wordmark", type: :feature do
     )
   end
 
-  shared_examples "a cycling slash" do
+  def palette(*names)
+    evaluate_script(<<~JS)
+      (() => {
+        const style = getComputedStyle(document.documentElement)
+        return #{names.to_json}.map((name) => style.getPropertyValue(`--color-mk-${name}-text`).trim())
+      })()
+    JS
+  end
+
+  def resolved_color(css)
+    evaluate_script(<<~JS)
+      (() => {
+        const probe = document.createElement("span")
+        probe.style.color = #{css.to_json}
+        document.body.append(probe)
+        const color = getComputedStyle(probe).color
+        probe.remove()
+        return color
+      })()
+    JS
+  end
+
+  def style_of(selector, property)
+    evaluate_script("getComputedStyle(document.querySelector(#{selector.to_json})).#{property}")
+  end
+
+  shared_examples "the shared wordmark" do
+    it "starts the slash pink" do
+      expect(style_of(".wordmark-slash", "color")).to eq(resolved_color("var(--color-mk-pink-text)"))
+    end
+
+    it "cycles in the public order" do
+      expect(cycle).to eq(palette("pink", "orange", "sand", "green", "blue", "violet"))
+    end
+
+    it "sets the wordmark at the brand size" do
+      expect(style_of("a.wordmark", "fontSize")).to eq("18px")
+    end
+
+    it "rings the wordmark in the accent on focus" do
+      execute_script("document.querySelector('a.wordmark').focus({ focusVisible: true })")
+
+      expect(style_of("a.wordmark", "outlineColor")).to eq(resolved_color("var(--color-accent)"))
+    end
+
     it "rests until hovered" do
       expect(animating?).to be(false)
     end
@@ -42,7 +95,7 @@ RSpec.describe "The wordmark", type: :feature do
   describe "in the public header" do
     before { visit "/" }
 
-    it_behaves_like "a cycling slash"
+    it_behaves_like "the shared wordmark"
   end
 
   describe "in the admin top bar" do
@@ -51,6 +104,6 @@ RSpec.describe "The wordmark", type: :feature do
       visit "/admin"
     end
 
-    it_behaves_like "a cycling slash"
+    it_behaves_like "the shared wordmark"
   end
 end
