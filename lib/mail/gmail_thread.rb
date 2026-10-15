@@ -9,7 +9,8 @@ module Mail
     BLANK = /\A[[:space:]]*\z/
     CATEGORY = "CATEGORY_"
     CHARSET = /charset="?([^";\s]+)/i
-    FLAGS = { starred: "STARRED", trashed: "TRASH", sent: "SENT", draft: "DRAFT", important: "IMPORTANT" }.freeze
+    EVERY = { trashed: "TRASH", draft: "DRAFT" }.freeze
+    FLAGS = { starred: "STARRED", sent: "SENT", important: "IMPORTANT" }.freeze
     FROM = /\A\s*"?(?<name>[^"<]*?)"?\s*<(?<address>[^>]*)>\s*\z/
     HTML = "text/html"
     NO_SUBJECT = "(no subject)"
@@ -38,11 +39,11 @@ module Mail
     attr_reader :messages
 
     def thread(now: Time.now)
-      spam = labels.include?("SPAM")
+      spam = every?("SPAM")
 
       {
         gmail_id:, subject: messages.first&.fetch(:subject) || NO_SUBJECT, status: status(spam),
-        marked_spam_at: (now if spam), **FLAGS.transform_values { labels.include?(it) },
+        marked_spam_at: (now if spam), **flags,
         archived: !labels.include?("INBOX"), category:,
         received_at: messages.map { it[:received_at] }.max || now,
       }
@@ -72,6 +73,8 @@ module Mail
       utf8(Base64.urlsafe_decode64(part.dig("body", "data")), charset)
     end
 
+    def every?(label) = message_labels.any? && message_labels.all? { it.include?(label) }
+
     def files(payload)
       parts(payload).select { attachment?(it) && !it["partId"].to_s.empty? }.map do |part|
         {
@@ -81,9 +84,11 @@ module Mail
       end
     end
 
+    def flags = FLAGS.transform_values { labels.include?(it) }.merge(EVERY.transform_values { every?(it) })
+
     def header(part, name) = part.fetch("headers", []).find { it["name"].casecmp?(name) }&.fetch("value")
 
-    def labels = @labels ||= @json.fetch("messages", []).flat_map { it.fetch("labelIds", []) }.to_set
+    def labels = @labels ||= message_labels.reduce(Set.new, :|)
 
     def message(json)
       payload = json.fetch("payload", {})
@@ -94,6 +99,8 @@ module Mail
         received_at: Time.at(json.fetch("internalDate").to_i/1000r),
       }
     end
+
+    def message_labels = @message_labels ||= @json.fetch("messages", []).map { it.fetch("labelIds", []).to_set }
 
     def parts(part) = [part, *part.fetch("parts", []).flat_map { parts(it) }]
 

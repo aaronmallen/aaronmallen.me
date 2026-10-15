@@ -44,7 +44,16 @@ RSpec.describe Mail::Jobs::SyncGmail do
     run
   end
 
+  def sync_messages(*labels)
+    sent = labels.each.with_index(1).map { |labels_of, index| gmail_message("m#{index}", labels: labels_of) }
+
+    stub_gmail(history: %w[t1], threads: { "t1" => sent })
+    run
+  end
+
   def thread(gmail_id = "t1") = rows("mail_threads").where(gmail_id:).one
+
+  def threads_in(folder) = rows("mail_threads").in_folder(Blog::Types::MailFolder[folder]).to_a.map(&:gmail_id)
 
   describe "an account syncing for the first time" do
     before do
@@ -220,6 +229,38 @@ RSpec.describe Mail::Jobs::SyncGmail do
         sync_message(labels: %w[SENT])
 
         expect(thread.sent).to be(true)
+      end
+
+      it "brings a trashed thread back to the inbox, unread, when a reply arrives", :aggregate_failures do
+        sync_messages(%w[TRASH], %w[INBOX UNREAD])
+
+        expect(threads_in("inbox")).to eq(%w[t1])
+        expect(thread).to have_attributes(status: "unread", trashed: false)
+      end
+
+      it "keeps a thread in the inbox while a reply to it is a draft", :aggregate_failures do
+        sync_messages(%w[INBOX], %w[DRAFT])
+
+        expect(threads_in("inbox")).to eq(%w[t1])
+        expect(thread.draft).to be(false)
+      end
+
+      it "keeps a thread out of spam while one of its messages is not" do
+        sync_messages(%w[SPAM], %w[INBOX])
+
+        expect(thread).to have_attributes(status: "read", marked_spam_at: nil)
+      end
+
+      it "files a thread in the trash, drafts and spam when every message is there", :aggregate_failures do
+        sync_messages(%w[TRASH DRAFT SPAM], %w[TRASH DRAFT SPAM])
+
+        expect(thread).to have_attributes(trashed: true, draft: true, status: "spam")
+      end
+
+      it "counts inbox, unread, starred, sent and important from any one message" do
+        sync_messages(%w[INBOX UNREAD STARRED], %w[SENT IMPORTANT])
+
+        expect(thread).to have_attributes(archived: false, status: "unread", starred: true, sent: true, important: true)
       end
 
       it "drops a message Gmail deleted" do
