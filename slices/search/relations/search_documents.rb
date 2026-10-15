@@ -16,7 +16,7 @@ module Search
         query = tsquery(phrase)
         found = best(query, kinds).order(*RANKED).limit(page.limit).offset(page.offset)
 
-        found.from_self(alias: :found).select(*LINKED, headline(query)).order(*RANKED)
+        with_body(found, query).select(*LINKED, headline(query)).order(*RANKED)
       end
 
       def kind_counts(phrase, kinds:)
@@ -28,16 +28,25 @@ module Search
       private
 
       def best(query, kinds)
-        matched = dataset.unordered.where(kind: kinds).where(Sequel.lit("search_vector @@ ?", query))
-
-        ranked = matched.select(*LINKED, :body, Sequel.function(:ts_rank, :search_vector, query).as(:rank))
+        ranked = matching(query).where(kind: kinds).select(*LINKED, rank(query).as(:rank))
 
         ranked.distinct(:kind, :source_id).order(:kind, :source_id, Sequel.desc(:rank)).from_self(alias: :best)
       end
 
-      def headline(query) = Sequel.function(:ts_headline, CONFIG, :body, query, HEADLINE).as(:match)
+      def headline(query) = Sequel.function(:ts_headline, CONFIG, Sequel[:top][:body], query, HEADLINE).as(:match)
+
+      def matching(query) = dataset.unordered.where(Sequel.lit("search_vector @@ ?", query))
+
+      def rank(query) = Sequel.function(:ts_rank, :search_vector, query)
 
       def tsquery(phrase) = Sequel.function(:websearch_to_tsquery, CONFIG, phrase)
+
+      def with_body(found, query)
+        same = { kind: Sequel[:found][:kind], source_id: Sequel[:found][:source_id] }
+        top = matching(query).where(same).select(:body).order(Sequel.desc(rank(query))).limit(1)
+
+        found.from_self(alias: :found).cross_join(top.lateral.as(:top))
+      end
     end
   end
 end
