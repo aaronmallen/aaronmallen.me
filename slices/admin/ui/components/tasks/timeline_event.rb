@@ -18,7 +18,7 @@ module Admin
           def view_template
             icon, key = EVENTS.fetch(@entry.kind)
 
-            li(class: "timeline-event", data: { task_event: @entry.kind }) do
+            li(class: "timeline-event") do
               Moment(at: @entry.occurred_at, format: :short, class: "timeline-time")
               span(class: "timeline-event-text") do
                 Icon(["timeline-event-icon", icon])

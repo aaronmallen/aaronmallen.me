@@ -11,14 +11,14 @@ const pressed = new Set();
 const ready = new WeakSet();
 let bound = false;
 
-export function setupBulk(root = document) {
-  for (const form of root.querySelectorAll(FORM)) {
+export function setupBulk() {
+  for (const form of document.querySelectorAll(FORM)) {
     form.querySelector(ALL).hidden = false;
     for (const choose of form.querySelectorAll(CHOOSE)) choose.nextElementSibling.hidden = true;
     show(form);
   }
 
-  for (const button of root.querySelectorAll(TOGGLE)) {
+  for (const button of document.querySelectorAll(TOGGLE)) {
     const form = document.getElementById(button.dataset.bulkToggle);
     if (!form) continue;
 
@@ -26,7 +26,7 @@ export function setupBulk(root = document) {
     if (fresh(ready, [button]).length) button.addEventListener("click", () => flip(button));
   }
 
-  for (const form of fresh(ready, root.querySelectorAll(FORM))) {
+  for (const form of fresh(ready, document.querySelectorAll(FORM))) {
     const box = all(form);
 
     box.addEventListener("change", () => {

@@ -53,8 +53,8 @@ lets a class be checked against its source: AA-343 audited the type by laying ea
 counterpart, and its notes are how AA-407 found the eyebrow missing.
 
 Every slice builds its sheet from the same `config/tailwind.css`. `config/tailwind/public.css` scans only the public
-sources, and `config/tailwind/admin.css` scans the whole tree for the admin and MCP slices. Each layout links its own
-sheet. A utility reaches the public sheet only when a public source names it, but a rule no class guards reaches every
+sources, and `config/tailwind/admin.css` scans only the admin, MCP and shared sources. Each layout links its own sheet.
+A utility reaches a sheet only when one of its sources names it, but a rule no class guards reaches every
 slice, so the site cannot do what the design does and cap every `p` at a measure. Each run of prose names its own cap
 instead, and a rule meant for one side has to hang off a class that side owns, as the admin's phone type steps hang off
 `.adm`.

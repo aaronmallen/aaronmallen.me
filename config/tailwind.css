@@ -155,8 +155,6 @@
   --text-work--line-height: 1.3;
   --text-work--letter-spacing: -0.01em;
 
-  --tracking-eyebrow: 0.02em;
-
   --spacing-gutter: 5rem;
   --container-measure: 44em;
   --container-entry-meta: clamp(150px, 18cqi, 230px);
@@ -918,28 +916,8 @@
   }
 }
 
-@utility eyebrow {
-  @apply meta tracking-eyebrow;
-}
-
 @utility lede {
   @apply mb-8 max-w-measure text-lede text-ink-muted;
-}
-
-@utility chips {
-  @apply mt-8 flex list-none flex-wrap gap-2 p-0;
-
-  & li {
-    @apply rounded-full border border-line px-3 py-1 meta;
-  }
-
-  & li:nth-child(3n + 2) {
-    border-color: color-mix(in oklab, var(--color-mk-green) 40%, var(--color-line));
-  }
-
-  & li:nth-child(3n + 3) {
-    border-color: color-mix(in oklab, var(--color-mk-blue) 40%, var(--color-line));
-  }
 }
 
 @utility crs {
@@ -5702,10 +5680,6 @@
 
 @utility task-form-foot {
   @apply flex flex-wrap items-center justify-end gap-2;
-}
-
-@utility task-form-delete {
-  @apply mr-auto;
 }
 
 @utility dialog {

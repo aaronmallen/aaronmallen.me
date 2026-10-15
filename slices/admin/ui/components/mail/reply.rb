@@ -20,7 +20,7 @@ module Admin
           def view_template
             return if @thread.status == SPAM || @thread.trashed
 
-            details(class: "mail-reply", open: (true if kept), data: { mail_reply: "" }) do
+            details(class: "mail-reply", open: (true if kept)) do
               Button(summary: true, small: true) do
                 Icon("fa-solid fa-reply")
                 plain t(".reply")
