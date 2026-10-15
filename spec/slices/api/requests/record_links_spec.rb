@@ -8,7 +8,9 @@ RSpec.describe "API record links", type: :request do
       .merge("url" => "/admin/commits/#{id}")
   end
 
-  def link(kind, id, **fields) = call_api(:post, "/links/#{kind}/#{id}", JSON.generate(fields))
+  def link(kind, id, token: api_token, **fields)
+    call_api(:post, "/links/#{kind}/#{id}", JSON.generate(fields), token:)
+  end
 
   def link_every_pair
     API::Serializers::Link::KINDS.to_h { [it, linkable_record(it)] }.tap do |records|
@@ -18,7 +20,17 @@ RSpec.describe "API record links", type: :request do
     end
   end
 
-  def list(kind, id) = call_api(:get, "/links/#{kind}/#{id}")
+  def list(kind, id, token: api_token) = call_api(:get, "/links/#{kind}/#{id}", token:)
+
+  def mailless = api_token(%w[read write delete])
+
+  def refusal = [last_response.status, last_response.headers["WWW-Authenticate"], JSON.parse(last_response.body)]
+
+  def refused_for_mail
+    body = { "error" => "insufficient_scope", "error_description" => "this endpoint needs a token with the mail scope" }
+
+    [403, 'Bearer error="insufficient_scope", scope="mail"', body]
+  end
 
   def status = last_response.status
 
@@ -26,7 +38,9 @@ RSpec.describe "API record links", type: :request do
 
   def titles(answered) = answered.fetch("links").transform_values { it.map { it.fetch("title") } }
 
-  def unlink(kind, id, other_kind, other_id) = call_api(:delete, "/links/#{kind}/#{id}/#{other_kind}/#{other_id}")
+  def unlink(kind, id, other_kind, other_id, token: api_token)
+    call_api(:delete, "/links/#{kind}/#{id}/#{other_kind}/#{other_id}", token:)
+  end
 
   let(:post_record) { create(:post, title: "On hosting") }
   let(:commit) { create(:commit, message: "Move the server") }
@@ -84,21 +98,35 @@ RSpec.describe "API record links", type: :request do
       end
     end
 
-    it "refuses a mail thread, which needs the mail scope" do
-      thread = create(:message)
+    it "links a mail thread with the mail scope" do
+      thread = create(:message, subject: "Lunch on Friday")
+      links = { "post" => [include("id" => post_record.id, "title" => "On hosting")] }
 
-      expect([link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id).fetch("errors").keys,
-              status])
-        .to eq([%w[other_kind], 422])
+      expect([link("mail_thread", thread.id, other_kind: "post", other_id: post_record.id), status])
+        .to match([{ "kind" => "mail_thread", "id" => thread.id, "links" => links }, 201])
     end
 
-    it "names every kind it links when it refuses a mail thread" do
+    it "shows a linked mail thread from the other side with the mail scope" do
+      thread = create(:message, subject: "Lunch on Friday")
+      link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id)
+
+      expect(titles(list("post", post_record.id))).to eq("mail_thread" => ["Lunch on Friday"])
+    end
+
+    it "refuses a mail thread on either side without the mail scope, naming mail", :aggregate_failures do
       thread = create(:message)
 
-      message = link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id).fetch("message")
+      link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id, token: mailless)
+      expect(refusal).to eq(refused_for_mail)
+      link("mail_thread", thread.id, other_kind: "post", other_id: post_record.id, token: mailless)
+      expect([refusal, stored]).to eq([refused_for_mail, 0])
+    end
+
+    it "names every kind it links when it refuses a kind it does not know" do
+      message = link("post", post_record.id, other_kind: "person", other_id: 1).fetch("message")
 
       expect(message.scan(/"(\w+)"/).flatten)
-        .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request])
+        .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request mail_thread])
     end
 
     it "answers an unknown record with a 404" do
@@ -117,6 +145,22 @@ RSpec.describe "API record links", type: :request do
     it "answers a pair with no link with a 404" do
       expect([unlink("post", post_record.id, "commit", commit.id).fetch("message"), status])
         .to eq(["post #{post_record.id} has no link to commit #{commit.id}", 404])
+    end
+
+    it "removes a link to a mail thread with the mail scope" do
+      thread = create(:message)
+      link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id)
+
+      expect([unlink("mail_thread", thread.id, "post", post_record.id).fetch("links"), status, stored])
+        .to eq([{}, 200, 0])
+    end
+
+    it "refuses to remove a link to a mail thread without the mail scope, naming mail" do
+      thread = create(:message)
+      link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id)
+      unlink("post", post_record.id, "mail_thread", thread.id, token: mailless)
+
+      expect([refusal, stored]).to eq([refused_for_mail, 1])
     end
 
     it "refuses another kind it does not know with a 422" do
@@ -142,7 +186,13 @@ RSpec.describe "API record links", type: :request do
       thread = create(:message)
       Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "mail_thread", other_id: thread.id })
 
-      expect(list("task", task.id).fetch("links")).to eq({})
+      expect(list("task", task.id, token: mailless).fetch("links")).to eq({})
+    end
+
+    it "refuses the links of a mail thread without the mail scope" do
+      list("mail_thread", create(:message).id, token: mailless)
+
+      expect(refusal).to eq(refused_for_mail)
     end
 
     it "cuts a long title" do

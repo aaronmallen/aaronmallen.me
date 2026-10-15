@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class RecordLinkEndpoint < Endpoint
+      SCOPED = true
       PAIR = {
         additionalProperties: false,
         properties: {
@@ -23,7 +24,17 @@ module API
 
       private
 
-      def answered(kind, id) = Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id)))
+      def answered(kind, id, scopes)
+        kinds = mail?(scopes) ? Serializers::Link::KINDS : Serializers::Link::UNMAILED
+
+        Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id), kinds))
+      end
+
+      def handled(fields, scopes)
+        return super if mail?(scopes) || !fields.values_at(:kind, :other_kind).include?(Serializers::Link::MAIL_THREAD)
+
+        Failure(Structs::Refusal.unmailed)
+      end
     end
   end
 end

@@ -7,9 +7,9 @@ module API
 
       include Deps[unlink_records: "links.operations.unlink_records"]
 
-      def handle(kind:, id:, other_kind:, other_id:)
+      def handle(kind:, id:, other_kind:, other_id:, scopes:)
         case unlink_records.call(kind, id, other_kind, other_id)
-          in Success(*) then answered(kind, id)
+          in Success(*) then answered(kind, id, scopes)
           in Failure(:not_found) then not_found(RecordLinks.unlinked(kind, id, other_kind, other_id))
           else failed(Helpers::Wording::UNSAVED)
         end

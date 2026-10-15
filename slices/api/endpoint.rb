@@ -75,7 +75,9 @@ module API
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
 
-    def linked(groups) = groups.slice(*Serializers::Link::KINDS).transform_values { serialized(Serializers::Link, it) }
+    def linked(groups, kinds = Serializers::Link::UNMAILED)
+      groups.slice(*kinds).transform_values { serialized(Serializers::Link, it) }
+    end
 
     def links_for(id) = linked(record_link_queries.for_record(self.class::KIND, id))
 

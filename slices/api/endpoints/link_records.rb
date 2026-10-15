@@ -8,9 +8,9 @@ module API
 
       include Deps[link_records: "links.operations.link_records", project_queries: "projects.repos.project_queries"]
 
-      def handle(kind:, id:, other_kind:, other_id:)
+      def handle(kind:, id:, other_kind:, other_id:, scopes:)
         case link_records.call(kind, id, { other_kind:, other_id: })
-          in Success(*) then answered(kind, id)
+          in Success(*) then answered(kind, id, scopes)
           in Failure(:not_found) then missing(RecordLinks.name(kind), id)
           in Failure[:invalid, errors] then rejected(errors, RecordLinks::COMPLAINTS)
           else failed(Helpers::Wording::UNSAVED)

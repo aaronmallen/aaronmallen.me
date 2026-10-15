@@ -46,6 +46,21 @@ RSpec.describe "MCP mail scope", type: :request do
       end
     end
 
+    it "refuses to link a record to a mail thread, naming mail" do
+      post = create(:post)
+
+      expect([mcp_text("link_records", kind: "post", id: post.id, other_kind: "mail_thread", other_id: thread.id),
+              Links::Slice["relations.record_links"].count])
+        .to eq(["this endpoint needs a token with the mail scope", 0])
+    end
+
+    it "hides a linked mail thread from list_links" do
+      post = create(:post)
+      Links::Slice["operations.link_records"].call("post", post.id, { other_kind: "mail_thread", other_id: thread.id })
+
+      expect(mcp_answer("list_links", kind: "post", id: post.id).fetch("links")).to eq({})
+    end
+
     it "refuses to wake a message row" do
       snooze(thread)
 
@@ -63,6 +78,22 @@ RSpec.describe "MCP mail scope", type: :request do
 
     it "lists mail in the inbox" do
       expect(inbox_kinds).to eq(%w[message])
+    end
+
+    it "links a record to a mail thread, marking the subject untrusted" do
+      post = create(:post)
+
+      expect(mcp_answer("link_records", kind: "post", id: post.id, other_kind: "mail_thread", other_id: thread.id)
+        .dig("links", "mail_thread").map { it.fetch("title") })
+        .to eq([{ "untrusted" => true, "text" => "Zeppelin sighting" }])
+    end
+
+    it "unlinks a record from a mail thread" do
+      post = create(:post)
+      Links::Slice["operations.link_records"].call("post", post.id, { other_kind: "mail_thread", other_id: thread.id })
+      mcp_call("unlink_records", kind: "mail_thread", id: thread.id, other_kind: "post", other_id: post.id)
+
+      expect(Links::Slice["relations.record_links"].count).to eq(0)
     end
 
     it "clears a message row" do

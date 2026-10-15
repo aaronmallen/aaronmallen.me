@@ -31,8 +31,10 @@ no foreign key can hold a column whose table depends on the row.
 **A new `links` feature slice owns `record_links`.** The table spans kinds six slices own, so no one of them owns it,
 the way `activity` owns its view (ADR 0052). It exports operations to link and unlink two records, a query that lists
 a record's links, and a search across kinds. `admin` and `api` import them. As #911 records, `mcp` reaches them
-through the `api` endpoints ([ADR 0088][0088]). The `api` leaves `mail_thread` out of the kinds it links and lists
-(#1139), so mail stays behind the `mail` scope ([ADR 0151][0151]) until those endpoints check it.
+through the `api` endpoints ([ADR 0088][0088]). Since #1444 the `api` links and lists every kind, `mail_thread`
+among them, but a mail thread stays behind the `mail` scope ([ADR 0151][0151]). Without it, a link, unlink or list
+that names a mail thread on either side gets a 403 naming `mail`, and a record's links leave mail threads out. A mail
+thread's subject comes marked untrusted, as a commit's title does.
 
 **Each side is a kind and an id.** A `record_kind` enum (ADR 0015) holds the eight kinds, declared in the order above,
 since the Linked section groups by kind in that order. It now holds ten: #911 declared `pull_request` ninth, and

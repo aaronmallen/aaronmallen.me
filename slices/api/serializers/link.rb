@@ -6,7 +6,9 @@ module API
       COMMIT = Blog::Types::RecordKind["commit"]
       PULL_REQUEST = Blog::Types::RecordKind["pull_request"]
       TASK = Blog::Types::RecordKind["task"]
-      KINDS = (Blog::Types::RecordKind.values - [Blog::Types::RecordKind["mail_thread"]]).freeze
+      MAIL_THREAD = Blog::Types::RecordKind["mail_thread"]
+      KINDS = Blog::Types::RecordKind.values.freeze
+      UNMAILED = (KINDS - [MAIL_THREAD]).freeze
       SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
@@ -29,7 +31,7 @@ module API
       def title(link)
         case link.kind
           when TASK then synced(link.id, link.title)
-          when COMMIT, PULL_REQUEST then untrusted(link.title)
+          when COMMIT, PULL_REQUEST, MAIL_THREAD then untrusted(link.title)
           else link.title
         end
       end

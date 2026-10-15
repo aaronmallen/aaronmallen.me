@@ -8,7 +8,7 @@ module MCP
       DELIVERIES =
         "Each delivery's error quotes what the network answered, so it comes marked untrusted. #{WARNING}".freeze
       LINKS = "The title of each synced task among the linked records may come from an issue tracker, and the " \
-              "title of each commit and pull request from someone else. Both come marked untrusted. " \
+              "title of each commit, pull request and mail thread from someone else. Each comes marked untrusted. " \
               "#{WARNING}".freeze
       MAIL_THREADS = "Each thread's subject, first body and reply address come marked untrusted. #{WARNING}".freeze
       TASK =

@@ -9,7 +9,7 @@ module API
         required: %w[kind id],
       }.freeze
 
-      def handle(kind:, id:) = answered(kind, id)
+      def handle(kind:, id:, scopes:) = answered(kind, id, scopes)
     end
   end
 end
