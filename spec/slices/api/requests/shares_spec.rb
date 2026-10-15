@@ -44,8 +44,8 @@ RSpec.describe "API shares", type: :request do
       ), 201])
     end
 
-    it "gives the share a 16-letter code" do
-      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{16}\z/)
+    it "gives the share a three letter code" do
+      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
     end
 
     it "stores the file byte for byte" do
@@ -107,8 +107,8 @@ RSpec.describe "API shares", type: :request do
       ), 201])
     end
 
-    it "gives the group a 16-letter code" do
-      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{16}\z/)
+    it "gives the group a three letter code" do
+      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
     end
 
     it "answers with each file and its own link" do

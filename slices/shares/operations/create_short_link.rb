@@ -4,8 +4,8 @@ module Shares
   module Operations
     class CreateShortLink < Blog::Operation
       include Deps[
-        contract: "contracts.short_link_contract", short_link_mutations: "repos.short_link_mutations",
-        short_link_queries: "repos.short_link_queries",
+        contract: "contracts.short_link_contract", short_code_queries: "repos.short_code_queries",
+        short_link_mutations: "repos.short_link_mutations", short_link_queries: "repos.short_link_queries",
       ]
 
       def call(params)
@@ -17,7 +17,7 @@ module Shares
       private
 
       def create(fields, attempts = Code::ATTEMPTS)
-        id = short_link_mutations.create(code: fields[:code] || Code.random, **fields.except(:code))
+        id = short_link_mutations.create(code: fields[:code] || short_code_queries.free_code, **fields.except(:code))
         Success(short_link_queries.find(id))
       rescue ROM::SQL::UniqueConstraintError => e
         raise unless short_link_mutations.violated_constraint(e) == Code::KEY

@@ -1049,7 +1049,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       text = mastodon_text(queued(parts: ["see https://github.com/ada and #{post_url}"]))
       code = short_code("https://github.com/ada")
 
-      expect(code).to match(/\A[a-z2-9]{5}\z/)
+      expect(code).to match(/\A[a-z2-9]{3}\z/)
       expect(text).to eq("see http://shares.localhost/#{code} and #{post_url}?ref=mastodon")
     end
 
@@ -1084,7 +1084,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       facets = facets_for("see https://github.com/ada")
       code = short_code("https://github.com/ada")
 
-      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 33)])
+      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 31)])
     end
 
     {

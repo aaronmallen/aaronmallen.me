@@ -596,8 +596,8 @@ RSpec.describe "The share host", type: :request do
   end
 
   it "leaves the blog's host as it was", :aggregate_failures do
-    file = share
-    get "/#{file.code}", {}, "HTTP_HOST" => "aaronmallen.me"
+    file = share.tap { Shares::Slice["relations.short_codes"].where(code: it.code).update(code: "zzq") }
+    get "/zzq", {}, "HTTP_HOST" => "aaronmallen.me"
 
     expect(last_response.status).to eq(404)
     expect(last_response.headers["Cache-Control"]).not_to eq("private, no-store")

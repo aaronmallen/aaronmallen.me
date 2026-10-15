@@ -173,7 +173,7 @@ RSpec.describe "Admin links", type: :request do
       shorten(destination: " https://example.com/talk ", code: "")
       follow_redirect!
 
-      expect(links.map { [it[:destination], it[:code].length] }).to eq([["https://example.com/talk", 5]])
+      expect(links.map { [it[:destination], it[:code].length] }).to eq([["https://example.com/talk", 3]])
       expect(page).to have_css("[data-toast]", text: "Shortened")
     end
 

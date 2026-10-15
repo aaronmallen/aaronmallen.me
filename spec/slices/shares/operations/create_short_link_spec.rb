@@ -3,12 +3,33 @@
 RSpec.describe Shares::Operations::CreateShortLink do
   def create(**params) = described_class.new.call({ destination: "https://example.com/talk" }.merge(params))
 
-  it "makes a link with a random five character code", :aggregate_failures do
+  it "makes a link with a random three character code", :aggregate_failures do
     link = create.value!
 
-    expect(link.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{5}\z/)
+    expect(link.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
     expect(link.destination).to eq("https://example.com/talk")
     expect(link.click_count).to eq(0)
+  end
+
+  it "takes the one three character code left free" do
+    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"]
+    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
+
+    expect(create.value!.code).to eq("xyz")
+  end
+
+  it "moves to four characters once every three character code is taken" do
+    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join)
+    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
+
+    expect(create.value!.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
+  end
+
+  it "counts no typed code outside the alphabet toward a full length" do
+    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"] + ["abl"]
+    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
+
+    expect(create.value!.code).to eq("xyz")
   end
 
   it "makes a link with the code and title I give", :aggregate_failures do

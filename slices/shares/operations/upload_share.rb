@@ -13,6 +13,7 @@ module Shares
         contract: "contracts.upload_contract",
         share_mutations: "repos.share_mutations",
         share_queries: "repos.share_queries",
+        short_code_queries: "repos.short_code_queries",
       ]
 
       def call(upload)
@@ -28,7 +29,7 @@ module Shares
 
       def create(fields, attempts = Code::ATTEMPTS)
         share_mutations.create(
-          code: Code.secret, key: SecureRandom.hex(KEY_BYTES),
+          code: short_code_queries.free_code, key: SecureRandom.hex(KEY_BYTES),
           filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
         )
       rescue ROM::SQL::UniqueConstraintError => e

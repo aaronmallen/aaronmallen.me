@@ -26,6 +26,13 @@ RSpec.describe "A short link on the share host", type: :request do
     expect(last_response.headers["Location"]).to eq("https://example.org")
   end
 
+  it "still sends a link made under an older, longer code" do
+    Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "ab2cd")
+    fetch("ab2cd")
+
+    expect(last_response.headers["Location"]).to eq("https://example.com/talk")
+  end
+
   describe "a changed code" do
     let!(:old) { link.code }
 

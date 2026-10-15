@@ -27,8 +27,8 @@ RSpec.describe Shares::Operations::UploadShareGroup do
         upload(share_upload("a", "a.txt", "text/plain"), share_upload("%PDF", "b.pdf", "application/pdf")).value!
       end
 
-      it "makes one group under one five character code", :aggregate_failures do
-        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{16}\z/)
+      it "makes one group under one three character code", :aggregate_failures do
+        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
         expect(group).to have_attributes(view_count: 0, zip_download_count: 0)
         expect(Shares::Slice["relations.shares"].count).to eq(0)
       end
@@ -53,10 +53,10 @@ RSpec.describe Shares::Operations::UploadShareGroup do
     end
 
     it "tries a new code when the first is taken" do
-      Shares::Slice["relations.short_codes"].insert(code: "aaaaa")
-      allow(SecureRandom).to receive(:alphanumeric).and_return("aaaaa", "bbbbb")
+      Shares::Slice["relations.short_codes"].insert(code: "aaa")
+      allow(Shares::Code).to receive(:pick).and_return("aaa", "bbb")
 
-      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbbbb")
+      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbb")
     end
 
     it "refuses no files" do
