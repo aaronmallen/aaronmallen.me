@@ -8,6 +8,7 @@ module Admin
         GMAIL_FAILED = { send: ["gmail"] }.freeze
         SENT = "mail_page.toasts.sent"
 
+        include Redirect
         include Deps[index_view: "ui.views.mail.index"]
 
         def handle(request, response)
@@ -35,7 +36,7 @@ module Admin
           thread = Blog::Types::IdParam[fields[:thread]] unless archived
 
           toast(response, archived ? ARCHIVED : SENT)
-          response.redirect_to(Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread:))
+          response.redirect_to(listed(request, thread:))
         end
       end
     end

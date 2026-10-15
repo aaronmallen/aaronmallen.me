@@ -36,7 +36,7 @@ module Admin
               Folders(list: @list, counts: @counts, labels: shown_labels, chips:)
               panes
             end
-            Pager(page: @threads, route: :admin_mail, params: @list)
+            Pager(page: @threads, route: :admin_mail, params: @list.except(:page))
           end
 
           private

@@ -27,7 +27,7 @@ module Admin
           folder: folder(params[:folder]),
           show: Blog::Types::MailShowParam[params[:show]],
           search: Blog::Types::OptionalText[params[:search]],
-        }.compact
+        }.compact.merge(Blog::Structs::Page.query(Blog::Types::PageParam.call(params[:page]) { 1 }))
       end
 
       def label(folder) = (folder.delete_prefix(LABEL) if folder.start_with?(LABEL))

@@ -61,7 +61,7 @@ module Admin
 
           def link(folder, tone = nil, drop:, &)
             on = folder == @list[:folder]
-            a(href: path(:admin_mail, **@list, folder:), class: ["mail-folder", tone, ("on" if on)],
+            a(href: path(:admin_mail, **@list.except(:page), folder:), class: ["mail-folder", tone, ("on" if on)],
               aria: { current: ("page" if on) }, data: drop.compact, &)
           end
 

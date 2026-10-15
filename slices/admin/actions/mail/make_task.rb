@@ -10,7 +10,11 @@ module Admin
         UNARCHIVED = "mail_page.toasts.tasked_unarchived"
         UNTITLED = "mail_page.toasts.untitled"
 
-        include Deps[make_mail_task: "operations.make_mail_task"]
+        include Redirect
+        include Deps[
+          make_mail_task: "operations.make_mail_task",
+          thread_queries: "mail.repos.thread_queries", # rubocop:disable Hanami/UnusedDeps
+        ]
 
         def handle(request, response)
           id = record_id(request)
@@ -31,7 +35,7 @@ module Admin
         def back(request, id)
           return routes.path(:admin_inbox) if request.params[:origin] == INBOX
 
-          Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: id)
+          listed(request, thread: id)
         end
 
         def made(id, fields)

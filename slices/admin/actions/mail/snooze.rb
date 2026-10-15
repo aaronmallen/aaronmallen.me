@@ -4,11 +4,12 @@ module Admin
   module Actions
     module Mail
       class Snooze < Inbox::Snooze
+        include Redirect
+        include Deps[thread_queries: "mail.repos.thread_queries"] # rubocop:disable Hanami/UnusedDeps
+
         private
 
-        def back(request)
-          Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: record_id(request))
-        end
+        def back(request) = listed(request, thread: record_id(request))
 
         def kind(_request) = "message"
       end

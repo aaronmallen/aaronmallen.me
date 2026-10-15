@@ -34,7 +34,7 @@ module Admin
         def list(request)
           return { origin: INBOX } if request.params[:origin] == INBOX
 
-          { **Helpers::MailList.from(request.params), **Blog::Structs::Page.query(page_number(request)) }
+          Helpers::MailList.from(request.params)
         end
       end
     end

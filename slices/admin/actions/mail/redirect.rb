@@ -11,7 +11,7 @@ module Admin
           list = Helpers::MailList.from(request.params)
           page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
 
-          Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page), **)
+          Helpers::MailList.back(routes, list.except(:page), **Blog::Structs::Page.query(page), **)
         end
       end
     end

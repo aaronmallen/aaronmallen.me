@@ -504,6 +504,26 @@ RSpec.describe "Admin mail", type: :request do
         expect(repo.by_id(thread.id).snoozed_until).to be > Time.now
       end
 
+      describe "on a later page" do
+        before { lower_page_size(:admin, to: 1) }
+
+        def archive_on_page_three(count)
+          thread = Array.new(count) { create(:message) }.first
+          get "/admin/mail", page: "3", thread: thread.id
+          form = page.find(".mail-acts form", text: "Archive")
+          post(form[:action], form.all("input[type=hidden]", visible: :all).to_h { [it[:name], it[:value]] })
+          last_response.location[/page=(\d+)/, 1]
+        end
+
+        it "keeps the page" do
+          expect(archive_on_page_three(4)).to eq("3")
+        end
+
+        it "steps back a page when the archive empties the last one" do
+          expect(archive_on_page_three(3)).to eq("2")
+        end
+      end
+
       it "wakes a snoozed thread" do
         thread = create(:message, snoozed_until: Time.now + 3600)
         act("/admin/mail/#{thread.id}/wake", folder: "snoozed")
