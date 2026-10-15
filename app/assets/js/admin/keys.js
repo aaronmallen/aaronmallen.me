@@ -1,7 +1,7 @@
 import { MENU } from "./context_menu.js";
 import { fresh } from "./fresh.js";
 
-const FIELD = [
+export const FIELD = [
   "input:not([type=button], [type=checkbox], [type=color], [type=file], [type=image], [type=radio], [type=range], " +
     "[type=reset], [type=submit])",
   "textarea",

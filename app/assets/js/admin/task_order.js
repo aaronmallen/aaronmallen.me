@@ -1,5 +1,5 @@
 import { fresh } from "./fresh.js";
-import { bind } from "./keys.js";
+import { bind, FIELD } from "./keys.js";
 import { whilePosting } from "./live.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
@@ -52,7 +52,7 @@ function drag(event, grip) {
 function nudge(event) {
   const step = KEYS[event.key];
   const row = event.target.closest?.(ROW);
-  if (!row?.querySelector(`${GRIP}:not([hidden])`)) return;
+  if (event.target.closest?.(FIELD) || !row?.querySelector(`${GRIP}:not([hidden])`)) return;
 
   event.preventDefault();
 

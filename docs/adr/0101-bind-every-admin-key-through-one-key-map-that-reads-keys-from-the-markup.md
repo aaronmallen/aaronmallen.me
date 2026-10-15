@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, assets]
 issue: "#297"
-amended: ["#745", "#915", "#1106"]
+amended: ["#745", "#915", "#1106", "#1362"]
 tags: [admin, keyboard, shortcuts, palette, help, accessibility, javascript]
 ---
 
@@ -57,7 +57,8 @@ such key. A published post draws no publish button, so `p` does nothing on it.
   sits in the avatar menu ([ADR 0128][0128]).
 - **Chords in script.** `keys.js` exports `bind` for a key held with Ctrl, Meta or Alt, which may fire where plain
   keys may not. `palette.js` binds `⌘/` and `Ctrl+/`, and since #745 `⌘K`, and `task_order.js` binds Alt+Up
-  and Alt+Down. `/` is a plain key, on the slash button alone, and since #745 on the search button that replaced it.
+  and Alt+Down, which since #1362 stay quiet in a field as plain keys do. `/` is a plain key, on the slash button
+  alone, and since #745 on the search button that replaced it.
 
 **Keys #745 adds.** `w` sits on a control that opens a journal entry, as `c` sits on the create button. `e`
 opens the highlighted row on lists where no row key claims it, and on a task row it opens the task's drawer in

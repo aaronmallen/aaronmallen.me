@@ -168,6 +168,15 @@ RSpec.describe "Admin task order", type: :feature do
       expect(evaluate_script("document.activeElement.textContent.trim()")).to eq("first")
     end
 
+    it "leaves Alt+Up to a field in the row", :aggregate_failures do
+      row("second").hover.find(".task-complete summary").click
+      row("second").first("input[type=number]").click
+      page.driver.browser.keyboard.type(%i[alt up])
+
+      expect(shown).to eq(%w[first second third])
+      expect(request_gate.count(place_path("second"))).to eq(0)
+    end
+
     it "does nothing past the top", :aggregate_failures do
       nudge("first", :up)
 
