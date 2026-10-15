@@ -148,6 +148,14 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         expect(page).to have_css(".hint", text: "counts under both")
       end
 
+      it "flags no row, since most tasks carry more than one tag" do
+        expect(page).to have_no_css(".time-row .pill")
+      end
+
+      it "flags each task line that counts under another tag" do
+        expect(tasks_in("ruby").map { it.has_css?(".pill", text: "shared", visible: :all) }).to eq([true, false])
+      end
+
       it "groups by tag when the URL names no grouping" do
         visit_time(from: "2026-03-02", to: "2026-03-08")
 

@@ -25,7 +25,6 @@ module Admin
             span(class: "time-label") do
               Icon("fa-solid fa-chevron-right time-caret")
               span(class: "meter-name") { name }
-              shared if @group.shared
             end
             meter
             span(class: "meter-count") { Blog::Helpers::Figures.hours(@group.seconds) }
