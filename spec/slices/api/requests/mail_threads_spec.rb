@@ -32,6 +32,12 @@ RSpec.describe "API mail threads", type: :request do
       expect(call_api(:get, "")).to eq(trusted(mcp_answer("list_mail_threads")))
     end
 
+    it "reads no more of the first message's body than its preview" do
+      create(:message)
+
+      expect(counting { call_api(:get, "") }.join.scan(/(?<!left\()"body"/)).to be_empty
+    end
+
     it "needs a token with the mail scope" do
       call_api(:get, "", token: mint(%w[read]))
 

@@ -47,7 +47,7 @@ module Mail
         found = in_days(from, to)
         found = found.with_status(status) if status
 
-        page.fill(found.with_letter.with_account.combine(:tags).newest_first.paged(page).to_a)
+        page.fill(found.with_preview.with_account.combine(:tags).newest_first.paged(page).to_a)
       end
 
       def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD

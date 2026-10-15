@@ -18,6 +18,7 @@ module API
       ).freeze
 
       schema_attributes
+      attributes :body, if: proc { it.respond_to?(:body) }
       stamps :received_at, :snoozed_until
       tag_names
       untrusted :subject, :body, :reply_to

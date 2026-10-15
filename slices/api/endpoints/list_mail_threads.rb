@@ -45,7 +45,7 @@ module API
           from: first&.iso8601,
           to: last&.iso8601,
           counts: message_queries.count_received_between(from: first, to: last),
-          mail_threads: found.rows.map { serialized(Serializers::MailThread, it).except("body") },
+          mail_threads: found.rows.map { serialized(Serializers::MailThread, it) },
           **Helpers::Paging.fields(found),
         }
       end
