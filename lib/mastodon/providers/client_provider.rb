@@ -10,7 +10,8 @@ module Mastodon
 
         def client(http)
           connect = lambda do |host, token|
-            http.call(url: "https://#{host}", headers: HEADERS.merge("Authorization" => "Bearer #{token}")) do |faraday|
+            headers = HEADERS.merge("Authorization" => "Bearer #{token}")
+            http.call(url: "https://#{host}", headers:, redirects: 0) do |faraday|
               faraday.request :json
               faraday.response :json
             end

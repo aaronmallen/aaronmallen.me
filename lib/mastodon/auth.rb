@@ -61,7 +61,7 @@ module Mastodon
       OAuth2::Client.new(
         app[:client_id], app[:client_secret],
         auth_scheme: :request_body, authorize_url: AUTHORIZE_PATH, site: "https://#{host}", token_url: TOKEN_PATH,
-        connection_opts: { request: { timeout: TIMEOUT } },
+        connection_opts: { request: { timeout: TIMEOUT } }, max_redirects: 0,
       )
     end
   end

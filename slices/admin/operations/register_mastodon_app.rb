@@ -30,7 +30,7 @@ module Admin
         given = server.to_s.strip
         host = Blog::Types::Normalized::Host.call(given.include?("://") ? given : "https://#{given}") { nil }
 
-        host&.match?(SERVER) ? Success(host) : Failure(:bad_server)
+        host&.match?(SERVER) && Blog::PublicAddress.host?(host) ? Success(host) : Failure(:bad_server)
       end
 
       def register(host, **)

@@ -7,6 +7,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
 
   before do
     sign_in_to_admin
+    resolves_publicly("ruby.social")
     stub_request(:post, apps_url).to_return(**json_response(client_id: "app-id", client_secret: "app-secret"))
     stub_request(:post, "https://ruby.social/oauth/token")
       .to_return(**json_response(access_token: "masto-token", scope:, token_type: "Bearer"))
@@ -77,6 +78,32 @@ RSpec.describe "Admin Mastodon connection", type: :request do
       expect(page).to have_css("[data-toast]", text: "That isn't a server name")
     end
 
+    it "refuses a server that resolves to a private address and sends nothing", :aggregate_failures do
+      resolves("ruby.social", "192.168.1.20")
+      start_connect
+      follow_redirect!
+
+      expect(a_request(:any, /.*/)).not_to have_been_made
+      expect(page).to have_css("[data-toast]", text: "That isn't a server name")
+    end
+
+    it "refuses a loopback address given as the server and sends nothing", :aggregate_failures do
+      start_connect("127.0.0.1")
+      follow_redirect!
+
+      expect(a_request(:any, /.*/)).not_to have_been_made
+      expect(page).to have_css("[data-toast]", text: "That isn't a server name")
+    end
+
+    it "does not follow the server when it redirects the app registration", :aggregate_failures do
+      stub_request(:post, apps_url).to_return(status: 307, headers: { "Location" => "http://10.0.0.5/api/v1/apps" })
+      start_connect
+      follow_redirect!
+
+      expect(a_request(:any, /10\.0\.0\.5/)).not_to have_been_made
+      expect(page).to have_css("[data-toast]", text: "didn't answer as Mastodon")
+    end
+
     it "refuses a server that does not answer as Mastodon", :aggregate_failures do
       stub_request(:post, apps_url).to_return(status: 404)
       start_connect
@@ -118,6 +145,15 @@ RSpec.describe "Admin Mastodon connection", type: :request do
       Social::Slice["networks.all"].fetch("mastodon").post("Hello", idempotency_key: "key")
 
       expect(posted).to have_been_made
+    end
+
+    it "does not follow a post the server redirects", :aggregate_failures do
+      stub_request(:post, SocialNetworks::MASTODON_STATUSES)
+        .to_return(status: 307, headers: { "Location" => "http://10.0.0.5/api/v1/statuses" })
+      mastodon = Social::Slice["networks.all"].fetch("mastodon")
+
+      expect { mastodon.post("Hello", idempotency_key: "key") }.to raise_error(Mastodon::Error)
+      expect(a_request(:any, /10\.0\.0\.5/)).not_to have_been_made
     end
   end
 
