@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class UpdateTag < TagEndpoint
+      SCOPED = true
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Helpers::Schema::ID, **PROPERTIES },
@@ -11,9 +12,10 @@ module API
 
       include Deps[save_tag: "tags.operations.save_tag", tag_queries: "tags.repos.tag_queries"]
 
-      def handle(id:, scope:, name: nil, color: nil)
+      def handle(id:, scope:, scopes:, name: nil, color: nil)
         current = tag_queries.find_in(scope, id)
         return missing("tag", id) if current.nil?
+        return invalid(id: [format(MAIL_TAG, id, "changing")]) if !mail?(scopes) && tag_queries.mail_only?(scope, id)
 
         saved(save_tag.call({ name: name || current.name, color: }, scope:, id:), id)
       end

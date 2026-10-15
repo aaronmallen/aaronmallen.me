@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class TagEndpoint < Endpoint
+      MAIL_TAG = "tag %s is on mail threads, so %s it needs the mail scope"
       PRIVATE_KINDS = "journal entries, tasks, decisions and task rules"
       SCOPE = {
         type: "string",

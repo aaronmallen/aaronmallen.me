@@ -110,6 +110,32 @@ RSpec.describe "API tags", type: :request do
 
       expect(status).to eq(404)
     end
+
+    it "refuses a tag only mail threads carry without the mail scope, naming mail", :aggregate_failures do
+      mail_tagged("billing")
+      id = tag_queries.all_in("private").first.id
+      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write]))
+
+      expect([last_response.body, status]).to match([include("mail scope"), 422])
+      expect(tag_queries.find_in("private", id)).to have_attributes(name: "billing")
+    end
+
+    it "renames a tag mail threads and other records carry without the mail scope" do
+      mail_tagged("billing")
+      create(:task, tags: %w[billing])
+      id = tag_queries.all_in("private").first.id
+      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write]))
+
+      expect([status, tag_queries.find_in("private", id).name]).to eq([200, "invoices"])
+    end
+
+    it "renames a tag only mail threads carry with the mail scope" do
+      mail_tagged("billing")
+      id = tag_queries.all_in("private").first.id
+      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write mail]))
+
+      expect([status, tag_queries.find_in("private", id).name]).to eq([200, "invoices"])
+    end
   end
 
   describe "DELETE /api/v1/tags/:scope/:id" do
