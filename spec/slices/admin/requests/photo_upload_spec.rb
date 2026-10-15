@@ -22,7 +22,8 @@ RSpec.describe "Admin photo upload", type: :request do
 
   def keep_puts
     stub_request(:put, store_url).to_return do |request|
-      stored[File.basename(request.uri.path)] = { body: request.body.b, content_type: request.headers["Content-Type"] }
+      stored[request.uri.path.delete_prefix("/photos/")] =
+        { body: request.body.b, content_type: request.headers["Content-Type"] }
       { status: 200 }
     end
   end
@@ -31,7 +32,7 @@ RSpec.describe "Admin photo upload", type: :request do
 
   def photos = Media::Slice["relations.photos"].to_a
 
-  def store_url = %r{\Ahttps://store\.example(?::443)?/photos/[0-9a-f]{32}\.[a-z]+\z}
+  def store_url = %r{\Ahttps://store\.example(?::443)?/photos/(?:\d+/)?[0-9a-f]{32}\.[a-z]+\z}
 
   def upload(file, token: admin_csrf_token)
     post "/admin/photos", { photo: file }, { "HTTP_X_CSRF_TOKEN" => token, "HTTP_ACCEPT" => "application/json" }
@@ -103,6 +104,18 @@ RSpec.describe "Admin photo upload", type: :request do
       it "shrinks its long edge to 2560px and keeps its shape" do
         expect(image).to have_attributes(width: 2560, height: 853)
       end
+
+      it "stores each smaller width beside it", :aggregate_failures do
+        key = stored.keys.first
+        widths = [640, 1280, 1920].to_h { [it, Vips::Image.new_from_buffer(stored.fetch("#{it}/#{key}")[:body], "").width] }
+
+        expect(widths).to eq(640 => 640, 1280 => 1280, 1920 => 1920)
+        expect(stored.fetch("640/#{key}")[:content_type]).to eq("image/png")
+      end
+
+      it "lists the widths on its row" do
+        expect(photos.map { it[:widths] }).to eq([[640, 1280, 1920]])
+      end
     end
 
     describe "a photo under 2560px" do
@@ -110,6 +123,11 @@ RSpec.describe "Admin photo upload", type: :request do
 
       it "keeps its size" do
         expect(image).to have_attributes(width: 32, height: 24)
+      end
+
+      it "stores no smaller width", :aggregate_failures do
+        expect(stored.size).to eq(1)
+        expect(photos.map { it[:widths] }).to eq([[]])
       end
     end
 

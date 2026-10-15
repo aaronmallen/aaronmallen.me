@@ -14,9 +14,9 @@ module Public
         config.formats.clear
 
         def handle(request, response)
-          key = request.params[:key]
-          published = published?(key)
-          photo = fetch(key) if published || session_reader.call(request).signed_in?
+          published = published(request.params[:key])
+          key = stored_key(request, published)
+          photo = fetch(key) if key
           response.headers.delete("Vary")
           return miss(response) unless photo
 
@@ -26,7 +26,7 @@ module Public
         private
 
         def fetch(key)
-          store.get(key) if photo_key?(key)
+          store.get(key)
         rescue ObjectStore::Client::Error
           nil
         end
@@ -39,13 +39,22 @@ module Public
 
         def photo_key?(key) = Blog::Types::PhotoKey.valid?(key)
 
-        def published?(key) = photo_key?(key) && !photo_queries.published(key).nil?
+        def published(key) = photo_key?(key) ? photo_queries.published(key) : nil
 
         def serve(response, photo, cache_control)
           response.headers["Cache-Control"] = cache_control
           response.content_type = photo.content_type
           response.body = photo.body
         end
+
+        def stored_key(request, published)
+          key, width = request.params.to_h.values_at(:key, :width)
+          return width_key(published, width.to_i) if width
+
+          key if published || (photo_key?(key) && session_reader.call(request).signed_in?)
+        end
+
+        def width_key(published, width) = published&.widths&.include?(width) ? published.variant_key(width) : nil
       end
     end
   end

@@ -26,6 +26,13 @@ RSpec.describe Media::Jobs::SweepPhotos do
     expect(a_request(:delete, media_store_url(photo.key))).to have_been_made
   end
 
+  it "deletes the smaller widths of a photo it sweeps from the store" do
+    photo = create(:photo, created_at: Time.now - day - 60, widths: [640, 1280])
+    sweep
+
+    expect([640, 1280].map { a_request(:delete, media_store_url("#{it}/#{photo.key}")) }).to all(have_been_made)
+  end
+
   it "keeps a photo uploaded less than a day ago", :aggregate_failures do
     photo = uploaded(day - 60)
     sweep

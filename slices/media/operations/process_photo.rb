@@ -14,13 +14,16 @@ module Media
       PAGE_HEIGHT = "page-height"
       QUALITY = 85
       SHRINK = 0.8
+      TALL = 10_000_000
+      WIDTHS = [640, 1280, 1920].freeze
 
-      Processed = Data.define(:body, :width, :height)
+      Processed = Data.define(:body, :width, :height, :variants)
 
       def call(bytes, type)
         image = thumbnail(bytes, LONG_EDGE, type)
+        variants = resize(bytes, type, image.width)
 
-        Processed.new(body: save(image, type), width: image.width, height: frame_height(image))
+        Processed.new(body: save(image, type), width: image.width, height: frame_height(image), variants:)
       rescue Vips::Error
         nil
       end
@@ -48,6 +51,12 @@ module Media
         nil
       end
 
+      def variants(bytes, type, width)
+        resize(bytes, type, width)
+      rescue Vips::Error
+        nil
+      end
+
       private
 
       def frame_height(image)
@@ -56,13 +65,17 @@ module Media
 
       def load_options(type) = ANIMATED.include?(type) ? ALL_PAGES : FIRST_PAGE
 
+      def resize(bytes, type, width)
+        WIDTHS.select { it < width }.to_h { [it, save(thumbnail(bytes, it, type, TALL), type)] }
+      end
+
       def save(image, type)
         options = LOSSY.include?(type) ? { Q: QUALITY } : Blog::Constants::EMPTY_HASH
         image.write_to_buffer(".#{type}", strip: true, **options)
       end
 
-      def thumbnail(bytes, edge, type)
-        Vips::Image.thumbnail_buffer(bytes, edge, height: edge, size: :down, option_string: load_options(type))
+      def thumbnail(bytes, width, type, height = width)
+        Vips::Image.thumbnail_buffer(bytes, width, height:, size: :down, option_string: load_options(type))
       end
     end
   end

@@ -128,6 +128,46 @@ RSpec.describe "Media", type: :request do
     end
   end
 
+  describe "a smaller width of a photo" do
+    let(:photo) { create(:photo, key:, widths: [640, 1280]) }
+    let(:store) do
+      stub_request(:get, media_store_url("640/#{key}")).to_return(body: "small",
+                                                                  headers: { "Content-Type" => "image/jpeg" })
+    end
+
+    before do
+      connect_media_store
+      store
+    end
+
+    it "serves a stored width of a published photo like the photo", :aggregate_failures do
+      claim_for_post(:published)
+      get "/media/640/#{key}"
+
+      expect(last_response.body).to eq("small")
+      expect(last_response.content_type).to eq("image/jpeg")
+      expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
+    end
+
+    it "answers a width the photo does not store with a 404 and never asks the store", :aggregate_failures do
+      claim_for_post(:published)
+      stray = stub_request(:any, /store\.example/)
+      get "/media/960/#{key}"
+
+      expect(last_response.status).to eq(404)
+      expect(stray).not_to have_been_requested
+    end
+
+    it "answers a width of a photo no published post shows with a 404, even to the operator", :aggregate_failures do
+      claim_for_post(:draft)
+      sign_in_to_admin
+      get "/media/640/#{key}"
+
+      expect(last_response.status).to eq(404)
+      expect(store).not_to have_been_requested
+    end
+  end
+
   describe "an unknown key" do
     before do
       connect_media_store

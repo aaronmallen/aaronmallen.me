@@ -48,8 +48,10 @@ module Media
       def save(processed, type)
         record = photo_mutations.create(
           key: key_for(type), width: processed.width, height: processed.height, byte_size: processed.body.bytesize,
+          widths: processed.variants.keys,
         )
         step store(record.key, processed.body, type)
+        processed.variants.each { |width, body| step store(record.variant_key(width), body, type) }
         record
       end
 

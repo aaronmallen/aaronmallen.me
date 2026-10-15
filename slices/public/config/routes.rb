@@ -18,6 +18,7 @@ module Public
     get "/contact", to: "pages.contact", as: :contact
     get "/privacy", to: "pages.privacy", as: :privacy
     get "/media/:key", to: "media.show", as: :media
+    get "/media/:width/:key", to: "media.show", as: :media_width, width: /\d+/
     get "/site.webmanifest", to: "manifests.show", as: :manifest
     get "/sitemap.xml", to: "sitemaps.show", as: :sitemap
     get "/robots.txt", to: "robots.show", as: :robots

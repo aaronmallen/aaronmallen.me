@@ -8,6 +8,8 @@ module Media
 
       schema :photos, infer: true
 
+      def missing_widths(min) = where(Sequel.function(:cardinality, :widths) => 0).where(Sequel[:width] > min)
+
       def published
         posts = dataset.db[:posts].where(status: PUBLISHED).select(:id)
         where(id: dataset.db[:photo_claims].where(owner: POST, owner_id: posts).select(:photo_id))

@@ -24,6 +24,8 @@ module Markdown
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/
     SIZED_IMAGE = '<img width="%d" height="%d" '
+    SIZES = "(min-width: 44em) 44em, 100vw"
+    SRCSET_IMAGE = '<img width="%d" height="%d" srcset="%s" sizes="%s" '
     TEXT_NODES = %i[code code_block text].freeze
 
     def self.headings(html)
@@ -36,9 +38,16 @@ module Markdown
       keys = html.scan(MEDIA_IMAGE).flatten.uniq
       return html if keys.empty?
 
-      sizes = yield keys
-      html.gsub(MEDIA_IMAGE) { (size = sizes[Regexp.last_match(1)]) ? format(SIZED_IMAGE, *size) : it }
+      photos = yield keys
+      html.gsub(MEDIA_IMAGE) { (photo = photos[Regexp.last_match(1)]) ? sized_image(photo) : it }
     end
+
+    def self.sized_image(photo)
+      return format(SIZED_IMAGE, photo.width, photo.height) if photo.widths.empty?
+
+      format(SRCSET_IMAGE, photo.width, photo.height, photo.srcset, SIZES)
+    end
+    private_class_method :sized_image
 
     def initialize(markdown)
       @root = Commonmarker.parse(markdown, options: OPTIONS)

@@ -27,6 +27,21 @@ CI runs the same task. `mise run test` makes the same check first and stops, poi
 cannot load libvips. The Pi gets both by hand, with the `apt-get` packages above. Without libvips the site does not
 start.
 
+## Smaller widths
+
+Each upload also stores copies 640, 1280 and 1920 px wide, under `<width>/<key>`, for each width narrower than the
+photo. Post pages list them in `srcset`. Photos uploaded before the copies have none until you store them once, on
+the Pi from the app's directory with the production environment loaded:
+
+```sh
+bundle exec hanami run 'puts Media::Slice["operations.backfill_photo_widths"].call'
+```
+
+It prints how many photos it filled in. A photo the store fails to return stays as it was, so run it again until it
+prints `0`.
+
+## Development
+
 ## Development
 
 `mise run dev` starts RustFS from `.config/compose.yml` and makes the `blog-development` bucket in it.

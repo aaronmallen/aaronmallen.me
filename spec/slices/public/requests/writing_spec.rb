@@ -291,6 +291,34 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_css(".prose img[src='/media/#{photo.key}'][width='1200'][height='800']")
     end
 
+    describe "a site media image with smaller widths" do
+      let(:photo) { create(:photo, width: 1500, height: 1000, widths: [640, 1280]) }
+      let(:image) { page.find(".prose img[src='/media/#{photo.key}']") }
+
+      before do
+        publish("hello", 1, body: "![shot](/media/#{photo.key})")
+        get "/writing/hello"
+      end
+
+      it "lists each width and the photo in its srcset" do
+        key = photo.key
+
+        expect(image[:srcset]).to eq("/media/640/#{key} 640w, /media/1280/#{key} 1280w, /media/#{key} 1500w")
+      end
+
+      it "sizes it to the post column" do
+        expect(image[:sizes]).to eq("(min-width: 44em) 44em, 100vw")
+      end
+    end
+
+    it "gives a site media image with no smaller widths no srcset" do
+      photo = create(:photo, width: 600, height: 400)
+      publish("hello", 1, body: "![shot](/media/#{photo.key})")
+      get "/writing/hello"
+
+      expect(page).to have_no_css(".prose img[srcset], .prose img[sizes]")
+    end
+
     it "renders a site media image with no known size", :aggregate_failures do
       publish("hello", 1, body: "![shot](/media/#{'f' * 32}.png)")
       get "/writing/hello"

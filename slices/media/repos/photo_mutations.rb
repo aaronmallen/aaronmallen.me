@@ -5,7 +5,7 @@ module Media
     class PhotoMutations < Blog::DB::Repo
       root :photos
 
-      commands :create
+      commands :create, update: :by_pk
 
       def claim(owner, owner_id, keys)
         photo_claims.for_owners(owner, owner_id).delete

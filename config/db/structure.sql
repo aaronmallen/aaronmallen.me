@@ -3154,6 +3154,7 @@ CREATE TABLE public.photos (
     height integer NOT NULL,
     byte_size integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    widths integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT photos_size_check CHECK (((width > 0) AND (height > 0) AND (byte_size > 0)))
 );
 
@@ -8261,4 +8262,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015001000_backfill_task_projects_and_tags_from_rules.rb'),
 ('20261015003000_add_sync_token_to_calendars.rb'),
 ('20261015010000_add_number_to_tasks.rb'),
-('20261015080000_add_rendered_body_to_posts.rb');
+('20261015080000_add_rendered_body_to_posts.rb'),
+('20261015090000_add_widths_to_photos.rb');

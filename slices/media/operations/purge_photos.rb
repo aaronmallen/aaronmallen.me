@@ -12,7 +12,7 @@ module Media
       def purge(photo)
         photo_mutations.transaction do
           deleted = photo_mutations.delete_unclaimed(photo.id).positive?
-          client.delete(photo.key) if deleted
+          [photo.key, *photo.widths.map { photo.variant_key(it) }].each { client.delete(it) } if deleted
           deleted
         end
       rescue ObjectStore::Client::Error
