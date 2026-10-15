@@ -41,7 +41,7 @@ module Public
           record_visit.call(
             visit,
             address: read_visitor_address.call(request),
-            base_url: request.base_url,
+            base_url: "#{request.scheme}://#{Blog::RequestHost.call(request)}",
             signed_in: signed_in?(request),
             user_agent: request.get_header("HTTP_USER_AGENT"),
           )

@@ -500,6 +500,40 @@ RSpec.describe "The share host", type: :request do
     expect(a_request(:get, share_store_url(file.key))).not_to have_been_made
   end
 
+  describe "a forwarded host header" do
+    { "HTTP_X_FORWARDED_HOST" => "shares.localhost",
+      "HTTP_FORWARDED" => "host=shares.localhost" }.each do |header, value|
+      it "gives the blog's answer to a request for the blog's host under #{header}", :aggregate_failures do
+        file = share
+        get "/#{file.code}", {}, "HTTP_HOST" => "aaronmallen.me", header => value
+
+        expect(last_response.headers["Cache-Control"]).not_to eq("private, no-store")
+        expect(a_request(:get, share_store_url(file.key))).not_to have_been_made
+      end
+    end
+
+    it "still serves a known code on the share host" do
+      file = share
+      stub_object(file)
+      fetch("/#{file.code}", "HTTP_X_FORWARDED_HOST" => "aaronmallen.me", "HTTP_FORWARDED" => "host=aaronmallen.me")
+
+      expect(last_response.body).to eq(bytes)
+    end
+
+    it "still answers 404 for an unknown code on the share host without letting a cache keep it", :aggregate_failures do
+      fetch("/zzzzz", "HTTP_X_FORWARDED_HOST" => "aaronmallen.me", "HTTP_FORWARDED" => "host=aaronmallen.me")
+
+      expect(last_response.status).to eq(404)
+      expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+    end
+  end
+
+  it "knows the share host with a port on it" do
+    fetch("/zzzzz", "HTTP_HOST" => "shares.localhost:3000")
+
+    expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+  end
+
   it "serves the blog on its own host" do
     get "/about", {}, "HTTP_HOST" => "aaronmallen.me"
 

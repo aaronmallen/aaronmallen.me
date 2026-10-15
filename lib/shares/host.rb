@@ -11,7 +11,7 @@ module Shares
     end
 
     def call(env)
-      return @app.call(env) unless ::Rack::Request.new(env).host == @host
+      return @app.call(env) unless Blog::RequestHost.call(::Rack::Request.new(env)) == @host
 
       status, headers, body = @shares.call(env)
       headers["cache-control"] = CACHE_CONTROL

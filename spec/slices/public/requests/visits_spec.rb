@@ -190,6 +190,19 @@ RSpec.describe "Visits", type: :request do
       expect(stored.first.referrer_path).to eq("/writing/hello")
     end
 
+    it "judges the site by the request's own host, not a forwarded one", :aggregate_failures do
+      view(referrer: "https://news.example/item", headers: { "HTTP_X_FORWARDED_HOST" => "news.example" })
+
+      expect(stored.first.referrer_host).to eq("news.example")
+      expect(stored.first.referrer_path).to be_nil
+    end
+
+    it "judges the site by its host with the port removed" do
+      view(referrer: "http://example.org/writing", headers: { "HTTP_HOST" => "example.org:8080" })
+
+      expect(stored.first.referrer_path).to eq("/writing")
+    end
+
     it "keeps no path for a referrer on another site" do
       view(referrer: "https://news.example/item")
 
