@@ -10,7 +10,7 @@ module Admin
           VERDICTS = {
             Blog::Types::WebmentionVerdict["approved"] => [".approve", "fa-solid fa-check"],
             Blog::Types::WebmentionVerdict["ignored"] => [".ignore", "fa-regular fa-eye-slash"],
-            SPAM => [".spam", "fa-solid fa-ban"],
+            SPAM => [".spam", :ban],
           }.freeze
 
           layout nil
@@ -20,7 +20,7 @@ module Admin
 
           def view_template
             ContextMenu(label: "#{@mention.author_label} · #{type}", return_to: @return_to) do |menu|
-              menu.link(t(".open_source"), href: source, icon: "fa-solid fa-arrow-up-right-from-square", outbound: true)
+              menu.link(t(".open_source"), href: source, icon: :outbound, outbound: true)
               menu.separator
               moderation(menu)
               menu.separator
@@ -36,7 +36,7 @@ module Admin
           end
 
           def records(menu)
-            menu.copy(t(".copy_source"), text: source, copied: t(".copied_source"), icon: "fa-regular fa-copy")
+            menu.copy(t(".copy_source"), text: source, copied: t(".copied_source"), icon: :copy)
             menu.link(t(".go_to_post"), href: path(:admin_edit_post, id: @mention.post_id),
                                         icon: "fa-solid fa-file-lines")
           end

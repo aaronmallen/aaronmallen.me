@@ -46,7 +46,7 @@ module Blog
 
           span(class: "pu") do
             plain @url.sub(SCHEME, "")
-            Icon("fa-solid fa-arrow-up-right-from-square")
+            Icon(:outbound)
           end
         end
 

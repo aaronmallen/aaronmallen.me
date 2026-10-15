@@ -39,7 +39,7 @@ module Admin
 
           def remove
             Form(action: remove_path, data: { confirm: }) do
-              Button(type: "submit", variant: :warn, small: true, label: t(".remove"), icon: "fa-solid fa-trash-can")
+              Button(type: "submit", variant: :warn, small: true, label: t(".remove"), icon: :trash)
             end
           end
 

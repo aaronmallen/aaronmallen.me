@@ -33,7 +33,7 @@ module Admin
             h2(id: title_id, class: "card-title") { @title }
             Button(
               variant: :gh, small: true, label: t(".close"), data: { dialog_close: true },
-              icon: "fa-solid fa-xmark",
+              icon: :close,
             )
           end
         end

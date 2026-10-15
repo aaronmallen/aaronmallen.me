@@ -61,7 +61,7 @@ module Admin
             fields = { origin: ORIGIN }
 
             menu.post(t(".move", list:), action: move, fields:, icon: "fa-solid fa-arrow-right")
-            menu.post(t(".cancel"), action: cancel, fields:, icon: "fa-solid fa-ban", warn: true,
+            menu.post(t(".cancel"), action: cancel, fields:, icon: :ban, warn: true,
                                     confirm: t(".confirm_cancel"))
           end
 

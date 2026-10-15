@@ -27,7 +27,7 @@ module Admin
           def clear_range
             href = path(:admin_tasks, **{ filter: @tab, q: @query }.reject { |_, value| value.empty? })
 
-            Button(href:, variant: :gh, small: true, icon: "fa-solid fa-xmark", aria: { label: t(".clear_range") }) do
+            Button(href:, variant: :gh, small: true, icon: :close, aria: { label: t(".clear_range") }) do
               plain @range.values.uniq.map { l(it, format: :short) }.join(" → ")
             end
           end

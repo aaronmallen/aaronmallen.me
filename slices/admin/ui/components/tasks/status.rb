@@ -9,7 +9,7 @@ module Admin
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle"],
             Blog::Types::TaskStatus["in_progress"] => [:blue, "fa-solid fa-circle-play"],
             Blog::Types::TaskStatus["done"] => [:green, "fa-solid fa-circle-check"],
-            Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban"],
+            Blog::Types::TaskStatus["canceled"] => %i[sand ban],
           }.freeze
 
           prop :status, Blog::Types::TaskStatus

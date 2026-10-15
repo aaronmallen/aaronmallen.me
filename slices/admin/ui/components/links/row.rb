@@ -32,10 +32,10 @@ module Admin
               data: { record_key: short, record_key_copied: t(".copied") },
             ) do
               plain Helpers::ShareLink.bare(short)
-              Icon("fa-regular fa-copy")
+              Icon(:copy)
             end
             Button(
-              href: @link.destination, small: true, variant: :gh, icon: "fa-solid fa-arrow-up-right-from-square",
+              href: @link.destination, small: true, variant: :gh, icon: :outbound,
               label: t(".open", link: @link.destination), target: "_blank", rel: "noopener",
             )
           end

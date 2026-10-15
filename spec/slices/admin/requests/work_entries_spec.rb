@@ -114,6 +114,13 @@ RSpec.describe "Admin work history", type: :request do
         expect(page).to have_button("Remove")
       end
 
+      it "draws Remove with the trash icon every other delete uses" do
+        create(:work_entry)
+        get "/admin/projects", filter: "work"
+
+        expect(page.find_button("Remove")).to have_css("i.fa-regular.fa-trash-can", visible: :all)
+      end
+
       it "asks before removing" do
         create(:work_entry, org: "Rackspace", role: "Software Engineer")
         get "/admin/projects", filter: "work"

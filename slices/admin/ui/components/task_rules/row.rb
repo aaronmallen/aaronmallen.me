@@ -31,7 +31,7 @@ module Admin
           def acts
             div(class: "rule-acts hov") do
               label(class: "bt sm rule-pen", for: toggle_id, title: t(".edit")) do
-                Icon("fa-regular fa-pen-to-square")
+                Icon(:edit)
                 span(class: "sr-only") { t(".edit") }
               end
             end

@@ -39,7 +39,7 @@ module Admin
         def delete
           confirm = { confirm: t(".confirm_delete", view: @view.name) }
 
-          act(:admin_delete_saved_view, "fa-regular fa-trash-can", t(".delete"), variant: :warn, data: confirm)
+          act(:admin_delete_saved_view, :trash, t(".delete"), variant: :warn, data: confirm)
         end
 
         def rename

@@ -24,7 +24,7 @@ module Admin
 
           def mark
             span(class: "task-mark sand") do
-              Icon("fa-solid fa-ban")
+              Icon(:ban)
               plain t(".canceled")
             end
           end

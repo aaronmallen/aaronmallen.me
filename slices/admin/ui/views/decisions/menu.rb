@@ -8,7 +8,7 @@ module Admin
           include Components::Decisions
 
           CLOSINGS = {
-            drop: { label: ".drop", title: ".drop_title", icon: "fa-solid fa-ban", variant: :warn },
+            drop: { label: ".drop", title: ".drop_title", icon: :ban, variant: :warn },
             reopen: { label: ".reopen", title: ".reopen_title", icon: "fa-solid fa-rotate-left", variant: :pri },
           }.freeze
 
@@ -52,8 +52,8 @@ module Admin
 
           def opens(menu)
             menu.link(t(".open"), href: act(:admin_decision), icon: "fa-regular fa-folder-open")
-            menu.link(t(".edit"), href: act(:admin_edit_decision), icon: "fa-regular fa-pen-to-square")
-            menu.copy(t(".copy_number"), text: key, copied:, icon: "fa-regular fa-copy", hint: key)
+            menu.link(t(".edit"), href: act(:admin_edit_decision), icon: :edit)
+            menu.copy(t(".copy_number"), text: key, copied:, icon: :copy, hint: key)
           end
 
           def tags(menu)

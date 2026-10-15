@@ -6,9 +6,9 @@ module Admin
       class StatusPill < Component
         STATUSES = {
           published: [:green, "fa-solid fa-circle-check", ".published"],
-          draft: [:orange, "fa-regular fa-pen-to-square", ".draft"],
+          draft: [:orange, :edit, ".draft"],
           scheduled: [:blue, "fa-regular fa-clock", ".scheduled"],
-          spam: [:pink, "fa-solid fa-ban", ".spam"],
+          spam: [:pink, :ban, ".spam"],
           connected: [:green, "fa-solid fa-circle-check", ".connected"],
           failing: [:pink, "fa-solid fa-triangle-exclamation", ".failing"],
           paused: [nil, "fa-solid fa-pause", ".paused"],
@@ -18,7 +18,7 @@ module Admin
           lapsed: [:pink, "fa-solid fa-hourglass-end", ".lapsed"],
           open: [:orange, "fa-regular fa-circle", ".open"],
           resolved: [:green, "fa-solid fa-circle-check", ".resolved"],
-          dropped: [nil, "fa-solid fa-ban", ".dropped"],
+          dropped: [nil, :ban, ".dropped"],
           active: [:green, "fa-solid fa-circle-check", ".active"],
           archived: [nil, "fa-solid fa-box-archive", ".archived"],
         }.freeze

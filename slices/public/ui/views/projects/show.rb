@@ -92,7 +92,7 @@ module Public
           def links
             repo = "#{GITHUB}#{@project.repo}" if written?(@project.repo)
             link(repo, @project.repo, "fa-brands fa-github") if repo
-            link(@project.url, @project.url.sub(SCHEME, ""), "fa-solid fa-arrow-up-right-from-square") if url?(repo)
+            link(@project.url, @project.url.sub(SCHEME, ""), :outbound) if url?(repo)
             stats
           end
 

@@ -13,7 +13,7 @@ module Admin
         def view_template
           Button(
             small: true, variant: :warn, type: "submit", form: @form.delete_id(@record),
-            icon: "fa-regular fa-trash-can",
+            icon: :trash,
           ) { t(DELETES.fetch(@kind)) }
           Button(small: true, variant: :pri, type: "submit", form: @form.form_id(@record)) { t(".save") }
         end

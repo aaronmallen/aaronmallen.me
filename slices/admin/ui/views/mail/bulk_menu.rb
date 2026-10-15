@@ -6,7 +6,6 @@ module Admin
       module Mail
         class BulkMenu < View
           ACT = Blog::Types::MessageBulkAction
-          DELETE = "fa-regular fa-trash-can"
           INBOX = Blog::Types::MailFolder["inbox"]
           MARKS = [
             [ACT["read"], "fa-regular fa-envelope-open", ".read"],
@@ -44,7 +43,7 @@ module Admin
             menu.separator
             files(menu)
             menu.separator
-            act(menu, ACT["trash"], DELETE, t(".delete", count:), warn: true, confirm: t(".confirm"))
+            act(menu, ACT["trash"], :trash, t(".delete", count:), warn: true, confirm: t(".confirm"))
           end
 
           def files(menu)
@@ -79,7 +78,7 @@ module Admin
           def trash(menu)
             act(menu, ACT["inbox"], "fa-solid fa-rotate-left", t(".restore", count:))
             menu.separator
-            act(menu, ACT["delete"], DELETE, t(".delete_forever", count:), warn: true, confirm: t(".confirm_forever"))
+            act(menu, ACT["delete"], :trash, t(".delete_forever", count:), warn: true, confirm: t(".confirm_forever"))
           end
         end
       end

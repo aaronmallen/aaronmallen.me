@@ -32,7 +32,7 @@ module Admin
 
         def cancel(row)
           data = { confirm: t(".confirm_cancel", task: row.title) }
-          task_form(:admin_cancel_task, row, t(".cancel"), "fa-solid fa-ban", data:)
+          task_form(:admin_cancel_task, row, t(".cancel"), :ban, data:)
         end
 
         def carried(row) = task(row, t(".carried", count: row.days), "fa-solid fa-rotate-left")
@@ -90,7 +90,7 @@ module Admin
 
           ListItem(title: row.title, href:, sub:, icon:, **hovered(row)) do |item|
             item.meta { p(class: "li-sub") { reason } } if reason
-            icon_link(href, t(".open"), "fa-regular fa-pen-to-square")
+            icon_link(href, t(".open"), :edit)
             snooze(row)
           end
         end

@@ -29,7 +29,7 @@ module Admin
             fields = { **picked, act: DELETE }
             confirm = t(".confirm_delete")
 
-            menu.post(t(".delete"), action:, fields:, icon: "fa-regular fa-trash-can", warn: true, confirm:)
+            menu.post(t(".delete"), action:, fields:, icon: :trash, warn: true, confirm:)
           end
 
           def held = @posts.flat_map { it.tags.map(&:name) }.uniq.sort

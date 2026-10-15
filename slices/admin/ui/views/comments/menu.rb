@@ -20,7 +20,7 @@ module Admin
           def view_template
             ContextMenu(label:, return_to: @return_to) do |menu|
               @comment.synced? ? source(menu) : edit(menu)
-              menu.copy(t(".copy_text"), text: @comment.body, copied: t(".copied_text"), icon: "fa-regular fa-copy")
+              menu.copy(t(".copy_text"), text: @comment.body, copied: t(".copied_text"), icon: :copy)
               delete(menu) unless @comment.synced?
             end
           end
@@ -33,19 +33,19 @@ module Admin
             action = path(ROUTES.dig(@owner, :delete), id: @owner_id, comment_id: @comment.source_id)
 
             menu.separator
-            menu.post(t(".delete"), action:, icon: "fa-regular fa-trash-can", warn: true, confirm: t(".confirm_delete"))
+            menu.post(t(".delete"), action:, icon: :trash, warn: true, confirm: t(".confirm_delete"))
           end
 
           def edit(menu)
             href = "#{path(ROUTES.dig(@owner, :page), id: @owner_id)}##{anchor}"
 
-            menu.link(t(".edit"), href:, icon: "fa-regular fa-pen-to-square", dialog: anchor)
+            menu.link(t(".edit"), href:, icon: :edit, dialog: anchor)
           end
 
           def label = Admin::Short.title(@comment.body.lines.first.to_s.strip)
 
           def source(menu)
-            icon = "fa-solid fa-arrow-up-right-from-square"
+            icon = :outbound
 
             menu.link(t(".view_source"), href: @comment.url, icon:, outbound: true)
           end

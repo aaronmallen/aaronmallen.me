@@ -35,7 +35,7 @@ module Admin
 
             details(class: "cal-event-edit") do
               Button(summary: true, small: true, variant: :gh) do
-                IconLabel(icon: "fa-regular fa-pen-to-square") do
+                IconLabel(icon: :edit) do
                   t(".edit")
                 end
               end
@@ -84,7 +84,7 @@ module Admin
           def links
             div(class: "cal-event-links") do
               link(@event.meet_url, MEET, t(".meet")) if @event.meet_url
-              link(@event.link, "fa-solid fa-arrow-up-right-from-square", t(".google")) if @event.link
+              link(@event.link, :outbound, t(".google")) if @event.link
             end
           end
 

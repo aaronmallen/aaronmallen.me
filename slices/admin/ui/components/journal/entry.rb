@@ -31,7 +31,7 @@ module Admin
 
           def actions
             div(class: "journal-entry-actions hov", hidden: editing?, data: { journal_actions: "" }) do
-              Button(**icon(t(".edit"), "fa-regular fa-pen-to-square"), data: { journal_edit: "" })
+              Button(**icon(t(".edit"), :edit), data: { journal_edit: "" })
               links_link
               delete_form
             end
@@ -48,7 +48,7 @@ module Admin
 
           def delete_form
             Form(**delete_attributes) do
-              Button(**icon(t(".delete"), "fa-regular fa-trash-can"), variant: :warn, type: "submit")
+              Button(**icon(t(".delete"), :trash), variant: :warn, type: "submit")
             end
           end
 

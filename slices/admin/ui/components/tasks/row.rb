@@ -43,7 +43,7 @@ module Admin
             aria = { keyshortcuts: EDIT }
             data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
 
-            Button(href:, label:, aria:, data:, small: true, icon: "fa-regular fa-pen-to-square")
+            Button(href:, label:, aria:, data:, small: true, icon: :edit)
           end
 
           def menu_path = path(:admin_task_menu, id: @task.id, filter: tab, origin: @origin)

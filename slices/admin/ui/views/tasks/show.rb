@@ -56,7 +56,7 @@ module Admin
             data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
 
             Button(
-              href: edit_path, small: true, icon: "fa-regular fa-pen-to-square", title: t(".edit_title"),
+              href: edit_path, small: true, icon: :edit, title: t(".edit_title"),
               aria: { keyshortcuts: EDIT }, data:,
             ) { t(".edit") }
           end

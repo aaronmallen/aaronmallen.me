@@ -7,7 +7,6 @@ module Admin
         class Actions < Component
           ANOTHER_ICON = "fa-solid fa-plus"
           DISCONNECT_ICON = "fa-solid fa-link-slash"
-          OPEN_ICON = "fa-solid fa-arrow-up-right-from-square"
           RECONNECT_ICON = "fa-solid fa-rotate"
           TEST_ICON = "fa-solid fa-plug-circle-check"
 
@@ -36,7 +35,7 @@ module Admin
           def dashboard
             return unless definition.dashboard
 
-            Button(small: true, variant: :gh, icon: OPEN_ICON, **external) { t(".open", name: definition.name) }
+            Button(small: true, variant: :gh, icon: :outbound, **external) { t(".open", name: definition.name) }
           end
 
           def definition = @row.definition

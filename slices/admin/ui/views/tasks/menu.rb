@@ -11,7 +11,6 @@ module Admin
           EDIT = Components::Tasks::Row::EDIT
           EXTERNAL = Blog::Types::TaskFilter["external"]
           FROM_INBOX = Blog::Types::TaskOrigin["inbox"]
-          ISSUE = "fa-solid fa-arrow-up-right-from-square"
           TAG = Blog::Types::TaskBulkAction["tag"]
           UNTAG = Blog::Types::TaskBulkAction["untag"]
 
@@ -28,7 +27,7 @@ module Admin
 
           def view_template
             ContextMenu(label: "#{key} · #{@task.title}", return_to: @return_to) do |menu|
-              menu.link(t(".open"), href: open_path, icon: "fa-regular fa-pen-to-square", key: EDIT)
+              menu.link(t(".open"), href: open_path, icon: :edit, key: EDIT)
               menu.separator
               progress(menu)
               column(menu) if @board
@@ -58,7 +57,7 @@ module Admin
           end
 
           def copies(menu)
-            menu.sub(t(".copy"), icon: "fa-regular fa-copy") do
+            menu.sub(t(".copy"), icon: :copy) do
               copied = t("ui.components.record_key.copied.task", key:)
               menu.copy(t(".copy_number"), text: key, copied:, icon: nil, hint: key)
               menu.copy(t(".copy_title"), text: @task.title, copied: t(".copied_title"), icon: nil)
@@ -67,9 +66,9 @@ module Admin
           end
 
           def ends(menu)
-            menu.post(t(".cancel"), action: act(:admin_cancel_task), icon: "fa-solid fa-ban") unless closed?
+            menu.post(t(".cancel"), action: act(:admin_cancel_task), icon: :ban) unless closed?
             confirm = t(".confirm_delete")
-            menu.post(t(".delete"), action: act(:admin_delete_task), icon: "fa-regular fa-trash-can", warn: true,
+            menu.post(t(".delete"), action: act(:admin_delete_task), icon: :trash, warn: true,
                                     confirm:)
           end
 
@@ -89,7 +88,7 @@ module Admin
           def records(menu)
             tags(menu)
             copies(menu)
-            source { menu.link(t(".open_issue"), href: it.url, icon: ISSUE, outbound: true) }
+            source { menu.link(t(".open_issue"), href: it.url, icon: :outbound, outbound: true) }
             seen(menu)
             Components::Inbox::SnoozeMenu(menu:, kind: "task", id: @task.id) if @origin == FROM_INBOX
           end

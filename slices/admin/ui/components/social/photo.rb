@@ -38,7 +38,7 @@ module Admin
             div(class: "compose-photo-tools") do
               tool("fa-solid fa-arrow-left", t(".earlier"), social_photo_move: "-1")
               tool("fa-solid fa-arrow-right", t(".later"), social_photo_move: "1")
-              tool("fa-solid fa-xmark", t(".remove"), social_photo_remove: "")
+              tool(:close, t(".remove"), social_photo_remove: "")
             end
           end
         end

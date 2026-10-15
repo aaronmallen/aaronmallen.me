@@ -37,7 +37,7 @@ module Admin
           def cancel
             data = { confirm: t(".confirm_cancel", task: @task.title) }
 
-            change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"), data:)
+            change(:admin_cancel_task, :ban, t(".cancel"), data:)
           end
 
           def change(route, icon, label, variant: nil, data: Blog::Constants::EMPTY_HASH, key: nil)

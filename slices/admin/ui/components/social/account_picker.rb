@@ -102,7 +102,7 @@ module Admin
 
           def remove(account)
             label = t(".remove", account: account.label)
-            button(type: "button", class: "compose-chip-remove", aria: { label: }) { Icon("fa-solid fa-xmark") }
+            button(type: "button", class: "compose-chip-remove", aria: { label: }) { Icon(:close) }
           end
 
           def search

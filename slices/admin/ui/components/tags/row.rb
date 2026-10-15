@@ -27,7 +27,7 @@ module Admin
           def edit
             Button(
               href: "##{Editor.id_for(@tag)}", small: true, class: "tag-pen", label: t(".edit"),
-              icon: "fa-regular fa-pen-to-square",
+              icon: :edit,
             )
           end
 

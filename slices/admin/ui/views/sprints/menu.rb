@@ -15,7 +15,7 @@ module Admin
             ContextMenu(label: t(".label", date: l(date, format: :medium))) do |menu|
               menu.link(t(".calendar"), href: path(:admin_calendar, day: date.iso8601), icon: "fa-regular fa-calendar")
               menu.separator
-              menu.post(t(".drop"), action: path(:admin_drop_sprint, id: @sprint.id), icon: "fa-regular fa-trash-can",
+              menu.post(t(".drop"), action: path(:admin_drop_sprint, id: @sprint.id), icon: :trash,
                                     warn: true, confirm: t(".confirm_drop"))
             end
           end

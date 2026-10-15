@@ -11,14 +11,11 @@ module Admin
           ICONS = {
             ".archive" => ["fa-solid fa-box-archive"], ".mark_read" => ["fa-regular fa-envelope-open", :gh],
             ".mark_unread" => ["fa-regular fa-envelope", :gh], ".not_spam" => [BACK], ".restore" => [BACK],
-            ".spam" => ["fa-solid fa-ban", :warn], ".star" => ["fa-regular fa-star", :gh],
+            ".spam" => %i[ban warn], ".star" => ["fa-regular fa-star", :gh],
             ".unstar" => ["fa-solid fa-star", :gh],
           }.freeze
-          EDIT = "fa-regular fa-pen-to-square"
-          OUT = "fa-solid fa-arrow-up-right-from-square"
           READ = Blog::Types::MessageStatus["read"]
           SPAM = Blog::Types::MessageStatus["spam"]
-          TRASH = "fa-regular fa-trash-can"
           UNREAD = Blog::Types::MessageStatus["unread"]
 
           prop :thread, Blog::Types::Instance(ROM::Struct)
@@ -53,7 +50,7 @@ module Admin
           def delete(label_key, confirm_key)
             Form(action: path(:admin_delete_mail, id: @thread.id), data: { morph: true }) do
               HiddenFields(values: @list)
-              Button(type: "submit", variant: :warn, small: true, icon: TRASH, data: { confirm: t(confirm_key) }) do
+              Button(type: "submit", variant: :warn, small: true, icon: :trash, data: { confirm: t(confirm_key) }) do
                 t(label_key)
               end
             end
@@ -61,7 +58,7 @@ module Admin
 
           def edit
             href = path(:admin_mail, **@list, thread: @thread.id, resume: Blog::Constants::CHECKED)
-            Button(href:, small: true, icon: EDIT) { t(".edit_draft") }
+            Button(href:, small: true, icon: :edit) { t(".edit_draft") }
           end
 
           def form_acts
@@ -70,7 +67,9 @@ module Admin
           end
 
           def gmail
-            Button(variant: :gh, small: true, icon: OUT, href: GMAIL, target: "_blank", rel: "noopener") { t(".gmail") }
+            Button(variant: :gh, small: true, icon: :outbound, href: GMAIL, target: "_blank", rel: "noopener") do
+              t(".gmail")
+            end
           end
 
           def gmail_acts
@@ -102,7 +101,7 @@ module Admin
           def trash
             Form(action: path(:admin_bulk_mail), data: { morph: true }) do
               HiddenFields(values: { **@list, "ids[]": @thread.id, act: ACT["trash"] })
-              Button(type: "submit", variant: :warn, small: true, icon: TRASH) { t(".trash") }
+              Button(type: "submit", variant: :warn, small: true, icon: :trash) { t(".trash") }
             end
           end
 

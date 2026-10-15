@@ -7,8 +7,6 @@ module Admin
         class Menu < View
           DELETE = Blog::Types::PostBulkAction["delete"]
           DRAFT = Blog::Types::PostStatus["draft"]
-          EDIT = "fa-regular fa-pen-to-square"
-          OUTBOUND = "fa-solid fa-arrow-up-right-from-square"
           PUBLISHED = Blog::Types::PostStatus["published"]
           TAG = Blog::Types::PostBulkAction["tag"]
           UNTAG = Blog::Types::PostBulkAction["untag"]
@@ -22,7 +20,7 @@ module Admin
 
           def view_template
             ContextMenu(label: @post.title, return_to: @return_to) do |menu|
-              menu.link(t(draft? ? ".keep_writing" : ".edit"), href: act(:admin_edit_post), icon: EDIT)
+              menu.link(t(draft? ? ".keep_writing" : ".edit"), href: act(:admin_edit_post), icon: :edit)
               published(menu) if published?
               menu.separator
               tags(menu)
@@ -40,7 +38,7 @@ module Admin
                        **Blog::Structs::Page.query(@list[:page]), return_to: nil }
 
             menu.separator
-            menu.post(t(".delete"), action: path(:admin_bulk_posts), fields:, icon: "fa-regular fa-trash-can",
+            menu.post(t(".delete"), action: path(:admin_bulk_posts), fields:, icon: :trash,
                                     warn: true, confirm: t(".confirm_delete"))
           end
 
@@ -54,7 +52,7 @@ module Admin
 
           def published(menu)
             menu.link(t(".analytics"), href: act(:admin_post_analytics), icon: "fa-solid fa-chart-simple")
-            menu.link(t(".view"), href: public_url, icon: OUTBOUND, outbound: true)
+            menu.link(t(".view"), href: public_url, icon: :outbound, outbound: true)
           end
 
           def published? = @post.status == PUBLISHED

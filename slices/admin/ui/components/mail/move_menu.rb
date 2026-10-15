@@ -9,8 +9,8 @@ module Admin
           MOVES = {
             ACT["inbox"] => ["fa-solid fa-inbox", ".inbox"],
             ACT["archive"] => ["fa-solid fa-box-archive", ".archive"],
-            ACT["spam"] => ["fa-solid fa-ban", ".spam"],
-            ACT["trash"] => ["fa-regular fa-trash-can", ".trash"],
+            ACT["spam"] => [:ban, ".spam"],
+            ACT["trash"] => [:trash, ".trash"],
           }.freeze
 
           prop :menu, Blog::Types::Instance(ContextMenu)

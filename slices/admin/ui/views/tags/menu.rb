@@ -20,7 +20,7 @@ module Admin
             ContextMenu(label: name, return_to: @return_to) do |menu|
               menu.link(t(".rename"), href: "##{Editor.id_for(@tag)}", icon: "fa-solid fa-i-cursor")
               menu.sub(t(".color"), icon: "fa-solid fa-palette") { COLORS.each { color(menu, *it) } }
-              menu.copy(t(".copy"), text: name, copied: t(".copied", tag: name), icon: "fa-regular fa-copy")
+              menu.copy(t(".copy"), text: name, copied: t(".copied", tag: name), icon: :copy)
               menu.separator
               delete(menu)
             end
@@ -39,7 +39,7 @@ module Admin
           def delete(menu)
             confirm = t(".confirm_delete")
             fields = { scope: @tag.scope }
-            icon = "fa-regular fa-trash-can"
+            icon = :trash
 
             menu.post(t(".delete"), action: act(:admin_delete_tag), icon:, warn: true, confirm:, fields:)
           end

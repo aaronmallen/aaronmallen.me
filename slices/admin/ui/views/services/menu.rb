@@ -39,7 +39,7 @@ module Admin
           def dashboard(menu)
             label = t(".open", name: definition.name)
 
-            menu.link(label, href: definition.dashboard, icon: BUTTONS::OPEN_ICON, outbound: true)
+            menu.link(label, href: definition.dashboard, icon: :outbound, outbound: true)
           end
 
           def definition = @row.definition

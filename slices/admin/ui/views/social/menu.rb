@@ -5,7 +5,6 @@ module Admin
     module Views
       module Social
         class Menu < View
-          DELETE = "fa-regular fa-trash-can"
           DRAFT = Blog::Types::SocialPostStatus["draft"]
           POSTED = Blog::Types::SocialPostStatus["posted"]
 
@@ -18,7 +17,7 @@ module Admin
           def view_template
             ContextMenu(label: head, return_to: @return_to) do |menu|
               edits(menu) if editable?
-              menu.copy(t(".copy_text"), text:, copied: t(".copied_text"), icon: "fa-regular fa-copy")
+              menu.copy(t(".copy_text"), text:, copied: t(".copied_text"), icon: :copy)
               remove(menu) if editable?
             end
           end
@@ -30,7 +29,7 @@ module Admin
           def editable? = @social_post.status != POSTED && @social_post.deliveries.empty?
 
           def edits(menu)
-            menu.link(t(".edit"), href: edit_path, icon: "fa-regular fa-pen-to-square")
+            menu.link(t(".edit"), href: edit_path, icon: :edit)
             menu.link(t(".linked"), href: "#{edit_path}##{Index::LINKS}", icon: "fa-solid fa-link")
           end
 
@@ -42,7 +41,7 @@ module Admin
             fields = { filter: @filter, return_to: nil }
 
             menu.separator
-            menu.post(label, action:, fields:, icon: DELETE, warn: true, confirm: t(".confirm_remove"))
+            menu.post(label, action:, fields:, icon: :trash, warn: true, confirm: t(".confirm_remove"))
           end
 
           def text = @social_post.parts.map(&:body).join("\n\n")

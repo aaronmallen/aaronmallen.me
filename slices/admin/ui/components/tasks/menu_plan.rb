@@ -45,7 +45,7 @@ module Admin
               sprint(t(".today"), @today)
               sprint(t(".tomorrow"), @today + 1)
               @sprints.each { sprint(t(".sprint"), it.sprint_date) }
-              @menu.post(t(".unschedule"), action: act(:admin_schedule_task), icon: "fa-solid fa-xmark") if held
+              @menu.post(t(".unschedule"), action: act(:admin_schedule_task), icon: :close) if held
             end
           end
 

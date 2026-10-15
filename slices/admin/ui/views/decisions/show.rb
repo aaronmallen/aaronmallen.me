@@ -31,7 +31,7 @@ module Admin
             PageHead(title: @decision.title, kicker: t(".kicker"), sub: lede) do
               BackLink(href: path(:admin_decisions, status: @decision.status)) { t(".back") }
               StatusPill(status: @decision.status)
-              Button(href: path(:admin_edit_decision, id: @decision.id), icon: "fa-regular fa-pen-to-square") do
+              Button(href: path(:admin_edit_decision, id: @decision.id), icon: :edit) do
                 t(".edit")
               end
             end

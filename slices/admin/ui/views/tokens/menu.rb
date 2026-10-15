@@ -11,7 +11,7 @@ module Admin
 
           def view_template
             ContextMenu(label: @token.name) do |menu|
-              menu.post(t(".revoke"), action: path(:admin_revoke_token, id: @token.id), icon: "fa-solid fa-ban",
+              menu.post(t(".revoke"), action: path(:admin_revoke_token, id: @token.id), icon: :ban,
                                       warn: true, confirm: t(".confirm_revoke"))
             end
           end

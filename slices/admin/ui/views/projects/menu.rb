@@ -7,7 +7,6 @@ module Admin
         class Menu < View
           GITHUB = "https://github.com/%s"
           REPO = "fa-brands fa-github"
-          SITE = "fa-solid fa-arrow-up-right-from-square"
 
           layout nil
 
@@ -18,7 +17,7 @@ module Admin
           def view_template
             ContextMenu(label: @project.name, return_to: @return_to) do |menu|
               menu.link(t(".open_board"), href: act(:admin_project), icon: "fa-solid fa-table-columns")
-              menu.link(t(".edit"), href: act(:admin_edit_project), icon: "fa-regular fa-pen-to-square")
+              menu.link(t(".edit"), href: act(:admin_edit_project), icon: :edit)
               opens(menu)
               menu.separator
               tags(menu)
@@ -41,12 +40,12 @@ module Admin
           end
 
           def copy_repo(menu)
-            menu.copy(t(".copy_repo"), text: @project.repo, copied: t(".copied_repo"), icon: "fa-regular fa-copy")
+            menu.copy(t(".copy_repo"), text: @project.repo, copied: t(".copied_repo"), icon: :copy)
           end
 
           def opens(menu)
             menu.link(t(".open_repo"), href: format(GITHUB, @project.repo), icon: REPO, outbound: true) if repo?
-            menu.link(t(".open_site"), href: @project.url, icon: SITE, outbound: true) if written?(@project.url)
+            menu.link(t(".open_site"), href: @project.url, icon: :outbound, outbound: true) if written?(@project.url)
           end
 
           def repo? = written?(@project.repo)

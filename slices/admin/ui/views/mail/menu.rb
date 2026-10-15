@@ -16,7 +16,6 @@ module Admin
           }.freeze
           REPLY = Components::Mail::FieldError.id_for(:body, Components::Mail::Reply::SCOPE)
           SPAM = Blog::Types::MessageStatus["spam"]
-          TRASH = "fa-regular fa-trash-can"
           UNREAD = Blog::Types::MessageStatus["unread"]
 
           layout nil
@@ -44,7 +43,7 @@ module Admin
           private
 
           def act(menu, act, key = ".#{act}", **)
-            menu.post(t(key), action: path(:admin_bulk_mail), icon: ICONS.fetch(act, TRASH),
+            menu.post(t(key), action: path(:admin_bulk_mail), icon: ICONS.fetch(act, :trash),
                               fields: { **picked, act: }, **)
           end
 
@@ -103,7 +102,7 @@ module Admin
             return unless @thread.reply_to
 
             menu.copy(t(".copy_address"), text: @thread.reply_to, copied: t(".copied_address"),
-                                          icon: "fa-regular fa-copy")
+                                          icon: :copy)
           end
 
           def shown = inbox? ? {} : @list

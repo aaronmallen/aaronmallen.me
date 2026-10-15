@@ -6,7 +6,6 @@ module Admin
       module Projects
         class Row < Component
           ARCHIVE = [:admin_archive_project, ".archive", "fa-solid fa-box-archive", :gh].freeze
-          EDIT_ICON = "fa-regular fa-pen-to-square"
           PRIVATE = Blog::Types::ProjectVisibility["private"]
           RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
 
@@ -32,7 +31,7 @@ module Admin
             change(*(@project.archived? ? RESTORE : ARCHIVE))
             label = t(".edit")
 
-            Button(href: edit_path, small: true, label:, icon: EDIT_ICON)
+            Button(href: edit_path, small: true, label:, icon: :edit)
           end
 
           def archived_on

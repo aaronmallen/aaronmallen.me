@@ -88,7 +88,7 @@ module Admin
           Form(action: comment_route(:delete, comment), data:) do
             @fields&.call
             Button(
-              type: "submit", variant: :gh, small: true, label:, icon: "fa-regular fa-trash-can",
+              type: "submit", variant: :gh, small: true, label:, icon: :trash,
             )
           end
         end

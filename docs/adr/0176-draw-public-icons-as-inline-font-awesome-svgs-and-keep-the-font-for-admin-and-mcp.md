@@ -6,7 +6,7 @@ created: 2026-10-14
 area: [assets, config, lib, public, admin, mcp]
 supersedes: ["0033"]
 issue: "#1305"
-amended: ["#1282"]
+amended: ["#1282", "#1215"]
 tags: [icons, font-awesome, svg, css, tailwind, accessibility, performance]
 ---
 
@@ -34,6 +34,9 @@ Public pages draw each icon as an inline SVG from Font Awesome Free. Admin and M
   so the page's spec fails.
 - **The markup.** The `<i>` keeps its Font Awesome class names, which now only name the icon. Rules in
   `config/tailwind.css` such as `i.fa-retweet` keep matching.
+- **Action names.** Since #1215, `Icon` also takes a common action's name, such as `:trash`, and swaps in its class
+  names from `Icon::ACTIONS`, so delete, edit, ban, close, copy and outbound links each show one icon. Any other name
+  passes through as class names, and a public page finds the SVG through the swapped names.
 - **The sheets.** `app/assets/css/admin.css` imports Font Awesome. `base.css` holds only the site's fonts, so
   `public/app.css` carries no Font Awesome CSS and links no Font Awesome font.
 - **Code captions.** `Markdown::Document` draws `file-code` as an SVG in an `<i>` with no class, on public pages and

@@ -5,7 +5,6 @@ module Admin
     module Components
       module Services
         class ConnectDialog < Component
-          GO = "fa-solid fa-arrow-up-right-from-square"
           SERVER_FIELD = {
             autocapitalize: "none", autocomplete: "off", name: "server", placeholder: "mastodon.social", required: true,
             spellcheck: "false",
@@ -46,7 +45,7 @@ module Admin
             Button(small: true, variant: :gh, data: { dialog_close: true }) do
               t("ui.components.edit_note_dialog.cancel")
             end
-            Button(small: true, variant: :pri, type: "submit", form: form_id, icon: GO) { t(".continue", name:) }
+            Button(small: true, variant: :pri, type: "submit", form: form_id, icon: :outbound) { t(".continue", name:) }
           end
 
           def form_id = "#{id}-form"

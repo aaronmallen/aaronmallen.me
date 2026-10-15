@@ -7,7 +7,7 @@ module Admin
         VERDICTS = {
           Blog::Types::WebmentionVerdict["approved"] => ["fa-solid fa-check", ".approve"],
           Blog::Types::WebmentionVerdict["ignored"] => ["fa-regular fa-eye-slash", ".ignore"],
-          Blog::Types::WebmentionVerdict["spam"] => ["fa-solid fa-ban", ".spam"],
+          Blog::Types::WebmentionVerdict["spam"] => [:ban, ".spam"],
         }.freeze
 
         prop :verdict, Blog::Types::WebmentionVerdict

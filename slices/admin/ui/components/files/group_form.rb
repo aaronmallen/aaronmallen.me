@@ -102,7 +102,7 @@ module Admin
               div(class: "file-group-item-body") { item_body(file) }
               Button(
                 small: true, variant: :gh, type: "submit", form: self.class.remove_id(@group, file),
-                icon: "fa-regular fa-trash-can", label: t(".remove", name: file.filename),
+                icon: :trash, label: t(".remove", name: file.filename),
               )
             end
           end

@@ -38,7 +38,7 @@ module Admin
 
             details(class: "comment-edit", open: mine) do
               Button(summary: true, small: true, title: t(".edit")) do
-                Icon("fa-regular fa-pen-to-square")
+                Icon(:edit)
                 span(class: "sr-only") { t(".edit") }
               end
               OptionForm(

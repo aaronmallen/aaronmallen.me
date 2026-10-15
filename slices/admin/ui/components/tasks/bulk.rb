@@ -21,10 +21,10 @@ module Admin
             BulkBar(id: ID, action: path(:admin_bulk_tasks), label: t(".label"), fields:,
                     menu: path(:admin_tasks_bulk_menu, **fields), toggled: true) do |bar|
               bar.act(COMPLETE, icon: "fa-solid fa-check", label: t(".complete"), variant: :pri)
-              bar.act(CANCEL, icon: "fa-solid fa-ban", label: t(".cancel"))
+              bar.act(CANCEL, icon: :ban, label: t(".cancel"))
               move(bar)
               bar.tagging(tag: TAG, untag: UNTAG)
-              bar.act(DELETE, icon: "fa-regular fa-trash-can", label: t(".delete"), variant: :warn, data: confirm)
+              bar.act(DELETE, icon: :trash, label: t(".delete"), variant: :warn, data: confirm)
             end
           end
 

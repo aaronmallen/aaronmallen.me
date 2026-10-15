@@ -31,14 +31,14 @@ module Admin
 
             menu.copy(t(".copy_short"), text: short, copied: t(".copied_short"), icon: "fa-solid fa-link")
             menu.copy(t(".copy_destination"), text: destination, copied: t(".copied_destination"),
-                                              icon: "fa-regular fa-copy")
+                                              icon: :copy)
             menu.copy(t(".copy_markdown"), text: markdown, copied: t(".copied_markdown"), icon: "fa-brands fa-markdown")
           end
 
           def delete(menu)
             confirm = t(".confirm_delete")
 
-            menu.post(t(".delete"), action: act(:admin_delete_link), icon: "fa-regular fa-trash-can", warn: true,
+            menu.post(t(".delete"), action: act(:admin_delete_link), icon: :trash, warn: true,
                                     confirm:)
           end
 
@@ -47,8 +47,8 @@ module Admin
           def opens(menu)
             dialog = ShareDrawer.id_for(LinkForm, @link)
 
-            menu.link(t(".edit"), href: act(:admin_edit_link), icon: "fa-regular fa-pen-to-square", dialog:)
-            menu.link(t(".open"), href: @link.destination, icon: "fa-solid fa-arrow-up-right-from-square",
+            menu.link(t(".edit"), href: act(:admin_edit_link), icon: :edit, dialog:)
+            menu.link(t(".open"), href: @link.destination, icon: :outbound,
                                   outbound: true)
           end
 

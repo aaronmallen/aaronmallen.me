@@ -13,7 +13,7 @@ module Admin
             ContextMenu(label: Components::ClientRow.label(@client)) do |menu|
               menu.link(t(".sightings"), href: path(:admin_security), icon: "fa-solid fa-shield-halved")
               menu.separator
-              menu.post(t(".revoke"), action: path(:admin_revoke_client, id: @client.id), icon: "fa-solid fa-ban",
+              menu.post(t(".revoke"), action: path(:admin_revoke_client, id: @client.id), icon: :ban,
                                       warn: true, confirm: t(".confirm_revoke"))
             end
           end

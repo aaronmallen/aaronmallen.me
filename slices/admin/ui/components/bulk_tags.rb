@@ -22,7 +22,7 @@ module Admin
           end
           return if @held.empty?
 
-          @menu.sub(t(".remove"), icon: "fa-solid fa-xmark") { @held.each { tag(UNTAG, it) } }
+          @menu.sub(t(".remove"), icon: :close) { @held.each { tag(UNTAG, it) } }
         end
 
         private

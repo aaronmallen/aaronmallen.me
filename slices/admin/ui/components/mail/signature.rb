@@ -17,7 +17,7 @@ module Admin
               input(type: "checkbox", id:, name: "mail[signature]", value: Blog::Constants::CHECKED, checked: @on)
               @senders.each { signature(it) }
               label(class: "mail-sig-off", for: id, title: t(".remove")) do
-                Icon("fa-solid fa-xmark")
+                Icon(:close)
                 span(class: "sr-only") { t(".remove") }
               end
               label(class: "mail-sig-on", for: id) { t(".add") }

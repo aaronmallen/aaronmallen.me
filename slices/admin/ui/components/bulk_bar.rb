@@ -36,7 +36,7 @@ module Admin
             Input(name: "tag", class: "bulk-field", autocomplete: "off", placeholder: t(".tag_placeholder"),
                   aria: { label: t(".tag_name") })
             act(tag, icon: "fa-solid fa-tag", label: t(".tag"))
-            act(untag, icon: "fa-solid fa-xmark", label: t(".untag")) if untag
+            act(untag, icon: :close, label: t(".untag")) if untag
           end
         end
 

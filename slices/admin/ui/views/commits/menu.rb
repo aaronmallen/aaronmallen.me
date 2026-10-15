@@ -5,8 +5,6 @@ module Admin
     module Views
       module Commits
         class Menu < View
-          COPY = "fa-regular fa-copy"
-
           layout nil
 
           prop :commit, Blog::Types::Instance(ROM::Struct)
@@ -15,8 +13,8 @@ module Admin
             ContextMenu(label: "#{sha} · #{subject}") do |menu|
               opens(menu)
               menu.separator
-              menu.copy(t(".copy_sha"), text: @commit.sha, copied: t(".copied_sha"), icon: COPY, hint: sha)
-              menu.copy(t(".copy_message"), text: subject, copied: t(".copied_message"), icon: COPY)
+              menu.copy(t(".copy_sha"), text: @commit.sha, copied: t(".copied_sha"), icon: :copy, hint: sha)
+              menu.copy(t(".copy_message"), text: subject, copied: t(".copied_message"), icon: :copy)
             end
           end
 

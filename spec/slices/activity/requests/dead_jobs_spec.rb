@@ -87,6 +87,10 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
       expect(page_has_card?).to be(false)
     end
 
+    it "draws Discard with the trash icon every other delete uses" do
+      expect(card.find("button[aria-label='Discard']")).to have_css("i.fa-regular.fa-trash-can", visible: :all)
+    end
+
     it "asks before it discards" do
       expect(card.find("form:has(button[aria-label='Discard'])")["data-confirm"])
         .to include("Social::Jobs::SendWebmention")

@@ -4,8 +4,6 @@ module Admin
   module UI
     module Components
       class DeleteForm < Component
-        ICON = "fa-regular fa-trash-can"
-
         prop :action, Blog::Types::String
         prop :confirm, Blog::Types::String
         prop :label, Blog::Types::String
@@ -15,7 +13,7 @@ module Admin
         def view_template
           Form(action: @action, **@attributes, data: { morph: (true if @morph), confirm: @confirm }) do
             yield if block_given?
-            Button(variant: :warn, type: "submit", small: true, icon: ICON) { @label }
+            Button(variant: :warn, type: "submit", small: true, icon: :trash) { @label }
           end
         end
       end

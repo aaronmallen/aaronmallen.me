@@ -80,7 +80,7 @@ module Admin
             end
             a(class: "review-chip", href: href(nil)) do
               plain t(WHOLE.fetch(@period))
-              Icon("fa-solid fa-xmark")
+              Icon(:close)
             end
           end
 

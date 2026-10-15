@@ -33,7 +33,7 @@ module Admin
 
           def delete_button
             Button(
-              variant: :warn, small: true, type: "submit", form: DeleteForm::ID, icon: "fa-regular fa-trash-can",
+              variant: :warn, small: true, type: "submit", form: DeleteForm::ID, icon: :trash,
             ) { t(".delete") }
           end
 

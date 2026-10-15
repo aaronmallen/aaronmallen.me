@@ -5,8 +5,6 @@ module Admin
     module Views
       module Journal
         class Menu < View
-          TRASH = "fa-regular fa-trash-can"
-
           layout nil
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
@@ -17,7 +15,7 @@ module Admin
             ContextMenu(label:, return_to: @return_to) do |menu|
               opens(menu)
               tags(menu)
-              menu.copy(t(".copy_text"), text: @entry.body, copied: t(".copied_text"), icon: "fa-regular fa-copy")
+              menu.copy(t(".copy_text"), text: @entry.body, copied: t(".copied_text"), icon: :copy)
               menu.separator
               delete(menu)
             end
@@ -30,7 +28,7 @@ module Admin
           def delete(menu)
             confirm = t(".confirm_delete")
 
-            menu.post(t(".delete"), action: act(:admin_delete_journal_entry), icon: TRASH, warn: true, confirm:)
+            menu.post(t(".delete"), action: act(:admin_delete_journal_entry), icon: :trash, warn: true, confirm:)
           end
 
           def edit_path = path(:admin_journal, to: @entry.entry_date.iso8601, edit: @entry.id)
@@ -42,7 +40,7 @@ module Admin
           def names = @entry.tags.map(&:name)
 
           def opens(menu)
-            menu.link(t(".edit"), href: edit_path, icon: "fa-regular fa-pen-to-square")
+            menu.link(t(".edit"), href: edit_path, icon: :edit)
             menu.link(t(".links"), href: links_path, icon: "fa-solid fa-link")
           end
 

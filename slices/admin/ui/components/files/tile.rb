@@ -38,7 +38,7 @@ module Admin
               t(".copy")
             end
             Button(
-              href: link, small: true, variant: :gh, icon: "fa-solid fa-arrow-up-right-from-square",
+              href: link, small: true, variant: :gh, icon: :outbound,
               label: t(".open", name: @share.filename), target: "_blank", rel: "noopener",
             )
           end

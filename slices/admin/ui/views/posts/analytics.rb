@@ -43,7 +43,7 @@ module Admin
           def actions
             BackLink(href: path(:admin_posts)) { t(".back") }
             range_form
-            Button(href: path(:admin_edit_post, id: @post.id), icon: "fa-regular fa-pen-to-square") { t(".edit") }
+            Button(href: path(:admin_edit_post, id: @post.id), icon: :edit) { t(".edit") }
           end
 
           def bounce_rate = Blog::Helpers::Figures.share(stat(:bounces), stat(:visitors))

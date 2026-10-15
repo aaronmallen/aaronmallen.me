@@ -40,7 +40,7 @@ module Admin
           end
 
           def delete_button
-            Button(variant: :warn, type: "submit", form: delete_form_id, icon: "fa-regular fa-trash-can") do
+            Button(variant: :warn, type: "submit", form: delete_form_id, icon: :trash) do
               t(".delete")
             end
           end

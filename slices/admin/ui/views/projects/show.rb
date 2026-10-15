@@ -75,7 +75,7 @@ module Admin
           def facts
             div(class: "kb-meta") do
               link(repo_url, @project.repo, "fa-brands fa-github") if repo_url
-              link(@project.url, @project.url.sub(SCHEME, ""), "fa-solid fa-arrow-up-right-from-square") if site?
+              link(@project.url, @project.url.sub(SCHEME, ""), :outbound) if site?
               counts
               published
             end
@@ -86,7 +86,7 @@ module Admin
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
-              Button(href: path(:admin_edit_project, id: @project.id), icon: "fa-regular fa-pen-to-square") do
+              Button(href: path(:admin_edit_project, id: @project.id), icon: :edit) do
                 t(".edit")
               end
             end

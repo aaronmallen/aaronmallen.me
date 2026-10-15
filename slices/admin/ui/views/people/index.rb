@@ -28,7 +28,7 @@ module Admin
 
             Button(
               href: path(:admin_edit_person, id: person.id), small: true, label:,
-              icon: "fa-regular fa-pen-to-square", data: { person_edit: true },
+              icon: :edit, data: { person_edit: true },
             )
           end
 

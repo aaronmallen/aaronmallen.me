@@ -29,7 +29,7 @@ module Admin
             Form(action: route(:admin_delete_task_session), data:) do
               return_fields
               Button(
-                type: "submit", variant: :gh, small: true, label:, icon: "fa-regular fa-trash-can",
+                type: "submit", variant: :gh, small: true, label:, icon: :trash,
               )
             end
           end

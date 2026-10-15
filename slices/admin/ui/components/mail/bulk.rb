@@ -52,7 +52,7 @@ module Admin
             choose(bar, "to", moves)
             labels = label_options
             choose(bar, "label", labels) if labels.any?
-            bar.act(ACT["trash"], icon: "fa-regular fa-trash-can", label: t(".trash"), variant: :warn)
+            bar.act(ACT["trash"], icon: :trash, label: t(".trash"), variant: :warn)
           end
 
           def label_options
@@ -70,7 +70,7 @@ module Admin
 
           def trash(bar)
             bar.act(ACT["inbox"], icon: "fa-solid fa-rotate-left", label: t(".restore"))
-            bar.act(ACT["delete"], icon: "fa-regular fa-trash-can", label: t(".delete_forever"), variant: :warn, data:)
+            bar.act(ACT["delete"], icon: :trash, label: t(".delete_forever"), variant: :warn, data:)
           end
         end
       end

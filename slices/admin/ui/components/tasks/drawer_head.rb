@@ -26,7 +26,7 @@ module Admin
 
             OriginLink(
               origin: @origin, filter: @filter, variant: :gh, small: true, data: { task_close: true }, label:,
-              icon: "fa-solid fa-xmark", class: "task-drawer-close",
+              icon: :close, class: "task-drawer-close",
             ) { label }
           end
 

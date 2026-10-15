@@ -22,8 +22,8 @@ module Admin
             FOLDER["sent"] => "fa-regular fa-paper-plane",
             FOLDER["drafts"] => "fa-regular fa-file-lines",
             FOLDER["all"] => "fa-regular fa-envelope-open",
-            FOLDER["spam"] => "fa-solid fa-ban",
-            FOLDER["trash"] => "fa-regular fa-trash-can",
+            FOLDER["spam"] => :ban,
+            FOLDER["trash"] => :trash,
           }.freeze
           NAMES = FOLDER.values.to_h { [it, "ui.components.mail.folders.names.#{it}"] }.freeze
 

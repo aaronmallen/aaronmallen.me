@@ -27,7 +27,7 @@ module Admin
 
             Button(
               type: "submit", small: true, label:, aria:, data: { key: KEY, key_label: t(".key") },
-              icon: "fa-solid fa-arrow-up-right-from-square",
+              icon: :outbound,
             )
           end
         end

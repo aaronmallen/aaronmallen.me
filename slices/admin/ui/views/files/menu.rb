@@ -36,7 +36,7 @@ module Admin
           def delete(menu)
             confirm = t(".confirm_delete")
 
-            menu.post(t(".delete"), action: act(:admin_delete_file), icon: "fa-regular fa-trash-can", warn: true,
+            menu.post(t(".delete"), action: act(:admin_delete_file), icon: :trash, warn: true,
                                     confirm:)
           end
 
@@ -51,8 +51,8 @@ module Admin
           def opens(menu)
             dialog = ShareDrawer.id_for(ShareForm, @share)
 
-            menu.link(t(".details"), href: act(:admin_edit_file), icon: "fa-regular fa-pen-to-square", dialog:)
-            menu.link(t(".open"), href: link, icon: "fa-solid fa-arrow-up-right-from-square", outbound: true)
+            menu.link(t(".details"), href: act(:admin_edit_file), icon: :edit, dialog:)
+            menu.link(t(".open"), href: link, icon: :outbound, outbound: true)
           end
         end
       end
