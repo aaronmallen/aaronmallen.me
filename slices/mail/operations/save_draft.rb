@@ -6,6 +6,8 @@ module Mail
       HEADERS = %w[to cc bcc subject].freeze
       DRAFTS = "#{SyncGmail::GMAIL}/drafts".freeze
       LISTED = 500
+      MESSAGES = "#{SyncGmail::GMAIL}/messages".freeze
+      THREADS = "#{SyncGmail::GMAIL}/threads".freeze
 
       include Deps[
         google: "google.client",
@@ -18,7 +20,7 @@ module Mail
         account = step sender(fields[:from])
         draft = step saved(account, fields)
 
-        send_mail.mirror(account, draft.dig("message", "threadId"))
+        store(account, draft.fetch("message"))
         draft.fetch("id")
       rescue Google::Error => e
         Failure([:gmail_failed, e.message])
@@ -38,6 +40,11 @@ module Mail
       private
 
       def create(account, message) = google.post(DRAFTS, { message: }, account: account.address)
+
+      def kept(account, gmail_id)
+        thread = google.get("#{THREADS}/#{gmail_id}", account: account.address, format: "minimal")
+        thread.fetch("messages", []).map { it.fetch("id") }
+      end
 
       def opened(id, message, thread)
         headers = message.dig("payload", "headers").to_h { [it["name"].downcase, it["value"]] }
@@ -62,6 +69,16 @@ module Mail
         account = send_mail.senders.find { it.id == Blog::Types::IdParam[id] }
 
         account ? Success(account) : Failure([:invalid, { from: [Blog::Contract::FORMAT] }])
+      end
+
+      def store(account, message)
+        gmail_id = message.fetch("threadId")
+        id = gmail_mutations.thread_id(account.id, gmail_id)
+        return send_mail.mirror(account, gmail_id) unless id
+
+        kept = kept(account, gmail_id)
+        full = google.get("#{MESSAGES}/#{message.fetch('id')}", account: account.address, format: "full")
+        gmail_mutations.store_draft(id, GmailThread.new({ "id" => gmail_id, "messages" => [full] }), kept)
       end
 
       def update(account, id, message)

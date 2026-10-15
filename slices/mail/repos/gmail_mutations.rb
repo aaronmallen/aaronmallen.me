@@ -36,6 +36,17 @@ module Mail
         mail_accounts.where(id: account_id).dataset.update(signature:, settings_synced_at: now)
       end
 
+      def store_draft(thread_id, draft, kept, now: Time.now)
+        message = draft.messages.first
+
+        transaction do
+          mail_messages.where(mail_thread_id: thread_id).exclude(gmail_id: kept).delete
+          upsert_messages(thread_id, [message], now)
+          store_attachments(thread_id, draft.attachments)
+          restate(thread_id, message, now)
+        end
+      end
+
       def store_labels(account_id, labels, now: Time.now)
         rows = labels.map { { **it, mail_account_id: account_id, created_at: now, updated_at: now } }
 
@@ -55,6 +66,8 @@ module Mail
           label(id, account_id, thread.label_ids)
         end
       end
+
+      def thread_id(account_id, gmail_id) = mail_threads.where(mail_account_id: account_id, gmail_id:).pluck(:id).first
 
       private
 
@@ -85,6 +98,13 @@ module Mail
         Sequel.case([[{ Sequel[:excluded][:status] => SPAM }, kept]], nil)
       end
 
+      def restate(thread_id, message, now)
+        received_at = Sequel.function(:greatest, :received_at, message[:received_at])
+        subject = Sequel.case([[{ draft: true }, message[:subject]]], :subject)
+
+        mail_threads.where(id: thread_id).dataset.update(received_at:, subject:, updated_at: now)
+      end
+
       def store_attachments(thread_id, attachments)
         rows = attachment_rows(thread_id, attachments)
         stored = stored_attachments(rows.keys)
@@ -95,20 +115,22 @@ module Mail
       end
 
       def store_messages(id, messages, now)
-        rows = messages.map { { **it, mail_thread_id: id, created_at: now, updated_at: now } }
-
-        mail_messages.where(mail_thread_id: id).exclude(gmail_id: rows.map { it[:gmail_id] }).delete
-        mail_messages.dataset.insert_conflict(
-          target: %i[mail_thread_id gmail_id], update: mail_messages.excluded(MESSAGE_COLUMNS),
-          update_where: changed(:mail_messages, MESSAGE_COLUMNS - %i[updated_at]),
-        ).multi_insert(rows)
+        mail_messages.where(mail_thread_id: id).exclude(gmail_id: messages.map { it[:gmail_id] }).delete
+        upsert_messages(id, messages, now)
       end
 
       def stored_attachments(ids)
         mail_attachments.where(mail_message_id: ids).dataset.to_a.group_by { it[:mail_message_id] }
       end
 
-      def thread_id(account_id, gmail_id) = mail_threads.where(mail_account_id: account_id, gmail_id:).pluck(:id).first
+      def upsert_messages(id, messages, now)
+        rows = messages.map { { **it, mail_thread_id: id, created_at: now, updated_at: now } }
+
+        mail_messages.dataset.insert_conflict(
+          target: %i[mail_thread_id gmail_id], update: mail_messages.excluded(MESSAGE_COLUMNS),
+          update_where: changed(:mail_messages, MESSAGE_COLUMNS - %i[updated_at]),
+        ).multi_insert(rows)
+      end
 
       def upsert_thread(account_id, row, now)
         update = { **mail_threads.excluded(THREAD_COLUMNS), marked_spam_at: }

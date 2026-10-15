@@ -84,6 +84,44 @@ RSpec.describe "Admin mail drafts and attachments", type: :request do
     end
   end
 
+  describe "autosaving a stored draft" do
+    let(:earlier) { Time.now - 3600 }
+
+    def messages = Mail::Slice["relations.mail_messages"].where(mail_thread_id: thread.id).order(:gmail_id).to_a
+
+    def seed(*messages, live:)
+      json = JSON.parse({ id: "t5", messages: }.to_json)
+      Mail::Slice["repos.gmail_mutations"].store_thread(work.id, Mail::GmailThread.new(json), now: earlier)
+      stub_gmail_thread("t5", live)
+    end
+
+    def thread = stored("t5")
+
+    before do
+      stub_draft(:put, "#{gmail}/drafts/r1")
+      html = [gmail_part("text/html", "<p>Later</p>")]
+      stub_request(:get, %r{\A#{gmail}/messages/d1\?})
+        .to_return(google_health_json(gmail_message("d1", labels: %w[DRAFT], Subject: "Later", parts: html)))
+    end
+
+    it "rewrites no other message of the thread", :aggregate_failures do
+      seed(gmail_message("m1"), gmail_message("d0", labels: %w[DRAFT]), live: [gmail_message("m1"), draft_message])
+      save_draft(draft: "r1")
+
+      expect(messages.map { it[:gmail_id] }).to eq(%w[d1 m1])
+      expect(messages.last[:updated_at]).to be_within(1).of(earlier)
+      expect(a_request(:get, %r{\A#{gmail}/threads/t5\?.*format=full})).not_to have_been_made
+    end
+
+    it "shows the latest text in Drafts", :aggregate_failures do
+      seed(gmail_message("d0", labels: %w[DRAFT], Subject: "Plans"), live: [draft_message])
+      save_draft(draft: "r1")
+
+      expect(thread).to have_attributes(draft: true, subject: "Later")
+      expect(messages.map { it.values_at(:gmail_id, :html_body) }).to eq([["d1", "<p>Later</p>"]])
+    end
+  end
+
   describe "opening a draft" do
     let(:thread) do
       create(:message, mail_account_id: work.id, gmail_id: "t5", subject: "Plans", visitor_hash: nil)
