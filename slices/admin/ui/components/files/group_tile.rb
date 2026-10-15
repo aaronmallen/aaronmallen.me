@@ -50,7 +50,8 @@ module Admin
           def name = t(".name", count: files.size)
 
           def opener
-            a(href: path(:admin_edit_file_group, id: @group.id), data: { dialog_open: GroupDrawer.id_for(@group) }) do
+            a(href: path(:admin_edit_file_group, id: @group.id),
+              data: { dialog_open: ShareDrawer.id_for(GroupForm, @group) }) do
               name
             end
           end

@@ -32,10 +32,10 @@ module Admin
           def filter = @list[:filter]
 
           def filter_form
-            AutoForm(action: path(:admin_files)) do
-              input(type: "hidden", name: "search", value: search) if search
-              SegmentedControl(label: t(".filter"), name: "kind", options:, selected: filter)
-            end
+            FilterSwitch(
+              action: path(:admin_files), name: "kind", options: FILTERS, selected: filter, label: t(".filter"),
+              keep: { search: },
+            )
           end
 
           def grid
@@ -43,11 +43,9 @@ module Admin
               @groups.each { GroupTile(group: it) }
               @shares.rows.each { Tile(share: it) }
             end
-            @groups.each { GroupDrawer(group: it) }
-            @shares.rows.each { Drawer(share: it) }
+            @groups.each { |group| ShareDrawer(form: GroupForm, record: group, kind: :group) { GroupForm(group:) } }
+            @shares.rows.each { |share| ShareDrawer(form: ShareForm, record: share, kind: :file) { ShareForm(share:) } }
           end
-
-          def options = FILTERS.transform_values { t(it) }
 
           def query = { kind: filter, search: }.compact
 

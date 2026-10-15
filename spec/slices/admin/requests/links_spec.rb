@@ -121,6 +121,14 @@ RSpec.describe "Admin links", type: :request do
       expect(titles).to eq(%w[Recording example.com])
     end
 
+    it "keeps the search when sorting" do
+      get "/admin/links", search: "example"
+
+      switch = "form:has([type=radio][name=sort])"
+
+      expect(page).to have_css("#{switch} [type=hidden][name=search][value=example]", visible: :hidden)
+    end
+
     it "says when nothing matches" do
       get "/admin/links", search: "nothing"
 

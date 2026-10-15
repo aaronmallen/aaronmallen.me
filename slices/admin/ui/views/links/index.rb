@@ -52,7 +52,7 @@ module Admin
 
           def list
             Card(class: "link-list") { @links.rows.empty? ? Empty { t(empty) } : @links.rows.each { Row(link: it) } }
-            @links.rows.each { Drawer(link: it) }
+            @links.rows.each { |link| ShareDrawer(form: LinkForm, record: link, kind: :link) { LinkForm(link:) } }
           end
 
           def new_form
@@ -84,13 +84,11 @@ module Admin
           def sort = @list[:sort]
 
           def sort_form
-            AutoForm(action: path(:admin_links)) do
-              input(type: "hidden", name: "search", value: search) if search
-              SegmentedControl(label: t(".sort"), name: "sort", options: sorts, selected: sort)
-            end
+            FilterSwitch(
+              action: path(:admin_links), name: "sort", options: SORTS, selected: sort, label: t(".sort"),
+              keep: { search: },
+            )
           end
-
-          def sorts = SORTS.transform_values { t(it) }
 
           def sub
             t(

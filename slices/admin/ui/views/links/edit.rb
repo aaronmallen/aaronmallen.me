@@ -16,7 +16,7 @@ module Admin
             PageHead(title: Helpers::ShareLink.bare(Helpers::ShareLink.for(@link.code)))
             Card(class: "file-drawer") do
               LinkForm(link: @link, values: @values, errors: @errors)
-              div(class: "file-drawer-foot") { Foot(link: @link) }
+              div(class: "file-drawer-foot") { ShareFoot(form: LinkForm, record: @link, kind: :link) }
             end
           end
         end

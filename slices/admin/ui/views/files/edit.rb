@@ -16,7 +16,7 @@ module Admin
             PageHead(title: @share.filename)
             Card(class: "file-drawer") do
               ShareForm(share: @share, values: @values, errors: @errors)
-              div(class: "file-drawer-foot") { Foot(share: @share) }
+              div(class: "file-drawer-foot") { ShareFoot(form: ShareForm, record: @share, kind: :file) }
             end
           end
         end

@@ -60,7 +60,7 @@ module Admin
           def opener
             a(
               href: path(:admin_edit_file, id: @share.id),
-              data: { dialog_open: Drawer.id_for(@share) },
+              data: { dialog_open: ShareDrawer.id_for(ShareForm, @share) },
             ) { @share.filename }
           end
 

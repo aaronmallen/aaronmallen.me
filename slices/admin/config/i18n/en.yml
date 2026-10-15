@@ -836,21 +836,11 @@ en:
         save: "Save"
         title: "What changed and why"
       files:
-        drawer:
-          title: "Shared file"
         field_error:
           code:
             blank: "Give it a code."
             format: "Use lowercase letters, numbers and single hyphens."
             taken: "Another file or short link already uses that code."
-        foot:
-          delete: "Delete file"
-          save: "Save"
-        group_drawer:
-          title: "Shared group"
-        group_foot:
-          delete: "Delete group"
-          save: "Save"
         group_form:
           add: "Add"
           add_label: "Add files to this group"
@@ -1085,8 +1075,6 @@ en:
             one: "%{count} word"
             other: "%{count} words"
       links:
-        drawer:
-          title: "Short link"
         field_error:
           code:
             blank: "Give it a code."
@@ -1095,9 +1083,6 @@ en:
           destination:
             blank: "Paste a link to shorten."
             format: "That doesn't look like a web link. It has to start with http:// or https://."
-        foot:
-          delete: "Delete link"
-          save: "Save"
         link_form:
           clicks:
             one: "%{clicks} click"
@@ -2079,6 +2064,15 @@ en:
       settings_head:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
+      share_drawer:
+        file: "Shared file"
+        group: "Shared group"
+        link: "Short link"
+      share_foot:
+        file: "Delete file"
+        group: "Delete group"
+        link: "Delete link"
+        save: "Save"
       social:
         account_picker:
           all: "all %{count}"

@@ -141,6 +141,14 @@ RSpec.describe "Admin files", type: :request do
         expect(names).to contain_exactly("notes.txt", "clip.mp4")
       end
 
+      it "keeps the search when filtering" do
+        get "/admin/files", search: "notes"
+
+        switch = "form:has([type=radio][name=kind])"
+
+        expect(page).to have_css("#{switch} [type=hidden][name=search][value=notes]", visible: :hidden)
+      end
+
       it "says when nothing matches" do
         get "/admin/files", search: "nothing"
 

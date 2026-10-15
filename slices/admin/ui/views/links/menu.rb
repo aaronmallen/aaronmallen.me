@@ -45,7 +45,7 @@ module Admin
           def markdown = Helpers::ShareLink.markdown(@link.title || Row.host(@link.destination), short)
 
           def opens(menu)
-            dialog = Drawer.id_for(@link)
+            dialog = ShareDrawer.id_for(LinkForm, @link)
 
             menu.link(t(".edit"), href: act(:admin_edit_link), icon: "fa-regular fa-pen-to-square", dialog:)
             menu.link(t(".open"), href: @link.destination, icon: "fa-solid fa-arrow-up-right-from-square",

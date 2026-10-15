@@ -49,7 +49,7 @@ module Admin
           end
 
           def opens(menu)
-            dialog = Drawer.id_for(@share)
+            dialog = ShareDrawer.id_for(ShareForm, @share)
 
             menu.link(t(".details"), href: act(:admin_edit_file), icon: "fa-regular fa-pen-to-square", dialog:)
             menu.link(t(".open"), href: link, icon: "fa-solid fa-arrow-up-right-from-square", outbound: true)

@@ -16,7 +16,7 @@ module Admin
             PageHead(title: t(".title", code: @group.code))
             Card(class: "file-drawer") do
               GroupForm(group: @group, values: @values, errors: @errors)
-              div(class: "file-drawer-foot") { GroupFoot(group: @group) }
+              div(class: "file-drawer-foot") { ShareFoot(form: GroupForm, record: @group, kind: :group) }
             end
           end
         end

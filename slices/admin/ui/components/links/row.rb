@@ -51,7 +51,7 @@ module Admin
           end
 
           def opener
-            a(href: path(:admin_edit_link, id: @link.id), data: { dialog_open: Drawer.id_for(@link) }) do
+            a(href: path(:admin_edit_link, id: @link.id), data: { dialog_open: ShareDrawer.id_for(LinkForm, @link) }) do
               @link.title || host
             end
           end

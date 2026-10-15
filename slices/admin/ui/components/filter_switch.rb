@@ -9,9 +9,11 @@ module Admin
         prop :options, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
         prop :selected, Blog::Types::String.optional
         prop :label, Blog::Types::String
+        prop :keep, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
         def view_template
           AutoForm(action: @action) do
+            @keep.compact.each { |name, value| input(type: "hidden", name:, value:) }
             SegmentedControl(label: @label, name: @name, options:, selected: @selected)
           end
         end
