@@ -23,7 +23,7 @@ module Admin
 
       def fetch_grant(**)
         Success(google.grant(**))
-      rescue OAuth2::Error, Faraday::Error, KeyError
+      rescue Blog::ServiceError
         Failure(:google_failed)
       end
 

@@ -18,12 +18,13 @@ module LinkedIn
 
     def grant(code:, redirect_uri:, **)
       token = client.auth_code.get_token(code, redirect_uri:)
-      member = token.get(USERINFO_URL).parsed
-      raise KeyError, "LinkedIn answered the member with no JSON profile" unless member.is_a?(Hash)
+      member = member(token)
 
       { account_id: member.fetch("sub"), label: member.fetch("name"),
         credentials: { access_token: token.token, expires_at: token.expires_at },
         scopes: token.params["scope"].to_s.split(SCOPES) }
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     def revoke(access_token)
@@ -34,5 +35,12 @@ module LinkedIn
     private
 
     attr_reader :client
+
+    def member(token)
+      member = token.get(USERINFO_URL).parsed
+      raise Error, "LinkedIn answered the member with no JSON profile" unless member.is_a?(Hash)
+
+      member
+    end
   end
 end

@@ -296,6 +296,39 @@ RSpec.describe "Admin Google connection", type: :request do
       expect(connection).to be_nil
     end
 
+    describe "when Google answers with a body it can't read" do
+      def html = { body: "<html>", headers: { "Content-Type" => "application/json" } }
+
+      def refused(userinfo: nil)
+        stub_token({ access_token: "ya29.new", expires_in: 3599, token_type: "Bearer" })
+        stub_request(:get, userinfo_url).to_return(userinfo) if userinfo
+        yield if block_given?
+        callback(code: "code", state: start_connect)
+        follow_redirect!
+      end
+
+      it "refuses a token that isn't JSON", :aggregate_failures do
+        refused { stub_request(:post, token_url).to_return(html) }
+
+        expect(connection).to be_nil
+        expect(toast).to include("Google didn't answer")
+      end
+
+      it "refuses a user that isn't JSON", :aggregate_failures do
+        refused(userinfo: html)
+
+        expect(connection).to be_nil
+        expect(toast).to include("Google didn't answer")
+      end
+
+      it "refuses a user with no address", :aggregate_failures do
+        refused(userinfo: json({ sub: "1" }))
+
+        expect(connection).to be_nil
+        expect(toast).to include("Google didn't answer")
+      end
+    end
+
     it "refuses a state it never sent" do
       start_connect
       callback(code: "code", state: "forged")

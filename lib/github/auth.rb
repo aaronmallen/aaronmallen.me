@@ -2,7 +2,6 @@
 
 require "base64"
 require "json"
-require "multi_xml"
 
 module GitHub
   class Auth
@@ -32,6 +31,8 @@ module GitHub
 
       { access_token: token.token, account_id: user.fetch("id").to_s, label: "@#{user.fetch('login')}",
         scopes: token.params["scope"].to_s.split(",").map(&:strip).reject(&:empty?) }
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     def revoke(access_token)
@@ -47,10 +48,12 @@ module GitHub
     end
 
     def verified_email(code:, redirect_uri:, code_verifier:)
-      emails = parse(exchange(code:, redirect_uri:, code_verifier:).get(EMAILS_URL, headers: ACCEPT.dup))
-      raise KeyError, "GitHub answered the emails with no JSON list" unless emails.is_a?(Array)
+      emails = exchange(code:, redirect_uri:, code_verifier:).get(EMAILS_URL, headers: ACCEPT.dup).parsed
+      raise Error, "GitHub answered the emails with no JSON list" unless emails.is_a?(Array)
 
       emails.find { it.is_a?(Hash) && it["primary"] == true && it["verified"] == true }&.fetch("email")
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     private
@@ -59,21 +62,11 @@ module GitHub
 
     def basic_auth = "Basic #{Base64.strict_encode64("#{client.id}:#{client.secret}")}"
 
-    def exchange(code:, redirect_uri:, code_verifier:)
-      client.auth_code.get_token(code, redirect_uri:, code_verifier:)
-    rescue JSON::ParserError, MultiXML::ParseError
-      raise KeyError, "GitHub answered the token with a body no parser reads"
-    end
-
-    def parse(response)
-      response.parsed
-    rescue JSON::ParserError, MultiXML::ParseError
-      nil
-    end
+    def exchange(code:, redirect_uri:, code_verifier:) = client.auth_code.get_token(code, redirect_uri:, code_verifier:)
 
     def profile(response)
-      body = parse(response)
-      raise KeyError, "GitHub answered the user with no JSON profile" unless body.is_a?(Hash)
+      body = response.parsed
+      raise Error, "GitHub answered the user with no JSON profile" unless body.is_a?(Hash)
 
       body
     end

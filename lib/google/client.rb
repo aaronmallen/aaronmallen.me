@@ -34,8 +34,7 @@ module Google
     def account(**credentials)
       raise Error, NOT_SET_UP unless configured?
 
-      token = @tokens.build(credentials)
-      named(token.expired? ? token.refresh : token)
+      @tokens.build(credentials).then { named(it.expired? ? it.refresh : it) }
     rescue OAuth2::Error => e
       raise Error, refusal(e)
     rescue Faraday::Error => e
@@ -59,6 +58,8 @@ module Google
       token = oauth.auth_code.get_token(code, redirect_uri:, code_verifier:)
 
       { **named(token), credentials: @tokens.stored(token), scopes: token.params["scope"].to_s.split }
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     def holders(*scopes)
@@ -119,7 +120,7 @@ module Google
     end
 
     def named(token)
-      email = token.get(USERINFO_URL).parsed.fetch("email")
+      email = Hash.try_convert(token.get(USERINFO_URL).parsed).to_h.fetch("email")
 
       { account_id: email, label: email }
     end

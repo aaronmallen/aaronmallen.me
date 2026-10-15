@@ -28,6 +28,8 @@ module Mastodon
 
       { access_token: token.token, account_id: account.fetch("id").to_s,
         label: "@#{account.fetch('username')}@#{host}", scopes: token.params["scope"].to_s.split }
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     def register(host, redirect_uri:, scope:)
@@ -38,6 +40,8 @@ module Mastodon
       found = body(client(host).request(:post, APPS_PATH, body: app))
 
       { client_id: found.fetch("client_id"), client_secret: found.fetch("client_secret") }
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     def revoke(host, app, token)
@@ -48,7 +52,7 @@ module Mastodon
 
     def body(response)
       parsed = response.parsed
-      raise KeyError, "Mastodon answered with no JSON object" unless parsed.is_a?(Hash)
+      raise Error, "Mastodon answered with no JSON object" unless parsed.is_a?(Hash)
 
       parsed
     end

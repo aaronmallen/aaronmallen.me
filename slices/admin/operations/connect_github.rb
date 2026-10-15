@@ -19,7 +19,7 @@ module Admin
 
       def fetch_grant(**)
         Success(github.grant(**))
-      rescue OAuth2::Error, Faraday::Error, KeyError
+      rescue Blog::ServiceError
         Failure(:github_failed)
       end
     end

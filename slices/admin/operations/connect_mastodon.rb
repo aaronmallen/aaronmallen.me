@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "multi_xml"
-
 module Admin
   module Operations
     class ConnectMastodon < ConnectOperation
@@ -24,7 +22,7 @@ module Admin
 
       def fetch_grant(...)
         Success(mastodon.grant(...))
-      rescue OAuth2::Error, Faraday::Error, KeyError, JSON::ParserError, MultiXML::ParseError
+      rescue Blog::ServiceError
         Failure(:mastodon_failed)
       end
 

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "multi_xml"
-
 module Admin
   module Operations
     class RegisterMastodonApp < Blog::Operation
@@ -37,7 +35,7 @@ module Admin
 
       def register(host, **)
         Success(mastodon.register(host, **))
-      rescue OAuth2::Error, Faraday::Error, KeyError, JSON::ParserError, MultiXML::ParseError
+      rescue Blog::ServiceError
         Failure(:mastodon_failed)
       end
     end

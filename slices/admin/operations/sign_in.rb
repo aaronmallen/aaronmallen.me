@@ -18,7 +18,7 @@ module Admin
 
       def fetch_email(client:, code:, redirect_uri:, code_verifier:)
         Success(client.verified_email(code:, redirect_uri:, code_verifier:))
-      rescue OAuth2::Error, Faraday::Error, KeyError, JSON::ParserError
+      rescue Blog::ServiceError
         Failure(:provider_failed)
       end
     end

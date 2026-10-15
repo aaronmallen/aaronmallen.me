@@ -21,9 +21,11 @@ module Google
 
     def verified_email(code:, redirect_uri:, code_verifier:)
       info = client.auth_code.get_token(code, redirect_uri:, code_verifier:).get(USERINFO_URL).parsed
-      raise KeyError, "Google answered the user with no JSON profile" unless info.is_a?(Hash)
+      raise Error, "Google answered the user with no JSON profile" unless info.is_a?(Hash)
 
       info.fetch("email") if info["email_verified"] == true
+    rescue *Blog::ServiceError::OAUTH_FAILURES => e
+      raise Error, e.message
     end
 
     private
