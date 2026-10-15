@@ -18,9 +18,7 @@ module Tasks
       def call(id, at: Time.now)
         transaction do
           series = task_series_mutations.current(id)
-          task = task_queries.by_id(id)
-
-          make(series, task, at) if series && !series.paused && task.closed?
+          make(series, id, at) if series && !series.paused
         end
       end
 
@@ -39,7 +37,10 @@ module Tasks
         copy
       end
 
-      def make(series, task, at)
+      def make(series, id, at)
+        task = task_queries.by_id(id)
+        return unless task.closed?
+
         copy = clone(task, next_cadence_date.call(series.to_h, Blog::TimeZone.today(at)), at)
         task_series_mutations.advance(series.id, copy.id, at)
         task_queries.by_id(copy.id)

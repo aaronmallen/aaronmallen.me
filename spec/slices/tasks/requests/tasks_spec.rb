@@ -62,6 +62,39 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     end
   end
 
+  describe "completing a task" do
+    def complete(task) = send_to("/admin/tasks/#{task.id}/complete", filter: "completed")
+
+    it "reads no links or contributors for a task with no series" do
+      task = create(:task)
+
+      expect(logged_sql { complete(task) }).not_to match(/FROM "task_(links|contributors)"/)
+    end
+
+    it "fails a closed task with closed" do
+      expect(Tasks::Slice["operations.complete_task"].call(create(:task, :done).id).failure).to eq(:closed)
+    end
+
+    context "with a task in a live series" do
+      let(:photo) { create(:photo) }
+      let(:task) { create(:task, note: "![A photo](/media/#{photo.key})") }
+
+      def claims(id) = Media::Slice["relations.photo_claims"].where(owner: "task", owner_id: id).pluck(:photo_id)
+
+      def copy = repo.by_id(Tasks::Slice["relations.task_series"].one[:task_id])
+
+      before do
+        Tasks::Slice["repos.task_mutations"].replace_tags(task.id, %w[home])
+        Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "days", every: 1 })
+        complete(task)
+      end
+
+      it "carries the tags and photos to the next task" do
+        expect([copy.id == task.id, copy.tags.map(&:name), claims(copy.id)]).to eq([false, %w[home], [photo.id]])
+      end
+    end
+  end
+
   describe "deleting a task imported from GitHub" do
     it "takes its source with it" do
       source = create(:task_source)

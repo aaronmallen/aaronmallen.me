@@ -34,7 +34,7 @@ module Tasks
       end
 
       def find(id)
-        found(task_queries.by_id(id)).bind { it.closed? ? Failure(:closed) : Success(it) }
+        found(task_queries.by_ids([id]).first).bind { it.closed? ? Failure(:closed) : Success(it) }
       end
 
       def replaced(seconds, tracked)
