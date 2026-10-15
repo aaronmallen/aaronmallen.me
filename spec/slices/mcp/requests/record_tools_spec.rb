@@ -87,15 +87,24 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "stops at the row cap and says where to go on" do
-      stub_const("API::Helpers::DayWindow::CAP", 2)
+      lower_page_size(:mcp, to: 2)
       [1, 2, 2, 3].each { create(:commit, commit_date: Date.new(2026, 3, it)) }
       call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
 
       expect(content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
     end
 
+    it "names the MCP page size in each day-paged tool's description" do
+      lower_page_size(:mcp, to: 7)
+      rpc("tools/list")
+      paged = %w[list_commits list_journal_entries list_pull_requests read_activity]
+      described = document.dig("result", "tools").select { paged.include?(it.fetch("name")) }
+
+      expect(described.map { it.fetch("description") }).to all(include("One answer carries about 7 rows"))
+    end
+
     it "rounds a full window out to the end of its last day" do
-      stub_const("API::Helpers::DayWindow::CAP", 2)
+      lower_page_size(:mcp, to: 2)
       3.times { create(:commit, commit_date: Date.new(2026, 3, 2)) }
       call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
 
@@ -168,7 +177,7 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "stops at the row cap and says where to go on" do
-      stub_const("API::Helpers::DayWindow::CAP", 2)
+      lower_page_size(:mcp, to: 2)
       [1, 2, 2, 3].each { create(:pull_request, ready_at: on(it)) }
       call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 

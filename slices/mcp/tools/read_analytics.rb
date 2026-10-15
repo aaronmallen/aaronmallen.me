@@ -101,8 +101,6 @@ module MCP
       endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
-        def described(analytics) = format(description_value, analytics)
-
         private
 
         def answered(payload)

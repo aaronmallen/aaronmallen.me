@@ -28,7 +28,7 @@ module API
         },
       ).freeze
 
-      include Deps["settings", search_queries: "search.repos.search_queries"]
+      include Deps[search_queries: "search.repos.search_queries"]
 
       def handle(query:, scopes:, kind: nil, page: 1)
         found = search_queries.search(text: query, page: page_of(page), kinds: kinds(kind, scopes))
@@ -43,8 +43,6 @@ module API
         chosen = kind ? [kind] : KINDS
         mail?(scopes) ? chosen : chosen - [MESSAGE]
       end
-
-      def page_of(number) = Blog::Structs::Page.new(number:, size: settings.page_size[:admin])
     end
   end
 end

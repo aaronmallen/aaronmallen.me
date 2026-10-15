@@ -15,6 +15,8 @@ module MCP
       class << self
         attr_reader :endpoint_key, :scope_value
 
+        def described(values) = format(description_value, values)
+
         def endpoint(scope:)
           @endpoint_key = name_value.to_sym
           input_schema(API::Endpoints.const_get(name.split("::").last, false)::SCHEMA)

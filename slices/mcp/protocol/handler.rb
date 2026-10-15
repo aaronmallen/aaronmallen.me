@@ -33,6 +33,7 @@ module MCP
         "tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
+      DAY_PAGED = [Tools::ListCommits, Tools::ListJournalEntries, Tools::ListPullRequests, Tools::ReadActivity].freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
       SPLIT_ENDPOINTS = %i[
         create_person create_project create_tag create_task_rule update_person update_project update_tag
@@ -225,6 +226,12 @@ module MCP
         endpoints.merge(oauth_client_id:, scopes:, task_source_queries:)
       end
 
+      def descriptions
+        paged = DAY_PAGED.to_h { [it.name_value, it.described(page_size: settings.page_size[:mcp])] }
+
+        paged.merge(Tools::ReadAnalytics.name_value => Tools::ReadAnalytics.described(settings.analytics))
+      end
+
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
 
       def owner = settings.owner_name
@@ -236,7 +243,7 @@ module MCP
       def server(scopes, oauth_client_id)
         ScopedServer.new(
           configuration: Configuration.new(exception_reporter: method(:report)),
-          descriptions: { Tools::ReadAnalytics.name_value => Tools::ReadAnalytics.described(settings.analytics) },
+          descriptions:,
           instructions: format(INSTRUCTIONS, owner),
           name:,
           prompts: PROMPTS,

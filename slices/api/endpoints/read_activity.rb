@@ -77,7 +77,7 @@ module API
       end
 
       def window(first, last, filters)
-        page = Helpers::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, settings, day: :occurred_on.to_proc) do |from, to, limit|
           found(from, to, filters, limit)
         end
         rows = page.fetch(:rows)

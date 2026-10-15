@@ -43,7 +43,7 @@ module API
         search = { types: window[:types] & kinds,
                    **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
 
-        Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
+        Helpers::DayWindow.page(window[:from], window[:day], settings, day: :occurred_on.to_proc) do |from, to, limit|
           activity_queries.between(from:, to:, limit:, **search)
         end
       end
@@ -59,7 +59,7 @@ module API
       def journal(filters, continue_to)
         search = search_query.call(query: filters["q"], fields: JOURNAL_FIELDS).to_h
         last_day = continue_to || Blog::Types::DateParam[filters["to"]]
-        found = journal_entry_queries.days(size: Helpers::DayWindow::CAP, to: last_day, **search)
+        found = journal_entry_queries.days(size: Helpers::DayWindow.size(settings), to: last_day, **search)
 
         { rows: found.rows.flat_map(&:last), **paging(found.older_query) }
       end

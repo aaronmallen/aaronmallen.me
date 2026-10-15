@@ -39,7 +39,7 @@ module API
       private
 
       def listed(first, last, repos)
-        page = Helpers::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, settings, day: :commit_date.to_proc) do |from, to, limit|
           commit_queries.between(from:, to:, repos:, limit:)
         end
         rows = page.fetch(:rows)

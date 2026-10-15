@@ -33,7 +33,7 @@ module API
       private
 
       def listed(first, last)
-        page = Helpers::DayWindow.page(first, last, day: DAY) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, settings, day: DAY) do |from, to, limit|
           pull_request_queries.between(from:, to:, limit:)
         end
         rows = page.fetch(:rows)

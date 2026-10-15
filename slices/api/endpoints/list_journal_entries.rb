@@ -44,7 +44,7 @@ module API
       private
 
       def listed(first, last, tag)
-        page = Helpers::DayWindow.page(first, last, day: :entry_date.to_proc) do |from, to, limit|
+        page = Helpers::DayWindow.page(first, last, settings, day: :entry_date.to_proc) do |from, to, limit|
           journal_entry_queries.between(from:, to:, limit:, tag:)
         end
         rows = page.fetch(:rows)

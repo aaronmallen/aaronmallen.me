@@ -14,12 +14,11 @@ module API
 
       BACKWARDS = "from comes after to"
       BAD_DAY = "give from and to as days, such as 2026-01-01"
-      CAP = 100
       DAYS = { type: "string", description: "a day, as YYYY-MM-DD" }.freeze
       PAGING_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
-                    "One answer carries about #{CAP} rows, newest first, rounded out to the end of a day. " \
+                    "One answer carries about %<page_size>s rows, newest first, rounded out to the end of a day. " \
                     "Past that, partial comes back true and continue_to holds the day to send as to " \
-                    "for the next window".freeze
+                    "for the next window"
       RANGE = bounds("range")
       WINDOW = bounds("window")
 
@@ -52,12 +51,14 @@ module API
         open_day(from || to).fmap { from ? [it, nil] : [nil, it] }
       end
 
-      def page(first, last, day:, &)
-        found = Blog::Structs::DayCursor.page(first, last, size: CAP, day:, &)
+      def page(first, last, settings, day:, &)
+        found = Blog::Structs::DayCursor.page(first, last, size: size(settings), day:, &)
         return { rows: found.rows, partial: false } unless found.partial?
 
         { rows: found.rows, partial: true, continue_to: found.continue_to.iso8601 }
       end
+
+      def size(settings) = settings.page_size[:mcp]
     end
   end
 end

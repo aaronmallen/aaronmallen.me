@@ -68,7 +68,7 @@ RSpec.describe "API search", type: :request do
 
   describe "paging" do
     before do
-      lower_page_size(:admin, to: 2)
+      lower_page_size(:mcp, to: 2)
       3.times { create(:task, title: "Call the plumber #{it}") }
       create(:message, subject: "Plumber invoice")
     end
@@ -89,6 +89,8 @@ RSpec.describe "API search", type: :request do
     end
 
     it "lists on each page the records the screen lists on it" do
+      lower_page_size(:admin, to: 2)
+
       [1, 2].each do |page|
         expect(results(query: "plumber", page:).map { it.fetch("title") })
           .to eq(screen_titles(q: "plumber", page:))

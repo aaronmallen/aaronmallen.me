@@ -166,7 +166,7 @@ RSpec.describe "API saved view records", type: :request do
     end
 
     it "pages by day, taking continue_to for the next window" do
-      stub_const("API::Helpers::DayWindow::CAP", 1)
+      lower_page_size(:mcp, to: 1)
       entries = [0, 1, 2].map { create(:journal_entry, entry_date: today - it) }
       view = create(:saved_view, screen: "journal")
 
@@ -247,7 +247,7 @@ RSpec.describe "API saved view records", type: :request do
     end
 
     it "starts from its saved day and pages back by continue_to" do
-      stub_const("API::Helpers::DayWindow::CAP", 1)
+      lower_page_size(:mcp, to: 1)
       [0, 1, 2].map { create(:commit, commit_date: today - it, message: "day #{it}") }
       view = create(:saved_view, screen: "activity", filters: { day: (today - 1).iso8601 })
 

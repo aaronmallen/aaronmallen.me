@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, activity]
 issue: AA-426
-amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123"]
+amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123", "#1421"]
 tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
 ---
 
@@ -47,8 +47,8 @@ ADR 0151 keeps mail threads, contact messages among them, from a token without `
 A commit crosses whole: repository, sha, full message, additions and deletions, private and employer
 repositories included. A subject line is not what a review reads.
 
-`read_activity` answers one window at a time: about 100 rows (`Blog::Helpers::DayWindow::CAP`, which #941
-corrected from 200), rounded out to the end of a day, with `partial`
+`read_activity` answers one window at a time: about `page_size.mcp` rows, 100 today (since #1421 the setting,
+not a constant #941 corrected from 200), rounded out to the end of a day, with `partial`
 set and a `continue_to` day to send as `to` for the next window. The client may pass `kinds`, `repos`, `tags` and
 `text`. These narrow a read, but the client picks them, so they control nothing.
 
