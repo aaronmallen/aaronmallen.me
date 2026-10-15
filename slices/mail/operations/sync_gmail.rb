@@ -17,7 +17,7 @@ module Mail
         def get(path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
       end
 
-      include Deps[google: "google.client", gmail_mutations: "repos.gmail_mutations"]
+      include Deps["settings", google: "google.client", gmail_mutations: "repos.gmail_mutations"]
 
       def backfill(address, page_token = nil)
         mailbox = mailbox(address)
@@ -117,10 +117,15 @@ module Mail
       end
 
       def threads(mailbox, page_token)
-        mailbox.get("threads", includeSpamTrash: true, maxResults: PAGE_SIZE, **token(page_token))
+        mailbox.get("threads", includeSpamTrash: true, maxResults: PAGE_SIZE, q: window, **token(page_token))
       end
 
       def token(page_token) = page_token ? { pageToken: page_token } : {}
+
+      def window
+        days = settings.mail[:backfill_days]
+        ["-in:trash", ("newer_than:#{days}d" if days)].compact.join(" ")
+      end
     end
   end
 end

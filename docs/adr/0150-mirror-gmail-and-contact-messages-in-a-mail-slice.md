@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [db, admin, api, contact]
 issue: "#1122"
-amended: ["#1159"]
+amended: ["#1159", "#1381"]
 tags: [mail, gmail, google, contact, messages, slices, sync, polling, inbox, snooze]
 ---
 
@@ -40,6 +40,11 @@ A migration moves every row of `messages` into a thread, with its tags, snooze a
 within five minutes. It never retries and catches up on its next run ([ADR 0012][0012]), and its outcome goes to
 `sync_states` ([ADR 0047][0047]).
 
+**The backfill reaches back as far as the `mail.backfill_days` setting allows**, and skips trash. With no value set,
+it takes every thread in each account but the trash. A lost history id starts the backfill over inside the same
+window. Mail older than the window stays in Gmail and never reaches the site, unless a new message or a change lands
+on its thread. Rows the site mirrored before the window was set stay until someone deletes them.
+
 **Gmail holds a thread's state, and snooze and site tags stay here.**
 
 | State | Lives in |
@@ -72,8 +77,8 @@ only here too, and Gmail never sees it.
 
 The contact form keeps its guards ([ADR 0043][0043]) and its page ([ADR 0044][0044]), and now writes a thread.
 
-Mail bodies sit in our database, so they land in the nightly backups ([ADR 0105][0105]) unless someone decides
-otherwise.
+Mail bodies sit in our database, so they land in the nightly backups ([ADR 0105][0105]). The backfill window bounds
+how much of a mailbox they hold, and trash never lands from the backfill.
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md

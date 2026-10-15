@@ -16,6 +16,11 @@ module SettingsOverrides
     allow(settings).to receive(:contact).and_return(settings.contact.merge(key => to))
   end
 
+  def change_mail_setting(key, to:)
+    settings = Hanami.app["settings"]
+    allow(settings).to receive(:mail).and_return(settings.mail.merge(key => to))
+  end
+
   def lower_page_size(scope, to:)
     settings = Hanami.app["settings"]
     allow(settings).to receive(:page_size).and_return(settings.page_size.merge(scope => to))

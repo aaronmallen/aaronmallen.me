@@ -60,6 +60,7 @@ module Blog
 
     AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
     BoardDays = Types::Coercible::Integer.constrained(gt: 0)
+    MailDays = Types::Coercible::Integer.constrained(gt: 0)
     MinimumSubmitSeconds = Types::Coercible::Integer.constrained(gteq: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
@@ -114,9 +115,7 @@ module Blog
       )
     end
 
-    def self.unless_blank(type)
-      type.optional.constructor { |value| value.to_s.strip.empty? ? nil : value }
-    end
+    def self.unless_blank(type) = type.optional.constructor { |value| value.to_s.strip.empty? ? nil : value }
 
     def self.unless_set(type, default)
       type.default(default).constructor { it.nil? ? Dry::Types::Undefined : it }
@@ -189,6 +188,8 @@ module Blog
       client_secret?: Value,
       profile_url?: Value,
     )
+
+    setting :mail, default: {}, constructor: Schema.schema(backfill_days?: unless_blank(MailDays))
 
     setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 
