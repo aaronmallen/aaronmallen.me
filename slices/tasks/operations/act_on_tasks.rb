@@ -5,6 +5,7 @@ module Tasks
     class ActOnTasks < Blog::Operation
       CANCEL = Blog::Types::TaskBulkAction["cancel"]
       COMPLETE = Blog::Types::TaskBulkAction["complete"]
+      DELETE = Blog::Types::TaskBulkAction["delete"]
       MOVE = Blog::Types::TaskBulkAction["move"]
       TAG = Blog::Types::TaskBulkAction["tag"]
       UNTAG = Blog::Types::TaskBulkAction["untag"]
@@ -37,7 +38,8 @@ module Tasks
           when MOVE then move_task
           when TAG then tag_task
           when UNTAG then untag_task
-          else delete_task
+          when DELETE then delete_task
+          else raise ArgumentError, "no task operation for #{act}"
         end
       end
     end

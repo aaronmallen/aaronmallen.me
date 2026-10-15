@@ -3,6 +3,7 @@
 module Posts
   module Operations
     class ActOnPosts < Blog::Operation
+      DELETE = Blog::Types::PostBulkAction["delete"]
       TAG = Blog::Types::PostBulkAction["tag"]
       UNTAG = Blog::Types::PostBulkAction["untag"]
 
@@ -32,7 +33,8 @@ module Posts
         case fields[:act]
           when TAG then tag_post.call(id, fields[:tag])
           when UNTAG then untag_post.call(id, fields[:tag])
-          else delete_draft(id)
+          when DELETE then delete_draft(id)
+          else raise ArgumentError, "no post operation for #{fields[:act]}"
         end
       end
     end

@@ -4,12 +4,12 @@ module Tasks
   module Contracts
     class TaskCadenceContract < Blog::Contract
       FIELDS = {
-        "days" => %i[every],
-        "weeks" => %i[every weekday starts_on],
-        "month_day" => %i[day],
-        "month_end" => [],
-        "month_weekday" => %i[week weekday],
-        "yearly" => %i[month day],
+        Blog::Types::TaskCadence["days"] => %i[every],
+        Blog::Types::TaskCadence["weeks"] => %i[every weekday starts_on],
+        Blog::Types::TaskCadence["month_day"] => %i[day],
+        Blog::Types::TaskCadence["month_end"] => [],
+        Blog::Types::TaskCadence["month_weekday"] => %i[week weekday],
+        Blog::Types::TaskCadence["yearly"] => %i[month day],
       }.freeze
       LEAP_YEAR = 2024
 

@@ -3,14 +3,22 @@
 module Tasks
   module Operations
     class NextCadenceDate
+      DAYS = Blog::Types::TaskCadence["days"]
+      MONTH_DAY = Blog::Types::TaskCadence["month_day"]
+      MONTH_END = Blog::Types::TaskCadence["month_end"]
+      MONTH_WEEKDAY = Blog::Types::TaskCadence["month_weekday"]
+      MONTHLY = [MONTH_DAY, MONTH_END, MONTH_WEEKDAY].freeze
       WEEK = 7
+      WEEKS = Blog::Types::TaskCadence["weeks"]
+      YEARLY = Blog::Types::TaskCadence["yearly"]
 
       def call(cadence, after)
         case cadence.fetch(:cadence)
-          when "days" then after + cadence.fetch(:every)
-          when "weeks" then weekly(cadence, after)
-          when "yearly" then yearly(*cadence.values_at(:month, :day), after)
-          else monthly(after) { in_month(cadence, it) }
+          when DAYS then after + cadence.fetch(:every)
+          when WEEKS then weekly(cadence, after)
+          when YEARLY then yearly(*cadence.values_at(:month, :day), after)
+          when *MONTHLY then monthly(after) { in_month(cadence, it) }
+          else raise ArgumentError, "no cadence for #{cadence.fetch(:cadence)}"
         end
       end
 
@@ -18,9 +26,10 @@ module Tasks
 
       def in_month(cadence, month)
         case cadence.fetch(:cadence)
-          when "month_day" then on_day(month.year, month.month, cadence.fetch(:day))
-          when "month_end" then last_day(month.year, month.month)
-          else nth_weekday(month, *cadence.values_at(:week, :weekday))
+          when MONTH_DAY then on_day(month.year, month.month, cadence.fetch(:day))
+          when MONTH_END then last_day(month.year, month.month)
+          when MONTH_WEEKDAY then nth_weekday(month, *cadence.values_at(:week, :weekday))
+          else raise ArgumentError, "no monthly cadence for #{cadence.fetch(:cadence)}"
         end
       end
 

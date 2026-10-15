@@ -122,4 +122,8 @@ RSpec.describe Tasks::Operations::NextCadenceDate do
       expect(after("2027-03-01", cadence: "yearly", month: 2, day: 29)).to eq("2028-02-29")
     end
   end
+
+  it "raises on a kind it has no branch for" do
+    expect { after("2026-10-14", cadence: "hourly") }.to raise_error(ArgumentError, /hourly/)
+  end
 end
