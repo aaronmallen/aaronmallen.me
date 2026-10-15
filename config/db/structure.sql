@@ -17,6 +17,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+
+
+--
 -- Name: attention_kind; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -6032,6 +6046,13 @@ CREATE UNIQUE INDEX mail_labels_mail_account_id_name_index ON public.mail_labels
 
 
 --
+-- Name: mail_messages_letter_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mail_messages_letter_index ON public.mail_messages USING gin ((((((COALESCE((reply_to)::text, ''::text) || ' '::text) || COALESCE((body)::text, ''::text)) || ' '::text) || COALESCE(from_name, ''::text))) public.gin_trgm_ops);
+
+
+--
 -- Name: mail_messages_mail_thread_id_gmail_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8450,4 +8471,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015120010_backfill_analytics_rollup_hours.rb'),
 ('20261015130000_add_preview_to_activities.rb'),
 ('20261015140000_count_task_numbers_per_scope.rb'),
-('20261015150700_index_waiting_mail_threads.rb');
+('20261015150700_index_waiting_mail_threads.rb'),
+('20261015180200_index_mail_message_letters.rb');

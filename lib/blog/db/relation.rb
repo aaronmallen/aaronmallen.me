@@ -38,7 +38,7 @@ module Blog
       def containing(text, *columns)
         return none if unmatchable?(text)
 
-        pattern = "%#{dataset.escape_like(text)}%"
+        pattern = like_pattern(text)
 
         where(Sequel.|(*columns.map { Sequel.ilike(it, pattern) }))
       end
@@ -50,6 +50,8 @@ module Blog
       def find_linkable(ids: nil, text: nil, limit: nil)
         (text ? matching(text) : where(id: ids)).limit(limit).linkable
       end
+
+      def like_pattern(text) = "%#{dataset.escape_like(text)}%"
 
       def linkables(title:, day:)
         columns = [:id, Sequel.as(title, :title), Sequel.as(day, :day)]

@@ -227,7 +227,8 @@ RSpec.describe "Admin mail", type: :request do
 
     describe "unread and search" do
       before do
-        gmail(subject: "Invoice overdue", body: "please pay", from_name: "Ada Lovelace")
+        gmail(subject: "Invoice overdue", body: "please pay", from_name: "Ada Lovelace",
+              reply_to: "ada@engines.example")
         gmail(subject: "Lighthouse", body: "a question", status: "read")
         tag(create(:message, subject: "Tagged", status: "read"), "billing")
       end
@@ -245,12 +246,13 @@ RSpec.describe "Admin mail", type: :request do
       end
 
       {
-        "subject" => ["lighthouse", %w[Lighthouse]],
-        "body" => ["please", ["Invoice overdue"]],
-        "sender" => ["lovelace", ["Invoice overdue"]],
-        "tag" => ["billing", %w[Tagged]],
+        "subject" => ["ighthou", %w[Lighthouse]],
+        "body" => ["leas", ["Invoice overdue"]],
+        "sender" => ["ovelac", ["Invoice overdue"]],
+        "reply-to address" => ["engines.ex", ["Invoice overdue"]],
+        "tag" => ["illin", %w[Tagged]],
       }.each do |field, (query, listed)|
-        it "finds a thread by its #{field}" do
+        it "finds a thread by part of its #{field}" do
           get "/admin/mail", search: query
 
           expect(subjects).to eq(listed)

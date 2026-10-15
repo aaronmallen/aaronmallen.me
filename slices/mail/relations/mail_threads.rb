@@ -8,7 +8,6 @@ module Mail
       NOTIFICATION = /(@(github\.com|linear\.app|docs\.google\.com)|^drive-shares-(dm-)?noreply@google\.com)$/i
       PREVIEW = 500
       PRIMARY = Sequel.|({ category: nil }, { category: Blog::Types::MailCategory["personal"] })
-      SEARCHED = %i[reply_to body from_name].map { Sequel.function(:coalesce, it, "") }.freeze
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
@@ -35,7 +34,14 @@ module Mail
 
       def marked_spam_before(time) = where { marked_spam_at < time }
 
-      def matching(text) = containing(text, :subject, tag_names, letters)
+      def matching(text)
+        return none if unmatchable?(text)
+
+        pattern = like_pattern(text)
+        written = mail_messages.matching(text).dataset.unordered.select(:mail_thread_id)
+
+        where(Sequel.|(Sequel.ilike(:subject, pattern), Sequel.ilike(tag_names, pattern), { id: written }))
+      end
 
       def newest_first = order(self[:received_at].desc, self[:id].desc)
 
@@ -112,12 +118,6 @@ module Mail
       def kept = exclude(status: SPAM).where(trashed: false)
 
       def last_message = own_messages.reverse(:received_at, :id).limit(1)
-
-      def letters
-        joined = own_messages.select(Sequel.function(:string_agg, Sequel.join(SEARCHED, " "), " "))
-
-        Sequel.function(:coalesce, joined, "")
-      end
 
       def notification
         Sequel.like(Sequel.function(:coalesce, first_message.select(:reply_to), ""), NOTIFICATION)
