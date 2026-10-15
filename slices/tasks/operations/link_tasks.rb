@@ -13,7 +13,7 @@ module Tasks
       }.freeze
 
       include Deps[
-        contract: "contracts.task_link_contract",
+        contract: "contracts.task_link_contract", # rubocop:disable Hanami/UnusedDeps
         task_mutations: "repos.task_mutations",
         task_queries: "repos.task_queries",
       ]
@@ -40,8 +40,6 @@ module Tasks
 
         Failure([:invalid, { field => [code] }])
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

@@ -7,7 +7,7 @@ module Posts
       UNTAG = Blog::Types::PostBulkAction["untag"]
 
       include Deps[
-        contract: "contracts.bulk_contract",
+        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
         delete_post: "operations.delete_post",
         post_mutations: "repos.post_mutations",
         tag_post: "operations.tag_post",
@@ -35,8 +35,6 @@ module Posts
           else delete_draft(id)
         end
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

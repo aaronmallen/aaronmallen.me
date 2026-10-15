@@ -12,7 +12,7 @@ module Links
 
       include Deps[
         records: "repos.record_link_queries",
-        contract: "contracts.record_link_contract",
+        contract: "contracts.record_link_contract", # rubocop:disable Hanami/UnusedDeps
         record_link_mutations: "repos.record_link_mutations",
         set_task_project: "tasks.operations.set_task_project",
       ]
@@ -50,8 +50,6 @@ module Links
           Failure([:invalid, { other_id: [code == :taken ? "taken" : "missing"] }])
         end
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

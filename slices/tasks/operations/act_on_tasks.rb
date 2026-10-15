@@ -11,7 +11,7 @@ module Tasks
       INPUTS = { MOVE => :to, TAG => :tag, UNTAG => :tag }.freeze
 
       include Deps[
-        contract: "contracts.bulk_contract",
+        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
         cancel_task: "operations.cancel_task",
         complete_task: "operations.complete_task",
         delete_task: "operations.delete_task",
@@ -40,8 +40,6 @@ module Tasks
           else delete_task
         end
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

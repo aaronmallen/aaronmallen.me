@@ -10,7 +10,7 @@ module Mail
 
       include Deps[
         change_thread: "operations.change_thread",
-        contract: "contracts.bulk_contract",
+        contract: "contracts.bulk_contract", # rubocop:disable Hanami/UnusedDeps
         delete_message: "operations.delete_message",
         message_queries: "repos.message_queries",
         message_tag_mutations: "repos.message_tag_mutations",
@@ -40,8 +40,6 @@ module Mail
         yield
         found(message_queries.by_id(id))
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

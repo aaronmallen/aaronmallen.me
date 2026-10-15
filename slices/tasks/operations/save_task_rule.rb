@@ -11,7 +11,7 @@ module Tasks
       GITHUB = Blog::Types::TaskSourceProvider["github"]
 
       include Deps[
-        contract: "contracts.task_rule_contract",
+        contract: "contracts.task_rule_contract", # rubocop:disable Hanami/UnusedDeps
         task_event_mutations: "repos.task_event_mutations",
         task_rule_mutations: "repos.task_rule_mutations",
         task_rule_queries: "repos.task_rule_queries",
@@ -64,8 +64,6 @@ module Tasks
         task_event_mutations.track(task_ids, now, seen: false) { task_rule_mutations.tag_tasks(task_ids, tag_ids) }
         task_rule_mutations.fill_project(task_ids, project_ids.first)
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

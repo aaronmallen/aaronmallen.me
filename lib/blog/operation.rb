@@ -45,6 +45,8 @@ module Blog
       day >= TimeZone.today(now) ? Success(day) : Failure(:past)
     end
 
+    def validate(params) = validated(contract.call(every_field(params)))
+
     def validated(result) = result.to_monad.fmap(&:to_h).alt_map { [:invalid, it.errors.to_h] }
   end
 end

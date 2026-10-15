@@ -5,7 +5,8 @@ module Calendar
     class EditEvent < Blog::Operation
       include EventWrites
       include Deps[
-        calendar_queries: "repos.calendar_queries", contract: "contracts.event_contract",
+        calendar_queries: "repos.calendar_queries",
+        contract: "contracts.event_contract", # rubocop:disable Hanami/UnusedDeps
         google: "google.client",
       ]
 
@@ -33,8 +34,6 @@ module Calendar
 
         GoogleEvent.first_day(series) + (fields[:date] - event.starts_on)
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

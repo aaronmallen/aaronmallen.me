@@ -6,7 +6,7 @@ module Decisions
       OPTION_EDITED = Blog::Types::DecisionEventKind["option_edited"]
 
       include Deps[
-        contract: "contracts.decision_option_contract",
+        contract: "contracts.decision_option_contract", # rubocop:disable Hanami/UnusedDeps
         decision_mutations: "repos.decision_mutations",
         decision_option_mutations: "repos.decision_option_mutations",
         decision_queries: "repos.decision_queries",
@@ -39,8 +39,6 @@ module Decisions
         decision_mutations.record(decision.id, OPTION_EDITED, option_id: option.id, note: kept)
         Success(saved)
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

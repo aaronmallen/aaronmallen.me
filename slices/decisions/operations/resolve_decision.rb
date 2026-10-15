@@ -9,7 +9,7 @@ module Decisions
 
       include Deps[
         close_decision_task: "tasks.operations.close_decision_task",
-        contract: "contracts.resolution_contract",
+        contract: "contracts.resolution_contract", # rubocop:disable Hanami/UnusedDeps
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
       ]
@@ -39,8 +39,6 @@ module Decisions
 
         Failure([:invalid, { option_id: ["missing"] }])
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

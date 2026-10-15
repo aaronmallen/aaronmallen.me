@@ -5,7 +5,8 @@ module Calendar
     class CreateEvent < Blog::Operation
       include EventWrites
       include Deps[
-        calendar_queries: "repos.calendar_queries", contract: "contracts.event_contract",
+        calendar_queries: "repos.calendar_queries",
+        contract: "contracts.event_contract", # rubocop:disable Hanami/UnusedDeps
         google: "google.client",
       ]
 
@@ -18,10 +19,6 @@ module Calendar
           google.post(GoogleEvent.url(calendar), body, account: calendar.account)
         end)
       end
-
-      private
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

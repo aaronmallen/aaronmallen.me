@@ -10,7 +10,7 @@ module Social
       UNRESOLVED = "unresolved"
 
       include Deps[
-        contract: "contracts.person_contract",
+        contract: "contracts.person_contract", # rubocop:disable Hanami/UnusedDeps
         networks: "networks.all",
         person_mutations: "repos.person_mutations",
         person_queries: "repos.person_queries",
@@ -58,8 +58,6 @@ module Social
 
         lookup(handle)
       end
-
-      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end
