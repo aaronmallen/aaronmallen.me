@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+#MISE description="Print EXPLAIN (ANALYZE, BUFFERS) for a statement or a file of SQL, in a transaction it rolls back"
+#USAGE arg "<sql>" help="A statement, or the path to a file that holds one"
+
+set -e
+
+if [ -f "$1" ]; then
+  statement="$(cat "$1")"
+else
+  statement="$1"
+fi
+
+while :; do
+  case "$statement" in
+  *[[:space:]] | *\;) statement="${statement%?}" ;;
+  *) break ;;
+  esac
+done
+
+printf 'BEGIN;\nEXPLAIN (ANALYZE, BUFFERS) %s\n;\nROLLBACK;\n' "$statement" |
+  scripts/util/psql --quiet --set ON_ERROR_STOP=1

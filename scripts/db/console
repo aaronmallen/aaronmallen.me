@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+#MISE description="Open psql on the database the settings name, or run a query or a file of SQL on it"
+#USAGE arg "[sql]" help="A query, or the path to a file of SQL, to run in place of the prompt"
+
+set -e
+
+if [ "$#" -eq 0 ]; then
+  exec scripts/util/psql
+elif [ -f "$1" ]; then
+  exec scripts/util/psql --set ON_ERROR_STOP=1 --file "$1"
+else
+  exec scripts/util/psql --set ON_ERROR_STOP=1 --command "$1"
+fi

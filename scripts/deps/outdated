@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+#MISE description="List outdated gems, node packages and mise tools"
+
+set -e
+
+echo "Gems"
+bundle outdated --only-explicit || [ "$?" -eq 1 ]
+
+printf '\nNode packages\n'
+aube outdated
+
+printf '\nmise tools\n'
+mise outdated --local

@@ -1,0 +1,35 @@
+name: Outdated dependencies
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  outdated:
+    name: List outdated dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Install the pinned tools
+        uses: jdx/mise-action@v5
+
+      - name: Install the dependencies
+        run: |
+          export GEM_HOME="$RUNNER_TEMP/gems"
+          echo "GEM_HOME=$GEM_HOME" >>"$GITHUB_ENV"
+          echo "$GEM_HOME/bin" >>"$GITHUB_PATH"
+          mise run setup:dependencies
+
+      - name: List outdated dependencies
+        run: |-
+          {
+            echo '```text'
+            mise run deps:outdated
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"

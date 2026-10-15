@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+exec scripts/util/ensure_postgres bundle exec ruby -e '
+  require "hanami/prepare"
+
+  database = Hanami.app["settings"].database
+  env = {
+    "PGDATABASE" => database[:name],
+    "PGHOST" => database[:host],
+    "PGPASSWORD" => database[:password],
+    "PGPORT" => database[:port].to_s,
+    "PGUSER" => database[:user],
+  }
+
+  exec(env, "psql", *ARGV)
+' -- "$@"
