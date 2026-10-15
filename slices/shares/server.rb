@@ -62,17 +62,18 @@ module Shares
       !Blog::Helpers::Bot.match?(request.user_agent)
     end
 
-    def disposition(share)
-      kind = INLINE_TYPE.match?(share.content_type) ? "inline" : "attachment"
-      fallback = share.filename.gsub(UNSAFE_FILENAME, "_")
-      "#{kind}; filename=\"#{fallback}\"; filename*=UTF-8''#{ERB::Util.url_encode(share.filename)}"
-    end
+    def disposition(share) = named(INLINE_TYPE.match?(share.content_type) ? "inline" : "attachment", share.filename)
 
     def group_file(request, code, id)
       file = share_group_queries.by_code(code)&.share_group_files&.find { it.id == id }
       return [404, {}, []] unless file
 
       stream(request, file) { share_group_mutations.count_file_download(file.id) }
+    end
+
+    def named(kind, filename)
+      fallback = filename.gsub(UNSAFE_FILENAME, "_")
+      "#{kind}; filename=\"#{fallback}\"; filename*=UTF-8''#{ERB::Util.url_encode(filename)}"
     end
 
     def note(request, range) = counted?(request, range) && yield
@@ -145,7 +146,7 @@ module Shares
 
     def zip_headers(group)
       {
-        "content-disposition" => "attachment; filename=\"#{group.code}.zip\"",
+        "content-disposition" => named("attachment", "#{group.name || group.code}.zip"),
         "content-security-policy" => FILE_POLICY,
         "content-type" => "application/zip",
         "x-content-type-options" => "nosniff",

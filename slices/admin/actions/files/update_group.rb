@@ -32,10 +32,10 @@ module Admin
         end
 
         def values(params)
-          alt_texts = Blog::Types::Fields[params[:files]].to_h do |file_id, fields|
-            [file_id.to_s, Blog::Types::Text[Blog::Types::Fields[fields][:alt_text]]]
+          files = Blog::Types::Fields[params[:files]].to_h do |file_id, fields|
+            [file_id.to_s, Blog::Types::Fields[fields].transform_values { Blog::Types::Text[it] }]
           end
-          { code: Blog::Types::Text[params[:code]], alt_texts: }
+          { name: Blog::Types::Text[params[:name]], code: Blog::Types::Text[params[:code]], files: }
         end
       end
     end

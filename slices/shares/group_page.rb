@@ -112,6 +112,8 @@ module Shares
 
     def file_path(file) = "/#{@group.code}/#{file.id}"
 
+    def heading = @group.name || TITLE
+
     def images = split.first
 
     def others = split.last
@@ -119,7 +121,7 @@ module Shares
     def render_body
       header { a(href: @settings.site_url) { @settings.owner_name } }
       main do
-        h1 { TITLE }
+        h1 { heading }
         a(class: "download", href: "/#{@group.code}.zip", download: "") { DOWNLOAD }
         render_images
         render_files
@@ -138,7 +140,7 @@ module Shares
       meta(charset: "utf-8")
       meta(name: "viewport", content: "width=device-width, initial-scale=1")
       meta(name: "robots", content: "noindex")
-      title { "#{TITLE} | #{@settings.owner_name}" }
+      title { "#{heading} | #{@settings.owner_name}" }
       style { raw(safe(STYLE)) }
     end
 

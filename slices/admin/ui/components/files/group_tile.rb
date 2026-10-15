@@ -47,7 +47,7 @@ module Admin
             span { t(".views", count: @group.view_count, views: Blog::Helpers::Figures.count(@group.view_count)) }
           end
 
-          def name = t(".name", count: files.size)
+          def name = @group.name || t(".name", count: files.size)
 
           def opener
             a(href: path(:admin_edit_file_group, id: @group.id),

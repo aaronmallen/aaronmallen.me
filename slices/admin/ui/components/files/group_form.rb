@@ -18,7 +18,7 @@ module Admin
           def self.scope(group) = "share-group-#{group.id}"
 
           def view_template
-            p(class: "file-drawer-name") { t(".name", count: files.size) }
+            p(class: "file-drawer-name") { title }
             p(class: "file-drawer-meta") { meta }
             h3(class: "file-drawer-head") { t(".link") }
             code(class: "file-drawer-link") { link }
@@ -40,31 +40,7 @@ module Admin
             end
           end
 
-          def alt_text(file)
-            input = {
-              name: "group[files][#{file.id}][alt_text]", value: alt_text_value(file),
-              placeholder: t(".alt_text_placeholder"),
-            }
-
-            Field(
-              label: t(".alt_text"), name: :alt_text, errors: @errors.dig(:files, file.id) || {}, error: FieldError,
-              scope: "#{scope}-file-#{file.id}",
-            ) do |control, field|
-              Input(**control, **input, autocomplete: "off")
-              field.after { Hint { t(".alt_text_hint") } }
-            end
-          end
-
-          def alt_text_value(file) = @values ? @values[:alt_texts][file.id.to_s] : file.alt_text.to_s
-
-          def code_field
-            value = @values ? @values[:code] : @group.code
-
-            Field(label: t(".code"), name: :code, errors: @errors, error: FieldError, scope:) do |control, field|
-              Input(**control, name: "group[code]", value:, autocomplete: "off", spellcheck: "false")
-              field.after { Hint { t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host) } }
-            end
-          end
+          def code_hint = t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host)
 
           def copy
             Button(
@@ -86,36 +62,26 @@ module Admin
             action = path(:admin_update_file_group, id: @group.id)
 
             Form(id: self.class.form_id(@group), action:, class: "form-stack") do
-              code_field
+              group_field(:name, t(".group_name"), t(".group_name_hint"), placeholder: @group.code)
+              group_field(:code, t(".code"), code_hint, spellcheck: "false")
               h3(class: "file-drawer-head") { t(".files") }
-              ul(class: "file-group-list") { files.each { item(it) } }
+              ul(class: "file-group-list") { file_items }
             end
+          end
+
+          def file_items
+            files.each { render GroupFile.new(group: @group, file: it, values: @values, errors: @errors) }
           end
 
           def files = @group.share_group_files
 
-          def image?(file) = Tile::IMAGE.match?(file.content_type)
+          def group_field(name, label, hint, **)
+            value = @values ? @values[name] : @group.public_send(name).to_s
 
-          def item(file)
-            li(class: "file-group-item") do
-              thumb(file)
-              div(class: "file-group-item-body") { item_body(file) }
-              Button(
-                small: true, variant: :gh, type: "submit", form: self.class.remove_id(@group, file),
-                icon: :trash, label: t(".remove", name: file.filename),
-              )
+            Field(label:, name:, errors: @errors, error: FieldError, scope:) do |control, field|
+              Input(**control, name: "group[#{name}]", value:, autocomplete: "off", **)
+              field.after { Hint { hint } }
             end
-          end
-
-          def item_body(file)
-            p(class: "file-group-item-name") do
-              a(href: "#{link}/#{file.id}", target: "_blank", rel: "noopener") { file.filename }
-            end
-            p(class: "file-card-meta") do
-              span { Blog::Helpers::Figures.size(file.byte_size) }
-              span { t(".downloads", count: file.download_count, downloads: count(file.download_count)) }
-            end
-            alt_text(file) if image?(file)
           end
 
           def link = Helpers::ShareLink.for(@group.code)
@@ -139,16 +105,7 @@ module Admin
 
           def scope = self.class.scope(@group)
 
-          def thumb(file)
-            if image?(file)
-              img(class: "file-group-thumb", src: "#{link}/#{file.id}?preview", alt: file.alt_text.to_s,
-                  loading: "lazy")
-            else
-              span(class: "file-group-thumb", aria: { hidden: true }) do
-                Icon(Tile::ICONS.find { |type, _| type.match?(file.content_type) }&.last || Tile::FILE_ICON)
-              end
-            end
-          end
+          def title = @group.name || t(".name", count: files.size)
         end
       end
     end

@@ -16,7 +16,7 @@ module Admin
           def view_template
             content_for(:live_tables, LIVE_TABLES)
             BackLink(href: path(:admin_files), variant: :gh, small: true, class: "editor-back") { t(".all_files") }
-            PageHead(title: t(".title", code: @group.code))
+            PageHead(title: @group.name || t(".title", code: @group.code))
             Card(class: "file-drawer") do
               GroupForm(group: @group, values: @values, errors: @errors)
               div(class: "file-drawer-foot") { ShareFoot(form: GroupForm, record: @group, kind: :group) }

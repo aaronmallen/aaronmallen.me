@@ -7,6 +7,9 @@ module API
         {
           id: Helpers::Schema::INTEGER,
           code: { type: "string", description: "the group's short code on the share host" },
+          name: Helpers::Schema.nullable(Helpers::Schema::STRING).merge(
+            description: "the name on the group's page and zip; null when the group goes by its code",
+          ),
           url: { type: "string", description: "the link that opens the group's page" },
           view_count: Helpers::Schema::INTEGER,
           zip_download_count: Helpers::Schema::INTEGER,

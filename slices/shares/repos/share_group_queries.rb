@@ -13,6 +13,8 @@ module Shares
 
       def count = share_groups.count
 
+      def file(id) = share_group_files.by_pk(id).one
+
       def find(id)
         share_groups.with_code.by_pk(id).combine(:share_group_files).node(:share_group_files) { it.order(:id) }.one
       end

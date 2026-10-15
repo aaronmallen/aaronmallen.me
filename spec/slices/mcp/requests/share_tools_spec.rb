@@ -120,4 +120,38 @@ RSpec.describe "MCP share tools", type: :request do
       expect(refusal("read_share_group", id: 0).first).to be(true)
     end
   end
+
+  describe "update_share" do
+    it "renames a share" do
+      share = Shares::Slice["operations.upload_share"].call(share_upload("a", "a.txt", "text/plain")).value!
+
+      expect(answer("update_share", id: share.id, filename: "b.txt")).to include("filename" => "b.txt")
+    end
+  end
+
+  describe "update_share_group" do
+    it "names a group, and read_share_group reads the name back" do
+      group = make_group(share_upload("a", "a.txt", "text/plain"))
+      answer("update_share_group", id: group.id, name: "Beach trip")
+
+      expect(answer("read_share_group", id: group.id)).to include("name" => "Beach trip")
+    end
+  end
+
+  describe "update_share_group_file" do
+    it "renames a file in a group" do
+      group = make_group(share_upload("a", "a.txt", "text/plain"))
+      file = group.share_group_files.first
+
+      expect(answer("update_share_group_file", id: group.id, file_id: file.id, filename: "b.txt").fetch("files"))
+        .to contain_exactly(include("id" => file.id, "filename" => "b.txt"))
+    end
+
+    it "refuses a blank name" do
+      group = make_group(share_upload("a", "a.txt", "text/plain"))
+
+      expect(refusal("update_share_group_file", id: group.id, file_id: group.share_group_files.first.id, filename: "")
+        .first).to be(true)
+    end
+  end
 end

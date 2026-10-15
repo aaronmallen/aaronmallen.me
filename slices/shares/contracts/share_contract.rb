@@ -8,13 +8,15 @@ module Shares
       params do
         optional(:code).filled(CODE)
         optional(:alt_text).maybe(Blog::Types::OptionalText)
+        optional(:filename).filled(Blog::Types::TrimmedText)
+        optional(:name).maybe(Blog::Types::OptionalText)
       end
 
       rule(:code) do
         key.failure(FORMAT) if key? && !Blog::Types::ShortCode.valid?(value)
       end
 
-      rule(:alt_text).validate(:without_controls)
+      %i[alt_text filename name].each { rule(it).validate(:without_controls) }
     end
   end
 end

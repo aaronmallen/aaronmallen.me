@@ -63,7 +63,8 @@ module API
     import keys: %w[repos.search_queries], from: :search
 
     import keys: %w[
-      operations.upload_share operations.upload_share_group repos.share_group_queries repos.share_queries
+      operations.name_share_group operations.rename_share_file operations.upload_share
+      operations.upload_share_group repos.share_group_queries repos.share_queries
     ], from: :shares
 
     import keys: %w[
@@ -116,6 +117,7 @@ module API
       endpoints.list_mail_threads endpoints.mark_mail_thread endpoints.read_mail_thread
       endpoints.list_clients endpoints.read_analytics endpoints.read_performance endpoints.read_photo
       endpoints.list_share_groups endpoints.list_shares endpoints.read_share endpoints.read_share_group
+      endpoints.update_share endpoints.update_share_group endpoints.update_share_group_file
       endpoints.upload_share endpoints.upload_share_group
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
       endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task

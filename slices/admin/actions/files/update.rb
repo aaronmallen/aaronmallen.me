@@ -27,7 +27,7 @@ module Admin
           share = share_queries.find(id)
           halt 404 unless share
 
-          values = { code: Blog::Types::Text[params[:code]], alt_text: Blog::Types::Text[params[:alt_text]] }
+          values = %i[filename code alt_text].to_h { [it, Blog::Types::Text[params[it]]] }
           response.status = 422
           response.render(edit_view, share:, values:, errors:)
         end

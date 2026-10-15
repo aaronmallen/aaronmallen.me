@@ -26,9 +26,11 @@ module Shares
 
       def delete(short_code_id) = short_codes.by_pk(short_code_id).delete
 
+      def name(id, name) = share_groups.by_pk(id).update(name:, updated_at: Time.now)
+
       def remove_file(id) = share_group_files.by_pk(id).delete
 
-      def set_alt_text(id, alt_text) = share_group_files.by_pk(id).update(alt_text:, updated_at: Time.now)
+      def update_file(id, **) = share_group_files.by_pk(id).update(**, updated_at: Time.now)
     end
   end
 end

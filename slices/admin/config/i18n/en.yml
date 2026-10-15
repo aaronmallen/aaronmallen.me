@@ -860,28 +860,38 @@ en:
             blank: "Give it a code."
             format: "Use lowercase letters, numbers and single hyphens."
             taken: "Another file or short link already uses that code."
-        group_form:
-          add: "Add"
-          add_label: "Add files to this group"
+          filename:
+            blank: "Give it a name."
+            control: "Take out the control characters."
+          name:
+            control: "Take out the control characters."
+        group_file:
           alt_text: "Alt text"
           alt_text_hint: "The group's page uses it for the image."
           alt_text_placeholder: "What the image shows"
+          downloads:
+            one: "%{downloads} download"
+            other: "%{downloads} downloads"
+          filename: "File name"
+          filename_hint: "Downloads and the zip save it under this name. Its link stays the same."
+          remove: "Remove %{name}"
+        group_form:
+          add: "Add"
+          add_label: "Add files to this group"
           code: "Short code"
           confirm_delete:
             one: "Delete this group and its file? Its link stops working at once."
             other: "Delete this group and its %{count} files? Its link stops working at once."
           confirm_remove: "Remove %{name}? Its link stops working at once."
           copy_link: "Copy link"
-          downloads:
-            one: "%{downloads} download"
-            other: "%{downloads} downloads"
           files: "Files"
+          group_name: "Name"
+          group_name_hint: "Titles the group's page and names its zip. Leave it blank to use the code."
           link: "Share link"
           link_copied: "Link copied"
           name:
             one: "%{count} file"
             other: "%{count} files"
-          remove: "Remove %{name}"
           uploaded: "uploaded %{on}"
           views:
             one: "%{views} view"
@@ -910,6 +920,8 @@ en:
           downloads:
             one: "%{downloads} download"
             other: "%{downloads} downloads"
+          filename: "File name"
+          filename_hint: "Downloads save under this name. Its link stays the same."
           link: "Share link"
           link_copied: "Link copied"
           markdown_copied: "Markdown copied"

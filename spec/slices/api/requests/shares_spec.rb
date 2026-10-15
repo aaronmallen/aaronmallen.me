@@ -224,4 +224,70 @@ RSpec.describe "API shares", type: :request do
               status]).to eq(["no share group has the ID 999", 404])
     end
   end
+
+  describe "PATCH /api/v1/shares/{id}" do
+    let(:share) { make_share("text", "notes.txt", "text/plain") }
+
+    it "renames the share and keeps its code" do
+      expect(call_api(:patch, "/shares/#{share.id}", { filename: " todo.txt " }))
+        .to include("filename" => "todo.txt", "code" => share.code)
+    end
+
+    it "refuses a blank name and keeps the old one", :aggregate_failures do
+      expect([call_api(:patch, "/shares/#{share.id}", { filename: " " }).fetch("message"), status])
+        .to eq(["filename: is empty", 422])
+      expect(shares.first[:filename]).to eq("notes.txt")
+    end
+
+    it "answers 404 for a group file's ID" do
+      file = make_group(share_upload("a", "a.txt", "text/plain")).share_group_files.first
+      call_api(:patch, "/shares/#{file.id}", { filename: "b.txt" })
+
+      expect([status, group_files.first[:filename]]).to eq([404, "a.txt"])
+    end
+  end
+
+  describe "PATCH /api/v1/share_groups/{id}" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain")) }
+
+    it "names the group" do
+      expect(call_api(:patch, "/share_groups/#{group.id}", { name: "Beach trip" }))
+        .to include("name" => "Beach trip", "code" => group.code)
+    end
+
+    it "clears the name with null" do
+      call_api(:patch, "/share_groups/#{group.id}", { name: "Beach trip" })
+
+      expect(call_api(:patch, "/share_groups/#{group.id}", { name: nil })).to include("name" => nil)
+    end
+
+    it "reads the name back" do
+      call_api(:patch, "/share_groups/#{group.id}", { name: "Beach trip" })
+
+      expect(call_api(:get, "/share_groups").fetch("share_groups").first).to include("name" => "Beach trip")
+    end
+
+    it "answers 404 for a group that is not there" do
+      call_api(:patch, "/share_groups/999", { name: "Beach trip" })
+
+      expect(status).to eq(404)
+    end
+  end
+
+  describe "PATCH /api/v1/share_groups/{id}/files/{file_id}" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain")) }
+    let(:file) { group.share_group_files.first }
+
+    it "renames the file and keeps its link" do
+      expect(call_api(:patch, "/share_groups/#{group.id}/files/#{file.id}", { filename: "b.txt" }).fetch("files"))
+        .to contain_exactly(include("filename" => "b.txt", "url" => "http://shares.localhost/#{group.code}/#{file.id}"))
+    end
+
+    it "answers 404 for a file in another group", :aggregate_failures do
+      other = make_group(share_upload("c", "c.txt", "text/plain"))
+      call_api(:patch, "/share_groups/#{other.id}/files/#{file.id}", { filename: "b.txt" })
+
+      expect([status, group_files.find { it[:id] == file.id }[:filename]]).to eq([404, "a.txt"])
+    end
+  end
 end

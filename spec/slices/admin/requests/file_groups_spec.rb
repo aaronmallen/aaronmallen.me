@@ -50,6 +50,14 @@ RSpec.describe "Admin file groups", type: :request do
       expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{group.code}/#{image[:id]}?preview']")
     end
 
+    it "shows a named group by its name in the list and its drawer", :aggregate_failures do
+      Shares::Slice["relations.share_groups"].by_pk(group.id).update(name: "Beach trip")
+      get "/admin/files"
+
+      expect(page).to have_css(".file-card-name", exact_text: "Beach trip")
+      expect(drawer).to have_css(".file-drawer-name", exact_text: "Beach trip", visible: :all)
+    end
+
     it "lists groups before single files" do
       upload_share
       get "/admin/files"
@@ -101,8 +109,17 @@ RSpec.describe "Admin file groups", type: :request do
       expect(row.text(:all)).to include("2 downloads")
     end
 
-    it "edits the code and the alt text of images only", :aggregate_failures do
+    it "edits the group's name and code", :aggregate_failures do
+      expect(drawer).to have_field("group[name]", with: "", visible: :all)
       expect(drawer).to have_field("group[code]", with: group.code, visible: :all)
+    end
+
+    it "edits each file's name", :aggregate_failures do
+      expect(drawer).to have_field("group[files][#{image[:id]}][filename]", with: "shot.png", visible: :all)
+      expect(drawer.all("input[name$='[filename]']", visible: :all).size).to eq(2)
+    end
+
+    it "edits the alt text of images only", :aggregate_failures do
       expect(drawer).to have_field("group[files][#{image[:id]}][alt_text]", visible: :all)
       expect(drawer.all("input[name$='[alt_text]']", visible: :all).size).to eq(1)
     end
@@ -256,8 +273,45 @@ RSpec.describe "Admin file groups", type: :request do
         shown = Capybara.string(server.get("/#{group.code}").body).all("img").map { it[:alt] }
 
         expect([shown,
-                hints]).to match([include("A cat"), include(i18n.t("ui.components.files.group_form.alt_text_hint"))])
+                hints]).to match([include("A cat"), include(i18n.t("ui.components.files.group_file.alt_text_hint"))])
       end
+    end
+
+    it "names the group, which titles its page and its zip", :aggregate_failures do
+      save(code: group.code, name: " Beach trip ")
+
+      expect(stored[:name]).to eq("Beach trip")
+      expect(Capybara.string(server.get("/#{group.code}").body)).to have_css("h1", exact_text: "Beach trip")
+    end
+
+    it "clears the name when left blank" do
+      save(code: group.code, name: "Beach trip")
+      save(code: group.code, name: " ")
+
+      expect(stored[:name]).to be_nil
+    end
+
+    it "keeps the name when the form sends none" do
+      save(code: group.code, name: "Beach trip")
+      save(code: "trip")
+
+      expect(stored[:name]).to eq("Beach trip")
+    end
+
+    it "renames a file and keeps its link", :aggregate_failures do
+      id = image[:id]
+      save(code: group.code, files: { id.to_s => { filename: "cat.png" } })
+
+      expect(image).to be_nil
+      expect(files.find { it[:id] == id }[:filename]).to eq("cat.png")
+    end
+
+    it "refuses a blank file name and changes nothing", :aggregate_failures do
+      save(code: "trip", name: "Beach trip", files: { image[:id].to_s => { filename: " " } })
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css("#share-group-#{group.id}-file-#{image[:id]}-filename[aria-invalid='true']")
+      expect([stored[:code], stored[:name], image[:filename]]).to eq([group.code, nil, "shot.png"])
     end
 
     it "sets the alt text on an image" do

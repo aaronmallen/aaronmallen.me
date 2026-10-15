@@ -351,7 +351,44 @@ RSpec.describe "The share host", type: :request do
 
     def file_downloads(name) = Shares::Slice["relations.share_group_files"].by_pk(file(name).id).one[:download_count]
 
+    def name_group(name) = Shares::Slice["operations.name_share_group"].call(group.id, { name: }).value!
+
+    def rename(file, filename) = Shares::Slice["operations.rename_share_file"].call(file.id, { filename: }).value!
+
     def views = Shares::Slice["relations.share_groups"].by_pk(group.id).one[:view_count]
+
+    describe "a name" do
+      it "titles the page", :aggregate_failures do
+        name_group("Beach trip")
+        fetch("/#{group.code}")
+
+        expect(page).to have_css("h1", exact_text: "Beach trip")
+        expect(page.find("title", visible: :all).text(:all)).to start_with("Beach trip |")
+      end
+
+      it "falls back to the plain title when left blank" do
+        name_group("Beach trip")
+        name_group(" ")
+        fetch("/#{group.code}")
+
+        expect(page).to have_css("h1", exact_text: Shares::GroupPage::TITLE)
+      end
+    end
+
+    it "lists a renamed file under its new name at the same link" do
+      rename(file("notes.txt"), "todo.txt")
+      fetch("/#{group.code}")
+
+      expect(page).to have_link("todo.txt", href: "/#{group.code}/#{file('notes.txt').id}")
+    end
+
+    it "downloads a renamed file under its new name" do
+      rename(file("notes.txt"), "todo.txt")
+      stub_request(:get, share_store_url(file("notes.txt").key)).to_return(body: bytes)
+      fetch("/#{group.code}/#{file('notes.txt').id}")
+
+      expect(disposition).to include('filename="todo.txt"')
+    end
 
     describe "the page" do
       before do
@@ -499,8 +536,22 @@ RSpec.describe "The share host", type: :request do
         fetch("/#{group.code}.zip")
 
         expect(last_response.headers["Content-Type"]).to eq("application/zip")
-        expect(disposition).to eq(%(attachment; filename="#{group.code}.zip"))
+        expect(disposition).to eq(%(attachment; filename="#{group.code}.zip"; filename*=UTF-8''#{group.code}.zip))
         expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+      end
+
+      it "downloads a named group under its name" do
+        name_group("Beach trip")
+        fetch("/#{group.code}.zip")
+
+        expect(disposition).to eq(%(attachment; filename="Beach trip.zip"; filename*=UTF-8''Beach%20trip.zip))
+      end
+
+      it "holds a renamed file under its new name" do
+        rename(file("notes.txt"), "todo.txt")
+        fetch("/#{group.code}.zip")
+
+        expect(unzip(last_response.body).keys).to eq(%w[beach.jpg dunes.png todo.txt paper.pdf])
       end
 
       it "gives a second file of the same name a name of its own" do

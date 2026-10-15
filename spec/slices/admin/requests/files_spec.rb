@@ -317,7 +317,8 @@ RSpec.describe "Admin files", type: :request do
         expect(drawer).to have_css("button[data-record-key='#{link}']", visible: :all)
       end
 
-      it "edits the code but no alt text for a file that is no image", :aggregate_failures do
+      it "edits the name and the code but no alt text for a file that is no image", :aggregate_failures do
+        expect(drawer).to have_field("share[filename]", with: "deck.pdf", visible: :all)
         expect(drawer).to have_field("share[code]", with: file.code, visible: :all)
         expect(drawer).to have_no_field("share[alt_text]", visible: :all)
         expect(drawer).to have_no_css("[data-record-key^='![']", visible: :all)
@@ -391,6 +392,8 @@ RSpec.describe "Admin files", type: :request do
 
       def error(reason) = i18n.t(reason, scope: "ui.components.files.field_error.code")
 
+      def name_error(reason) = i18n.t(reason, scope: "ui.components.files.field_error.filename")
+
       def save(**fields)
         post("/admin/files/#{file.id}", { share: fields }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
       end
@@ -427,6 +430,25 @@ RSpec.describe "Admin files", type: :request do
 
         expect(stored[:alt_text]).to eq("A cat")
       end
+
+      it "renames the file, which downloads under its new name at the same link", :aggregate_failures do
+        stub_request(:get, share_store_url(file.key)).to_return(body: "x" * 2048)
+        save(code: file.code, filename: " cat.png ")
+        downloaded = server.get("/#{file.code}")
+
+        expect(downloaded.status).to eq(200)
+        expect(downloaded["content-disposition"]).to include('filename="cat.png"')
+      end
+
+      { "a blank name" => [" ", "blank"], "a name with a control character" => ["a\u0007.png", "control"] }
+        .each do |name, (filename, reason)|
+          it "refuses #{name} and keeps the old one", :aggregate_failures do
+            save(code: file.code, filename:)
+
+            expect([last_response.status, shares.find { it[:id] == file.id }[:filename]]).to eq([422, "shot.png"])
+            expect(page).to have_css(".field-error", text: name_error(reason))
+          end
+        end
 
       { "a bad code" => ["Re Sume", "format"], "a blank code" => [" ", "blank"] }.each do |name, (code, reason)|
         it "refuses #{name} and changes nothing", :aggregate_failures do

@@ -3994,6 +3994,7 @@ CREATE TABLE public.share_groups (
     zip_download_count integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    name public.non_blank_text,
     CONSTRAINT share_groups_counts_check CHECK (((view_count >= 0) AND (zip_download_count >= 0)))
 );
 
@@ -8575,6 +8576,7 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015230200_add_backfill_page_to_mail_accounts.rb'),
 ('20261015231400_add_first_failed_at_to_post_link_checks.rb'),
 ('20261016001000_merge_shares_into_share_group_files.rb'),
+('20261016001451_add_name_to_share_groups.rb'),
 ('20261016001466_create_public_search_documents.rb'),
 ('20261016001470_create_short_link_checks.rb'),
 ('20261016001473_notify_admin_changes_on_post_link_checks.rb');

@@ -11,31 +11,34 @@ module Shares
 
       def call(id, params)
         group = step found(group_queries.find(id))
-        fields = step validated(contract.call(code: params[:code]))
-        alt_texts = step alt_texts(group, sent_alt_texts(params[:files]))
+        fields = step validated(contract.call(group_form(params)))
+        files = step file_fields(group, sent_files(params[:files]))
 
-        step save(group, fields[:code], alt_texts)
+        step save(group, fields, files)
       end
 
       private
 
-      def alt_texts(group, sent)
-        results = checked_images(group, sent)
+      def checked_files(group, sent)
+        group.share_group_files.filter_map do |file|
+          form = sent.fetch(file.id, Blog::Constants::EMPTY_HASH).slice(*editable(file))
+          [file.id, contract.call(form)] unless form.empty?
+        end.to_h
+      end
+
+      def editable(file) = GroupPage::IMAGE.match?(file.content_type) ? %i[alt_text filename] : %i[filename]
+
+      def file_fields(group, sent)
+        results = checked_files(group, sent)
         errors = results.reject { |_, result| result.success? }.transform_values { it.errors.to_h }
 
-        errors.empty? ? Success(results.transform_values { it[:alt_text] }) : Failure([:invalid, { files: errors }])
+        errors.empty? ? Success(results.transform_values(&:to_h)) : Failure([:invalid, { files: errors }])
       end
 
-      def checked_images(group, sent)
-        images = group.share_group_files.select { GroupPage::IMAGE.match?(it.content_type) && sent.key?(it.id) }
-        images.to_h { [it.id, contract.call(alt_text: sent[it.id])] }
-      end
+      def group_form(params) = params.slice(:name).merge(code: params[:code])
 
-      def save(group, code, alt_texts)
-        transaction do
-          group_mutations.change_code(group.short_code_id, code)
-          alt_texts.each { |file_id, alt_text| group_mutations.set_alt_text(file_id, alt_text) }
-        end
+      def save(group, fields, files)
+        transaction { write(group, fields, files) }
         Success(group_queries.find(group.id))
       rescue ROM::SQL::UniqueConstraintError => e
         raise unless group_mutations.violated_constraint(e) == Code::KEY
@@ -43,10 +46,16 @@ module Shares
         Failure([:invalid, { code: [Code::TAKEN] }])
       end
 
-      def sent_alt_texts(files)
+      def sent_files(files)
         Blog::Types::Fields[files].to_h do |id, fields|
-          [Blog::Types::IdParam[id.to_s], Blog::Types::Fields[fields][:alt_text]]
+          [Blog::Types::IdParam[id.to_s], Blog::Types::Fields[fields]]
         end
+      end
+
+      def write(group, fields, files)
+        group_mutations.change_code(group.short_code_id, fields[:code])
+        group_mutations.name(group.id, fields[:name]) if fields.key?(:name)
+        files.each { |file_id, changes| group_mutations.update_file(file_id, **changes) }
       end
     end
   end

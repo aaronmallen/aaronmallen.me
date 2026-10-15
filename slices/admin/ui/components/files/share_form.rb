@@ -68,6 +68,7 @@ module Admin
 
           def fields
             code_hint = t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host)
+            field(:filename, t(".filename"), t(".filename_hint"), spellcheck: "false")
             field(:code, t(".code"), code_hint, spellcheck: "false")
             return unless image?
 
@@ -98,7 +99,7 @@ module Admin
 
           def thumb = Helpers::ShareLink.preview(@share.code)
 
-          def values = @values || { code: @share.code, alt_text: @share.alt_text.to_s }
+          def values = @values || { filename: @share.filename, code: @share.code, alt_text: @share.alt_text.to_s }
         end
       end
     end
