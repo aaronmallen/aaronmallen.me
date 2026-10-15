@@ -186,6 +186,12 @@ RSpec.describe "Admin record links", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+
+      it "answers 404 for a kind it doesn't know" do
+        unlink("person", task.id)
+
+        expect(last_response.status).to eq(404)
+      end
     end
 
     describe "signed out" do

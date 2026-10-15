@@ -25,7 +25,7 @@ module Links
       def side(kind, id)
         id = Blog::Types::IdParam[id]
 
-        [kind, id] if id
+        [kind, id] if id && Blog::Types::RecordKind.valid?(kind)
       end
 
       def sides(*pairs)
