@@ -11,11 +11,14 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            nav(class: "seg", aria: { label: t(".label") }) do
-              step(@month.prev_month, rel: "prev", label: ".previous", icon: "fa-chevron-left")
-              a(class: ["seg-option", ("current" if showing_today?)], href: path(:admin_calendar)) { t(".today") }
-              step(@month.next_month, rel: "next", label: ".next", icon: "fa-chevron-right")
-            end
+            SegmentedLinks(
+              label: t(".label"),
+              items: [
+                step(@month.prev_month, rel: "prev", label: ".previous", icon: "fa-chevron-left"),
+                { href: path(:admin_calendar), text: t(".today"), current: showing_today? },
+                step(@month.next_month, rel: "next", label: ".next", icon: "fa-chevron-right"),
+              ],
+            )
           end
 
           private
@@ -23,10 +26,12 @@ module Admin
           def showing_today? = @month.year == @today.year && @month.month == @today.month
 
           def step(month, rel:, label:, icon:)
-            a(class: "seg-option", href: path(:admin_calendar, month: month.strftime(MONTH)), rel:) do
-              Icon(["fa-solid", icon])
-              span(class: "sr-only") { t(label, month: l(month, format: :month)) }
-            end
+            {
+              href: path(:admin_calendar, month: month.strftime(MONTH)),
+              text: t(label, month: l(month, format: :month)),
+              icon:,
+              rel:,
+            }
           end
         end
       end

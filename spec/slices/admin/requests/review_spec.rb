@@ -78,6 +78,11 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "offers no way past this week" do
         expect(page).to have_css(".seg-option[aria-disabled]", text: "Next week")
       end
+
+      it "steps back a week with an icon" do
+        expect(page).to have_css("a.seg-option[rel='prev'] i.fa-chevron-left", visible: :all)
+          .and have_link("Previous week")
+      end
     end
 
     describe "a week with records" do

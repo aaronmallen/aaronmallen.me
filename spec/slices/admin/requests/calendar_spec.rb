@@ -190,6 +190,11 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
       it "mark this month only when it shows" do
         expect(page).to have_no_css(".seg-option.current", text: "This month")
       end
+
+      it "point each way with an icon", :aggregate_failures do
+        expect(page).to have_css("a.seg-option[rel='prev'] i.fa-chevron-left", visible: :all)
+        expect(page).to have_css("a.seg-option[rel='next'] i.fa-chevron-right", visible: :all)
+      end
     end
 
     it "opens the first of a month that holds no today" do

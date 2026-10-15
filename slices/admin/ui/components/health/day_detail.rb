@@ -24,11 +24,6 @@ module Admin
 
           private
 
-          def arrows
-            step(date - 1, rel: "prev", label: ".previous", icon: "fa-chevron-left", disabled: date == @first)
-            step(date + 1, rel: "next", label: ".next", icon: "fa-chevron-right", disabled: date == @today)
-          end
-
           def asleep_label
             return t(".asleep") unless @day.bed_at && @day.woke_at
 
@@ -62,7 +57,13 @@ module Admin
             div(class: "health-day-head") do
               h3(class: "health-day-title") { title }
               time(class: "health-day-date", datetime: date.iso8601) { l(date, format: :full) }
-              nav(class: "seg", aria: { label: t(".days") }) { arrows }
+              SegmentedLinks(
+                label: t(".days"),
+                items: [
+                  step(date - 1, rel: "prev", label: ".previous", icon: "fa-chevron-left", disabled: date == @first),
+                  step(date + 1, rel: "next", label: ".next", icon: "fa-chevron-right", disabled: date == @today),
+                ],
+              )
             end
           end
 
@@ -90,13 +91,7 @@ module Admin
           end
 
           def step(day, rel:, label:, icon:, disabled:)
-            inner = proc do
-              Icon(["fa-solid", icon])
-              span(class: "sr-only") { t(label) }
-            end
-            return span(class: "seg-option", aria: { disabled: true }, &inner) if disabled
-
-            a(class: "seg-option", href: path(:admin_health, span: @span, day: day.iso8601), rel:, &inner)
+            { href: path(:admin_health, span: @span, day: day.iso8601), text: t(label), icon:, rel:, disabled: }
           end
 
           def title
