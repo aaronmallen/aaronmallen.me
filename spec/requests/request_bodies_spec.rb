@@ -46,6 +46,28 @@ RSpec.describe "A request body", type: :request do
     end
   end
 
+  describe "a form over 1 MB with no declared length" do
+    before { post "/contact", "message[body]=#{'a' * megabyte}", form.merge("CONTENT_LENGTH" => nil) }
+
+    it_behaves_like "a refusal", 413
+
+    it "stores no message" do
+      expect(messages).to be_empty
+    end
+  end
+
+  describe "a form under 1 MB with no declared length" do
+    before do
+      fields = { reply_to: "ada@example.com", subject: "A question", body: "About the beacon" }
+      body = Rack::Utils.build_nested_query(message: stamped(fields))
+      post "/contact", body, form.merge("CONTENT_LENGTH" => nil)
+    end
+
+    it "stores the message the action read" do
+      expect(messages.size).to eq(1)
+    end
+  end
+
   describe "a JSON body over 1 MB" do
     before { post "/api/v1/journal_entries", rpc(megabyte), json.merge("HTTP_ACCEPT" => "application/json") }
 

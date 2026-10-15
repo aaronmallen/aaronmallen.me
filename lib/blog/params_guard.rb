@@ -8,6 +8,7 @@ module Blog
     AUTHORIZATION = "HTTP_AUTHORIZATION"
     BAD_REQUEST = 400
     BODY_LIMIT = 1024 * 1024
+    CHUNK = 64 * 1024
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
     MAIL_DRAFT_PATH = "/admin/mail/draft"
     MAIL_SEND_PATH = "/admin/mail/send"
@@ -59,6 +60,23 @@ module Blog
       UPLOAD_LIMITS.fetch(request.path_info, BODY_LIMIT)
     end
 
+    def oversized?(request)
+      limit = limit(request)
+      return request.content_length.to_i > limit if request.content_length
+
+      request.body ? read_size(request.body, limit) > limit : false
+    end
+
+    def read_size(input, limit)
+      size = 0
+      while (chunk = input.read(CHUNK))
+        size += chunk.bytesize
+        break if size > limit
+      end
+      input.rewind
+      size
+    end
+
     def readable?(request)
       [::Rack::Utils.unescape_path(request.path_info), request.GET, form(request)].all? { utf8?(it) }
     rescue ::Rack::BadRequest
@@ -66,7 +84,7 @@ module Blog
     end
 
     def refusal(request)
-      if request.content_length.to_i > limit(request) then TOO_LARGE
+      if oversized?(request) then TOO_LARGE
       elsif request.media_type == MULTIPART && !upload?(request) then UNSUPPORTED
       elsif !readable?(request) then BAD_REQUEST
       end
