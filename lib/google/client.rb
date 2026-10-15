@@ -19,14 +19,16 @@ module Google
     PROVIDER = Blog::Types::ServiceProvider["google"]
     RATE_LIMIT = /"(?:user)?rateLimitExceeded"/i
     RECONNECT = "%s needs a reconnect"
+    REFUSALS = { NOT_FOUND => NotFound, GONE => Gone }.freeze
     REVOKE_URL = "https://oauth2.googleapis.com/revoke"
     TOO_MANY_REQUESTS = 429
     UNAUTHORIZED = 401
     USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
-    def initialize(oauth:)
+    def initialize(oauth:, connections: nil, tokens: nil)
       @oauth = oauth
-      @tokens = Tokens.new(oauth:, change_connection: method(:change_connection))
+      @connections = connections
+      @tokens = tokens || Tokens.new(oauth:, change_connection: method(:change_connection))
     end
 
     def account(**credentials)
@@ -69,6 +71,8 @@ module Google
 
     def holding(scope) = holders(scope).first
 
+    def loaded = self.class.new(oauth:, connections:, tokens: @tokens.remembering)
+
     def patch(url, body, account:) = request(account, :patch, url, body: body.to_json, headers: JSON_HEADERS.dup)
 
     def post(url, body, account:, narrow: nil)
@@ -97,7 +101,7 @@ module Google
       connection
     end
 
-    def connections = services["repos.connection_queries"].for(PROVIDER)
+    def connections = @connections || services["repos.connection_queries"].for(PROVIDER)
 
     def covers?(granted, wanted)
       granted.start_with?(wanted) || (FULL_SCOPES.key?(granted) && wanted.start_with?(FULL_SCOPES[granted]))
@@ -130,12 +134,7 @@ module Google
 
     def refusal(error) = "Google answered #{error.response&.status || error.code}"
 
-    def refused(response)
-      return NotFound if response&.status == NOT_FOUND
-      return Gone if response&.status == GONE
-
-      rate_limited?(response) ? RateLimited : Error
-    end
+    def refused(response) = REFUSALS.fetch(response&.status) { rate_limited?(response) ? RateLimited : Error }
 
     def request(account, verb, url, narrow: nil, **options)
       return unless configured?

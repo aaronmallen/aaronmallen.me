@@ -7,9 +7,10 @@ module Google
     INVALID_GRANT = "invalid_grant"
     LATENCY = 60
 
-    def initialize(oauth:, change_connection:)
+    def initialize(oauth:, change_connection:, current: nil)
       @oauth = oauth
       @change_connection = change_connection
+      @current = current
       @narrowed = {}
     end
 
@@ -21,7 +22,7 @@ module Google
     end
 
     def current(connection)
-      token = build(connection.credentials)
+      token = @current&.fetch(connection.id, nil) || build(connection.credentials)
       token.expired? ? renew(connection, token) : token
     end
 
@@ -36,8 +37,13 @@ module Google
       end
     end
 
+    def remembering = self.class.new(oauth: @oauth, change_connection: @change_connection, current: {})
+
     def renew(connection, token)
-      refreshed(connection) { token.refresh }.tap { @change_connection.call(connection.id, credentials: stored(it)) }
+      refreshed(connection) { token.refresh }.tap do |fresh|
+        @change_connection.call(connection.id, credentials: stored(fresh))
+        @current[connection.id] = fresh if @current
+      end
     end
 
     def stored(token) = { access_token: token.token, expires_at: token.expires_at, refresh_token: token.refresh_token }

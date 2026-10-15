@@ -19,6 +19,14 @@ module Spec
       )
     end
 
+    def gmail_history(ids, threads)
+      added = ids.flat_map do |id|
+        threads.fetch(id, []).map { |message| { message: { **message.slice(:id, :labelIds), threadId: id } } }
+      end
+
+      { messages: ids.map { { threadId: it } }, messagesAdded: added }
+    end
+
     def gmail_message(id, labels: %w[INBOX UNREAD], at: Time.now, parts: nil, **headers)
       headers = { From: "Ada Lovelace <ada@example.com>", Subject: "Engines", **headers }
 
@@ -56,7 +64,7 @@ module Spec
       stub_request(:get, "#{GMAIL}/profile").to_return(google_health_json({ historyId: profile }))
       stub_request(:get, "#{GMAIL}/labels").to_return(google_health_json({ labels: }))
       stub_request(:get, %r{\A#{GMAIL}/settings/sendAs/}o).to_return(google_health_json({ signature: }))
-      pages = { history: [{ messages: history.map { |id| { threadId: id } } }], historyId: history_id }
+      pages = { history: [gmail_history(history, threads)], historyId: history_id }
       stub_request(:get, %r{\A#{GMAIL}/history\?}o).to_return(google_health_json(pages))
       threads.each { |id, messages| stub_gmail_thread(id, messages) }
     end

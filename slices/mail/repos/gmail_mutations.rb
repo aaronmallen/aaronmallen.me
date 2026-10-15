@@ -27,10 +27,13 @@ module Mail
         mail_accounts.where(id: account_id).dataset.update(history_id:, updated_at: Time.now)
       end
 
+      def label_ids(account_id) = mail_labels.where(mail_account_id: account_id).pluck(:gmail_id)
+
       def label_named(account_id, name) = mail_labels.where(mail_account_id: account_id, name:).one
 
-      def sign(account_id, signature)
-        mail_accounts.where(id: account_id).dataset.update(signature: (signature unless signature.empty?))
+      def sign(account_id, signature, now: Time.now)
+        signature = nil if signature.empty?
+        mail_accounts.where(id: account_id).dataset.update(signature:, settings_synced_at: now)
       end
 
       def store_labels(account_id, labels, now: Time.now)

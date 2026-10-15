@@ -2603,7 +2603,8 @@ CREATE TABLE public.mail_accounts (
     history_id text,
     shown boolean DEFAULT true NOT NULL,
     sends boolean DEFAULT true NOT NULL,
-    signature text
+    signature text,
+    settings_synced_at timestamp with time zone
 );
 
 
@@ -8299,4 +8300,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015010000_add_number_to_tasks.rb'),
 ('20261015080000_add_rendered_body_to_posts.rb'),
 ('20261015090000_add_widths_to_photos.rb'),
-('20261015100000_index_activity_dates_moved_task_events_and_delivery_connections.rb');
+('20261015100000_index_activity_dates_moved_task_events_and_delivery_connections.rb'),
+('20261015110000_add_settings_synced_at_to_mail_accounts.rb');

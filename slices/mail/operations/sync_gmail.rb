@@ -6,16 +6,24 @@ module Mail
   module Operations
     class SyncGmail < Blog::Operation
       GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
+      LABELS_ADDED = %w[messagesAdded labelsAdded].freeze
       PAGE_SIZE = 25
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
+      SETTINGS_EVERY = 3600
       USER_LABEL = "user"
+      USER_LABEL_PREFIX = "Label_"
+
+      Mailbox = Data.define(:google, :address) do
+        def get(path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
+      end
 
       include Deps[google: "google.client", gmail_mutations: "repos.gmail_mutations"]
 
       def backfill(address, page_token = nil)
+        mailbox = mailbox(address)
         account = gmail_mutations.account(address)
-        page = gmail(address, "threads", includeSpamTrash: true, maxResults: PAGE_SIZE, **token(page_token))
-        page.fetch("threads", []).each { store(address, account.id, it.fetch("id")) }
+        page = threads(mailbox, page_token)
+        page.fetch("threads", []).each { store(mailbox, account.id, it.fetch("id")) }
 
         Success(page["nextPageToken"])
       rescue Google::RateLimited => e
@@ -28,64 +36,88 @@ module Mail
 
       private
 
-      def catch_up(address, account)
-        ids, history_id = changes(address, account.history_id)
-        ids.uniq.each { store(address, account.id, it) }
-        gmail_mutations.follow(account.id, history_id)
-        ids.uniq.size
+      def added_user_labels(records)
+        added = records.flat_map { |record| LABELS_ADDED.flat_map { record.fetch(it, []) } }
+        ids = added.flat_map { [*it["labelIds"], *it.dig("message", "labelIds")] }
+        ids.select { it.start_with?(USER_LABEL_PREFIX) }
+      end
+
+      def catch_up(mailbox, account)
+        records, history_id = changes(mailbox, account.history_id)
+        refresh(mailbox, account.id) if stale?(account, records)
+        ids = records.flat_map { it.fetch("messages", []) }.map { it.fetch("threadId") }.uniq
+        ids.each { store(mailbox, account.id, it) }
+        gmail_mutations.follow(account.id, history_id) unless history_id == account.history_id
+        ids.size
       rescue Google::NotFound
-        start(address, account)
+        start(mailbox, account)
       end
 
-      def changes(address, start, page_token = nil)
-        page = gmail(address, "history", startHistoryId: start, **token(page_token))
-        ids = page.fetch("history", []).flat_map { it.fetch("messages", []) }.map { it.fetch("threadId") }
+      def changes(mailbox, start, page_token = nil)
+        page = mailbox.get("history", startHistoryId: start, **token(page_token))
+        records = page.fetch("history", [])
         following = page["nextPageToken"]
-        return [ids, page.fetch("historyId")] unless following
+        return [records, page.fetch("historyId")] unless following
 
-        more, last = changes(address, start, following)
-        [ids + more, last]
+        more, last = changes(mailbox, start, following)
+        [records + more, last]
       end
 
-      def gmail(address, path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
+      def mailbox(address, client = google.loaded) = Mailbox.new(client, address)
 
-      def start(address, account)
-        gmail_mutations.follow(account.id, gmail(address, "profile").fetch("historyId"))
-        Jobs::BackfillGmail.perform_async(address)
+      def refresh(mailbox, account_id)
+        store_labels(mailbox, account_id)
+        store_signature(mailbox, account_id)
+      end
+
+      def stale?(account, records)
+        return true if account.settings_synced_at.nil? || account.settings_synced_at < Time.now - SETTINGS_EVERY
+
+        labels = added_user_labels(records)
+        labels.any? && (labels - gmail_mutations.label_ids(account.id)).any?
+      end
+
+      def start(mailbox, account)
+        refresh(mailbox, account.id)
+        gmail_mutations.follow(account.id, mailbox.get("profile").fetch("historyId"))
+        Jobs::BackfillGmail.perform_async(mailbox.address)
         0
       end
 
-      def store(address, account_id, gmail_id)
-        gmail_mutations.store_thread(account_id, GmailThread.new(gmail(address, "threads/#{gmail_id}", format: "full")))
+      def store(mailbox, account_id, gmail_id)
+        gmail_mutations.store_thread(account_id, GmailThread.new(mailbox.get("threads/#{gmail_id}", format: "full")))
       rescue Google::NotFound
         gmail_mutations.delete_thread(account_id, gmail_id)
       end
 
-      def store_labels(address, account_id)
-        labels = gmail(address, "labels").fetch("labels", []).select { it["type"] == USER_LABEL }
+      def store_labels(mailbox, account_id)
+        labels = mailbox.get("labels").fetch("labels", []).select { it["type"] == USER_LABEL }
 
         gmail_mutations.store_labels(account_id, labels.map { { gmail_id: it.fetch("id"), name: it.fetch("name") } })
       end
 
-      def store_signature(address, account_id)
-        signature = gmail(address, "settings/sendAs/#{address}")["signature"].to_s
+      def store_signature(mailbox, account_id)
+        signature = mailbox.get("settings/sendAs/#{mailbox.address}")["signature"].to_s
 
         gmail_mutations.sign(account_id, Sanitize.fragment(signature, GmailThread::SANITIZE).strip)
       end
 
-      def sync(address)
-        account = gmail_mutations.account(address)
-        store_labels(address, account.id)
-        store_signature(address, account.id)
+      def sync(mailbox)
+        account = gmail_mutations.account(mailbox.address)
 
-        Success(account.history_id ? catch_up(address, account) : start(address, account))
+        Success(account.history_id ? catch_up(mailbox, account) : start(mailbox, account))
       rescue Google::Error => e
         Failure([:gmail_failed, e.message])
       end
 
       def synced
-        results = google.holders(SCOPE).map { sync(it) }
+        client = google.loaded
+        results = client.holders(SCOPE).map { sync(mailbox(it, client)) }
         results.find(&:failure?) || Success(results.sum(&:value!))
+      end
+
+      def threads(mailbox, page_token)
+        mailbox.get("threads", includeSpamTrash: true, maxResults: PAGE_SIZE, **token(page_token))
       end
 
       def token(page_token) = page_token ? { pageToken: page_token } : {}

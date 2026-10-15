@@ -21,6 +21,8 @@ RSpec.describe Mail::Jobs::SyncGmail do
 
   def history_page(ids, **) = google_health_json({ history: [{ messages: ids.map { { threadId: it } } }], ** })
 
+  def hour_passes = rows("mail_accounts").where(address:).dataset.update(settings_synced_at: Time.now - 3601)
+
   def label_names(thread)
     ids = rows("mail_thread_labels").where(mail_thread_id: thread.id).pluck(:mail_label_id)
 
@@ -34,6 +36,8 @@ RSpec.describe Mail::Jobs::SyncGmail do
   def rows(name) = Mail::Slice["relations.#{name}"].with(auto_struct: true)
 
   def run = described_class.new.perform
+
+  def run_an_hour_later = hour_passes.then { run }
 
   def sync_message(**)
     stub_gmail(history: %w[t1], threads: { "t1" => [gmail_message("m1", **)] })
@@ -74,7 +78,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
       stub_gmail(signature: "<b>Old</b>")
       run
       stub_gmail
-      run
+      run_an_hour_later
 
       expect(account.signature).to be_nil
     end
@@ -134,6 +138,38 @@ RSpec.describe Mail::Jobs::SyncGmail do
         expect(Mail::Slice["repos.message_queries"].by_id(thread.id))
           .to have_attributes(status: "read", snoozed_until: sent_at + 3600, tags: [have_attributes(name: "people")])
       end
+    end
+
+    describe "labels and the signature" do
+      before { stub_gmail(labels: receipts, signature: "<b>New</b>") }
+
+      it "leaves them alone within the hour", :aggregate_failures do
+        run
+
+        expect(a_request(:get, "#{Spec::GoogleAccounts::GMAIL}/labels")).to have_been_made.once
+        expect([rows("mail_labels").to_a, account.signature]).to eq([[], nil])
+      end
+
+      it "refreshes them once an hour has passed", :aggregate_failures do
+        run_an_hour_later
+
+        expect(rows("mail_labels").pluck(:name)).to eq(%w[Receipts])
+        expect(account.signature).to eq("<b>New</b>")
+      end
+
+      it "refreshes them when new mail carries a label it doesn't hold" do
+        stub_gmail(history: %w[t1], labels: receipts, threads: { "t1" => [gmail_message("m1", labels: %w[Label_1])] })
+        run
+
+        expect(label_names(thread)).to eq(%w[Receipts])
+      end
+    end
+
+    it "reads each account's connection once per sync" do
+      connect_google(account_id: "b@example.com", scopes: Spec::GoogleAccounts::GMAIL_SCOPES, token: "ya29.b")
+      stub_gmail(history: %w[t1], threads: { "t1" => [gmail_message("m1")] })
+
+      expect(counting { run }.grep(/"service_connections"/).size).to eq(1)
     end
 
     it "sends the admin no notice when Gmail has nothing new", :commits do
