@@ -275,6 +275,34 @@
   @apply font-mono text-meta text-ink-muted;
 }
 
+@utility meta-badge {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility meta-row {
+  @apply flex flex-wrap items-center gap-x-3.5;
+}
+
+@utility accent-outline {
+  @apply outline-2 outline-offset-2 outline-accent;
+}
+
+@utility accent-focus {
+  @apply focus-visible:accent-outline;
+}
+
+@utility menu-surface {
+  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+}
+
+@utility tap-target {
+  @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+}
+
+@utility stick-bar {
+  @apply sticky top-[calc(var(--spacing-top-bar)+1rem)];
+}
+
 @utility skip-link {
   @apply sr-only font-display;
   @apply focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50;
@@ -486,7 +514,7 @@
 }
 
 @utility pub-focus {
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
 }
 
 @utility site-header {
@@ -567,7 +595,7 @@
 
 @utility settings-menu-panel {
   @apply absolute top-[calc(100%+10px)] right-0 z-50 hidden w-menu flex-col p-1.5;
-  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+  @apply menu-surface;
 
   :where(.settings-menu:has(.settings-menu-toggle[aria-expanded="true"])) & {
     display: flex;
@@ -709,7 +737,7 @@
 @utility pc {
   @apply flex flex-col gap-2 rounded-panel border border-line bg-ground-sunk p-pc text-ink no-underline;
   @apply transition-colors duration-150 hover:no-underline;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
 
   &:is(a):hover {
     @apply border-ink-muted;
@@ -812,7 +840,7 @@
   & .board-card {
     @apply flex flex-col gap-1.5 rounded-field border border-line bg-ground px-3.5 py-3 text-ink no-underline;
     @apply transition-colors duration-150 hover:border-ink-muted hover:no-underline;
-    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply accent-focus;
   }
 
   &.in-progress .board-card {
@@ -1045,7 +1073,7 @@
 @utility f-b {
   @apply inline-flex cursor-pointer items-center gap-2.25 rounded-full border border-accent bg-accent px-5 py-2.5;
   @apply font-mono text-btn whitespace-nowrap text-accent-on hover:brightness-108;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
   @apply disabled:cursor-not-allowed disabled:opacity-45;
 
   @media (width < 43.75rem) {
@@ -1292,7 +1320,7 @@
 
   & a {
     @apply flex flex-col gap-1.5 text-ink no-underline transition-colors duration-150 hover:border-ink-muted;
-    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply accent-focus;
   }
 
   & .l {
@@ -1381,7 +1409,7 @@
 }
 
 @utility pal-r-match {
-  @apply min-w-0 truncate font-mono text-badge text-ink-muted;
+  @apply min-w-0 truncate meta-badge;
 }
 
 @utility pal-r-sub {
@@ -1394,7 +1422,7 @@
 
 @utility pal-f {
   @apply flex flex-wrap items-center gap-4 border-t border-line px-4 py-2.5;
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility pal-r-key {
@@ -1402,7 +1430,7 @@
 }
 
 @utility kbd {
-  @apply rounded-xs border border-line bg-ground px-1.5 py-0.5 font-mono text-badge text-ink-muted;
+  @apply rounded-xs border border-line bg-ground px-1.5 py-0.5 meta-badge;
 }
 
 @utility keys {
@@ -1543,8 +1571,8 @@
 }
 
 @utility avatar-menu {
-  @apply fixed inset-auto top-[3.75rem] right-admin-gutter m-0 w-menu flex-col rounded-menu border border-line;
-  @apply bg-ground-sunk p-1.5 text-ink shadow-menu;
+  @apply fixed inset-auto top-[3.75rem] right-admin-gutter m-0 w-menu flex-col menu-surface;
+  @apply p-1.5 text-ink;
 
   &:popover-open {
     @apply flex;
@@ -1808,7 +1836,7 @@
 
 @utility saved-view-panel {
   @apply absolute top-full right-0 z-55 mt-1.5 flex w-[280px] flex-col gap-3 p-3 text-left;
-  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+  @apply menu-surface;
 
   :where(.activity-rail) & {
     @apply right-auto left-0;
@@ -1958,7 +1986,7 @@
 }
 
 @utility journal-entry-head {
-  @apply mb-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 meta;
+  @apply mb-1.5 meta-row gap-y-1 meta;
 }
 
 @utility journal-entry-body {
@@ -1986,7 +2014,7 @@
 
   & a {
     @media (width < 43.75rem) {
-      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+      @apply tap-target;
     }
   }
 }
@@ -2042,7 +2070,7 @@
 }
 
 @utility journal-modal-foot {
-  @apply flex flex-wrap items-center gap-3 border-t border-line py-2.5 pr-3 pl-5 font-mono text-badge text-ink-muted;
+  @apply flex flex-wrap items-center gap-3 border-t border-line py-2.5 pr-3 pl-5 meta-badge;
 }
 
 @utility journal-modal-tags {
@@ -2087,7 +2115,7 @@
 
 @utility journal-compose {
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -2185,7 +2213,7 @@
 }
 
 @utility cal-weekdays {
-  @apply grid grid-cols-7 gap-1 font-mono text-badge text-ink-muted;
+  @apply grid grid-cols-7 gap-1 meta-badge;
 
   @media (width < 43.75rem) {
     @apply hidden;
@@ -2234,7 +2262,7 @@
 }
 
 @utility cal-date {
-  @apply flex shrink-0 gap-1.5 font-mono text-badge text-ink-muted;
+  @apply flex shrink-0 gap-1.5 meta-badge;
 
   @media (width < 43.75rem) {
     @apply w-16;
@@ -2427,7 +2455,7 @@
   @apply focus-ring;
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)];
+    @apply stick-bar;
   }
 
   @media (width < 53.75rem) {
@@ -2673,7 +2701,7 @@
 
 @utility review-notes {
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -2861,7 +2889,7 @@
   }
 
   &:focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 
   @media (width < 43.75rem) {
@@ -3053,10 +3081,10 @@
 @utility toolbar-button {
   @apply cursor-pointer rounded-seg border border-transparent px-1.5 py-0.5 font-mono text-btn-sm normal-case;
   @apply tracking-normal text-ink-muted hover:border-line hover:text-ink transition-colors duration-150 ease-in-out;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
 
   @media (width < 43.75rem) {
-    @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    @apply tap-target;
   }
 }
 
@@ -3366,7 +3394,7 @@
 }
 
 @utility task-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1.5 font-mono text-badge text-ink-muted;
+  @apply meta-row gap-y-1.5 meta-badge;
 }
 
 @utility task-mark {
@@ -3451,7 +3479,7 @@
   @apply flex min-w-0 items-center gap-2 border-t border-line py-1.5 first:border-t-0 first:pt-0;
 
   & .task-link-label {
-    @apply w-24 shrink-0 font-mono text-badge text-ink-muted;
+    @apply w-24 shrink-0 meta-badge;
   }
 
   & .task-link-title {
@@ -3563,7 +3591,7 @@
 }
 
 @utility record-picker-results {
-  @apply mt-2 flex flex-col gap-2 rounded-menu border border-line bg-ground-sunk p-1.5 shadow-menu;
+  @apply mt-2 flex flex-col gap-2 menu-surface p-1.5;
 
   & .record-link-list {
     @apply gap-1;
@@ -3618,7 +3646,7 @@
 }
 
 @utility comment-head {
-  @apply flex min-w-0 flex-wrap items-center gap-2.5 font-mono text-badge text-ink-muted;
+  @apply flex min-w-0 flex-wrap items-center gap-2.5 meta-badge;
 }
 
 @utility comment-author {
@@ -3802,7 +3830,7 @@
 }
 
 @utility read-meta-list {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility decision-tabs {
@@ -3810,7 +3838,7 @@
 }
 
 @utility decision-tab-count {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility decision-row {
@@ -3831,7 +3859,7 @@
 }
 
 @utility decision-meta {
-  @apply mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply mt-1.5 meta-row gap-y-1 meta-badge;
 }
 
 @utility decision-chosen {
@@ -3839,18 +3867,18 @@
 }
 
 @utility decision-main {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 }
 
 @utility decision-side {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 
   & > .card {
     @apply bg-transparent;
   }
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -3921,7 +3949,7 @@
 }
 
 @utility decision-event-time {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility decision-event-text {
@@ -3953,7 +3981,7 @@
 }
 
 @utility inbox-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply meta-row gap-y-1 meta-badge;
 
   & > * {
     @apply inline-flex items-center gap-1.5;
@@ -4002,7 +4030,7 @@
   @apply mt-1.5 border-t border-line;
 
   & > summary {
-    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 font-mono text-badge text-ink-muted select-none;
+    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 meta-badge select-none;
     @apply hover:text-ink admin-focus;
 
     &::-webkit-details-marker {
@@ -4041,7 +4069,7 @@
 
 @utility mail-list {
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)];
+    @apply stick-bar;
   }
 
   &:has(form[data-bulk-off]) {
@@ -4108,7 +4136,7 @@
   @apply hidden;
 
   @media (width >= 1180px) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] flex max-h-[calc(100vh-110px)] flex-col gap-px overflow-auto;
+    @apply stick-bar flex max-h-[calc(100vh-110px)] flex-col gap-px overflow-auto;
   }
 }
 
@@ -4179,7 +4207,7 @@
 }
 
 @utility mail-folder-count {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 
   .on > & {
     @apply text-ink;
@@ -4312,7 +4340,7 @@
 }
 
 @utility mail-row-meta {
-  @apply mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-0.5 font-mono text-badge text-ink-muted;
+  @apply mt-1 meta-row gap-y-0.5 meta-badge;
 }
 
 @utility mail-row-preview {
@@ -4427,7 +4455,7 @@
 }
 
 @utility mail-reply-head {
-  @apply flex flex-wrap items-center gap-2.5 border-b border-line px-3 py-2 font-mono text-badge text-ink-muted;
+  @apply flex flex-wrap items-center gap-2.5 border-b border-line px-3 py-2 meta-badge;
 }
 
 @utility mail-reply-as {
@@ -4451,7 +4479,7 @@
 }
 
 @utility mail-compose-foot {
-  @apply flex flex-wrap items-center gap-2.5 border-t border-line px-3 py-2 font-mono text-badge text-ink-muted;
+  @apply flex flex-wrap items-center gap-2.5 border-t border-line px-3 py-2 meta-badge;
 }
 
 @utility mail-attach-names {
@@ -4470,7 +4498,7 @@
   @apply flex flex-wrap items-center gap-3 border-b border-line px-5 py-1.5 last:border-b-0;
 
   & > label {
-    @apply w-14 shrink-0 font-mono text-badge text-ink-muted;
+    @apply w-14 shrink-0 meta-badge;
 
     @media (width < 43.75rem) {
       @apply inline-flex min-h-tap items-center;
@@ -4590,19 +4618,19 @@
   }
 
   :has(> input:focus-visible) > & {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 }
 
 @utility mail-sig-on {
-  @apply cursor-pointer font-mono text-badge text-ink-muted underline underline-offset-2 hover:text-ink;
+  @apply cursor-pointer meta-badge underline underline-offset-2 hover:text-ink;
 
   @media (width < 43.75rem) {
     @apply inline-flex min-h-tap items-center;
   }
 
   :has(> input:focus-visible) > & {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 }
 
@@ -4668,7 +4696,7 @@
 }
 
 @utility person-row-meta {
-  @apply mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply mt-1.5 meta-row gap-y-1 meta-badge;
 }
 
 @utility person-row-token {
@@ -4704,7 +4732,7 @@
 }
 
 @utility project-card-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply meta-row gap-y-1 meta-badge;
 
   & > span {
     @apply inline-flex items-center gap-1;
@@ -4712,7 +4740,7 @@
 }
 
 @utility kb-meta {
-  @apply -mt-2 mb-6 flex flex-wrap items-center gap-x-4.5 gap-y-1.5 font-mono text-badge text-ink-muted;
+  @apply -mt-2 mb-6 flex flex-wrap items-center gap-x-4.5 gap-y-1.5 meta-badge;
 
   & > a,
   & > span {
@@ -4782,7 +4810,7 @@
 }
 
 @utility kcol-count {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility kcol-list {
@@ -4790,7 +4818,7 @@
 }
 
 @utility kcol-empty {
-  @apply m-0 grid min-h-14 place-items-center rounded-card border border-dashed border-line font-mono text-badge text-ink-muted;
+  @apply m-0 grid min-h-14 place-items-center rounded-card border border-dashed border-line meta-badge;
 }
 
 @utility kc {
@@ -4843,14 +4871,14 @@
 }
 
 @utility project-side {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 
   & > .card {
     @apply bg-transparent;
   }
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -4946,7 +4974,7 @@
 }
 
 @utility file-card-meta {
-  @apply flex flex-wrap gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply flex flex-wrap gap-x-3.5 gap-y-1 meta-badge;
 
   & > span {
     @apply whitespace-nowrap;
@@ -5143,7 +5171,7 @@
 }
 
 @utility work-row-meta {
-  @apply mt-1.5 font-mono text-badge text-ink-muted;
+  @apply mt-1.5 meta-badge;
 }
 
 @utility work-row-blurb {
@@ -5161,7 +5189,7 @@
 }
 
 @utility post-row-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 empty:hidden;
+  @apply meta-row gap-y-1 empty:hidden;
 }
 
 @utility post-editor {
@@ -5180,7 +5208,7 @@
   }
 
   & .editor-main {
-    @apply flex min-w-0 flex-col gap-stack;
+    @apply stack;
   }
 
   & .edit {
@@ -5234,14 +5262,14 @@
 }
 
 @utility today-main {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 }
 
 @utility today-side {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -5273,7 +5301,7 @@
   }
 
   & > summary {
-    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 font-mono text-badge text-ink-muted select-none;
+    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 meta-badge select-none;
     @apply hover:text-ink admin-focus;
 
     &::-webkit-details-marker {
@@ -5355,7 +5383,7 @@
 }
 
 @utility task-tab-count {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 
   &.w {
     @apply text-mk-orange-text;
@@ -5397,7 +5425,7 @@
   }
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -5480,7 +5508,7 @@
     @apply static flex-col-reverse items-start gap-0.5 bg-transparent py-0;
 
     @media (width >= 53.75rem) {
-      @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+      @apply stick-bar self-start;
     }
   }
 
@@ -5510,7 +5538,7 @@
 }
 
 @utility task-stbar-worked {
-  @apply m-0 ml-auto inline-flex items-center gap-1.5 font-mono text-badge text-ink-muted;
+  @apply m-0 ml-auto inline-flex items-center gap-1.5 meta-badge;
 }
 
 @utility task-stbar-running {
@@ -5548,7 +5576,7 @@
 
   & a {
     @media (width < 43.75rem) {
-      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+      @apply tap-target;
     }
   }
 
@@ -5796,7 +5824,7 @@
   }
 
   .sr-only:focus-visible + & {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 }
 
@@ -5807,7 +5835,7 @@
     @apply hover:underline focus-ring;
 
     @media (width < 43.75rem) {
-      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+      @apply tap-target;
     }
   }
 
@@ -6007,7 +6035,7 @@
 }
 
 @utility rule-project-archived {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility project-pick {
@@ -6027,7 +6055,7 @@
 }
 
 @utility project-pick-archived {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility project-pick-remove {
@@ -6094,14 +6122,14 @@
 }
 
 @utility settings-main {
-  @apply flex min-w-0 flex-col gap-stack;
+  @apply stack;
 }
 
 @utility settings-side {
   @apply bg-transparent;
 
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 
   & .rule-fields {
@@ -6826,7 +6854,7 @@
   }
 
   &:has(:focus-visible) {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 
   @media (width < 43.75rem) {
@@ -6969,7 +6997,7 @@
 @utility toggle {
   @apply relative inline-block h-toggle-h w-toggle-w shrink-0 cursor-pointer appearance-none rounded-full;
   @apply border border-line bg-ground transition-colors duration-150 ease-in-out;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
   @apply disabled:cursor-not-allowed disabled:opacity-45;
 
   &::before {
@@ -6989,7 +7017,7 @@
 @utility check {
   @apply relative inline-block size-check shrink-0 cursor-pointer appearance-none rounded-sm border border-line bg-ground;
   @apply transition-colors duration-150 ease-in-out;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply accent-focus;
   @apply disabled:cursor-not-allowed disabled:opacity-45;
 
   &::after {
@@ -7070,7 +7098,7 @@
 
   &:has(:focus-visible),
   &:is(a):focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 
   &:is(a) {
@@ -7082,7 +7110,7 @@
   }
 
   @media (width < 43.75rem) {
-    @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    @apply tap-target;
   }
 }
 
@@ -7267,7 +7295,7 @@
 }
 
 @utility compose-preview-network {
-  @apply font-mono text-badge text-ink-muted;
+  @apply meta-badge;
 }
 
 @utility compose-preview-text {
@@ -7384,7 +7412,7 @@
   }
 
   &:has(:focus-visible) {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply accent-outline;
   }
 
   &:has(:disabled) {
@@ -7469,7 +7497,7 @@
   @apply hover:text-ink admin-focus;
 
   @media (width < 43.75rem) {
-    @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    @apply tap-target;
   }
 }
 
@@ -7499,7 +7527,7 @@
 
 @utility compose-accounts-menu {
   @apply absolute top-full right-0 z-55 mt-1.5 max-h-105 w-[400px] max-w-[calc(100vw-2rem)] overflow-auto p-2;
-  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+  @apply menu-surface;
 }
 
 @utility compose-account-group {
@@ -7596,7 +7624,7 @@
 }
 
 @utility sq-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 meta;
+  @apply meta-row gap-y-1 meta;
 }
 
 @utility sq-network {
@@ -7653,7 +7681,7 @@
 
 @utility social-side {
   @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    @apply stick-bar self-start;
   }
 }
 
@@ -7736,7 +7764,7 @@
 
 @utility ctx {
   @apply fixed z-80 flex max-h-[calc(100vh-1rem)] w-max max-w-80 min-w-56 flex-col overflow-auto p-1.5 outline-none;
-  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+  @apply menu-surface;
 
   @media (width < 43.75rem) {
     @apply max-w-[calc(100vw-1rem)];
@@ -7752,7 +7780,7 @@
 }
 
 @utility ctx-head {
-  @apply mb-1 truncate border-b border-line px-2.5 pt-[7px] pb-2 font-mono text-badge text-ink-muted;
+  @apply mb-1 truncate border-b border-line px-2.5 pt-[7px] pb-2 meta-badge;
 }
 
 @utility ctx-item {
