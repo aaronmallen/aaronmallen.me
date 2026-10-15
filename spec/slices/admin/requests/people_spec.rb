@@ -88,31 +88,29 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_css("a.person-row-name[href='/admin/people/#{person.id}/edit']")
       end
 
-      it "opens each person's editor in a drawer the page draws" do
+      it "draws one empty edit drawer however many people there are", :aggregate_failures do
+        3.times { create(:person) }
+        get "/admin/people"
+
+        expect(page).to have_css("form[data-person-form]", count: 1, visible: :all)
+        expect(page).to have_css("dialog#person-edit-drawer [data-person-edit-body]:empty", visible: :all)
+      end
+
+      it "marks each person's name to open the edit drawer" do
         person = create(:person)
         get "/admin/people"
 
-        expect(page).to have_css("a.person-row-name[data-dialog-open='person-#{person.id}-drawer']")
-          .and have_css("dialog#person-#{person.id}-drawer form[action='/admin/people/#{person.id}']", visible: :all)
+        expect(page).to have_css("a.person-row-name[href='/admin/people/#{person.id}/edit'][data-person-edit]")
       end
 
-      it "offers a pencil on each row that opens the person's drawer" do
+      it "offers a pencil on each row that opens the edit drawer" do
         person = create(:person, name: "Ada")
         get "/admin/people"
 
         pencil = page.find(".person-row .hov a:has(i.fa-pen-to-square)")
 
-        expect([pencil[:href], pencil["data-dialog-open"], pencil[:title]])
-          .to eq(["/admin/people/#{person.id}/edit", "person-#{person.id}-drawer", "Edit Ada"])
-      end
-
-      it "offers a remove in each person's drawer" do
-        person = create(:person)
-        get "/admin/people"
-
-        expect(page).to have_css(
-          "dialog#person-#{person.id}-drawer form#person-#{person.id}-delete[data-confirm]", visible: :all,
-        )
+        expect([pencil[:href], pencil["data-person-edit"], pencil[:title]])
+          .to eq(["/admin/people/#{person.id}/edit", "", "Edit Ada"])
       end
 
       it "opens a new person in a drawer the page draws" do
@@ -531,6 +529,14 @@ RSpec.describe "Admin people", type: :request do
         get "/admin/people/#{person.id}/edit"
 
         expect(page).to have_field("person[bluesky_handle]", with: "ada.bsky.social")
+      end
+
+      it "marks the editor the drawer fills from" do
+        get "/admin/people/#{person.id}/edit"
+
+        expect(page).to have_css(
+          "[data-person-editor] form[action='/admin/people/#{person.id}'] ~ form#person-delete[data-confirm]",
+        )
       end
 
       it "saves a change and says so", :aggregate_failures do

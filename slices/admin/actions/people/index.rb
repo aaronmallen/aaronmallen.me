@@ -11,10 +11,7 @@ module Admin
         ]
 
         def handle(_request, response)
-          people = person_queries.all
-          editors = [nil, *people].map { build_person_editor.call(person: it) }
-
-          response.render(view, people:, editors:, searchable:)
+          response.render(view, people: person_queries.all, editor: build_person_editor.call, searchable:)
         end
 
         private

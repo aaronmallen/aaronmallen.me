@@ -5,24 +5,25 @@ module Admin
     module Components
       module People
         class Drawer < Component
-          prop :person, Blog::Types::Instance(ROM::Struct).optional
-          prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
-          prop :errors, Blog::Types::Hash
+          EDIT = "person-edit"
+          NEW = "person-new"
 
-          def self.id_for(person) = person ? "person-#{person.id}" : "person-new"
+          prop :editor, Blog::Types::Hash.optional, default: nil
+
+          def self.id_for(scope) = "#{scope}-drawer"
 
           def view_template
-            Dialog(id: "#{scope}-drawer", title_id: "#{scope}-title", title:, data: { dialog: true }) do
+            Dialog(id: self.class.id_for(scope), title_id: "#{scope}-title", title:, data: { dialog: true }) do
               Hint { t("ui.components.people.editor.sub") }
-              PersonForm(person: @person, values: @values, errors: @errors, scope:)
+              @editor ? PersonForm(**@editor, scope:) : div(data: { person_edit_body: true })
             end
           end
 
           private
 
-          def scope = self.class.id_for(@person)
+          def scope = @editor ? NEW : EDIT
 
-          def title = t(@person ? ".edit" : ".new")
+          def title = t(@editor ? ".new" : ".edit")
         end
       end
     end

@@ -111,20 +111,22 @@ RSpec.describe "Admin people", type: :feature do
   end
 
   describe "the drawers" do
-    let!(:person) { create(:person, name: "Ada Lovelace", key: "ada") }
-
-    before { visit "/admin/people" }
+    before do
+      create(:person, name: "Ada Lovelace", key: "ada")
+      create(:person, name: "Grace Hopper", key: "grace")
+      visit "/admin/people"
+    end
 
     it "opens a person's editor from their name" do
       click_link "Ada Lovelace"
 
-      expect(page).to have_field("person-#{person.id}-key", with: "ada")
+      expect(page).to have_field("person-key", with: "ada")
     end
 
     it "saves from the drawer" do
       click_link "Ada Lovelace"
-      fill_in "person-#{person.id}-name", with: "Countess Ada"
-      within("#person-#{person.id}-drawer") { click_button "Save" }
+      fill_in "person-name", with: "Countess Ada"
+      within("#person-edit-drawer") { click_button "Save" }
 
       expect(page).to have_css(".person-row-name", text: "Countess Ada")
     end
@@ -135,7 +137,7 @@ RSpec.describe "Admin people", type: :feature do
 
       find_by_id("person-new-drawer").find("[data-dialog-close]").click
       click_link "Ada Lovelace"
-      expect(page).to have_css("#person-#{person.id}-title", text: "edit person")
+      expect(page).to have_css("#person-edit-title", text: "edit person")
     end
 
     it "shows the person's key in the key hint" do
@@ -143,22 +145,37 @@ RSpec.describe "Admin people", type: :feature do
 
       hint = translate("ui.components.people.person_form.key_note", key: "ada")
 
-      expect(page).to have_css("#person-#{person.id}-drawer .hint", text: hint)
+      expect(page).to have_css("#person-edit-drawer .hint", text: hint)
     end
 
     it "marks the handle fields with their network", :aggregate_failures do
       click_link "Ada Lovelace"
 
-      within("#person-#{person.id}-drawer") do
+      within("#person-edit-drawer") do
         expect(page).to have_css(".field-net.mastodon .fa-mastodon")
         expect(page).to have_css(".field-net.bluesky .fa-bluesky")
       end
     end
 
+    it "fills the one drawer with whichever person I open next" do
+      click_link "Ada Lovelace"
+      find_by_id("person-edit-drawer").find("[data-dialog-close]").click
+      click_link "Grace Hopper"
+
+      expect(page).to have_field("person-key", with: "grace")
+    end
+
+    it "asks before removing from the drawer" do
+      click_link "Ada Lovelace"
+      message = confirm_no { within("#person-edit-drawer") { click_button "Remove" } }
+
+      expect(message).to eq(translate("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
+    end
+
     it "puts Remove before Save" do
       click_link "Ada Lovelace"
 
-      expect(find("#person-#{person.id}-drawer .person-form-actions")).to have_text(/Remove.*Save/m)
+      expect(find("#person-edit-drawer .person-form-actions")).to have_text(/Remove.*Save/m)
     end
 
     it "fills the key from the name in the new person drawer" do

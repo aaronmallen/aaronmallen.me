@@ -70,7 +70,7 @@ RSpec.describe "Admin screens", type: :feature do
       "person drawer" => lambda do
         visit "/admin/people"
         click_link person.name
-        find("dialog#person-#{person.id}-drawer[open] form[data-person-form]")
+        find("dialog#person-edit-drawer[open] form[data-person-form]")
       end,
       "snooze drawer" => -> { open_snooze },
       "task editor" => -> { open_editor },

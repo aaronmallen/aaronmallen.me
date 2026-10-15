@@ -13,7 +13,7 @@ module Admin
             BackLink(href: path(:admin_people), variant: :gh, small: true, class: "editor-back") { t(".all_people") }
 
             PageHead(title: @person ? @person.name : t(".new_person"), sub: t(".sub"))
-            Card { PersonForm(person: @person, values: @values, errors: @errors) }
+            Card(data: { person_editor: true }) { PersonForm(person: @person, values: @values, errors: @errors) }
           end
         end
       end

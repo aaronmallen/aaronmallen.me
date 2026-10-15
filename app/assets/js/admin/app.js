@@ -20,6 +20,7 @@ import { setupMailEditors } from "./mail_editor.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupMorphForms } from "./morph_form.js";
 import { setupPalette } from "./palette.js";
+import { setupPersonDrawer } from "./person_drawer.js";
 import { setupPersonFinder } from "./person_finder.js";
 import { setupPersonForms } from "./person_form.js";
 import { setupPools } from "./pools.js";
@@ -57,6 +58,7 @@ const STEPS = [
   setupMailEditors,
   setupMarkdownEditors,
   setupPalette,
+  setupPersonDrawer,
   setupPersonFinder,
   setupPersonForms,
   setupPools,
