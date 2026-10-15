@@ -65,6 +65,12 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       expect(column("side")).to eq(["Shipped today"])
     end
 
+    it "reads the mail settings once" do
+      sql = logged_sql { get "/admin" }
+
+      expect(sql.scan('FROM "mail_settings"').size).to eq(1)
+    end
+
     it "lists the quiet lines under Shipped today" do
       get "/admin"
 

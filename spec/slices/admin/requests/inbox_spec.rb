@@ -24,6 +24,13 @@ RSpec.describe "Admin inbox", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    it "reads the mail settings once" do
+      create(:message)
+      create(:message, subject: "Starred", starred: true, status: "read")
+
+      expect(logged_sql { get "/admin/inbox" }.scan('FROM "mail_settings"').size).to eq(1)
+    end
+
     it "lists an unread message, a pending webmention and an unseen synced issue, newest first" do
       synced(title: "Oldest", created_at: Time.now - 120)
       create(:message, subject: "Middle", received_at: Time.now - 60)

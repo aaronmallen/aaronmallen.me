@@ -6116,6 +6116,20 @@ CREATE INDEX mail_threads_status_index ON public.mail_threads USING btree (statu
 
 
 --
+-- Name: mail_threads_waiting_starred_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mail_threads_waiting_starred_index ON public.mail_threads USING btree (mail_account_id) WHERE ((starred IS TRUE) AND (archived IS FALSE) AND (trashed IS FALSE) AND (draft IS FALSE));
+
+
+--
+-- Name: mail_threads_waiting_unread_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mail_threads_waiting_unread_index ON public.mail_threads USING btree (mail_account_id) WHERE ((status = 'unread'::public.message_status) AND (archived IS FALSE) AND (trashed IS FALSE) AND (draft IS FALSE));
+
+
+--
 -- Name: oauth_clients_client_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8435,4 +8449,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015120000_create_analytics_rollup_hours.rb'),
 ('20261015120010_backfill_analytics_rollup_hours.rb'),
 ('20261015130000_add_preview_to_activities.rb'),
-('20261015140000_count_task_numbers_per_scope.rb');
+('20261015140000_count_task_numbers_per_scope.rb'),
+('20261015150700_index_waiting_mail_threads.rb');

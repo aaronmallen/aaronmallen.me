@@ -18,17 +18,6 @@ RSpec.describe "Admin mail", type: :request do
     create(:mail_thread_label, mail_thread_id: thread.id, mail_label_id: id)
   end
 
-  def logged_sql
-    db = Mail::Slice["db.rom"].gateways.values.first.connection
-    log = StringIO.new
-    logger = Logger.new(log)
-    db.loggers << logger
-    yield
-    log.string
-  ensure
-    db.loggers.delete(logger)
-  end
-
   def repo = Mail::Slice["repos.thread_queries"]
 
   def status(thread) = repo.by_id(thread.id)&.status

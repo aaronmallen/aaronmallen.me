@@ -9,11 +9,16 @@ module Admin
 
         include Deps[
           inbox_queries: "api.repos.inbox_queries",
+          message_queries: "mail.repos.message_queries",
           post_queries: "posts.repos.post_queries",
           record_link_queries: "links.repos.record_link_queries",
         ]
 
-        def handle(request, response)
+        def handle(request, response) = message_queries.memoizing { show(request, response) }
+
+        private
+
+        def show(request, response)
           rows = inbox_queries.unseen
           response[:rows] = rows
           response[:count] = navigation(request).inbox_count
@@ -21,8 +26,6 @@ module Admin
           response[:slugs] = slugs(rows)
           response[:tasks] = tasks(rows)
         end
-
-        private
 
         def slugs(rows) = post_queries.slugs(rows.filter_map { it.record.post_id if it.kind == :webmention })
 
