@@ -25,16 +25,15 @@ module Mail
       def every_account = mail_accounts.form_last.to_a
 
       def folder_counts(account: nil)
-        COUNTED.to_h do |folder, unread|
-          found = held(mail_threads.in_folder(folder), account)
-          [folder, (unread ? found.with_status(UNREAD) : found).count]
-        end
+        counted = COUNTED.map { |folder, unread| folder_count(folder, unread) }
+
+        COUNTED.keys.zip(held(mail_threads, account).dataset.unordered.select(*counted).first.values).to_h
       end
 
-      def labels
+      def labels(shown_accounts = accounts)
         counts = unread_labels
 
-        shown = accounts.map(&:id)
+        shown = shown_accounts.map(&:id)
 
         label_names.select { shown.include?(it.first) }.group_by(&:first).transform_values do |pairs|
           pairs.map { |account, name| [name, counts.fetch([account, name], 0)] }
@@ -51,6 +50,12 @@ module Mail
       end
 
       private
+
+      def folder_count(folder, unread)
+        found = mail_threads.in_folder(folder)
+        found = found.with_status(UNREAD) if unread
+        Sequel.function(:count).*.filter(found.dataset.opts[:where]).as(folder.to_sym)
+      end
 
       def held(found, account) = account ? found.shown.where(mail_account_id: account) : found.shown
 

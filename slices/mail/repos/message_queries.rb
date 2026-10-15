@@ -3,6 +3,7 @@
 module Mail
   module Repos
     class MessageQueries < Blog::DB::Repo
+      MEMO = :mail_settings_memo
       SETTINGS = {
         contact_form: true, people: true, needs_reply: true, starred: true, important: false, skip_notifications: true,
       }.freeze
@@ -32,6 +33,14 @@ module Mail
 
       def exist?(id) = mail_threads.by_pk(id).exist?
 
+      def memoizing
+        was = Fiber[MEMO]
+        Fiber[MEMO] = was || {}
+        yield
+      ensure
+        Fiber[MEMO] = was
+      end
+
       def reasons(ids) = waiting.where(id: ids).to_a.to_h { [it.id, it.reason] }
 
       def received_between(from:, to:, page:, status: nil)
@@ -43,7 +52,10 @@ module Mail
 
       def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD
 
-      def settings = SETTINGS.merge(mail_settings.by_pk(SETTINGS_ID).one.to_h.slice(*SETTINGS.keys))
+      def settings
+        memo = Fiber[MEMO]
+        memo ? memo.fetch(:settings) { memo[:settings] = stored_settings } : stored_settings
+      end
 
       def snoozed = waiting.asleep.with_preview.with_account.newest_first.to_a
 
@@ -65,6 +77,8 @@ module Mail
       end
 
       def letters = mail_threads.with_letter.with_account.with_reason(settings).combine(:tags)
+
+      def stored_settings = SETTINGS.merge(mail_settings.by_pk(SETTINGS_ID).one.to_h.slice(*SETTINGS.keys))
 
       def waiting = mail_threads.waiting(settings)
     end

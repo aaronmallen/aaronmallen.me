@@ -98,8 +98,17 @@ RSpec.describe "Admin mail drafts and attachments", type: :request do
       stub_request(:get, %r{\A#{gmail}/drafts/r1\?}).to_return(google_health_json({ id: "r1", message: }))
     end
 
-    it "resumes it in compose", :aggregate_failures do
+    it "asks Gmail for nothing until the owner opens the editor", :aggregate_failures do
       get "/admin/mail", thread: thread.id
+
+      expect(a_request(:get, %r{\A#{gmail}/drafts})).not_to have_been_made
+      expect(Rack::Utils.parse_query(URI(page.find_link("Edit draft")[:href]).query))
+        .to include("thread" => thread.id.to_s, "resume" => "1")
+      expect(page).to have_no_css("#mail-compose[data-dialog-show]", visible: :all)
+    end
+
+    it "resumes it in compose", :aggregate_failures do
+      get "/admin/mail", thread: thread.id, resume: "1"
 
       expect(page).to have_css("#mail-compose[data-dialog-show]", visible: :all)
       expect(%w[draft to cc subject html].map { compose_value(it) })

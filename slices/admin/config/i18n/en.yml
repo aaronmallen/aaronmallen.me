@@ -1238,6 +1238,7 @@ en:
           confirm_delete_forever: "Delete forever?"
           delete: "Delete"
           delete_forever: "Delete forever"
+          edit_draft: "Edit draft"
           gmail: "Gmail"
           mark_read: "Mark read"
           mark_unread: "Mark unread"

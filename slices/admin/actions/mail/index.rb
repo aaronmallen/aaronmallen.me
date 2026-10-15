@@ -18,12 +18,15 @@ module Admin
         ]
 
         def handle(request, response)
-          show(request, response, draft: (COMPOSE if request.params[:compose]))
+          message_queries.memoizing do
+            show(request, response, draft: (COMPOSE if request.params[:compose]), resume: request.params[:resume])
+            response.render(view)
+          end
         end
 
         private
 
-        def show(request, response, draft:)
+        def show(request, response, draft:, resume: nil)
           list = Helpers::MailList.from(request.params)
           threads = thread_queries.page_listed(requested_page(request, response), **Helpers::MailList.query(list))
           not_found(response) if threads.past_end?
@@ -31,14 +34,14 @@ module Admin
           response[:list] = list
           response[:threads] = threads
           show_open(request, response)
-          show_compose(response, draft)
           show_sources(response, list[:account])
+          show_compose(response, draft, resume)
           show_marks(response)
         end
 
-        def show_compose(response, draft)
-          response[:senders] = send_mail.senders
-          drafted = save_draft.values(response[:open]) unless draft
+        def show_compose(response, draft, resume)
+          response[:senders] = send_mail.senders(response[:accounts])
+          drafted = save_draft.values(response[:open]) if resume && !draft
           response[:draft] = drafted ? { values: drafted, errors: Blog::Constants::EMPTY_HASH } : draft
         end
 
@@ -59,7 +62,7 @@ module Admin
         def show_sources(response, account)
           response[:accounts] = thread_queries.accounts
           response[:counts] = thread_queries.folder_counts(account:)
-          response[:labels] = thread_queries.labels
+          response[:labels] = thread_queries.labels(response[:accounts])
           response[:unread] = thread_queries.unread_by_account
         end
       end

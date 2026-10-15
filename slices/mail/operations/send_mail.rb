@@ -40,10 +40,10 @@ module Mail
         gmail_mutations.store_thread(account.id, GmailThread.new(json))
       end
 
-      def senders
+      def senders(accounts = thread_queries.accounts)
         addresses = google.holders(SCOPE)
 
-        thread_queries.accounts.select { it.provider == GMAIL && it.sends && addresses.include?(it.address) }
+        accounts.select { it.provider == GMAIL && it.sends && addresses.include?(it.address) }
       end
 
       private

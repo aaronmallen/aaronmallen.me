@@ -14,6 +14,7 @@ module Admin
             ".spam" => ["fa-solid fa-ban", :warn], ".star" => ["fa-regular fa-star", :gh],
             ".unstar" => ["fa-solid fa-star", :gh],
           }.freeze
+          EDIT = "fa-regular fa-pen-to-square"
           OUT = "fa-solid fa-arrow-up-right-from-square"
           READ = Blog::Types::MessageStatus["read"]
           SPAM = Blog::Types::MessageStatus["spam"]
@@ -32,6 +33,7 @@ module Admin
           private
 
           def acts
+            edit if @thread.draft
             change(ACT["archive"], ".archive") unless @thread.archived
             snoozed? ? wake : snooze
             TaskButton(thread: @thread, task: @task, list: @list)
@@ -55,6 +57,11 @@ module Admin
                 t(label_key)
               end
             end
+          end
+
+          def edit
+            href = path(:admin_mail, **@list, thread: @thread.id, resume: Blog::Constants::CHECKED)
+            Button(href:, small: true, icon: EDIT) { t(".edit_draft") }
           end
 
           def form_acts

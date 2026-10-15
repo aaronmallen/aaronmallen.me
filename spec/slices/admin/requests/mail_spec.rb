@@ -18,6 +18,17 @@ RSpec.describe "Admin mail", type: :request do
     create(:mail_thread_label, mail_thread_id: thread.id, mail_label_id: id)
   end
 
+  def logged_sql
+    db = Mail::Slice["db.rom"].gateways.values.first.connection
+    log = StringIO.new
+    logger = Logger.new(log)
+    db.loggers << logger
+    yield
+    log.string
+  ensure
+    db.loggers.delete(logger)
+  end
+
   def repo = Mail::Slice["repos.thread_queries"]
 
   def status(thread) = repo.by_id(thread.id)&.status
@@ -53,6 +64,14 @@ RSpec.describe "Admin mail", type: :request do
         get "/admin/mail"
 
         expect(subjects).to eq(["From the form", "From work"])
+      end
+
+      it "reads accounts and settings once and counts folders in one query", :aggregate_failures do
+        sql = logged_sql { get "/admin/mail" }
+
+        expect(sql.scan('SELECT "mail_accounts"."id"').size).to eq(1)
+        expect(sql.scan('FROM "mail_settings"').size).to eq(1)
+        expect(sql.scan("SELECT count(*) FILTER").size).to eq(1)
       end
 
       it "narrows to one account" do
