@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
-amended: ["#63", "#132", "#396", "#1314", "#1372"]
+amended: ["#63", "#132", "#396", "#1314", "#1372", "#1373"]
 tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
 ---
 
@@ -74,7 +74,7 @@ above 1 forks Puma, and each fork opens its own pool. The total has to stay insi
 `max_connections`. #1314 runs two web workers in production, and [ADR 0172][0172] holds the budget that follows.
 
 Redis on the NAS listens on port 30059. The settings fall back to 6379, so the deploy must set `REDIS_PORT` or the
-worker cannot connect. The NAS runs Postgres 17, which clears the schema's floor.
+worker cannot connect. The NAS runs Postgres 18, which clears the schema's floor.
 
 After a power cut the Pi and the NAS come back in any order, so the units must retry until the NAS answers rather
 than give up at boot.

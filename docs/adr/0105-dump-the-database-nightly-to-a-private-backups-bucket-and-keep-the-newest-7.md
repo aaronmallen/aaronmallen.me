@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [config, lib, record]
 issue: "#396"
+amended: ["#1373"]
 tags: [backups, postgres, pg-dump, s3, rustfs, nas, sidekiq, schedule, providers, sync-states, honeybadger]
 ---
 
@@ -67,7 +68,7 @@ Anyone with the bucket key, or root on RustFS, can read every token and message 
 A worker that is down at 00:30 skips that night's dump and says nothing. Today shows no failure, since no run
 failed.
 
-The Pi runs `pg_dump`, which mise does not manage, so the Pi needs one of version 17 or newer to match Postgres on
+The Pi runs `pg_dump`, which mise does not manage, so the Pi needs one of version 18 or newer to match Postgres on
 the NAS. An older one refuses to dump. Each dump also crosses the LAN twice, from the NAS to the Pi and back.
 
 The key has to list the bucket to find the dumps past 7, which the photo key does not need.

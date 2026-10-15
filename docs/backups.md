@@ -23,19 +23,19 @@ Honeybadger gets it. It never retries. The next night's run tries again.
 ## The `pg_dump` client
 
 The worker runs `pg_dump` on the machine it runs on, and mise does not manage it. `pg_dump` refuses to dump a
-server newer than itself, so it needs a version of 17 or newer to dump Postgres 17.
+server newer than itself, so it needs a version of 18 or newer to dump Postgres 18.
 
 On the Pi, which runs Debian, add the PostgreSQL apt repository and install the client:
 
 ```sh
 sudo apt-get install --yes curl ca-certificates postgresql-common
 sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-sudo apt-get install --yes postgresql-client-17
+sudo apt-get install --yes postgresql-client-18
 pg_dump --version
 ```
 
-The last line should print 17 or newer. The worker finds `pg_dump` on its `PATH`. When the version it prints
-differs from the one you installed, put `/usr/lib/postgresql/17/bin` first on the worker's `PATH`.
+The last line should print 18 or newer. The worker finds `pg_dump` on its `PATH`. When the version it prints
+differs from the one you installed, put `/usr/lib/postgresql/18/bin` first on the worker's `PATH`.
 
 The job connects with the database settings the site already reads, through `PGHOST`, `PGPORT`, `PGUSER`,
 `PGPASSWORD` and `PGDATABASE`, so `pg_dump` needs nothing else.
