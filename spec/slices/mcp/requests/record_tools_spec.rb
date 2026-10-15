@@ -39,8 +39,8 @@ RSpec.describe "MCP record tools", type: :request do
     def fields_of(commit)
       {
         "id" => commit.id, "sha" => commit.sha, "repo" => "aaronmallen/blog", "branch" => "main",
-        "message" => "fix the feed\n\nthe body runs on", "date" => "2026-03-02", "time" => "14:05",
-        "additions" => 12, "deletions" => 3,
+        "message" => { "untrusted" => true, "text" => "fix the feed\n\nthe body runs on" },
+        "date" => "2026-03-02", "time" => "14:05", "additions" => 12, "deletions" => 3,
       }
     end
 

@@ -18,6 +18,7 @@ module API
       ).freeze
 
       schema_attributes
+      untrusted :message
 
       def date(commit) = day(commit.commit_date)
 

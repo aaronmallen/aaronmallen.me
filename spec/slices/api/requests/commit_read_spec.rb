@@ -47,11 +47,11 @@ RSpec.describe "API reading a commit", type: :request do
         .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Move the server")])
     end
 
-    it "answers the same JSON as read_commit" do
+    it "answers what read_commit answers, less the untrusted marks" do
       commit = create(:commit)
       link(commit.id, "post", create(:post).id)
 
-      expect(read(commit.id)).to eq(mcp_answer("read_commit", id: commit.id))
+      expect(read(commit.id)).to eq(trusted(mcp_answer("read_commit", id: commit.id)))
     end
 
     it "answers an unknown ID with a 404" do

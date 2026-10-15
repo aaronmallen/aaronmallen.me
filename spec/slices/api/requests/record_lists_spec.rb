@@ -34,10 +34,10 @@ RSpec.describe "API commits, pull requests and syncs", type: :request do
         .to eq([blog.sha])
     end
 
-    it "answers the same JSON as list_commits" do
+    it "answers what list_commits answers, less the untrusted marks" do
       create(:commit, commit_date: Date.new(2026, 3, 2))
 
-      expect(call_api(:get, "/commits", march)).to eq(mcp_answer("list_commits", **march))
+      expect(call_api(:get, "/commits", march)).to eq(trusted(mcp_answer("list_commits", **march)))
     end
 
     it "refuses a window with no to with a 422" do

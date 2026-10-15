@@ -3,6 +3,7 @@
 module API
   module Serializers
     class Activity < Serializer
+      COMMIT = Blog::Types::ActivityKind["commit"]
       COMMENT = Blog::Types::ActivityKind["comment"]
       POST = Blog::Types::ActivityKind["post"]
       SESSION = Blog::Types::ActivityKind["session"]
@@ -57,7 +58,7 @@ module API
 
       def name(row)
         case row.type
-          when *VISITORS then untrusted(row.name)
+          when COMMIT, *VISITORS then untrusted(row.name)
           when SESSION then synced(row.task_id, row.name)
           when TASK then synced(row.source_id, row.name)
           else row.name

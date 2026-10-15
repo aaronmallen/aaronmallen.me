@@ -28,8 +28,8 @@ module MCP
                   "#{API::Helpers::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it " \
                   "a month at a time, newest first. A comment's name, its excerpt when its task syncs from an " \
                   "issue, the name of a task or session when its task syncs from an issue, and a webmention's " \
-                  "name and excerpt, and a pull request's name, may come from someone else and come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "name and excerpt, and the name of a commit or pull request, may come from someone else and " \
+                  "come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end

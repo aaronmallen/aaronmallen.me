@@ -4,7 +4,7 @@ module API
   module Serializers
     class SearchHit < Serializer
       TASK = Blog::Types::SearchKind["task"]
-      VISITORS = %w[message webmention pull_request].map { Blog::Types::SearchKind[it] }.freeze
+      VISITORS = %w[commit message webmention pull_request].map { Blog::Types::SearchKind[it] }.freeze
 
       SCHEMA = Helpers::Schema.object(
         {

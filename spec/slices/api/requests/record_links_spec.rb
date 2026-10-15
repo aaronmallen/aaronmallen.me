@@ -167,8 +167,9 @@ RSpec.describe "API record links", type: :request do
       linked = link("post", post_record.id, other_kind: "commit", other_id: commit.id)
       unlink("post", post_record.id, "commit", commit.id)
 
-      expect(mcp_answer("link_records", kind: "post", id: post_record.id, other_kind: "commit", other_id: commit.id))
-        .to eq(linked)
+      answer = mcp_answer("link_records", kind: "post", id: post_record.id, other_kind: "commit", other_id: commit.id)
+
+      expect(trusted(answer)).to eq(linked)
     end
 
     it "unlink as unlink_records does" do

@@ -614,7 +614,8 @@ RSpec.describe "MCP endpoint", type: :request do
       read_activity
 
       expect(entries.first)
-        .to include("kind" => "commit", "date" => today.iso8601, "time" => "14:30", "name" => "posts: add the view")
+        .to include("kind" => "commit", "date" => today.iso8601, "time" => "14:30",
+                    "name" => marked("posts: add the view"))
     end
 
     it "gives each row the ID its kind's read tool takes" do
@@ -638,7 +639,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, message: "posts: add the view\n\nThe body says why it changed")
       read_activity
 
-      expect(names).to eq(["posts: add the view\n\nThe body says why it changed"])
+      expect(names).to eq([marked("posts: add the view\n\nThe body says why it changed")])
     end
 
     it "gives a commit its repository, sha and line counts" do
@@ -943,14 +944,14 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, message: "newer")
       read_activity
 
-      expect(names).to eq(%w[newer older])
+      expect(names).to eq([marked("newer"), marked("older")])
     end
 
     it "reads a range a year wide" do
       create(:commit, commit_date: today - 300, message: "long ago")
       read_activity(from: today - 365)
 
-      expect(names).to eq(["long ago"])
+      expect(names).to eq([marked("long ago")])
     end
 
     it "reads nothing outside the window" do
@@ -973,7 +974,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, repo: "aaronmallen/site", message: "in site")
       read_activity(repos: %w[aaronmallen/blog])
 
-      expect(names).to eq(["in blog"])
+      expect(names).to eq([marked("in blog")])
     end
 
     it "keeps the commits of every repository it is given" do
@@ -982,7 +983,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, repo: "aaronmallen/other", message: "in other")
       read_activity(repos: %w[aaronmallen/blog site])
 
-      expect(names).to contain_exactly("in blog", "in site")
+      expect(names).to contain_exactly(marked("in blog"), marked("in site"))
     end
 
     it "keeps what is not a commit when it is given two repositories" do
@@ -990,7 +991,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:journal_entry, entry_date: today, body: "walked the dog")
       read_activity(repos: %w[aaronmallen/blog aaronmallen/site])
 
-      expect(names).to contain_exactly("in blog", "walked the dog")
+      expect(names).to contain_exactly(marked("in blog"), "walked the dog")
     end
 
     it "narrows to a repository named with capitals" do
@@ -998,7 +999,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, repo: "aaronmallen/site", message: "in site")
       read_activity(repos: %w[aaronmallen/Blog])
 
-      expect(names).to eq(["in blog"])
+      expect(names).to eq([marked("in blog")])
     end
 
     it "narrows to a repository named with capitals and no owner" do
@@ -1006,7 +1007,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:commit, commit_date: today, repo: "aaronmallen/site", message: "in site")
       read_activity(repos: %w[Blog])
 
-      expect(names).to eq(["in blog"])
+      expect(names).to eq([marked("in blog")])
     end
 
     it "narrows to the tags it is given" do
@@ -1128,7 +1129,7 @@ RSpec.describe "MCP endpoint", type: :request do
         three_days
         read_activity
 
-        expect(names).to eq(["commit 1", "commit 2"])
+        expect(names).to eq([marked("commit 1"), marked("commit 2")])
       end
 
       it "gives the day to carry on from" do
@@ -1143,7 +1144,7 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity
         read_activity(to: Date.iso8601(content.fetch("continue_to")))
 
-        expect(names).to eq(["commit 3"])
+        expect(names).to eq([marked("commit 3")])
       end
 
       it "finishes the window on the next ask" do

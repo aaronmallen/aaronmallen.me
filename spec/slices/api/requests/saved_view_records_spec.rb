@@ -35,7 +35,7 @@ RSpec.describe "API saved view records", type: :request do
 
   def saved_rows(filters)
     view = create(:saved_view, screen: "activity", filters:)
-    mcp_answer("read_saved_view", id: view.id).fetch("records").map { it.values_at("date", "name") }
+    trusted(mcp_answer("read_saved_view", id: view.id)).fetch("records").map { it.values_at("date", "name") }
   end
 
   def screen_rows(filters)
