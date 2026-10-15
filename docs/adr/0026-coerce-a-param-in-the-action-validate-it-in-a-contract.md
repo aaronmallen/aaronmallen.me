@@ -48,11 +48,11 @@ same way. `Admin::Operations::BuildPostsPage` and `BuildActivityPage` take the f
 `PostFilterParam` and `DateParam`.
 
 Two kinds of check sit outside the rule, as #956 set out. An OAuth callback checks its own `state`, `error` and
-`code`: the GitHub sign-in in `Admin::Actions::Sessions::Create` and the Mastodon connect in
-`Admin::Actions::Services::MastodonCallback`. The `state` check reads the session, which only the action holds, and
-no form waits to show an error. An action may also answer 404 when a key it looks up names nothing, such as an
-unknown renderer in `Admin::Actions::Markdown::Preview` or a record id no row has. A missing page has no fields to
-word an error beside, so a contract would add nothing.
+`code`: the GitHub sign-in in `Admin::Actions::Sessions::Create` and the service connects in
+`Admin::ServiceCallback`, which every connect callback extends. The `state` check reads the session, which only
+the action holds, and no form waits to show an error. An action may also answer 404 when a key it looks up names
+nothing, such as an unknown renderer in `Admin::Actions::Markdown::Preview` or a record id no row has. A missing
+page has no fields to word an error beside, so a contract would add nothing.
 
 ## Alternatives
 

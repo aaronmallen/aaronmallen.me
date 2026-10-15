@@ -4,14 +4,11 @@ require "multi_xml"
 
 module Admin
   module Operations
-    class ConnectMastodon < Blog::Operation
+    class ConnectMastodon < ConnectOperation
       PROVIDER = Blog::Types::ServiceProvider["mastodon"]
 
       include Deps[
-        add_connection: "services.operations.add_connection",
         app_queries: "services.repos.app_queries",
-        change_connection: "services.operations.change_connection",
-        connection_queries: "services.repos.connection_queries",
         mastodon: "mastodon.auth",
       ]
 
@@ -33,13 +30,6 @@ module Admin
 
       def held(host, account_id)
         connection_queries.for(PROVIDER).find { it.host == host && it.account_id == account_id }
-      end
-
-      def save(held, **grant)
-        return add_connection.call(provider: PROVIDER, **grant) if held.nil?
-
-        change_connection.call(held.id, **grant.except(:account_id, :host), revoked_at: nil)
-        Success(connection_queries.by_id(held.id))
       end
     end
   end

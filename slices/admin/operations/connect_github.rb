@@ -2,15 +2,10 @@
 
 module Admin
   module Operations
-    class ConnectGitHub < Blog::Operation
+    class ConnectGitHub < ConnectOperation
       PROVIDER = Blog::Types::ServiceProvider["github"]
 
-      include Deps[
-        add_connection: "services.operations.add_connection",
-        change_connection: "services.operations.change_connection",
-        connection_queries: "services.repos.connection_queries",
-        github: "github.auth",
-      ]
+      include Deps[github: "github.auth"]
 
       def call(code:, redirect_uri:, code_verifier:)
         grant = step fetch_grant(code:, redirect_uri:, code_verifier:)
@@ -26,13 +21,6 @@ module Admin
         Success(github.grant(**))
       rescue OAuth2::Error, Faraday::Error, KeyError
         Failure(:github_failed)
-      end
-
-      def save(held, **grant)
-        return add_connection.call(provider: PROVIDER, **grant) if held.nil?
-
-        change_connection.call(held.id, **grant.except(:account_id), revoked_at: nil)
-        Success(connection_queries.by_id(held.id))
       end
     end
   end
