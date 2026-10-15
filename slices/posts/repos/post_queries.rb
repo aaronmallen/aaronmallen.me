@@ -4,6 +4,7 @@ module Posts
   module Repos
     class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
+      FEED_VERSION = %i[id published_at updated_at].freeze
       PAGER = %i[title slug published_at].freeze
       SITEMAP = %i[id slug published_at updated_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
@@ -69,6 +70,8 @@ module Posts
 
       def published(limit = nil) = with_tags.published.newest_first.limit(limit).to_a
 
+      def published_by_ids(ids) = with_tags.published.with_ids(ids).newest_first.to_a
+
       def published_by_slug(slug) = with_tags.published.with_slug(slug).one
 
       def published_page(page) = page.fill(with_tags.published.newest_first.paged(page).to_a)
@@ -81,6 +84,12 @@ module Posts
         tagged = post_tags.where(post_id: posts.published.select(:id).dataset).select(:tag_id)
 
         tags.where(id: tagged.dataset).pluck(:name).sort
+      end
+
+      def published_versions(page) = page.fill(versions.published.newest_first.paged(page).to_a)
+
+      def published_versions_by_tag(tag, page)
+        page.fill(versions.published.tagged(tag).newest_first.paged(page).to_a)
       end
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
@@ -96,6 +105,8 @@ module Posts
       private
 
       def pager(found) = found.select(*PAGER).limit(1).one
+
+      def versions = posts.select(*FEED_VERSION).combine(:tags)
 
       def with_tags = posts.combine(:tags)
     end

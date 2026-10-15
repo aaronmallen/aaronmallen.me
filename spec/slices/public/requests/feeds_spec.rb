@@ -441,6 +441,8 @@ RSpec.describe "Feeds", type: :request do
   end
 
   describe "a reader polling again" do
+    def body_columns = /"posts"\."body(_html)?"/
+
     def older_entry(field) = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/older']/#{field}").text
 
     def poll(path, etag: nil, last_modified: nil)
@@ -519,6 +521,15 @@ RSpec.describe "Feeds", type: :request do
 
           expect(Commonmarker).not_to have_received(:parse)
           expect(Commonmarker).not_to have_received(:to_html)
+        end
+
+        it "reads no post body for a 304 to a reader that sends the ETag back", :aggregate_failures do
+          etag = validators[:etag]
+          polled = counting { poll(path, etag:) }
+          fetched = counting { get path }
+
+          expect(polled.grep(body_columns)).to be_empty
+          expect(fetched.grep(body_columns)).not_to be_empty
         end
 
         it "answers 200 with the new entry once another post is published", :aggregate_failures do

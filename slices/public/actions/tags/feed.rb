@@ -16,7 +16,7 @@ module Public
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }
           page = requested_page(request, response)
           redirect_to_own_path(request, response, :tag_feed, page, tag:)
-          posts = post_queries.published_page_by_tag(tag, page)
+          posts = post_queries.published_versions_by_tag(tag, page)
           halt 404 if posts.rows.empty?
           version = version_feed_or_halt(request, response, posts)
 

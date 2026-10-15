@@ -13,7 +13,7 @@ module Public
         answer_any_accept :atom
 
         def handle(request, response)
-          posts = post_queries.published_page(requested_page(request, response))
+          posts = post_queries.published_versions(requested_page(request, response))
           halt 404 if posts.past_end?
           version = version_feed_or_halt(request, response, posts)
 

@@ -22,8 +22,9 @@ module Public
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
           feed_head(xml, version, title:, html:, params:)
           feed_links(xml, version.posts, html:, feed:, params:)
-          edits = post_queries.edits_for_posts(version.posts.rows.map(&:id))
-          version.posts.rows.each { entry(xml, it, version.changed_at(it), edits) }
+          ids = version.posts.rows.map(&:id)
+          edits = post_queries.edits_for_posts(ids)
+          post_queries.published_by_ids(ids).each { entry(xml, it, version.changed_at(it), edits) }
         end
       end
 
