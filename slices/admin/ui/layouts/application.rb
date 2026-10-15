@@ -24,7 +24,13 @@ module Admin
           Components::Journal::WriteDialog(today: Blog::TimeZone.today, return_to: (request.fullpath if request.get?))
         end
 
-        def main_data = { live: (path(:admin_events) if navigation), morph_failed: t(".morph_failed") }
+        def main_data
+          {
+            live: (path(:admin_events) if navigation),
+            live_at: request.env[Live::Clock::KEY],
+            morph_failed: t(".morph_failed"),
+          }
+        end
 
         def render_body(&)
           session = Auth::Session.for(request)

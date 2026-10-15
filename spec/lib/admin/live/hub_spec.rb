@@ -69,6 +69,15 @@ RSpec.describe Admin::Live::Hub do
     expect(readers.map { read_until(it, "data: messages\n\n") }).to all(include("event: change\ndata: messages\n\n"))
   end
 
+  it "stamps each change with the hub's clock" do
+    reader = open_stream
+    before = Admin::Live::Clock.now
+    notify("messages")
+    stamp = Integer(read_until(reader, "data: messages\n\n")[/^id: (\d+)$/, 1])
+
+    expect(stamp).to be_between(before, Admin::Live::Clock.now)
+  end
+
   describe "with nothing changing" do
     let(:heartbeat_seconds) { 0.2 }
 

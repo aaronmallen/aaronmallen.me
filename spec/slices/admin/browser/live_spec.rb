@@ -97,6 +97,52 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("#message-#{message.id}")
   end
 
+  describe "after an in-place submit" do
+    let(:sprint) { Tasks::Slice["repos.sprint_queries"].on(today) || create(:sprint, sprint_date: today) }
+
+    def renders = request_gate.count("/admin/tasks")
+
+    before do
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
+      live "/admin/tasks?filter=today"
+      find(".task-title", exact_text: "Ship it").ancestor(".task").tap(&:hover).click_button("Start")
+      assert_selector :button, "Stop"
+    end
+
+    it "renders the page once" do
+      sleep 1
+
+      expect(renders).to eq(2)
+    end
+
+    it "still shows a change made elsewhere" do
+      create(:message)
+
+      expect(page).to have_css(".top-bar .pill-nav-dot")
+    end
+  end
+
+  describe "after a save from the task panel" do
+    def renders = request_gate.count("/admin/tasks")
+
+    before do
+      create(:task, title: "Email the accountant")
+      live "/admin/tasks?filter=next"
+      find(".task", text: "Email the accountant").find(".task-title").click
+      find("dialog#task-panel[open]").click_link("Edit")
+      find("dialog#task-panel[open] [data-task-edit]").fill_in("task[title]", with: "Email the bookkeeper")
+      find("dialog#task-panel[open]").click_button("Save")
+      find("dialog#task-panel[open] [data-task-read] h1", exact_text: "Email the bookkeeper")
+      sleep 1
+      find("dialog#task-panel[open] [data-task-read] .task-drawer-close").click
+    end
+
+    it "reloads the page with no refetch before it", :aggregate_failures do
+      expect(page).to have_css(".task-title", exact_text: "Email the bookkeeper")
+      expect(renders).to eq(2)
+    end
+  end
+
   describe "while the owner types" do
     let(:mention) { create(:webmention, received_at: Time.now - 60) }
     let(:reason) { find("#webmention-#{mention.id} input[name='reason']") }

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284"]
+amended: ["#911", "#1284", "#1286"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -52,7 +52,8 @@ notice per table, after the rows are there to read. A table written on every pub
 
 **One hub per web process holds every stream.** A hub in `lib/admin`, which an admin slice provider starts on the
 first stream, keeps one Postgres connection outside the Sequel pool in `LISTEN admin_changes`. It writes each
-notice as an SSE event, named `change` with the table as its data, to every open stream. It writes a comment line
+notice as an SSE event, named `change` with the table as its data, to every open stream. Since #1286 each event's
+`id` holds the time the hub heard the notice, in microseconds on the host's monotonic clock. It writes a comment line
 every 30 seconds as a heartbeat and drops any socket that cannot take a write without blocking. When its own
 connection drops, it reconnects and sends one event, so pages catch up on what they missed. Under Puma's cluster
 mode each fork starts its own hub after the fork.
@@ -61,11 +62,17 @@ mode each fork starts its own hub after the fork.
 then takes the socket through Rack's full hijack, writes the status line and headers itself
 (`Content-Type: text/event-stream`, `Cache-Control: no-cache`, no `Content-Length`, no compression) and a
 `retry:` line, and hands the socket to the hub. The Puma thread goes back to the pool at once, so open tabs never
-hold the threads that serve pages. Events carry only a table name, so a stream that outlives its session gives away
-nothing, and the refetch it causes still meets the sign-in check.
+hold the threads that serve pages. Events carry only a table name and a clock reading, so a stream that outlives its
+session gives away nothing, and the refetch it causes still meets the sign-in check.
 
-**Every event refreshes every open page.** Pages declare no topics. The client ignores the table name, which is
-there for logs and for a later record that wants topics.
+**Every event refreshes every open page that does not already show it.** Since #1286 every admin action reads the same
+clock before it runs, and the layout draws that reading on `<main>` as `data-live-at`. A notice reaches the hub only
+after its commit, so a page whose request began after the hub heard of a change already shows it. `live.js` keeps the
+reading of the page on screen and skips any event older than it, so a tab's own in-place submit, whose answer is drawn
+after the commit, refetches nothing. While a `data-morph` form posts, events wait, and the tab refetches once it answers
+only if an event is newer than the answer. Saving from the task panel stops the stream's refetches, since closing the
+panel reloads the page. Pages declare no topics. The client ignores the table name, which is there for logs and for a
+later record that wants topics.
 
 **`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event
 it calls the page's own URL through `setupFetch`, so events within its wait become one request and a new event
@@ -79,7 +86,8 @@ stream. The toast sits outside what the morph touches.
 - **Rows carry ids.** A row in a list that can grow draws an `id` from its record, such as `message-12`, so
   idiomorph matches it by record and the row the key map has focused keeps its focus when a new row lands above.
 - **Reconnects catch up.** After every `open` but the first, `live.js` refetches once. When the stream ends for good,
-  as it does when the tunnel answers 502 during a deploy, `live.js` opens a new one after a growing wait.
+  as it does when the tunnel answers 502 during a deploy, `live.js` opens a new one after a growing wait. A
+  reconnect also forgets the reading of the page on screen, since a reboot starts the clock again.
 - **Hidden tabs wait.** A tab whose document is hidden makes no request when an event arrives. It notes the miss and
   refetches once when it shows again, so tabs in the background do not take Puma threads from the page in front.
 - **Pages left behind let go.** `live.js` closes its stream on `pagehide` and opens it again when the page comes back
@@ -144,7 +152,8 @@ to report its own errors. rack-test cannot read a hijacked stream, so stream spe
 
 A Puma restart drops every stream. Each tab reconnects and refetches once.
 
-Every change costs a page render for each open tab, the tab that made the change among them.
+Every change costs a page render for each open tab, save a tab whose own in-place submit made it. When the hub hears of
+that change after the redirect's request began, as a slow notice can, that tab renders twice, as it did before #1286.
 
 The morph sets every attribute back to what the server drew, so state a script holds in markup, such as an open
 disclosure, resets unless the module sets it again.

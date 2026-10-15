@@ -101,22 +101,21 @@ RSpec.describe "Admin task row actions", type: :feature do
       end
     end
 
-    describe "from next with a live refresh that answers after it lands" do
+    describe "from next with its live change arriving before it lands" do
       before do
         create(:task, title: "Plan it")
         visit "/admin/tasks?filter=next"
         landing = request_gate.hold("/admin/tasks")
         row("Plan it").click_button(translate("ui.components.tasks.controls.start"))
         landing.wait_for_arrival
-        refresh = request_gate.hold("/admin/tasks")
-        refresh.wait_for_arrival
+        sleep 1
         landing.release
         find(".toast", text: translate("tasks_page.toasts.started"))
-        refresh.release
+        sleep 1
       end
 
-      it "asks again and keeps the list it landed on", :aggregate_failures do
-        expect { request_gate.answered("/admin/tasks") }.to eventually(eq(4))
+      it "asks for no refresh and keeps the list it landed on", :aggregate_failures do
+        expect(request_gate.answered("/admin/tasks")).to eq(2)
         expect(page).to have_css(".task-tabs [aria-current]", text: "today")
         expect(row("Plan it")).to have_css("details.task-complete")
       end

@@ -2,7 +2,7 @@ import { Idiomorph } from "idiomorph";
 import { MENU } from "./context_menu.js";
 import { focusField } from "./dialog.js";
 import { parse } from "./in_place.js";
-import { MORPHED_PARTS, morphPage } from "./live.js";
+import { MORPHED_PARTS, morphPage, whilePosting } from "./live.js";
 import { showToast } from "./toast.js";
 
 const FAILED = "[data-morph-failed]";
@@ -29,7 +29,7 @@ export function setupMorphForms() {
     if (busy.has(form)) return;
 
     busy.add(form);
-    post(form, event.submitter).finally(() => busy.delete(form));
+    whilePosting(post(form, event.submitter)).finally(() => busy.delete(form));
   });
 }
 

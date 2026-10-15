@@ -11,7 +11,7 @@ module Admin
 
     verify_csrf_under_test
 
-    before :require_sign_in
+    before :stamp_live, :require_sign_in
 
     private
 
@@ -69,6 +69,10 @@ module Admin
     end
 
     def sign_in_required? = true
+
+    def stamp_live(request, _response)
+      request.env[Live::Clock::KEY] = Live::Clock.now
+    end
 
     def toast(response, key, **)
       response.flash[UI::Components::Toast::FLASH_KEY] = i18n.t!(key, **)

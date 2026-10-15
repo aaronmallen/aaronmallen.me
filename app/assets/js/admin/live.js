@@ -15,16 +15,36 @@ const HOLD = `dialog:modal, ${ASKING}, ${MENU}`;
 export const MORPHED_PARTS = PARTS.join(", ");
 
 const edits = trackEdits();
-let morphs = 0;
+let shown = drawnAt(document);
+let leaving = false;
+let posts = 0;
+let refetch = null;
 let started = false;
+let wanted = 0;
 
 export function forgetEdits(form) {
   for (const control of form.elements) edits.delete(control);
 }
 
+export function leavePage() {
+  leaving = true;
+  refetch?.stop();
+}
+
+export async function whilePosting(post) {
+  posts += 1;
+  try {
+    return await post;
+  } finally {
+    posts -= 1;
+    if (!posts && wanted > shown) refetch?.later();
+  }
+}
+
 export function morphPage(next) {
   const typing = Boolean(document.activeElement?.matches(TYPED));
-  morphs += 1;
+  shown = Math.max(shown, drawnAt(next));
+  if (shown > wanted) refetch?.stop();
   for (const selector of PARTS) {
     const now = document.querySelector(selector);
     const drawn = next.querySelector(selector);
@@ -43,40 +63,44 @@ export function setupLive() {
   if (started || !url) return;
 
   started = true;
-  let asked = 0;
   let next = null;
 
   const morph = () => {
-    if (!next || document.querySelector(HOLD)) return;
+    if (!next || leaving || document.querySelector(HOLD)) return;
 
-    const drawn = next;
+    const page = next;
     next = null;
-    if (asked === morphs) morphPage(drawn);
-    else refetch.later();
+    if (drawnAt(page) > shown) morphPage(page);
   };
 
-  const refetch = setupFetch({
-    request: () => {
-      asked = morphs;
-      return { url: window.location.href, redirect: "manual" };
-    },
+  refetch = setupFetch({
+    request: () => ({ url: window.location.href, redirect: "manual" }),
     done: (html) => {
       next = parse(html);
+      wanted = 0;
       morph();
     },
   });
 
   let missed = false;
-  const changed = () => {
+  const changed = (at) => {
+    if (at === Infinity) shown = 0;
+    if (leaving || at < shown) return;
+
+    wanted = Math.max(wanted, at);
     missed = document.hidden;
-    if (!missed) refetch.later();
+    if (!missed && !posts) refetch.later();
   };
 
   document.addEventListener("close", morph, true);
   document.addEventListener("visibilitychange", () => {
-    if (missed) changed();
+    if (missed) changed(wanted);
   });
   listen(url, changed);
+}
+
+function drawnAt(page) {
+  return Number(page.querySelector("[data-live-at]")?.dataset.liveAt) || 0;
 }
 
 function keepsOpen(name, node, change) {
@@ -108,11 +132,11 @@ function listen(url, changed) {
     source = current;
 
     current.addEventListener("open", () => {
-      if (opened) changed();
+      if (opened) changed(Infinity);
       opened = true;
       wait = WAIT;
     });
-    current.addEventListener("change", changed);
+    current.addEventListener("change", (event) => changed(Number(event.lastEventId) || Infinity));
     current.addEventListener("error", () => {
       if (current.readyState !== EventSource.CLOSED) return;
 

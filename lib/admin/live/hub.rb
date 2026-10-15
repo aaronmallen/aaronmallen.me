@@ -88,7 +88,7 @@ module Admin
         false
       end
 
-      def event(table) = "event: change\ndata: #{table}\n\n"
+      def event(table) = "id: #{Clock.now}\nevent: change\ndata: #{table}\n\n"
 
       def listen(db)
         options = { after_listen: ->(_) { listening }, loop: ->(_) { beat }, timeout: @tick_seconds }

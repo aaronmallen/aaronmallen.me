@@ -3,6 +3,7 @@ import { setupConfirms } from "./confirm.js";
 import { FIELD, focusField, showDialog } from "./dialog.js";
 import { fresh } from "./fresh.js";
 import { parse, plain, setupPost, setupVisit } from "./in_place.js";
+import { leavePage } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
 import { setupTaskOrder } from "./task_order.js";
@@ -104,6 +105,7 @@ function setupPanel(panel) {
       if (response.type !== "opaqueredirect") return false;
 
       saved = true;
+      leavePage();
       await reread(panelBody.querySelector(CANCEL).href);
       return true;
     },
