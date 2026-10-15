@@ -31,7 +31,7 @@ module API
           items: { type: "string", enum: Blog::Types::NetworkName.values },
           description: "the networks that get the announcement",
         },
-        webmentions_enabled: { type: "boolean", description: "whether the post sends and takes webmentions" },
+        webmentions_enabled: { type: "boolean", description: "whether the post accepts webmentions" },
       }.freeze
 
       OUTCOME = { type: "string", enum: %w[drafted published saved scheduled] }.freeze
