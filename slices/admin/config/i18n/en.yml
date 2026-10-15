@@ -497,6 +497,7 @@ en:
             one: "Feed subscribers per day, last %{count} day"
             other: "Feed subscribers per day, last %{count} days"
           day: "Day"
+          direct_readers: "direct readers"
           latest: "latest %{count}"
           no_aggregators: "No aggregator counts yet."
           subscribers: "Subscribers"

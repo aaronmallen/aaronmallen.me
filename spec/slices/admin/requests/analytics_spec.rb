@@ -402,10 +402,13 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:feed_subscriber, day: today, aggregator: "feedly", subscribers: 40)
         create(:feed_subscriber, day: today, path: "/writing/tags/ruby.atom", aggregator: "feedly", subscribers: 2)
         create(:feed_subscriber, day: today - 1, aggregator: "inoreader", subscribers: 9)
+        create(:feed_subscriber, day: today - 1, aggregator: "feedly", subscribers: 30)
+        create(:feed_subscriber, day: today - 1, path: "/writing/tags/ruby.atom", aggregator: "feedly", subscribers: 2)
         create(:feed_subscriber, day: today - 2, aggregator: "feedly", subscribers: 38)
-        create(:feed_subscriber, day: today - 9, aggregator: "newsblur", subscribers: 5)
+        create(:feed_subscriber, day: today - 2, aggregator: "newsblur", subscribers: 5)
         create(:feed_reader, day: today, readers: 3)
         create(:feed_reader, day: today, path: "/writing/tags/ruby.atom", readers: 1)
+        create(:feed_reader, day: today - 1, readers: 5)
         create(:feed_reader, day: today - 2, readers: 2)
         get "/admin/analytics", range: "7"
       end
@@ -415,7 +418,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "adds each day's aggregator counts and other readers across the feeds" do
-        expect(readings.last(3)).to eq([[short(today - 2), "40"], [short(today - 1), "9"], [short(today), "46"]])
+        expect(readings.last(3)).to eq([[short(today - 2), "45"], [short(today - 1), "46"], [short(today), "46"]])
       end
 
       it "counts a day with nothing as zero" do
@@ -423,25 +426,23 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "names the last whole day in the card head, leaving out today" do
-        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 9")
+        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 46")
       end
 
       it "draws a point for each day" do
         expect(feed_card.find("polyline")[:points].split.size).to eq(7)
       end
 
-      it "names each aggregator, most subscribers first" do
-        expect(aggregators(:name)).to eq(%w[feedly inoreader])
+      it "names each aggregator on the latest day, most subscribers first, then the direct readers" do
+        expect(aggregators(:name)).to eq(["feedly", "inoreader", "direct readers"])
       end
 
-      it "counts each aggregator's latest count across its feeds" do
-        expect(aggregators(:count)).to eq(%w[42 9])
+      it "counts each aggregator across its feeds and the direct readers on the latest day" do
+        expect(aggregators(:count)).to eq(%w[32 9 5])
       end
 
-      it "takes in a longer range the aggregators it covers" do
-        get "/admin/analytics", range: "14"
-
-        expect(aggregators(:name)).to eq(%w[feedly inoreader newsblur])
+      it "lists rows that add up to the latest count" do
+        expect(aggregators(:count).sum(&:to_i)).to eq(46)
       end
     end
 
@@ -453,6 +454,10 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "reads yesterday's count in the card head" do
         expect(page.find(".card", text: "Feed subscribers")).to have_css(".chart-peak", exact_text: "latest 40")
+      end
+
+      it "lists no direct readers row when none fetched that day" do
+        expect(page.find(".card", text: "Feed subscribers").all(".meter-name").map(&:text)).to eq(%w[feedly])
       end
     end
 

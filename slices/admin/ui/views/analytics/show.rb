@@ -46,7 +46,7 @@ module Admin
             ReferrersCard(rows: @referrers)
             CountriesCard(rows: @countries)
             ScrollCard(reached: @scroll.fetch(:reached), views: @scroll.fetch(:views))
-            FeedCard(**@feed.slice(:aggregators, :days, :latest))
+            FeedCard(**@feed.slice(:aggregators, :days, :latest, :readers))
             mentions_card
           end
 

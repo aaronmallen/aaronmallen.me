@@ -70,6 +70,7 @@ module API
         {
           days: rows({ day: Helpers::Schema::DAY, subscribers: INTEGER }),
           latest: INTEGER,
+          readers: INTEGER,
           aggregators: rows({ aggregator: STRING, subscribers: INTEGER }),
         },
       ).freeze

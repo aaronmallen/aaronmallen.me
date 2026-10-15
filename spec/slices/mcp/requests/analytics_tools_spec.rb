@@ -886,10 +886,16 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       create(:feed_reader, day: today - 1, readers: 3)
     end
 
-    it "gives each aggregator's latest count across the feeds, most first" do
-      expect(feed.fetch("aggregators")).to eq(
-        [{ "aggregator" => "feedly", "subscribers" => 42 }, { "aggregator" => "inoreader", "subscribers" => 9 }],
-      )
+    it "gives each aggregator's count on the latest day across the feeds" do
+      expect(feed.fetch("aggregators")).to eq([{ "aggregator" => "inoreader", "subscribers" => 9 }])
+    end
+
+    it "gives the other readers on the latest day" do
+      expect(feed.fetch("readers")).to eq(3)
+    end
+
+    it "gives each aggregator's count on the last day of a past range across the feeds, most first" do
+      expect(feed(to: today - 9).fetch("aggregators")).to eq([{ "aggregator" => "newsblur", "subscribers" => 5 }])
     end
 
     it "counts the subscribers and other readers each day", :aggregate_failures do

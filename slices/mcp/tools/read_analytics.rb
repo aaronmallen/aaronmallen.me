@@ -44,8 +44,9 @@ module MCP
                   "feed counts the people who follow the site's feeds: days gives subscribers each day, the count " \
                   "feed aggregators such as Feedly report plus the other readers that fetched a feed; latest " \
                   "gives that count for the last day of the range, or yesterday when the range runs to today; " \
-                  "and aggregators gives each aggregator's latest count in the range, summed across the feeds, " \
-                  "most first. webmentions gives pending, the webmentions waiting for review now whatever the " \
+                  "aggregators gives each aggregator's count on that day, summed across the feeds, most first; " \
+                  "and readers gives the other readers on that day, so readers and the aggregators add up to " \
+                  "latest. webmentions gives pending, the webmentions waiting for review now whatever the " \
                   "range; received, the webmentions that came in over the range in any state; and posts, the " \
                   "top #{TOP} posts by webmentions received over the range, each with its post_id, title and " \
                   "received. " \

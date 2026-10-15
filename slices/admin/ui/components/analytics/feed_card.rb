@@ -11,6 +11,7 @@ module Admin
           prop :aggregators, Blog::Types::Array.of(Blog::Types::Hash)
           prop :days, Blog::Types::Array.of(Blog::Types::Hash)
           prop :latest, Blog::Types::Integer
+          prop :readers, Blog::Types::Integer
 
           def view_template
             Card(title: t(".title")) do |card|
@@ -24,7 +25,11 @@ module Admin
 
           private
 
-          def aggregators = @aggregators.map { { count: it[:subscribers], label: it[:aggregator] } }
+          def aggregators
+            found = @aggregators.map { { count: it[:subscribers], label: it[:aggregator] } }
+
+            @readers.zero? ? found : [*found, { count: @readers, label: t(".direct_readers") }]
+          end
 
           def chart
             div(class: "chart sm") do
