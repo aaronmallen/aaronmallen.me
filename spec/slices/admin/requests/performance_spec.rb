@@ -19,6 +19,8 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
     )
   end
 
+  def lede(view, count) = Admin::Slice["i18n"].t(["ui.views.performance", view, "lede"].join("."), count:)
+
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
   def page = Capybara.string(last_response.body)
@@ -73,6 +75,13 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       get "/admin/performance"
 
       expect(rows("Routes").map { cells(it).first(7) }).to eq([slow_route, writing_route])
+    end
+
+    it "heads the page with the range over timings kept on this server", :aggregate_failures do
+      request_row(100.0)
+      get "/admin/performance", range: "14"
+      expect(page).to have_css(".page-head-sub", exact_text: lede("show", 14))
+      expect(rows("Routes")).to have(1).item
     end
 
     it "heads the routes card with the count and order" do
@@ -231,6 +240,7 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       it "heads the page with the route", :aggregate_failures do
         expect(page).to have_css(".page-head h1 .perf-verb", exact_text: "GET")
         expect(page).to have_css(".page-head h1 .perf-path", exact_text: "/writing/:slug")
+        expect(page).to have_css(".page-head-sub", exact_text: lede("requests", 7))
       end
 
       it "charts the route per day and heads the table with the rows shown of the total", :aggregate_failures do

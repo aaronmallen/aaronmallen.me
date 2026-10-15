@@ -27,7 +27,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "heads the page with the range" do
-        expect(lede).to include("in the last 7 days").and end_with("Self-hosted rollups, no third-party scripts.")
+        expect(lede).to include("in the last 7 days").and end_with("on this server, with no outside scripts.")
       end
 
       it "answers with the page titled Analytics", :aggregate_failures do
@@ -131,14 +131,14 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
     end
 
-    describe "without a previous range" do
+    describe "without views in the previous range" do
       before do
         create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)
         get "/admin/analytics", range: "7"
       end
 
-      it "says there is no prior period" do
-        expect(lede).to include("with no prior period to compare")
+      it "says the previous range had none" do
+        expect(lede).to include(i18n.t("ui.views.analytics.show.no_prior", count: 7))
       end
 
       it "names no rise or fall" do

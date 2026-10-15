@@ -853,6 +853,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         replace_component("tasks.repos.sprint_queries", failing)
       end
 
+      def next_up = words("lede.next", task: "Ship the panel")
+
       def panel = page.find("[data-sprint-panel]")
 
       def plan(*titles, done: 0)
@@ -899,6 +901,14 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
         expect(page).to have_css(".page-head-title", exact_text: words("headline.empty"))
         expect(page).to have_css(".page-head-sub", exact_text: words("lede.empty"))
+      end
+
+      it "rolls a task still open at night into the next day, as the empty lede says" do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today - 1).id, title: "Ship the panel")
+        Tasks::Jobs::RollOverSprint.new.perform
+        get "/admin"
+
+        expect(page).to have_css(".page-head-sub", text: words("lede.carried", lead: next_up, count: 1))
       end
 
       it "counts one thing left" do

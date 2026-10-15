@@ -18,8 +18,8 @@ tags: [analytics, privacy, beacon, retention, geoip, throttle]
 
 The analytics spec (AA-210) wants to know which pages people read, for how long, and where they come from. The usual
 answer is a third-party script that follows visitors across the web, and the site will not carry one. The dashboard
-promises "self-hosted rollups, no third-party scripts". It shows views, visitors, read time, bounce, referrers and
-countries over at most 30 days. A bounce is a visitor with one view that day.
+promises its numbers are "counted on this server, with no outside scripts". It shows views, visitors, read
+time, bounce, referrers and countries over at most 30 days. A bounce is a visitor with one view that day.
 
 Whatever we store now fixes what we can learn later. Old events cannot be hashed again or tied to a visitor again.
 

@@ -41,6 +41,35 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    describe "the line on work sessions" do
+      def act(task, action, **params)
+        post("/admin/tasks/#{task.id}/#{action}", _csrf_token: admin_csrf_token, **params)
+      end
+
+      def after(action)
+        params = action == "schedule" ? { sprint_on: (today + 1).iso8601 } : {}
+        task = create(:task)
+        act(task, "start")
+        opened = sessions(task)
+        act(task, action, **params)
+        [opened, sessions(task)]
+      end
+
+      def sessions(task) = Tasks::Slice["relations.work_sessions"].for_task(task.id).to_a.map { it[:ended_at].nil? }
+
+      it "says a start opens a session and what closes it" do
+        visit_time
+
+        expect(page.find(".page-head-sub").text).to end_with("or moving it to another day, closes the session.")
+      end
+
+      %w[stop complete cancel schedule].each do |action|
+        it "holds: a start opens one session and #{action} closes it" do
+          expect(after(action)).to eq([[true], [false]])
+        end
+      end
+    end
+
     describe "with no range in the URL" do
       before { visit_time }
 

@@ -330,6 +330,12 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response.status).to eq(403)
       expect(signed_out?).to be(true)
     end
+
+    it "says on the sign-in page that the email must be verified and an owner's" do
+      get "/admin/sign-in"
+
+      expect(page).to have_css(".page-head-sub", exact_text: Admin::Slice["i18n"].t("ui.views.sessions.new.sub"))
+    end
   end
 
   describe "signing in as a GitHub account with no emails" do

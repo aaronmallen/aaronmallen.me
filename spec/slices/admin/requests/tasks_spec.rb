@@ -697,6 +697,10 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "puts a new task in next unless told otherwise" do
         expect(page).to have_select("task[list]", selected: "next")
       end
+
+      it "names every field the form asks for in the lede" do
+        expect(page).to have_css(".page-head-sub", exact_text: i18n.t("ui.views.tasks.new.sub"))
+      end
     end
 
     describe "the new task page from Today" do

@@ -116,6 +116,29 @@ RSpec.describe "Admin task rules", type: :request do
       expect(page).to have_link("Task rules", href: "/admin/tasks/rules")
     end
 
+    describe "the blurb" do
+      let(:blog) { create(:project) }
+
+      def synced
+        id = Tasks::Slice["relations.task_sources"].pluck(:task_id).first
+        Tasks::Slice["repos.task_queries"].by_id(id).then { [it.tags.map(&:name), it.project_id] }
+      end
+
+      before do
+        rule("aaronmallen/*", "ruby", projects: [blog.id.to_s])
+        connect_github_token
+        stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search(github_issue("I_seven", number: 7)))
+        stub_github(GitHubGraphQL::ISSUES_QUERY, github_issue_nodes)
+        Tasks::Jobs::SyncIssues.new.perform("github")
+        get "/admin/tasks/rules"
+      end
+
+      it "says a rule tags the issues it matches as they sync and gives them a project", :aggregate_failures do
+        expect(synced).to eq([%w[ruby], blog.id])
+        expect(page).to have_css(".card-blurb", exact_text: i18n.t("ui.views.task_rules.index.sub"))
+      end
+    end
+
     describe "the notes" do
       let(:blog) { create(:project) }
       let!(:task) { create(:task, :external).tap { create(:task_source, task: it, url: "https://github.com/x/blog/issues/1") } }

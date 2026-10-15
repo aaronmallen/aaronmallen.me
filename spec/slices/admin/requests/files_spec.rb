@@ -10,6 +10,8 @@ RSpec.describe "Admin files", type: :request do
 
   def json = JSON.parse(last_response.body)
 
+  def lede(count, size) = i18n.t("ui.views.files.index.lede", count:, size:, host: "shares.localhost")
+
   def names = page.all(".file-card-name").map(&:text)
 
   def share(name, type = "text/plain", at: Time.now)
@@ -70,6 +72,20 @@ RSpec.describe "Admin files", type: :request do
       it "sums the files in the lede" do
         expect(page.find(".page-head-sub").text).to start_with("1 file shared on shares.localhost, 2 KB in all.")
       end
+
+      it "says anyone with the link can open the file, and the link opens it signed out", :aggregate_failures do
+        stub_request(:get, %r{\A#{share_store_url}/}).to_return(body: "x" * 2048)
+
+        expect(page).to have_css(".page-head-sub", exact_text: lede(1, "2 KB"))
+        expect(Rack::MockRequest.new(Shares::Slice["server"]).get("/#{code('deck.pdf')}").status).to eq(200)
+      end
+    end
+
+    it "says anyone with a file's link can open it when there are several" do
+      %w[deck.pdf notes.txt].each { share(it) }
+      get "/admin/files"
+
+      expect(page).to have_css(".page-head-sub", exact_text: lede(2, "4 KB"))
     end
 
     it "shows an image as a thumbnail with its alt text" do

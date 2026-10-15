@@ -58,6 +58,12 @@ RSpec.describe "Admin mail settings", type: :request do
         expect(page).to have_field("accounts[#{work.id}][sends]", checked: true)
       end
 
+      it "says it picks which accounts show and send, and which threads reach Waiting", :aggregate_failures do
+        expect(page).to have_css(".page-head-sub", exact_text: Admin::Slice["i18n"].t("ui.views.mail.settings.sub"))
+        expect(page).to have_field("accounts[#{work.id}][shown]").and have_field("accounts[#{work.id}][sends]")
+        expect(page).to have_field("settings[needs_reply]")
+      end
+
       it "only shows the contact form", :aggregate_failures do
         expect(page).to have_field("accounts[#{form}][shown]", checked: true)
         expect(page).to have_no_field("accounts[#{form}][sends]")

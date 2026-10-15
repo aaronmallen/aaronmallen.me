@@ -2866,10 +2866,10 @@ en:
         show:
           down: "down %{percent}% on the previous %{count} days"
           heading: "Analytics"
-          lede: "%{views} from %{visitors} in the last %{count} days, %{change}. %{per_visit} pages per visit, %{read} average read. Self-hosted rollups, no third-party scripts."
+          lede: "%{views} from %{visitors} in the last %{count} days, %{change}. %{per_visit} pages per visit, %{read} average read. Counted on this server, with no outside scripts."
           mentioned_posts: "Webmentions per post"
           no_mentions: "No mentions yet."
-          no_prior: "with no prior period to compare"
+          no_prior: "and none in the previous %{count} days"
           pending: "%{count} pending"
           received:
             one: "%{formatted} received"
@@ -2982,8 +2982,8 @@ en:
           heading: "Files"
           images: "images"
           lede:
-            one: "%{count} file shared on %{host}, %{size} in all. Anyone with the link can download it."
-            other: "%{count} files shared on %{host}, %{size} in all. Anyone with a link can download it."
+            one: "%{count} file shared on %{host}, %{size} in all. Anyone with the link can open it."
+            other: "%{count} files shared on %{host}, %{size} in all. Anyone with a file's link can open it."
           matches:
             one: "%{count} match"
             other: "%{count} matches"
@@ -3036,7 +3036,7 @@ en:
             other: "%{count} entries"
           entries_label: "Entries"
           heading: "Journal"
-          never_public: "never rendered on the public site"
+          never_public: "never shown on the public site"
           no_match: "No entries match."
           private: "Private"
           search: "Search"
@@ -3231,8 +3231,8 @@ en:
             other: "Sidekiq · %{count} classes"
           jobs: "Jobs"
           lede:
-            one: "Routes and jobs by p95 over the last %{count} day, from rows kept on this server."
-            other: "Routes and jobs by p95 over the last %{count} days, from rows kept on this server."
+            one: "Routes and jobs over the last %{count} day. Timings stay on this server."
+            other: "Routes and jobs over the last %{count} days. Timings stay on this server."
           no_jobs: "No jobs ran in this range."
           no_routes: "No requests in this range."
           per_day: "Server time per day"
@@ -3413,7 +3413,7 @@ en:
           no_sightings: "Nothing has used it yet."
           no_sign_ins: "No sign-ins yet."
           sign_ins: "Sign-ins"
-          sub: "Each device and place that has reached the admin."
+          sub: "Every sign-in, failed ones too, and where each token and client has called from."
           token: "API token"
       services:
         index:
@@ -3532,7 +3532,7 @@ en:
           empty: "No rules yet."
           heading: "Task rules"
           note: "Editing or deleting a rule changes only new imports. Tasks keep the tags and projects they have."
-          sub: "Each rule gives the issues it matches private tags and projects on import."
+          sub: "Each rule gives the issues it matches private tags as they sync, and a project when they have none."
           title: "Tags and projects by repo or team"
         menu:
           confirm_delete: "Click again to delete"
@@ -3593,7 +3593,7 @@ en:
         new:
           heading: "New task"
           label: "Tasks"
-          sub: "Title, notes, list, sprint and tags in one go."
+          sub: "Title, notes, list, sprint, tags and repeats in one go."
           title: "Create a task"
         session_menu:
           confirm_delete: "Click again to delete"
@@ -3615,7 +3615,7 @@ en:
       time_report:
         show:
           heading: "Time"
-          span: "%{from} → %{to} · %{total}. Starting a task opens a work session, and stopping or finishing it closes the session."
+          span: "%{from} → %{to} · %{total}. Starting a task opens a work session. Stopping, finishing or canceling it, or moving it to another day, closes the session."
       today:
         attention_menu:
           cancel: "Cancel task"
@@ -3646,8 +3646,8 @@ en:
               one: "%{lead}, carried over %{count} day"
               other: "%{lead}, carried over %{count} days"
             clear:
-              one: "All %{count} done. Pull something from next, or call it a day."
-              other: "All %{count} done. Pull something from next, or call it a day."
+              one: "All %{count} done. Pull something from next, or stop for the day."
+              other: "All %{count} done. Pull something from next, or stop for the day."
             doing: "You're in the middle of %{task}"
             empty: "What do you want to get done today? Anything still open tonight rolls into tomorrow."
             next: "Up next: %{task}"

@@ -37,6 +37,14 @@ RSpec.describe "Admin security", type: :request do
       expect(card("Sign-ins")).to have_css(".empty")
     end
 
+    it "says it lists every sign-in, failed ones too, and where each token called from", :aggregate_failures do
+      sign_in_row(outcome: "denied")
+      sight(api_token_id: token("Terminal").id)
+      get "/admin/security"
+      expect(page).to have_css(".settings-aside", exact_text: Admin::Slice["i18n"].t("ui.views.security.show.sub"))
+      expect([card("Sign-ins"), credential("Terminal")]).to all(have_css(".li"))
+    end
+
     it "lists sign-ins newest first" do
       sign_in_row(browser: "Safari", created_at: Time.now - 60)
       sign_in_row(browser: "Firefox", outcome: "wrong_account")

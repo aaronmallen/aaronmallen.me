@@ -165,7 +165,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         create(:journal_entry, body: "four", entry_date: today - 40)
         get "/admin/journal"
 
-        sub = "Private · never rendered on the public site · 2 entries · 4 words · wrote on 1 of the last 30 days"
+        sub = "Private · never shown on the public site · 2 entries · 4 words · wrote on 1 of the last 30 days"
 
         expect(page).to have_css(".page-head-sub", exact_text: sub)
       end

@@ -44,7 +44,7 @@ module Admin
           end
 
           def change_text
-            return t(".no_prior") unless change
+            return t(".no_prior", count: @range) unless change
 
             t(change.negative? ? ".down" : ".up", count: @range, percent: change.abs)
           end

@@ -337,6 +337,14 @@ RSpec.describe "Admin links", type: :request do
       expect(server.get("/talk").headers["Location"]).to eq("https://example.org/talk")
     end
 
+    it "keeps the short link when the destination changes, as the lede says", :aggregate_failures do
+      save(destination: "https://example.org/talk")
+      get "/admin/links"
+
+      expect(page.find(".page-head-sub").text).to end_with("any time; the short link stays the same.")
+      expect(stored).to include(code: "talk", destination: "https://example.org/talk")
+    end
+
     it "answers at the new code and 404 at the old one", :aggregate_failures do
       save(code: "keynote")
 
