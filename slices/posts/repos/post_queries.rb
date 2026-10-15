@@ -8,6 +8,8 @@ module Posts
       LINKS = %i[id body].freeze
       LIST = %i[id title slug published_at read_time summary first_paragraph].freeze
       PAGER = %i[title slug published_at].freeze
+      RELATED = 3
+      RELATED_TERMS = 16
       SITEMAP = %i[id slug published_at updated_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
 
@@ -107,6 +109,14 @@ module Posts
         page.fill(versions.published.tagged(tag).newest_first.paged(page).to_a)
       end
 
+      def related(post)
+        others = listed.published.without(post.id)
+        tagged = others.sharing_tags_with(post.id).limit(RELATED).to_a
+        return tagged if tagged.length == RELATED
+
+        tagged + worded_like(post, others.without(tagged.map(&:id))).limit(RELATED - tagged.length).to_a
+      end
+
       def shown?(ids) = posts.with_ids(ids).scheduled_or_published.exist?
 
       def sitemap_posts = posts.published.newest_first.select(*SITEMAP).to_a
@@ -124,6 +134,8 @@ module Posts
       def versions = posts.select(*FEED_VERSION).combine(:tags)
 
       def with_tags = posts.combine(:tags)
+
+      def worded_like(post, others) = others.worded_like(posts.top_terms(post.id, RELATED_TERMS))
     end
   end
 end

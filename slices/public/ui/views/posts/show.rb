@@ -17,6 +17,7 @@ module Public
           prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :previous_post, Blog::Types::Instance(ROM::Struct).optional
           prop :next_post, Blog::Types::Instance(ROM::Struct).optional
+          prop :related_posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :syndication_urls, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
           prop :webmentions, Blog::Types::Hash.schema(
             responses: Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)),
@@ -30,6 +31,7 @@ module Public
               head_row
               post_body
               extras
+              Related(posts: @related_posts, tags: @post.tags)
               more_posts
             end
           end

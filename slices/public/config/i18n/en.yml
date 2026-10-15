@@ -76,6 +76,10 @@ en:
           reposts:
             one: "%{count} repost"
             other: "%{count} reposts"
+        related:
+          heading: "Related"
+          shares: "shares"
+          wording: "similar wording"
         syndication:
           heading: "Also posted on"
           networks:

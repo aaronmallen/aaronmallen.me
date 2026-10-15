@@ -163,7 +163,7 @@ RSpec.describe "Analytics beacon", type: :feature do
     end
 
     it "starts a page that fits on screen at the full depth" do
-      create(:post, :published, slug: "short", body: "Short")
+      create(:post, :published, slug: "short", title: "Short", body: "Short")
       page.current_window.resize_to(1280, 1000)
       visit "/writing/short"
 

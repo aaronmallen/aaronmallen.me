@@ -1277,6 +1277,42 @@
   text-wrap: pretty;
 }
 
+@utility rel {
+  @apply mt-[clamp(44px,4.4vw,72px)] max-w-[min(100%,1100px)];
+
+  & ol {
+    @apply m-0 grid list-none gap-x-[clamp(24px,2.4vw,44px)] p-0;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  }
+
+  & li {
+    @apply m-0 flex flex-col gap-2 pt-1.5 pb-5.5;
+
+    @media (width < 43.75rem) {
+      @apply pt-1 pb-4.5;
+    }
+  }
+
+  & .rt {
+    @apply font-display text-[clamp(1.15rem,1.35vw,1.45rem)] leading-[1.18] font-bold tracking-[-0.02em] text-ink;
+    @apply no-underline hover:text-accent-text focus-ring;
+    text-wrap: balance;
+
+    @media (width < 43.75rem) {
+      @apply block py-0.5;
+    }
+  }
+
+  & .rs {
+    @apply m-0 line-clamp-2 font-serif text-base/[1.5] text-ink-muted;
+    text-wrap: pretty;
+  }
+
+  & .rm {
+    @apply mt-auto mb-0 flex flex-wrap gap-x-3.5 gap-y-1 font-mono text-[12px] text-ink-muted;
+  }
+}
+
 @utility pgr {
   @apply mt-[clamp(28px,3vw,44px)] grid max-w-[min(100%,1100px)] gap-pgrid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));

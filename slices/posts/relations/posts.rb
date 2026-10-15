@@ -5,6 +5,14 @@ module Posts
     class Posts < Blog::DB::Relation
       PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
+      SHARED_TAG = Sequel[:post_tags][:tag_id]
+      MOST_SHARED = Sequel.function(:count, SHARED_TAG).desc
+      TERM_ORDER = [
+        Sequel.desc(Sequel.expr("A" => Sequel.function(:any, :weights))),
+        Sequel.desc(Sequel.function(:cardinality, :positions)),
+        :lexeme,
+      ].freeze
+      VECTOR = Sequel[:posts][:search_vector]
 
       schema :posts, infer: true do
         associations do
@@ -30,7 +38,7 @@ module Posts
 
       def newer_than(post) = where(published_order > [post.published_at, post.id])
 
-      def newest_first = order(self[:published_at].desc, self[:id].desc)
+      def newest_first = order(*newest_order)
 
       def older_than(post) = where(published_order < [post.published_at, post.id])
 
@@ -48,7 +56,19 @@ module Posts
 
       def scheduled_or_published = with_status([SCHEDULED, PUBLISHED])
 
+      def sharing_tags_with(post_id)
+        tag_ids = dataset.db[:post_tags].where(post_id:).select(:tag_id)
+
+        join(:post_tags).where(SHARED_TAG => tag_ids).group(self[:id]).order(MOST_SHARED, *newest_order)
+      end
+
       def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
+
+      def top_terms(post_id, limit)
+        lexemes = dataset.db.from(:posts, Sequel.function(:unnest, VECTOR)).where(Sequel[:posts][:id] => post_id)
+
+        lexemes.order(*TERM_ORDER).limit(limit).select_map(:lexeme)
+      end
 
       def unpublished = exclude(status: PUBLISHED)
 
@@ -58,9 +78,24 @@ module Posts
 
       def with_status(status) = where(status:)
 
+      def without(ids) = exclude(self[:id].qualified => ids)
+
+      def worded_like(terms)
+        return none if terms.empty?
+
+        query = Sequel.cast(terms.map { quoted_term(it) }.join(" | "), :tsquery)
+
+        where(Sequel.lit("? @@ ?", VECTOR, query))
+          .order(Sequel.function(:ts_rank, VECTOR, query).desc, *newest_order)
+      end
+
       private
 
+      def newest_order = [self[:published_at].desc, self[:id].desc]
+
       def published_order = Sequel.expr([self[:published_at], self[:id]])
+
+      def quoted_term(term) = "'#{term.gsub(/['\\]/) { "\\#{it}" }}'"
     end
   end
 end

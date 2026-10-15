@@ -36,6 +36,7 @@ module Public
         def expose_pager(response, post)
           response[:previous_post] = post_queries.previous_published(post)
           response[:next_post] = post_queries.next_published(post)
+          response[:related_posts] = post_queries.related(post)
         end
 
         def webmentions_for(post)
