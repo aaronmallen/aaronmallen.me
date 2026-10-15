@@ -264,17 +264,30 @@ RSpec.describe "Admin pages that stay live", type: :feature do
   end
 
   describe "after a save from the task panel" do
+    def changed_since?(at) = evaluate_script("window.changes").any? { |id, table| id > at && table == "tasks" }
+
     def renders = request_gate.count("/admin/tasks")
 
+    def watch_changes
+      execute_script(<<~JS)
+        window.changes = [];
+        new EventSource("/admin/events").addEventListener("change", (event) => window.changes.push([Number(event.lastEventId), event.data]));
+      JS
+      Timeout.timeout(5) { sleep 0.05 until request_gate.answered(events) >= 2 }
+    end
+
     before do
+      create(:sprint, sprint_date: today)
       create(:task, title: "Email the accountant")
       live "/admin/tasks?filter=next"
+      watch_changes
       find(".task", text: "Email the accountant").find(".task-title").click
       find("dialog#task-panel[open]").click_link("Edit")
       find("dialog#task-panel[open] [data-task-edit]").fill_in("task[title]", with: "Email the bookkeeper")
+      saved = Admin::Live::Clock.now
       find("dialog#task-panel[open]").click_button("Save")
       find("dialog#task-panel[open] [data-task-read] h1", exact_text: "Email the bookkeeper")
-      sleep 1
+      Timeout.timeout(5) { sleep 0.05 until changed_since?(saved) }
       find("dialog#task-panel[open] [data-task-read] .task-drawer-close").click
     end
 
