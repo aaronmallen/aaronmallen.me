@@ -39,7 +39,7 @@ module Admin
             TaskButton(thread: @thread, task: @task, list: @list)
             star
             read
-            div(class: "mail-acts-far") { @form ? form_acts : gmail }
+            div(class: "mail-acts-far") { @form ? form_acts : gmail_acts }
           end
 
           def change(act, label_key)
@@ -73,6 +73,11 @@ module Admin
             Button(variant: :gh, small: true, icon: OUT, href: GMAIL, target: "_blank", rel: "noopener") { t(".gmail") }
           end
 
+          def gmail_acts
+            trash
+            gmail
+          end
+
           def gone? = spam? || @thread.trashed
 
           def gone_acts
@@ -93,6 +98,13 @@ module Admin
           def spam? = @thread.status == SPAM
 
           def star = @thread.starred ? change(ACT["unstar"], ".unstar") : change(ACT["star"], ".star")
+
+          def trash
+            Form(action: path(:admin_bulk_mail), data: { morph: true }) do
+              HiddenFields(values: { **@list, "ids[]": @thread.id, act: ACT["trash"] })
+              Button(type: "submit", variant: :warn, small: true, icon: TRASH) { t(".trash") }
+            end
+          end
 
           def wake
             Form(action: path(:admin_wake_mail, id: @thread.id), data: { morph: true }) do

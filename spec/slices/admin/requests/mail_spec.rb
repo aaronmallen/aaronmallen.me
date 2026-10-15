@@ -423,8 +423,8 @@ RSpec.describe "Admin mail", type: :request do
           expect(page).to have_link("Add to People", href: "/admin/people/new")
         end
 
-        it "links a Gmail thread out to Gmail and keeps spam and delete for the contact form" do
-          expect(acts).to eq(["Archive", "Snooze", "Make a task", "Star", "Mark read", "Gmail"])
+        it "offers Trash and links a Gmail thread out to Gmail, keeping spam and delete for the contact form" do
+          expect(acts).to eq(["Archive", "Snooze", "Make a task", "Star", "Mark read", "Trash", "Gmail"])
         end
       end
 
@@ -534,6 +534,14 @@ RSpec.describe "Admin mail", type: :request do
 
       def stored(thread) = repo.by_id(thread.id)
 
+      def trash_from_reader(thread)
+        get "/admin/mail", folder: "inbox", show: "all", thread: thread.id
+        form = Capybara.string(last_response.body).find(".mail-acts form", text: "Trash")
+        post(form[:action], form.all("input[type=hidden]", visible: :all).to_h { [it[:name], it[:value]] })
+        follow_redirect!
+        form[:action]
+      end
+
       before do
         connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
         stub_request(:post, %r{\A#{threads}/}o).to_return(google_health_json({}))
@@ -606,6 +614,27 @@ RSpec.describe "Admin mail", type: :request do
 
         expect(toast).to eq("Nothing changed · Gmail refused the change")
         expect(stored(thread)).not_to be_nil
+      end
+
+      it "moves a Gmail thread to trash from the reader as the menu does and lands on the list", :aggregate_failures do
+        thread = gmail(gmail_id: "t1")
+
+        expect(trash_from_reader(thread)).to eq("/admin/mail/bulk")
+        expect(changed("t1", "trash")).to have_been_made
+        expect(stored(thread).trashed).to be(true)
+        expect([last_request.fullpath, toast]).to eq(["/admin/mail?folder=inbox&show=all", "Moved 1 thread to Trash"])
+      end
+
+      it "keeps Restore and Delete forever on a Gmail thread in trash" do
+        get "/admin/mail", folder: "trash", thread: gmail(gmail_id: "t1", trashed: true).id
+
+        expect(acts).to eq(["Restore", "Delete forever"])
+      end
+
+      it "keeps Not spam and Delete forever on a Gmail thread in spam" do
+        get "/admin/mail", folder: "spam", thread: gmail(gmail_id: "t1", status: "spam").id
+
+        expect(acts).to eq(["Not spam", "Delete forever"])
       end
 
       it "offers Delete forever on a trashed Gmail thread" do

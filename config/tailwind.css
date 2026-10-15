@@ -4115,7 +4115,7 @@
   @apply grid grid-cols-1 items-start gap-stack;
 
   @media (width >= 1180px) {
-    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr);
   }
 }
 
@@ -4207,6 +4207,14 @@
 
 @utility mail-folder-head {
   @apply flex items-center gap-2 px-3 pt-1 pb-1.5 font-mono text-badge tracking-[.08em] text-ink-muted uppercase;
+
+  & > .mail-account {
+    @apply block min-w-0 truncate;
+  }
+
+  & .mail-dot {
+    @apply mr-1.5;
+  }
 }
 
 @utility mail-account {

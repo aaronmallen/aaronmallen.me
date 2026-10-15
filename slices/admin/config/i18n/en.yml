@@ -1246,6 +1246,7 @@ en:
           restore: "Restore"
           spam: "Spam"
           star: "Star"
+          trash: "Trash"
           unstar: "Unstar"
           wake: "Wake"
         reply:

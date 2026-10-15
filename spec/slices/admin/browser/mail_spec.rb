@@ -3,6 +3,19 @@
 RSpec.describe "Admin mail", type: :feature do
   let(:pane) { find(".mail-pane") }
 
+  def long_accounts
+    page.current_window.resize_to(1180, 800)
+    labels = %w[receipts travel bills school family newsletters-and-other-very-long-label-names]
+    %w[aaron.allen.long.address@work.example.com side.project.address@personal.example.org].each do |address|
+      account = create(:mail_account, name: address, address:)
+      thread = create(:message, mail_account_id: account.id, subject: "From #{address}")
+      labels.each do |name|
+        label = create(:mail_label, mail_account_id: account.id, name:)
+        create(:mail_thread_label, mail_thread_id: thread.id, mail_label_id: label.id)
+      end
+    end
+  end
+
   def pick_all
     visit "/admin/mail"
     click_button "Select"
@@ -35,6 +48,15 @@ RSpec.describe "Admin mail", type: :feature do
 
     expect(page).to have_css("nav.mail-folders")
     expect(page).to have_no_select("mail-folder")
+  end
+
+  it "fits every account's labels in the folder list and keeps both panes at 1180px", :aggregate_failures do
+    long_accounts
+    visit "/admin/mail?thread=#{create(:message, subject: 'Open').id}"
+
+    expect(evaluate_script("(n => n.scrollWidth - n.clientWidth)(document.querySelector('nav.mail-folders'))")).to eq(0)
+    expect(evaluate_script("document.documentElement.scrollWidth - innerWidth")).to be <= 0
+    expect(page).to have_css(".mail-list").and have_css(".mail-reader")
   end
 
   it "swaps the sidebar for the folder select below 1180px", :aggregate_failures do
