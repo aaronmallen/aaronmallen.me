@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, public]
 issue: "#235"
-amended: ["#376", "#468", "#911"]
+amended: ["#376", "#468", "#911", "#1308"]
 tags: [cache, cloudflare, cache-control, cookies, sessions, theme, deploy, public]
 ---
 
@@ -20,9 +20,8 @@ The Pi renders every public page itself. The Hanami post drew about 6,400 views 
 `cf-cache-status: DYNAMIC`. The Pi coped, but a bigger wave lands on five Puma threads.
 
 A public page is not the same for every reader. The signed-in owner sees the admin items and gets
-`private, no-store`, as [ADR 0024][0024] says, and a visitor who picked a theme gets it written into the page, as
-[ADR 0032][0032] says. Public pages send `Vary: Cookie` for both, but Cloudflare does not key HTML on `Vary`, so a
-page it keeps goes to every reader whatever cookie they send. Analytics count a view when the page posts to
+`private, no-store`, as [ADR 0024][0024] says. Public pages send `Vary: Cookie`, but Cloudflare does not key HTML on
+`Vary`, so a page it keeps goes to every reader whatever cookie they send. Analytics count a view when the page posts to
 `/pulse`, not when the server renders it.
 
 ## Decision
@@ -30,8 +29,8 @@ page it keeps goes to every reader whatever cookie they send. Analytics count a 
 The server marks a page shared, and a Cloudflare cache rule keeps only what the server marks.
 
 `Public::Action.share_with_caches` adds an after callback that sends `public, max-age=0, s-maxage=300`. It sends it
-only on a 200, only when nothing set `Cache-Control` first, and only when the request carries neither the
-`admin.session` nor the `site_theme` cookie. A shared page is then always the page a reader with no cookie gets.
+only on a 200, only when nothing set `Cache-Control` first, and only when the request carries no `admin.session` cookie.
+A shared page is then always the page a reader with no cookie gets.
 The home page, about, projects, the post index, a post and a tag page call it. As #911 records, the privacy page,
 `robots.txt` and the sitemap call it too. A halt, such as a 404, skips after callbacks, and so does an error, so neither
 is ever marked shared. A redirect is not a 200. The contact page sends `private, no-store` itself. The feeds keep their
@@ -50,8 +49,8 @@ since a later rule wins.
   `(http.host eq "<site host>" and http.request.method in {"GET" "HEAD"})`. Set the cache to eligible. Set the
   edge TTL to "Use cache-control header if present, bypass cache if not". Set the browser TTL to "Respect
   origin". Leave the cache key as it is.
-- **Skip the cache for a personal page**, second. Match a request that carries either cookie:
-  `(http.cookie contains "admin.session" or http.cookie contains "site_theme")`. Set the cache to bypass.
+- **Skip the cache for a personal page**, second. Match a request that carries the session cookie:
+  `(http.cookie contains "admin.session")`. Set the cache to bypass.
 
 The first rule needs no list of paths. A page that sends no `Cache-Control`, or sends `private, no-store`, is never
 stored, so the admin, the API, MCP and the contact page stay out. The second rule keeps a stored page from a reader
@@ -67,7 +66,11 @@ spare the Pi more requests. It needs a Cloudflare API token, a client and a job,
 stale page up with no end. Five minutes of a stale page costs less.
 
 **Key the cache on the theme cookie.** Cloudflare can add a cookie to the cache key only on the Enterprise plan.
-Readers who picked a theme are few, so they skip the cache.
+
+**Skip the cache for a reader who picked a theme.** The server once wrote the saved theme into the page, so the
+second rule matched `site_theme` too and every such reader reached the Pi. As #1308 records, a script at the top of
+`<head>` now reads the cookie and sets `data-site-theme` before the stylesheet paints, as [ADR 0032][0032] says. The
+server sends the same page whatever theme a reader picked, so `site_theme` left `PERSONAL_COOKIES` and the rule.
 
 **Mark every public page shared in `set_cache_policy`.** One before callback would cover every page, but it would
 also mark a 404 and the contact page, and every new page would be shared until someone thought to stop it. Each
@@ -82,7 +85,8 @@ window.
 The rules live outside the repo. Rebuilding the zone means setting them up by hand from this record, and the code
 cannot tell when they are missing: pages then answer `DYNAMIC` again and the Pi renders them all.
 
-A reader with a forged or stale session cookie, or any `site_theme` cookie, always reaches the Pi.
+A reader with a forged or stale session cookie always reaches the Pi. A reader with a `site_theme` cookie gets the
+shared page.
 
 Anything new that changes a public page per reader must either set `Cache-Control` before the after callback runs
 or add its cookie to `Public::Action::PERSONAL_COOKIES` and to the second rule. Missing either one serves one

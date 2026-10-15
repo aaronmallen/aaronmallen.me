@@ -10,7 +10,7 @@ module Public
     NOT_MODIFIED = 304
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
     OK = 200
-    PERSONAL_COOKIES = [Blog::SessionCookie::KEY, Blog::UI::Layouts::Application::THEME_COOKIE].freeze
+    PERSONAL_COOKIES = [Blog::SessionCookie::KEY].freeze
     SAME_ORIGIN_FETCHES = %w[none same-origin].freeze
     SHARED_CACHE_LIFETIME = 300
 

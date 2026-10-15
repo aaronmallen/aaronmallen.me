@@ -119,13 +119,23 @@ RSpec.describe "Cache headers", type: :request do
   end
 
   describe "a public page a visitor with a saved theme asked for" do
+    let(:plain_body) do
+      get "/"
+      last_response.body
+    end
+
     before do
+      plain_body
       set_cookie "#{Blog::UI::Layouts::Application::THEME_COOKIE}=dark"
       get "/"
     end
 
-    it "keeps it from a shared cache" do
-      expect(cache_control).to be_nil
+    it "lets a shared cache keep it" do
+      expect(cache_control).to eq(shared)
+    end
+
+    it "matches the page a visitor with no cookie gets" do
+      expect(last_response.body).to eq(plain_body)
     end
   end
 

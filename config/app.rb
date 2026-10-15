@@ -17,6 +17,7 @@ require "blog/extensions/rom/sql/postgres/type_builder/extension"
 require "blog/params_guard"
 require "blog/request_connection"
 require "blog/request_timer"
+require "blog/theme_script"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
 require "bluesky"
@@ -46,6 +47,7 @@ module Blog
     end
 
     config.actions.content_security_policy[:manifest_src] = "'self'"
+    config.actions.content_security_policy[:script_src] += " #{Blog::ThemeScript::SOURCE_HASH}"
     config.actions.method_override = false
     config.actions.view_name_inference_base = "ui.views"
 

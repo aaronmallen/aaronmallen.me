@@ -9,7 +9,7 @@ module Blog
         FEED_TYPE = "application/atom+xml"
         ICON_TYPE = "image/svg+xml"
         MANIFEST_PATH = "/site.webmanifest"
-        THEME_COOKIE = "site_theme"
+        THEME_COOKIE = ThemeScript::COOKIE
         THEMES = {
           "light" => { color: "#faf4f2", icon: "fa-sun", label_key: ".themes.light" }.freeze,
           "dark" => { color: "#222222", icon: "fa-moon", label_key: ".themes.dark" }.freeze,
@@ -20,7 +20,7 @@ module Blog
         def document
           doctype
 
-          html(lang: "en", data: { site_theme: saved_theme, theme_cookie: THEME_COOKIE }) do
+          html(lang: "en", data: { theme_cookie: THEME_COOKIE }) do
             head { render_head }
             yield
           end
@@ -63,8 +63,9 @@ module Blog
 
         def render_meta
           meta(charset: "utf-8")
+          script { raw(safe(ThemeScript::SOURCE)) }
           meta(name: "viewport", content: "width=device-width, initial-scale=1")
-          meta(name: "color-scheme", content: saved_theme || "light dark")
+          meta(name: "color-scheme", content: "light dark")
           render_theme_colors
           meta(name: "description", content: page_description) if page_description
         end
@@ -77,11 +78,6 @@ module Blog
 
         def render_webmention_link
           link(rel: "webmention", href: page_webmention) if page_webmention
-        end
-
-        def saved_theme
-          theme = request.cookies[THEME_COOKIE]
-          theme if THEMES.key?(theme)
         end
 
         def title_suffix = Hanami.app.settings.owner_name

@@ -35,6 +35,15 @@ RSpec.describe "The public header", type: :feature do
     expect([first, theme.call]).to contain_exactly("light", "dark")
   end
 
+  it "draws the theme a reader saved in the cookie past the content security policy", :aggregate_failures do
+    emulate_color_scheme("light")
+    page.driver.set_cookie(Blog::UI::Layouts::Application::THEME_COOKIE, "dark", domain: page.server.host, path: "/")
+    visit "/about"
+
+    expect(evaluate_script("document.documentElement.dataset.siteTheme")).to eq("dark")
+    expect(evaluate_script("getComputedStyle(document.documentElement).colorScheme")).to eq("dark")
+  end
+
   describe "on a phone" do
     before { page.current_window.resize_to(390, 844) }
 

@@ -195,7 +195,9 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "keeps the rest of the content security policy" do
-      expect(policy).to include("default-src 'none'", "script-src 'self'", "object-src 'none'")
+      expect(policy).to include(
+        "default-src 'none'", "script-src 'self' #{Blog::ThemeScript::SOURCE_HASH}", "object-src 'none'",
+      )
     end
 
     it "lets the form send me back to any redirect URI a client can register" do
