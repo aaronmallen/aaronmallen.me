@@ -21,6 +21,8 @@ RSpec.describe Record::Jobs::ImportCommits do
 
   def queued = Record::Jobs::BackfillRepoCommits.jobs.map { it["args"].first }
 
+  def repos_page(number) = github_repos_page(github_repository(repo), more: true, cursor: "repos-page-#{number}")
+
   def stall(name, at: Time.now - (3 * 60 * 60))
     Record::Slice["relations.sync_states"].of("backfill", repo: name).update(updated_at: at)
   end
@@ -91,7 +93,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     end
 
     it "stops at the page limit" do
-      stub_repos(github_repository(repo), more: true)
+      stub_repos_answer(*Array.new(GitHub::Client::MAX_PAGES + 1) { repos_page(it + 2) })
       import
 
       expect(github_request(GitHubGraphQL::REPOS_QUERY)).to have_been_made.times(GitHub::Client::MAX_PAGES)

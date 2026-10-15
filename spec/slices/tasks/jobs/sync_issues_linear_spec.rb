@@ -29,6 +29,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def issue(**) = linear_issue("L_one", **)
 
+  def page_of(number, **) = linear_assigned(linear_issue("L_#{number}", key: "ABC-#{number}"), **)
+
   def searched = linear_request(LinearGraphQL::ASSIGNED_QUERY)
 
   def sources = Tasks::Slice["relations.task_sources"]
@@ -48,6 +50,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       linear_issues(*nodes.select { ids.include?(it[:id]) })
     end
   end
+
+  def stub_pages(*pages) = stub_linear(LinearGraphQL::ASSIGNED_QUERY, *pages)
 
   def sync = described_class.new.perform("linear")
 
@@ -88,29 +92,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(linear_request(LinearGraphQL::ASSIGNED_QUERY, key: LinearGraphQL::KEY)).to have_been_made
-    end
-  end
-
-  describe "more pages of issues than the cap" do
-    before do
-      pages = 0
-      stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
-        pages += 1
-        linear_assigned(linear_issue("L_#{pages}", key: "ABC-#{pages}"), more: true)
-      end
-    end
-
-    it "reads ten pages and imports what they held", :aggregate_failures do
-      sync
-
-      expect(linear_request(LinearGraphQL::ASSIGNED_QUERY)).to have_been_made.times(10)
-      expect(sources.where(provider: "linear").count).to eq(10)
-    end
-
-    it "records the page limit on the sync state" do
-      sync
-
-      expect(failure).to include(reason: "page_limit")
     end
   end
 

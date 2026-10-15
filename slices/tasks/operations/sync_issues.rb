@@ -48,10 +48,10 @@ module Tasks
       def fetch(run)
         remote(run.client, run.provider) do
           listing = run.client.assigned_issues
-          assigned = listing.items
+          assigned = listing.items.uniq { it[:id] }
           checked = run.client.issues(unseen(run, assigned))
 
-          Success([listing, checked, history(run, [*assigned, *checked])])
+          Success([listing.with(items: assigned), checked, history(run, [*assigned, *checked])])
         end
       end
 

@@ -38,6 +38,34 @@ RSpec.shared_examples "an issue sync" do |provider:, sync_name:, body:, referenc
     end
   end
 
+  describe "more than ten pages of assigned issues" do
+    before { stub_pages(*Array.new(12) { |n| page_of(n + 1, more: n < 11, cursor: "page-#{n + 2}") }) }
+
+    it "reads every page and imports every issue", :aggregate_failures do
+      sync
+
+      expect(searched).to have_been_made.times(12)
+      expect(sources.where(provider:).count).to eq(12)
+    end
+
+    it "records no failure" do
+      sync
+
+      expect(failure).to be_nil
+    end
+  end
+
+  describe "a listing whose next page cursor never moves" do
+    before { stub_pages(page_of(1, more: true, cursor: "page-2")) }
+
+    it "stops once the cursor comes back and records the page limit", :aggregate_failures do
+      sync
+
+      expect(searched).to have_been_made.times(2)
+      expect(failure).to include(reason: "page_limit")
+    end
+  end
+
   describe "a new issue with labels" do
     before { create(:tag, :private, name: "bug-fix") }
 

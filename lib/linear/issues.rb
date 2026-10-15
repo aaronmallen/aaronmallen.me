@@ -86,7 +86,7 @@ module Linear
     private
 
     def assigned_in(transport)
-      walk do |cursor, found|
+      walk(max_pages: nil) do |cursor, found|
         viewer = transport.query(Queries::ASSIGNED, cursor:)&.dig("viewer")
         page = viewer&.dig("assignedIssues")
         page&.fetch("nodes")&.each { found << issue(it, viewer["id"]) }

@@ -17,8 +17,8 @@ module LinearGraphQL
     end
   end
 
-  def linear_assigned(*nodes, more: false, viewer: VIEWER_ID)
-    page = { nodes:, pageInfo: { endCursor: more ? "issues-page-2" : nil, hasNextPage: more } }
+  def linear_assigned(*nodes, more: false, cursor: "issues-page-2", viewer: VIEWER_ID)
+    page = { nodes:, pageInfo: { endCursor: more ? cursor : nil, hasNextPage: more } }
 
     linear_json(data: { viewer: { assignedIssues: page, id: viewer } })
   end

@@ -9,15 +9,17 @@ module Blog
 
     def more?(page) = page&.dig("pageInfo", "hasNextPage") == true
 
-    def walk(cursor = nil)
+    def walk(cursor = nil, max_pages: MAX_PAGES)
       found = []
       page = nil
+      seen = Set[cursor, nil]
 
-      MAX_PAGES.times do
+      (1..max_pages).each do
         page = yield cursor, found
         break unless more?(page)
 
         cursor = page.dig("pageInfo", "endCursor")
+        break unless seen.add?(cursor)
       end
 
       Listing.new(items: found, cut_short: more?(page))

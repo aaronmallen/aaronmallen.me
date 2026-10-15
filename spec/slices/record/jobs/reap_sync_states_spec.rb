@@ -1,10 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe Record::Jobs::ReapSyncStates do
+  def capped_pages
+    Array.new(GitHub::Client::MAX_PAGES) do |n|
+      github_repos_page(github_repository(repo), more: true, cursor: "repos-page-#{n + 2}")
+    end
+  end
+
   def commit_mutations = Record::Slice["repos.commit_mutations"]
-  def commit_queries = Record::Slice["repos.commit_queries"]
   let(:gone) { "aaronmallen/renamed" }
   let(:repo) { "aaronmallen/aaronmallen.me" }
+
+  def commit_queries = Record::Slice["repos.commit_queries"]
 
   def commits_sync = Blog::Types::SyncName["commits"]
 
@@ -79,8 +86,7 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     def whole_sync_failure = sync_state_queries.failure(commits_sync)
 
     it "records the page limit under the commits sync" do
-      pages = Array.new(GitHub::Client::MAX_PAGES) { github_repos_page(github_repository(repo), more: true) }
-      stub_repos_answer(*pages, github_repos_page(github_repository(gone)))
+      stub_repos_answer(*capped_pages, github_repos_page(github_repository(gone)))
       reap
 
       expect(whole_sync_failure).to include(reason: "page_limit")
@@ -165,8 +171,7 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     end
 
     it "reaps nothing when the page limit cuts the list short" do
-      pages = Array.new(GitHub::Client::MAX_PAGES) { github_repos_page(github_repository(repo), more: true) }
-      stub_repos_answer(*pages, github_repos_page(github_repository(gone)))
+      stub_repos_answer(*capped_pages, github_repos_page(github_repository(gone)))
       reap
 
       expect(kept?).to be(true)

@@ -51,8 +51,8 @@ module GitHubGraphQL
     github_json(data: { nodes:, rateLimit: github_rate_limit(remaining:), viewer: { id: VIEWER_ID } })
   end
 
-  def github_issue_search(*nodes, more: false, remaining: 4999)
-    search = { nodes:, pageInfo: github_page_info(more, "issues-page-2") }
+  def github_issue_search(*nodes, more: false, cursor: "issues-page-2", remaining: 4999)
+    search = { nodes:, pageInfo: github_page_info(more, cursor) }
 
     github_json(data: { rateLimit: github_rate_limit(remaining:), search:, viewer: { id: VIEWER_ID } })
   end
@@ -100,8 +100,8 @@ module GitHubGraphQL
 
   def github_related(*ids, more: false) = { nodes: ids.map { it && { id: it } }, pageInfo: { hasNextPage: more } }
 
-  def github_repos_page(*repositories, more: false, remaining: 4999)
-    page = { pageInfo: github_page_info(more, "repos-page-2"), nodes: repositories }
+  def github_repos_page(*repositories, more: false, cursor: "repos-page-2", remaining: 4999)
+    page = { pageInfo: github_page_info(more, cursor), nodes: repositories }
 
     github_json(data: { rateLimit: github_rate_limit(remaining:), viewer: { repositories: page } })
   end

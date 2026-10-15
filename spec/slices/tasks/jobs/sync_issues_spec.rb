@@ -28,6 +28,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def issue(id = "I_seven", **) = github_issue(id, number: 7, **)
 
+  def page_of(number, **) = github_issue_search(github_issue("I_#{number}", number:), **)
+
   def searched = github_request(GitHubGraphQL::ASSIGNED_QUERY)
 
   def sources = Tasks::Slice["relations.task_sources"]
@@ -45,6 +47,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       github_issue_nodes(*ids.map { |id| nodes.find { it[:id] == id } })
     end
   end
+
+  def stub_pages(*pages) = stub_github(GitHubGraphQL::ASSIGNED_QUERY, *pages)
 
   def stub_rest(path, response) = stub_request(:get, "#{api}/repos/#{path}").to_return(response)
 
