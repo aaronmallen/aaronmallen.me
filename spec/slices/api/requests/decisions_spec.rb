@@ -1,16 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API decisions", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(hour) = Blog::TimeZone.local_time(2026, 9, 1, hour, 0)
-
-  def call_api(verb, path, fields = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/decisions#{path}", fields && JSON.generate(fields), headers)
-    JSON.parse(last_response.body)
-  end
 
   def comments = Decisions::Slice["relations.decision_comments"]
 
@@ -24,13 +15,13 @@ RSpec.describe "API decisions", type: :request do
     Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
   end
 
-  def list(query = "") = call_api(:get, "?#{query}")
+  def list(query = "") = call_api(:get, "/decisions?#{query}")
 
   def listed(query = "") = list(query).fetch("decisions").map { it.fetch("id") }
 
   def options = Decisions::Slice["relations.decision_options"]
 
-  def read(id) = call_api(:get, "/#{id}")
+  def read(id) = call_api(:get, "/decisions/#{id}")
 
   def record_history
     event(decision, "opened", 8)
@@ -62,7 +53,7 @@ RSpec.describe "API decisions", type: :request do
 
   describe "POST /api/v1/decisions" do
     it "opens a decision and answers 201 with it", :aggregate_failures do
-      answered = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up", tags: %w[Queues] })
+      answered = call_api(:post, "/decisions", { title: "Pick a queue", problem: "Jobs pile up", tags: %w[Queues] })
 
       expect(status).to eq(201)
       expect(answered).to include("title" => "Pick a queue", "problem" => "Jobs pile up", "status" => "open",
@@ -70,21 +61,21 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "records the opened event" do
-      id = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
+      id = call_api(:post, "/decisions", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
 
       expect(Decisions::Slice["relations.decision_events"].where(decision_id: id).pluck(:kind)).to eq(["opened"])
     end
 
     it "adds a task to resolve it to the end of the next list" do
       create(:task, title: "Earlier", position: 5)
-      id = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
+      id = call_api(:post, "/decisions", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
 
       expect(Tasks::Slice["relations.tasks"].where(list: "next").order(:position).pluck(:title))
         .to eq(["Earlier", "Resolve decision ##{id}: Pick a queue"])
     end
 
     it "ties the task to it with a sourced from link" do
-      id = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
+      id = call_api(:post, "/decisions", { title: "Pick a queue", problem: "Jobs pile up" }).fetch("id")
       task_id = Tasks::Slice["relations.tasks"].to_a.last[:id]
 
       expect(Links::Slice["relations.record_links"].one).to include(
@@ -96,32 +87,32 @@ RSpec.describe "API decisions", type: :request do
       refusal = { "error" => "invalid", "message" => "problem: write the problem down first",
                   "errors" => { "problem" => ["write the problem down first"] } }
 
-      expect([call_api(:post, "", { title: "Pick a queue", problem: " " }), status]).to eq([refusal, 422])
+      expect([call_api(:post, "/decisions", { title: "Pick a queue", problem: " " }), status]).to eq([refusal, 422])
     end
   end
 
   describe "PATCH /api/v1/decisions/:id" do
     it "changes what it names and keeps the rest" do
-      answered = call_api(:patch, "/#{decision.id}", { title: "Pick a job queue" })
+      answered = call_api(:patch, "/decisions/#{decision.id}", { title: "Pick a job queue" })
 
       expect(answered).to include("title" => "Pick a job queue", "problem" => "Jobs pile up")
     end
 
     it "edits an open decision's problem with no note" do
-      call_api(:patch, "/#{decision.id}", { problem: "Jobs pile up fast" })
+      call_api(:patch, "/decisions/#{decision.id}", { problem: "Jobs pile up fast" })
 
       expect([status, reload(decision).problem]).to eq([200, "Jobs pile up fast"])
     end
 
     it "drops the note on an open decision's edit" do
-      call_api(:patch, "/#{decision.id}", { problem: "Jobs pile up fast", note: "Load grew" })
+      call_api(:patch, "/decisions/#{decision.id}", { problem: "Jobs pile up fast", note: "Load grew" })
 
       expect(events(decision).where(kind: "edited").pluck(:note)).to eq([nil])
     end
 
     it "refuses a closed decision's new problem without a note and keeps the old one", :aggregate_failures do
       closed = create(:decision, status: "dropped", problem: "Jobs pile up")
-      answered = call_api(:patch, "/#{closed.id}", { problem: "Jobs pile up fast" })
+      answered = call_api(:patch, "/decisions/#{closed.id}", { problem: "Jobs pile up fast" })
 
       expect([answered.fetch("errors"), status])
         .to eq([{ "note" => ["a resolved or dropped decision needs a note to say why it changed"] }, 422])
@@ -130,39 +121,39 @@ RSpec.describe "API decisions", type: :request do
 
     it "keeps the note on a closed decision's edit" do
       closed = create(:decision, status: "dropped")
-      call_api(:patch, "/#{closed.id}", { problem: "Jobs pile up fast", note: "Load grew" })
+      call_api(:patch, "/decisions/#{closed.id}", { problem: "Jobs pile up fast", note: "Load grew" })
 
       expect(events(closed).where(kind: "edited").pluck(:note)).to eq(["Load grew"])
     end
 
     it "records no event for an edit that changes nothing" do
-      call_api(:patch, "/#{decision.id}", { title: "Pick a queue", problem: "Jobs pile up" })
+      call_api(:patch, "/decisions/#{decision.id}", { title: "Pick a queue", problem: "Jobs pile up" })
 
       expect([status, events(decision).count]).to eq([200, 0])
     end
 
     it "refuses a note over 500 characters" do
       closed = create(:decision, status: "dropped")
-      call_api(:patch, "/#{closed.id}", { problem: "Jobs pile up fast", note: "a" * 501 })
+      call_api(:patch, "/decisions/#{closed.id}", { problem: "Jobs pile up fast", note: "a" * 501 })
 
       expect([status, events(closed).count]).to eq([422, 0])
     end
 
     it "answers an unknown decision with a 404" do
-      expect([call_api(:patch, "/999999", { title: "Gone" }), status])
+      expect([call_api(:patch, "/decisions/999999", { title: "Gone" }), status])
         .to eq([{ "error" => "not_found", "message" => "no decision has the ID 999999" }, 404])
     end
   end
 
   describe "POST /api/v1/decisions/:id/resolve" do
     it "resolves the decision with its own option" do
-      answered = call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      answered = call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(answered).to include("status" => "resolved", "resolved_option_id" => option.id)
     end
 
     it "answers with the decision's options" do
-      answered = call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      answered = call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(answered.fetch("options").map { it.slice("id", "title", "body") })
         .to eq([{ "id" => option.id, "title" => "Sidekiq", "body" => "Runs today" }])
@@ -170,7 +161,7 @@ RSpec.describe "API decisions", type: :request do
 
     it "refuses another decision's option with a field error and leaves it open", :aggregate_failures do
       stranger = create(:decision_option)
-      answered = call_api(:post, "/#{decision.id}/resolve", { option_id: stranger.id, reason: "It runs" })
+      answered = call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: stranger.id, reason: "It runs" })
 
       expect([answered.fetch("errors"), status])
         .to eq([{ "option_id" => ["pick one of this decision's own options"] }, 422])
@@ -178,13 +169,13 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "answers an unknown decision with a 404" do
-      call_api(:post, "/999999/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/999999/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(status).to eq(404)
     end
 
     it "refuses a blank reason" do
-      answered = call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "" })
+      answered = call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "" })
 
       expect(answered.fetch("errors")).to eq("reason" => ["write down why first"])
     end
@@ -193,58 +184,59 @@ RSpec.describe "API decisions", type: :request do
       closed = create(:decision, status: "dropped")
       choice = create(:decision_option, decision_id: closed.id)
 
-      expect(call_api(:post, "/#{closed.id}/resolve", { option_id: choice.id, reason: "Now" }).fetch("errors"))
+      expect(call_api(:post, "/decisions/#{closed.id}/resolve",
+                      { option_id: choice.id, reason: "Now" }).fetch("errors"))
         .to eq("id" => ["decision #{closed.id} is already resolved or dropped"])
     end
   end
 
   describe "POST /api/v1/decisions/:id/drop" do
     it "drops the decision with no choice" do
-      expect(call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" }))
+      expect(call_api(:post, "/decisions/#{decision.id}/drop", { reason: "Not needed" }))
         .to include("status" => "dropped", "resolved_option_id" => nil)
     end
 
     it "refuses a request with no reason" do
-      expect([call_api(:post, "/#{decision.id}/drop", {}).fetch("errors"), status])
+      expect([call_api(:post, "/decisions/#{decision.id}/drop", {}).fetch("errors"), status])
         .to eq([{ "reason" => ["reason is missing"] }, 422])
     end
   end
 
   describe "POST /api/v1/decisions/:id/reopen" do
     it "reopens a resolved decision and clears the choice" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
-      expect(call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" }))
+      expect(call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Load grew" }))
         .to include("status" => "open", "resolved_option_id" => nil)
     end
 
     it "refuses an open decision" do
-      expect(call_api(:post, "/#{decision.id}/reopen", { reason: "Again" }).fetch("errors"))
+      expect(call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Again" }).fetch("errors"))
         .to eq("id" => ["decision #{decision.id} is already open"])
     end
   end
 
   describe "POST /api/v1/decisions/:id/options" do
     it "adds the option and answers 201 with it", :aggregate_failures do
-      answered = call_api(:post, "/#{decision.id}/options", { title: "Resque", body: "Runs on **Redis**" })
+      answered = call_api(:post, "/decisions/#{decision.id}/options", { title: "Resque", body: "Runs on **Redis**" })
 
       expect(status).to eq(201)
       expect(answered).to include("title" => "Resque", "body" => "Runs on **Redis**")
     end
 
     it "takes an option with no body" do
-      expect(call_api(:post, "/#{decision.id}/options", { title: "Do nothing" }).fetch("body")).to eq("")
+      expect(call_api(:post, "/decisions/#{decision.id}/options", { title: "Do nothing" }).fetch("body")).to eq("")
     end
 
     it "refuses a closed decision" do
       closed = create(:decision, status: "dropped")
 
-      expect(call_api(:post, "/#{closed.id}/options", { title: "Resque" }).fetch("errors"))
+      expect(call_api(:post, "/decisions/#{closed.id}/options", { title: "Resque" }).fetch("errors"))
         .to eq("id" => ["decision #{closed.id} is resolved or dropped, so reopen it to add an option"])
     end
 
     it "answers an unknown decision with a 404" do
-      call_api(:post, "/999999/options", { title: "Resque" })
+      call_api(:post, "/decisions/999999/options", { title: "Resque" })
 
       expect(status).to eq(404)
     end
@@ -252,7 +244,7 @@ RSpec.describe "API decisions", type: :request do
 
   describe "PATCH /api/v1/decisions/:id/options/:option_id" do
     it "changes what it names and keeps the rest" do
-      expect(call_api(:patch, "/#{decision.id}/options/#{option.id}", { title: "Sidekiq 8" }))
+      expect(call_api(:patch, "/decisions/#{decision.id}/options/#{option.id}", { title: "Sidekiq 8" }))
         .to include("title" => "Sidekiq 8", "body" => "Runs today")
     end
 
@@ -260,12 +252,12 @@ RSpec.describe "API decisions", type: :request do
       closed = create(:decision, status: "dropped")
       choice = create(:decision_option, decision_id: closed.id)
 
-      expect(call_api(:patch, "/#{closed.id}/options/#{choice.id}", { title: "Renamed" }).fetch("errors"))
+      expect(call_api(:patch, "/decisions/#{closed.id}/options/#{choice.id}", { title: "Renamed" }).fetch("errors"))
         .to eq("note" => ["a resolved or dropped decision needs a note to say why it changed"])
     end
 
     it "records no event for an option edit that changes nothing" do
-      call_api(:patch, "/#{decision.id}/options/#{option.id}", { title: "Sidekiq", body: "Runs today" })
+      call_api(:patch, "/decisions/#{decision.id}/options/#{option.id}", { title: "Sidekiq", body: "Runs today" })
 
       expect([status, events(decision).count]).to eq([200, 0])
     end
@@ -275,44 +267,44 @@ RSpec.describe "API decisions", type: :request do
 
       message = "decision #{decision.id} has no option with the ID #{stranger.id}"
 
-      expect([call_api(:patch, "/#{decision.id}/options/#{stranger.id}", { title: "Mine" }), status])
+      expect([call_api(:patch, "/decisions/#{decision.id}/options/#{stranger.id}", { title: "Mine" }), status])
         .to eq([{ "error" => "not_found", "message" => message }, 404])
     end
   end
 
   describe "DELETE /api/v1/decisions/:id/options/:option_id" do
     it "deletes the option" do
-      answered = call_api(:delete, "/#{decision.id}/options/#{option.id}")
+      answered = call_api(:delete, "/decisions/#{decision.id}/options/#{option.id}")
 
       expect([answered, options.by_pk(option.id).exist?])
         .to eq([{ "id" => decision.id, "option_id" => option.id, "deleted" => true }, false])
     end
 
     it "answers another decision's option with a 404" do
-      call_api(:delete, "/#{decision.id}/options/#{create(:decision_option).id}")
+      call_api(:delete, "/decisions/#{decision.id}/options/#{create(:decision_option).id}")
 
       expect(status).to eq(404)
     end
 
     it "deletes the option's events with it" do
-      added = call_api(:post, "/#{decision.id}/options", { title: "Resque" }).fetch("id")
-      call_api(:delete, "/#{decision.id}/options/#{added}")
+      added = call_api(:post, "/decisions/#{decision.id}/options", { title: "Resque" }).fetch("id")
+      call_api(:delete, "/decisions/#{decision.id}/options/#{added}")
 
       expect(events(decision).where(option_id: added).count).to eq(0)
     end
 
     it "deletes an option once chosen after the decision reopens" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
-      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
-      call_api(:delete, "/#{decision.id}/options/#{option.id}")
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Load grew" })
+      call_api(:delete, "/decisions/#{decision.id}/options/#{option.id}")
 
       expect([status, options.by_pk(option.id).exist?]).to eq([200, false])
     end
 
     it "refuses the option the decision was resolved with" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
-      expect([call_api(:delete, "/#{decision.id}/options/#{option.id}").fetch("errors"), status])
+      expect([call_api(:delete, "/decisions/#{decision.id}/options/#{option.id}").fetch("errors"), status])
         .to eq([{ "option_id" => ["the decision was resolved with this option, so reopen it first"] }, 422])
     end
   end
@@ -321,32 +313,32 @@ RSpec.describe "API decisions", type: :request do
     let(:comment) { create(:decision_comment, decision_id: decision.id, body: "Leaning on Sidekiq") }
 
     it "adds a comment and answers 201 with it", :aggregate_failures do
-      answered = call_api(:post, "/#{decision.id}/comments", { body: "  Leaning on Sidekiq " })
+      answered = call_api(:post, "/decisions/#{decision.id}/comments", { body: "  Leaning on Sidekiq " })
 
       expect(status).to eq(201)
       expect(answered).to include("body" => "Leaning on Sidekiq")
     end
 
     it "refuses a blank comment" do
-      expect(call_api(:post, "/#{decision.id}/comments", { body: " " }).fetch("errors"))
+      expect(call_api(:post, "/decisions/#{decision.id}/comments", { body: " " }).fetch("errors"))
         .to eq("body" => ["write the comment first"])
     end
 
     it "edits a comment" do
-      answered = call_api(:patch, "/#{decision.id}/comments/#{comment.id}", { body: "Leaning on Resque" })
+      answered = call_api(:patch, "/decisions/#{decision.id}/comments/#{comment.id}", { body: "Leaning on Resque" })
 
       expect(answered).to include("id" => comment.id, "body" => "Leaning on Resque")
     end
 
     it "answers another decision's comment with a 404" do
       stranger = create(:decision_comment)
-      call_api(:patch, "/#{decision.id}/comments/#{stranger.id}", { body: "Mine" })
+      call_api(:patch, "/decisions/#{decision.id}/comments/#{stranger.id}", { body: "Mine" })
 
       expect(status).to eq(404)
     end
 
     it "deletes a comment" do
-      answered = call_api(:delete, "/#{decision.id}/comments/#{comment.id}")
+      answered = call_api(:delete, "/decisions/#{decision.id}/comments/#{comment.id}")
 
       expect([answered, comments.by_pk(comment.id).exist?])
         .to eq([{ "id" => decision.id, "comment_id" => comment.id, "deleted" => true }, false])
@@ -356,7 +348,7 @@ RSpec.describe "API decisions", type: :request do
   describe "the tag endpoints" do
     it "adds tags and keeps the ones it has", :aggregate_failures do
       tag(decision, "queues")
-      answered = call_api(:post, "/#{decision.id}/tags", { tags: %w[Ruby queues] })
+      answered = call_api(:post, "/decisions/#{decision.id}/tags", { tags: %w[Ruby queues] })
 
       expect(status).to eq(201)
       expect(answered.fetch("tags")).to contain_exactly("queues", "ruby")
@@ -365,22 +357,22 @@ RSpec.describe "API decisions", type: :request do
     it "tags a closed decision with no note" do
       closed = create(:decision, status: "dropped")
 
-      expect(call_api(:post, "/#{closed.id}/tags", { tags: %w[ruby] }).fetch("tags")).to eq(["ruby"])
+      expect(call_api(:post, "/decisions/#{closed.id}/tags", { tags: %w[ruby] }).fetch("tags")).to eq(["ruby"])
     end
 
     it "refuses a tag that is not lowercase words joined by hyphens" do
-      expect(call_api(:post, "/#{decision.id}/tags", { tags: ["no way!"] }).fetch("errors"))
+      expect(call_api(:post, "/decisions/#{decision.id}/tags", { tags: ["no way!"] }).fetch("errors"))
         .to eq("tags" => ["a tag is lowercase words joined by hyphens"])
     end
 
     it "takes one tag off" do
       tag(decision, "queues", "ruby")
 
-      expect(call_api(:delete, "/#{decision.id}/tags/queues").fetch("tags")).to eq(["ruby"])
+      expect(call_api(:delete, "/decisions/#{decision.id}/tags/queues").fetch("tags")).to eq(["ruby"])
     end
 
     it "answers a tag the decision does not carry with a 404" do
-      expect([call_api(:delete, "/#{decision.id}/tags/queues"), status])
+      expect([call_api(:delete, "/decisions/#{decision.id}/tags/queues"), status])
         .to eq([{ "error" => "not_found", "message" => "decision #{decision.id} has no tag queues" }, 404])
     end
   end
@@ -464,7 +456,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "counts the decisions with the words and tag given, whatever the status asked for" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
       [decision, create(:decision, title: "Pick a queue")].each { tag(it, "queues") }
       tag(create(:decision, title: "Pick a queue"), "ruby")
 
@@ -492,7 +484,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "answers the chosen option and the reason it won", :aggregate_failures do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
       choice = read(decision.id).fetch("choice")
 
       expect(choice).to include("reason" => "It runs today", "option" => include("id" => option.id))
@@ -500,9 +492,9 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "answers the latest reason when the decision was resolved again" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
-      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "Still the best" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Load grew" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "Still the best" })
 
       expect(read(decision.id).dig("choice", "reason")).to eq("Still the best")
     end
@@ -563,7 +555,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "reads a decision as read_decision does" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(mcp_answer("read_decision", id: decision.id)).to eq(read(decision.id))
     end
@@ -573,7 +565,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "opens a decision as open_decision does" do
-      answered = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" })
+      answered = call_api(:post, "/decisions", { title: "Pick a queue", problem: "Jobs pile up" })
       stamps = %w[id created_at updated_at]
 
       expect(mcp_answer("open_decision", title: "Pick a queue", problem: "Jobs pile up").except(*stamps))
@@ -581,7 +573,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "refuses a closed decision's edit without a note, as the admin does", :aggregate_failures do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(mcp_text("edit_decision", id: decision.id, problem: "Jobs pile up fast"))
         .to eq("note: a resolved or dropped decision needs a note to say why it changed")
@@ -616,34 +608,34 @@ RSpec.describe "API decisions", type: :request do
     def task = Tasks::Slice["relations.tasks"].by_pk(task_id).one
 
     it "follows a new title" do
-      call_api(:patch, "/#{decision.id}", { title: "Pick a job queue" })
+      call_api(:patch, "/decisions/#{decision.id}", { title: "Pick a job queue" })
 
       expect(task[:title]).to eq("Resolve decision ##{decision.id}: Pick a job queue")
     end
 
     it "completes when the decision resolves" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/decisions/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
 
       expect(task[:status]).to eq("done")
     end
 
     it "cancels when the decision drops" do
-      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
+      call_api(:post, "/decisions/#{decision.id}/drop", { reason: "Not needed" })
 
       expect(task[:status]).to eq("canceled")
     end
 
     it "reopens when the decision reopens" do
-      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
-      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
+      call_api(:post, "/decisions/#{decision.id}/drop", { reason: "Not needed" })
+      call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Load grew" })
 
       expect(task[:status]).to eq("open")
     end
 
     it "comes back when I deleted it and the decision reopens" do
-      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" })
+      call_api(:post, "/decisions/#{decision.id}/drop", { reason: "Not needed" })
       Tasks::Slice["operations.delete_task"].call(task_id)
-      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
+      call_api(:post, "/decisions/#{decision.id}/reopen", { reason: "Load grew" })
 
       expect(Tasks::Slice["repos.task_queries"].by_decision(decision.id))
         .to have_attributes(title: "Resolve decision ##{decision.id}: Pick a queue", status: "open", list: "next")

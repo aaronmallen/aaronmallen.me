@@ -4,8 +4,6 @@ RSpec.describe "API reading a photo", type: :request do
   let(:bytes) { Hanami.app.root.join("spec/fixtures/photos/rotated_with_gps.jpg").binread }
   let(:photo) { create(:photo, width: 20, height: 40, byte_size: bytes.bytesize) }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def read(reference)
     get "/api/v1/photos", { photo: reference },
         { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }

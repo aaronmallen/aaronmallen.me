@@ -4,28 +4,19 @@ RSpec.describe "API task time", type: :request do
   let(:started) { Time.at(((Time.now.to_i - 86_400) / 60) * 60) }
   let(:task) { create(:task, worked_seconds: 3600) }
 
-  def act(id, verb, fields = {}) = call_api(:post, "/#{id}/#{verb}", JSON.generate(fields))
-
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/tasks#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
+  def act(id, verb, fields = {}) = call_api(:post, "/tasks/#{id}/#{verb}", JSON.generate(fields))
 
   def closed(from: started, to: started + 1800, on: task)
     create(:work_session, task_id: on.id, started_at: from, ended_at: to)
   end
 
   def edit(session, on: task, **times)
-    call_api(:patch, "/#{on.id}/sessions/#{session[:id]}", JSON.generate(times.transform_values { local(it) }))
+    call_api(:patch, "/tasks/#{on.id}/sessions/#{session[:id]}", JSON.generate(times.transform_values { local(it) }))
   end
 
   def local(time) = time.is_a?(Time) ? Blog::TimeZone.input_value(time) : time
 
-  def remove(session, on: task) = call_api(:delete, "/#{on.id}/sessions/#{session[:id]}")
+  def remove(session, on: task) = call_api(:delete, "/tasks/#{on.id}/sessions/#{session[:id]}")
 
   def running_task(since: started)
     found = create(:task, :in_progress, :in_sprint, worked_seconds: 600)
@@ -135,7 +126,7 @@ RSpec.describe "API task time", type: :request do
     end
 
     it "refuses a request with no start" do
-      call_api(:patch, "/#{task.id}/sessions/#{closed.id}", JSON.generate(ended_at: local(started)))
+      call_api(:patch, "/tasks/#{task.id}/sessions/#{closed.id}", JSON.generate(ended_at: local(started)))
 
       expect(status).to eq(422)
     end
@@ -238,13 +229,13 @@ RSpec.describe "API task time", type: :request do
 
   describe "the total on a read" do
     it "comes back from read_task" do
-      expect(call_api(:get, "/#{task.id}").fetch("worked_seconds")).to eq(3600)
+      expect(call_api(:get, "/tasks/#{task.id}").fetch("worked_seconds")).to eq(3600)
     end
 
     it "comes back on each task from list_tasks" do
       task
 
-      expect(call_api(:get, "").fetch("tasks").map { it.fetch("worked_seconds") }).to eq([3600])
+      expect(call_api(:get, "/tasks").fetch("tasks").map { it.fetch("worked_seconds") }).to eq([3600])
     end
   end
 

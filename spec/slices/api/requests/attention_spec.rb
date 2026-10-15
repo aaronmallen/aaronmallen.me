@@ -3,8 +3,6 @@
 RSpec.describe "API attention", :frozen_clock, type: :request do
   let(:today) { Blog::TimeZone.today }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def card_titles
     sign_in_to_admin
     get "/admin"

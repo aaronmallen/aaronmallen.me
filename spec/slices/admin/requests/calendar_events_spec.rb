@@ -27,8 +27,6 @@ RSpec.describe "Admin calendar events", :frozen_clock, type: :request do
 
   def stored = Calendar::Slice["repos.calendar_queries"].listed.to_h { [it.name, it.hidden] }
 
-  def toast = page.find("[data-toast]", visible: :all).text(:all)
-
   def visit_day = get("/admin/calendar", day: day.iso8601)
 
   it "changes no calendar for anybody who has not signed in" do

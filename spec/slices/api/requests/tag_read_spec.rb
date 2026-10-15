@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading a tag", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def ids(answer, kind) = answer.fetch(kind).map { it.fetch("id") }
 
   def read(name)

@@ -37,11 +37,6 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
     }
   end
 
-  def toast
-    follow_redirect!
-    page.find("[data-toast]", visible: :all).text(:all)
-  end
-
   def whole(first, after)
     { start: { date: first.iso8601, dateTime: nil, timeZone: nil },
       end: { date: after.iso8601, dateTime: nil, timeZone: nil } }

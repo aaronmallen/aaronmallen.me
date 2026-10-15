@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading a social post", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def compose(body)
     Social::Slice["repos.social_post_mutations"]
       .create_with_parts(parts: [body], posted_at: nil, status: "draft", targets: %w[mastodon])

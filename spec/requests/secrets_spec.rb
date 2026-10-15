@@ -287,8 +287,6 @@ RSpec.describe "Secrets a request carries", type: :request do
   describe "an agent uploading a photo" do
     let(:data) { Base64.strict_encode64(secret) }
 
-    def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
     def through_api
       headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
       post "/api/v1/photos", JSON.generate(data:, filename: "photo.png"), headers

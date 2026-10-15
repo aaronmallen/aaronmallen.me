@@ -19,8 +19,6 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
   def short_link(destination, **) = Shares::Slice["operations.create_short_link"].call({ destination:, ** }).value!
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do

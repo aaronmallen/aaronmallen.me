@@ -18,13 +18,8 @@ RSpec.describe Tasks::Operations::StartTask do
 
     def started_together(task)
       held(task) do
-        Array.new(2) { Thread.new { Tasks::Slice["operations.start_task"].call(task.id) } }.tap { wait_until_waiting(2) }
+        Array.new(2) { Thread.new { Tasks::Slice["operations.start_task"].call(task.id) } }.tap { Spec::DB::Locks.wait_for_waiters(database, 2) }
       end.map(&:value)
-    end
-
-    def wait_until_waiting(count)
-      waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock")
-      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
     end
 
     it "lets both succeed and leaves one open session", :aggregate_failures do

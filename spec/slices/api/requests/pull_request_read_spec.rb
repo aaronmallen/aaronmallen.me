@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading a pull request", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def link(id, other_kind, other_id)
     Links::Slice["operations.link_records"].call("pull_request", id, { other_kind:, other_id: }).value!
   end

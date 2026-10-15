@@ -6,13 +6,7 @@ RSpec.describe "API health days", type: :request do
 
   def at(day, hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
 
-  def mint(*scopes) = API::Slice["operations.mint_token"].call(name: "Terminal", scopes:).value!.fetch(:value)
-
-  def read(token = mint("health"), **params)
-    get "/api/v1/health/days", params,
-        { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
-    JSON.parse(last_response.body)
-  end
+  def read(token = api_token(%w[health]), **params) = call_api(:get, "/health/days", params, token:)
 
   def status = last_response.status
 
@@ -73,7 +67,7 @@ RSpec.describe "API health days", type: :request do
   it "refuses a token with only read" do
     create(:health_day, day: monday, minutes_asleep: 420)
 
-    expect(read(mint("read", "suggest", "write", "publish", "delete"), **range)).to eq(
+    expect(read(api_token(%w[read suggest write publish delete]), **range)).to eq(
       "error" => "insufficient_scope", "error_description" => "this endpoint needs a token with the health scope",
     )
   end

@@ -1,16 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API OpenAPI document", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil, token: api_token)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
-    public_send(verb, "/api/v1#{path}", body, headers)
-    last_response
-  end
-
-  def document = JSON.parse(call_api(:get, "/openapi.json").body)
+  def document = call_api(:get, "/openapi.json")
 
   def endpoints
     names = Dir[API::Slice.root.join("endpoints", "*.rb")].map { File.basename(it, ".rb") }

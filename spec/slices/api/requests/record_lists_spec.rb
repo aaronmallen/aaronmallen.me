@@ -3,15 +3,6 @@
 RSpec.describe "API commits, pull requests and syncs", type: :request do
   include Spec::DB::FactoryHelper.new(:record)
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, params = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1#{path}", params, headers)
-    JSON.parse(last_response.body)
-  end
-
   def march = { from: "2026-03-01", to: "2026-03-31" }
 
   def status = last_response.status

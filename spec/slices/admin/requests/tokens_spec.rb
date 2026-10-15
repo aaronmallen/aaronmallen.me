@@ -3,8 +3,6 @@
 RSpec.describe "Admin API tokens", type: :request do
   let(:stored) { API::Slice["db.rom"].relations[:api_tokens] }
 
-  def call_api(value) = get("/api/v1/token", {}, { "HTTP_AUTHORIZATION" => "Bearer #{value}" })
-
   def checked(*scopes) = Blog::Types::OAuthScope.values.to_h { [it, scopes.include?(it) ? "1" : "0"] }
 
   def error(code, field = "name") = Admin::Slice["i18n"].t(["ui.components.tokens.field_error", field, code].join("."))
@@ -78,7 +76,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "shows a value the API takes" do
       mint("Terminal")
       follow_redirect!
-      call_api(revealed)
+      call_api(:get, "/token", token: revealed)
 
       expect(last_response.status).to eq(200)
     end
@@ -196,7 +194,7 @@ RSpec.describe "Admin API tokens", type: :request do
 
       def status_at(value, time)
         allow(Time).to receive(:now).and_return(time)
-        call_api(value)
+        call_api(:get, "/token", token: value)
         last_response.status
       end
 
@@ -372,7 +370,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "cuts the token off from the API" do
       value, token = minted.values_at(:value, :token)
       revoke(token.id)
-      call_api(value)
+      call_api(:get, "/token", token: value)
 
       expect(last_response.status).to eq(401)
     end

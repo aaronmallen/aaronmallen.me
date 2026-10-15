@@ -15,8 +15,6 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
 
   def menu(path) = get(path, return_to: "/admin/x?y=1")
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   shared_examples "a row menu" do
     it "posts every action by fetch and morph back to the page it opened on", :aggregate_failures do
       forms = page.all("[data-context-menu] form", visible: :all)

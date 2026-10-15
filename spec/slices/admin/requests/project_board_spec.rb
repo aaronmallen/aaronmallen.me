@@ -25,8 +25,6 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
 
   def titles(name) = column(name).all(".kc-title").map(&:text)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def today_sprint = Tasks::Slice["repos.sprint_queries"].on(Blog::TimeZone.today).id
 
   describe "signed in" do

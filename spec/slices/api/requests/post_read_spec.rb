@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading a post", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def open_edit(edit)
     {
       "id" => edit.id, "part" => nil, "original" => edit.original, "replacement" => edit.replacement,

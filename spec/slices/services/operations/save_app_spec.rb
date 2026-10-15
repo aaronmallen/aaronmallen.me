@@ -17,16 +17,11 @@ RSpec.describe Services::Operations::SaveApp, :commits do
     other = Sequel.connect(database.opts.merge(max_connections: 1))
     saving = other.transaction do
       other[:service_apps].insert(**fields, credentials: "sealed")
-      Thread.new { save(client_id) }.tap { wait_until_waiting }
+      Thread.new { save(client_id) }.tap { Spec::DB::Locks.wait_for_waiters(database) }
     end
     saving.join
   ensure
     other&.disconnect
-  end
-
-  def wait_until_waiting
-    waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock")
-    Timeout.timeout(5) { sleep(0.01) until waiting.any? }
   end
 
   it "replaces the app it already holds for the server", :aggregate_failures do

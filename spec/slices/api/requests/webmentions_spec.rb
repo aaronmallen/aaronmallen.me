@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading webmentions", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, 12, 0)
 
   def counts(pending: 0, approved: 0, ignored: 0, spam: 0)

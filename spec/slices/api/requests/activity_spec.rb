@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading the activity feed", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  let(:scopes) { nil }
 
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
 
@@ -18,10 +18,7 @@ RSpec.describe "API reading the activity feed", type: :request do
     create(:journal_entry, entry_date: march, body: "A note")
   end
 
-  def get_json(path, params = nil)
-    get path, params, { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
-    JSON.parse(last_response.body)
-  end
+  def get_json(path, params = nil) = call_api(:get, path, params, token: api_token(scopes))
 
   def kinds(answer) = answer.fetch("activity").map { it.fetch("kind") }
 
@@ -31,11 +28,11 @@ RSpec.describe "API reading the activity feed", type: :request do
 
   def range = { from: "2026-03-01", to: "2026-03-31" }
 
-  def read(**params) = get_json("/api/v1/activity", { **range, **params })
+  def read(**params) = get_json("/activity", { **range, **params })
 
   def status = last_response.status
 
-  def summarize(**params) = get_json("/api/v1/activity/summary", { **range, **params })
+  def summarize(**params) = get_json("/activity/summary", { **range, **params })
 
   def viewed(slug, views)
     create(:post, :published, slug:, published_at: at(march, 9))
@@ -170,10 +167,7 @@ RSpec.describe "API reading the activity feed", type: :request do
   end
 
   describe "the MCP tools" do
-    def api_token
-      @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal", scopes: MCPToolCalls::SCOPES.split)
-                                                        .value!.fetch(:value)
-    end
+    let(:scopes) { MCPToolCalls::SCOPES.split }
 
     it "answers read_activity as GET /api/v1/activity does" do
       create(:commit, commit_date: march)
@@ -211,8 +205,6 @@ RSpec.describe "API reading the activity feed", type: :request do
   end
 
   describe "workouts" do
-    def read_only = API::Slice["operations.mint_token"].call(name: "Reader", scopes: %w[read]).value!.fetch(:value)
-
     before do
       create(:workout, kind: "STRENGTH_TRAINING", started_at: at(march, 7), minutes: 65, device: "Pixel Watch 3")
       create(:commit, commit_date: march)
@@ -228,7 +220,7 @@ RSpec.describe "API reading the activity feed", type: :request do
     end
 
     describe "for a token with only read" do
-      let(:api_token) { read_only }
+      let(:scopes) { %w[read] }
 
       it "leaves workouts out of the feed" do
         expect(kinds(read)).to eq(["commit"])
@@ -246,7 +238,7 @@ RSpec.describe "API reading the activity feed", type: :request do
       it "leaves workouts out of an activity saved view" do
         view = create(:saved_view, screen: "activity", filters: { **range, day: "2026-03-31" })
 
-        expect(get_json("/api/v1/saved_views/#{view.id}/records").fetch("records").map { it.fetch("kind") })
+        expect(get_json("/saved_views/#{view.id}/records").fetch("records").map { it.fetch("kind") })
           .to eq(["commit"])
       end
     end

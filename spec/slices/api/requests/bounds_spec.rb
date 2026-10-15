@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API page and ID bounds", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
 
   def ids(schema, parent = nil)

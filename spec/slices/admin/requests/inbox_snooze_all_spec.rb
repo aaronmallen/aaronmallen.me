@@ -18,8 +18,6 @@ RSpec.describe "Admin inbox Snooze All", type: :request do
 
   def synced(title: "An issue") = create(:task, :external, title:).tap { create(:task_source, task: it) }
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all).strip
-
   before do
     allow(Time).to receive(:now).and_return(now)
     sign_in_to_admin

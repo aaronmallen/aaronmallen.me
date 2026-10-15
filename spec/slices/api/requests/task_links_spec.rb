@@ -1,22 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe "API task links", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/tasks#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
-  def link(id, **fields) = call_api(:post, "/#{id}/links", JSON.generate(fields))
+  def link(id, **fields) = call_api(:post, "/tasks/#{id}/links", JSON.generate(fields))
 
   def status = last_response.status
 
   def tasks = Tasks::Slice["repos.task_queries"]
 
-  def unlink(id, other_id) = call_api(:delete, "/#{id}/links/#{other_id}")
+  def unlink(id, other_id) = call_api(:delete, "/tasks/#{id}/links/#{other_id}")
 
   let(:task) { create(:task, title: "Ship") }
   let(:other) { create(:task, title: "Migrate") }
@@ -102,7 +93,7 @@ RSpec.describe "API task links", type: :request do
   end
 
   describe "a parent link" do
-    def read(id) = call_api(:get, "/#{id}")
+    def read(id) = call_api(:get, "/tasks/#{id}")
 
     before { create(:task_link, :parent, from_task_id: task.id, to_task_id: other.id) }
 
@@ -122,7 +113,7 @@ RSpec.describe "API task links", type: :request do
   describe "the MCP tools" do
     it "link as link_tasks does" do
       linked = link(task.id, kind: "blocks", other_id: other.id)
-      call_api(:delete, "/#{task.id}/links/#{other.id}")
+      call_api(:delete, "/tasks/#{task.id}/links/#{other.id}")
 
       expect(unstamped(trusted(mcp_answer("link_tasks", id: task.id, kind: "blocks", other_id: other.id))))
         .to eq(unstamped(linked))

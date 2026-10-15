@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sequel"
+require "timeout"
 
 module Spec
   module DB
@@ -15,6 +16,10 @@ module Spec
 
           holder.disconnect
           raise "another test run holds #{db.opts[:database]}; let it finish or stop it, then run the suite again"
+        end
+
+        def wait_for_waiters(db, count = 1)
+          Timeout.timeout(5) { sleep(0.01) until waiters(db) >= count }
         end
 
         def within_timeout(db)
@@ -43,6 +48,11 @@ module Spec
         end
 
         def suite_key = Sequel.function(:hashtext, SUITE_KEY)
+
+        def waiters(db)
+          db.get(Sequel.function(:pg_stat_clear_snapshot))
+          db[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock").count
+        end
       end
     end
   end

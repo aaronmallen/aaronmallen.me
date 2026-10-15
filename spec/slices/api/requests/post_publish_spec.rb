@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API publishing a post", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def overlong = { syndication_enabled: true, syndication_body: "a" * 301, syndication_targets: %w[bluesky] }
 
   def post_queries = Posts::Slice["repos.post_queries"]

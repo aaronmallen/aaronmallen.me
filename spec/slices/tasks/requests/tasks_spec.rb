@@ -169,8 +169,6 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
 
       def schedule(day) = send_to("/admin/tasks/#{closed.id}/schedule", sprint_on: day.to_s)
 
-      def toast = Capybara.string(last_response.body).find("[data-toast] .toast", visible: :all).text(:all)
-
       closed_days.each do |named, ahead|
         it "leaves it #{status} in its list for #{named}" do
           schedule((today + ahead).iso8601)

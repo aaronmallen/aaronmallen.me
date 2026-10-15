@@ -1,18 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe "API journal entries", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def create_entry(fields) = call_api(:post, "/journal_entries", JSON.generate(fields))
 
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/journal_entries#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
-  def create_entry(fields) = call_api(:post, "", JSON.generate(fields))
-
-  def delete_entry(id) = call_api(:delete, "/#{id}")
+  def delete_entry(id) = call_api(:delete, "/journal_entries/#{id}")
 
   def entries = Record::Slice["relations.journal_entries"]
 
@@ -23,15 +14,15 @@ RSpec.describe "API journal entries", type: :request do
     Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
   end
 
-  def list(**window) = call_api(:get, "", window)
+  def list(**window) = call_api(:get, "/journal_entries", window)
 
-  def read(id) = call_api(:get, "/#{id}")
+  def read(id) = call_api(:get, "/journal_entries/#{id}")
 
   def status = last_response.status
 
   def today = Blog::TimeZone.today
 
-  def update_entry(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def update_entry(id, fields) = call_api(:patch, "/journal_entries/#{id}", JSON.generate(fields))
 
   describe "GET /api/v1/journal_entries" do
     def entry_on(day, time, body) = create(:journal_entry, entry_date: Date.new(2026, 3, day), entry_time: time, body:)
@@ -226,12 +217,12 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "refuses a body that is not JSON with a 400" do
-      expect([call_api(:post, "", "{nope"), status])
+      expect([call_api(:post, "/journal_entries", "{nope"), status])
         .to eq([{ "error" => "invalid_json", "message" => "the body takes a JSON object" }, 400])
     end
 
     it "refuses a JSON body that is not an object with a 400" do
-      expect([call_api(:post, "", "[]").fetch("error"), status]).to eq(["invalid_json", 400])
+      expect([call_api(:post, "/journal_entries", "[]").fetch("error"), status]).to eq(["invalid_json", 400])
     end
 
     it "answers a failure it did not expect with a 500" do

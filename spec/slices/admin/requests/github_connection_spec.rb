@@ -303,8 +303,6 @@ RSpec.describe "Admin GitHub connection", type: :request do
         )
       end
 
-      def toast = page.find("[data-toast]").text
-
       it "reports that GitHub answers a test" do
         stub_user("ghp_new")
         post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token

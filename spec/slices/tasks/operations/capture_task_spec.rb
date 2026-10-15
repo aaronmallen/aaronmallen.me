@@ -23,15 +23,9 @@ RSpec.describe Tasks::Operations::CaptureTask, :commits, :frozen_clock do
 
   def placed_together(*writes)
     held_by_another_session do
-      writes.map { Thread.new(&it) }.tap { wait_until_all_wait(writes.size) }
+      writes.map { Thread.new(&it) }.tap { Spec::DB::Locks.wait_for_waiters(database, writes.size) }
     end.each(&:join)
     Tasks::Slice["relations.tasks"].pluck(:position)
-  end
-
-  def wait_until_all_wait(count)
-    here = database[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
-    waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
-    Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
   end
 
   describe "two tasks placed at once" do

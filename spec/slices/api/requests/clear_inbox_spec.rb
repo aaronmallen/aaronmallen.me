@@ -5,8 +5,6 @@ RSpec.describe "API clear inbox", type: :request do
   let(:task) { synced }
   let(:webmention) { create(:webmention) }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def clear(**ids)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     post "/api/v1/inbox/seen", JSON.generate(ids), headers.merge("HTTP_AUTHORIZATION" => "Bearer #{api_token}")

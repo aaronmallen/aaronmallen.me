@@ -26,8 +26,6 @@ RSpec.describe "Admin mail", type: :request do
 
   def tag(thread, name) = Mail::Slice["repos.message_tag_mutations"].add(thread.id, name)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   it "sends a visitor who isn't signed in to sign in" do
     get "/admin/mail"
 
@@ -895,14 +893,8 @@ RSpec.describe "Admin mail", type: :request do
           Thread.new { Rack::MockRequest.new(app).post("/admin/mail/#{thread.id}/task", params:, "HTTP_COOKIE" => cookie) }
         end
 
-        def wait_until_both_wait
-          waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database),
-                                                      wait_event_type: "Lock")
-          Timeout.timeout(5) { sleep(0.01) until waiting.count == 2 }
-        end
-
         it "makes one task" do
-          tabs = held_by_another_session { Array.new(2) { make_in_thread }.tap { wait_until_both_wait } }
+          tabs = held_by_another_session { Array.new(2) { make_in_thread }.tap { Spec::DB::Locks.wait_for_waiters(database, 2) } }
           tabs.each(&:join)
 
           expect(Tasks::Slice["relations.tasks"].where(title: "Book lunch").count).to eq(1)

@@ -31,8 +31,6 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
 
   def tasks(count) = Array.new(count) { create(:task) }
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   describe "signed in" do
     before { sign_in_to_admin }
 

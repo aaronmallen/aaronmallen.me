@@ -1,19 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe "API bulk task actions", type: :request do
-  def act(name, ids, **fields) = call_api(name, JSON.generate(ids:, **fields))
-
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def act(name, ids, **fields) = call_api(:post, "/tasks/bulk/#{name}", JSON.generate(ids:, **fields))
 
   def bare(answer)
     answer.fetch("tasks").map { it.except("id", "label", "position", "completed_at", "created_at", "updated_at") }
-  end
-
-  def call_api(name, body)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    post "/api/v1/tasks/bulk/#{name}", body, headers
-    JSON.parse(last_response.body)
   end
 
   def deleted(task) = { "id" => task.id, "title" => task.title, "deleted" => true }
@@ -251,7 +242,7 @@ RSpec.describe "API bulk task actions", type: :request do
     end
 
     it "refuses a request with no IDs" do
-      expect(call_api("complete", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
+      expect(call_api(:post, "/tasks/bulk/complete", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
   end
 

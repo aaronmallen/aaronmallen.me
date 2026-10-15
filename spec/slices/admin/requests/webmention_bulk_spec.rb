@@ -17,8 +17,6 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
 
   def status(mention) = relation.by_pk(mention.id).one&.fetch(:status)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def webmention_queries = Social::Slice["repos.webmention_queries"]
 
   describe "signed in" do

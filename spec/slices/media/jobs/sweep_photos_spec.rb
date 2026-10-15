@@ -69,7 +69,7 @@ RSpec.describe Media::Jobs::SweepPhotos do
       threads = [Thread.new(&first)]
       wait_at_gate
       threads << Thread.new(&second)
-      wait_for_lock
+      Spec::DB::Locks.wait_for_waiters(database)
       gate << :go
       threads.map(&:value)
     end
@@ -79,11 +79,6 @@ RSpec.describe Media::Jobs::SweepPhotos do
     def save_holding_open = Media::Slice["repos.photo_mutations"].transaction { save.tap { gate.pop } }
 
     def wait_at_gate = Timeout.timeout(5) { sleep(0.01) until gate.num_waiting.positive? }
-
-    def wait_for_lock
-      waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock")
-      Timeout.timeout(5) { sleep(0.01) until waiting.any? }
-    end
 
     it "keeps a photo a save claims while the sweep waits", :aggregate_failures do
       meet(-> { save_holding_open }, -> { sweep })

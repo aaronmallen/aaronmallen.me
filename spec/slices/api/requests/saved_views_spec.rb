@@ -1,26 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe "API saved views", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def create_view(fields) = call_api(:post, "/saved_views", JSON.generate(fields))
 
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/saved_views#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
+  def delete_view(id) = call_api(:delete, "/saved_views/#{id}")
 
-  def create_view(fields) = call_api(:post, "", JSON.generate(fields))
-
-  def delete_view(id) = call_api(:delete, "/#{id}")
-
-  def list(**query) = call_api(:get, "", query)
+  def list(**query) = call_api(:get, "/saved_views", query)
 
   def status = last_response.status
 
   def stored(id) = SavedViews::Slice["relations.saved_views"].by_pk(id).one
 
-  def update_view(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def update_view(id, fields) = call_api(:patch, "/saved_views/#{id}", JSON.generate(fields))
 
   def views = SavedViews::Slice["relations.saved_views"]
 

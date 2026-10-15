@@ -1,30 +1,21 @@
 # frozen_string_literal: true
 
 RSpec.describe "API tasks", type: :request do
-  def act(id, verb, fields = {}) = call_api(:post, "/#{id}/#{verb}", JSON.generate(fields))
-
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def act(id, verb, fields = {}) = call_api(:post, "/tasks/#{id}/#{verb}", JSON.generate(fields))
 
   def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/tasks#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
-  def capture(fields) = call_api(:post, "", JSON.generate(fields))
+  def capture(fields) = call_api(:post, "/tasks", JSON.generate(fields))
 
   def link(kind, id, other_kind, other_id)
     Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
   end
 
-  def list(query = {}) = call_api(:get, "", query)
+  def list(query = {}) = call_api(:get, "/tasks", query)
 
-  def read(id) = call_api(:get, "/#{id}")
+  def read(id) = call_api(:get, "/tasks/#{id}")
 
-  def save(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def save(id, fields) = call_api(:patch, "/tasks/#{id}", JSON.generate(fields))
 
   def status = last_response.status
 
@@ -575,7 +566,7 @@ RSpec.describe "API tasks", type: :request do
       task = create(:task)
       other = in_project(podcast)
 
-      answered = call_api(:post, "/#{task.id}/links", JSON.generate(kind: "relates", other_id: "POD-1"))
+      answered = call_api(:post, "/tasks/#{task.id}/links", JSON.generate(kind: "relates", other_id: "POD-1"))
 
       expect(answered.fetch("links")).to match([include("id" => other.id, "task_label" => "POD-1")])
     end
@@ -734,7 +725,7 @@ RSpec.describe "API tasks", type: :request do
     end
 
     it "refuses a body that is not JSON with a 400" do
-      expect([call_api(:post, "", "{nope"), status])
+      expect([call_api(:post, "/tasks", "{nope"), status])
         .to eq([{ "error" => "invalid_json", "message" => "the body takes a JSON object" }, 400])
     end
   end
@@ -891,12 +882,12 @@ RSpec.describe "API tasks", type: :request do
     it "removes the task" do
       task = create(:task, title: "Gone")
 
-      expect([call_api(:delete, "/#{task.id}"), tasks.by_id(task.id)])
+      expect([call_api(:delete, "/tasks/#{task.id}"), tasks.by_id(task.id)])
         .to eq([{ "id" => task.id, "title" => "Gone", "deleted" => true }, nil])
     end
 
     it "answers an unknown ID with a 404" do
-      call_api(:delete, "/999999")
+      call_api(:delete, "/tasks/999999")
 
       expect(status).to eq(404)
     end
@@ -1310,7 +1301,7 @@ RSpec.describe "API tasks", type: :request do
 
     it "delete as delete_task does" do
       ids = [create(:task, title: "same").id, create(:task, title: "same").id]
-      deleted = call_api(:delete, "/#{ids.first}")
+      deleted = call_api(:delete, "/tasks/#{ids.first}")
 
       expect(mcp_answer("delete_task", id: ids.last)).to eq(deleted.merge("id" => ids.last))
     end

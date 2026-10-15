@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API inbox", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/1"
 
   def read(token = api_token)

@@ -1,28 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.describe "API social posts", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/social_posts#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
 
   def compose(*parts, status: "draft", targets: %w[mastodon], **)
     Social::Slice["repos.social_post_mutations"].create_with_parts(parts:, status:, targets:, **)
   end
 
-  def create_social_post(fields) = call_api(:post, "", JSON.generate(fields))
+  def create_social_post(fields) = call_api(:post, "/social_posts", JSON.generate(fields))
 
-  def delete_social_post(id) = call_api(:delete, "/#{id}")
+  def delete_social_post(id) = call_api(:delete, "/social_posts/#{id}")
 
-  def list(**query) = call_api(:get, "", query)
+  def list(**query) = call_api(:get, "/social_posts", query)
 
-  def send_social_post(id, fields = {}) = call_api(:post, "/#{id}/send", JSON.generate(fields))
+  def send_social_post(id, fields = {}) = call_api(:post, "/social_posts/#{id}/send", JSON.generate(fields))
 
   def status = last_response.status
 
@@ -41,7 +32,7 @@ RSpec.describe "API social posts", type: :request do
 
   def targeted(id) = Social::Slice["operations.list_target_accounts"].call(stored(id)).map(&:id)
 
-  def update_social_post(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def update_social_post(id, fields) = call_api(:patch, "/social_posts/#{id}", JSON.generate(fields))
 
   before { connect_social_networks }
 

@@ -4,8 +4,6 @@ RSpec.describe "API inbox snooze", type: :request do
   let(:message) { create(:message, subject: "message") }
   let(:ends_at) { Time.now.floor + 3600 }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def inbox_titles
     get "/api/v1/inbox", {}, { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     JSON.parse(last_response.body).fetch("inbox").map { it.fetch("title") }

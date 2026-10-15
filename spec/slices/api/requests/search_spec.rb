@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API search", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def find(**params)
     headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/search", params, headers

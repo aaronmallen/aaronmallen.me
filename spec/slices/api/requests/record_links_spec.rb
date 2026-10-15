@@ -1,15 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API record links", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/links#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
   def commit_link
     id = commit.id
 
@@ -17,7 +8,7 @@ RSpec.describe "API record links", type: :request do
       .merge("url" => "/admin/commits/#{id}")
   end
 
-  def link(kind, id, **fields) = call_api(:post, "/#{kind}/#{id}", JSON.generate(fields))
+  def link(kind, id, **fields) = call_api(:post, "/links/#{kind}/#{id}", JSON.generate(fields))
 
   def link_every_pair
     API::Serializers::Link::KINDS.to_h { [it, linkable_record(it)] }.tap do |records|
@@ -27,7 +18,7 @@ RSpec.describe "API record links", type: :request do
     end
   end
 
-  def list(kind, id) = call_api(:get, "/#{kind}/#{id}")
+  def list(kind, id) = call_api(:get, "/links/#{kind}/#{id}")
 
   def status = last_response.status
 
@@ -35,7 +26,7 @@ RSpec.describe "API record links", type: :request do
 
   def titles(answered) = answered.fetch("links").transform_values { it.map { it.fetch("title") } }
 
-  def unlink(kind, id, other_kind, other_id) = call_api(:delete, "/#{kind}/#{id}/#{other_kind}/#{other_id}")
+  def unlink(kind, id, other_kind, other_id) = call_api(:delete, "/links/#{kind}/#{id}/#{other_kind}/#{other_id}")
 
   let(:post_record) { create(:post, title: "On hosting") }
   let(:commit) { create(:commit, message: "Move the server") }

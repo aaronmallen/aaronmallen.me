@@ -17,8 +17,6 @@ RSpec.describe "Admin Bluesky connection", type: :request do
     ))
   end
 
-  def toast = page.find("[data-toast]").text
-
   it "offers a handle and app password form", :aggregate_failures do
     get "/admin/services?connect=bluesky"
 

@@ -5,8 +5,6 @@ require "base64"
 RSpec.describe "API photo upload", type: :request do
   let(:stored) { {} }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def bytes_of(name) = Hanami.app.root.join("spec/fixtures/photos", name).binread
 
   def claims_of(owner) = Media::Slice["relations.photo_claims"].where(owner:).to_a.map { it[:photo_id] }

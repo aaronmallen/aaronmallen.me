@@ -1,18 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe "API bulk webmention actions", type: :request do
-  def act(name, ids) = call_api(name, JSON.generate(ids:))
-
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def act(name, ids) = call_api(:post, "/webmentions/bulk/#{name}", JSON.generate(ids:))
 
   def bare(answer) = answer.fetch("webmentions").map { it.except("id", "source_url") }
-
-  def call_api(name, body)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    post "/api/v1/webmentions/bulk/#{name}", body, headers
-    JSON.parse(last_response.body)
-  end
 
   def fields(mention, status)
     {
@@ -114,7 +105,7 @@ RSpec.describe "API bulk webmention actions", type: :request do
     end
 
     it "refuses a request with no IDs" do
-      expect(call_api("approve", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
+      expect(call_api(:post, "/webmentions/bulk/approve", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
   end
 

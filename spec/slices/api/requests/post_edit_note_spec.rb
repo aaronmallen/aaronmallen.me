@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API revising a post's edit note", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def note_of(edit) = Posts::Slice["relations.post_edits"].by_pk(edit.id).one&.fetch(:note)
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "note" => [message] } }

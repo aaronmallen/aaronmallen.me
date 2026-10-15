@@ -3,8 +3,6 @@
 RSpec.describe "API review", type: :request do
   let(:wednesday) { Date.new(2026, 9, 16) }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
   def carried(*days) = create(:task, :in_sprint).tap { |task| days.each { carry(task, it) } }

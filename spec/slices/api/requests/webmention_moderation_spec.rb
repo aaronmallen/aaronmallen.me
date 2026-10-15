@@ -1,15 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API webmention moderation and settings", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1#{path}", body && JSON.generate(body), headers)
-    JSON.parse(last_response.body)
-  end
-
   def status = last_response.status
 
   def webmention_queries = Social::Slice["repos.webmention_queries"]

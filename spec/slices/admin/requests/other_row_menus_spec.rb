@@ -23,8 +23,6 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
   def returns = page.all("[data-context-menu] form", visible: :all).map { return_to(it) }.uniq
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do

@@ -22,8 +22,6 @@ RSpec.describe "Admin inbox Mark All As Seen", type: :request do
 
   def synced(title: "An issue") = create(:task, :external, title:).tap { create(:task_source, task: it) }
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all).strip
-
   before { sign_in_to_admin }
 
   it "shows the button in the head when rows wait, asking to confirm" do

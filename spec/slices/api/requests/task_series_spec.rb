@@ -12,16 +12,7 @@ RSpec.describe "API task recurrence", :frozen_clock, type: :request do
     }
   end
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def cadence(answer) = answer.fetch("recur")&.slice("cadence", *self.class.cadences.values.flat_map(&:keys))&.compact
-
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1#{path}", body && JSON.generate(body), headers)
-    JSON.parse(last_response.body)
-  end
 
   def recur(id, fields) = Tasks::Slice["operations.set_task_cadence"].call(id, fields).value!
 

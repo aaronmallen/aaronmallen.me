@@ -106,16 +106,10 @@ RSpec.describe "Task numbers", type: :app do
   end
 
   describe "two tasks created at once", :commits do
-    def wait_until_waiting(count)
-      here = db[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
-      waiting = db[:pg_locks].where(locktype: "advisory", granted: false, database: here)
-      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
-    end
-
     it "gives them different numbers" do
       other = Sequel.connect(db.opts.merge(max_connections: 1))
       other.get(Sequel.function(:pg_advisory_lock, Sequel.function(:hashtext, "tasks_next_number"), pod))
-      threads = Array.new(2) { Thread.new { task(pod) } }.tap { wait_until_waiting(2) }
+      threads = Array.new(2) { Thread.new { task(pod) } }.tap { Spec::DB::Locks.wait_for_waiters(db, 2) }
       other.disconnect
 
       expect(threads.map(&:value).map { number(it) }.sort).to eq([1, 2])

@@ -4,8 +4,6 @@ RSpec.describe "Admin record tags", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:tags) { Tags::Slice["relations.tags"] }
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   shared_examples "a tag route" do |path:, list:, scope:|
     def send_tag(record, verb, tag, **)
       suffix = verb == :untag ? "/tags/delete" : "/tags"

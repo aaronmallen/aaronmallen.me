@@ -6,8 +6,6 @@ RSpec.describe "API snooze inbox", type: :request do
   let(:task) { create(:task, :external).tap { create(:task_source, task: it) } }
   let(:webmention) { create(:webmention) }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def everything = { tasks: [task.id], messages: [message.id], webmentions: [webmention.id] }
 
   def inbox_ids = API::Slice["repos.inbox_queries"].unseen.map { it.record.id }

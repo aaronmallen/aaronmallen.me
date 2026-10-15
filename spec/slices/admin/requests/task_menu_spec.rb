@@ -14,8 +14,6 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
 
   def tag(task, *names) = Tasks::Slice["repos.task_mutations"].replace_tags(task.id, names)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do

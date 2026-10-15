@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API MCP clients", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def connect(client, scope:)
     MCP::Slice["operations.issue_tokens"].call(
       oauth_client_id: client.id,

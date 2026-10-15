@@ -6,8 +6,6 @@ RSpec.describe "Admin saved views", type: :request do
 
   def links = page.all(".saved-view-link").map(&:text)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   def views = repo.all
 
   {

@@ -49,8 +49,6 @@ RSpec.describe "Admin mail sending", type: :request do
     stub_gmail_thread(thread_id, [gmail_message("s1", labels: %w[SENT], From: "aaron@work.example")])
   end
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   before do
     sign_in_to_admin
     connect_google(account_id: work.address, scopes: send_scopes)

@@ -3,18 +3,9 @@
 RSpec.describe "API people", type: :request do
   let(:person_queries) { Social::Slice["repos.person_queries"] }
 
-  def add(fields) = call_api(:post, "", JSON.generate(fields))
+  def add(fields) = call_api(:post, "/people", JSON.generate(fields))
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
-  def call_api(verb, path, body = nil, query: nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/people#{path}", query || body, headers)
-    JSON.parse(last_response.body)
-  end
-
-  def edit(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def edit(id, fields) = call_api(:patch, "/people/#{id}", JSON.generate(fields))
 
   def everyone = person_queries.all
 
@@ -24,11 +15,11 @@ RSpec.describe "API people", type: :request do
     person.to_h.slice(:id, :key, :name, :mastodon_handle, :bluesky_handle).merge(stamps).transform_keys(&:to_s)
   end
 
-  def list = call_api(:get, "")
+  def list = call_api(:get, "/people")
 
-  def read(id) = call_api(:get, "/#{id}")
+  def read(id) = call_api(:get, "/people/#{id}")
 
-  def remove(id) = call_api(:delete, "/#{id}")
+  def remove(id) = call_api(:delete, "/people/#{id}")
 
   def resolves(handle, did)
     stub_request(:get, "#{SocialNetworks::BLUESKY_PUBLIC}/com.atproto.identity.resolveHandle")
@@ -36,7 +27,7 @@ RSpec.describe "API people", type: :request do
       .to_return(**json_response(did:))
   end
 
-  def search(network, text) = call_api(:get, "/search/#{network}", query: { query: text })
+  def search(network, text) = call_api(:get, "/people/search/#{network}", { query: text })
 
   def status = last_response.status
 

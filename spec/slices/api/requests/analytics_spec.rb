@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API analytics", :frozen_clock, type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def read(**params)
     window = { from: (today - 6).iso8601, to: today.iso8601 }.merge(params)
     get "/api/v1/analytics", window,

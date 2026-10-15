@@ -10,8 +10,6 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
 
   def status(article) = post_queries.by_id(article.id).status
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   describe "signed in" do
     before { sign_in_to_admin }
 

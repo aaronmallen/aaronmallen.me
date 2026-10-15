@@ -206,15 +206,9 @@ RSpec.describe "Contact messages", type: :request do
 
     def sent_together(addresses)
       senders = held_by_another_session do
-        addresses.map { send_in_thread(it) }.tap { wait_until_both_wait }
+        addresses.map { send_in_thread(it) }.tap { Spec::DB::Locks.wait_for_waiters(database, 2) }
       end
       senders.map { it.value.status }
-    end
-
-    def wait_until_both_wait
-      here = database[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
-      waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
-      Timeout.timeout(5) { sleep(0.01) until waiting.count == 2 }
     end
   end
 

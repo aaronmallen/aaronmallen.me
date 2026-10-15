@@ -1,22 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe "API sprints", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def current = call_api(:get, "/sprints/current")
 
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/sprints#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
+  def drop(id) = call_api(:delete, "/sprints/#{id}")
 
-  def current = call_api(:get, "/current")
+  def list(**window) = call_api(:get, "/sprints", window)
 
-  def drop(id) = call_api(:delete, "/#{id}")
-
-  def list(**window) = call_api(:get, "", window)
-
-  def plan(fields) = call_api(:post, "", JSON.generate(fields))
+  def plan(fields) = call_api(:post, "/sprints", JSON.generate(fields))
 
   def sprints = Tasks::Slice["repos.sprint_queries"]
 
@@ -121,7 +112,7 @@ RSpec.describe "API sprints", type: :request do
     end
 
     it "refuses a body that is not JSON with a 400" do
-      expect([call_api(:post, "", "{nope").fetch("error"), status]).to eq(["invalid_json", 400])
+      expect([call_api(:post, "/sprints", "{nope").fetch("error"), status]).to eq(["invalid_json", 400])
     end
   end
 

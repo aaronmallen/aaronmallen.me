@@ -122,14 +122,8 @@ RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
       create(:sprint, sprint_date: today)
       create(:work_session, task_id: carried.id, started_at: Time.now - 60)
       held_by_another_session do
-        Array.new(2) { Thread.new { Tasks::Operations::CurrentSprint.new.call } }.tap { wait_until_all_wait(2) }
+        Array.new(2) { Thread.new { Tasks::Operations::CurrentSprint.new.call } }.tap { Spec::DB::Locks.wait_for_waiters(database, 2) }
       end.map(&:value)
-    end
-
-    def wait_until_all_wait(count)
-      here = database[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
-      waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
-      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
     end
 
     it "lets both succeed" do

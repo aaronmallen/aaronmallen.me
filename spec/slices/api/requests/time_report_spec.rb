@@ -5,8 +5,6 @@ RSpec.describe "API time report", type: :request do
   let(:gem) { create(:project, name: "gem") }
   let(:range) { { from: "2026-03-02", to: "2026-03-08" } }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(day, hour, minute = 0) = Blog::TimeZone.local_time(2026, 3, day, hour, minute)
 
   def groups(**) = read(**).fetch("groups")

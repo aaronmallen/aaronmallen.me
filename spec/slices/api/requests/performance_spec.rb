@@ -28,8 +28,6 @@ RSpec.describe "API performance", :frozen_clock, type: :request do
     )
   end
 
-  def mint(scopes) = API::Slice["operations.mint_token"].call(name: "Terminal", scopes:).value!.fetch(:value)
-
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
   def page_row(load, route: "/", lcp: nil, on: today)
@@ -38,10 +36,8 @@ RSpec.describe "API performance", :frozen_clock, type: :request do
     )
   end
 
-  def read(from: today, to: today, token: mint(%w[read]))
-    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
-    get "/api/v1/performance", { from: from.to_s, to: to.to_s }, headers
-    JSON.parse(last_response.body)
+  def read(from: today, to: today, token: api_token(%w[read]))
+    call_api(:get, "/performance", { from: from.to_s, to: to.to_s }, token:)
   end
 
   def relation(name) = Performance::Slice["db.rom"].relations[name]
@@ -100,7 +96,7 @@ RSpec.describe "API performance", :frozen_clock, type: :request do
   end
 
   it "refuses a token without the read scope" do
-    read(token: mint(%w[write]))
+    read(token: api_token(%w[write]))
 
     expect(last_response.status).to eq(403)
   end

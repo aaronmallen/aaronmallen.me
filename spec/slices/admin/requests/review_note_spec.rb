@@ -196,14 +196,11 @@ RSpec.describe "Admin review note", :frozen_clock, type: :request do
     end
 
     describe "a note for the week under way" do
-      def api_token = API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
       def attention = Activity::Slice["repos.attention_queries"].stalled.select { it.kind == "journal" }
 
       def calendar_marks
-        headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
-        get "/api/v1/calendar", { from: (last_day - 6).iso8601, to: last_day.iso8601 }, headers
-        JSON.parse(last_response.body).fetch("days").map { it.fetch("journal") }
+        days = call_api(:get, "/calendar", { from: (last_day - 6).iso8601, to: last_day.iso8601 }).fetch("days")
+        days.map { it.fetch("journal") }
       end
 
       def last_day = today + (7 - today.cwday)

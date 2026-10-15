@@ -35,8 +35,6 @@ RSpec.describe "Admin mail menus", type: :request do
 
   def submenu(label) = page.find("[aria-haspopup]", text: label, visible: :all).sibling("[role=menu]", visible: :all)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   before { allow(Time).to receive(:now).and_return(now) }
 
   it "sends a visitor who isn't signed in to sign in" do

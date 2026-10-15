@@ -3,8 +3,6 @@
 RSpec.describe "Timing a request", type: :request do
   let(:json) { { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" } }
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def rows = Performance::Slice["db.rom"].relations[:performance_requests].to_a
 
   before { serve_like_puma }

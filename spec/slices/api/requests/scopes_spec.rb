@@ -14,15 +14,7 @@ RSpec.describe "API token scopes", type: :request do
 
   def all_scopes = Blog::Types::OAuthScope.values
 
-  def call_api(verb, path, token)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
-    public_send(verb.to_sym, "/api/v1#{path.gsub(/\{\w+\}/, '0')}", %w[patch post].include?(verb) ? "{}" : nil, headers)
-    last_response
-  end
-
   def document = JSON.parse(last_response.body)
-
-  def mint(scopes) = API::Slice["operations.mint_token"].call(name: "Terminal", scopes:).value!
 
   def needed(id)
     return Blog::Types::OAuthScope["read"] if self.class.unscoped.include?(id)
@@ -37,21 +29,25 @@ RSpec.describe "API token scopes", type: :request do
   end
 
   def refused?(verb, path, scope, tokens)
-    call_api(verb, path, tokens.fetch(scope)).status == 403 &&
+    response_to(verb, path, tokens.fetch(scope)).status == 403 &&
       last_response.headers["WWW-Authenticate"] == %(Bearer error="insufficient_scope", scope="#{scope}")
+  end
+
+  def response_to(verb, path, token)
+    call_api(verb, path.gsub(/\{\w+\}/, "0"), %w[patch post].include?(verb) ? "{}" : nil, token:).then { last_response }
   end
 
   def stored = API::Slice["db.rom"].relations[:api_tokens]
 
   it "asks each operation for the scope its MCP tool asks for" do
-    tokens = all_scopes.to_h { [it, mint(all_scopes - [it])[:value]] }
+    tokens = all_scopes.to_h { [it, api_token(all_scopes - [it])] }
     wrong = operations.reject { |verb, path, id| refused?(verb, path, needed(id), tokens) }
 
     expect(wrong).to be_empty, wrong.map { |verb, path, id| "#{verb.upcase} #{path} (#{id})" }.join("\n")
   end
 
   it "says which scope the token lacks" do
-    call_api("post", "/tasks", mint(%w[read])[:value])
+    response_to("post", "/tasks", api_token(%w[read]))
 
     expect(document).to eq(
       "error" => "insufficient_scope", "error_description" => "this endpoint needs a token with the write scope",
@@ -59,13 +55,13 @@ RSpec.describe "API token scopes", type: :request do
   end
 
   it "lets a token with the scope through" do
-    call_api("post", "/tasks", mint(%w[write])[:value])
+    response_to("post", "/tasks", api_token(%w[write]))
 
     expect(last_response.status).to eq(422)
   end
 
   it "lets a read token read" do
-    call_api("get", "/token", mint(%w[read])[:value])
+    response_to("get", "/token", api_token(%w[read]))
 
     expect(last_response.status).to eq(200)
   end
@@ -79,7 +75,7 @@ RSpec.describe "API token scopes", type: :request do
   it "gives a token stored before scopes every scope" do
     value = Blog::Types::NewSecret[]
     stored.dataset.insert(name: "Old laptop", token_digest: Blog::Types::SecretDigest[value])
-    call_api("post", "/posts/{id}/publish", value)
+    response_to("post", "/posts/{id}/publish", value)
 
     expect(last_response.status).to eq(422)
   end

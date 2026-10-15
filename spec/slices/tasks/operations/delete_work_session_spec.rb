@@ -10,7 +10,7 @@ RSpec.describe Tasks::Operations::DeleteWorkSession do
 
     def deleted_together
       held do
-        Array.new(2) { Thread.new { described_class.new.call(task.id, session.id) } }.tap { wait_until_waiting(2) }
+        Array.new(2) { Thread.new { described_class.new.call(task.id, session.id) } }.tap { Spec::DB::Locks.wait_for_waiters(database, 2) }
       end.map(&:value)
     end
 
@@ -22,11 +22,6 @@ RSpec.describe Tasks::Operations::DeleteWorkSession do
       end
     ensure
       other&.disconnect
-    end
-
-    def wait_until_waiting(count)
-      waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock")
-      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
     end
 
     it "takes the session's length off the total once" do

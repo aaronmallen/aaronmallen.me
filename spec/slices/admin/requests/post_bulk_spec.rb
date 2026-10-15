@@ -20,8 +20,6 @@ RSpec.describe "Admin bulk post actions", type: :request do
 
   def tagged(*names, **attributes) = create(:post, **attributes).tap { post_mutations.replace_tags(it.id, names) }
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   describe "signed in" do
     before { sign_in_to_admin }
 

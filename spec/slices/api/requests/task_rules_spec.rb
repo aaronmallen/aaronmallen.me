@@ -1,24 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe "API task rules", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def create_rule(fields) = call_api(:post, "/task_rules", JSON.generate(fields))
 
-  def call_api(verb, path, body = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/task_rules#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
-  def create_rule(fields) = call_api(:post, "", JSON.generate(fields))
-
-  def delete_rule(id) = call_api(:delete, "/#{id}")
+  def delete_rule(id) = call_api(:delete, "/task_rules/#{id}")
 
   def linear(workspace, key)
     sourced("x", provider: "linear", url: "https://linear.app/#{workspace}/issue/#{key}/a-title")
   end
 
-  def list = call_api(:get, "")
+  def list = call_api(:get, "/task_rules")
 
   def project_ids(task) = Tasks::Slice["relations.tasks"].by_pk(task.id).pluck(:project_id).compact
 
@@ -36,7 +27,7 @@ RSpec.describe "API task rules", type: :request do
 
   def tag_names(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).tags.map(&:name)
 
-  def update_rule(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
+  def update_rule(id, fields) = call_api(:patch, "/task_rules/#{id}", JSON.generate(fields))
 
   describe "GET /api/v1/task_rules" do
     it "lists each rule by pattern with its ID, pattern and tags" do

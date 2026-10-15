@@ -16,7 +16,7 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
 
   def agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36"
 
-  def call_api(address: "81.2.69.160", user_agent: agent)
+  def check_in(address: "81.2.69.160", user_agent: agent)
     get "/api/v1/token", {},
         { "HTTP_AUTHORIZATION" => "Bearer #{minted[:value]}", **access_headers(user_agent, address) }
   end
@@ -26,8 +26,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
   def known_devices = security_table(:known_devices)
 
   def new_city
-    call_api
-    call_api(address: "198.51.100.7")
+    check_in
+    check_in(address: "198.51.100.7")
   end
 
   def no_links = %w[post_id url reason failures].to_h { [it, nil] }
@@ -44,7 +44,7 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
 
   describe "an API token" do
     it "adds nothing for the token's first device" do
-      call_api
+      check_in
 
       expect(rows).to eq([])
     end
@@ -56,8 +56,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     end
 
     it "adds a row for a device the token has not called from" do
-      call_api
-      call_api(user_agent: "curl/8.7.1")
+      check_in
+      check_in(user_agent: "curl/8.7.1")
 
       expect(titles).to eq(["API token Terminal: an unknown device in London, GB"])
     end
@@ -65,7 +65,7 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     it "adds nothing for a device and city the token already used" do
       new_city
       known_devices.update(created_at: days_ago(30))
-      call_api(address: "198.51.100.7")
+      check_in(address: "198.51.100.7")
 
       expect(rows).to eq([])
     end
@@ -74,7 +74,7 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
       new_city
       known_devices.update(created_at: days_ago(30))
       security_table(:sightings).delete
-      call_api(address: "198.51.100.7")
+      check_in(address: "198.51.100.7")
 
       expect([rows, security_table(:sightings).count]).to eq([[], 1])
     end

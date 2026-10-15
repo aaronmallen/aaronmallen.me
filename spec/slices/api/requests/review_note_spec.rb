@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API review note", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def headers(token)
     found = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     token ? found.merge("HTTP_AUTHORIZATION" => "Bearer #{token}") : found

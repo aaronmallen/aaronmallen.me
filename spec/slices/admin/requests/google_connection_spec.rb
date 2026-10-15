@@ -77,8 +77,6 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def stub_token(body, status: 200) = stub_request(:post, token_url).to_return(status:, **json(body))
 
-  def toast = page.find("[data-toast]").text
-
   describe "without client credentials in settings" do
     before { set_up_google_client({}) }
 

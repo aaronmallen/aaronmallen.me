@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API saved view records", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
 
   def commit_row(commit)

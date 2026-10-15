@@ -10,8 +10,6 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
 
   def snoozes(kind, id) = page.all("form[action='/admin/inbox/#{kind}/#{id}/snooze']", visible: :all)
 
-  def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
-
   before do
     allow(Time).to receive(:now).and_return(now)
     sign_in_to_admin

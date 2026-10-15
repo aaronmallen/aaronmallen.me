@@ -470,18 +470,12 @@ RSpec.describe "OAuth token", type: :request do
       allow(repo).to(receive(spend).and_wrap_original do |original, *args, **options|
         original.call(*args, **options).tap do
           revoking = Thread.new { MCP::Slice["operations.revoke_client"].call(client.id) }
-          wait_until_blocked
+          Spec::DB::Locks.wait_for_waiters(database)
         end
       end)
       replace_component(key, repo)
       yield
       revoking.value
-    end
-
-    def wait_until_blocked
-      here = database[:pg_stat_activity].where(datname: Sequel.function(:current_database)).select(:pid)
-      waiting = database[:pg_locks].where(granted: false, pid: here)
-      Timeout.timeout(5) { sleep(0.01) until waiting.any? }
     end
 
     it "leaves no live token behind a code exchange" do

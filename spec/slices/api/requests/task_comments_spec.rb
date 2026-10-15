@@ -1,24 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe "API task comments", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-
   def body_of(comment) = Tasks::Slice["relations.task_comments"].by_pk(comment.id).one&.fetch(:body)
 
-  def call_api(verb, path, fields = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    public_send(verb, "/api/v1/tasks/#{path}", fields && JSON.generate(fields), headers)
-    JSON.parse(last_response.body)
-  end
-
-  def comment(id, **fields) = call_api(:post, "#{id}/comments", fields)
+  def comment(id, **fields) = call_api(:post, "/tasks/#{id}/comments", fields)
 
   def edit(id, comment_id, **fields)
-    call_api(:patch, "#{id}/comments/#{comment_id}", fields)
+    call_api(:patch, "/tasks/#{id}/comments/#{comment_id}", fields)
   end
 
-  def remove(id, comment_id) = call_api(:delete, "#{id}/comments/#{comment_id}")
+  def remove(id, comment_id) = call_api(:delete, "/tasks/#{id}/comments/#{comment_id}")
 
   def stamps(saved) = { "created_at" => saved.created_at.utc.iso8601, "updated_at" => saved.updated_at.utc.iso8601 }
 
@@ -74,7 +65,8 @@ RSpec.describe "API task comments", type: :request do
     it "shows the comment when the task is read" do
       comment(task.id, body: "Blocked on review")
 
-      expect(call_api(:get, task.id.to_s).fetch("comments").map { it.fetch("body") }).to eq(["Blocked on review"])
+      expect(call_api(:get, "/tasks/#{task.id}").fetch("comments").map { it.fetch("body") })
+        .to eq(["Blocked on review"])
     end
   end
 

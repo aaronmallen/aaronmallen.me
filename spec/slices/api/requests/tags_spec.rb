@@ -1,18 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API tags", type: :request do
-  def api_token = @api_token ||= mint
-
-  def call_api(verb, path, body = nil, token: api_token)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}"
-    public_send(verb, "/api/v1/tags#{path}", body, headers)
-    JSON.parse(last_response.body)
-  end
-
   def mail_tagged(name) = create(:message).tap { Mail::Slice["repos.message_tag_mutations"].add(it.id, name) }
-
-  def mint(**) = API::Slice["operations.mint_token"].call(name: "Terminal", **).value!.fetch(:value)
 
   def status = last_response.status
 
@@ -23,7 +12,7 @@ RSpec.describe "API tags", type: :request do
       create(:post, tags: %w[ruby])
       create(:tag, :private, name: "health")
 
-      expect([call_api(:get, "", { scope: "public" }).fetch("tags").map { it.values_at("name", "count") }, status])
+      expect([call_api(:get, "/tags", { scope: "public" }).fetch("tags").map { it.values_at("name", "count") }, status])
         .to eq([[["ruby", 1]], 200])
     end
 
@@ -31,17 +20,17 @@ RSpec.describe "API tags", type: :request do
       create(:tag, name: "ruby")
       create(:tag, name: "rails")
 
-      expect(call_api(:get, "", { scope: "public", query: "rub" }).values_at("count", "partial")).to eq([1, false])
+      expect(call_api(:get, "/tags", { scope: "public", query: "rub" }).values_at("count", "partial")).to eq([1, false])
     end
 
     it "answers the same JSON as list_tags" do
       create(:post, tags: %w[ruby])
 
-      expect(call_api(:get, "", { scope: "public" })).to eq(mcp_answer("list_tags", scope: "public"))
+      expect(call_api(:get, "/tags", { scope: "public" })).to eq(mcp_answer("list_tags", scope: "public"))
     end
 
     describe "without the mail scope" do
-      def private_tags = call_api(:get, "", { scope: "private" }, token: mint(scopes: %w[read])).fetch("tags")
+      def private_tags = call_api(:get, "/tags", { scope: "private" }, token: api_token(%w[read])).fetch("tags")
 
       it "leaves mail threads out of a tag's count and kinds" do
         create(:task, tags: %w[billing])
@@ -56,7 +45,7 @@ RSpec.describe "API tags", type: :request do
         mail_tagged("billing")
 
         expect(private_tags.map { it.fetch("name") }).to eq(%w[chores])
-        expect(call_api(:get, "", { scope: "private" }, token: mint(scopes: %w[read])).fetch("count")).to eq(1)
+        expect(call_api(:get, "/tags", { scope: "private" }, token: api_token(%w[read])).fetch("count")).to eq(1)
       end
 
       it "keeps a tag nothing carries" do
@@ -69,12 +58,12 @@ RSpec.describe "API tags", type: :request do
     it "counts mail threads with the mail scope" do
       mail_tagged("billing")
 
-      expect(call_api(:get, "", { scope: "private" }).fetch("tags").map { it.values_at("name", "by_kind") })
+      expect(call_api(:get, "/tags", { scope: "private" }).fetch("tags").map { it.values_at("name", "by_kind") })
         .to eq([["billing", { "messages" => 1 }]])
     end
 
     it "refuses a request with no scope with a 422" do
-      call_api(:get, "")
+      call_api(:get, "/tags")
 
       expect(status).to eq(422)
     end
@@ -82,14 +71,14 @@ RSpec.describe "API tags", type: :request do
 
   describe "POST /api/v1/tags" do
     it "adds the tag to its scope with a 201" do
-      added = call_api(:post, "", JSON.generate(scope: "private", name: "health", color: "mk-blue"))
+      added = call_api(:post, "/tags", JSON.generate(scope: "private", name: "health", color: "mk-blue"))
 
       expect([added.values_at("name", "color"), status]).to eq([%w[health mk-blue], 201])
     end
 
     it "refuses a name another tag holds with a 422" do
       create(:tag, name: "ruby")
-      call_api(:post, "", JSON.generate(scope: "public", name: "ruby"))
+      call_api(:post, "/tags", JSON.generate(scope: "public", name: "ruby"))
 
       expect([JSON.parse(last_response.body).fetch("errors"), status])
         .to eq([{ "name" => ["another tag already holds that name"] }, 422])
@@ -100,13 +89,13 @@ RSpec.describe "API tags", type: :request do
     it "renames the tag and keeps its colour" do
       tag = create(:tag, name: "ruby", color: "mk-blue")
 
-      expect(call_api(:patch, "/public/#{tag.id}", JSON.generate(name: "rails")).values_at("name", "color"))
+      expect(call_api(:patch, "/tags/public/#{tag.id}", JSON.generate(name: "rails")).values_at("name", "color"))
         .to eq(%w[rails mk-blue])
     end
 
     it "answers a tag from the other scope with a 404" do
       tag = create(:tag, :private)
-      call_api(:patch, "/public/#{tag.id}", JSON.generate(name: "rails"))
+      call_api(:patch, "/tags/public/#{tag.id}", JSON.generate(name: "rails"))
 
       expect(status).to eq(404)
     end
@@ -114,7 +103,7 @@ RSpec.describe "API tags", type: :request do
     it "refuses a tag only mail threads carry without the mail scope, naming mail", :aggregate_failures do
       mail_tagged("billing")
       id = tag_queries.all_in("private").first.id
-      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write]))
+      call_api(:patch, "/tags/private/#{id}", { name: "invoices" }, token: api_token(%w[write]))
 
       expect([last_response.body, status]).to match([include("mail scope"), 422])
       expect(tag_queries.find_in("private", id)).to have_attributes(name: "billing")
@@ -124,7 +113,7 @@ RSpec.describe "API tags", type: :request do
       mail_tagged("billing")
       create(:task, tags: %w[billing])
       id = tag_queries.all_in("private").first.id
-      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write]))
+      call_api(:patch, "/tags/private/#{id}", { name: "invoices" }, token: api_token(%w[write]))
 
       expect([status, tag_queries.find_in("private", id).name]).to eq([200, "invoices"])
     end
@@ -132,7 +121,7 @@ RSpec.describe "API tags", type: :request do
     it "renames a tag only mail threads carry with the mail scope" do
       mail_tagged("billing")
       id = tag_queries.all_in("private").first.id
-      call_api(:patch, "/private/#{id}", JSON.generate(name: "invoices"), token: mint(scopes: %w[write mail]))
+      call_api(:patch, "/tags/private/#{id}", { name: "invoices" }, token: api_token(%w[write mail]))
 
       expect([status, tag_queries.find_in("private", id).name]).to eq([200, "invoices"])
     end
@@ -142,14 +131,14 @@ RSpec.describe "API tags", type: :request do
     it "removes the tag for good", :aggregate_failures do
       tag = create(:tag)
 
-      expect([call_api(:delete, "/public/#{tag.id}"), status]).to eq([{ "id" => tag.id, "removed" => true }, 200])
+      expect([call_api(:delete, "/tags/public/#{tag.id}"), status]).to eq([{ "id" => tag.id, "removed" => true }, 200])
       expect(tag_queries.find_in("public", tag.id)).to be_nil
     end
 
     it "refuses a tag a mail thread carries without the mail scope, naming mail", :aggregate_failures do
       mail_tagged("billing")
       id = tag_queries.all_in("private").first.id
-      call_api(:delete, "/private/#{id}", nil, token: mint(scopes: %w[delete]))
+      call_api(:delete, "/tags/private/#{id}", nil, token: api_token(%w[delete]))
 
       expect([last_response.body, status]).to match([include("mail scope"), 422])
       expect(tag_queries.find_in("private", id)).not_to be_nil
@@ -158,13 +147,14 @@ RSpec.describe "API tags", type: :request do
     it "removes a tag a mail thread carries with the mail scope" do
       mail_tagged("billing")
       id = tag_queries.all_in("private").first.id
-      call_api(:delete, "/private/#{id}", nil, token: mint(scopes: %w[delete mail]))
+      call_api(:delete, "/tags/private/#{id}", nil, token: api_token(%w[delete mail]))
 
       expect([status, tag_queries.find_in("private", id)]).to eq([200, nil])
     end
 
     it "answers an unknown ID with a 404" do
-      expect([call_api(:delete, "/public/999999").fetch("message"), status]).to eq(["no tag has the ID 999999", 404])
+      expect([call_api(:delete, "/tags/public/999999").fetch("message"),
+              status]).to eq(["no tag has the ID 999999", 404])
     end
   end
 end

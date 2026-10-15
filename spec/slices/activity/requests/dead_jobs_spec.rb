@@ -12,11 +12,7 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
     allow(Sidekiq::RetrySet).to receive(:new).and_return(retry_set)
   end
 
-  def api_read
-    token = API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
-    get "/api/v1/attention", {}, { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
-    JSON.parse(last_response.body)
-  end
+  def api_read = call_api(:get, "/attention")
 
   def card
     sign_in_to_admin

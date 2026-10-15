@@ -22,8 +22,6 @@ RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
 
   def target = today + 10
 
-  def toast = page.find("[data-toast]", visible: :all).text(:all)
-
   it "moves nothing for anybody who has not signed in" do
     scheduled = create(:post, :scheduled, published_at: at(day, 9))
     post "/admin/calendar/posts/#{scheduled.id}/move", to: target.iso8601, day: day.iso8601

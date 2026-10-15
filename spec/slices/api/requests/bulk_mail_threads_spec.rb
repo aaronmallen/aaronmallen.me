@@ -1,24 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe "API bulk mail thread actions", type: :request do
-  def act(name, ids, **fields) = call_api(name, JSON.generate(ids:, **fields))
-
-  def api_token = @api_token ||= mint(nil)
-
-  def call_api(name, body)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    post "/api/v1/mail/threads/bulk/#{name}", body, headers
-    JSON.parse(last_response.body)
+  def act(name, ids, token: api_token, **fields)
+    call_api(:post, "/mail/threads/bulk/#{name}", JSON.generate(ids:, **fields), token:)
   end
 
   def gone_id = create(:message).id.tap { Mail::Slice["repos.message_mutations"].delete(it) }
 
   def ids(messages) = messages.map(&:id)
-
-  def mint(scopes)
-    API::Slice["operations.mint_token"].call({ name: "Terminal", scopes: }.compact).value!.fetch(:value)
-  end
 
   def queries
     timer = Blog::Timer.start
@@ -154,7 +143,8 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     end
 
     it "refuses a request with no tag" do
-      expect(call_api("tag", JSON.generate(ids: ids(picked))).fetch("errors")).to eq("tag" => ["tag is missing"])
+      expect(call_api(:post, "/mail/threads/bulk/tag",
+                      JSON.generate(ids: ids(picked))).fetch("errors")).to eq("tag" => ["tag is missing"])
     end
   end
 
@@ -210,10 +200,10 @@ RSpec.describe "API bulk mail thread actions", type: :request do
   end
 
   describe "a token without the mail scope" do
-    def api_token = @api_token ||= mint(%w[read write delete])
-
     def refusal_for(name, ids)
-      act(name, ids, tag: "billing", snoozed_until: (Time.now + 3600).utc.iso8601).fetch("error").then { [status, it] }
+      token = api_token(%w[read write delete])
+      error = act(name, ids, token:, tag: "billing", snoozed_until: (Time.now + 3600).utc.iso8601).fetch("error")
+      [status, error]
     end
 
     it "refuses every mail endpoint" do
@@ -256,7 +246,7 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     end
 
     it "refuses a request with no IDs" do
-      expect(call_api("read", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
+      expect(call_api(:post, "/mail/threads/bulk/read", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
   end
 

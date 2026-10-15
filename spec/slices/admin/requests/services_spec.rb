@@ -27,8 +27,6 @@ RSpec.describe "Admin connected services", type: :request do
 
   def row(name) = page.find(".li", text: name)
 
-  def toast = page.find("[data-toast]").text
-
   describe "signed in" do
     before { sign_in_to_admin }
 

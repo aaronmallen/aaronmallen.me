@@ -31,8 +31,6 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
     authorize_query.fetch("state")
   end
 
-  def toast = page.find("[data-toast]").text
-
   def token_url = "https://www.linkedin.com/oauth/v2/accessToken"
 
   def userinfo_url = "https://api.linkedin.com/v2/userinfo"
