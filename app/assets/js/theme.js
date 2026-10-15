@@ -15,27 +15,23 @@ function saveTheme(theme) {
   });
 }
 
+function render() {
+  for (const button of document.querySelectorAll("[data-theme-choice]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.themeChoice === currentTheme()));
+  }
+}
+
 export function setupThemePicker() {
-  for (const toggle of document.querySelectorAll("[data-theme-toggle]")) {
-    toggle.addEventListener("click", () => saveTheme(currentTheme() === "dark" ? "light" : "dark"));
-  }
+  document.addEventListener("click", (event) => {
+    const choice = event.target.closest("[data-theme-choice]");
+    if (choice) saveTheme(choice.dataset.themeChoice);
+    else if (event.target.closest("[data-theme-toggle]")) saveTheme(currentTheme() === "dark" ? "light" : "dark");
+    else return;
 
-  const buttons = document.querySelectorAll("[data-theme-choice]");
-  if (buttons.length === 0) return;
-
-  const render = () => {
-    for (const button of buttons) {
-      button.setAttribute("aria-pressed", String(button.dataset.themeChoice === currentTheme()));
-    }
-  };
-
-  for (const button of buttons) {
-    button.addEventListener("click", () => {
-      saveTheme(button.dataset.themeChoice);
-      render();
-    });
-  }
+    render();
+  });
 
   systemDark.addEventListener("change", render);
+  document.addEventListener("admin:morphed", render);
   render();
 }

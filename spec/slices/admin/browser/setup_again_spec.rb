@@ -87,6 +87,13 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
     end
   end
 
+  it "picks a theme from the new avatar menu" do
+    click_button(class: "avatar")
+    other = find(".avatar-menu-item[data-theme-choice][aria-pressed='false']").tap(&:click)["data-theme-choice"]
+
+    expect(page).to have_css(".avatar-menu-item[data-theme-choice='#{other}'][aria-pressed='true']")
+  end
+
   it "opens the palette from its new trigger and moves one row per arrow" do
     find(".top-bar-search").click
     find("[data-palette-query]").send_keys(:down)

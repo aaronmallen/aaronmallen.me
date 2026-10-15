@@ -26,6 +26,12 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     Tasks::Jobs::SyncIssues.new.perform("github")
   end
 
+  def theme
+    evaluate_script(<<~JS)
+      document.documentElement.dataset.siteTheme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    JS
+  end
+
   def wait_for_stream
     Timeout.timeout(5) { sleep 0.05 until request_gate.answered(events) >= 1 }
   end
@@ -62,6 +68,15 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     find("#thread-#{message.id}")
 
     expect(page).to have_css("button[data-bulk-toggle][aria-pressed='false']", text: "Select")
+  end
+
+  it "marks the current theme in the avatar menu after a live update" do
+    live "/admin/inbox"
+    create(:message, subject: "Hello there")
+    find(".top-bar .pill-nav-dot")
+    click_button(class: "avatar")
+
+    expect(page).to have_css(".avatar-menu-item[data-theme-choice='#{theme}'][aria-pressed='true']")
   end
 
   describe "on a decision page with an empty comment box" do
