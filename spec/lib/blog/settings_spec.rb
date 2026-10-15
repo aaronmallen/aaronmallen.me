@@ -273,4 +273,21 @@ RSpec.describe Blog::Settings do
       expect { web_threads("0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
     end
   end
+
+  describe "#share_site" do
+    def transfers(value)
+      store = Hanami::Settings::CompositeStore.new(
+        { share_site: { transfers: value, url: "https://aa.cool" } }, Hanami.app.config.settings_store,
+      )
+      described_class.new(store).share_site[:transfers]
+    end
+
+    it "leaves the cap on transfers unset when blank" do
+      expect(transfers("")).to be_nil
+    end
+
+    it "refuses a cap on transfers under one" do
+      expect { transfers("0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+  end
 end

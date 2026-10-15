@@ -25,6 +25,7 @@ redis:
   timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
 share_site:
+  transfers: <%= ENV["SHARE_TRANSFERS"].to_json %>
   url: http://shares.localhost:2300
 share_store:
   access_key: <%= ENV["MEDIA_STORE_ACCESS_KEY"].to_json %>

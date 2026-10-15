@@ -5,6 +5,7 @@ status: active
 created: 2026-10-14
 area: [config, db, shares]
 issue: "#1259"
+amended: ["#1384"]
 tags: [shares, share-groups, aa-cool, hosts, routing, zip, streaming, puma, cache-control, short-codes]
 ---
 
@@ -55,7 +56,7 @@ remove or delete would have to rebuild or sweep it, and the spec wants no second
 
 A zip download holds one of the five Puma threads for the whole transfer, as every share download does under
 [ADR 0142][0142], and no cache keeps it. A zip is as large as the group, so one download can hold a thread for a long
-time, and nothing caps it.
+time. The cap on share transfers that #1384 adds to [ADR 0142][0142] counts each zip as one.
 
 The page needs nothing from the share host but these paths. Its styles and any script have to come inline or from
 the blog's host.

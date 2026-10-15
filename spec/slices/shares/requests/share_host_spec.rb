@@ -263,6 +263,79 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  describe "past the cap on transfers in flight", :commits do
+    let(:gate) { Queue.new }
+    let(:group) { Shares::Slice["operations.upload_share_group"].call([share_upload(bytes, "a.txt", "text/plain")]).value! }
+    let(:transfers) { [] }
+
+    def download = "/#{group.code}/#{group.share_group_files.first.id}"
+
+    def free = transfers.size.times { gate << true }
+
+    def limit = Hanami.app.settings.web_threads - 2
+
+    before do
+      group
+      started = Queue.new
+      store = instance_double(ObjectStore::Client, configured?: true, exists?: true)
+      allow(store).to receive(:stream) do |*, &chunk|
+        started << true
+        gate.pop(timeout: 5)
+        chunk.call(bytes)
+      end
+      replace_component("share_store.client", store)
+      app
+      limit.times { transfers << Thread.new { Rack::MockRequest.new(app).get(download, "HTTP_HOST" => "shares.localhost") } }
+      Timeout.timeout(5) { limit.times { started.pop } }
+    end
+
+    after do
+      free
+      transfers.each(&:join)
+    end
+
+    it "answers a download with 503 and Retry-After at once", :aggregate_failures do
+      fetch(download)
+
+      expect(last_response.status).to eq(503)
+      expect(last_response.headers["Retry-After"]).to eq("10")
+      expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+    end
+
+    it "answers a range request with 503" do
+      fetch(download, "HTTP_RANGE" => "bytes=2-5")
+
+      expect(last_response.status).to eq(503)
+    end
+
+    it "answers a zip with 503" do
+      fetch("/#{group.code}.zip")
+
+      expect(last_response.status).to eq(503)
+    end
+
+    it "still serves the group's page" do
+      fetch("/#{group.code}")
+
+      expect(last_response.status).to eq(200)
+    end
+
+    it "still serves a blog page" do
+      get "/about", {}, "HTTP_HOST" => "aaronmallen.me"
+
+      expect(last_response.status).to eq(200)
+    end
+
+    it "lets the transfers in flight finish and frees their places", :aggregate_failures do
+      free
+      expect(transfers.map { it.value.status }).to all(eq(200))
+
+      gate << true
+      fetch(download)
+      expect(last_response.status).to eq(200)
+    end
+  end
+
   describe "a group's code" do
     let(:browser) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Safari/605.1.15" }
     let(:page) { Capybara.string(last_response.body) }

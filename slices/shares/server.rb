@@ -28,6 +28,11 @@ module Shares
       short_link_mutations: "repos.short_link_mutations", short_link_queries: "repos.short_link_queries",
     ]
 
+    def initialize(**)
+      super
+      @transfers = Transfers.new(settings)
+    end
+
     def call(env)
       request = ::Rack::Request.new(env)
       code, id, zip = requested_path(request)
@@ -118,7 +123,7 @@ module Shares
     def stream(request, file, &)
       return [503, {}, []] unless client.configured?
 
-      client.exists?(file.key) ? serve(request, file, &) : [404, {}, []]
+      @transfers.call { client.exists?(file.key) ? serve(request, file, &) : [404, {}, []] }
     end
 
     def zip(request, code)
@@ -126,8 +131,10 @@ module Shares
       return [404, {}, []] unless group
       return [503, {}, []] unless client.configured?
 
-      share_group_mutations.count_zip_download(group.id) if counted?(request)
-      [200, zip_headers(group), request.head? ? [] : zip_body(group.share_group_files)]
+      @transfers.call do
+        share_group_mutations.count_zip_download(group.id) if counted?(request)
+        [200, zip_headers(group), request.head? ? [] : zip_body(group.share_group_files)]
+      end
     end
 
     def zip_body(files)

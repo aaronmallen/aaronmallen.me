@@ -5,7 +5,7 @@ status: active
 created: 2026-10-10
 area: [config]
 issue: "#1055"
-amended: ["#1259"]
+amended: ["#1259", "#1384"]
 tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, cache-control, puma, aa-cool]
 ---
 
@@ -63,7 +63,11 @@ Download counts stay exact, and a share dies the moment the owner deletes it or 
 
 Every download holds one of the five Puma threads at the defaults for the whole transfer, the cost [ADR
 0080][0080] names for a photo cache miss, now paid on every request. A large file that spreads widely, or a video
-that seeks with many range requests, can tie up the threads that blog pages need. Nothing caps this.
+that seeks with many range requests, could tie up the threads that blog pages need, so #1384 caps them. The
+`share_site.transfers` setting, which `SHARE_TRANSFERS` sets, caps the downloads, range requests and zips each worker
+streams at once. Unset, it leaves two threads free, so three at the defaults. Past the cap the share host answers
+`503` with `Retry-After` at once rather than wait for a thread. A share group's page and a short link's redirect stay
+outside the cap, but each image the group page previews counts against it.
 
 `.config/config.ru` holds routing for the first time. A spec has to build the app from that file to reach the share
 host, as the strict transport spec does under [ADR 0111][0111], and any other way to start the site has to use it or

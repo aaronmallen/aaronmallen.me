@@ -223,7 +223,7 @@ module Blog
       username?: Value,
     )
 
-    setting :share_site, default: {}, constructor: Schema.schema(url: SiteUrl)
+    setting :share_site, default: {}, constructor: Schema.schema(transfers?: unless_blank(Threads), url: SiteUrl)
 
     setting :share_store, default: {}, constructor: object_store(DEFAULT_SHARE_STORE_READ_TIMEOUT)
 
