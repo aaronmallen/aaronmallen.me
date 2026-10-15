@@ -54,7 +54,8 @@ module MCP
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Each country gives its country_code and its English country_name, which is null for visits " \
                   "from before the site kept names. " \
-                  "Each top path gives its latest page title, which the visitor's browser sends, marked untrusted. " \
+                  "Each top path's path and latest page title, the path of each top path since, and the path " \
+                  "of each entry and exit page come from the visitor's browser and come marked untrusted. " \
                   "Each referrer's host, each click's link_host and link_path, and each internal referrer's path " \
                   "come from the visitor's browser and come marked untrusted too; a direct visit's host stays null. " \
                   "#{Untrusted::WARNING}. " \
@@ -105,25 +106,32 @@ module MCP
       endpoint scope: Blog::Types::OAuthScope["read"]
 
       VISITOR_TEXT = {
-        paths: %i[title],
+        paths: %i[path title],
         referrers: %i[host],
         clicks: %i[link_host link_path],
         internal_referrers: %i[path],
+        entry_pages: %i[path],
+        exit_pages: %i[path],
       }.freeze
 
       class << self
         private
 
         def answered(payload)
-          VISITOR_TEXT.reduce(super) do |answer, (key, fields)|
-            next answer unless answer.key?(key)
-
-            answer.merge(key => answer.fetch(key).map { |row| row.merge(marked(key, row.slice(*fields))) })
-          end
+          answer = marked_rows(super)
+          answer.key?(:since) ? answer.merge(since: marked_rows(answer.fetch(:since))) : answer
         end
 
         def marked(key, fields)
           fields.to_h { |field, text| [field, text.nil? && key == :referrers ? text : Untrusted.call(text)] }
+        end
+
+        def marked_rows(payload)
+          VISITOR_TEXT.reduce(payload) do |answer, (key, fields)|
+            next answer unless answer.key?(key)
+
+            answer.merge(key => answer.fetch(key).map { |row| row.merge(marked(key, row.slice(*fields))) })
+          end
         end
       end
     end

@@ -40,7 +40,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       create(:analytics_rollup_path, day:, path: "/writing/quiet", views: 5, visitors: 5, bounces: 0)
       create(:analytics_rollup_path, day:, path: "/writing/loud", views: 40, visitors: 20, bounces: 0)
 
-      expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/loud /writing/quiet])
+      expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/loud /writing/quiet].map { marked(it) })
     end
 
     it "sums a path across the days of the range" do
@@ -49,7 +49,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       create(:analytics_rollup_path, day: first, path: "/writing/hello", views: 3, visitors: 2, bounces: 0)
       create(:analytics_rollup_path, day: second, path: "/writing/hello", views: 4, visitors: 3, bounces: 0)
 
-      expect(read.fetch("paths").first).to include("path" => "/writing/hello", "views" => 7, "visitors" => 5)
+      expect(read.fetch("paths").first).to include("path" => marked("/writing/hello"), "views" => 7, "visitors" => 5)
     end
 
     it "gives the referrers, a direct visit as null" do
@@ -118,7 +118,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     it "counts today from the visits before they roll up" do
       create(:analytics_event, path: "/writing/today", referrer_host: "news.example", country_code: "US")
 
-      expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/today])
+      expect(read.fetch("paths").map { it.fetch("path") }).to eq([marked("/writing/today")])
     end
 
     describe "today's visitors" do
@@ -168,7 +168,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "ranks the paths of every unrolled day and none of a rolled up day's events" do
-        expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/late /writing/early])
+        expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/late /writing/early].map { marked(it) })
       end
 
       it "gives the referrers and countries of every unrolled day", :aggregate_failures do
@@ -183,7 +183,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       def hosts = read.fetch("referrers").map { it.fetch("host") }
 
-      def paths = read.fetch("paths").map { it.fetch("path") }
+      def paths = read.fetch("paths").map { it.fetch("path").fetch("text") }
 
       before do
         day = roll_up(today - 1, views: 1_000, visitors: 500).day
@@ -272,7 +272,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
     it "gives each top path its read-throughs" do
       expect(read.fetch("paths").to_h { it.values_at("path", "read_throughs") })
-        .to eq("/writing/hello" => 5, "/writing/other" => 1)
+        .to eq(marked("/writing/hello") => 5, marked("/writing/other") => 1)
     end
 
     it "gives a page its own read-throughs" do
@@ -1000,8 +1000,8 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "ranks the paths viewed since then" do
         expect(read_raw(since: at(12).iso8601).fetch("since").fetch("paths"))
-          .to eq([{ "path" => "/writing/late", "views" => 2, "visitors" => 2 },
-                  { "path" => "/writing/hello", "views" => 1, "visitors" => 1 }])
+          .to eq([{ "path" => marked("/writing/late"), "views" => 2, "visitors" => 2 },
+                  { "path" => marked("/writing/hello"), "views" => 1, "visitors" => 1 }])
       end
 
       it "reads a time with no offset as Chicago time" do
@@ -1176,17 +1176,20 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
       it "ranks the pages visitors saw first by visitors" do
         expect(read_raw.fetch("entry_pages"))
-          .to eq([{ "path" => "/writing/new", "visitors" => 2 }, { "path" => "/about", "visitors" => 1 }])
+          .to eq([{ "path" => marked("/writing/new"), "visitors" => 2 },
+                  { "path" => marked("/about"), "visitors" => 1 }])
       end
 
       it "ranks the pages visitors saw last by visitors" do
         expect(read_raw.fetch("exit_pages"))
-          .to eq([{ "path" => "/about", "visitors" => 2 }, { "path" => "/writing/old", "visitors" => 1 }])
+          .to eq([{ "path" => marked("/about"), "visitors" => 2 },
+                  { "path" => marked("/writing/old"), "visitors" => 1 }])
       end
 
       it "starts from since" do
         expect(read_raw(since: at(11).iso8601).fetch("entry_pages"))
-          .to eq([{ "path" => "/about", "visitors" => 1 }, { "path" => "/writing/new", "visitors" => 1 }])
+          .to eq([{ "path" => marked("/about"), "visitors" => 1 },
+                  { "path" => marked("/writing/new"), "visitors" => 1 }])
       end
 
       it "leaves out internal referrers" do
