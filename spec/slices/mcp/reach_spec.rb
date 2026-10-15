@@ -90,6 +90,7 @@ RSpec.describe "MCP reach", type: :app do
       "mail.operations.create_message" => "a reader sends a message through the public form",
       "mail.operations.download_attachment" => "the owner downloads an attachment from the admin's mail reader",
       "mail.operations.label_message" => "sets a thread's tags from the admin; tag_mail_threads covers it",
+      "mail.operations.reclean_mail_html" => "the owner queues a job that cleans stored mail HTML again",
       "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",
       "mail.operations.save_draft" => "the compose dialog saves its draft to Gmail; agents get no send tool",
       "mail.operations.send_mail" => "the owner sends mail from the admin; spec #1119 gives agents no send tool",

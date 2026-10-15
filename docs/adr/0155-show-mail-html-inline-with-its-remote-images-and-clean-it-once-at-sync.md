@@ -5,6 +5,7 @@ status: active
 created: 2026-10-12
 area: [admin, lib, mail]
 issue: "#1157"
+amended: ["#1392"]
 tags: [mail, gmail, html, sanitize, images, privacy, csp, reader]
 ---
 
@@ -34,6 +35,11 @@ message with no HTML, such as a contact form one, shows its plain `body` as it d
 **HTML is cleaned once, at sync, by `Mail::GmailThread`.** The reader trusts what the row holds and does not clean it
 again. Any change to what mail may carry goes in that class.
 
+**Clean stored mail again whenever the Sanitize config or gem changes.** Gmail mail keeps no raw HTML, so
+`Mail::Jobs::RecleanMailHtml` fetches each stored Gmail thread again, a page at a time, and rewrites each message's
+`html_body` through `Mail::GmailThread`. It leaves a thread Gmail no longer has as it is and logs how many it left.
+Queue it by hand, once, after the change ships.
+
 ## Alternatives
 
 **A sandboxed iframe.** It walls mail markup off from the admin, but the document inside takes none of the admin's
@@ -53,8 +59,9 @@ the owner read it, along with the owner's address and the time.
 Mail markup sits in the admin's document. Its `class` and `id` attributes survive cleaning, so the admin's CSS can
 restyle it, and an `id` can clash with one the admin uses.
 
-The sync is the only guard. A change to the Sanitize config reaches old rows only after they sync again, and a bug
-there puts whatever it lets through straight into the admin.
+The sync is the only guard. A change to the Sanitize config reaches old rows only after they sync again or the
+clean job runs, and a bug there puts whatever it lets through straight into the admin. The job cannot reach a
+thread Gmail has dropped, or contact form mail, which keeps no HTML.
 
 An image on plain `http` does not load, since the content security policy allows only `https`.
 
