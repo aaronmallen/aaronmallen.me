@@ -11,7 +11,7 @@ module Shares
       def call(params)
         fields = step validate(params)
 
-        step create(fields)
+        step(create(fields)).tap { fetch_title(it) }
       end
 
       private
@@ -24,6 +24,10 @@ module Shares
         return Failure([:invalid, { code: [Code::TAKEN] }]) if fields[:code] || attempts == 1
 
         create(fields, attempts - 1)
+      end
+
+      def fetch_title(link)
+        short_link_mutations.after_commit { Jobs::FetchShortLinkTitle.perform_async(link.id) } unless link.title
       end
 
       def validate(params)

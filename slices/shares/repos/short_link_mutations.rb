@@ -24,6 +24,10 @@ module Shares
 
       def delete(short_code_id) = short_codes.by_pk(short_code_id).delete
 
+      def fill_title(id, destination, title)
+        short_links.where(id:, destination:, title: nil).update(title:, updated_at: Time.now)
+      end
+
       def lock_destination(destination) = short_links.lock_until_commit(Sequel.function(:hashtext, destination))
     end
   end

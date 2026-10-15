@@ -11,10 +11,11 @@ RSpec.describe Social::Operations::ExpandForNetwork do
     expect(expansion.text).to eq("Read https://aaronmallen.me/a?ref=bluesky and http://shares.localhost/xxxxx")
   end
 
-  it "makes no short link unless asked" do
+  it "makes no short link and fetches no title unless asked", :aggregate_failures do
     expand(["Read https://example.com/b"], "bluesky")
 
     expect(short_links.count).to eq(0)
+    expect(Shares::Jobs::FetchShortLinkTitle.jobs).to be_empty
   end
 
   it "counts a link I shortened before at its own code" do
@@ -23,10 +24,11 @@ RSpec.describe Social::Operations::ExpandForNetwork do
     expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/my-talk")
   end
 
-  it "makes a short link for a new outside link when asked" do
+  it "makes a short link when asked and queues a fetch of its title", :aggregate_failures, :commits do
     text = expand(["Read https://example.com/b"], "mastodon", make_links: true).first.text
     link = Shares::Slice["repos.short_link_queries"].by_destination("https://example.com/b")
 
+    expect(Shares::Jobs::FetchShortLinkTitle.jobs.map { it["args"] }).to eq([[link.id]])
     expect(text).to eq("Read http://shares.localhost/#{link.code}")
   end
 

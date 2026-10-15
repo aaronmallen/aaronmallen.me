@@ -1053,6 +1053,13 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(text).to eq("see http://shares.localhost/#{code} and #{post_url}?ref=mastodon")
     end
 
+    it "leaves the new link's title to a job, so the page cannot hold up delivery", :aggregate_failures, :commits do
+      mastodon_text(queued(parts: ["see https://github.com/ada"]))
+
+      expect(a_request(:get, "https://github.com/ada")).not_to have_been_made
+      expect(Shares::Jobs::FetchShortLinkTitle.jobs.size).to eq(1)
+    end
+
     it "sends a link already on aa.cool as typed" do
       expect(mastodon_text(queued(parts: ["see http://shares.localhost/talk"]))).to eq("see http://shares.localhost/talk")
     end

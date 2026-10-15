@@ -456,4 +456,71 @@ RSpec.describe "Admin links", type: :request do
       expect(last_response).to be_not_found
     end
   end
+
+  describe "the destination's title", :commits do
+    let(:fetches) { Shares::Jobs::FetchShortLinkTitle }
+
+    before { resolves_publicly("example.com", "example.org") }
+
+    def listed
+      fetches.drain
+      get "/admin/links"
+      titles
+    end
+
+    def page_titled(url, title)
+      stub_request(:get, url).to_return(body: "<title>#{title}</title>", headers: { "Content-Type" => "text/html" })
+    end
+
+    def save(made, **changes)
+      fields = { destination: made.destination, code: made.code, title: "" }.merge(changes)
+      post("/admin/links/#{made.id}", { link: fields }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+    end
+
+    it "names a link I shorten after its page" do
+      page_titled("https://example.com/talk", "My talk")
+      shorten(destination: "https://example.com/talk")
+
+      expect(listed).to eq(["My talk"])
+    end
+
+    it "shows the host when the page will not answer" do
+      stub_request(:get, "https://example.com/talk").to_return(status: 503)
+      shorten(destination: "https://example.com/talk")
+
+      expect(listed).to eq(["example.com"])
+    end
+
+    it "fetches again when I clear the title and save" do
+      made = link(title: "Old")
+      page_titled("https://example.com/talk", "My talk")
+      save(made)
+
+      expect(listed).to eq(["My talk"])
+    end
+
+    it "fetches the new destination's title when I retarget a link with none" do
+      made = link
+      fetches.clear
+      page_titled("https://example.org/deck", "My deck")
+      save(made, destination: "https://example.org/deck")
+
+      expect(listed).to eq(["My deck"])
+    end
+
+    it "keeps my title when I retarget a titled link", :aggregate_failures do
+      made = link(title: "Mine")
+      save(made, destination: "https://example.org/deck", title: "Mine")
+
+      expect(fetches.jobs).to be_empty
+      expect(listed).to eq(["Mine"])
+    end
+
+    it "queues nothing when it refuses the save" do
+      made = link(title: "Mine")
+      save(made, destination: "javascript:alert(1)")
+
+      expect(fetches.jobs).to be_empty
+    end
+  end
 end
