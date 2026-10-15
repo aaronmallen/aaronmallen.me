@@ -3,7 +3,9 @@
 RSpec.describe "Robots", type: :request do
   def lines = last_response.body.lines(chomp: true)
 
-  def rules = ["User-agent: *", *%w[/admin /api /mcp /oauth /pulse /webmention].map { "Disallow: #{it}" }, "Allow: /"]
+  def rules
+    ["User-agent: *", *%w[/admin /api /mcp /oauth /pulse /search /webmention].map { "Disallow: #{it}" }, "Allow: /"]
+  end
 
   it "answers as plain text" do
     get "/robots.txt"

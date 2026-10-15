@@ -10,6 +10,8 @@ module Posts
           belongs_to :tag
         end
       end
+
+      def counts(post_ids) = where(post_id: post_ids).dataset.unordered.group_and_count(:tag_id)
     end
   end
 end

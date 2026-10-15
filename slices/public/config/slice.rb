@@ -25,6 +25,8 @@ module Public
 
     import keys: %w[repos.post_queries], from: :posts
 
+    import keys: %w[repos.public_search_queries], from: :search
+
     import keys: %w[repos.task_comment_queries repos.task_queries], from: :tasks
 
     import keys: %w[operations.receive_webmention repos.social_post_queries repos.webmention_queries], from: :social

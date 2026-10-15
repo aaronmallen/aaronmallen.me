@@ -31,6 +31,9 @@ en:
           contact: "contact"
           projects: "projects"
           writing: "writing"
+        search: "search"
+        search_label: "Search"
+        search_key: "/"
         skip_link: "Skip to content"
         theme_toggle_label: "Toggle dark mode"
       pager:

@@ -8,6 +8,7 @@ module Posts
       LINKS = %i[id body].freeze
       LIST = %i[id title slug published_at read_time summary first_paragraph].freeze
       PAGER = %i[title slug published_at].freeze
+      PUBLIC_TAG = Blog::Types::TagScope["public"]
       RELATED = 3
       RELATED_TERMS = 16
       SITEMAP = %i[id slug published_at updated_at].freeze
@@ -98,6 +99,10 @@ module Posts
       def published_slug?(slug) = posts.published.with_slug(slug).exist?
 
       def published_tag?(tag) = posts.published.tagged(tag).select(:id).exist?
+
+      def published_tag_counts
+        tags.where(scope: PUBLIC_TAG).ranked_by(post_tags.counts(posts.published.select(:id).dataset)).to_a
+      end
 
       def published_tag_names
         tagged = post_tags.where(post_id: posts.published.select(:id).dataset).select(:tag_id)

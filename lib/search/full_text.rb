@@ -29,7 +29,9 @@ module Search
       ranked.distinct(:kind, :source_id).order(:kind, :source_id, Sequel.desc(:rank)).from_self(alias: :best)
     end
 
-    def headline(query) = Sequel.function(:ts_headline, CONFIG, Sequel[:top][:body], query, HEADLINE).as(:match)
+    def headline(query)
+      Sequel.function(:ts_headline, CONFIG, Sequel[:top][:body], query, self.class::HEADLINE).as(:match)
+    end
 
     def matching(query) = dataset.unordered.where(Sequel.lit("search_vector @@ ?", query))
 

@@ -95,7 +95,7 @@ RSpec.describe Search::Repos::PublicSearchQueries do
 
       aloft = hits("airships").select { it.title == "Airships aloft" }
 
-      expect(aloft.map(&:match)).to eq(["Airships aloft\n\nUp we go"])
+      expect(aloft.map(&:excerpt)).to eq([[["", false], ["Airships", true], [" aloft\n\nUp we go", false]]])
     end
   end
 

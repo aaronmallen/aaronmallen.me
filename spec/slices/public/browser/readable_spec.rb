@@ -32,6 +32,15 @@ RSpec.describe "Public screens", type: :feature do
       "post" => "/writing/hello",
       "privacy" => "/privacy",
       "projects" => "/projects",
+      "search" => "/search",
+      "search nothing" => "/search?q=kafka",
+      "search results" => "/search?q=palette",
+      "search failed" => lambda do
+        queries = Search::Slice["repos.public_search_queries"]
+        allow(queries).to receive(:counts).and_raise(Sequel::DatabaseError)
+        replace_component("search.repos.public_search_queries", queries)
+        visit "/search?q=palette"
+      end,
       "tag" => "/writing/tags/ruby",
       "task" => "/projects/sai/tasks/#{board_task.number}",
       "writing" => "/writing",

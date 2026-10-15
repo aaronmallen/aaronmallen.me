@@ -87,6 +87,8 @@ module Public
 
         def render_meta
           super
+          robots = content_for(:robots)
+          meta(name: "robots", content: robots) if robots
           render_open_graph
           render_twitter_card
         end

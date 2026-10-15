@@ -20,7 +20,7 @@ module Blog
             nav(class: "main-nav", aria: { label: t(".label") }) do
               PAGES.each { |(route, label_key)| nav_item(route:, label_key:) }
             end
-            div(class: "main-nav-settings") { @session.signed_in? ? SettingsMenu(session: @session) : theme_toggle }
+            div(class: "main-nav-settings") { settings }
           end
         end
 
@@ -30,6 +30,22 @@ module Blog
           href = path(route)
 
           a(class: "main-nav-link", href:, aria: { current: ("page" if request.path == href) }) { t(label_key) }
+        end
+
+        def search_link
+          href = path(:search)
+
+          a(class: "search-link", href:,
+            aria: { label: t(".search_label"), current: ("page" if request.path == href) }) do
+            Icon("fa-solid fa-magnifying-glass")
+            span { t(".search") }
+            kbd { t(".search_key") }
+          end
+        end
+
+        def settings
+          search_link
+          @session.signed_in? ? SettingsMenu(session: @session) : theme_toggle
         end
 
         def theme_toggle

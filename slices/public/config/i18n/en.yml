@@ -88,6 +88,47 @@ en:
             mastodon: "Mastodon"
         toc:
           label: "On this page"
+      search_bar:
+        for: " for “%{query}”"
+        kinds:
+          all: "all"
+          post: "posts"
+          project: "projects"
+          task: "tasks"
+        label: "Show results for"
+        results:
+          one: "%{count} result"
+          other: "%{count} results"
+        summaries:
+          post:
+            one: "%{count} post"
+            other: "%{count} posts"
+          project:
+            one: "%{count} project"
+            other: "%{count} projects"
+          task:
+            one: "%{count} task"
+            other: "%{count} tasks"
+        summary: ": %{kinds}."
+      search_hit:
+        board: "%{name} board"
+        labels:
+          post: "post"
+          project: "project"
+          task: "task"
+        number: "#%{number}"
+        statuses:
+          active: "active"
+          archived: "archived"
+        tasks:
+          canceled: "canceled"
+          done: "done"
+          in_progress: "in progress"
+          open: "open"
+      search_ways:
+        latest: "Recent writing"
+        tags: "Start from a tag"
+        writing: "All writing"
       work_row:
         current: "Present"
         years: "%{from}–%{to}"
@@ -274,6 +315,35 @@ en:
             title: "Board not found"
           stars: "★ %{stars}"
           title: "%{name} board"
+      search:
+        index:
+          description: "Search posts, projects and tasks."
+          failed:
+            heading: "Search isn’t working right now."
+            lede: "Something broke on my end, not yours. Try again in a bit, or browse in the meantime."
+            projects: "Browse projects"
+            retry: "Try again"
+            writing: "Browse writing"
+          group_count: " · %{count}"
+          groups:
+            post: "Posts"
+            project: "Projects"
+            task: "Tasks"
+          heading: "Search"
+          hint: "Matches titles, text and tags. Put a phrase in quotes to match it exactly."
+          label: "Search posts, projects and tasks"
+          more:
+            post: "All %{count} posts matching “%{query}”"
+            project: "All %{count} projects matching “%{query}”"
+            task: "All %{count} tasks matching “%{query}”"
+          none:
+            heading: "Nothing matched “%{query}”."
+            lede: "Try fewer words, or a different spelling. Or start from a tag or something recent."
+            status: "No results for “%{query}”."
+          placeholder: "Try “providers” or “sidekiq”"
+          submit: "Search"
+          title: "Search"
+          title_for: "%{query} · Search"
       tags:
         show:
           description: "Posts and projects tagged %{tag}."

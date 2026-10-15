@@ -17,6 +17,7 @@ module Public
     get "/projects/:slug/tasks/:number", to: "tasks.show", as: :project_task
     get "/contact", to: "pages.contact", as: :contact
     get "/privacy", to: "pages.privacy", as: :privacy
+    get "/search", to: "search.index", as: :search
     get "/media/:key", to: "media.show", as: :media
     get "/media/:width/:key", to: "media.show", as: :media_width, width: /\d+/
     get "/site.webmanifest", to: "manifests.show", as: :manifest

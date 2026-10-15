@@ -4,7 +4,7 @@ module Public
   module Actions
     module Robots
       class Show < Action
-        PRIVATE_PATHS = %w[/admin /api /mcp /oauth /pulse /webmention].freeze
+        PRIVATE_PATHS = %w[/admin /api /mcp /oauth /pulse /search /webmention].freeze
 
         config.formats.clear.accept :txt
         answer_any_accept :txt
