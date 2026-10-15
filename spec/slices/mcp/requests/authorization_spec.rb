@@ -182,6 +182,15 @@ RSpec.describe "OAuth authorization", type: :request do
         .and(have_button("Cancel", name: "decision", value: "cancel"))
     end
 
+    it "draws approve as the primary button and cancel as a plain one", :aggregate_failures do
+      expect(page).to have_button("Approve", class: %w[bt pri], type: "submit")
+      expect(page).to have_css("button.bt:not(.pri)[type='submit']", text: "Cancel")
+    end
+
+    it "puts where the client sends me back in a hint" do
+      expect(page).to have_css("p.hint", text: redirect_uri)
+    end
+
     it "carries a CSRF token" do
       expect(page).to have_css("form input[name='_csrf_token']", visible: :hidden)
     end
@@ -386,6 +395,14 @@ RSpec.describe "OAuth authorization", type: :request do
       authorize(response_type: "token")
 
       expect(page.find_link("Go back to claude.ai")[:href]).to start_with("#{redirect_uri}?")
+    end
+
+    it "draws the way back as a button beside a hint", :aggregate_failures do
+      sign_in_to_admin
+      authorize(response_type: "token")
+
+      expect(page).to have_css("section.card a.bt", text: "Go back to claude.ai")
+      expect(page).to have_css("section.card p.hint")
     end
 
     it "issues no code when it refuses the request" do

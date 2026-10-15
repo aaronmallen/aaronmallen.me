@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Admin
+module Blog
   module UI
     module Components
       class Button < Component
@@ -10,7 +10,7 @@ module Admin
         prop :disabled, Blog::Types::Bool, default: false
         prop :href, Blog::Types::String.optional, default: nil
         prop :summary, Blog::Types::Bool, default: false
-        prop :icon, Blog::UI::Components::Icon::NAME.optional, default: nil
+        prop :icon, Icon::NAME.optional, default: nil
         prop :label, Blog::Types::String.optional, default: nil
         prop :attributes, Blog::Types::Hash, :**
 

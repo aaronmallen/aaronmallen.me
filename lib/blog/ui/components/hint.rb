@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Admin
+module Blog
   module UI
     module Components
       class Hint < Component

@@ -22,8 +22,8 @@ module MCP
           def render_error
             section(class: "card") do
               p { t(".error", description: @error_description, error: @error) }
-              p(class: "hint") { t(".nothing") }
-              a(class: "bt", href: @url) { t(".back", host:) }
+              Hint { t(".nothing") }
+              Button(href: @url) { t(".back", host:) }
             end
           end
         end

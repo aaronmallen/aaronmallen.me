@@ -41,8 +41,8 @@ module MCP
           def render_form
             Form(action: path(:mcp_oauth_decide), class: "connect-actions") do
               HiddenFields(values: @fields)
-              button(type: "submit", name: "decision", value: CANCEL, class: "bt") { t(".cancel") }
-              button(type: "submit", name: "decision", value: APPROVE, class: "bt pri") { t(".approve") }
+              Button(type: "submit", name: "decision", value: CANCEL) { t(".cancel") }
+              Button(variant: :pri, type: "submit", name: "decision", value: APPROVE) { t(".approve") }
             end
           end
 
@@ -61,7 +61,7 @@ module MCP
 
               ul { @scopes.each { render_grant(it) } }
 
-              p(class: "hint") { t(".returns", uri: @redirect_uri) }
+              Hint { t(".returns", uri: @redirect_uri) }
             end
           end
 
