@@ -15,6 +15,8 @@ module Public
         config.formats.clear.accept :webmanifest
         answer_any_accept :webmanifest, MEDIA_TYPE
 
+        share_with_caches
+
         def handle(_request, response)
           response.body = JSON.generate(manifest)
         end

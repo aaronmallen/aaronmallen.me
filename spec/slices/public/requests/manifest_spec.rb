@@ -17,6 +17,17 @@ RSpec.describe "Web manifest", type: :request do
     it "lists the 192px and 512px icons by their fingerprinted URLs" do
       expect(manifest["icons"]).to eq([icon("icon-192.png", "192x192"), icon("icon-512.png", "512x512")])
     end
+
+    it "lets caches keep it for five minutes" do
+      expect(last_response.headers["Cache-Control"]).to eq("public, max-age=0, s-maxage=300")
+    end
+  end
+
+  it "keeps shared caches from holding it while the owner is signed in" do
+    sign_in_to_admin
+    get "/site.webmanifest"
+
+    expect(last_response.headers["Cache-Control"].to_s).not_to include("s-maxage")
   end
 
   it "answers a browser that accepts anything" do
