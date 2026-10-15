@@ -20,6 +20,10 @@ module Posts
 
       def due_at(time) = with_status(SCHEDULED).where { published_at <= time }
 
+      def last_changed_at
+        unordered.max(Sequel.function(:greatest, self[:published_at].qualified, self[:updated_at].qualified))
+      end
+
       def linkable = linkables(title: :title, day: self.class.site_day(:published_at, :created_at))
 
       def matching(text) = containing(text, :title, :summary, :body)

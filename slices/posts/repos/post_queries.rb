@@ -60,6 +60,11 @@ module Posts
 
       def held_follow_ups = held_post_follow_ups.oldest_first.to_a
 
+      def last_changed_published_at(tag = nil)
+        published = posts.published
+        (tag ? published.tagged(tag) : published).last_changed_at
+      end
+
       def last_deleted_at = post_deletions.last_deleted_at
 
       def last_untagged_at = post_tag_removals.last_removed_at

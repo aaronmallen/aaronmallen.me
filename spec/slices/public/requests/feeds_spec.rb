@@ -710,6 +710,39 @@ RSpec.describe "Feeds", type: :request do
           expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
         end
       end
+
+      describe "#{path} at one post a page after the older post's latest note" do
+        before do
+          lower_page_size(:public, to: 1)
+          edited = yesterday + 60
+          create(:post_edit, post: older, note: "fixed a typo", created_at: edited, updated_at: edited)
+          get path
+        end
+
+        it "answers 200 to a reader with only the time once a newer post shifts the page", :aggregate_failures do
+          sent = validators
+          publish("newest", 0, tags: %w[ruby])
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
+        end
+      end
+    end
+
+    describe "a later page of a tag feed at one post a page" do
+      before do
+        lower_page_size(:public, to: 1)
+        get "/writing/tags/ruby.atom?page=2"
+      end
+
+      it "answers 304 to a reader with only the time once a post under another tag is published" do
+        sent = validators
+        publish("newest", 0, tags: %w[rust])
+        poll("/writing/tags/ruby.atom?page=2", last_modified: sent[:last_modified])
+
+        expect(last_response.status).to eq(304)
+      end
     end
 
     describe "the last page at one post a page" do

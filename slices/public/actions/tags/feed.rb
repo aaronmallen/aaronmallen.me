@@ -18,7 +18,7 @@ module Public
           redirect_to_own_path(request, response, :tag_feed, page, tag:)
           posts = post_queries.published_versions_by_tag(tag, page)
           halt 404 if posts.rows.empty?
-          version = version_feed_or_halt(request, response, posts)
+          version = version_feed_or_halt(request, response, posts, tag:)
 
           response.body = render_feed(version, tag)
         end

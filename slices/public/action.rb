@@ -105,10 +105,10 @@ module Public
 
     def unchanged_since?(since, last_modified) = since && last_modified && since.to_i >= last_modified.to_time.to_i
 
-    def version_feed_or_halt(request, response, posts)
+    def version_feed_or_halt(request, response, posts, tag: nil)
       count_feed_fetch(request)
       keep_feed_from_caches(response)
-      version = version_atom_feed.call(posts)
+      version = version_atom_feed.call(posts, tag:)
       halt_if_feed_unchanged(request, response, version)
       version
     end
