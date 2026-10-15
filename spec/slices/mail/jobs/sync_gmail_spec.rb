@@ -286,6 +286,12 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(message.body).to eq("Hi x")
     end
 
+    it "stores the text of an HTML-only body without its entities" do
+      sync_message(parts: [gmail_part("text/html", "<p>Tom &amp; Jerry&nbsp;&lt;3</p>")])
+
+      expect(message.body).to eq("Tom & Jerry <3")
+    end
+
     it "keeps the styling of a stored HTML body but not its position" do
       html = %(<div style="position: fixed; z-index: 9999; top: 0; color: red"><img src="https://example.com/a.png">Hi</div>)
       sync_message(parts: [gmail_part("text/html", html)])

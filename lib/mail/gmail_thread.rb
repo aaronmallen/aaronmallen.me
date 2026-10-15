@@ -13,6 +13,7 @@ module Mail
     FLAGS = { starred: "STARRED", sent: "SENT", important: "IMPORTANT" }.freeze
     FROM = /\A\s*"?(?<name>[^"<]*?)"?\s*<(?<address>[^>]*)>\s*\z/
     HTML = "text/html"
+    NBSP = "\u00A0"
     NO_SUBJECT = "(no subject)"
     NUL = "\0"
     PLAIN = "text/plain"
@@ -57,7 +58,7 @@ module Mail
       plain = text(payload, PLAIN)
       html = text(payload, HTML)
 
-      { body: present(plain || (html && Sanitize.fragment(html))),
+      { body: present(plain || (html && html_text(html))),
         html_body: html && Sanitize.fragment(html, SANITIZE) }
     end
 
@@ -87,6 +88,8 @@ module Mail
     def flags = FLAGS.transform_values { labels.include?(it) }.merge(EVERY.transform_values { every?(it) })
 
     def header(part, name) = part.fetch("headers", []).find { it["name"].casecmp?(name) }&.fetch("value")
+
+    def html_text(html) = Nokogiri::HTML5.fragment(Sanitize.fragment(html)).text.tr(NBSP, " ")
 
     def labels = @labels ||= message_labels.reduce(Set.new, :|)
 
