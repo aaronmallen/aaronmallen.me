@@ -251,4 +251,24 @@ RSpec.describe Record::Jobs::ImportPullRequests do
       expect(failure).to include(reason: "rate_limited")
     end
   end
+
+  describe "a run that crashes" do
+    before { replace_component("operations.import_pull_requests", ->(*) { raise KeyError, "key not found: :id" }) }
+
+    def import_crashing
+      import
+    rescue KeyError
+      nil
+    end
+
+    it "records the crash where the admin reads it" do
+      import_crashing
+
+      expect(failure).to include(reason: "crashed", message: "key not found: :id")
+    end
+
+    it "still raises, so the error reaches error tracking" do
+      expect { import }.to raise_error(KeyError, /key not found/)
+    end
+  end
 end

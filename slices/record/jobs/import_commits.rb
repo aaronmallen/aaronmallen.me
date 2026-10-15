@@ -11,7 +11,11 @@ module Record
         record_sync_outcome: "operations.record_sync_outcome", # rubocop:disable Hanami/UnusedDeps
       ]
 
-      def perform = record_outcome(SYNC, commit_mutations.with_import_lock { import_commits.call })
+      def perform
+        result = record_crash(SYNC) { commit_mutations.with_import_lock { import_commits.call } }
+
+        record_outcome(SYNC, result)
+      end
     end
   end
 end
