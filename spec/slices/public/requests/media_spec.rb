@@ -56,6 +56,40 @@ RSpec.describe "Media", type: :request do
       expect(last_response).to be_ok
     end
 
+    it "tags it with its key" do
+      get path
+
+      expect(last_response.headers["ETag"]).to eq(%("#{key}"))
+    end
+
+    it "answers a browser that holds it with an empty 304 and never asks the store", :aggregate_failures do
+      get path, {}, "HTTP_IF_NONE_MATCH" => %("#{key}")
+
+      expect(last_response.status).to eq(304)
+      expect(last_response.body).to be_empty
+      expect(stub_store).not_to have_been_requested
+    end
+
+    it "keeps the tag and cache header on a 304", :aggregate_failures do
+      get path, {}, "HTTP_IF_NONE_MATCH" => %("#{key}")
+
+      expect(last_response.headers["ETag"]).to eq(%("#{key}"))
+      expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
+    end
+
+    it "matches a weak tag in a list" do
+      get path, {}, "HTTP_IF_NONE_MATCH" => %("other", W/"#{key}")
+
+      expect(last_response.status).to eq(304)
+    end
+
+    it "sends the photo when the browser holds another one", :aggregate_failures do
+      get path, {}, "HTTP_IF_NONE_MATCH" => %("#{'b' * 32}.jpg")
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to eq("photo")
+    end
+
     it "stays public while a draft also shows it" do
       claim_for_post(:draft)
       get path
@@ -109,11 +143,27 @@ RSpec.describe "Media", type: :request do
           expect(last_response.content_type).to eq("image/jpeg")
         end
 
-        it "keeps the operator's copy out of every cache" do
+        it "lets only the operator's browser keep the photo for an hour" do
           sign_in_to_admin
           get path
 
-          expect(cache_control).to eq("private, no-store")
+          expect(cache_control).to eq("private, max-age=3600")
+        end
+
+        it "answers the operator's browser that holds it with a 304 and never asks the store", :aggregate_failures do
+          sign_in_to_admin
+          get path, {}, "HTTP_IF_NONE_MATCH" => %("#{key}")
+
+          expect(last_response.status).to eq(304)
+          expect(cache_control).to eq("private, max-age=3600")
+          expect(store).not_to have_been_requested
+        end
+
+        it "answers a visitor who sends the tag with a 404", :aggregate_failures do
+          get path, {}, "HTTP_IF_NONE_MATCH" => %("#{key}")
+
+          expect(last_response.status).to eq(404)
+          expect(last_response.headers["ETag"]).to be_nil
         end
       end
     end
@@ -149,6 +199,28 @@ RSpec.describe "Media", type: :request do
       expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
     end
 
+    it "tags a width with its own key" do
+      claim_for_post(:published)
+      get "/media/640/#{key}"
+
+      expect(last_response.headers["ETag"]).to eq(%("640/#{key}"))
+    end
+
+    it "answers a browser that holds a width with a 304 and never asks the store", :aggregate_failures do
+      claim_for_post(:published)
+      get "/media/640/#{key}", {}, "HTTP_IF_NONE_MATCH" => %("640/#{key}")
+
+      expect(last_response.status).to eq(304)
+      expect(store).not_to have_been_requested
+    end
+
+    it "sends a width when the browser holds the full photo" do
+      claim_for_post(:published)
+      get "/media/640/#{key}", {}, "HTTP_IF_NONE_MATCH" => %("#{key}")
+
+      expect(last_response.body).to eq("small")
+    end
+
     it "answers a width the photo does not store with a 404 and never asks the store", :aggregate_failures do
       claim_for_post(:published)
       stray = stub_request(:any, /store\.example/)
@@ -179,6 +251,10 @@ RSpec.describe "Media", type: :request do
     it "answers with an empty 404", :aggregate_failures do
       expect(last_response.status).to eq(404)
       expect(last_response.body).to be_empty
+    end
+
+    it "sends no tag" do
+      expect(last_response.headers["ETag"]).to be_nil
     end
 
     it "lets every cache keep it for a minute" do
@@ -231,6 +307,7 @@ RSpec.describe "Media", type: :request do
       expect(last_response.status).to eq(404)
       expect(last_response.body).to be_empty
       expect(cache_control).to eq("public, max-age=60")
+      expect(last_response.headers["ETag"]).to be_nil
     end
 
     it "still loads a post that uses the photo", :aggregate_failures do

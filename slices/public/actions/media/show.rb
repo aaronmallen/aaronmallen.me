@@ -6,8 +6,9 @@ module Public
       class Show < Action
         CACHE_PUBLISHED = "public, max-age=31536000, s-maxage=86400, immutable"
         CACHE_MISS = "public, max-age=60"
-        CACHE_NEVER = "private, no-store"
+        CACHE_PRIVATE = "private, max-age=3600"
         NOT_FOUND = 404
+        NOT_MODIFIED = 304
 
         include Deps[photo_queries: "media.repos.photo_queries", store: "media_store.client"]
 
@@ -16,14 +17,19 @@ module Public
         def handle(request, response)
           published = published(request.params[:key])
           key = stored_key(request, published)
-          photo = fetch(key) if key
           response.headers.delete("Vary")
-          return miss(response) unless photo
+          return miss(response) unless key
 
-          serve(response, photo, published ? CACHE_PUBLISHED : CACHE_NEVER)
+          validators(response, key, published)
+          return not_modified(response) if fresh?(request, key)
+
+          photo = fetch(key)
+          photo ? serve(response, photo) : miss(response)
         end
 
         private
+
+        def etag(key) = %("#{key}")
 
         def fetch(key)
           store.get(key)
@@ -31,9 +37,21 @@ module Public
           nil
         end
 
+        def fresh?(request, key)
+          request.get_header("HTTP_IF_NONE_MATCH").to_s.split(",").any? do |tag|
+            tag.strip.delete_prefix("W/") == etag(key)
+          end
+        end
+
         def miss(response)
+          response.headers.delete("ETag")
           response.headers["Cache-Control"] = CACHE_MISS
           response.status = NOT_FOUND
+          response.body = Blog::Constants::EMPTY_STRING
+        end
+
+        def not_modified(response)
+          response.status = NOT_MODIFIED
           response.body = Blog::Constants::EMPTY_STRING
         end
 
@@ -41,8 +59,7 @@ module Public
 
         def published(key) = photo_key?(key) ? photo_queries.published(key) : nil
 
-        def serve(response, photo, cache_control)
-          response.headers["Cache-Control"] = cache_control
+        def serve(response, photo)
           response.content_type = photo.content_type
           response.body = photo.body
         end
@@ -52,6 +69,11 @@ module Public
           return width_key(published, width.to_i) if width
 
           key if published || (photo_key?(key) && session_reader.call(request).signed_in?)
+        end
+
+        def validators(response, key, published)
+          response.headers["Cache-Control"] = published ? CACHE_PUBLISHED : CACHE_PRIVATE
+          response.headers["ETag"] = etag(key)
         end
 
         def width_key(published, width) = published&.widths&.include?(width) ? published.variant_key(width) : nil

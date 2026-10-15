@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [config, media, public]
 issue: "#132"
-amended: ["#137", "#396", "#394", "#468"]
+amended: ["#137", "#396", "#394", "#468", "#1310"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 
@@ -43,8 +43,11 @@ We store photos in any S3-compatible store named in settings and serve them thro
   Cloudflare then serves repeat requests from its own cache. #468 added `s-maxage=86400`, so Cloudflare keeps a
   photo for a day and a photo taken down drops off the edge ([ADR 0109][0109]).
 - Since #394 a visitor gets only a photo a published post claims ([ADR 0082][0082]). Any other photo answers a
-  visitor with the same empty 404 as a missing key, and answers the signed in owner with `private, no-store`, so
-  no cache keeps a photo from a journal entry, a task or a draft.
+  visitor with the same empty 404 as a missing key. Since #1310 the signed in owner gets it with
+  `private, max-age=3600`, so only the owner's browser keeps a photo from a journal entry, a task or a draft, and
+  for an hour at most.
+- Since #1310 every photo, and every stored width of it, sends its key as a strong `ETag`. A request whose
+  `If-None-Match` names that tag gets an empty 304 without a read from the store.
 - A photo the store does not have, or a store that does not answer, gives an empty 404.
 
 ## Alternatives
