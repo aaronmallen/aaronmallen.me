@@ -1016,6 +1016,10 @@ CREATE TABLE public.posts (
     canonical_url text DEFAULT ''::text NOT NULL,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(summary, ''::text) || ' '::text) || COALESCE(body, ''::text))), 'B'::"char"))) STORED,
     unsent_webmention_targets text[] DEFAULT '{}'::text[] NOT NULL,
+    body_html text NOT NULL,
+    first_paragraph text,
+    read_time integer NOT NULL,
+    word_count integer NOT NULL,
     CONSTRAINT posts_published_at_check CHECK (((status = 'draft'::public.post_status) OR (published_at IS NOT NULL)))
 );
 
@@ -3188,6 +3192,7 @@ CREATE TABLE public.post_edits (
     note public.non_blank_text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    note_html text NOT NULL,
     CONSTRAINT post_edits_note_length_check CHECK ((char_length((note)::text) <= 500))
 );
 
@@ -8255,4 +8260,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015000300_add_relation_to_record_links.rb'),
 ('20261015001000_backfill_task_projects_and_tags_from_rules.rb'),
 ('20261015003000_add_sync_token_to_calendars.rb'),
-('20261015010000_add_number_to_tasks.rb');
+('20261015010000_add_number_to_tasks.rb'),
+('20261015080000_add_rendered_body_to_posts.rb');

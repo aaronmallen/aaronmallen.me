@@ -34,13 +34,11 @@ module Public
             end
           end
 
-          def markdown(edit) = raw(safe(::Markdown.to_html(edit.note)))
-
-          def note(edit) = div(class: "post-edit-note") { markdown(edit) }
+          def note(edit) = div(class: "post-edit-note") { raw(safe(edit.note_html)) }
 
           def notes(edits)
             ul(class: "post-edit-list") do
-              edits.each { |edit| li(class: "post-edit-item") { markdown(edit) } }
+              edits.each { |edit| li(class: "post-edit-item") { raw(safe(edit.note_html)) } }
             end
           end
         end

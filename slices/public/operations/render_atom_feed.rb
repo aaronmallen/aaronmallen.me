@@ -41,10 +41,10 @@ module Public
       end
 
       def edit_notes(html, edits)
-        return html.div(class: "post-edit-note") { html << markdown(edits.first) } if edits.one?
+        return html.div(class: "post-edit-note") { html << edits.first.note_html } if edits.one?
 
         html.ul(class: "post-edit-list") do
-          edits.each { |edit| html.li(class: "post-edit-item") { html << markdown(edit) } }
+          edits.each { |edit| html.li(class: "post-edit-item") { html << edit.note_html } }
         end
       end
 
@@ -88,8 +88,6 @@ module Public
           xml.link(rel:, type: MEDIA_TYPE, href: url(feed, params, number)) if number
         end
       end
-
-      def markdown(edit) = ::Markdown.to_html(edit.note)
 
       def notes(edits)
         return Blog::Constants::EMPTY_STRING if edits.empty?

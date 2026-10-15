@@ -3,6 +3,14 @@
 module Posts
   module Repos
     class PostMutations < Blog::DB::Repo
+      module Rendered
+        def create(attributes) = super(Helpers::Rendering.with_body(attributes))
+
+        def update(id, attributes = {}, **fields) = super(id, Helpers::Rendering.with_body(attributes.merge(fields)))
+      end
+
+      prepend Rendered
+
       root :posts
 
       stamped_commands :create, :update
@@ -31,6 +39,22 @@ module Posts
       end
 
       def replace_tags(id, names) = post_tags.retag(id, names, tags)
+
+      def rerender
+        rerender_rows(posts, :body, Helpers::Rendering::BODY) { Helpers::Rendering.body(it) } +
+          rerender_rows(post_edits, :note, Helpers::Rendering::NOTE) { Helpers::Rendering.note(it) }
+      end
+
+      private
+
+      def rerender_rows(relation, source, columns)
+        relation.select(:id, source, *columns).to_a.count do |row|
+          fresh = yield row[source]
+          next false if fresh == row.to_h.slice(*columns)
+
+          relation.by_pk(row.id).where(source => row[source]).update(fresh).positive?
+        end
+      end
     end
   end
 end

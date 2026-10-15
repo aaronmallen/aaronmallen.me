@@ -24,6 +24,28 @@ RSpec.describe "Posts", type: :request do
     end
   end
 
+  describe "the stored rendering" do
+    let(:posts) { Posts::Slice["relations.posts"] }
+
+    before do
+      published = publish("hello", body: "the markdown")
+      posts.by_pk(published.id).update(body_html: "<p>stored html</p>", first_paragraph: "stored blurb", read_time: 7)
+    end
+
+    it "shows the stored html and read time on the post page", :aggregate_failures do
+      get "/writing/hello"
+
+      expect(page).to have_css(".prose p", text: "stored html").and have_no_text("the markdown")
+      expect(page).to have_css(".post-meta", text: "7 min")
+    end
+
+    it "shows the stored first paragraph on the writing page" do
+      get "/writing"
+
+      expect(page).to have_css(".entry-blurb", exact_text: "stored blurb")
+    end
+  end
+
   describe "the pager on two posts published at the same time" do
     let(:at) { Time.now.round - 60 }
 
@@ -65,6 +87,24 @@ RSpec.describe "Posts", type: :request do
     end
 
     def slug_error(code) = i18n.t(code, scope: "ui.components.posts.field_error.slug")
+
+    it "stores the rendered body, first paragraph, read time and word count" do
+      save(title: "Hello", slug: "hello", body: "## Setup\n\none *two* three")
+
+      expect(post_queries.all.first).to have_attributes(
+        body_html: include('<h2 id="setup">', "<em>two</em>"), first_paragraph: "one two three", read_time: 1,
+        word_count: 4,
+      )
+    end
+
+    it "stores a new body's rendering and the edit note's html on a published post", :aggregate_failures do
+      published = publish("hello", body: "old words")
+      fields = { title: "Hello", slug: "hello", body: "new words here", edit_note: "Fixed *it*" }
+      save("/admin/posts/#{published.id}", **fields)
+
+      expect(post_queries.by_id(published.id)).to have_attributes(body_html: "<p>new words here</p>\n", word_count: 3)
+      expect(post_queries.edits_for_post(published.id).map(&:note_html)).to eq(["<p>Fixed <em>it</em></p>\n"])
+    end
 
     it "refuses a blank slug when the title has no letter or number", :aggregate_failures do
       save(title: "!!!", slug: "")

@@ -51,6 +51,9 @@ production:
     refresh_social_engagement:
       cron: "0 */4 * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::RefreshSocialEngagement
+    rerender_posts:
+      cron: "30 3 * * * <%= Blog::TimeZone::NAME %>"
+      class: Posts::Jobs::RerenderPosts
     roll_over_sprint:
       cron: "0 0 * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::RollOverSprint

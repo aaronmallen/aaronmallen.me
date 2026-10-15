@@ -78,7 +78,7 @@ module Admin
       end
 
       def draft_counts(drafts)
-        drafts.to_h { [it.id, { read_time: it.read_time, words: ::Markdown.word_count(it.body) }] }
+        drafts.to_h { [it.id, { read_time: it.read_time, words: it.word_count }] }
       end
 
       def due(scheduled, social) = scheduled.map(&:published_at) + social[:scheduled].map(&:posted_at)

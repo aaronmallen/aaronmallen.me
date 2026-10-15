@@ -21,7 +21,7 @@ module Posts
           **COUNTS.transform_values { |key| figures.transform_values { it.fetch(key) } },
           unique_reader_counts: post_reader_queries.unique_readers(posts),
           webmention_counts: webmention_queries.count_by_post(ids),
-          word_counts: posts.to_h { [it.id, ::Markdown.word_count(it.body)] },
+          word_counts: posts.to_h { [it.id, it.word_count] },
         }
       end
     end

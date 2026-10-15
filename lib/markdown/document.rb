@@ -26,6 +26,12 @@ module Markdown
     SIZED_IMAGE = '<img width="%d" height="%d" '
     TEXT_NODES = %i[code code_block text].freeze
 
+    def self.headings(html)
+      html.scan(H2).filter_map do |id, text|
+        { id:, text: CGI.unescapeHTML(text.gsub(TAG, Blog::Constants::EMPTY_STRING)).strip } unless id.empty?
+      end
+    end
+
     def self.size_images(html)
       keys = html.scan(MEDIA_IMAGE).flatten.uniq
       return html if keys.empty?
@@ -47,11 +53,7 @@ module Markdown
       text unless text.empty?
     end
 
-    def headings
-      html.scan(H2).filter_map do |id, text|
-        { id:, text: CGI.unescapeHTML(text.gsub(TAG, Blog::Constants::EMPTY_STRING)).strip } unless id.empty?
-      end
-    end
+    def headings = self.class.headings(html)
 
     def html = @html ||= render
 
