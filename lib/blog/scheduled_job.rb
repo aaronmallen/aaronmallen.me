@@ -2,9 +2,29 @@
 
 module Blog
   class ScheduledJob < Job
+    module CheckIn
+      def perform(*args)
+        super.tap { check_in(args) }
+      end
+    end
+
+    include Deps["settings", honeybadger: "honeybadger.agent"]
+
     sidekiq_options retry: false
 
+    def self.check_in_name(*args) = [Hanami.app.inflector.underscore(name.split("::").last), *args].join("_")
+
+    def self.inherited(job)
+      super
+      job.prepend(CheckIn)
+    end
+
     private
+
+    def check_in(args)
+      id = settings.honeybadger.fetch(:check_ins, {})[self.class.check_in_name(*args)]
+      honeybadger.check_in(id) if id
+    end
 
     def record_and_raise(sync, failure, error)
       record_sync_outcome.call(sync, failure)

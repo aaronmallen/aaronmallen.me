@@ -45,6 +45,33 @@ google:
   client_secret: <%= ENV["GOOGLE_CLIENT_SECRET"].to_json %>
 honeybadger:
   api_key: <%= ENV["HONEYBADGER_API_KEY"].to_json %>
+  check_ins:
+    back_up_database: <%= ENV["HONEYBADGER_CHECK_IN_BACK_UP_DATABASE"].to_json %>
+    check_post_links: <%= ENV["HONEYBADGER_CHECK_IN_CHECK_POST_LINKS"].to_json %>
+    import_commits: <%= ENV["HONEYBADGER_CHECK_IN_IMPORT_COMMITS"].to_json %>
+    import_pull_requests: <%= ENV["HONEYBADGER_CHECK_IN_IMPORT_PULL_REQUESTS"].to_json %>
+    prune_access_records: <%= ENV["HONEYBADGER_CHECK_IN_PRUNE_ACCESS_RECORDS"].to_json %>
+    publish_due_posts: <%= ENV["HONEYBADGER_CHECK_IN_PUBLISH_DUE_POSTS"].to_json %>
+    queue_held_follow_ups: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_FOLLOW_UPS"].to_json %>
+    queue_held_webmentions: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_WEBMENTIONS"].to_json %>
+    reap_expired_credentials: <%= ENV["HONEYBADGER_CHECK_IN_REAP_EXPIRED_CREDENTIALS"].to_json %>
+    reap_spam_messages: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SPAM_MESSAGES"].to_json %>
+    reap_sync_states: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SYNC_STATES"].to_json %>
+    reap_webmention_receipts: <%= ENV["HONEYBADGER_CHECK_IN_REAP_WEBMENTION_RECEIPTS"].to_json %>
+    refresh_country_database: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_COUNTRY_DATABASE"].to_json %>
+    refresh_projects: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_PROJECTS"].to_json %>
+    refresh_social_engagement: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_SOCIAL_ENGAGEMENT"].to_json %>
+    rerender_posts: <%= ENV["HONEYBADGER_CHECK_IN_RERENDER_POSTS"].to_json %>
+    roll_over_sprint: <%= ENV["HONEYBADGER_CHECK_IN_ROLL_OVER_SPRINT"].to_json %>
+    roll_up_analytics: <%= ENV["HONEYBADGER_CHECK_IN_ROLL_UP_ANALYTICS"].to_json %>
+    roll_up_timing: <%= ENV["HONEYBADGER_CHECK_IN_ROLL_UP_TIMING"].to_json %>
+    send_due_social_posts: <%= ENV["HONEYBADGER_CHECK_IN_SEND_DUE_SOCIAL_POSTS"].to_json %>
+    sweep_photos: <%= ENV["HONEYBADGER_CHECK_IN_SWEEP_PHOTOS"].to_json %>
+    sync_calendar: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_CALENDAR"].to_json %>
+    sync_gmail: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_GMAIL"].to_json %>
+    sync_health: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_HEALTH"].to_json %>
+    sync_issues_github: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_ISSUES_GITHUB"].to_json %>
+    sync_issues_linear: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_ISSUES_LINEAR"].to_json %>
   project_url: <%= ENV["HONEYBADGER_PROJECT_URL"].to_json %>
   report_data: <%= ENV["HONEYBADGER_REPORT_DATA"].to_json %>
 linkedin:

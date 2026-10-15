@@ -179,6 +179,7 @@ module Blog
 
     setting :honeybadger, default: {}, constructor: Schema.schema(
       api_key?: Value,
+      check_ins?: Types::Hash.map(Types::Coercible::String, Value),
       project_url?: Value,
       report_data?: Types::Params::Bool.optional,
     )

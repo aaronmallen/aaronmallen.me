@@ -20,6 +20,13 @@ RSpec.describe "The worker's schedule", type: :app do
     expect(retries).to all(be(false))
   end
 
+  it "names a Honeybadger check-in setting for every entry" do
+    store = Hanami::Settings::FileStore.new(File.expand_path("../../config/settings/default.yml", __dir__))
+    names = schedule.values.map { Object.const_get(it.fetch("class")).check_in_name(*it["args"]) }
+
+    expect(store.fetch("honeybadger").fetch("check_ins").keys).to match_array(names)
+  end
+
   it "puts every job on a queue the worker reads", :aggregate_failures do
     queues = jobs.to_h { [it.name, it.get_sidekiq_options["queue"]] }
 

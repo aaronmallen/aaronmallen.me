@@ -5,8 +5,8 @@ status: active
 created: 2026-09-28
 area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219"]
-tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375"]
+tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures, check-ins]
 ---
 
 # ADR 0012: Never retry a scheduled job, and make its next run catch up
@@ -62,7 +62,7 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | --- | --- |
 | `BackUpDatabase`, `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
 | `RefreshProjects`, `SyncCalendar`, `SyncGmail`, `SyncHealth`, `SyncIssues` | Record a `Failure`; record an exception, then raise |
-| `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks` | Raise |
+| `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks`, `RollUpTiming`, `RerenderPosts` | Raise |
 | `ImportCommits`, `ImportPullRequests` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos`, `PruneAccessRecords`, `ReapSpamMessages` | Drop it |
 
@@ -74,7 +74,18 @@ may run with no backup store or MaxMind key. `ImportCommits`, `ImportPullRequest
 `:lock_busy`, since another run holds the lock. An exception none of them catch still raises from any job and
 reaches Honeybadger.
 
+**A Honeybadger check-in shows a run that never happened** (#1375). Neither `sync_states` nor Honeybadger's error
+reports hear of a run that never starts: a worker that fails to boot, or a schedule that skips a run, since
+sidekiq-scheduler does not replay one. `Blog::ScheduledJob` sends each job's own check-in after a run that
+finishes, and none after one that raises, so Honeybadger alerts when a check-in comes late. It looks the check-in
+up in `honeybadger.check_ins` under the job's name and its arguments, such as `publish_due_posts` or
+`sync_issues_linear`, and each comes from a `HONEYBADGER_CHECK_IN_<NAME>` variable. A job with none set runs as
+before. The worker's schedule spec holds every entry to a name in that list. The owner makes each check-in and its
+schedule in Honeybadger by hand.
+
 ## Alternatives
+
+**An alert inside the app.** It cannot fire while the app or the worker is down, which is when it matters most.
 
 **Sidekiq's default of 25 retries.** For a scheduled job a retry repeats the work the next run does anyway. It
 does not rescue an operation that reads its work from the clock. That operation has to catch up instead.
