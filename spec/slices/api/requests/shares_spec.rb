@@ -172,7 +172,11 @@ RSpec.describe "API shares", type: :request do
     end
 
     it "finds shares by their words" do
-      expect(filenames(search: "notes")).to eq(["notes.txt"])
+      expect(filenames(query: "notes")).to eq(["notes.txt"])
+    end
+
+    it "no longer filters by search" do
+      expect(filenames(search: "notes")).to eq(["notes.txt", "photo.png"])
     end
 
     it "pages the list" do

@@ -78,7 +78,11 @@ RSpec.describe "MCP share tools", type: :request do
       upload_share("one", "notes.txt")
       upload_share("two", "other.txt")
 
-      expect(answer("list_shares", search: "notes").fetch("shares").map { it.fetch("filename") }).to eq(%w[notes.txt])
+      expect(answer("list_shares", query: "notes").fetch("shares").map { it.fetch("filename") }).to eq(%w[notes.txt])
+    end
+
+    it "refuses the old search filter" do
+      expect(mcp_call("list_shares", search: "notes").fetch("isError")).to be(true)
     end
   end
 

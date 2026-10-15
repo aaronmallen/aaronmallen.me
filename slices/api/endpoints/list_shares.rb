@@ -8,7 +8,7 @@ module API
         properties: {
           filter: { type: "string", enum: Blog::Types::ShareFilter.values, description: "all when left out" },
           page: Helpers::Paging::PAGE,
-          search: { type: "string", description: "words to find in a share's file name, type or code" },
+          query: { type: "string", description: "words to find in a share's file name, type or code" },
         },
       }.freeze
 
@@ -18,8 +18,8 @@ module API
 
       include Deps[share_queries: "shares.repos.share_queries"]
 
-      def handle(filter: Blog::Types::ShareFilter.values.first, page: 1, search: nil)
-        found = { filter:, search: Blog::Types::TrimmedText[search].then { it.empty? ? nil : it } }
+      def handle(filter: Blog::Types::ShareFilter.values.first, page: 1, query: nil)
+        found = { filter:, search: Blog::Types::TrimmedText[query].then { it.empty? ? nil : it } }
         shares = share_queries.page_listed(page_of(page), **found)
 
         Success(
