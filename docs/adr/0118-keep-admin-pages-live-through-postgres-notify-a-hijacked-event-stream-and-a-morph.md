@@ -89,6 +89,9 @@ stream. The toast sits outside what the morph touches.
 
 - **Dialogs hold the morph.** While any modal `dialog` is open, the palette and the task modal among them, `live.js`
   keeps the newest answer and morphs when the dialog closes.
+- **Edits hold their controls.** The morph skips a control the owner typed in, and a form that holds one. A box
+  whose tick differs from what the server drew counts as an edit too, so boxes a script ticked, such as the
+  remembered social accounts or "select all", keep their ticks.
 - **Rows carry ids.** A row in a list that can grow draws an `id` from its record, such as `message-12`, so
   idiomorph matches it by record and the row the key map has focused keeps its focus when a new row lands above.
 - **Reconnects catch up.** After every `open` but the first, `live.js` refetches once. When the stream ends for good,

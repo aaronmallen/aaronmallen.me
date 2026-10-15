@@ -270,6 +270,42 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     end
   end
 
+  describe "with social accounts a script picked" do
+    let(:accounts) { %w[mastodon bluesky].map { social_account(it).id.to_s } }
+
+    before do
+      connect_social_networks
+      sign_in_to_admin
+      visit "/admin/social"
+      execute_script("localStorage.setItem('social:accounts', arguments[0])", JSON.generate(accounts))
+      visit "/admin/social"
+      wait_for_stream
+      create(:message)
+      assert_selector ".top-bar .pill-nav-dot"
+    end
+
+    it "keeps every picked account" do
+      expect(all("[data-social-target]:checked", visible: :all).map(&:value)).to match_array(accounts)
+    end
+  end
+
+  describe "with rows ticked by select all" do
+    before do
+      %w[first second third].each_with_index { |title, index| create(:task, title:, position: index + 1) }
+      live "/admin/tasks?filter=next"
+      click_button "Select"
+      find(".task", text: "first").find("input[name='ids[]']").check
+      find("[data-bulk-all] input").check
+      create(:message)
+      assert_selector ".top-bar .pill-nav-dot"
+    end
+
+    it "keeps every row ticked and counts them", :aggregate_failures do
+      expect(page).to have_no_css(".task input[name='ids[]']:not(:checked)")
+      expect(page).to have_css("[data-bulk-count]", exact_text: "3 ticked")
+    end
+  end
+
   describe "while a dialog is open" do
     let(:message) { create(:message) }
 

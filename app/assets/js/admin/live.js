@@ -124,7 +124,7 @@ function trackEdits() {
 
 function untouched(node) {
   const controls = node instanceof HTMLFormElement ? [...node.elements] : [node];
-  return !controls.some((control) => edits.has(control));
+  return !controls.some((control) => edits.has(control) || control.checked !== control.defaultChecked);
 }
 
 function listen(url, changed) {
