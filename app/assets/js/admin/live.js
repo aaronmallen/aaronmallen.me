@@ -4,6 +4,7 @@ import { MENU } from "./context_menu.js";
 import { setupFetch } from "./fetching.js";
 import { parse } from "./in_place.js";
 
+const CATCH_UP = "*";
 const LONGEST_WAIT = 30000;
 const MORPHED = "admin:morphed";
 const OPENS = "dialog, details";
@@ -107,6 +108,11 @@ function keepsOpen(name, node, change) {
   return !(change === "remove" && name === "open" && node.matches(OPENS));
 }
 
+function shows(table) {
+  const listed = document.querySelector("[data-live-tables]")?.dataset.liveTables.split(" ");
+  return !listed || table === CATCH_UP || listed.includes(table);
+}
+
 function trackEdits() {
   const edited = new WeakSet();
 
@@ -136,7 +142,9 @@ function listen(url, changed) {
       opened = true;
       wait = WAIT;
     });
-    current.addEventListener("change", (event) => changed(Number(event.lastEventId) || Infinity));
+    current.addEventListener("change", (event) => {
+      if (shows(event.data)) changed(Number(event.lastEventId) || Infinity);
+    });
     current.addEventListener("error", () => {
       if (current.readyState !== EventSource.CLOSED) return;
 

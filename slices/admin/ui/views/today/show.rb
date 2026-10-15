@@ -7,6 +7,11 @@ module Admin
         class Show < View
           include Components::Tasks
 
+          LIVE_TABLES = %w[
+            attention_snoozes commits health_days journal_entries oauth_clients oauth_tokens posts projects
+            service_connections social_post_deliveries social_posts sprints sync_states task_comments task_links
+            task_tags work_sessions
+          ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
@@ -25,6 +30,7 @@ module Admin
           def view_template
             content_for(:title, t(".heading"))
             content_for(:task_origin, ORIGIN)
+            content_for(:live_tables, LIVE_TABLES)
 
             div(class: "today") do
               PageHead(title: headline, kicker:, sub: lede) { head_actions }

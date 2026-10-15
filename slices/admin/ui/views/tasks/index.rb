@@ -9,6 +9,9 @@ module Admin
 
           COMPLETED = Blog::Types::TaskTab["completed"]
           FINISHED_TODAY = :finished_today
+          LIVE_TABLES = %w[
+            projects saved_views sprints task_comments task_contributors task_links task_series task_tags work_sessions
+          ].freeze
           RECURRING = Blog::Types::TaskTab["recurring"]
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -26,6 +29,7 @@ module Admin
           prop :waiting, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) do
               Filters(tab: @tab, query:, range:)
               BulkToggle(form: Bulk::ID) if bulk?

@@ -27,6 +27,7 @@ module Admin
           prop :unread, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
+            content_for(:live_tables, %w[record_links service_connections])
             PageHead(title: t(".heading"), sub:) do
               filter_form
               tools

@@ -7,6 +7,8 @@ module Admin
         class Index < View
           include Components::Inbox
 
+          LIVE_TABLES = %w[posts record_links task_tags].freeze
+
           prop :count, Blog::Types::Integer
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
@@ -14,6 +16,7 @@ module Admin
           prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { head_actions if @rows.any? }
 
             Card do

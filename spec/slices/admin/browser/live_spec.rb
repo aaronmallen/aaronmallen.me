@@ -97,6 +97,52 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("#message-#{message.id}")
   end
 
+  describe "on a page that lists its tables" do
+    def notify(table) = Tasks::Slice["db.rom"].gateways[:default].connection.notify("admin_changes", payload: table)
+
+    def renders(path = "/admin/tasks") = request_gate.count(path)
+
+    def wait_for_renders(count, path = "/admin/tasks")
+      Timeout.timeout(5) { sleep 0.05 until renders(path) >= count }
+    end
+
+    it "lists the tables behind the page and the top bar" do
+      live "/admin/tasks"
+
+      expect(find("main")["data-live-tables"].split).to include("task_tags", "mail_threads")
+    end
+
+    it "ignores a change to a table it does not list" do
+      live "/admin/tasks"
+      notify("decisions")
+      sleep 1
+
+      expect(renders).to eq(1)
+    end
+
+    it "refetches for a change to a table it lists" do
+      live "/admin/tasks"
+      notify("task_tags")
+
+      expect { wait_for_renders(2) }.not_to raise_error
+    end
+
+    it "refetches on the catch-up event" do
+      live "/admin/tasks"
+      notify(Admin::Live::Hub::CATCH_UP)
+
+      expect { wait_for_renders(2) }.not_to raise_error
+    end
+
+    it "refetches for any table on a page that lists none", :aggregate_failures do
+      live "/admin/security"
+      notify("decisions")
+
+      expect(page).to have_no_css("main[data-live-tables]")
+      expect { wait_for_renders(2, "/admin/security") }.not_to raise_error
+    end
+  end
+
   describe "after an in-place submit" do
     let(:sprint) { Tasks::Slice["repos.sprint_queries"].on(today) || create(:sprint, sprint_date: today) }
 

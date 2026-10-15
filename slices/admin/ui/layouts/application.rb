@@ -9,6 +9,11 @@ module Admin
         include Navigated
         include Deps["settings"]
 
+        LIVE_TABLES = %w[
+          mail_accounts mail_labels mail_messages mail_settings mail_thread_labels mail_thread_tags mail_threads people
+          tags task_sources tasks webmentions
+        ].freeze
+
         def view_template(&)
           document do
             body(class: "adm") { render_body(&) }
@@ -24,10 +29,16 @@ module Admin
           Components::Journal::WriteDialog(today: Blog::TimeZone.today, return_to: (request.fullpath if request.get?))
         end
 
+        def live_tables
+          listed = content_for(:live_tables)
+          (LIVE_TABLES | listed).join(" ") if listed
+        end
+
         def main_data
           {
             live: (path(:admin_events) if navigation),
             live_at: request.env[Live::Clock::KEY],
+            live_tables:,
             morph_failed: t(".morph_failed"),
           }
         end

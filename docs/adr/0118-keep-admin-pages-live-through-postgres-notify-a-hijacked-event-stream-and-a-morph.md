@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286"]
+amended: ["#911", "#1284", "#1286", "#1287"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -71,8 +71,14 @@ after its commit, so a page whose request began after the hub heard of a change 
 reading of the page on screen and skips any event older than it, so a tab's own in-place submit, whose answer is drawn
 after the commit, refetches nothing. While a `data-morph` form posts, events wait, and the tab refetches once it answers
 only if an event is newer than the answer. Saving from the task panel stops the stream's refetches, since closing the
-panel reloads the page. Pages declare no topics. The client ignores the table name, which is there for logs and for a
-later record that wants topics.
+panel reloads the page.
+
+**A page may list its tables.** Since #1287 a view can pass the tables it draws to the layout through
+`content_for(:live_tables)`, counting the tables behind any view it reads. The layout adds the tables its own top bar
+and palette read, which the inbox count reaches, and draws the list on `<main>` as `data-live-tables`. `live.js`
+skips an event whose table is not on the list. A page that lists none refetches on every event, as before, and the
+catch-up event (`*`) refetches every page. Today, Tasks, Mail and Inbox list theirs, so a new email no longer
+redraws the task board.
 
 **`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event
 it calls the page's own URL through `setupFetch`, so events within its wait become one request and a new event
@@ -124,9 +130,10 @@ process would have to read the admin session cookie to sign in.
 **A Rack 3 streaming body.** Puma runs the body on the request's thread until it returns, so each stream still
 holds a thread.
 
-**Topics.** A page would list the tables it draws and refetch only for those. Pages draw counts from views such as
-`review_tasks` and `activities` that read many tables, and a page that misses one goes stale with no warning. The
-admin has one user, so the waste is a page render per open tab per change.
+**Topics on every page.** Each page would list the tables it draws and refetch only for those. Pages draw counts from
+views such as `review_tasks` and `activities` that read many tables, and a page that misses one goes stale with no
+warning. #1287 lists them only on the pages that stay open longest and change most, and leaves the rest refetching
+on every event.
 
 **Turbo 8, htmx with SSE, or Alpine with JSON.** The owner turned these down in #636. Turbo takes over links and
 forms, htmx swaps server fragments, and JSON needs a second renderer beside Phlex.
@@ -152,7 +159,11 @@ to report its own errors. rack-test cannot read a hijacked stream, so stream spe
 
 A Puma restart drops every stream. Each tab reconnects and refetches once.
 
-Every change costs a page render for each open tab, save a tab whose own in-place submit made it. When the hub hears of
+Every change costs a page render for each open tab, save a tab whose own in-place submit made it and a tab whose
+page does not list the table.
+
+A page that lists its tables goes stale with no warning when it starts to draw a table it does not list. A change to
+what Today, Tasks, Mail, Inbox or the top bar reads has to update the list beside it. When the hub hears of
 that change after the redirect's request began, as a slow notice can, that tab renders twice, as it did before #1286.
 
 The morph sets every attribute back to what the server drew, so state a script holds in markup, such as an open
