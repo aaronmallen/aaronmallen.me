@@ -5,6 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, db, admin, api, mcp, contact]
 issue: "#1123"
+amended: ["#1380"]
 tags: [mail, gmail, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -34,6 +35,9 @@ at consent and the owner ticks it on an API token, as with `health`, and it take
 - **Tools on `read` that list rows of every kind** leave mail threads out unless the token also holds `mail`:
   `read_activity`, `summarize_activity`, `search`, `list_inbox`, `list_attention`, record links and saved views. The
   rest of each answer reads as it does now, as ADR 0147 does for workouts.
+- **`API::Endpoint` holds the filter.** Before any endpoint answers, the base class drops each row whose `kind` is
+  `workout` from a token without `health`, and each `message` or `mail_thread` row from a token without `mail`. An
+  endpoint that drops them in its query as well keeps its counts and pages right; one that forgets leaks nothing.
 - **Google events stay on `read`**, in `list_calendar`.
 
 ## Alternatives
@@ -53,7 +57,8 @@ The `api_tokens_scopes_check` constraint in `config/db/structure.sql` lists ever
 to widen it, as `health` did.
 
 More endpoints check a scope by hand. ADR 0147 left one, `read_activity`; mail adds search, the inbox, attention,
-links and saved views. A later `read` endpoint that joins every kind has to drop both workouts and mail threads, and
-nothing but its specs will catch one that forgets.
+links and saved views. A later `read` endpoint that joins every kind gets both kinds dropped by the base class, but
+it should still drop them in its query, or a page can come back short. One request spec calls every API operation
+with a `read` token over a workout and a mail thread, and fails when either shows.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -20,6 +20,7 @@ module API
     UNAVAILABLE = false
     UNPUBLISHED = "%s shows in public, so this change needs the publish scope"
     WORKOUT = Blog::Types::ActivityKind["workout"]
+    GUARDED = { HEALTH => [WORKOUT], MAIL => [MAIL_ROW, Blog::Types::RecordKind["mail_thread"]] }.freeze
 
     include Dry::Monads[:result]
     include Deps["settings", task_queries: "tasks.repos.task_queries"]
@@ -60,8 +61,16 @@ module API
 
     def flat(errors) = errors.transform_values { it.is_a?(Hash) ? it.values.flatten.uniq : it }
 
+    def guarded?(row, kinds) = row.is_a?(Hash) && kinds.include?((row[:kind] || row["kind"]).to_s)
+
     def handled(fields, scopes)
-      unpublished(fields, scopes) || (self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields))
+      unpublished(fields, scopes) ||
+        (self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields)).fmap { hidden(it, scopes) }
+    end
+
+    def hidden(payload, scopes)
+      kinds = GUARDED.except(*scopes).values.flatten
+      kinds.empty? ? payload : without(payload, kinds)
     end
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
@@ -123,6 +132,14 @@ module API
       end
 
       Success(fields)
+    end
+
+    def without(value, kinds)
+      case value
+        when Hash then value.transform_values { without(it, kinds) }
+        when Array then value.reject { guarded?(it, kinds) }.map { without(it, kinds) }
+        else value
+      end
     end
   end
 end
