@@ -5,6 +5,219 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.19] - 2026-10-15
+
+### Added
+
+- LinkedIn joins Mastodon and Bluesky. Once `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET` are set, Connected
+  services connects a profile, and the footer links it. A thread goes out as one post with a blank line between parts,
+  and the composer counts it that way. The first four photos go with it, with their alt text, and a WebP photo goes as a
+  JPEG. Likes, replies and reposts come in when the account grants `r_member_postAnalytics`, and with `r_member_social`
+  a retry looks for the post among recent ones before it sends again.
+- A LinkedIn token lasts about 60 days and can't renew, so Connected services marks the connection "lapses soon" from
+  seven days out (`attention.lapsing_days`) and "lapsed" after, and Today's attention list, `list_attention` and the API
+  show a row for it. Reconnecting the same profile replaces its token and keeps its deliveries.
+- Tasks have a number within their project, and projects have a key of 2 to 6 capitals and digits, made from the name
+  when left blank. The admin, toasts and public pages print a task as KEY-n, or a bare number when it has no project. A
+  number never comes back once its task goes. Every API route and MCP tool that takes a task takes that label as a
+  string or the id as an integer, task replies carry `label`, and links carry `task_label`. `save_project` sets the key,
+  and `read_project` and `list_projects` show it.
+- Tasks repeat. The task form, its create dialog and the edit drawer have a Repeats picker: every N days, every N weeks
+  on a weekday, a day of the month, the last day of the month, the Nth weekday of the month or a date each year. Closing
+  the current copy makes the next one, with its title, note, tags and project, in the sprint for its next date, and the
+  timeline marks it. A Recurring tab under Tasks lists each series with its next date and a switch that pauses it.
+  `save_task` and `capture_task` take `recur`, every task reply shows it, and `list_task_series`, `pause_task_series`
+  and `resume_task_series` reach `/api/v1/task_series`.
+- Opening a decision makes a task, "Resolve decision #id: title", at the end of Next. Renaming, resolving, dropping or
+  reopening the decision renames, completes, cancels or reopens it. A decision opened before this gets its task the
+  first time it reopens.
+- Board columns, in the admin and in public, show 20 cards and a Load More that grows the column by 20
+  (`board.column_size`), and each head counts every task. A done or canceled task leaves both boards 14 days after it
+  closed (`board.closed_days`) and stays everywhere else. A task that changes column goes to the top of its new one.
+- The admin board has Select, a box on each card and a bulk bar that moves the picked cards to any column, all or none.
+  Cards show how many open tasks they block and how many block them, in place of link chips.
+- Each card on a published board links to a public task page at `/projects/:slug/tasks/:number`, with the task's title,
+  status, column, close date, notes, comments, related tasks and source issue, but no tags or time. A related task shows
+  only when it sits on a published board.
+- Share groups. Ticking "Share as one link" on upload puts every file under one code, whose page shows the images in a
+  carousel and lists the other files. Each file has its own link at `/<code>/<id>`, and Download all streams them as one
+  zip at `/<code>.zip`. Groups show as cards on Files, and a group's drawer changes its code, sets alt text, removes a
+  file, deletes the group and shows its views and downloads.
+- Shares in the API and MCP: `upload_share`, `upload_share_group`, `list_shares`, `read_share`, `list_share_groups` and
+  `read_share_group`, over `/api/v1/shares` and `/api/v1/share_groups`. Uploads take base64 and need `publish`, and
+  `list_shares` filters by `query`.
+- `SHARE_TRANSFERS` caps the share downloads, range requests and zips each web worker streams at once. Unset, it leaves
+  two threads free and never falls under one. Past the cap a transfer gets a 503 with Retry-After, so slow downloads
+  can't take every thread from the blog, admin, API and MCP server. Group pages and short links stay outside the cap.
+- A Performance tab beside Traffic on Analytics, also under Insights. It charts server time per day and ranks routes and
+  jobs by p95 over 7, 14 or 30 days, with browser load and LCP beside each GET route and a link to its 25 slowest
+  requests. The site times each request and job, and the reader beacon now sends page load times with only the route and
+  device class. Raw rows stay 30 days and a nightly job keeps each day's p50 and p95. `read_performance` and
+  `GET /api/v1/performance` read the same figures with `read`.
+- Clients with `mail` can link a record to a mail thread through `link_records`, `unlink_records` and the record link
+  routes, and only they see a record's mail threads among its links.
+- `list_tasks` takes `window_by`. `closed` keeps only the tasks closed inside the window, and the report prompt now uses
+  it, so a task made in the range and canceled after it no longer shows as dropped there. `touched` stays the default.
+- The mail reader has a Trash button for a Gmail thread outside trash and spam.
+- `MAIL_BACKFILL_DAYS` limits the Gmail backfill to the last N days. The backfill skips trash either way.
+- `PREVIOUS_DATA_KEY` rotates `DATA_KEY`: credentials sealed under either key open, and `mise run db:reseal` seals each
+  one again under the new key, prints how many it changed and fails when any opens under neither.
+- `MAXMIND_DATABASE_PATH` sets where the country database lives, `tmp/maxmind/GeoLite2-City.mmdb` by default. The worker
+  fetches the file when it boots with MaxMind set up and no file there.
+- Each scheduled job sends a Honeybadger check-in when a run finishes, so Honeybadger alerts when a run is late or
+  missing. Set `HONEYBADGER_CHECK_IN_<JOB>`, such as `HONEYBADGER_CHECK_IN_SYNC_GMAIL`, for each job to watch. A job
+  with none set runs as before.
+- `mise run db:restore` loads a dump, from disk or the backups bucket, into a scratch database, checks that migrations,
+  posts and tasks hold rows, then drops it.
+- More mise tasks: `db:console` opens psql on the database the settings name, `db:explain` prints the plan of a
+  statement in a transaction it rolls back, `deps:outdated` lists outdated gems, node packages and tools, `test:schemas`
+  fetches the GitHub and Linear schemas the suite checks queries against, and `dev:prune-workspaces` drops test
+  databases left by deleted workspaces.
+- `mise run lint` fails on a locale key no code reads and on an error page in `public/` that differs from a fresh
+  render.
+
+### Changed
+
+- `publish` now covers anything that shows in public, not only what can't be called back. `upload_share`,
+  `upload_share_group`, `add_work_entry`, `update_webmention_settings`, `update_post_edit_note` and
+  `approve_webmentions` need it outright. Other tools keep `write` but refuse a public target without `publish`: a
+  public project, a published or scheduled post, a task on a published board or a link that puts one there, an approving
+  `moderate_webmention`, and `sync_issues` while a published board is in its reach. Over the API the refusal is a 403
+  `insufficient_scope` naming `publish`. Before you deploy, check that each token and MCP client that edits public work
+  holds `publish`.
+- Mail stays behind `mail` in more places. Without it, `list_tags` leaves mail out of its counts and drops tags only
+  mail carries, `remove_tag` refuses a tag a mail thread carries, `update_tag` refuses a tag only mail threads carry,
+  and `list_inbox` leaves mail out before it keeps the newest rows, so tasks and webmentions no longer hide behind a
+  full mailbox. Every API reply also drops workout rows without `health` and mail rows without `mail`.
+- A task belongs to one project at most. Linking a task to a project moves it there, and unlinking clears it. A task
+  rule gives one project, and only to a task with none. The migration keeps one project per task, the one that owns the
+  issue's repo and then the oldest link, and keeps the lowest one on a rule that named several. A second migration gives
+  every task, once, the project and tags its rules give, and changes nothing set by hand. The time report no longer
+  marks a project as sharing time.
+- Live updates redraw less. Each admin page names the tables it draws and skips changes to the rest, so new mail no
+  longer redraws the board and a new commit no longer redraws the calendar. A hidden tab waits until it shows, changes
+  within one second share one refetch, a tab skips the echo of its own save, and writes that touch only `updated_at`,
+  counts or sync cursors send no change.
+- Task rows lose their check box. Each open row's hover bar offers Complete, started or not, and a closed row's offers
+  Reopen.
+- A task on a later sprint shows that sprint's date in place of Today, and its Move menu offers Today.
+- The time report card shows one hint when its rows add up to more than the total, and row headings lose the shared
+  pill.
+- A calendar event that fails its checks comes back in its form with the values you typed and an error beside each
+  field, in place of a toast.
+- Admin ledes, hints and tooltips now match what each screen does, a few that were wrong among them.
+- Opening a draft thread shows an Edit draft link, and only that asks Gmail for the draft.
+- The Inbox lists the newest 100 rows, and its count still says how many wait.
+- The mail folder column is 240px wide, and a long account name in a label group head truncates.
+- Linear's own mark replaces the stand-in icon on task source links and the Linear service tile.
+- Reconnecting a GitHub or Mastodon account updates the connection it holds, so scheduled deliveries keep pointing at it
+  and a revoked mark clears.
+- A post that lost a picked network before it sent records a failed delivery for that network, such as "No mastodon
+  account is connected", in place of looking fully sent.
+- Webmention sends and checks try again when the other side answers 429 or a 5xx, and a check that fails any other way
+  stops at once rather than trying six times.
+- `sync_issues` answers 503 when neither GitHub nor Linear is set up. An issue sync that stops at the page cap records
+  `page_limit`, a failed reap shows on the commits sync, and a crash in any sync job or import shows as a crashed sync
+  in place of the last good run.
+- API tokens record their last use at most every five minutes, as MCP clients do, and `list_api_tokens` says so.
+- Production Puma runs two preloaded workers when `HANAMI_WEB_CONCURRENCY` is unset, and Puma and Sidekiq turn on YJIT.
+  Set `MALLOC_ARENA_MAX=2` in the service units, since it has to be set before the process starts.
+- Public pages weigh less. They link their own stylesheet, about a quarter of the old size, draw icons as inline SVG
+  with no icon font, preload the body and heading fonts, and set the saved theme from a small inline script, so
+  Cloudflare can serve the cached page to every reader. Fingerprinted assets send a one year immutable Cache-Control,
+  and `/site.webmanifest` caches for five minutes.
+- Post photos list 640, 1280 and 1920px copies in a srcset. Photos send an ETag and answer a match with a 304, and a
+  signed in request for an unpublished photo caches in your browser for an hour. After you deploy, run the photo width
+  backfill in `docs/media-store.md` once, since older photos list no copies until then.
+- Posts store their rendered HTML, first paragraph, read time and word count, and a nightly job renders every post again
+  so a renderer change reaches old posts.
+- Mail search matches through a trigram index in place of reading every message, and a match no longer spans two
+  messages of a thread. Before you deploy, allow time for the migration, which builds the index over every stored
+  message.
+- Today and the Tasks tab load only the picked pool and fetch the other when you pick its tab, the people page fetches
+  one edit drawer when you open a person, and the task drawer asks for the task alone, not a whole admin page.
+- `mise run release` replaces `release:next` and tags the next version. It tags only when CI passed on that commit,
+  unless given `--skip-ci`, and never pushes. It refuses a commit already tagged, entries left under `[Unreleased]` and
+  a changelog with no section for the version. `--dry-run` prints the version, the commit and its CI state.
+- `mise run test:coverage` fails when line coverage drops below 98.3% or branch coverage below 90.8%.
+
+### Fixed
+
+- An issue sync that failed to start, complete, cancel or reopen a task still marked the issue handled, so it never
+  tried again. The run now counts as crashed and the next one retries.
+- The Gmail backfill went to the dead set after three failed tries and nothing started it again. It now saves its page
+  and resumes when it has stalled for an hour.
+- One failing Google account stopped Gmail sync for every account sorted after it.
+- Reconnecting one Google account and picking another in Google's chooser wrote the second over the first, and the first
+  stopped syncing.
+- A mail attachment named only with spaces stopped every Gmail sync at that thread.
+- A reply to a trashed thread showed only under Trash, and a draft started in Gmail hid its thread from every folder. A
+  thread now counts as trashed, a draft or spam only when every message does. Stored threads keep their flags until
+  Gmail reports a change.
+- The plain body of an HTML-only message kept entities such as `&amp;`, which reached the preview, the API and search.
+  Stored messages keep the old body until they sync again.
+- The calendar sync deleted every calendar and event when Google was not set up.
+- Archiving or starring on a later page of Mail sent you back to page 1.
+- A live update reset the mail editor to a bare textarea, showed Add on an empty comment box, undid the Cc, Bcc and
+  people finder reveals, hid the bulk Select button and cleared the theme picker's mark. It also reset boxes a script
+  ticked, such as Select all and the restored social picks, so a post went to one network or a bulk action hit one row.
+- When an admin script failed to start, the task and mail lists stuck in select mode with no way out. Each setup step
+  now runs on its own.
+- A live update that landed mid-save put a dragged task, event or mail row back, and an upload or new short link wiped
+  text typed in an open drawer.
+- Two quick submits of Make a task on a mail thread made two tasks.
+- Two deletes of one work session at once both took its time off the task, and an edit racing a stop could write a
+  running session over a closed one.
+- `save_task` with list `today` left a task on a later sprint where it was.
+- A bulk action on Today dropped the pull column's pool.
+- A saved view from the Completed tab lost its date range.
+- Alt+Up and Alt+Down in a work session's hour or minute field moved the row.
+- Starting a work session moved a task's manual time to today on the time report.
+- A stale tab could make sign-in open the live event stream as a blank page.
+- Accepting a suggestion for one part of a social post failed when another part already ran over its limit.
+- A social post that sent while a suggestion saved kept that suggestion pending.
+- A delivery that gave up after five retries could keep no error.
+- Two first connects to one Mastodon server at once answered a 500.
+- A malformed Google token or profile reply answered a 500 when connecting Google.
+- A request from an API token or MCP client deleted mid-request answered a 500 in place of a 401.
+- A share whose file had gone from the store hung the download. It now answers 404.
+- A failed photo upload left the copies it had already stored in the bucket.
+- Atom feed pages after the first kept their Last-Modified when a new post pushed entries down, so a reader got a 304
+  for a page that had changed. Sending a post's webmentions also moved its updated date in the feed and the sitemap.
+- Open draft pull requests took the import day as their date. They now take the time GitHub opened them.
+- Commits from a repo with capitals in its name credited no agent.
+- The commit backfill could miss commits when more than 100 on one branch shared a second.
+- Unlinking a record of an unknown kind answered a 500 in place of not found.
+- Admin analytics left days not yet rolled up out of the prior range, and a post's readers counted the month so far, not
+  the range picked.
+- The post schema said `webmentions_enabled` decides whether a post sends webmentions. It only decides whether the post
+  accepts them.
+- An MCP client with no name showed under different labels on Clients, its menu, Security and the health card.
+- 33 admin form errors showed no message.
+- A run of part of the suite overwrote the test runtime log, so the next full `mise run test` split its workers
+  unevenly.
+
+### Security
+
+- Admin sign-in uses PKCE, and its state expires after ten minutes. The site refuses a sign-in begun before you
+  deploy, so start it again.
+- Share and share group links get 16-letter codes, too long to guess. Short links keep five letters, and codes already
+  handed out keep working. A share upload refuses a content type that isn't one plain type, and every share file and zip
+  goes out with a content security policy that sandboxes it.
+- The share host and `/pulse` read the host from the Host header alone, so a forwarded header can no longer choose which
+  app answers.
+- Connecting Mastodon refuses a server that resolves to a private or local address, and the Mastodon clients no longer
+  follow redirects.
+- A request with no token can no longer make the server read a large body. `/api/v1/photos` and `/mcp` hold it to 1 MB,
+  and the server reads a body sent with no length in chunks and refuses it once it passes its route's limit.
+- Mail HTML can no longer set `position` or `z-index`, which let a sender lay a panel over the admin. Stored mail keeps
+  its old HTML until the `RecleanMailHtml` job fetches and cleans it again, so queue it once after you deploy.
+- `update_post` refuses a scheduled post whose time has passed unless the call gives a new one, so a client without
+  `publish` can't send an overdue post live.
+- More text that others write reaches MCP marked `{ untrusted: true, text }`: commit messages, calendar event titles,
+  places, notes and guests, the error text in dead jobs, deliveries and sync failures, and the paths, hosts and click
+  fields in `read_analytics`. The REST API still answers plain text.
+
 ## [26.10.18] - 2026-10-13
 
 ### Added
@@ -954,7 +1167,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...HEAD
+[26.10.19]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...26.10.19
 [26.10.18]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...26.10.18
 [26.10.17]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...26.10.17
 [26.10.16]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...26.10.16
