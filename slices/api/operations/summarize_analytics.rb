@@ -6,6 +6,7 @@ module API
       include Deps[
         event_queries: "analytics.repos.analytics_event_queries",
         feed_queries: "analytics.repos.feed_fetch_queries",
+        hour_queries: "analytics.repos.analytics_hour_queries",
         page_queries: "analytics.repos.analytics_page_queries",
         post_queries: "posts.repos.post_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
@@ -47,7 +48,7 @@ module API
           change: change(views, from, to),
           feed: feed_queries.feed_subscribers_between(from:, to:),
           webmentions: webmentions(from, to, top),
-          weekday_hours: event_queries.weekday_hours,
+          weekday_hours: hour_queries.weekday_hours,
         }
       end
 

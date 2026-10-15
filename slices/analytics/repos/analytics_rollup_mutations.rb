@@ -12,6 +12,7 @@ module Analytics
         analytics_rollup_page_countries: :page_countries,
         analytics_rollup_scroll_depths: :scroll_depths,
         analytics_rollup_clicks: :clicks,
+        analytics_rollup_hours: :hours,
       }.freeze
 
       root :analytics_rollups

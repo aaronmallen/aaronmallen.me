@@ -306,6 +306,33 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       expect(counts.values_at(9, 21)).to eq([[2, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1]])
     end
 
+    def rolled_hour(day, visitors:)
+      create(:analytics_rollup_hour, day: create(:analytics_rollup, day:).day, visitors:)
+    end
+
+    it "adds the rolled up days to today's visits" do
+      rolled_hour(monday(2), visitors: 3)
+      create(:analytics_event, occurred_at: at(today, 9))
+
+      counts = grid.fetch("hours")[9].except("hour").values.sum
+
+      expect(counts).to eq(4)
+    end
+
+    it "gives the same grid once the days are rolled up" do
+      [at(monday(2), 9), at(today - 1, 23), at(today, 0)].each { create(:analytics_event, occurred_at: it) }
+      before = grid
+      Analytics::Slice["operations.roll_up_analytics"].call
+
+      expect(grid).to eq(before)
+    end
+
+    it "leaves out rolled up days older than 90 days" do
+      rolled_hour(today - 90, visitors: 3)
+
+      expect(grid.fetch("hours").sum { it.except("hour").values.sum }).to eq(0)
+    end
+
     it "leaves out visits older than 90 days" do
       create(:analytics_event, occurred_at: at(today - 120, 9))
 

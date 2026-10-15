@@ -4,10 +4,8 @@ module Analytics
   module Repos
     class AnalyticsEventQueries < Blog::DB::Repo
       FLOORS = [0, 1, 10, 30, 60, 120, 300, 600].freeze
-      HOURS = (0..23)
       MEMO = :analytics_event_memo
       RETENTION_DAYS = 90
-      WEEKDAYS = (1..7)
 
       include Deps["settings"]
 
@@ -78,13 +76,6 @@ module Analytics
 
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 
-      def weekday_hours(to: Blog::TimeZone.today)
-        counts = analytics_events.between_days(retention_start(to), to).visitors_by_weekday_hour
-        hours = HOURS.map { |hour| WEEKDAYS.map { |weekday| counts.fetch([weekday, hour], 0) } }
-
-        { days: RETENTION_DAYS, hours: }
-      end
-
       private
 
       def buckets(views)
@@ -141,6 +132,14 @@ module Analytics
 
       def scoped(window, path) = path ? window.for_path(path) : window
 
+      def site_only(window)
+        {
+          referrers: window.counts_by(:referrer_host, as: :host).to_a,
+          countries: window.countries.to_a,
+          hours: window.visitors_by_hour,
+        }
+      end
+
       def summarize(day)
         window = analytics_events.on_day(day)
 
@@ -148,8 +147,7 @@ module Analytics
           day:,
           totals: window.totals.one,
           paths: window.paths.to_a,
-          referrers: window.counts_by(:referrer_host, as: :host).to_a,
-          countries: window.countries.to_a,
+          **site_only(window),
           sources: by_page(window.known(:source), :source),
           devices: by_page(window.known(:device_class), :device_class),
           **page_only(window),

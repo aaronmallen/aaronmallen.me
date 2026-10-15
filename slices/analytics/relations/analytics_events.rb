@@ -36,7 +36,6 @@ module Analytics
       VISITORS = Sequel.function(:count, :visitor_hash).distinct
       DAY_VIEWS = [DAY.as(:day), Sequel.function(:count, :id).as(:views), VISITORS.as(:visitors)].freeze
       VISITS = Sequel.function(:count).*
-      WEEKDAY = Sequel.extract(:isodow, LOCAL_TIME).cast(Integer)
 
       schema :analytics_events, infer: true
 
@@ -141,10 +140,8 @@ module Analytics
 
       def visitor_count = unordered.dataset.get(VISITORS)
 
-      def visitors_by_weekday_hour
-        found = unordered.dataset.select(WEEKDAY.as(:weekday), CLOCK_HOUR.as(:hour), VISITORS.as(:visitors))
-
-        found.group(WEEKDAY, CLOCK_HOUR).to_h { [it.values_at(:weekday, :hour), it.fetch(:visitors)] }
+      def visitors_by_hour
+        unordered.dataset.select(CLOCK_HOUR.as(:hour), VISITORS.as(:visitors)).group(CLOCK_HOUR).to_a
       end
 
       private

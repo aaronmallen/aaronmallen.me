@@ -11,8 +11,8 @@ module API
     ], from: :activity
 
     import keys: %w[
-      repos.analytics_event_queries repos.analytics_page_queries repos.analytics_rollup_queries repos.feed_fetch_queries
-      repos.post_reader_queries
+      repos.analytics_event_queries repos.analytics_hour_queries repos.analytics_page_queries
+      repos.analytics_rollup_queries repos.feed_fetch_queries repos.post_reader_queries
     ], from: :analytics
 
     import keys: %w[repos.calendar_day_queries], from: :calendar

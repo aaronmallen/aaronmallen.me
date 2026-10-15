@@ -33,6 +33,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
 
   def failure = sync_state_queries.failure(analytics_rollup)
 
+  def hours(on = day)
+    rollup_repo.analytics_rollup_hours.on(on).order(:hour).to_a.map { it.to_h.values_at(:hour, :visitors) }
+  end
+
   def kept = event_repo.analytics_events.order(:occurred_at, :id).to_a.map(&:id)
 
   def month_of(on) = Date.new(on.year, on.month, 1)
@@ -348,6 +352,15 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       roll_up
 
       expect(rolled(day)).to have_attributes(views: 1)
+    end
+
+    it "stores each hour's visitors, each reader once an hour" do
+      at_nine = Blog::TimeZone.day_start(day) + (9 * 3_600)
+      [visitor_hash, visitor_hash, "b" * 64].each { create(:analytics_event, occurred_at: at_nine, visitor_hash: it) }
+      event
+      roll_up
+
+      expect(hours).to eq([[9, 2], [12, 1]])
     end
 
     it "stores a day with no events" do

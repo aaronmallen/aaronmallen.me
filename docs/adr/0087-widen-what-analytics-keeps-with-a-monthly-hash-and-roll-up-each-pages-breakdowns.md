@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 area: [analytics, public, mcp, assets, db]
 issue: "#210"
+amended: ["#1292"]
 tags: [analytics, privacy, beacon, retention, reach, ref, scroll, device-class, rollups]
 ---
 
@@ -45,8 +46,10 @@ token the way a read goes, and the store keeps the greater value.
 in-app with our own list of patterns, and stores only the class. The raw user agent is never stored.
 
 **Hybrid storage.** Per-page sources, countries, referrer hosts, device classes, scroll milestones and monthly
-reach roll up and stay forever. Hourly counts, `since:`, the read-time spread and navigation (internal referrers,
-entry and exit pages) read raw events, so they reach back 90 days and no further.
+reach roll up and stay forever. Site-wide visitors per Chicago hour roll up into `analytics_rollup_hours` and stay
+forever too, so the weekday and hour chart reaches back to the first rolled-up day (#1292). `since:`, the read-time
+spread and navigation (internal referrers, entry and exit pages) read raw events, so they reach back 90 days and no
+further.
 
 ## Alternatives
 
@@ -75,8 +78,8 @@ The monthly hash ties a reader's views together for up to a month, where the dai
 in raw events for 90 days, and anyone holding the salt can walk the address space against it as they could the
 daily one.
 
-Hourly counts, `since:`, read-time spread and navigation stop at 90 days. A question about last spring's peak hour
-has no answer.
+`since:`, read-time spread and navigation stop at 90 days. Hourly counts no longer do: they keep only a day, an hour and
+a count, so they hold no visitor and can stay as long as the other rollups.
 
 New columns start empty and new rollups reach back only as far as raw events when they first run. Nothing is filled
 in for older days.
