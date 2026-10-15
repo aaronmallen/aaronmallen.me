@@ -26,6 +26,12 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def place(task) = repo.by_id(task.id).place
 
+  def queries
+    timer = Blog::Timer.start
+    yield
+    timer.stop.fetch(:query_count)
+  end
+
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
   def repo = Tasks::Slice["repos.task_queries"]
@@ -218,6 +224,18 @@ RSpec.describe "API bulk task actions", type: :request do
       task = create(:task)
 
       expect(act("complete", [task.id, task.id]).fetch("tasks").map { it.fetch("id") }).to eq([task.id])
+    end
+
+    it "answers in the order the IDs were given" do
+      given = ids(tasks(3)).reverse
+
+      expect(act("complete", given).fetch("tasks").map { it.fetch("id") }).to eq(given)
+    end
+
+    it "reads the tasks it answers with in the same queries however many it names" do
+      few, many = [1, 4].map { ids(tasks(it)) }
+
+      expect(queries { repo.detailed_in_order(few) }).to eq(queries { repo.detailed_in_order(many) })
     end
 
     it "refuses an empty list" do

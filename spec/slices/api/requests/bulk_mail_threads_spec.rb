@@ -20,6 +20,12 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     API::Slice["operations.mint_token"].call({ name: "Terminal", scopes: }.compact).value!.fetch(:value)
   end
 
+  def queries
+    timer = Blog::Timer.start
+    yield
+    timer.stop.fetch(:query_count)
+  end
+
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
   def repo = Mail::Slice["repos.message_queries"]
@@ -179,6 +185,14 @@ RSpec.describe "API bulk mail thread actions", type: :request do
         .to eq([ids(picked).map { [it, ends_at.iso8601] }, 200])
     end
 
+    it "answers each snoozed thread whole, in the order the IDs were given" do
+      picked = Array.new(2) { create(:message) }
+      answer = act("snooze", ids(picked).reverse, snoozed_until: ends_at.iso8601)
+
+      expect(answer.fetch("mail_threads").map { it.except("status") })
+        .to eq(picked.reverse.map { whole(it).merge("snoozed_until" => ends_at.iso8601) })
+    end
+
     it "snoozes none when one ID is gone and names it" do
       message = create(:message)
       gone = gone_id
@@ -215,6 +229,18 @@ RSpec.describe "API bulk mail thread actions", type: :request do
       message = create(:message)
 
       expect(act("read", [message.id, message.id]).fetch("mail_threads").map { it.fetch("id") }).to eq([message.id])
+    end
+
+    it "answers in the order the IDs were given" do
+      given = ids(Array.new(3) { create(:message) }).reverse
+
+      expect(act("read", given).fetch("mail_threads").map { it.fetch("id") }).to eq(given)
+    end
+
+    it "reads the threads it answers with in the same queries however many it names" do
+      few, many = [1, 4].map { |count| ids(Array.new(count) { create(:message) }) }
+
+      expect(queries { repo.by_ids_in_order(few) }).to eq(queries { repo.by_ids_in_order(many) })
     end
 
     it "refuses an empty list" do

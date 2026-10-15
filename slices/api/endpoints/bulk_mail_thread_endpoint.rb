@@ -26,7 +26,7 @@ module API
         end
       end
 
-      def answered(threads) = serialized(Serializers::MailThread, threads.map { message_queries.by_id(it.id) })
+      def answered(threads) = serialized(Serializers::MailThread, message_queries.by_ids_in_order(threads.map(&:id)))
     end
   end
 end

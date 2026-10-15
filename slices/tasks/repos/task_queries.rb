@@ -35,6 +35,12 @@ module Tasks
 
       def detailed(id) = with_details.combine(:sprint).by_pk(id).one
 
+      def detailed_in_order(ids)
+        found = with_details.combine(:sprint).where(id: ids).to_a.to_h { [it.id, it] }
+
+        found.values_at(*ids)
+      end
+
       def exist?(id) = tasks.by_pk(id).exist?
 
       def filtered(page:, **filters)

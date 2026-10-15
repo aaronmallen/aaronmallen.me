@@ -22,7 +22,7 @@ module API
 
       private
 
-      def answered(snoozed) = serialized(Serializers::MailThread, snoozed.map { message_queries.by_id(it.id) })
+      def answered(snoozed) = serialized(Serializers::MailThread, message_queries.by_ids_in_order(snoozed.map(&:id)))
     end
   end
 end

@@ -21,7 +21,7 @@ module API
         end
       end
 
-      def answered(ids, _tasks) = serialized(Serializers::Task, ids.map { task_queries.detailed(it) })
+      def answered(ids, _tasks) = serialized(Serializers::Task, task_queries.detailed_in_order(ids))
 
       def keyed(errors) = flat(errors).transform_keys { FIELDS.fetch(it, it) }
 

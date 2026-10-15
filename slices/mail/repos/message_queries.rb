@@ -10,9 +10,15 @@ module Mail
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
-      def by_id(id) = mail_threads.with_letter.with_account.with_reason(settings).combine(:tags).by_pk(id).one
+      def by_id(id) = letters.by_pk(id).one
 
       def by_id_for_update(id) = mail_threads.by_pk(id).lock.one
+
+      def by_ids_in_order(ids)
+        found = letters.where(id: ids).to_a.to_h { [it.id, it] }
+
+        found.values_at(*ids)
+      end
 
       def count_from_visitor_since(visitor_hashes, time)
         mail_messages.for_visitor(visitor_hashes).received_since(time).count
@@ -57,6 +63,8 @@ module Mail
         found = first ? mail_threads.received_since(first) : mail_threads
         last ? found.received_before(last) : found
       end
+
+      def letters = mail_threads.with_letter.with_account.with_reason(settings).combine(:tags)
 
       def waiting = mail_threads.waiting(settings)
     end
