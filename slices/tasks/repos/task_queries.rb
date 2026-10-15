@@ -60,6 +60,8 @@ module Tasks
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
 
+      def id_at(filter, sprint:, offset:) = pool(tasks, filter, sprint).in_order.limit(1, offset).pluck(:id).first
+
       def id_by_label(label)
         key, number = label.match(LABEL)&.captures
         return if number.nil?
@@ -86,9 +88,7 @@ module Tasks
       end
 
       def list(filter, sprint:, page:, **search)
-        found = filter == TODAY ? with_details.for_sprint(sprint.id) : with_details.in_list(filter)
-
-        page.fill(found.open.searched(**by_project(**search)).in_order.paged(page).to_a)
+        page.fill(pool(with_details, filter, sprint).searched(**by_project(**search)).in_order.paged(page).to_a)
       end
 
       def on_board(project_id, sizes)
@@ -137,6 +137,8 @@ module Tasks
       end
 
       def on_project(found, project_id) = recent(found.searched(project_ids: [project_id]))
+
+      def pool(found, filter, sprint) = (filter == TODAY ? found.for_sprint(sprint.id) : found.in_list(filter)).open
 
       def recent(found)
         since = Time.now - (settings.board[:closed_days] * DAY)

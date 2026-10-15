@@ -63,9 +63,7 @@ module Admin
       def lead(tab, sprint, page, filters)
         return if page.number == 1 || UNORDERED.include?(tab) || !filters[:query].empty?
 
-        previous = Blog::Structs::Page.new(number: page.number - 1, size: page.size)
-
-        task_queries.list(tab, sprint:, page: previous).rows.last&.id
+        task_queries.id_at(tab, sprint:, offset: page.offset - 1)
       end
 
       def listed(tab, sprint, planned, page, filters)
