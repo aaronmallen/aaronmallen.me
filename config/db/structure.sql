@@ -1283,7 +1283,8 @@ CREATE VIEW public.activities AS
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.commits
 UNION ALL
  SELECT 'post'::text AS type,
@@ -1302,7 +1303,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.posts
   WHERE (posts.status = 'published'::public.post_status)
 UNION ALL
@@ -1322,7 +1324,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    "left"((journal_entries.body)::text, 1000) AS preview
    FROM public.journal_entries
 UNION ALL
  SELECT 'social'::text AS type,
@@ -1341,7 +1344,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM (public.social_posts
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
            FROM public.social_post_parts
@@ -1366,7 +1370,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM (public.webmentions
      JOIN public.posts ON ((posts.id = webmentions.post_id)))
   WHERE (webmentions.status = 'approved'::public.webmention_status)
@@ -1389,7 +1394,8 @@ UNION ALL
     NULL::integer AS worked_seconds,
     COALESCE(( SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object('kind', task_contributors.kind, 'agent', task_contributors.agent, 'model', task_contributors.model)) ORDER BY task_contributors.id) AS jsonb_agg
            FROM public.task_contributors
-          WHERE (task_contributors.task_id = tasks.id)), '[{"kind": "owner"}]'::jsonb) AS contributors
+          WHERE (task_contributors.task_id = tasks.id)), '[{"kind": "owner"}]'::jsonb) AS contributors,
+    NULL::text AS preview
    FROM public.tasks
   WHERE (tasks.status = 'done'::public.task_status)
 UNION ALL
@@ -1412,7 +1418,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.projects
 UNION ALL
  SELECT 'sprint'::text AS type,
@@ -1431,7 +1438,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.sprints
 UNION ALL
  SELECT 'suggestion'::text AS type,
@@ -1450,7 +1458,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM ((public.suggestions
      LEFT JOIN public.posts ON ((posts.id = suggestions.post_id)))
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
@@ -1475,7 +1484,8 @@ UNION ALL
     task_comments.task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    "left"((task_comments.body)::text, 1000) AS preview
    FROM (public.task_comments
      JOIN public.tasks ON ((tasks.id = task_comments.task_id)))
 UNION ALL
@@ -1495,7 +1505,8 @@ UNION ALL
     NULL::integer AS task_id,
     decision_events.decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM ((public.decision_events
      JOIN public.decisions ON ((decisions.id = decision_events.decision_id)))
      LEFT JOIN public.decision_options ON ((decision_options.id = decision_events.option_id)))
@@ -1516,7 +1527,8 @@ UNION ALL
     NULL::integer AS task_id,
     decision_comments.decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    "left"((decision_comments.body)::text, 1000) AS preview
    FROM (public.decision_comments
      JOIN public.decisions ON ((decisions.id = decision_comments.decision_id)))
 UNION ALL
@@ -1536,7 +1548,8 @@ UNION ALL
     work_sessions.task_id,
     NULL::integer AS decision_id,
     (floor(EXTRACT(epoch FROM (work_sessions.ended_at - work_sessions.started_at))))::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM (public.work_sessions
      JOIN public.tasks ON ((tasks.id = work_sessions.task_id)))
   WHERE (work_sessions.ended_at IS NOT NULL)
@@ -1557,7 +1570,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.pull_requests
   WHERE (pull_requests.ready_at IS NOT NULL)
 UNION ALL
@@ -1581,7 +1595,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     NULL::integer AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.pull_requests
   WHERE ((pull_requests.ready_at IS NOT NULL) AND (COALESCE(pull_requests.merged_at, pull_requests.closed_at) IS NOT NULL))
 UNION ALL
@@ -1601,7 +1616,8 @@ UNION ALL
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
     (workouts.minutes * 60) AS worked_seconds,
-    NULL::jsonb AS contributors
+    NULL::jsonb AS contributors,
+    NULL::text AS preview
    FROM public.workouts;
 
 
@@ -8363,4 +8379,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261015100000_index_activity_dates_moved_task_events_and_delivery_connections.rb'),
 ('20261015110000_add_settings_synced_at_to_mail_accounts.rb'),
 ('20261015120000_create_analytics_rollup_hours.rb'),
-('20261015120010_backfill_analytics_rollup_hours.rb');
+('20261015120010_backfill_analytics_rollup_hours.rb'),
+('20261015130000_add_preview_to_activities.rb');

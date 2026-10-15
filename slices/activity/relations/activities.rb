@@ -65,8 +65,6 @@ module Activity
 
       def counts_by_type = unordered.select(:type) { integer.count(source_id).as(:count) }.group(:type)
 
-      def day_count = unordered.dataset.select(:occurred_on).distinct.count
-
       def in_repo(names)
         named = names.reject { unmatchable?(it) }.map { named_repo(it) }
 

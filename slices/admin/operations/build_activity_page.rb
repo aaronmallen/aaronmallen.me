@@ -20,8 +20,7 @@ module Admin
         counts = activity_queries.counts(**search.except(:types))
 
         {
-          **timeline(search, window[:day]),
-          totals: totals(search, counts),
+          **timeline(search, window[:day], counts),
           filters: filters.merge(counts:, today: Blog::TimeZone.today),
         }
       end
@@ -36,18 +35,13 @@ module Admin
         health_queries.days(from: events.last.occurred_on, to: events.first.occurred_on)
       end
 
-      def timeline(search, day)
-        paged = search.merge(day:, size: settings.page_size[:admin])
-        found = list_activity_events.call(**paged.except(:to))
-        events = found.rows
+      def timeline(search, day, counts)
+        found = list_activity_events.call(**search, day:, size: settings.page_size[:admin])
 
-        { events:, health: health(events), older: found.continue_to, newer: list_activity_events.newer_day(**paged) }
-      end
-
-      def totals(search, counts)
         {
-          events: counts.slice(*search[:types]).values.sum,
-          days: activity_queries.day_count(**search),
+          **found.slice(:events, :older, :newer),
+          health: health(found[:events]),
+          totals: { events: counts.slice(*search[:types]).values.sum, days: found[:days] },
         }
       end
     end

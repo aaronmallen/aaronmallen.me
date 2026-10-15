@@ -774,6 +774,12 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(newer_href).not_to include("day=")
       end
 
+      it "reads the activities three times for a page in the middle" do
+        lower_page_size(:admin, to: 1)
+
+        expect(activity_reads(today - 1)).to eq(3)
+      end
+
       it "reads the activities as often for the newer link on a deep page as on a shallow one" do
         lower_page_size(:admin, to: 1)
         (21..25).each { create(:commit, commit_date: today - it) }
@@ -1069,6 +1075,13 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(event_names).to eq(["tidy the imports"])
       end
 
+      it "matches journal text past what the row reads" do
+        create(:journal_entry, entry_date: today, body: "walked #{'the dog ' * 200}then rested")
+        visit_activity(q: "rested")
+
+        expect(event_names.first).to start_with("walked the dog")
+      end
+
       it "keeps the text in the field" do
         visit_activity(q: "ACTIVITIES")
 
@@ -1359,6 +1372,15 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
       it "ends it with an ellipsis" do
         expect(event_names.first).to end_with("…")
+      end
+
+      it "formats the start of an entry far longer than the row shows", :aggregate_failures do
+        create(:journal_entry, entry_date: today - 1, body: "**ran** #{'far ' * 400}")
+        visit_activity
+
+        expect(page.find(".activity-day:has(time[datetime='#{(today - 1).iso8601}']) .activity-event-name strong"))
+          .to have_text("ran")
+        expect(day_names(today - 1).first).to end_with("…")
       end
     end
   end

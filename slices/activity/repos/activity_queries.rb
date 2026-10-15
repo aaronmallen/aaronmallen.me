@@ -39,8 +39,6 @@ module Activity
         tallied.map(&:month).uniq.sort.reverse.to_h { [it, month_counts(tallied, it, types)] }
       end
 
-      def day_count(from:, to:, **filters) = narrowed(from:, to:, **filters).day_count
-
       def views(rows) = rows.any? { it.type == POST } ? rollup_queries.views_by_path : Blog::Constants::EMPTY_HASH
 
       private

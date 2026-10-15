@@ -18,7 +18,6 @@ module Admin
       }.freeze
       MARKDOWN = [JOURNAL, COMMENT, DECISION_COMMENT].freeze
       NAME_LIMIT = 120
-      OCCURRED_ON = :occurred_on.to_proc
       POST = Blog::Types::ActivityKind["post"]
       SESSION = Blog::Types::ActivityKind["session"]
       SOCIAL = Blog::Types::ActivityKind["social"]
@@ -43,24 +42,24 @@ module Admin
         activity_queries: "activity.repos.activity_queries",
       ]
 
-      def call(from:, day:, size:, **filters)
-        found = page(from, day, size, filters)
-        views = activity_queries.views(found.rows)
+      def call(from:, to:, day:, size:, **filters)
+        counts = activity_queries.counts_by_day(from:, to:, **filters)
+        shown = counts.select { |date, _| date <= day }
+        boundary = boundary(shown, size)
+        rows = activity_queries.between(from: boundary || from, to: day, **filters)
+        views = activity_queries.views(rows)
 
-        found.with(rows: found.rows.map { event(it, views) })
-      end
-
-      def newer_day(from:, to:, day:, size:, **filters)
-        return if day >= to
-
-        counts = activity_queries.counts_by_day(from: day, to:, **filters)
-        starts = page_starts(counts, to:, day:, size:)
-        return starts.last if shows_rows?(starts.last, counts:, to:, from:, day:, filters:)
-
-        starts[-2]
+        {
+          events: rows.map { event(it, views) },
+          older: older(shown, boundary),
+          newer: newer(counts, to:, day:, size:),
+          days: counts.size,
+        }
       end
 
       private
+
+      def boundary(shown, size) = (page_ends(shown, size).first if shown.values.sum > size)
 
       def commit_line(row)
         i18n.t!(
@@ -78,7 +77,7 @@ module Admin
         i18n.t!("activity_page.sub_lines.decision_excerpt", event:, excerpt: shortened(row.excerpt))
       end
 
-      def display_name(row) = row.type == COMMIT ? Helpers::CommitMessage.subject(row.name) : row.name
+      def display_name(row) = row.type == COMMIT ? Helpers::CommitMessage.subject(row.name) : row.preview || row.name
 
       def event(row, views)
         Structs::ActivityEvent.new(
@@ -97,18 +96,24 @@ module Admin
       def hours(seconds) = Blog::Helpers::Figures.hours(seconds)
 
       def name_html(row)
-        InlineMarkdown.to_html(row.name, keep: NAME_LIMIT) if MARKDOWN.include?(row.type)
+        InlineMarkdown.to_html(row.preview, keep: NAME_LIMIT) if MARKDOWN.include?(row.type)
       end
 
       def networks(targets)
         targets.to_a.map { i18n.t!(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
       end
 
-      def page(from, to, size, filters)
-        Blog::Structs::DayCursor.page(from, to, size:, day: OCCURRED_ON) do |first, last, limit|
-          activity_queries.between(from: first, to: last, limit:, **filters)
-        end
+      def newer(counts, to:, day:, size:)
+        return if day >= to
+
+        later = counts.select { |date, _| date >= day }
+        starts = page_starts(later, to:, day:, size:)
+        return starts.last if starts.last == to || later.keys.min <= starts.last || counts.keys.min < day
+
+        starts[-2]
       end
+
+      def older(shown, boundary) = (boundary.prev_day if boundary && shown.keys.min < boundary)
 
       def page_ends(counts, size)
         seen = 0
@@ -133,16 +138,10 @@ module Admin
         )
       end
 
-      def rows_before?(from, day, filters) = activity_queries.between(from:, to: day.prev_day, limit: 1, **filters).any?
-
       def session_line(row) = i18n.t!("activity_page.sub_lines.session", span: hours(row.worked_seconds))
 
       def shortened(name)
         Blog::Helpers::Truncation.cut(Blog::Helpers::Whitespace.squish(Blog::Types::Text[name]), keep: NAME_LIMIT)
-      end
-
-      def shows_rows?(start, counts:, to:, from:, day:, filters:)
-        start == to || counts.keys.min <= start || rows_before?(from, day, filters)
       end
 
       def social_line(row)
