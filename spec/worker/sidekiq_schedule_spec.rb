@@ -64,4 +64,14 @@ RSpec.describe "The worker's schedule", type: :app do
       expect(cron.next_time(run).to_t - run.to_t).to eq(24 * 60 * 60)
     end
   end
+
+  describe "the post link check" do
+    let(:cron) { Fugit::Cron.parse(schedule.fetch("check_post_links").fetch("cron")) }
+    let(:run) { cron.next_time(Time.utc(2026, 9, 17, 12)) }
+
+    it "runs every night at 03:00 Chicago", :aggregate_failures do
+      expect(Blog::TimeZone.local(run.to_t).iso8601).to eq("2026-09-18T03:00:00-05:00")
+      expect(cron.next_time(run).to_t - run.to_t).to eq(24 * 60 * 60)
+    end
+  end
 end

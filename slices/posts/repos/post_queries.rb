@@ -81,6 +81,8 @@ module Posts
 
       def published_bodies = posts.select(*LINKS).published.to_a
 
+      def published_body(id) = posts.select(*LINKS).published.by_pk(id).one
+
       def published_by_ids(ids) = with_tags.published.with_ids(ids).newest_first.to_a
 
       def published_by_slug(slug) = with_tags.published.with_slug(slug).one

@@ -6,7 +6,7 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
 
   def body_linking(*urls) = urls.map { "See [a note](#{it})." }.join("\n\n")
 
-  def check = described_class.new.perform
+  def check(at: nil) = at ? Posts::Slice["operations.check_post_links"].call(at:) : described_class.new.perform
 
   def checks = Posts::Slice["relations.post_link_checks"].to_a.to_h { [it[:url], it] }
 
@@ -18,7 +18,7 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     stub_request(:get, dead).to_return(status: 404)
   end
 
-  it "never retries, since next week's run checks every link again" do
+  it "never retries, since the next night's run checks every link again" do
     expect(described_class.get_sidekiq_options["retry"]).to be(false)
   end
 
@@ -29,12 +29,60 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     expect([a_request(:get, live), a_request(:get, dead)]).to all(have_been_made.once)
   end
 
-  it "counts a 404 as a failure and keeps the reason and when it ran", :aggregate_failures do
+  it "counts a 404 as a failure and keeps the reason, when it ran and when it first failed", :aggregate_failures do
     post_with(dead)
     check
 
-    expect(checks[dead]).to include(failures: 1, reason: "HTTP 404")
+    expect(checks[dead]).to include(failures: 1, reason: "404 Not Found")
+    expect(checks[dead].values_at(:checked_at, :first_failed_at)).to all(be_within(5).of(Time.now))
+  end
+
+  it "keeps the time a link first failed while it keeps failing", :aggregate_failures do
+    post_with(dead)
+    check(at: Time.now - 86_400)
+    check
+
+    expect(checks[dead][:first_failed_at]).to be_within(5).of(Time.now - 86_400)
     expect(checks[dead][:checked_at]).to be_within(5).of(Time.now)
+  end
+
+  it "forgets when a link first failed once it passes" do
+    post_with(live)
+    stub_request(:get, live).to_return(status: 404).then.to_return(status: 200)
+    2.times { check }
+
+    expect(checks[live]).to include(failures: 0, reason: nil, first_failed_at: nil)
+  end
+
+  it "keeps no first failed time for a link that never failed" do
+    post_with(live)
+    check
+
+    expect(checks[live][:first_failed_at]).to be_nil
+  end
+
+  it "counts a 5xx as a failure" do
+    stub_request(:get, dead).to_return(status: 503)
+    post_with(dead)
+    check
+
+    expect(checks[dead]).to include(failures: 1, reason: "503 Service Unavailable")
+  end
+
+  it "gives a 5xx with no common name its code alone" do
+    stub_request(:get, dead).to_return(status: 599)
+    post_with(dead)
+    check
+
+    expect(checks[dead]).to include(failures: 1, reason: "599")
+  end
+
+  it "counts a 429 as working, since some sites rate limit bots" do
+    stub_request(:get, live).to_return(status: 429)
+    post_with(live)
+    check
+
+    expect(checks[live]).to include(failures: 0, reason: nil)
   end
 
   it "counts a 410 as a failure" do
@@ -42,7 +90,7 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     post_with(dead)
     check
 
-    expect(checks[dead]).to include(failures: 1, reason: "HTTP 410")
+    expect(checks[dead]).to include(failures: 1, reason: "410 Gone")
   end
 
   it "counts failures in a row" do
@@ -87,12 +135,20 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     expect(a_request(:get, live).with(headers: { "User-Agent" => agent })).to have_been_made
   end
 
-  it "counts a timeout as a failure" do
+  it "counts a timeout as a failure and says how long it waited" do
     stub_request(:get, dead).to_timeout
     post_with(dead)
     check
 
-    expect(checks[dead][:failures]).to eq(1)
+    expect(checks[dead]).to include(failures: 1, reason: "Timed out after 10 seconds")
+  end
+
+  it "counts a read timeout as a failure" do
+    stub_request(:get, dead).to_raise(Net::ReadTimeout)
+    post_with(dead)
+    check
+
+    expect(checks[dead]).to include(failures: 1, reason: "Timed out after 10 seconds")
   end
 
   it "counts a 403 as working, since some sites turn bots away" do
@@ -111,7 +167,7 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     expect(checks[dead][:failures]).to eq(0)
   end
 
-  it "counts endless redirects as working, since only a 404, a 410 or no answer counts as broken" do
+  it "counts endless redirects as working, since only a 404, a 410, a 5xx or no answer counts as broken" do
     stub_request(:get, dead).to_return(status: 302, headers: { "Location" => dead })
     post_with(dead)
     check

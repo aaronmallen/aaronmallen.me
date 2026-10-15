@@ -9,6 +9,15 @@ module Social
       class Refused < Error; end
       class Unreachable < Error; end
 
+      class TimedOut < Unreachable
+        attr_reader :seconds
+
+        def initialize(url, seconds)
+          @seconds = seconds
+          super("#{url} took longer than #{seconds} seconds")
+        end
+      end
+
       Response = Data.define(:body, :headers, :status, :url)
       Target = Data.define(:address, :uri)
 
@@ -20,7 +29,7 @@ module Social
       PORTS = [80, 443].freeze
       REDIRECT_STATUSES = [301, 302, 303, 307, 308].freeze
       RETRY_STATUSES = [429, *500..599].freeze
-      UNREACHABLE = [Faraday::ConnectionFailed, Faraday::SSLError, Faraday::TimeoutError].freeze
+      UNREACHABLE = [Faraday::ConnectionFailed, Faraday::SSLError].freeze
 
       def initialize(connection:)
         @connection = connection
@@ -48,7 +57,12 @@ module Social
 
       def declared_over?(env) = env.response_headers["content-length"].to_i > MAX_BODY
 
-      def failure(error, deadline) = deadline.passed? || UNREACHABLE.any? { error.is_a?(it) } ? Unreachable : Error
+      def failure(error, verb, url, deadline)
+        return TimedOut.new(url, deadline.passed? ? BUDGET : connection.options.timeout) if timed_out?(error, deadline)
+
+        kind = UNREACHABLE.any? { error.is_a?(it) } ? Unreachable : Error
+        kind.new("#{verb.upcase} #{url} failed: #{error.message}")
+      end
 
       def follow(url, deadline)
         at = url
@@ -64,8 +78,6 @@ module Social
       end
 
       def location(response) = response.headers["location"].to_s.then { it unless it.empty? }
-
-      def overdue(url) = "#{url} took longer than #{BUDGET} seconds"
 
       def pin(request, target, deadline, on_data)
         request.options.context = { address: target.address, deadline: }
@@ -110,12 +122,16 @@ module Social
       end
 
       def request(verb, url, deadline, *body)
-        raise Unreachable, overdue(url) if deadline.passed?
+        raise TimedOut.new(url, BUDGET) if deadline.passed?
 
         target = reachable(url, deadline)
         read(url) { |on_data| connection.public_send(verb, target.uri, *body) { pin(it, target, deadline, on_data) } }
       rescue Faraday::Error => e
-        raise failure(e, deadline), deadline.passed? ? overdue(url) : "#{verb.upcase} #{url} failed: #{e.message}"
+        raise failure(e, verb, url, deadline)
+      end
+
+      def timed_out?(error, deadline)
+        deadline.passed? || error.is_a?(Faraday::TimeoutError) || error.wrapped_exception.is_a?(Timeout::Error)
       end
     end
   end

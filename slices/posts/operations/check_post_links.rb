@@ -15,6 +15,11 @@ module Posts
         post_queries: "repos.post_queries",
       ]
 
+      def again(post_id, url: nil, at: Time.now)
+        post = post_queries.published_body(post_id)
+        check(post, at, only: url) if post
+      end
+
       def call(at: Time.now)
         link_check_mutations.forget_unpublished
         post_queries.published_bodies.each { check(it, at) }
@@ -22,10 +27,10 @@ module Posts
 
       private
 
-      def check(post, at)
+      def check(post, at, only: nil)
         urls = links_in(post.body)
         link_check_mutations.forget_unlinked(post.id, urls)
-        urls.each { link_check_mutations.record(post_id: post.id, url: it, reason: check_link.call(it), at:) }
+        (only ? urls & [only] : urls).each { record(post, it, at) }
       end
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
@@ -44,6 +49,8 @@ module Posts
       rescue URI::Error, ArgumentError
         nil
       end
+
+      def record(post, url, at) = link_check_mutations.record(post_id: post.id, url:, reason: check_link.call(url), at:)
 
       def site = settings.site[:url].to_s
     end

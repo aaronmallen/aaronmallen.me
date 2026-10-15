@@ -26,7 +26,7 @@ RSpec.describe "Broken links on the attention list", :frozen_clock, type: :reque
   def listed
     {
       "kind" => "broken_link", "record_id" => link_check_id, "title" => "Linky post", "carried_count" => nil,
-      "days" => nil, "post_id" => post_record.id, "url" => dead, "reason" => "HTTP 404", "failures" => 2,
+      "days" => nil, "post_id" => post_record.id, "url" => dead, "reason" => "404 Not Found", "failures" => 2,
     }
   end
 
@@ -51,7 +51,7 @@ RSpec.describe "Broken links on the attention list", :frozen_clock, type: :reque
     check(2)
 
     expect(rows.map { it.to_h.slice(:title, :post_id, :url, :reason, :days) })
-      .to eq([{ title: "Linky post", post_id: post_record.id, url: dead, reason: "HTTP 404", days: 2 }])
+      .to eq([{ title: "Linky post", post_id: post_record.id, url: dead, reason: "404 Not Found", days: 2 }])
   end
 
   it "follows the failure limit in settings" do
@@ -103,7 +103,7 @@ RSpec.describe "Broken links on the attention list", :frozen_clock, type: :reque
     row = card_row
 
     expect(row.find(".li-title")[:href]).to eq("/admin/posts/#{post_record.id}/edit")
-    expect(row.all(".li-sub").map(&:text)).to eq([dead, "HTTP 404"])
+    expect(row.all(".li-sub").map(&:text)).to eq([dead, "404 Not Found"])
     expect(row).to have_css("input[value=broken_link]", visible: :all)
   end
 
