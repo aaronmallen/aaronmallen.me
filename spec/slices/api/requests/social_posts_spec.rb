@@ -88,7 +88,7 @@ RSpec.describe "API social posts", type: :request do
     it "answers as list_social_posts does" do
       compose("hi")
 
-      expect(mcp_answer("list_social_posts", queue: "drafts")).to eq(list(queue: "drafts"))
+      expect(trusted(mcp_answer("list_social_posts", queue: "drafts"))).to eq(list(queue: "drafts"))
     end
   end
 
@@ -105,7 +105,7 @@ RSpec.describe "API social posts", type: :request do
     end
 
     it "answers as create_social_post does, save the ID" do
-      answer = mcp_answer("create_social_post", parts: %w[hi], targets: %w[mastodon])
+      answer = trusted(mcp_answer("create_social_post", parts: %w[hi], targets: %w[mastodon]))
 
       expect(answer.except("id", "created_at", "updated_at"))
         .to eq(create_social_post(parts: %w[hi], targets: %w[mastodon]).except("id", "created_at", "updated_at"))

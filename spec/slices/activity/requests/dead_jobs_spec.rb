@@ -53,13 +53,16 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
     end
 
     it "returns it from list_attention" do
-      expected = { "name" => "Social::Jobs::SendWebmention", "died_at" => died_at.utc.iso8601, "error" => error }
+      expected = {
+        "name" => "Social::Jobs::SendWebmention", "died_at" => died_at.utc.iso8601,
+        "error" => { "untrusted" => true, "text" => error },
+      }
 
       expect(mcp_answer("list_attention").fetch("dead_jobs")).to eq([expected])
     end
 
     it "answers the MCP tool with the JSON the endpoint gives" do
-      expect(mcp_answer("list_attention")).to eq(api_read)
+      expect(trusted(mcp_answer("list_attention"))).to eq(api_read)
     end
   end
 

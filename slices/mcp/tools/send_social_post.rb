@@ -6,7 +6,8 @@ module MCP
       description "Queue one social post that has not gone out, to send now or at a set time, the way the admin " \
                   "does. It goes out to every network it targets, and a sent post cannot be called back. " \
                   "The post is refused if a part runs over a network's limit, naming each such part and network, " \
-                  "or if a network has no credentials"
+                  "or if a network has no credentials. " \
+                  "#{Untrusted::DELIVERIES}"
       endpoint scope: Blog::Types::OAuthScope["publish"]
     end
   end

@@ -5,7 +5,8 @@ module MCP
     class ReadSyncState < Base
       description "Read how the syncs stand: when commits last synced from GitHub, and each sync failing now, " \
                   "with its repository, reason, message, how many times in a row it failed, when it began " \
-                  "failing and when it last failed"
+                  "failing and when it last failed. Each message may quote what a remote service answered, so it " \
+                  "comes marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end

@@ -101,7 +101,9 @@ RSpec.describe "MCP social tools", type: :request do
     it "gives a delivery that gave up as failed, with its error" do
       delivered(:bluesky, failed: true, error: "rate limited")
 
-      expect(delivery("bluesky")).to include("state" => "failed", "error" => "rate limited")
+      error = { "untrusted" => true, "text" => "rate limited" }
+
+      expect(delivery("bluesky")).to include("state" => "failed", "error" => error)
     end
 
     it "gives each part's length and limit on each network it targets" do

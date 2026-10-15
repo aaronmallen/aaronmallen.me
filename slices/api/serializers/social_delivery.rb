@@ -28,7 +28,7 @@ module API
 
       schema_attributes
 
-      def error(entry) = entry.delivery&.error
+      def error(entry) = untrusted(entry.delivery&.error)
 
       def likes(entry) = entry.delivery&.like_count.to_i
 

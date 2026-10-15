@@ -5,7 +5,8 @@ module MCP
     class CreateSocialPost < Base
       description "Write a new social post and save it as a draft. Nothing goes out until send_social_post " \
                   "queues it. The answer gives each part's length and limit on each network, so a long part " \
-                  "shows before you send"
+                  "shows before you send. " \
+                  "#{Untrusted::DELIVERIES}"
       endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end

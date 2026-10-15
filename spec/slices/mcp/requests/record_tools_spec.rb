@@ -277,7 +277,8 @@ RSpec.describe "MCP record tools", type: :request do
 
     def failing_twice
       {
-        "sync" => "commits", "repo" => nil, "reason" => "github_failed", "message" => "503", "count" => 2,
+        "sync" => "commits", "repo" => nil, "reason" => "github_failed", "count" => 2,
+        "message" => { "untrusted" => true, "text" => "503" },
         "failing_since" => "2026-03-01T08:00:00Z", "last_failed_at" => "2026-03-02T08:00:00Z",
       }
     end

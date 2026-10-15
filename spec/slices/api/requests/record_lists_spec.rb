@@ -89,7 +89,7 @@ RSpec.describe "API commits, pull requests and syncs", type: :request do
         Blog::Types::SyncName["commits"], :github_failed, at: Time.utc(2026, 3, 1, 8), message: "502",
       )
 
-      expect(call_api(:get, "/sync_state")).to eq(mcp_answer("read_sync_state"))
+      expect(call_api(:get, "/sync_state")).to eq(trusted(mcp_answer("read_sync_state")))
     end
   end
 

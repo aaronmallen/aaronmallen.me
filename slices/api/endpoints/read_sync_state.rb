@@ -40,7 +40,9 @@ module API
 
       def failure(state)
         {
-          **state.slice(:sync, :repo, :reason, :message, :count),
+          **state.slice(:sync, :repo, :reason),
+          message: Helpers::Untrusted.call(state[:message]),
+          count: state.fetch(:count),
           failing_since: stamp(state.fetch(:since)),
           last_failed_at: stamp(state.fetch(:at)),
         }

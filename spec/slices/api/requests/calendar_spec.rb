@@ -212,7 +212,7 @@ RSpec.describe "API calendar", type: :request do
     create(:social_post, :posted, posted_at: at(first + 3, 8))
     create(:journal_entry, entry_date: first + 4)
 
-    expect(mcp_answer("list_calendar", **range)).to eq(read(**range))
+    expect(trusted(mcp_answer("list_calendar", **range))).to eq(read(**range))
   end
 
   it "answers the MCP tool with an error for a range over 366 days" do

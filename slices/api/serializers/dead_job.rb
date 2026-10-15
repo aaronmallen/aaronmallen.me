@@ -13,6 +13,7 @@ module API
 
       schema_attributes
       stamps :died_at
+      untrusted :error
     end
   end
 end

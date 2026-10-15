@@ -212,14 +212,14 @@ RSpec.describe "API reading a social post", type: :request do
       deliver(social_post, "mastodon", error: "slow")
       suggest(social_post, typo("teh", "the"))
 
-      expect(mcp_answer("read_social_post", id: social_post.id)).to eq(read(social_post.id))
+      expect(trusted(mcp_answer("read_social_post", id: social_post.id))).to eq(read(social_post.id))
     end
 
     it "names each account as GET /api/v1/social_posts/:id does" do
       social_post = create(:social_post, :posted, targets: %w[mastodon])
       connect_two_mastodons.each { deliver(social_post, "mastodon", connection_id: it.id, **sent_counts) }
 
-      expect(mcp_answer("read_social_post", id: social_post.id)).to eq(read(social_post.id))
+      expect(trusted(mcp_answer("read_social_post", id: social_post.id))).to eq(read(social_post.id))
     end
 
     it "reads a social hit from search whatever its status" do
