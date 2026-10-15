@@ -9,6 +9,8 @@ RSpec.describe "mise run release", type: :script do
     {
       "GIT_CONFIG_GLOBAL" => File::NULL,
       "GIT_CONFIG_NOSYSTEM" => "1",
+      "GIT_COMMITTER_EMAIL" => "spec@example.com",
+      "GIT_COMMITTER_NAME" => "Spec",
       "JJ_CONFIG" => File.join(root, "jj.toml"),
       "JJ_EMAIL" => "spec@example.com",
       "JJ_USER" => "Spec",

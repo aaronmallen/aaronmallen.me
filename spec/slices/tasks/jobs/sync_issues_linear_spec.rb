@@ -251,9 +251,10 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "keep every held comment and take the new ones when Linear cuts the list short" do
-      cut = discussed(linear_comment("c2"), linear_comment("c3"))
+      first, second, third = [900, 600, 300].map { Time.now - it }
+      cut = discussed(linear_comment("c2", at: second), linear_comment("c3", at: third))
       cut[:comments][:pageInfo] = { hasNextPage: true }
-      sync_twice(discussed(linear_comment("c1"), linear_comment("c2")), cut)
+      sync_twice(discussed(linear_comment("c1", at: first), linear_comment("c2", at: second)), cut)
 
       expect(comments.map(&:remote_id)).to eq(%w[c1 c2 c3])
     end
