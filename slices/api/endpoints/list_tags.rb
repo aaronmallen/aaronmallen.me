@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class ListTags < Endpoint
+      SCOPED = true
       SCHEMA = {
         additionalProperties: false,
         properties: {
@@ -37,14 +38,15 @@ module API
 
       include Deps[tag_queries: "tags.repos.tag_queries"]
 
-      def handle(scope:, page: 1, query: nil)
+      def handle(scope:, scopes:, page: 1, query: nil)
         text = Blog::Types::TrimmedText[query].downcase
-        usage = tag_queries.usage(scope:)
-        tags = tag_queries.page_matching(scope, text, page_of(page))
+        mail = mail?(scopes)
+        usage = tag_queries.usage(scope:, mail:)
+        tags = tag_queries.page_matching(scope, text, page_of(page), mail:)
 
         Success(
           tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
-          count: tag_queries.count_matching(scope, text),
+          count: tag_queries.count_matching(scope, text, mail:),
           **Helpers::Paging.fields(tags),
         )
       end

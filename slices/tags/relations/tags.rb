@@ -38,7 +38,17 @@ module Tags
         where(Sequel.like(:name, "%#{dataset.escape_like(text)}%"))
       end
 
+      def on_mail = where(id: mail_tags)
+
+      def outside_mail
+        held = JOINS.except(:messages).values.map { dataset.db[it].select(:tag_id) }.reduce(:union)
+
+        exclude(id: mail_tags.except(held))
+      end
+
       private
+
+      def mail_tags = dataset.db[JOINS.fetch(:messages)].select(:tag_id)
 
       def others(id) = rule_tags.where(task_rule_id: rule_id).exclude(tag_id: id)
 

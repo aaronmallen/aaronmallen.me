@@ -4,7 +4,9 @@ module API
   module Endpoints
     class RemoveTag < TagEndpoint
       LAST_TAG = "tag %s is the only tag on %s %s"
+      MAIL_TAG = "tag %s is on mail threads, so removing it needs the mail scope"
       RULES = { true => "the task rule", false => "the task rules" }.freeze
+      SCOPED = true
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Helpers::Schema::ID, scope: SCOPE },
@@ -12,9 +14,11 @@ module API
       }.freeze
       REPLY = Helpers::Schema.object({ id: Helpers::Schema::INTEGER, removed: Helpers::Schema::BOOLEAN }).freeze
 
-      include Deps[remove_tag: "tags.operations.remove_tag"]
+      include Deps[remove_tag: "tags.operations.remove_tag", tag_queries: "tags.repos.tag_queries"]
 
-      def handle(id:, scope:)
+      def handle(id:, scope:, scopes:)
+        return invalid(id: [format(MAIL_TAG, id)]) if !mail?(scopes) && tag_queries.mail?(scope, id)
+
         case remove_tag.call(id, scope:)
           in Success(_) then Success(id:, removed: true)
           in Failure[:last_tag_of_rules, patterns]

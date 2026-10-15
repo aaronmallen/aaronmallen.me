@@ -13,15 +13,19 @@ module Tags
 
       def all_in(scope) = tags.in_scope(scope).in_name_order.to_a
 
-      def count_matching(scope, text) = matching(scope, text).count
+      def count_matching(scope, text, mail: true) = matching(scope, text, mail).count
 
       def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one
 
       def last_tag_of_rules(id) = tags.last_tag_of_rules(id)
 
+      def mail?(scope, id) = tags.in_scope(scope).by_pk(id).on_mail.exist?
+
       def next_color(scope:) = tags.next_color(scope:)
 
-      def page_matching(scope, text, page) = page.fill(matching(scope, text).in_name_order.paged(page).to_a)
+      def page_matching(scope, text, page, mail: true)
+        page.fill(matching(scope, text, mail).in_name_order.paged(page).to_a)
+      end
 
       def summary(name)
         found = tags.by_names(name).to_a
@@ -34,8 +38,9 @@ module Tags
         )
       end
 
-      def usage(scope:)
+      def usage(scope:, mail: true)
         by_kind = tags.counts_by_kind(scope)
+        by_kind = by_kind.except(:messages) unless mail
 
         by_kind.values.flat_map(&:keys).uniq.to_h do |id|
           [id, by_kind.filter_map { |kind, counts| [kind, counts[id]] if counts[id] }.to_h]
@@ -44,7 +49,10 @@ module Tags
 
       private
 
-      def matching(scope, text) = tags.in_scope(scope).naming(text)
+      def matching(scope, text, mail)
+        found = tags.in_scope(scope).naming(text)
+        mail ? found : found.outside_mail
+      end
     end
   end
 end

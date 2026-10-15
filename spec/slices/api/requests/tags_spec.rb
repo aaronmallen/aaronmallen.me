@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe "API tags", type: :request do
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def api_token = @api_token ||= mint
 
-  def call_api(verb, path, body = nil)
+  def call_api(verb, path, body = nil, token: api_token)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}"
     public_send(verb, "/api/v1/tags#{path}", body, headers)
     JSON.parse(last_response.body)
   end
+
+  def mail_tagged(name) = create(:message).tap { Mail::Slice["repos.message_tag_mutations"].add(it.id, name) }
+
+  def mint(**) = API::Slice["operations.mint_token"].call(name: "Terminal", **).value!.fetch(:value)
 
   def status = last_response.status
 
@@ -34,6 +38,39 @@ RSpec.describe "API tags", type: :request do
       create(:post, tags: %w[ruby])
 
       expect(call_api(:get, "", { scope: "public" })).to eq(mcp_answer("list_tags", scope: "public"))
+    end
+
+    describe "without the mail scope" do
+      def private_tags = call_api(:get, "", { scope: "private" }, token: mint(scopes: %w[read])).fetch("tags")
+
+      it "leaves mail threads out of a tag's count and kinds" do
+        create(:task, tags: %w[billing])
+        mail_tagged("billing")
+
+        expect(private_tags.map { it.values_at("name", "count", "by_kind") })
+          .to eq([["billing", 1, { "tasks" => 1 }]])
+      end
+
+      it "leaves out a tag only mail threads carry", :aggregate_failures do
+        create(:task, tags: %w[chores])
+        mail_tagged("billing")
+
+        expect(private_tags.map { it.fetch("name") }).to eq(%w[chores])
+        expect(call_api(:get, "", { scope: "private" }, token: mint(scopes: %w[read])).fetch("count")).to eq(1)
+      end
+
+      it "keeps a tag nothing carries" do
+        create(:tag, :private, name: "chores")
+
+        expect(private_tags.map { it.fetch("name") }).to eq(%w[chores])
+      end
+    end
+
+    it "counts mail threads with the mail scope" do
+      mail_tagged("billing")
+
+      expect(call_api(:get, "", { scope: "private" }).fetch("tags").map { it.values_at("name", "by_kind") })
+        .to eq([["billing", { "messages" => 1 }]])
     end
 
     it "refuses a request with no scope with a 422" do
@@ -81,6 +118,23 @@ RSpec.describe "API tags", type: :request do
 
       expect([call_api(:delete, "/public/#{tag.id}"), status]).to eq([{ "id" => tag.id, "removed" => true }, 200])
       expect(tag_queries.find_in("public", tag.id)).to be_nil
+    end
+
+    it "refuses a tag a mail thread carries without the mail scope, naming mail", :aggregate_failures do
+      mail_tagged("billing")
+      id = tag_queries.all_in("private").first.id
+      call_api(:delete, "/private/#{id}", nil, token: mint(scopes: %w[delete]))
+
+      expect([last_response.body, status]).to match([include("mail scope"), 422])
+      expect(tag_queries.find_in("private", id)).not_to be_nil
+    end
+
+    it "removes a tag a mail thread carries with the mail scope" do
+      mail_tagged("billing")
+      id = tag_queries.all_in("private").first.id
+      call_api(:delete, "/private/#{id}", nil, token: mint(scopes: %w[delete mail]))
+
+      expect([status, tag_queries.find_in("private", id)]).to eq([200, nil])
     end
 
     it "answers an unknown ID with a 404" do
