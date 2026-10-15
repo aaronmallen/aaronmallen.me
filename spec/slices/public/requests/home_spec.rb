@@ -36,6 +36,14 @@ RSpec.describe "Home", type: :request do
       expect(page).to have_css(".entry-blurb", exact_text: "What it is about")
     end
 
+    it "reads no post bodies for the list", :aggregate_failures do
+      publish("hello", 1)
+      sql = logged_sql { get "/" }
+
+      expect(sql).to include('"posts"."title"')
+      expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+    end
+
     it "names the section with a kicker and links to the writing page", :aggregate_failures do
       publish("hello", 1)
       get "/"

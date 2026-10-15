@@ -17,7 +17,7 @@ module Posts
 
       def call(at: Time.now)
         link_check_mutations.forget_unpublished
-        post_queries.published.each { check(it, at) }
+        post_queries.published_bodies.each { check(it, at) }
       end
 
       private

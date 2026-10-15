@@ -35,6 +35,14 @@ RSpec.describe "Writing", type: :request do
       expect(page.all(".entry .entry-title").map(&:text)).to eq(%w[Newer Older])
     end
 
+    it "reads no post bodies for the list", :aggregate_failures do
+      publish("hello", 1)
+      sql = logged_sql { get "/writing" }
+
+      expect(sql).to include('"posts"."title"')
+      expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+    end
+
     it "links each title to its article" do
       publish("hello", 1)
       get "/writing"

@@ -5,6 +5,8 @@ module Posts
     class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
       FEED_VERSION = %i[id published_at updated_at].freeze
+      LINKS = %i[id body].freeze
+      LIST = %i[id title slug published_at read_time summary first_paragraph].freeze
       PAGER = %i[title slug published_at].freeze
       SITEMAP = %i[id slug published_at updated_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
@@ -73,15 +75,17 @@ module Posts
 
       def previous_published(post) = pager(posts.published.older_than(post).newest_first)
 
-      def published(limit = nil) = with_tags.published.newest_first.limit(limit).to_a
+      def published(limit = nil) = listed.published.newest_first.limit(limit).to_a
+
+      def published_bodies = posts.select(*LINKS).published.to_a
 
       def published_by_ids(ids) = with_tags.published.with_ids(ids).newest_first.to_a
 
       def published_by_slug(slug) = with_tags.published.with_slug(slug).one
 
-      def published_page(page) = page.fill(with_tags.published.newest_first.paged(page).to_a)
+      def published_page(page) = page.fill(listed.published.newest_first.paged(page).to_a)
 
-      def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
+      def published_page_by_tag(tag, page) = page.fill(listed.published.tagged(tag).newest_first.paged(page).to_a)
 
       def published_slug?(slug) = posts.published.with_slug(slug).exist?
 
@@ -108,6 +112,8 @@ module Posts
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
+
+      def listed = posts.select(*LIST).combine(:tags)
 
       def pager(found) = found.select(*PAGER).limit(1).one
 

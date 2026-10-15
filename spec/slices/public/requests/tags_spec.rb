@@ -37,6 +37,14 @@ RSpec.describe "Tags", type: :request do
     expect(page).to have_css(".entry-meta a.post-tag[href='/writing/tags/ruby']")
   end
 
+  it "reads no post bodies for the list", :aggregate_failures do
+    publish("hello", 1, tags: %w[ruby])
+    sql = logged_sql { get "/writing/tags/ruby" }
+
+    expect(sql).to include('"posts"."title"')
+    expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+  end
+
   it "uses the summary the post carries as the blurb" do
     publish("hello", 1, tags: %w[ruby], summary: "What it is about", body: "the first part")
     get "/writing/tags/ruby"
