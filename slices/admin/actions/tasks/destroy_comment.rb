@@ -10,7 +10,7 @@ module Admin
         include Deps[delete_task_comment: "tasks.operations.delete_task_comment"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
 
           settle(response, delete_task_comment.call(record_id(request), id), DELETED, tasks_path(request))
         end

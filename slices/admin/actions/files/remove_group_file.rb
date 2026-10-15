@@ -11,7 +11,7 @@ module Admin
 
         def handle(request, response)
           back = routes.path(:admin_files)
-          file_id = Blog::Types::IdParam[request.params[:file_id]] || halt(404)
+          file_id = record_id(request, :file_id)
 
           case remove_share_group_file.call(record_id(request), file_id)
             in Failure[:unavailable]

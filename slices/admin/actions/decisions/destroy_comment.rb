@@ -10,7 +10,7 @@ module Admin
         include Deps[delete_decision_comment: "decisions.operations.delete_decision_comment"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
 
           back = back_here(request) || decision_path(request)
 

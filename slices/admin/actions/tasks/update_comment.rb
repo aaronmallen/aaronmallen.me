@@ -9,7 +9,7 @@ module Admin
         include Deps[edit_task_comment: "tasks.operations.edit_task_comment"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
           params = Blog::Types::Fields[request.params[:comment]]
 
           result = edit_task_comment.call(record_id(request), id, params)

@@ -10,7 +10,7 @@ module Admin
         include Deps[unlink_task: "tasks.operations.unlink_task"]
 
         def handle(request, response)
-          other_id = Blog::Types::IdParam[request.params[:other_id]] || halt(404)
+          other_id = record_id(request, :other_id)
 
           settle(response, unlink_task.call(record_id(request), other_id), UNLINKED, tasks_path(request))
         end

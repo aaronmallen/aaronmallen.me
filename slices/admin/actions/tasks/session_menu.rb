@@ -7,7 +7,7 @@ module Admin
         include Deps[task_timeline_queries: "tasks.repos.task_timeline_queries"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)
+          id = record_id(request, :session_id)
           task_id = record_id(request)
           session = task_timeline_queries.entry(task_id, "session", id) || halt(404)
 

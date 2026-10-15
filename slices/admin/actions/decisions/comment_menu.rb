@@ -7,7 +7,7 @@ module Admin
         include Deps[decision_queries: "decisions.repos.decision_queries", view: "ui.views.comments.menu"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
           decision_id = record_id(request)
           comment = decision_queries.timeline_entry(decision_id, "comment", id) || halt(404)
 

@@ -17,7 +17,7 @@ module Admin
 
         def handle(request, response)
           post = post_queries.by_id(record_id(request)) || halt(404)
-          id = edit_id(request)
+          id = record_id(request, :edit_id)
           params = Blog::Types::Fields[request.params[:edit]]
 
           result = revise_edit_note.call(post.id, id, params)
@@ -29,8 +29,6 @@ module Admin
         end
 
         private
-
-        def edit_id(request) = Blog::Types::IdParam[request.params[:edit_id]] || halt(404)
 
         def invalid(response, post, id:, note:, errors:)
           noting = { id:, note: Blog::Types::Text[note], errors: }

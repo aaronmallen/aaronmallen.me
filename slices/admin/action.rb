@@ -51,7 +51,7 @@ module Admin
 
     def picked_ids(request) = Array(request.params[:ids]).filter_map { Blog::Types::IdParam[it] }.uniq
 
-    def record_id(request) = Blog::Types::IdParam[request.params[:id]] || halt(404)
+    def record_id(request, key = :id) = Blog::Types::IdParam[request.params[key]] || halt(404)
 
     def require_sign_in(request, response)
       return unless sign_in_required?

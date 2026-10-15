@@ -9,7 +9,7 @@ module Admin
         include Deps[delete_work_session: "tasks.operations.delete_work_session"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)
+          id = record_id(request, :session_id)
 
           result = delete_work_session.call(record_id(request), id)
 

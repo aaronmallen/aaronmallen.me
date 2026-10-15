@@ -7,7 +7,7 @@ module Admin
         include Deps[task_timeline_queries: "tasks.repos.task_timeline_queries", view: "ui.views.comments.menu"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
           comment = task_timeline_queries.entry(record_id(request), "comment", id) || halt(404)
 
           response.render(view, comment:, owner: :task, owner_id: comment.task_id, return_to: back_here(request))

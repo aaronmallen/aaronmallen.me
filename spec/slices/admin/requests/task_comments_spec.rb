@@ -361,6 +361,12 @@ RSpec.describe "Admin task comments", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+
+      it "answers 404 for a comment id that is not a number", :aggregate_failures do
+        send_to("/admin/tasks/#{task.id}/comments/nope/delete", filter: "next")
+
+        expect([last_response.status, bodies.size]).to eq([404, 1])
+      end
     end
 
     it "removes a task's comments with the task" do

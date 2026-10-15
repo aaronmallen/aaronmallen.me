@@ -12,7 +12,7 @@ module Admin
         ]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:task_id]] || halt(404)
+          id = record_id(request, :task_id)
           column = Blog::Types::TaskColumnParam[request.params[:to]] || halt(422)
 
           case set_task_column.call(id, column)

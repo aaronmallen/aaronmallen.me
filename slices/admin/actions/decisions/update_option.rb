@@ -9,7 +9,7 @@ module Admin
         include Deps[edit_decision_option: "decisions.operations.edit_decision_option"]
 
         def handle(request, response)
-          option_id = Blog::Types::IdParam[request.params[:option_id]] || halt(404)
+          option_id = record_id(request, :option_id)
           params = Blog::Types::Fields[request.params[:option]]
 
           result = edit_decision_option.call(record_id(request), option_id, params)

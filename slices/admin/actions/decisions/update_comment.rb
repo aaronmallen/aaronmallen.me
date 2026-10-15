@@ -9,7 +9,7 @@ module Admin
         include Deps[edit_decision_comment: "decisions.operations.edit_decision_comment"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = record_id(request, :comment_id)
           params = Blog::Types::Fields[request.params[:comment]]
 
           result = edit_decision_comment.call(record_id(request), id, params)
