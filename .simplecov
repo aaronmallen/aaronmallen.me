@@ -14,3 +14,7 @@ SimpleCov.configure do
     end
   end
 end
+
+SimpleCov.profiles.define "floor" do
+  minimum_coverage line: 98.3, branch: 90.8
+end

@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 superseded-by: "0139"
 issue: AA-807
-amended: ["#916"]
+amended: ["#916", "#1377"]
 tags: [testing, rspec, coverage, capybara, sidekiq, mcp]
 ---
 
@@ -45,8 +45,10 @@ Where a unit spec guards real logic, a behavior spec replaces it before the unit
 unguarded along the way. The move runs one slice at a time, and `lib/blog` counts as one. For each we record the
 branch coverage the old suite gives it, then add behavior specs until they reach it.
 
-Coverage may drop, but we keep it as high as we can. When a branch cannot be reached from outside, we check
-whether it is dead code, and if it is, we delete it.
+Coverage may drop, but we keep it above a floor. The `floor` profile in `.simplecov` sets it at 98.3% of lines and
+90.8% of branches. Only the CI merge, `mise run test:coverage`, loads that profile, so a run of part of the suite
+never fails on it. We raise the floor by hand as coverage grows. When a branch cannot be reached from outside, we
+check whether it is dead code, and if it is, we delete it.
 
 Browser specs run in the main suite. `mise run test` runs every spec in one process against one database and
 reports branch coverage per file, browser specs included. Spec layout is free.

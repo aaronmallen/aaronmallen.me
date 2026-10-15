@@ -6,6 +6,7 @@ created: 2026-10-10
 area: [app, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts, projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 supersedes: ["0035"]
 issue: "#916"
+amended: ["#1377"]
 tags: [testing, rspec, coverage, capybara, sidekiq, mcp, unit-specs]
 ---
 
@@ -55,6 +56,10 @@ We still write none of these:
   already covers.
 
 Browser specs run in the main suite, and `mise run test` reports branch coverage per file.
+
+Coverage holds above a floor: 98.3% of lines and 90.8% of branches, set in the `floor` profile in `.simplecov`. Only
+the CI merge, `mise run test:coverage`, loads that profile, so a run of part of the suite never fails on it. We raise
+the floor by hand as coverage grows.
 
 ## Alternatives
 

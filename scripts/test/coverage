@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#MISE description="Merge coverage results from separate runs into one report in coverage/"
+#MISE description="Merge coverage results from separate runs into one report in coverage/, failing below the floor in .simplecov"
 #MISE alias=["t:cov", "test:cov"]
 #USAGE arg "<resultset>..." var=#true help="The .resultset.json files to merge."
 
 set -e
 
-exec bundle exec ruby -e 'require "simplecov"; SimpleCov.collate ARGV' "$@"
+exec bundle exec ruby -e 'require "simplecov"; SimpleCov.collate ARGV, "floor"' "$@"
