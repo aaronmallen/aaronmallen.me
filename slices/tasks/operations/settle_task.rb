@@ -5,6 +5,7 @@ module Tasks
     class SettleTask < Blog::Operation
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       OPEN = Blog::Types::TaskSourceState["open"]
+      SETTLED = %i[closed not_found].freeze
       STARTED = Blog::Types::TaskSourceState["started"]
 
       include Deps[
@@ -40,12 +41,14 @@ module Tasks
       end
 
       def settle(task, from, to, at, replayed: false)
-        case to
-          when OPEN then reopen(task, from, at)
-          when STARTED then start(task, at, replayed)
-          when COMPLETED then task.done? ? Success(task) : finish(task, at)
-          else close(task, at)
-        end.value_or(task)
+        settled = case to
+                    when OPEN then reopen(task, from, at)
+                    when STARTED then start(task, at, replayed)
+                    when COMPLETED then task.done? ? Success(task) : finish(task, at)
+                    else close(task, at)
+                  end
+
+        step(settled.or { SETTLED.include?(it) ? Success(task) : Failure(it) })
       end
 
       def start(task, at, replayed)

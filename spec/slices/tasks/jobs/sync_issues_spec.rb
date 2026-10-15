@@ -868,6 +868,28 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "an issue closed on GitHub when its task cannot settle" do
+    before do
+      replace_component("operations.cancel_task", ->(*, **) { Dry::Monads::Failure(:invalid) })
+      stub_known(issue(state: "CLOSED", stateReason: "NOT_PLANNED"))
+    end
+
+    def run_failing
+      sync
+    rescue Dry::Monads::UnwrapError
+      nil
+    end
+
+    it "records the crash and leaves the source to try again", :aggregate_failures do
+      task = tracked
+      run_failing
+
+      expect(failure).to include(reason: "crashed")
+      expect(repo.by_id(task.id).status).to eq("open")
+      expect(sources.where(task_id: task.id).pluck(:remote_state)).to eq(["open"])
+    end
+  end
+
   describe "an issue reopened on GitHub" do
     it "reopens its done task" do
       task = tracked(:done, state: "completed")
