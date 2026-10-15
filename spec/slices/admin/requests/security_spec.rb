@@ -130,6 +130,13 @@ RSpec.describe "Admin security", type: :request do
       expect(credential("Claude").all(".li-title").map(&:text)).to eq(["Chrome · Linux"])
     end
 
+    it "names a client that registered no name by its redirect host" do
+      client(nil)
+      get "/admin/security"
+
+      expect(page.find(".security-cred-name")).to have_text(/\Aclaude\.ai/)
+    end
+
     it "shows a credential nothing has used" do
       token("Terminal")
       get "/admin/security"

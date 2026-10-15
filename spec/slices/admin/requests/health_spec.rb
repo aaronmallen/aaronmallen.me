@@ -239,6 +239,13 @@ RSpec.describe "Admin health", :frozen_clock, type: :request do
       it "lists the clients and tokens that hold health" do
         expect(agents).to eq([["Claude", "MCP client"], ["Terminal", "API token"]])
       end
+
+      it "names a client that registered no name by its redirect host" do
+        client(nil, %w[read health])
+        visit_health
+
+        expect(agents).to include(["claude.ai", "MCP client"])
+      end
     end
   end
 end

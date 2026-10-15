@@ -6,8 +6,6 @@ module Admin
       class ClientRow < Component
         prop :client, Blog::Types::Instance(ROM::Struct)
 
-        def self.label(client) = new(client:).send(:name)
-
         def view_template
           ListItem(title: name, data: { menu: path(:admin_client_menu, id: @client.id) }) do |item|
             item.meta { p(class: "li-sub") { sub } }
@@ -21,27 +19,15 @@ module Admin
           Stamped(text: dotted(redirect_host, t(".connected", time: Stamped::MARK)), at: @client.created_at)
         end
 
-        def host
-          Blog::Types::Normalized::Host.call(@client.redirect_uris.first) { Blog::Constants::EMPTY_STRING }
-        end
-
         def last_used
           return plain(t(".never_used")) if @client.last_used_at.nil?
 
           Stamped(text: t(".last_used", time: Stamped::MARK), at: @client.last_used_at)
         end
 
-        def name
-          return registered_name unless registered_name.empty?
+        def name = @client.display_name
 
-          host.empty? ? @client.client_id : host
-        end
-
-        def redirect_host
-          host unless host.empty? || host == name
-        end
-
-        def registered_name = @client.client_name.to_s.strip
+        def redirect_host = @client.redirect_host.then { it unless it == name }
 
         def revoke_attributes
           {

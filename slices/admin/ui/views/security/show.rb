@@ -28,8 +28,6 @@ module Admin
 
           private
 
-          def client_name(client) = client.client_name.to_s.strip.then { it.empty? ? client.client_id : it }
-
           def credential(kind, name, sightings)
             div(class: "security-cred") do
               p(class: "security-cred-name") do
@@ -47,7 +45,7 @@ module Admin
             return Empty { t(".no_credentials") } if @tokens.empty? && @clients.empty?
 
             @tokens.each { credential(t(".token"), it.name, sighted[[it.id, nil]]) }
-            @clients.each { credential(t(".client"), client_name(it), sighted[[nil, it.id]]) }
+            @clients.each { credential(t(".client"), it.display_name, sighted[[nil, it.id]]) }
           end
 
           def honeybadger_link

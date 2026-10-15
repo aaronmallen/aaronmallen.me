@@ -10,7 +10,7 @@ module Admin
           prop :client, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ContextMenu(label: Components::ClientRow.label(@client)) do |menu|
+            ContextMenu(label: @client.display_name) do |menu|
               menu.link(t(".sightings"), href: path(:admin_security), icon: "fa-solid fa-shield-halved")
               menu.separator
               menu.post(t(".revoke"), action: path(:admin_revoke_client, id: @client.id), icon: :ban,
