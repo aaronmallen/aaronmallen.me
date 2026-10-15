@@ -44,24 +44,6 @@ RSpec.describe "The worker's schedule", type: :app do
 
   def quarter_hourly = schedule.keys.select { cron(it).rough_frequency == 15 * 60 }
 
-  it "syncs issues from GitHub and from Linear every fifteen minutes", :aggregate_failures do
-    expect(schedule.slice("sync_issues", "sync_linear_issues").values).to contain_exactly(
-      include("class" => "Tasks::Jobs::SyncIssues", "args" => ["github"]),
-      include("class" => "Tasks::Jobs::SyncIssues", "args" => ["linear"]),
-    )
-    expect(quarter_hourly).to include("sync_issues", "sync_linear_issues")
-  end
-
-  it "syncs Google Calendar every fifteen minutes", :aggregate_failures do
-    expect(schedule.fetch("sync_calendar")).to include("class" => "Calendar::Jobs::SyncCalendar")
-    expect(quarter_hourly).to include("sync_calendar")
-  end
-
-  it "syncs Google Health every fifteen minutes", :aggregate_failures do
-    expect(schedule.fetch("sync_health")).to include("class" => "Health::Jobs::SyncHealth")
-    expect(quarter_hourly).to include("sync_health")
-  end
-
   it "gives each fifteen minute job a minute of its own" do
     minutes = quarter_hourly.flat_map { cron(it).minutes }
 

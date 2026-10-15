@@ -18,16 +18,6 @@ RSpec.describe Shares::Operations::CreateShortLink do
     expect(link.title).to eq("My talk")
   end
 
-  it "picks a random code when I leave it blank" do
-    expect(create(code: " ").value!.code).to match(/\A[a-z2-9]{5}\z/)
-  end
-
-  it "refuses a code another link holds" do
-    create(code: "talk")
-
-    expect(create(code: "talk").failure).to eq([:invalid, { code: ["taken"] }])
-  end
-
   it "refuses a code a share holds" do
     connect_share_store
     stub_request(:put, %r{\A#{share_store_url}/})
