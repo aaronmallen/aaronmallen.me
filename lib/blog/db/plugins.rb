@@ -8,7 +8,6 @@ module Blog
       ROM.plugins do
         adapter :sql do
           register :crediting, Crediting, type: :relation
-          register :daily_rollup, DailyRollup, type: :relation
           register :taggings, Taggings, type: :relation
           register :tags, Tags, type: :relation
         end
