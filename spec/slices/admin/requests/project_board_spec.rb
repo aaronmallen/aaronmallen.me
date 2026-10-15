@@ -170,6 +170,57 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
     end
 
+    describe "a card's links" do
+      let(:task) { linked(title: "Plan it") }
+
+      def card = column("backlog").find(".kc")
+
+      def marks = card.all(".task-mark").map(&:text)
+
+      def tie(from, to, *traits) = create(:task_link, *traits, from_task_id: from.id, to_task_id: to.id)
+
+      describe "with open and closed blocks" do
+        before do
+          2.times { tie(task, create(:task)) }
+          tie(task, create(:task, :done))
+          tie(create(:task), task)
+          tie(create(:task, :canceled), task)
+          get "/admin/projects/#{project.id}"
+        end
+
+        it "counts the open tasks it blocks and the open tasks that block it" do
+          expect(marks).to include("blocks 2", "blocked by 1")
+        end
+      end
+
+      describe "with only closed blocks" do
+        before do
+          tie(task, create(:task, :done))
+          tie(create(:task, :canceled), task)
+          get "/admin/projects/#{project.id}"
+        end
+
+        it "shows no count" do
+          expect(marks.grep(/block/)).to be_empty
+        end
+      end
+
+      describe "with every kind of link" do
+        before do
+          tie(task, create(:task))
+          tie(create(:task), task, :parent)
+          tie(task, create(:task), :duplicates)
+          tie(task, create(:task), :relates)
+          get "/admin/projects/#{project.id}"
+        end
+
+        it "shows the count in place of link chips", :aggregate_failures do
+          expect(card).to have_no_css(".task-link")
+          expect(marks).to include("blocks 1")
+        end
+      end
+    end
+
     describe "the card menu" do
       let(:task) { linked(title: "Plan it") }
 

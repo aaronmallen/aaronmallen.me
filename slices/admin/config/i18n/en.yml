@@ -2562,6 +2562,12 @@ en:
             relates: "relates to"
         meta:
           blocked: "blocked"
+          blocked_by:
+            one: "blocked by %{count}"
+            other: "blocked by %{count}"
+          blocks:
+            one: "blocks %{count}"
+            other: "blocks %{count}"
           carried:
             one: "carried ×%{count}"
             other: "carried ×%{count}"

@@ -7,6 +7,7 @@ module Admin
         class Meta < Component
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :scheduled, Blog::Types::Date.optional, default: nil
+          prop :counts, Blog::Types::Bool, default: false
 
           def view_template
             p(class: "task-meta") do
@@ -16,7 +17,7 @@ module Admin
               @task.tags.each { Tag(tag: it) }
               worked if worked?
               comments
-              Links(links: @task.links)
+              links
               Closed(task: @task) if @task.closed?
             end
           end
@@ -44,6 +45,15 @@ module Admin
 
               Tracked(task: @task, text: t(".in_progress_for", span: Tracked::SPAN))
             end
+          end
+
+          def links
+            return Links(links: @task.links) unless @counts
+
+            blocks = @task.links.count(&:blocking?)
+            blocked_by = @task.links.count(&:blocker?)
+            mark(nil, "fa-solid fa-arrow-right-long") { t(".blocks", count: blocks) } if blocks.positive?
+            mark(nil, "fa-solid fa-arrow-left-long") { t(".blocked_by", count: blocked_by) } if blocked_by.positive?
           end
 
           def mark(tone, icon, &)

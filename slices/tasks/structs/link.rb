@@ -16,13 +16,19 @@ module Tasks
 
       def self.outgoing(row) = new(direction: :outgoing, task: row.to_task, type: row.type)
 
-      def blocker? = direction == :incoming && type == BLOCKS && !Blog::Types::ClosedTaskStatus.valid?(task.status)
+      def blocker? = incoming? && open_block?
+
+      def blocking? = !incoming? && open_block?
 
       def incoming? = direction == :incoming
 
       def label = LABELS.fetch(type).fetch(direction)
 
       def rank = [ORDER.index(type), incoming? ? 0 : 1, task.id]
+
+      private
+
+      def open_block? = type == BLOCKS && !Blog::Types::ClosedTaskStatus.valid?(task.status)
     end
   end
 end
