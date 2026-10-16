@@ -41,10 +41,10 @@ module Social
 
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
 
-      def store(**attrs)
+      def store(keep_approved: false, **attrs)
         written = attrs.merge(author_url: normalize_author_url.call(attrs[:author_url]))
 
-        webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, **written)
+        webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, keep_approved:, **written)
       end
 
       def update_settings(**attrs)

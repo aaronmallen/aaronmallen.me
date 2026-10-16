@@ -4797,6 +4797,8 @@ CREATE TABLE public.webmention_settings (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     single_author_hosts text[] DEFAULT '{}'::text[] NOT NULL,
+    auto_approve_likes boolean DEFAULT true NOT NULL,
+    auto_approve_reposts boolean DEFAULT true NOT NULL,
     CONSTRAINT webmention_settings_singleton_check CHECK ((id = 1))
 );
 
@@ -8686,4 +8688,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016001470_create_short_link_checks.rb'),
 ('20261016001471_create_link_check_runs.rb'),
 ('20261016001473_notify_admin_changes_on_post_link_checks.rb'),
-('20261016001474_notify_admin_changes_on_short_link_checks.rb');
+('20261016001474_notify_admin_changes_on_short_link_checks.rb'),
+('20261016002022_add_auto_approve_likes_and_reposts_to_webmention_settings.rb');

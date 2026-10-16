@@ -27,12 +27,15 @@ RSpec.describe "API webmention moderation and settings", type: :request do
   end
 
   describe "GET /api/v1/webmention_settings" do
-    it "reads every setting with a 200" do
-      settings = {
-        "accept_bridgy" => true, "auto_approve_known_authors" => true, "enable_on_new_posts" => true,
-        "receive" => true, "send_on_publish" => true, "single_author_hosts" => [],
+    let(:settings) do
+      {
+        "accept_bridgy" => true, "auto_approve_known_authors" => true, "auto_approve_likes" => true,
+        "auto_approve_reposts" => true, "enable_on_new_posts" => true, "receive" => true, "send_on_publish" => true,
+        "single_author_hosts" => [],
       }
+    end
 
+    it "reads every setting with a 200" do
       expect([call_api(:get, "/webmention_settings"), status]).to eq([settings, 200])
     end
 
@@ -45,6 +48,11 @@ RSpec.describe "API webmention moderation and settings", type: :request do
     it "changes the settings it was given and keeps the rest" do
       expect(call_api(:patch, "/webmention_settings",
                       { receive: false })).to include("receive" => false, "send_on_publish" => true)
+    end
+
+    it "saves the like and repost toggles" do
+      expect(call_api(:patch, "/webmention_settings", { auto_approve_likes: false, auto_approve_reposts: false }))
+        .to include("auto_approve_likes" => false, "auto_approve_reposts" => false)
     end
 
     it "saves the hosts it was given, cleaned up and in order" do

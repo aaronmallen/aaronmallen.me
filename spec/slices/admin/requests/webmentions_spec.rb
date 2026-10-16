@@ -408,6 +408,8 @@ RSpec.describe "Admin webmentions", type: :request do
           receive: "1",
           send_on_publish: "1",
           auto_approve_known_authors: "1",
+          auto_approve_likes: "1",
+          auto_approve_reposts: "1",
           enable_on_new_posts: "1",
           accept_bridgy: "1",
         }

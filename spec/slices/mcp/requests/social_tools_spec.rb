@@ -522,13 +522,18 @@ RSpec.describe "MCP social tools", type: :request do
   end
 
   describe "read_webmention_settings" do
+    let(:settings) do
+      {
+        "accept_bridgy" => true, "auto_approve_known_authors" => true, "auto_approve_likes" => true,
+        "auto_approve_reposts" => true, "enable_on_new_posts" => true, "receive" => true, "send_on_publish" => true,
+        "single_author_hosts" => [],
+      }
+    end
+
     it "reads every setting" do
       call_tool("read_webmention_settings")
 
-      expect(content).to eq(
-        "accept_bridgy" => true, "auto_approve_known_authors" => true, "enable_on_new_posts" => true,
-        "receive" => true, "send_on_publish" => true, "single_author_hosts" => [],
-      )
+      expect(content).to eq(settings)
     end
   end
 
@@ -549,6 +554,12 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("update_webmention_settings", accept_bridgy: false)
 
       expect(content).to include("accept_bridgy" => false, "receive" => true)
+    end
+
+    it "saves the like and repost toggles" do
+      call_tool("update_webmention_settings", auto_approve_likes: false, auto_approve_reposts: false)
+
+      expect(webmention_queries.settings).to have_attributes(auto_approve_likes: false, auto_approve_reposts: false)
     end
 
     it "saves the hosts it was given, cleaned up and in order" do

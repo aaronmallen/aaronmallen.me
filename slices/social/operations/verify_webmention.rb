@@ -4,6 +4,7 @@ module Social
   module Operations
     class VerifyWebmention < Blog::Operation
       GONE_STATUSES = [404, 410].freeze
+      TYPE_TOGGLES = { "like" => :auto_approve_likes, "repost" => :auto_approve_reposts }.freeze
 
       include Deps[
         client: "page_fetcher.webmention",
@@ -33,13 +34,7 @@ module Social
         Success(settings)
       end
 
-      def approved?(page, source, settings)
-        author_url = page.author_link
-        return false unless settings.auto_approve_known_authors && author_url
-
-        check_author_scope.call(author_url, [source, page.url], single_author_hosts: settings.single_author_hosts) &&
-          webmention_queries.known_author?(author_url)
-      end
+      def approved_type?(page, settings) = TYPE_TOGGLES.key?(page.type) && settings.public_send(TYPE_TOGGLES[page.type])
 
       def fetch(post, source)
         response = client.fetch(source)
@@ -73,15 +68,26 @@ module Social
       end
 
       def status(page, source, settings)
-        approved?(page, source, settings) ? Repos::WebmentionMutations::APPROVED : Repos::WebmentionQueries::PENDING
+        kept = approved_type?(page, settings)
+        approved = kept || trusted?(page, source, settings)
+
+        { status: approved ? Repos::WebmentionMutations::APPROVED : Repos::WebmentionQueries::PENDING, keep_approved: kept }
       end
 
       def store(page, post, source, settings)
         author = page.author
         webmention_mutations.store(
           post_id: post.id, source_url: source, author_name: author[:name], author_url: author[:url],
-          type: page.type, excerpt: page.excerpt, received_at: Time.now, status: status(page, source, settings),
+          type: page.type, excerpt: page.excerpt, received_at: Time.now, **status(page, source, settings),
         )
+      end
+
+      def trusted?(page, source, settings)
+        author_url = page.author_link
+        return false unless settings.auto_approve_known_authors && author_url
+
+        check_author_scope.call(author_url, [source, page.url], single_author_hosts: settings.single_author_hosts) &&
+          webmention_queries.known_author?(author_url)
       end
     end
   end

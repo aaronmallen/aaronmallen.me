@@ -5,7 +5,10 @@ module API
   module Endpoints
     class WebmentionSettingsEndpoint < Endpoint
       HOSTS = :single_author_hosts
-      TOGGLES = %i[accept_bridgy auto_approve_known_authors enable_on_new_posts receive send_on_publish].freeze
+      TOGGLES = %i[
+        accept_bridgy auto_approve_known_authors auto_approve_likes auto_approve_reposts enable_on_new_posts receive
+        send_on_publish
+      ].freeze
       FIELDS = [*TOGGLES, HOSTS].freeze
 
       REPLY = Helpers::Schema.object(

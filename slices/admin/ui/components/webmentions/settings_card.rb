@@ -9,6 +9,8 @@ module Admin
             receive: ".receive",
             send_on_publish: ".send_on_publish",
             auto_approve_known_authors: ".auto_approve",
+            auto_approve_likes: ".auto_approve_likes",
+            auto_approve_reposts: ".auto_approve_reposts",
             enable_on_new_posts: ".enable_on_new_posts",
             accept_bridgy: ".accept_bridgy",
           }.freeze

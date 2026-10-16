@@ -34,8 +34,9 @@ module Social
 
       def received_since(time) = where { received_at >= time }
 
-      def store(resent:, **attrs)
-        update_statement = excluded([*resent, :updated_at]).merge(status: rechecked(resent))
+      def store(resent:, keep_approved: false, **attrs)
+        update_statement = excluded([*resent, :updated_at])
+        update_statement = update_statement.merge(status: rechecked(resent)) unless keep_approved
 
         command(:store).with(update_statement:).call(attrs)
       end

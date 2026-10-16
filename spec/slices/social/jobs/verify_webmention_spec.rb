@@ -710,6 +710,72 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     end
   end
 
+  describe "a like or a repost" do
+    let(:bridgy) { "https://brid.gy/like/mastodon/1" }
+    let(:card) { %(<div class="p-author h-card"><a class="u-url" href="https://mastodon.social/@ada">Ada</a></div>) }
+
+    def reaction(type, author: "https://grace.example/about")
+      entry(body: %(<a class="u-#{type}-of" href="#{target}">x</a>), author:)
+    end
+
+    {
+      "like" => :auto_approve_likes,
+      "repost" => :auto_approve_reposts,
+    }.each do |type, toggle|
+      it "approves a #{type} from an author it has never seen" do
+        verify_page(reaction(type))
+
+        expect(stored.status).to eq("approved")
+      end
+
+      it "approves a #{type} from Bridgy" do
+        stub_source(entry(body: %(#{card}<a class="u-#{type}-of" href="#{target}">x</a>)), url: bridgy)
+        verify(source: bridgy)
+
+        expect(stored(bridgy).status).to eq("approved")
+      end
+
+      it "leaves a #{type} waiting once #{toggle} is off" do
+        webmention_mutations.update_settings(toggle => false)
+        verify_page(reaction(type))
+
+        expect(stored.status).to eq("pending")
+      end
+
+      it "approves a #{type} from a known author on their own page once #{toggle} is off" do
+        create(:webmention, :approved, post: create(:post, :published), author_url: "https://grace.example/about")
+        webmention_mutations.update_settings(toggle => false)
+        stub_source(reaction(type), url: "https://grace.example/about/1")
+        verify(source: "https://grace.example/about/1")
+
+        expect(stored("https://grace.example/about/1").status).to eq("approved")
+      end
+
+      it "keeps a changed #{type} approved while #{toggle} is on" do
+        verify_page(reaction(type))
+        verify_page(reaction(type, author: "https://grace.example/me"))
+
+        expect(stored).to have_attributes(status: "approved", author_url: "https://grace.example/me")
+      end
+
+      it "leaves a #{type} that was waiting before alone on a resend" do
+        verify_page(reaction(type))
+        webmentions.from_source(source).update(status: "pending")
+        verify_page(reaction(type))
+
+        expect(stored.status).to eq("pending")
+      end
+
+      it "leaves a #{type} marked as spam alone on a changed resend" do
+        verify_page(reaction(type))
+        webmention_mutations.mark_spam(stored.id)
+        verify_page(reaction(type, author: "https://grace.example/me"))
+
+        expect(stored.status).to eq("spam")
+      end
+    end
+  end
+
   describe "a target that stopped being eligible" do
     {
       "went back to draft" => { status: "draft", published_at: nil },

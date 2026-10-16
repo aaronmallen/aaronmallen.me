@@ -4,7 +4,10 @@ module Admin
   module Actions
     module Webmentions
       class UpdateSettings < Action
-        SETTINGS = %i[receive send_on_publish auto_approve_known_authors enable_on_new_posts accept_bridgy].freeze
+        SETTINGS = %i[
+          receive send_on_publish auto_approve_known_authors auto_approve_likes auto_approve_reposts enable_on_new_posts
+          accept_bridgy
+        ].freeze
         TOASTS = "webmentions_page.toasts"
 
         include Deps[update_webmention_settings: "social.operations.update_webmention_settings"]
