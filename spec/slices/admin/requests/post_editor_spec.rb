@@ -831,6 +831,46 @@ RSpec.describe "Admin post editor", type: :request do
         expect(queued.size).to eq(1)
       end
 
+      describe "turned on after publish" do
+        let(:published) { create(:post, :published, slug: "hello", syndication_enabled: false) }
+
+        def switch_on(**fields)
+          save("/admin/posts/#{published.id}", intent: "save", title: "Hello", slug: "hello", body: published.body,
+                                               **card, **fields)
+        end
+
+        it "queues the cross-post", :commits do
+          switch_on
+
+          expect(queued).to contain_exactly(
+            have_attributes(post_id: published.id, targets: %w[mastodon bluesky],
+                            parts: [have_attributes(body: "In my own words")]),
+          )
+        end
+
+        it "queues nothing new once the post has cross-posted", :commits do
+          create(:social_post, :posted, post_id: published.id)
+          switch_on
+
+          expect(Social::Jobs::SyndicatePost.jobs).to be_empty
+        end
+
+        it "refuses text over a picked network's limit", :aggregate_failures do
+          switch_on(syndication_body: "a" * 301)
+
+          expect(last_response.status).to eq(422)
+          expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
+          expect(post_queries.by_id(published.id)).to have_attributes(syndication_enabled: false)
+        end
+
+        it "saves text over the limit once the post has cross-posted" do
+          create(:social_post, :posted, post_id: published.id)
+          switch_on(syndication_body: "a" * 301)
+
+          expect(post_queries.by_id(published.id)).to have_attributes(syndication_body: "a" * 301)
+        end
+      end
+
       it "refuses to publish text over a picked network's limit", :aggregate_failures do
         save(intent: "publish", title: "Hello", **card, syndication_body: "a" * 301)
 

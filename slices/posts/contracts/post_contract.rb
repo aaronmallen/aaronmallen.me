@@ -5,7 +5,6 @@ module Posts
     class PostContract < PostSeoContract
       ANNOUNCEMENT_TOO_LONG = "announcement_too_long"
       EDIT_NOTE_LIMIT = 500
-      PUBLISH = Blog::Types::PostIntent["publish"]
       TOO_LONG = "too_long"
       UNKNOWN_MENTION = "unknown_mention"
 
@@ -51,7 +50,7 @@ module Posts
       end
 
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|
-        next unless context[:intent] == PUBLISH && values[:syndication_enabled]
+        next unless context[:announcing] && values[:syndication_enabled]
         next if rule_error?(:syndication_body)
 
         typed = Blog::Types::Text[values[:syndication_body]]

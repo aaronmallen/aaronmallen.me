@@ -11,6 +11,7 @@ module Posts
         post_queries: "repos.post_queries",
         publish_post: "operations.publish_post",
         queue_follow_up: "operations.queue_follow_up",
+        social_post_queries: "social.repos.social_post_queries",
       ]
 
       CARD = %i[syndication_body syndication_enabled syndication_targets webmentions_enabled].freeze
@@ -21,11 +22,18 @@ module Posts
       SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
 
       def call(params, id: nil, intent: DRAFT, now: Time.now)
-        attributes = step validate(params, intent)
+        attributes = step validate(params, announcing: announcing?(id, intent))
         step persist(id, attributes, intent, now)
       end
 
       private
+
+      def announcing?(id, intent)
+        return true if intent == PUBLISH
+
+        post = post_queries.by_id(id) if id
+        post&.published? && unannounced?(post)
+      end
 
       def create_or_update(post, attributes)
         fields = attributes.except(:tags, NOTE)
@@ -46,6 +54,13 @@ module Posts
         return Success(nil) unless id
 
         found(post_mutations.by_id_for_update(id))
+      end
+
+      def follow_up(post)
+        post_mutations.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SEND_WEBMENTIONS) }
+        return unless post.syndication_enabled && unannounced?(post)
+
+        post_mutations.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SYNDICATE_POST) }
       end
 
       def form(params)
@@ -97,6 +112,8 @@ module Posts
         Success([:scheduled, create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["scheduled"]))])
       end
 
+      def unannounced?(post) = !social_post_queries.any_for_post?(post.id)
+
       def update_published(post, attributes)
         edited = edited?(post, attributes)
         note = attributes[NOTE].to_s
@@ -104,13 +121,13 @@ module Posts
 
         post_edit_mutations.create(post_id: post.id, note:) if edited
         saved = create_or_update(post, resending(attributes))
-        post_mutations.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
+        follow_up(saved)
 
         Success([:saved, saved])
       end
 
-      def validate(params, intent)
-        attributes = step validated(contract.call(form(params), intent:))
+      def validate(params, announcing:)
+        attributes = step validated(contract.call(form(params), announcing:))
         publish_at = attributes.delete(:publish_at)
         Success(attributes.merge(published_at: publish_at))
       end

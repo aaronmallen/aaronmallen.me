@@ -11,7 +11,7 @@ module Posts
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
     import keys: %w[
-      operations.check_network_fit operations.resolve_mentions repos.webmention_queries
+      operations.check_network_fit operations.resolve_mentions repos.social_post_queries repos.webmention_queries
     ], from: :social
 
     import keys: %w[operations.check_short_links], from: :shares
