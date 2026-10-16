@@ -76,6 +76,10 @@ module Admin
             span { t(".counts", open:, total: @counts.values.sum) }
           end
 
+          def create_task
+            Button(href: path(:admin_new_task, project: @project.key), icon: "fa-solid fa-plus") { t(".create_task") }
+          end
+
           def facts
             div(class: "kb-meta") do
               link(repo_url, @project.repo, "fa-brands fa-github") if repo_url
@@ -90,6 +94,7 @@ module Admin
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
+              create_task unless @project.archived_on
               Button(href: path(:admin_edit_project, id: @project.id), icon: :edit) do
                 t(".edit")
               end

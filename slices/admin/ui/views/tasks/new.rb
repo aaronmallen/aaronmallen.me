@@ -12,6 +12,7 @@ module Admin
           prop :errors, Blog::Types::Hash
           prop :values, Blog::Types::Hash
           prop :origin, Blog::Types::TaskOrigin
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
@@ -20,7 +21,7 @@ module Admin
             Card(label: t(".label"), title: t(".title")) do
               TaskForm(
                 errors: @errors, returns: { origin: @origin }, scope: SCOPE, today: Blog::TimeZone.today,
-                values: @values, autofocus: true,
+                values: @values, projects: @projects, autofocus: true,
               )
             end
           end

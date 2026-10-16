@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin tasks", :frozen_clock, type: :request do
+  def capture(title, filter: nil, **fields)
+    post "/admin/tasks", { _csrf_token: admin_csrf_token, filter:, task: { title:, **fields } }.compact
+  end
+
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:sprint_repo) { Tasks::Slice["repos.sprint_queries"] }
 
-  def capture(title, filter: nil, **fields)
-    post "/admin/tasks", { _csrf_token: admin_csrf_token, filter:, task: { title:, **fields } }.compact
-  end
-
   def empty_text(filter) = i18n.t(["ui.components.tasks.list_card.empty", filter].join("."))
+
+  def form_fields = %w[task[title] task[note] task[tags] task[list] task[project] task[sprint_on]]
 
   def lose_the_roll
     allow(sprint_repo).to receive(:by_id).and_return(nil)
@@ -689,9 +691,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "answers 200 asking for every field a task has but its type", :aggregate_failures do
         expect(last_response.status).to eq(200)
-        expect(fields).to eq(
-          ["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]", "task[recur][cadence]"],
-        )
+        expect(fields).to eq([*form_fields, "task[recur][cadence]"])
       end
 
       it "puts a new task in next unless told otherwise" do
@@ -700,6 +700,32 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "names every field the form asks for in the lede" do
         expect(page).to have_css(".page-head-sub", exact_text: i18n.t("ui.views.tasks.new.sub"))
+      end
+    end
+
+    describe "the project field" do
+      before do
+        create(:project, name: "Podcast", key: "POD")
+        create(:project, :archived, name: "Gone", key: "GONE")
+      end
+
+      it "offers no project and each live project by name" do
+        get "/admin/tasks/new"
+
+        expect(page).to have_select("task[project]", options: ["No project", "Podcast"], selected: "No project")
+      end
+
+      it "fills in the project the link names" do
+        get "/admin/tasks/new", project: "POD"
+
+        expect(page).to have_select("task[project]", selected: "Podcast")
+      end
+
+      it "offers the live projects in the dialog" do
+        get "/admin"
+
+        expect(page.find("dialog#task-create", visible: :all))
+          .to have_select("task[project]", options: ["No project", "Podcast"], visible: :all)
       end
     end
 
@@ -733,7 +759,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "holds the same fields as the new task page" do
         recur = %w[cadence every week weekday month day starts_on].map { "task[recur][#{it}]" }
 
-        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]", *recur])
+        expect(fields).to eq([*form_fields, *recur])
       end
 
       it "starts on next away from Today", :aggregate_failures do
@@ -859,6 +885,38 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create_task(sprint_on: tomorrow.iso8601)
 
         expect(repo.in_sprint(sprint_repo.on(tomorrow).id).map(&:title)).to eq(["Learn Elixir"])
+      end
+    end
+
+    describe "creating a task in a project" do
+      let!(:podcast) { create(:project, name: "Podcast", key: "POD") }
+
+      def created = repo.open_in_list("next").first
+
+      it "numbers it in the project it names" do
+        capture("Record the intro", list: "next", project: "POD")
+
+        expect([created.project_id, created.number]).to eq([podcast.id, 1])
+      end
+
+      it "leaves a task with no project bare" do
+        capture("Record the intro", list: "next", project: "")
+
+        expect(created.project_id).to be_nil
+      end
+
+      it "refuses an archived project and writes nothing", :aggregate_failures do
+        create(:project, :archived, name: "Gone", key: "GONE")
+        capture("Record the intro", list: "next", project: "GONE")
+
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.project.missing"))
+        expect(repo.open_in_list("next")).to be_empty
+      end
+
+      it "shows the chosen project again when the save fails" do
+        capture("", list: "next", project: "POD")
+
+        expect(page).to have_select("task[project]", selected: "Podcast")
       end
     end
 

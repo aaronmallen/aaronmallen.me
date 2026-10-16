@@ -10,12 +10,14 @@ module Admin
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           NEXT = Blog::Types::TaskFilter["next"]
           NOTE_HEIGHT = "160px"
+          PROJECTS = Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           RENDERER = Blog::Types::MarkdownRenderer["tasks"]
           TODAY = Blog::Types::TaskFilter["today"]
 
           prop :scope, Blog::Types::String
           prop :today, Blog::Types::Date
           prop :task, Blog::Types::Instance(ROM::Struct).optional, default: nil
+          prop :projects, PROJECTS, default: Blog::Constants::EMPTY_ARRAY
           prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :returns, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
@@ -95,6 +97,18 @@ module Admin
             div(class: "task-form-pair") do
               tags_field
               list_field
+            end
+            project_field unless @task
+          end
+
+          def project_field
+            Field(label: t(".project"), **error_props(:project)) do |control|
+              Select(
+                **control,
+                name: "task[project]",
+                options: { "" => t(".no_project"), **@projects.to_h { [it.key, it.name] } },
+                selected: @values[:project].to_s,
+              )
             end
           end
 

@@ -14,6 +14,7 @@ module API
             description: "today puts it in today's sprint; next when you leave it out",
           },
           note: { type: "string", description: "what done looks like, in Markdown" },
+          project: { type: "string", description: "the key of the project to number the task in, such as POD" },
           recur: Tasks::RECUR,
           sprint_on: { type: "string", description: "a sprint day to schedule it for, as YYYY-MM-DD" },
           tags: { type: "array", items: { type: "string" },
@@ -25,8 +26,8 @@ module API
 
       include Deps[capture_task: "tasks.operations.capture_task"]
 
-      def handle(title:, list: NEXT, note: nil, sprint_on: nil, tags: nil, recur: nil)
-        fields = { title:, note:, tags: Helpers::Wording.tag_list(tags), recur: Tasks.recur(recur) }
+      def handle(title:, list: NEXT, note: nil, project: nil, sprint_on: nil, tags: nil, recur: nil)
+        fields = { title:, note:, project:, tags: Helpers::Wording.tag_list(tags), recur: Tasks.recur(recur) }
 
         case capture_task.call(fields, filter: list, sprint_on:)
           in Success[_, task, *] then answered(task.id)

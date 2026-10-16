@@ -740,6 +740,44 @@ RSpec.describe "API tasks", type: :request do
       expect([status, tasks.all_open]).to eq([422, []])
     end
 
+    describe "in a project" do
+      before { create(:project, name: "Podcast", key: "POD") }
+
+      it "numbers the task in the project its key names" do
+        expect(capture(title: "Record the intro", project: "POD").fetch("label")).to eq("POD-1")
+      end
+
+      it "takes the key in any case" do
+        expect(capture(title: "Record the intro", project: "pod").fetch("label")).to eq("POD-1")
+      end
+
+      it "leaves the count of tasks with no project as it was" do
+        capture(title: "First")
+        capture(title: "Record the intro", project: "POD")
+
+        expect(capture(title: "Second").fetch("label")).to eq("2")
+      end
+
+      it "refuses a key no project has with a 422 and captures nothing" do
+        answer = capture(title: "Record the intro", project: "NOPE")
+
+        expect([answer.fetch("errors"), status, tasks.all_open])
+          .to eq([{ "project" => [API::Endpoints::Tasks::COMPLAINTS.dig(:project, "missing")] }, 422, []])
+      end
+
+      it "refuses an archived project's key with a 422 and captures nothing" do
+        create(:project, :archived, name: "Gone", key: "GONE")
+        answer = capture(title: "Record the intro", project: "GONE")
+
+        expect([answer.fetch("errors").keys, status, tasks.all_open]).to eq([%w[project], 422, []])
+      end
+
+      it "refuses a key it cannot read with a 422" do
+        expect([capture(title: "Record the intro", project: "no way").fetch("errors").keys, status])
+          .to eq([%w[project], 422])
+      end
+    end
+
     it "refuses a body that is not JSON with a 400" do
       expect([call_api(:post, "/tasks", "{nope"), status])
         .to eq([{ "error" => "invalid_json", "message" => "the body takes a JSON object" }, 400])

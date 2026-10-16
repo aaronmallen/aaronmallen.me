@@ -95,6 +95,10 @@ module API
           "self" => "a task cannot link to itself",
           "taken" => "these two tasks are already linked",
         },
+        project: {
+          Blog::Contract::FORMAT => "give a project key, such as POD",
+          "missing" => "no project has that key, or it is archived",
+        },
         started_at: {
           "blank" => "a session needs a start",
           Blog::Contract::FORMAT => "give the start as YYYY-MM-DDTHH:MM",

@@ -2617,6 +2617,9 @@ en:
             missing: "That task is gone. Find another."
             self: "A task cannot link to itself."
             taken: "These two tasks are already linked."
+          project:
+            format: "Pick a project from the list."
+            missing: "That project is gone or archived. Pick another."
           starts_on:
             format: "Give the first day as a date."
           started_at:
@@ -2824,7 +2827,9 @@ en:
         task_form:
           list: "List"
           note: "Notes"
+          no_project: "No project"
           note_placeholder: "What done looks like."
+          project: "Project"
           save: "Create task"
           tags: "Tags"
           tags_placeholder: "ruby, admin"
@@ -3537,6 +3542,7 @@ en:
             in_progress: "in progress"
             ready: "ready"
           counts: "%{open} open · %{total} total"
+          create_task: "Create Task"
           edit: "Edit Project"
           empty: "No tasks"
           hint: "Drag a card, or use its arrows or menu, to move it. Select moves several. In progress starts the task in today's sprint; done and canceled close it."
@@ -3783,7 +3789,7 @@ en:
         new:
           heading: "New task"
           label: "Tasks"
-          sub: "Title, notes, list, sprint, tags and repeats in one go."
+          sub: "Title, notes, list, project, sprint, tags and repeats in one go."
           title: "Create a task"
         session_menu:
           confirm_delete: "Click again to delete"

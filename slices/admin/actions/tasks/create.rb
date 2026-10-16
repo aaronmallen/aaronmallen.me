@@ -5,7 +5,7 @@ module Admin
     module Tasks
       class Create < Action
         CAPTURED = "tasks_page.toasts.captured"
-        FIELDS = %i[list note sprint_on tags title].freeze
+        FIELDS = %i[list note project sprint_on tags title].freeze
         PAST = "tasks_page.toasts.sprint_past"
         UPCOMING = Blog::Types::TaskView["upcoming"]
 
@@ -13,6 +13,7 @@ module Admin
         include Deps[
           capture_task: "tasks.operations.capture_task",
           new_view: "ui.views.tasks.new",
+          project_queries: "projects.repos.project_queries",
         ]
 
         def handle(request, response)
@@ -39,7 +40,9 @@ module Admin
           values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }.merge(recur: Blog::Types::Fields[params[:recur]])
 
           response.status = 422
-          response.render(new_view, errors:, origin: task_origin(request), values:)
+          response.render(
+            new_view, errors:, origin: task_origin(request), projects: project_queries.live_by_name, values:,
+          )
         end
       end
     end

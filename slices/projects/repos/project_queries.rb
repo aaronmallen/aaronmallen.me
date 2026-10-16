@@ -21,6 +21,10 @@ module Projects
 
       def live = with_tags.live.in_order.to_a
 
+      def live_by_name = projects.live.in_name_order.to_a
+
+      def live_id_by_key(key) = projects.live.where(key:).pluck(:id).first
+
       def public_archived = with_tags.in_public.archived.by_stars.to_a
 
       def public_board(slug)

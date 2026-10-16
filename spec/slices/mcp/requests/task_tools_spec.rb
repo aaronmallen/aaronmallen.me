@@ -110,6 +110,22 @@ RSpec.describe "MCP task tools", type: :request do
     end
   end
 
+  describe "capture_task in a project" do
+    before { create(:project, name: "Podcast", key: "POD") }
+
+    it "numbers the task in the project its key names" do
+      call_tool("capture_task", title: "Record the intro", project: "POD")
+
+      expect(JSON.parse(message).fetch("label")).to eq("POD-1")
+    end
+
+    it "refuses a key no project has as an error and captures nothing" do
+      call_tool("capture_task", title: "Record the intro", project: "NOPE")
+
+      expect([refused?, Tasks::Slice["relations.tasks"].count]).to eq([true, 0])
+    end
+  end
+
   %w[start_task complete_task reopen_task cancel_task delete_task].each do |name|
     it "refuses #{name} on a task that is not there as an error", :aggregate_failures do
       call_tool(name, id: 999_999)

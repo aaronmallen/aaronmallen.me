@@ -5,11 +5,14 @@ module Admin
     module Tasks
       class New < Action
         include Redirect
+        include Deps[project_queries: "projects.repos.project_queries"]
 
         def handle(request, response)
-          empty = Blog::Constants::EMPTY_HASH
-
-          response.render(view, errors: empty, origin: task_origin(request), values: empty)
+          response.render(
+            view,
+            errors: Blog::Constants::EMPTY_HASH, origin: task_origin(request), projects: project_queries.live_by_name,
+            values: { project: Blog::Types::Text[request.params[:project]] },
+          )
         end
       end
     end

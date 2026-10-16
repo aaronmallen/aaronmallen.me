@@ -36,6 +36,23 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       expect(page.first("a.ctx-item", visible: :all)[:href]).to eq("/admin/projects/#{project.id}")
     end
 
+    describe "the Create Task button" do
+      def button = page.find(".page-head-actions a", text: "Create Task")
+
+      it "opens the new task form with the project filled in" do
+        get "/admin/projects/#{project.id}"
+
+        expect(button["href"]).to eq("/admin/tasks/new?project=#{project.key}")
+      end
+
+      it "leaves it off an archived project's board" do
+        archived = create(:project, :archived)
+        get "/admin/projects/#{archived.id}"
+
+        expect(page).to have_no_css(".page-head-actions a", text: "Create Task")
+      end
+    end
+
     it "links the editor back to the board" do
       get "/admin/projects/#{project.id}/edit"
 
