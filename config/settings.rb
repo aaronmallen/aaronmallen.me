@@ -192,6 +192,10 @@ module Blog
 
     setting :mail, default: {}, constructor: Schema.schema(backfill_days?: unless_blank(MailDays))
 
+    setting :maintenance, default: {}, constructor: Schema.schema(
+      flag_path?: unless_set(Types::String, "tmp/maintenance"),
+    )
+
     setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 
     setting :maxmind, default: {}, constructor: Schema.schema(

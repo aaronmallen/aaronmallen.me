@@ -241,6 +241,26 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "#maintenance" do
+    def maintenance_with(**variables)
+      stub_const("ENV", ENV.to_h.merge(variables))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:maintenance)
+      store = Hanami::Settings::CompositeStore.new({ maintenance: file }, Hanami.app.config.settings_store)
+      described_class.new(store).maintenance
+    end
+
+    it "keeps the flag file under tmp when nothing names a path" do
+      stub_const("ENV", ENV.to_h.except("MAINTENANCE_FLAG_PATH"))
+
+      expect(maintenance_with[:flag_path]).to eq("tmp/maintenance")
+    end
+
+    it "takes the path MAINTENANCE_FLAG_PATH names" do
+      expect(maintenance_with("MAINTENANCE_FLAG_PATH" => "/srv/shared/maintenance")[:flag_path])
+        .to eq("/srv/shared/maintenance")
+    end
+  end
+
   describe "#maxmind" do
     def maxmind_with(**variables)
       stub_const("ENV", ENV.to_h.merge(variables))

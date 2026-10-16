@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Down for maintenance | Aaron Allen</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --ground: light-dark(#faf4f2, #222222);
+        --ink: light-dark(#29242a, #f7f1ff);
+        --ink-muted: light-dark(#666164, #bab6c0);
+        --line: light-dark(#d3cdcc, #363537);
+        --accent: light-dark(#b31d4b, #fc618d);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+      }
+
+      header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      header > * {
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 40rem;
+        box-sizing: border-box;
+        margin: 0 auto;
+        padding: 4rem 1.5rem;
+      }
+
+      .status {
+        margin: 0;
+        color: var(--accent);
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+      }
+
+      h1 {
+        margin: 0.5rem 0 1rem;
+        font-size: 2.25rem;
+        line-height: 1.2;
+      }
+
+      p {
+        color: var(--ink-muted);
+      }
+
+      main a {
+        color: var(--accent);
+      }
+
+      @media (width < 43.75rem) {
+        a {
+          display: inline-flex;
+          align-items: center;
+          min-height: 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span>Aaron Allen</span>
+    </header>
+    <main>
+      <p class="status">503</p>
+      <h1>Down for maintenance</h1>
+      <p>The site is down while its servers update. It will be back soon.</p>
+    </main>
+  </body>
+</html>

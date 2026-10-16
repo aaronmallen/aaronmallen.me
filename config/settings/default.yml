@@ -81,6 +81,8 @@ linkedin:
   profile_url: https://www.linkedin.com/in/aaronmallen/
 mail:
   backfill_days: <%= ENV["MAIL_BACKFILL_DAYS"].to_json %>
+maintenance:
+  flag_path: <%= ENV["MAINTENANCE_FLAG_PATH"].to_json %>
 mastodon:
   profile_url: https://ruby.social/@aaronmallen
 maxmind:
