@@ -68,6 +68,8 @@ module Markdown
 
     def read_time = [1, word_count.fdiv(WORDS_PER_MINUTE).round].max
 
+    def text = plain_text.split.join(" ")
+
     def word_count = plain_text.split.size
 
     private

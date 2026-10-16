@@ -17,12 +17,12 @@ module API
         tag_queries: "tags.repos.tag_queries",
       ]
 
-      def handle(id:, scope:, scopes:, name: nil, color: nil)
+      def handle(id:, scope:, scopes:, name: nil, color: nil, **fields)
         current = tag_queries.find_in(scope, id)
         return missing("tag", id) if current.nil?
         return invalid(id: [format(MAIL_TAG, id, "changing")]) if !mail?(scopes) && tag_queries.mail_only?(scope, id)
 
-        saved(save_tag.call({ name: name || current.name, color: }, scope:, id:), id)
+        saved(save_tag.call({ name: name || current.name, color:, **fields }, scope:, id:), id)
       end
 
       private

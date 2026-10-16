@@ -197,6 +197,55 @@ RSpec.describe "Tags", type: :request do
     expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[sai])
   end
 
+  describe "the description" do
+    def described(description)
+      create(:tag, name: "ruby", description:)
+      publish("hello", 1, tags: %w[ruby])
+      get "/writing/tags/ruby"
+    end
+
+    def meta(selector) = page.find("meta[#{selector}]", visible: :all)[:content]
+
+    def metas = [meta("name='description'"), meta("property='og:description'"), meta("name='twitter:description'")]
+
+    def usual = Public::Slice["i18n"].t("ui.views.tags.show.description", tag: "ruby")
+
+    it "renders it from markdown under the heading" do
+      described("notes on *ruby* and [hanami](https://hanamirb.org)")
+
+      expect(page).to have_css(".hd h1 + .ld em", text: "ruby")
+    end
+
+    it "puts it as plain text in the meta tags" do
+      described("notes on *ruby*\n\nand **hanami**")
+
+      expect(metas.uniq).to eq(["notes on ruby and hanami"])
+    end
+
+    it "cuts a long one to 160 characters in the meta tags", :aggregate_failures do
+      described("word " * 60)
+
+      expect(metas.map(&:length).uniq).to eq([160])
+      expect(metas.first).to end_with("…")
+    end
+
+    it "keeps the usual line for a tag without one", :aggregate_failures do
+      described(nil)
+
+      expect(metas.uniq).to eq([usual])
+      expect(page).to have_no_css(".hd .ld")
+    end
+
+    it "never shows the private tag's description, even under the same name", :aggregate_failures do
+      create(:tag, :private, name: "ruby", description: "a private note")
+      create(:task, tags: %w[ruby])
+      described(nil)
+
+      expect(page).to have_no_text("a private note")
+      expect(metas.uniq).to eq([usual])
+    end
+  end
+
   describe "paging" do
     def titles = page.all(".entry .entry-title").map(&:text)
 

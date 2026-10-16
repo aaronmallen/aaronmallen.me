@@ -29,6 +29,8 @@ module Public
 
     import keys: %w[repos.task_comment_queries repos.task_queries], from: :tasks
 
+    import keys: %w[repos.tag_queries], from: :tags
+
     import keys: %w[operations.receive_webmention repos.social_post_queries repos.webmention_queries], from: :social
 
     export []

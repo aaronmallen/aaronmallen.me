@@ -3422,7 +3422,8 @@ CREATE TABLE public.tags (
     color public.tag_color NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    scope public.tag_scope NOT NULL
+    scope public.tag_scope NOT NULL,
+    description text
 );
 
 
@@ -8722,4 +8723,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002032_create_trusted_authors.rb'),
 ('20261016002057_add_synced_from_to_calendars.rb'),
 ('20261016002066_defer_mail_label_name_check.rb'),
-('20261016002072_claim_decision_photos.rb');
+('20261016002072_claim_decision_photos.rb'),
+('20261016002074_add_description_to_tags.rb');

@@ -23,19 +23,28 @@ module API
 
       PROPERTIES = {
         color: { type: "string", enum: Blog::Types::TagColor.values },
+        description: {
+          type: "string",
+          description: "what the tag covers, in markdown; a public tag's page shows it. An empty string clears it",
+        },
         name: { type: "string", description: Helpers::Tags::FORMAT },
         scope: SCOPE,
       }.freeze
 
       REPLY = Helpers::Schema.object(
-        { id: Helpers::Schema::INTEGER, name: Helpers::Schema::STRING, color: Helpers::Schema::STRING },
+        {
+          id: Helpers::Schema::INTEGER,
+          name: Helpers::Schema::STRING,
+          color: Helpers::Schema::STRING,
+          description: Helpers::Schema.nullable(Helpers::Schema::STRING),
+        },
       ).freeze
 
       private
 
       def saved(result, id = nil)
         case result
-          in Success(tag) then Success(id: tag.id, name: tag.name, color: tag.color)
+          in Success(tag) then Success(id: tag.id, name: tag.name, color: tag.color, description: tag.description)
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in Failure(:not_found) then missing("tag", id)
           else failed("could not save the tag")

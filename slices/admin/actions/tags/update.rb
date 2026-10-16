@@ -32,7 +32,9 @@ module Admin
           back_here(request) || routes.path(:admin_tags, scope:, **(query.empty? ? {} : { q: query }))
         end
 
-        def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
+        def editing(id, params, errors)
+          { errors:, id:, name: Blog::Types::Text[params[:name]], **params.slice(:description) }
+        end
 
         def invalid(request, response, scope, query, editing)
           page = requested_page(request, response)

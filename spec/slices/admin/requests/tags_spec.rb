@@ -505,6 +505,58 @@ RSpec.describe "Admin tags", type: :request do
       end
     end
 
+    describe "describing a tag" do
+      let(:tag) { create(:tag, name: "ruby", description: "the language") }
+
+      def field = page.find("#tag-#{tag.id}-form textarea[name='tag[description]']", visible: :all)
+
+      it "fills the field in the rename form with the description" do
+        tag
+        get "/admin/tags"
+
+        expect(field.text).to eq("the language")
+      end
+
+      it "stores the description" do
+        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", description: "matz's *language*" })
+
+        expect(stored(tag.id).description).to eq("matz's *language*")
+      end
+
+      it "clears the description when the field is emptied" do
+        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", description: " " })
+
+        expect(stored(tag.id).description).to be_nil
+      end
+
+      it "keeps the description through a rename" do
+        send_to("/admin/tags/#{tag.id}", tag: { name: "crystal" })
+
+        expect(stored(tag.id)).to have_attributes(name: "crystal", description: "the language")
+      end
+
+      it "keeps the description through a recolour" do
+        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", color: "mk-orange" })
+
+        expect(stored(tag.id)).to have_attributes(color: "mk-orange", description: "the language")
+      end
+
+      it "keeps what was typed when it refuses a rename", :aggregate_failures do
+        send_to("/admin/tags/#{tag.id}", tag: { name: " ", description: "half written" })
+
+        expect(last_response.status).to eq(422)
+        expect(field.text).to eq("half written")
+        expect(stored(tag.id).description).to eq("the language")
+      end
+
+      it "describes a private tag from the private tab" do
+        tag = create(:tag, :private, name: "chores")
+        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "chores", description: "around the house" })
+
+        expect(stored(tag.id).description).to eq("around the house")
+      end
+    end
+
     describe "recolouring a tag" do
       let(:tag) { create(:tag, name: "ruby", color: "mk-blue") }
 

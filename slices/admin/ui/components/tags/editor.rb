@@ -45,6 +45,16 @@ module Admin
 
           def counts = Row::USE_KEYS.filter_map { |kind, key| t(key, count: @uses[kind]) if @uses[kind] }
 
+          def description = editing? ? @editing.fetch(:description) { @tag.description } : @tag.description
+
+          def description_field
+            label(class: "f", for: description_id) { t(".description") }
+            Textarea(id: description_id, name: "tag[description]", rows: 3, value: description)
+            Hint { t(".description_hint") }
+          end
+
+          def description_id = "tag-#{@tag.id}-description"
+
           def editing? = @editing&.fetch(:id) == @tag.id
 
           def errors = editing? ? @editing[:errors] : Blog::Constants::EMPTY_HASH
@@ -92,6 +102,7 @@ module Admin
               query_field
               label(class: "f", for: FieldError.id_for(:name, scope)) { t(".rename") }
               Input(**FieldError.control_attributes(:name, errors, scope), name: "tag[name]", value: name)
+              description_field
             end
           end
 

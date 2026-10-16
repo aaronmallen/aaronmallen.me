@@ -7,17 +7,18 @@ module MCP
         additionalProperties: false,
         properties: {
           id: API::Helpers::Schema::ID.merge(
-            description: "the tag to rename or recolour; leave it out to add a new one",
+            description: "the tag to rename, recolour or describe; leave it out to add a new one",
           ),
           **API::Endpoints::TagEndpoint::PROPERTIES,
         },
         required: ["scope"],
       }.freeze
 
-      description "Add a tag to a scope, or rename or recolour one in it when you give its id. #{TAG_KINDS}. A new " \
-                  "tag needs a name and takes the least used colour in its scope unless you give one. On a change, a " \
-                  "field you leave out keeps what it has, and a rename follows the tag onto every record that " \
-                  "carries it"
+      description "Add a tag to a scope, or rename, recolour or describe one in it when you give its id. " \
+                  "#{TAG_KINDS}. A new tag needs a name and takes the least used colour in its scope unless you " \
+                  "give one. A description is markdown that a public tag's page shows; an empty one clears it. On " \
+                  "a change, a field you leave out keeps what it has, and a rename follows the tag onto every " \
+                  "record that carries it"
       input_schema(SCHEMA)
       scope Blog::Types::OAuthScope["write"]
 

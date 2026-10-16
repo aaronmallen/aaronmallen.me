@@ -20,6 +20,7 @@ module API
           name: Helpers::Schema::STRING,
           scope: { type: "string", enum: Blog::Types::TagScope.values },
           color: Helpers::Schema::STRING,
+          description: Helpers::Schema.nullable(Helpers::Schema::STRING),
           count: { type: "integer", description: "how many records carry it" },
           by_kind: {
             type: "object",
@@ -54,7 +55,10 @@ module API
       private
 
       def summary(tag, held)
-        { id: tag.id, name: tag.name, scope: tag.scope, color: tag.color, count: held.values.sum, by_kind: held }
+        {
+          id: tag.id, name: tag.name, scope: tag.scope, color: tag.color, description: tag.description,
+          count: held.values.sum, by_kind: held,
+        }
       end
     end
   end

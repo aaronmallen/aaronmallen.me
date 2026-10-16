@@ -62,7 +62,7 @@ RSpec.describe "MCP tag tools", type: :request do
       create(:post, tags: %w[ruby])
       create(:project, tags: %w[ruby])
       create(:project, tags: %w[ruby cli])
-      create(:tag, name: "unused")
+      create(:tag, name: "unused", description: "kept for *later*")
       create(:task, tags: %w[chores ruby])
       call_tool("list_tags", scope: "public")
     end
@@ -83,6 +83,10 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "counts a tag nothing carries as zero" do
       expect(named("unused")).to include("count" => 0, "by_kind" => {})
+    end
+
+    it "gives each tag its description" do
+      expect(%w[ruby unused].map { named(it).fetch("description") }).to eq([nil, "kept for *later*"])
     end
 
     it "counts every tag in the scope" do
@@ -162,6 +166,41 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("save_tag", scope: "public", id: tag.id, name: "crystal")
 
       expect(tag_queries.find_in("public", tag.id)).to have_attributes(name: "crystal", color: "mk-pink")
+    end
+
+    it "adds a tag with a description and returns it" do
+      call_tool("save_tag", scope: "public", name: "ruby", description: "  all about *ruby*  ")
+
+      expect(content.fetch("description")).to eq("all about *ruby*")
+    end
+
+    it "describes a tag and returns the description", :aggregate_failures do
+      tag = create(:tag, name: "ruby")
+      call_tool("save_tag", scope: "public", id: tag.id, description: "all about ruby")
+
+      expect(content).to include("name" => "ruby", "description" => "all about ruby")
+      expect(tag_queries.find_in("public", tag.id).description).to eq("all about ruby")
+    end
+
+    it "keeps the description when a change leaves it out" do
+      tag = create(:tag, name: "ruby", description: "all about ruby")
+      call_tool("save_tag", scope: "public", id: tag.id, name: "crystal", color: "mk-green")
+
+      expect(tag_queries.find_in("public", tag.id).description).to eq("all about ruby")
+    end
+
+    it "clears the description when given an empty one" do
+      tag = create(:tag, name: "ruby", description: "all about ruby")
+      call_tool("save_tag", scope: "public", id: tag.id, description: "")
+
+      expect(tag_queries.find_in("public", tag.id).description).to be_nil
+    end
+
+    it "says in its description that it sets a description" do
+      rpc("tools/list")
+      tool = JSON.parse(last_response.body).dig("result", "tools").find { it.fetch("name") == "save_tag" }
+
+      expect(tool.fetch("description")).to include("describe", "description is markdown")
     end
 
     it "recolours a private tag" do
@@ -320,6 +359,15 @@ RSpec.describe "MCP tag tools", type: :request do
 
       expect([statuses("tasks"), content.fetch("journal_entries").map { it.fetch("body") }])
         .to eq([[["Shipped ruby", "done"]], ["Wrote some ruby"]])
+    end
+
+    it "gives each scope's description of the name" do
+      create(:tag, name: "ruby", description: "the language")
+      create(:tag, :private, name: "ruby")
+      create(:task, title: "Bump ruby", tags: %w[ruby])
+      call_tool("read_tag", name: "ruby")
+
+      expect(content.fetch("descriptions")).to eq("public" => "the language", "private" => nil)
     end
 
     it "refuses a name no tag holds", :aggregate_failures do

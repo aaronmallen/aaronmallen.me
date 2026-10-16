@@ -72,10 +72,11 @@ RSpec.describe "API reading a tag", type: :request do
     end
 
     it "answers a tag nothing carries with empty kinds" do
-      create(:tag, :private, name: "unused")
+      create(:tag, :private, name: "unused", description: "kept for later")
 
       expect(read("unused")).to eq(
-        "name" => "unused", "posts" => [], "projects" => [], "tasks" => [], "journal_entries" => [], "decisions" => [],
+        "name" => "unused", "descriptions" => { "public" => nil, "private" => "kept for later" },
+        "posts" => [], "projects" => [], "tasks" => [], "journal_entries" => [], "decisions" => [],
       )
     end
 

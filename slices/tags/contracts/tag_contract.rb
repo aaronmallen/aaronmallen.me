@@ -8,6 +8,7 @@ module Tags
       params do
         required(:name).filled(NAME)
         required(:color).maybe(Blog::Types::Nullable::TagColor)
+        optional(:description).maybe(Blog::Types::OptionalText)
       end
 
       rule(:name).validate(:without_controls)

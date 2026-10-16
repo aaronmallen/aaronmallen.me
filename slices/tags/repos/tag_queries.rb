@@ -26,6 +26,8 @@ module Tags
 
       def mail_only?(scope, id) = mail?(scope, id) && !tags.in_scope(scope).by_pk(id).outside_mail.exist?
 
+      def named_in(scope, name) = tags.in_scope(scope).by_names(name).one
+
       def next_color(scope:) = tags.next_color(scope:)
 
       def page_matching(scope, text, page, mail: true)

@@ -93,6 +93,13 @@ RSpec.describe "API tags", type: :request do
         .to eq(%w[rails mk-blue])
     end
 
+    it "describes the tag and keeps its name" do
+      tag = create(:tag, name: "ruby")
+
+      expect(call_api(:patch, "/tags/public/#{tag.id}", JSON.generate(description: "the language"))
+        .values_at("name", "description")).to eq(["ruby", "the language"])
+    end
+
     it "answers a tag from the other scope with a 404" do
       tag = create(:tag, :private)
       call_api(:patch, "/tags/public/#{tag.id}", JSON.generate(name: "rails"))

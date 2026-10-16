@@ -7,7 +7,7 @@ module API
 
       include Deps[save_tag: "tags.operations.save_tag"]
 
-      def handle(scope:, name: nil, color: nil) = saved(save_tag.call({ name:, color: }, scope:))
+      def handle(scope:, name: nil, color: nil, **fields) = saved(save_tag.call({ name:, color:, **fields }, scope:))
     end
   end
 end

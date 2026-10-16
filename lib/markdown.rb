@@ -10,6 +10,8 @@ module Markdown
 
     def to_html(markdown) = Document.new(markdown).html
 
+    def to_text(markdown) = Document.new(markdown).text
+
     def word_count(markdown) = Document.new(markdown).word_count
   end
 end

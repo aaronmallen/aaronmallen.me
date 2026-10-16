@@ -19,16 +19,18 @@ module Tags
 
       private
 
+      def changes(fields) = fields.compact.merge(fields.slice(:description))
+
       def find(id, scope)
         return Success(nil) unless id
 
         found(tag_queries.find_in(scope, id) && id)
       end
 
-      def form(params) = { color: params[:color], name: params[:name] }
+      def form(params) = { color: params[:color], name: params[:name], **params.slice(:description) }
 
       def persist(id, scope, fields)
-        Success(transaction { id ? tag_mutations.update(id, **fields.compact) : store(scope, fields) })
+        Success(transaction { id ? tag_mutations.update(id, **changes(fields)) : store(scope, fields) })
       rescue ROM::SQL::UniqueConstraintError => e
         raise unless tag_mutations.violated_constraint(e) == NAME_KEY
 

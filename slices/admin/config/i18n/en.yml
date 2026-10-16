@@ -2423,6 +2423,8 @@ en:
             zero: "Remove %{tag}? You can't undo it."
             one: "Remove %{tag}? %{uses} loses it."
             other: "Remove %{tag}? %{uses} lose it."
+          description: "Description"
+          description_hint: "Markdown. A public tag's page shows it under the heading; a private tag's stays here."
           remove: "Remove"
           rename: "Rename"
           save: "Save"

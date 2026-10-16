@@ -4,9 +4,12 @@ module Public
   module Actions
     module Tags
       class Show < Action
+        PUBLIC = Blog::Types::TagScope["public"]
+
         include Deps[
           post_queries: "posts.repos.post_queries",
           project_queries: "projects.repos.project_queries",
+          tag_queries: "tags.repos.tag_queries",
         ]
 
         share_with_caches
@@ -16,6 +19,7 @@ module Public
           page = requested_page(request, response)
           redirect_to_own_path(request, response, :tag, page, tag:)
           expose_listing(response, tag, page)
+          response[:description] = tag_queries.named_in(PUBLIC, tag)&.description
         end
 
         private
