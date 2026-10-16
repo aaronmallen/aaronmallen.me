@@ -8,4 +8,4 @@ fields: [api_key]
 powers:
   - Issue import into external tasks
 jobs:
-  - {name: Linear issue sync, every: every 15 minutes, sync: linear_issues}
+  - {every: every 15 minutes, sync: linear_issues}

@@ -56,11 +56,13 @@ module Admin
             yes ? Pill(color:) { t(held_key) } : Pill(color: :orange) { t(lacking_key) }
           end
 
+          def job_name(job) = t("ui.components.sync_failures.syncs").fetch(job[:sync].to_sym)
+
           def jobs
             return if @row.jobs.empty?
 
             label(t(".jobs"))
-            @row.jobs.each { line(it[:name], it[:every], name: "svc-job") }
+            @row.jobs.each { line(job_name(it), it[:every], name: "svc-job") }
             SyncFailures(failures: @row.failing_jobs.map { it[:failure] })
           end
 

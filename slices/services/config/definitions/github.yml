@@ -14,7 +14,7 @@ scopes:
   - {id: repo, label: Read repositories and issues, why: "Issues, commits, project stats"}
   - {id: "read:org", label: Read organization membership, why: "Repos and issues you reach through an org"}
 jobs:
-  - {name: GitHub issue sync, every: every 15 minutes, sync: issues}
-  - {name: Commit import, every: every 15 minutes, sync: commits}
-  - {name: Pull request import, every: every 15 minutes, sync: pull_requests}
-  - {name: Project refresh, every: nightly, sync: projects}
+  - {every: every 15 minutes, sync: issues}
+  - {every: every 15 minutes, sync: commits}
+  - {every: every 15 minutes, sync: pull_requests}
+  - {every: nightly, sync: projects}

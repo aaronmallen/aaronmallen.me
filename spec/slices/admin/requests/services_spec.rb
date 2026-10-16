@@ -169,6 +169,18 @@ RSpec.describe "Admin connected services", type: :request do
         it "names the failure at a glance" do
           expect(page).to have_css(".settings-side .sync-failure")
         end
+
+        it "names the job as the failure banner does" do
+          get "/admin/services?selected=#{connections.first.id}"
+
+          expect(page.find(".settings-side .sync-failure").text).to start_with(page.find(".svc-job").text)
+        end
+      end
+
+      it "has a sync label for every job" do
+        syncs = Services::Slice["repos.definition_queries"].all.flat_map(&:jobs).map { it[:sync].to_sym }
+
+        expect(syncs - Admin::Slice["i18n"].t("ui.components.sync_failures.syncs").keys).to be_empty
       end
     end
 
@@ -195,7 +207,8 @@ RSpec.describe "Admin connected services", type: :request do
         shown = get("/admin/services").then { hints(".settings-side") }
         get "/admin/services?selected=maxmind"
 
-        expect([page.find(".svc-line", text: "GeoIP database download").text, every("refresh_country_database"), shown])
+        expect([page.find(".svc-line", text: "Country database refresh").text, every("refresh_country_database"),
+                shown])
           .to match([include("weekly"), 7 * 86_400, include(hint("views.services.index.pick_hint"))])
       end
 
@@ -222,7 +235,7 @@ RSpec.describe "Admin connected services", type: :request do
 
         expect(page).to have_css(".settings-side .card-title", text: "MaxMind")
         expect(page).to have_css(".settings-side li", text: "Countries in Analytics")
-        expect(page).to have_css(".settings-side .svc-line", text: "GeoIP database download")
+        expect(page).to have_css(".settings-side .svc-line", text: "Country database refresh")
         expect(row("MaxMind")).to have_css("a.li-title[aria-current='true'][href='/admin/services']")
       end
 

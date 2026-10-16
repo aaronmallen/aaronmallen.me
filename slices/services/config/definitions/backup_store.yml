@@ -8,4 +8,4 @@ env:
 powers:
   - Nightly database backups
 jobs:
-  - {name: Database backup, every: nightly, sync: backups}
+  - {every: nightly, sync: backups}

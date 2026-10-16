@@ -10,4 +10,4 @@ powers:
   - Places on sign-ins and sightings
   - Countries in Analytics
 jobs:
-  - {name: GeoIP database download, every: weekly, sync: country_database}
+  - {every: weekly, sync: country_database}

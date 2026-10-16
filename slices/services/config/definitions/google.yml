@@ -32,6 +32,6 @@ scopes:
     why: Resting heart rate and HRV
     optional: true
 jobs:
-  - {name: Gmail sync, every: every 5 minutes, sync: mail}
-  - {name: Google Calendar sync, every: every 15 minutes, sync: calendar}
-  - {name: Google Health sync, every: every 15 minutes, sync: health}
+  - {every: every 5 minutes, sync: mail}
+  - {every: every 15 minutes, sync: calendar}
+  - {every: every 15 minutes, sync: health}
