@@ -2,33 +2,15 @@
 
 module Decisions
   module Operations
-    class EditDecisionComment < Blog::Operation
+    class EditDecisionComment < Blog::EditCommentOperation
       PHOTO_OWNER = Blog::Types::PhotoOwner["decision_comment"]
 
       include Deps[
-        claim_photos: "media.operations.claim_photos",
+        comment_mutations: "repos.decision_comment_mutations",
+        comment_photos: "media.operations.claim_photos",
+        comment_queries: "repos.decision_queries",
         contract: "contracts.decision_comment_contract",
-        decision_comment_mutations: "repos.decision_comment_mutations",
-        decision_queries: "repos.decision_queries",
       ]
-
-      def call(decision_id, id, params)
-        step find(decision_id, id)
-        fields = step validate(params)
-
-        transaction do
-          claim_photos.call(PHOTO_OWNER, id, fields[:body])
-          decision_comment_mutations.update(id, body: fields[:body])
-        end
-      end
-
-      private
-
-      def find(decision_id, id)
-        found(decision_queries.comment_on_decision?(decision_id, id) && id)
-      end
-
-      def validate(params) = validated(contract.call(body: params[:body]))
     end
   end
 end

@@ -26,6 +26,10 @@ Blog/UnusedDeps:
   Enabled: true
   AllowedNames:
     - act_on
+    - comment_mutations
+    - comment_owners
+    - comment_photos
+    - comment_queries
     - contract
     - honeybadger
     - queries

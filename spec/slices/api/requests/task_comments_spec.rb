@@ -111,6 +111,29 @@ RSpec.describe "API task comments", type: :request do
     end
   end
 
+  describe "a comment pasted with Windows line endings" do
+    let(:decision) { create(:decision) }
+    let(:pasted) { "Blocked\r\non review\rtoday\r\n" }
+
+    def bodies = [stored(task).first.body, Decisions::Slice["repos.decision_queries"].comments(decision.id).first.body]
+
+    it "saves the same body on a task and a decision when added" do
+      comment(task.id, body: pasted)
+      call_api(:post, "/decisions/#{decision.id}/comments", { body: pasted })
+
+      expect(bodies).to eq(["Blocked\non review\ntoday"] * 2)
+    end
+
+    it "saves the same body on a task and a decision when edited" do
+      local = create(:task_comment, task_id: task.id, body: "Blocked")
+      other = create(:decision_comment, decision_id: decision.id, body: "Blocked")
+      edit(task.id, local.id, body: pasted)
+      call_api(:patch, "/decisions/#{decision.id}/comments/#{other.id}", { body: pasted })
+
+      expect(bodies).to eq(["Blocked\non review\ntoday"] * 2)
+    end
+  end
+
   describe "DELETE /api/v1/tasks/:id/comments/:comment_id" do
     let(:local) { create(:task_comment, task_id: task.id, body: "Blocked on review") }
 

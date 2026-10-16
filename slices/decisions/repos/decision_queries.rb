@@ -9,13 +9,13 @@ module Decisions
 
       def by_tag(tag) = decisions.combine(:options, :tags).tagged(tag).newest_first.to_a
 
-      def comment_on_decision?(decision_id, id) = decision_comments.for_decision(decision_id).by_pk(id).exist?
-
       def comments(decision_id) = decision_comments.for_decision(decision_id).oldest_first.to_a
 
       def count_by_status = decisions.tally(:status)
 
       def count_found(tag: nil, text: nil) = narrowed(decisions, tag:, text:).tally(:status, STATUSES)
+
+      def editable_comment?(decision_id, id) = decision_comments.for_decision(decision_id).by_pk(id).exist?
 
       def exist?(id) = decisions.by_pk(id).exist?
 

@@ -2,31 +2,15 @@
 
 module Tasks
   module Operations
-    class EditTaskComment < Blog::Operation
+    class EditTaskComment < Blog::EditCommentOperation
       PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
 
       include Deps[
-        claim_photos: "media.operations.claim_photos",
+        comment_mutations: "repos.task_comment_mutations",
+        comment_photos: "media.operations.claim_photos",
+        comment_queries: "repos.task_comment_queries",
         contract: "contracts.task_comment_contract",
-        task_comment_mutations: "repos.task_comment_mutations",
-        task_comment_queries: "repos.task_comment_queries",
       ]
-
-      def call(task_id, id, params)
-        step find(task_id, id)
-        fields = step validate(params)
-
-        transaction do
-          claim_photos.call(PHOTO_OWNER, id, fields[:body])
-          task_comment_mutations.update(id, body: fields[:body])
-        end
-      end
-
-      private
-
-      def find(task_id, id) = found(task_comment_queries.local?(task_id, id) && id)
-
-      def validate(params) = validated(contract.call(body: params[:body]))
     end
   end
 end

@@ -4,7 +4,7 @@ module Tasks
   module Contracts
     class TaskCommentContract < Blog::Contract
       params do
-        required(:body).value(Blog::Types::TrimmedText, :filled?)
+        required(:body).value(Blog::Types::Normalized::Lines, :filled?)
       end
 
       rule(:body).validate(:without_controls, :visible)
