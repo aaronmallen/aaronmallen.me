@@ -7,6 +7,7 @@ module Projects
 
       def call(id, on: Blog::TimeZone.today)
         project = step find(id)
+        step live(project)
         step started(project, on)
         project_mutations.update(id, archived_on: on)
       end
@@ -16,6 +17,8 @@ module Projects
       def find(id)
         found(project_queries.by_id(id))
       end
+
+      def live(project) = project.archived? ? Failure(:archived) : Success(project)
 
       def started(project, on)
         starts = project.started_on

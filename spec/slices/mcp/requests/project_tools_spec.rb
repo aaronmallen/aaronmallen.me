@@ -313,6 +313,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(project_queries.by_id(project.id).archived_on).to be_nil
     end
 
+    it "refuses an archived project and keeps its archive day", :aggregate_failures do
+      project = create(:project, :archived, archived_on: today - 30)
+      call_tool("archive_project", id: project.id)
+
+      expect(message).to eq("not archived: it is archived already")
+      expect(project_queries.by_id(project.id).archived_on).to eq(today - 30)
+    end
+
     it "refuses an ID no project has" do
       call_tool("archive_project", id: 999_999)
 

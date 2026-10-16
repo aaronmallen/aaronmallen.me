@@ -68,6 +68,14 @@ RSpec.describe "API projects", type: :request do
         .to eq(["not archived: its start month has not come yet", 422])
     end
 
+    it "refuses an archived project with a 422 and keeps its archive day", :aggregate_failures do
+      project = create(:project, :archived, archived_on: today - 30)
+
+      expect([call_api(:post, "/projects/#{project.id}/archive").fetch("message"), status])
+        .to eq(["not archived: it is archived already", 422])
+      expect(project_queries.by_id(project.id).archived_on).to eq(today - 30)
+    end
+
     it "answers an unknown ID with a 404" do
       call_api(:post, "/projects/999999/archive")
 

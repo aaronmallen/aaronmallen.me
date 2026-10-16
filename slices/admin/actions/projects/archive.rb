@@ -4,6 +4,7 @@ module Admin
   module Actions
     module Projects
       class Archive < Action
+        ALREADY_ARCHIVED = "projects_page.toasts.already_archived"
         ARCHIVED = "projects_page.toasts.archived"
         NOT_STARTED = "projects_page.toasts.not_started"
 
@@ -16,15 +17,16 @@ module Admin
           result = archive_project.call(id)
 
           case result
-            in Failure(:not_started) then not_started(response, id)
+            in Failure(:archived) then refused(response, id, ALREADY_ARCHIVED)
+            in Failure(:not_started) then refused(response, id, NOT_STARTED)
             else settle(response, result, ARCHIVED, back_path(request))
           end
         end
 
         private
 
-        def not_started(response, id)
-          toast(response, NOT_STARTED)
+        def refused(response, id, key)
+          toast(response, key)
           response.redirect_to(routes.path(:admin_edit_project, id:))
         end
       end

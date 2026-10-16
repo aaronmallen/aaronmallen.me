@@ -334,6 +334,23 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
 
         expect(page).to have_css("[data-toast]", text: "Not archived · its start month has not come yet")
       end
+
+      it "keeps the day an archived project was archived", :aggregate_failures do
+        archived = create(:project, :archived, archived_on: Blog::TimeZone.today - 30)
+        post "/admin/projects/#{archived.id}/archive", _csrf_token: admin_csrf_token
+
+        expect(repo.by_id(archived.id).archived_on).to eq(Blog::TimeZone.today - 30)
+        expect(last_response).to be_redirect
+          .and have_attributes(location: end_with("/admin/projects/#{archived.id}/edit"))
+      end
+
+      it "says why an archived project was not archived again" do
+        archived = create(:project, :archived)
+        post "/admin/projects/#{archived.id}/archive", _csrf_token: admin_csrf_token
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "Not archived · it is archived already")
+      end
     end
 
     describe "restoring" do
