@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, mcp, projects, record, tasks]
 issue: "#660"
-amended: ["#1315", "#1391"]
+amended: ["#1315", "#1391", "#1517"]
 tags: [tasks, projects, tags, rules, imports, sync, github, linear, providers, repos, links]
 ---
 
@@ -43,6 +43,15 @@ repo, on create or edit, links the issues already imported from that repo. Both 
 Since #1315 a rule names one project at most, and a rule or repo match sets the task's one project in
 `tasks.project_id` instead of adding a link, as [ADR 0166][0166] records.
 
+Since #1517 the repo match is a real rule. Giving a project a repo, on create or edit and from the admin, the API or the
+MCP tool, saves a GitHub rule whose pattern is that repo and whose project is that project, so the mapping shows on the
+rules page and can take tags. When a GitHub rule for that repo already exists with no project, the save gives it the
+project; when it names another project, the save leaves it alone. A rule made or given the project this way sets it on
+the issues already imported, as creating a rule does. Changing or clearing the repo leaves the old rule. `SyncIssues` no
+longer reads `projects.repo`: an issue reaches a project only through a rule, and an exact repo rule's project wins over
+an `owner/*` rule's. A migration added a rule for every project whose repo no GitHub rule named, and gave the project to
+a rule for its repo that held none.
+
 ## Alternatives
 
 **A separate table of project rules.** Project rules get their own table, repo, operations, admin page, API endpoints
@@ -53,8 +62,8 @@ lost because a "tag rule" that holds only projects says something false on every
 
 ## Consequences
 
-The owner links a repo's issues to its project by giving the project a repo, and needs a rule only for `owner/*`, a
-Linear team, or a second project.
+The owner links a repo's issues to its project by giving the project a repo, and needs a rule of their own only for
+`owner/*`, a Linear team, or a second project.
 
 The rename touches the schema, the repo, the operations, the admin page, the API and the MCP tools at once, and any
 client that calls `save_task_tag_rule` or `list_task_tag_rules` breaks.

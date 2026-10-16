@@ -7,8 +7,8 @@ module Admin
         CREATED = "projects_page.toasts.created"
 
         include Deps[
+          add_repo_rule: "tasks.operations.add_repo_rule",
           build_project_editor: "operations.build_project_editor",
-          link_repo_tasks: "tasks.operations.link_repo_tasks",
           save_project: "projects.operations.save_project",
         ]
 
@@ -28,7 +28,7 @@ module Admin
 
         private
 
-        def save(params) = save_project.call(params).fmap { link_repo_tasks.call(it) }
+        def save(params) = save_project.call(params).fmap { add_repo_rule.call(it) }
       end
     end
   end

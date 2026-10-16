@@ -8,8 +8,8 @@ module Admin
         SAVED = "projects_page.toasts.saved"
 
         include Deps[
+          add_repo_rule: "tasks.operations.add_repo_rule",
           build_project_editor: "operations.build_project_editor",
-          link_repo_tasks: "tasks.operations.link_repo_tasks",
           list_record_links: "operations.list_record_links",
           project_queries: "projects.repos.project_queries",
           save_project: "projects.operations.save_project",
@@ -39,7 +39,7 @@ module Admin
         def save(params, id)
           was = project_queries.by_id(id)&.repo
 
-          save_project.call(params, id:).fmap { link_repo_tasks.call(it, was:) }
+          save_project.call(params, id:).fmap { add_repo_rule.call(it, was:) }
         end
       end
     end

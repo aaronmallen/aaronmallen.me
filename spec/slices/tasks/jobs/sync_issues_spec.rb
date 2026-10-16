@@ -221,33 +221,24 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(project_ids).to eq([site.id])
     end
 
-    it "takes a project its repo and a rule both name" do
-      Projects::Slice["repos.project_mutations"].update(site.id, repo: "aaronmallen/aaronmallen.me")
-      stub_assigned(issue)
+    it "takes no project from a project's repo alone" do
+      create(:project, repo: "octocat/pod")
+      stub_assigned(issue(repo: "octocat/pod"))
       sync
 
-      expect(project_ids).to eq([site.id])
+      expect(project_ids).to be_empty
     end
 
-    describe "and a project that owns its repo" do
-      before { create(:project, repo: "aaronmallen/aaronmallen.me") }
+    describe "and a rule for its exact repo made after the owner's" do
+      let(:pod) { create(:project) }
 
-      def owner_id = Projects::Slice["relations.projects"].where(repo: "aaronmallen/aaronmallen.me").pluck(:id).first
+      before { rule("aaronmallen/pod", projects: [pod.id]) }
 
-      it "takes that project over the rule projects" do
-        stub_assigned(issue(repo: "AaronMallen/AaronMallen.me"))
+      it "takes the exact rule's project over the owner rule's" do
+        stub_assigned(issue(repo: "AaronMallen/Pod"))
         sync
 
-        expect(project_ids).to eq([owner_id])
-      end
-
-      it "keeps that project off on the next sync when I removed it" do
-        stub_assigned(issue)
-        sync
-        unlink(owner_id)
-        sync
-
-        expect(project_ids).to be_empty
+        expect(project_ids).to eq([pod.id])
       end
     end
 

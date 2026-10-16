@@ -8725,4 +8725,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002066_defer_mail_label_name_check.rb'),
 ('20261016002072_claim_decision_photos.rb'),
 ('20261016002074_add_description_to_tags.rb'),
-('20261016002086_keep_manual_work_session_days_positive.rb');
+('20261016002086_keep_manual_work_session_days_positive.rb'),
+('20261016002092_add_task_rules_for_project_repos.rb');

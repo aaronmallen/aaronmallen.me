@@ -15,8 +15,6 @@ module Projects
 
       def id_by_key(key) = projects.where(Sequel.function(:lower, :key) => key.downcase).pluck(:id).first
 
-      def ids_by_repo(repo) = projects.where(repo:).pluck(:id)
-
       def ids_by_slug(slugs) = projects.slugged(slugs)
 
       def live = with_tags.live.in_order.to_a

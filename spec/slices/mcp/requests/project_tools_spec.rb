@@ -137,7 +137,10 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
       def linked = Tasks::Slice["relations.tasks"].by_pk(task).pluck(:project_id).compact
 
-      it "links them to the project" do
+      it "links them to the project through a GitHub task rule", :aggregate_failures do
+        rule = Tasks::Slice["repos.task_rule_queries"].by_pattern("github", "aaronmallen/fresh")
+
+        expect(rule.projects.map(&:id)).to eq([project.id])
         expect(linked).to eq([project.id])
       end
 

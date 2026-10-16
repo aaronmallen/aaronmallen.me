@@ -54,7 +54,7 @@ module API
       REPLY = Serializers::Project.reference
 
       include Deps[
-        link_repo_tasks: "tasks.operations.link_repo_tasks",
+        add_repo_rule: "tasks.operations.add_repo_rule",
         project_queries: "projects.repos.project_queries",
         save_project: "projects.operations.save_project",
       ]
@@ -98,7 +98,7 @@ module API
 
       def saved(fields, current: nil)
         id = current&.id
-        result = save_project.call(form(current, fields), id:).fmap { link_repo_tasks.call(it, was: current&.repo) }
+        result = save_project.call(form(current, fields), id:).fmap { add_repo_rule.call(it, was: current&.repo) }
 
         case result
           in Success(project) then Success(serialized(Serializers::Project, project))

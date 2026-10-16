@@ -12,19 +12,18 @@ module Tasks
 
       def by_id(id) = with_projects(with_targets.by_pk(id).to_a).first
 
+      def by_pattern(provider, pattern) = with_projects(with_targets(task_rules.where(provider:, pattern:)).to_a).first
+
       def matching_task_ids(rule) = task_ids_from(rule.provider) { rule.matches?(it) }
 
       def project_choices = project_queries.by_name
 
-      def repo_task_ids(repo) = task_ids_from(GITHUB) { it == repo }
-
       def targets(provider, origin)
         found = origin&.downcase
-        rules = found ? with_targets(task_rules.where(provider:)).to_a.select { it.matches?(found) } : []
+        rules = found ? with_targets(task_rules.where(provider:).order(Sequel.desc(:pattern))).to_a : []
+        rules = rules.select { it.matches?(found) }
 
-        ids = [*owners(provider, found), *rules.flat_map { project_ids(it) }]
-
-        [rules.flat_map { it.tags.map(&:name) }, ids.uniq]
+        [rules.flat_map { it.tags.map(&:name) }, rules.flat_map { project_ids(it) }.uniq]
       end
 
       private
@@ -35,8 +34,6 @@ module Tasks
           when LINEAR then Issues::LINEAR_URL.match(url.to_s)&.then { "#{it[:workspace]}/#{it[:team]}" }
         end.to_s.downcase
       end
-
-      def owners(provider, repo) = provider == GITHUB && repo ? project_queries.ids_by_repo(repo) : []
 
       def project_ids(rule) = rule.task_rule_projects.map(&:project_id)
 

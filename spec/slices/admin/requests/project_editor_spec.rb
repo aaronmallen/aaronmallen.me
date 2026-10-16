@@ -13,6 +13,12 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
   def linked(task_id) = Tasks::Slice["relations.tasks"].by_pk(task_id).pluck(:project_id).compact
 
+  def rule(pattern, tags: "ruby", projects: [])
+    Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags:, projects: }).value!
+  end
+
+  def rules = Tasks::Slice["repos.task_rule_queries"].all.map { [it.provider, it.pattern, it.projects.map(&:id)] }
+
   def save(project = nil, **overrides)
     path = project ? "/admin/projects/#{project.id}" : "/admin/projects"
     post path, _csrf_token: admin_csrf_token, project: fields(**overrides)
@@ -243,6 +249,30 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save
 
         expect(linked(task_id)).to eq([tracking("aaronmallen/sai").id])
+      end
+
+      it "adds a GitHub task rule that hands its repo to it" do
+        save
+
+        expect(rules).to eq([["github", "aaronmallen/sai", [tracking("aaronmallen/sai").id]]])
+      end
+
+      it "gives a rule for its repo that holds no project the project, and its imported issues", :aggregate_failures do
+        rule("aaronmallen/sai")
+        task_id = imported("aaronmallen/sai")
+        save
+
+        expect(rules).to eq([["github", "aaronmallen/sai", [tracking("aaronmallen/sai").id]]])
+        expect(linked(task_id)).to eq([tracking("aaronmallen/sai").id])
+      end
+
+      it "leaves a rule for its repo that names another project alone" do
+        other = create(:project)
+        rule("aaronmallen/sai", projects: [other.id])
+        task_id = imported("aaronmallen/sai")
+        save
+
+        expect([rules, linked(task_id)]).to eq([[["github", "aaronmallen/sai", [other.id]]], []])
       end
 
       it "saves the project", :aggregate_failures do
@@ -588,6 +618,14 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(project, repo: "aaronmallen/fresh")
 
         expect(linked(task_id)).to eq([project.id])
+      end
+
+      it "keeps the old repo's rule when the repo changes or clears" do
+        save(project, repo: "aaronmallen/fresh")
+        save(project, repo: "aaronmallen/other")
+        save(project, repo: "")
+
+        expect(rules).to eq(%w[aaronmallen/fresh aaronmallen/other].map { ["github", it, [project.id]] })
       end
 
       it "leaves a link I removed off when the repo stays the same" do
