@@ -394,13 +394,4 @@ RSpec.describe "API shares", type: :request do
       expect(status).to eq(404)
     end
   end
-
-  describe "a token without the write scope" do
-    it "may not group, move or ungroup shares" do
-      token = api_token(%w[read publish])
-      paths = ["/shares/bulk/group", "/share_groups/1/files", "/share_groups/1/files/2/ungroup"]
-
-      expect(paths.map { call_api(:post, it, { ids: [1, 2] }, token:).then { status } }).to eq([403, 403, 403])
-    end
-  end
 end

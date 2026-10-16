@@ -56,6 +56,21 @@ RSpec.describe "Changes that show in public", type: :request do
       expect(response_to(:post, "/share_groups", { files: [{ data: "aGk=", filename: "a.txt" }] })).to be_refused
     end
 
+    it "cannot group, move or ungroup shares" do
+      paths = ["/shares/bulk/group", "/share_groups/1/files", "/share_groups/1/files/2/ungroup"]
+
+      expect(paths.map { response_to(:post, it, { ids: [1, 2] }) }).to all(be_refused)
+    end
+
+    it "cannot rename a share, a share group or a file in a group" do
+      changes = {
+        "/shares/1" => { filename: "b.txt" }, "/share_groups/1" => { name: "Loud" },
+        "/share_groups/1/files/2" => { filename: "b.txt" },
+      }
+
+      expect(changes.map { response_to(:patch, *it) }).to all(be_refused)
+    end
+
     it "cannot change the body of a published post", :aggregate_failures do
       post = create(:post, :published, body: "as it was")
 

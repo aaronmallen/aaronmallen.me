@@ -5,7 +5,7 @@ module MCP
     class UpdateShare < Base
       description "Rename a shared file by ID. The new name is the one a download saves as, and the link stays " \
                   "the same"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint scope: Blog::Types::OAuthScope["publish"]
     end
   end
 end
