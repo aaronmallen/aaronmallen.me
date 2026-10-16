@@ -157,8 +157,18 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
         expect(page).to have_text("LinkedIn no longer takes the site's token")
       end
 
+      it "marks a connection lapsing late on the last day of the window on both pages", :aggregate_failures do
+        last = Blog::TimeZone.today + 7
+        connect_linkedin(lapses_at: Blog::TimeZone.local_time(last.year, last.month, last.day, 23, 59))
+        get "/admin/services"
+
+        expect(row).to have_css(".pill", text: "lapses soon")
+        expect(Activity::Slice["repos.attention_queries"].stalled.map(&:kind)).to include("lapsing")
+      end
+
       it "leaves a connection more than a week out marked connected" do
-        connect_linkedin(lapses_at: Time.now + (8 * 86_400))
+        out = Blog::TimeZone.today + 8
+        connect_linkedin(lapses_at: Blog::TimeZone.local_time(out.year, out.month, out.day))
         get "/admin/services"
 
         expect(row).to have_css(".pill", text: "connected")

@@ -4,7 +4,6 @@ module Admin
   module Operations
     class ListServices
       BRIDGY = "bridgy"
-      DAY = 86_400
 
       include Deps[
         "settings",
@@ -31,7 +30,7 @@ module Admin
         return unless lapses_at
         return :lapsed if lapses_at <= Time.now
 
-        :lapsing if lapses_at <= Time.now + (settings.attention[:lapsing_days] * DAY)
+        :lapsing if Blog::TimeZone.today(lapses_at) <= Blog::TimeZone.today + settings.attention[:lapsing_days]
       end
 
       def env(definition)
