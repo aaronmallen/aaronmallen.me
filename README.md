@@ -43,6 +43,7 @@ mise run format
 ## Docs
 
 - [Backups](docs/backups.md): the nightly database dumps and how to restore one.
+- [Maintenance](docs/maintenance.md): the Pi script that takes the site down for a NAS update.
 - [Media store](docs/media-store.md): the photo bucket, its key and libvips.
 - [Releasing](docs/releasing.md): the steps to tag and ship a version.
 - [Shares](docs/shares.md): the short links on `aa.cool`.
