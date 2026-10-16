@@ -5,6 +5,59 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.20] - 2026-10-16
+
+### Added
+
+- A search page at `/search`, linked from the header and opened from any page with `/`. It finds published posts, public
+  projects and tasks on published boards by their words or public tags, groups hits by kind and marks the words that
+  matched. It never shows a draft or private record, carries noindex, and robots.txt keeps crawlers off it. Each visitor
+  gets 20 searches a minute, which `SEARCH_THROTTLE_LIMIT` and `SEARCH_THROTTLE_WINDOW_MINUTES` change, and past that
+  the page answers 429.
+- A Related block under each post lists up to three other published posts: first those sharing the most tags, then those
+  with similar wording.
+- Short link destinations get checked each night with post links. Both count any 5xx and a timeout as broken, beside 404
+  and 410, and each failing link keeps a reason, such as "404 Not Found", and the night it first failed.
+- A "broken" filter on admin Posts lists published posts with failing links and a card of failing short links, each with
+  Check again, a link to fix it and Open link. Post rows carry an "N links failing" pill, orange after one night and
+  pink after two.
+- A "failing" filter on admin Links. Each link shows how its last check went, with Check again in its drawer and on its
+  edit page.
+- A Links button in the post editor opens a drawer of the post's outbound links, failing ones first, with Find in post,
+  Open link and, on a published post, Check again.
+- A Broken links line on Today's Needs attention card. When the last link check stopped early, Today and the Posts
+  broken filter show a banner with how far it got and Run it now.
+- A short link made with no title takes its destination's page title once a job fetches it. A title you type wins.
+- Share files take a name, and share groups take one that titles their page and zip. The admin sets them, as do `PATCH
+  /api/v1/shares/{id}`, `/api/v1/share_groups/{id}` and `/api/v1/share_groups/{id}/files/{file_id}`, and the MCP tools
+  `update_share`, `update_share_group` and `update_share_group_file`.
+- The admin files list groups two or more single shares, adds them to a group, and pulls a file out of its group under a
+  new code. The API and the MCP tools `group_shares`, `add_shares_to_group` and `ungroup_share_file` do the same with
+  `write`. A share that joins a group loses its own link.
+- The feed subscribers card lists direct feed readers under the aggregators, and `read_analytics` and the API return
+  them as `readers`.
+
+### Changed
+
+- New codes for shares, share groups and short links take 3 characters while any are free, then 4, and so on. Codes made
+  before keep their length.
+- Single shares and group files live in one table, so single shares have new ids in the API and MCP. Their links still
+  work.
+- `check_post_links` runs each night at 03:00 Chicago time, in place of Mondays at 06:00, and checks short links too.
+  Set its Honeybadger check-in to expect a nightly run.
+- The feed subscribers card, `read_analytics` and the API take each aggregator's count from the latest day alone, so the
+  rows add up to the total. An aggregator with no count that day drops off.
+- Insights loses its Search and Performance tabs. Performance sits on Analytics, and the palette's "See all results"
+  still opens search.
+- Webmention lists show a like in pink and a reply in sand.
+- The admin wordmark matches the public one: pink first, with the same size and focus ring.
+- Admin Links rows turn their title pink on hover, and the open icon on Links rows and share cards turns pink too.
+
+### Fixed
+
+- A Linear sync past ten pages of 25 issues failed each run with `page_limit` and never imported the rest. The Linear
+  and GitHub issue syncs now read every page.
+
 ## [26.10.19] - 2026-10-15
 
 ### Added
@@ -1167,7 +1220,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...HEAD
+[26.10.20]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...26.10.20
 [26.10.19]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...26.10.19
 [26.10.18]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...26.10.18
 [26.10.17]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...26.10.17
