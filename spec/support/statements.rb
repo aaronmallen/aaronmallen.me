@@ -17,13 +17,13 @@ module Spec
       end
     end
 
-    def counting
+    def counting(pattern = STATEMENT)
       listener = Listener.new
       notifications = Hanami.app["notifications"]
       notifications.subscribe(listener)
       yield
 
-      listener.queries.grep(STATEMENT)
+      listener.queries.grep(pattern)
     ensure
       notifications&.unsubscribe(listener)
     end

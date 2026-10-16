@@ -2,7 +2,7 @@
 
 module Tasks
   module Structs
-    IssueSyncRun = Data.define(:provider, :client, :now, :known) do
+    IssueSyncRun = Data.define(:provider, :client, :now, :known, :held) do
       def track(source)
         known[source.remote_id] = source
       end

@@ -30,7 +30,7 @@ module Tasks
       ]
 
       def call(provider:, client:, now: Time.now)
-        run = Structs::IssueSyncRun.new(provider:, client:, now:, known: tracked(provider))
+        run = Structs::IssueSyncRun.new(provider:, client:, now:, known: tracked(provider), held: {})
         listing, checked, history = step fetch(run)
         count = settle(run, listing.items, checked, history)
 
@@ -58,18 +58,21 @@ module Tasks
       def follow(run, source, task, issue, history: EMPTY_HASH, reached: false)
         state = observed(task, source, issue.fetch(:remote_state), reached)
         changes = history[issue[:id]]
+        stamp = source.restamp(state, issue, changes, run.now)
+        return if stamp.nil? && still?(run, source, task, issue, changes)
 
         transaction do
-          task = settle_task.call(task, from: source.remote_state, to: state, at: run.now, history: changes).value!
+          task = settled(run, source, task, state, changes)
           rewrite(task, issue)
-          restamp(source, state, issue, changes, run.now)
-          sync_comments.call(source, task, issue)
+          stamp && task_source_mutations.update(source.id, **stamp)
+          sync_comments.call(source, task, issue, run)
         end
       end
 
       def follow_all(run, issues, history)
         sources = issues.map { run.known.fetch(it[:id]) }
         tasks = task_queries.detailed_in_order(sources.map(&:task_id))
+        sync_comments.hold(run, tasks.compact.map(&:id), issues)
 
         issues.zip(sources, tasks) { |issue, source, task| task && follow(run, source, task, issue, history:) }
       end
@@ -85,6 +88,7 @@ module Tasks
           task = task_mutations.append(**copy(issue), list: EXTERNAL)
           label(task, run.provider, issue, run.now)
           fields = { task_id: task.id, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
+          sync_comments.hold(run, [task.id], [issue])
           task_source_mutations.create(**fields, provider: run.provider).tap { follow(run, it, task, issue, reached:) }
         end
       end
@@ -117,21 +121,9 @@ module Tasks
         reached
       end
 
-      def restamp(source, state, issue, changes, now)
-        checked_at = now if CLOSED.valid?(state)
-        history_cursor = source.next_cursor(issue[:updated_at], changes, now)
-        fields = { remote_state: state, url: issue[:url], checked_at:, history_cursor: }
-        return if fields.all? { |name, value| source[name] == value }
+      def retitled?(task, issue) = issue.key?(:title) && copy(issue) != { title: task.title, note: task.note }
 
-        task_source_mutations.update(source.id, **fields)
-      end
-
-      def rewrite(task, issue)
-        return unless issue.key?(:title)
-
-        fields = copy(issue)
-        task_mutations.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
-      end
+      def rewrite(task, issue) = retitled?(task, issue) && task_mutations.update(task.id, **copy(issue))
 
       def settle(run, assigned, checked, history)
         held, fresh = assigned.partition { run.known.key?(it[:id]) }
@@ -140,6 +132,14 @@ module Tasks
         import_all(run, fresh)
 
         fresh.size + step(relate(run, assigned:, checked:)).size
+      end
+
+      def settled(run, source, task, state, changes)
+        settle_task.call(task, from: source.remote_state, to: state, at: run.now, history: changes).value!
+      end
+
+      def still?(run, source, task, issue, changes)
+        changes.to_a.empty? && !retitled?(task, issue) && sync_comments.quiet?(source, task, issue, run)
       end
 
       def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }

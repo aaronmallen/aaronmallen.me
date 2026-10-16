@@ -20,6 +20,13 @@ module Tasks
 
         [history_cursor, updated_at, *history.map { it[:at] }].compact.max
       end
+
+      def restamp(state, issue, history, now)
+        checked_at = now if CLOSED.valid?(state)
+        history_cursor = next_cursor(issue[:updated_at], history, now)
+        fields = { remote_state: state, url: issue[:url], checked_at:, history_cursor: }
+        fields unless fields.all? { |name, value| self[name] == value }
+      end
     end
   end
 end

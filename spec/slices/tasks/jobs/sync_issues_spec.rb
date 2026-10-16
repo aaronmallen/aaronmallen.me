@@ -101,6 +101,47 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "issues that did not change since the last run" do
+    def held(*numbers, **fields)
+      numbers.map { github_issue("I_#{it}", number: it, comments: { nodes: [comment(it)] }, **fields) }
+    end
+
+    def hold(*numbers)
+      stub_assigned(*held(*numbers))
+      sync
+    end
+
+    def opened = counting(/\ASAVEPOINT/) { sync }.size
+
+    it "loads their synced comments in one query" do
+      hold(1, 2, 3)
+
+      expect(counting { sync }.grep(/\ASELECT "task_comments"/).size).to eq(1)
+    end
+
+    it "makes no write to their tasks, sources or comments" do
+      hold(1, 2, 3)
+
+      expect(counting { sync }.grep(/\A(INSERT INTO|UPDATE|DELETE FROM) "task/)).to be_empty
+    end
+
+    it "opens a transaction only for the one that changed" do
+      hold(1, 2, 3)
+      still = opened
+      stub_assigned(*held(1, 3), *held(2, title: "Renamed"))
+
+      expect(opened).to eq(still + 1)
+    end
+
+    it "makes no more queries over three than over one" do
+      hold(1)
+      one = counting(/./) { sync }.size
+      hold(1, 2, 3)
+
+      expect(counting(/./) { sync }.size).to eq(one)
+    end
+  end
+
   describe "a search result that is not an issue" do
     it "is skipped while the rest import" do
       stub_assigned({}, issue)
