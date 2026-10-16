@@ -12,8 +12,7 @@ module Admin
           prop :side, Blog::Types::String.optional
 
           def view_template
-            Card(title: @title) do |card|
-              card.side { span(class: "chart-peak") { @side } } if @side
+            Card(title: @title, note: @side) do
               Meters(color: @color, empty: @empty, rows: @rows)
             end
           end

@@ -29,10 +29,7 @@ module Admin
           private
 
           def jobs_card
-            Card(title: t(".jobs")) do |card|
-              card.side { span(class: "meta") { t(".job_count", count: @jobs.size) } }
-              next Empty { t(".no_jobs") } if @jobs.empty?
-
+            Card(title: t(".jobs"), note: t(".job_count", count: @jobs.size), empty: (t(".no_jobs") if @jobs.empty?)) do
               TimingTable(heading: t(".job"), rows: @jobs) { |row| span(class: "perf-path") { row[:job] } }
             end
           end
@@ -44,10 +41,9 @@ module Admin
           end
 
           def routes_card
-            Card(title: t(".routes")) do |card|
-              card.side { span(class: "meta") { t(".route_count", count: @routes.size) } }
-              next Empty { t(".no_routes") } if @routes.empty?
+            note = t(".route_count", count: @routes.size)
 
+            Card(title: t(".routes"), note:, empty: (t(".no_routes") if @routes.empty?)) do
               TimingTable(heading: t(".route"), rows: @routes, browser: true) { |row| route_link(row) }
             end
           end

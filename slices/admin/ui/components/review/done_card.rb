@@ -18,17 +18,17 @@ module Admin
           prop :focused, Blog::Types::Bool, default: false
 
           def view_template
-            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(tasks.size)), id: "review-done") do |card|
+            title = dotted(t(".title"), Blog::Helpers::Figures.count(tasks.size))
+
+            Card(title:, empty:, id: "review-done") do |card|
               card.side { SegmentedLinks(label: t(".group"), items: GROUPS.map { |name, text| switch(name, text) }) }
-              if tasks.empty?
-                Empty { t(@focused ? ".empty_day" : ".empty") }
-              else
-                listed
-              end
+              listed
             end
           end
 
           private
+
+          def empty = (t(@focused ? ".empty_day" : ".empty") if tasks.empty?)
 
           def foot
             div(class: "review-foot") do

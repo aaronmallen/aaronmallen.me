@@ -8,8 +8,9 @@ module Admin
           prop :authors, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            Card(title: t(".title"), id: "trusted-authors") do |card|
-              card.side { span(class: "settings-count") { t(".count", count: @authors.size) } }
+            note = t(".count", count: @authors.size)
+
+            Card(title: t(".title"), note:, note_class: "settings-count", id: "trusted-authors") do
               Hint { t(".hint") }
               @authors.empty? ? Empty { t(".empty") } : @authors.each { row(it) }
             end

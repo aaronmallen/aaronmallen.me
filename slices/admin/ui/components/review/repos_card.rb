@@ -10,9 +10,9 @@ module Admin
           prop :commits, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Hash)
 
           def view_template
-            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(total)), id: "review-commits") do
-              next Empty { t(".empty") } if @commits.empty?
+            title = dotted(t(".title"), Blog::Helpers::Figures.count(total))
 
+            Card(title:, empty: (t(".empty") if @commits.empty?), id: "review-commits") do
               Capped(items: repos) { |repo, totals| row(repo, totals) }
             end
           end

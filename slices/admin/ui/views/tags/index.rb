@@ -40,12 +40,13 @@ module Admin
           private
 
           def card
-            Card(title: t(TITLES.fetch(@scope)), data: { key_list: true }) do |card|
+            blurb = t(COUNTS.fetch(@scope), count: @count)
+
+            Card(title: t(TITLES.fetch(@scope)), blurb:, data: { key_list: true }) do |card|
               card.side do
                 switch
                 filter_form
               end
-              p(class: "card-blurb") { t(COUNTS.fetch(@scope), count: @count) }
               Capture(name: @name, errors: @errors, tag_scope: @scope)
               rows
             end

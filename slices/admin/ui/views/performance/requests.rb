@@ -76,10 +76,7 @@ module Admin
           def slowest = @slowest ||= @rows.map { it[:duration] }.max
 
           def slowest_card
-            Card(title: t(".slowest")) do |card|
-              card.side { span(class: "meta") { t(".shown", shown: count(@rows.size), total: count(total)) } }
-              requests
-            end
+            Card(title: t(".slowest"), note: t(".shown", shown: count(@rows.size), total: count(total))) { requests }
           end
 
           def status(code) = span(class: ["perf-status", ("bad" if code >= SERVER_ERROR)]) { code.to_s }

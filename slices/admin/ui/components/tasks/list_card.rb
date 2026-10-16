@@ -20,18 +20,19 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            Card(title:, class: "task-list", data: { key_list: true }) do |card|
+            Card(title:, blurb:, class: "task-list", data: { key_list: true }) do |card|
               card.side do
                 ImportActs() if external?
                 span(class: "card-note") { note }
               end
-              p(class: "card-blurb") { t(BLURBS.fetch(@tab)) } if BLURBS.key?(@tab)
               rows
               QuickAdd(filter: @tab, placeholder: t(".add_to", list: @tab)) unless external?
             end
           end
 
           private
+
+          def blurb = (t(BLURBS.fetch(@tab)) if BLURBS.key?(@tab))
 
           def carried = @counts.fetch(CARRIED)
 

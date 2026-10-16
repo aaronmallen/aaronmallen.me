@@ -12,12 +12,16 @@ module Admin
           def view_template
             content_for(:live_tables, LIVE_TABLES)
             SettingsHead(title: t(".heading"))
-            Card(title: t(".connected"), data: { key_list: true }) do |card|
-              card.side { span(class: "settings-count") { t(".count", count: @clients.size) } }
-              next Empty { t(".empty") } if @clients.empty?
-
+            Card(title: t(".connected"), **list_props, data: { key_list: true }) do
               @clients.each { ClientRow(client: it) }
             end
+          end
+
+          private
+
+          def list_props
+            { note: t(".count", count: @clients.size), note_class: "settings-count",
+              empty: (t(".empty") if @clients.empty?) }
           end
         end
       end

@@ -9,9 +9,7 @@ module Admin
           prop :focused, Blog::Types::Bool, default: false
 
           def view_template
-            Card(title: t(".title"), id: "review-worked") do
-              next Empty { t(".empty") } if days.empty?
-
+            Card(title: t(".title"), empty: (t(".empty") if days.empty?), id: "review-worked") do
               totals
               next if @focused
 

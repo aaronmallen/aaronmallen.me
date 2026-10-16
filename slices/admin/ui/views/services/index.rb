@@ -56,11 +56,10 @@ module Admin
           end
 
           def list
-            Card(title: t(".connected"), class: "svc-list", data: { key_list: true }) do |card|
-              card.side do
-                span(class: "settings-count") { summary }
-                connect_button unless @pickable.empty?
-              end
+            note = { note: summary, note_class: "settings-count" }
+
+            Card(title: t(".connected"), **note, class: "svc-list", data: { key_list: true }) do |card|
+              card.side { connect_button } unless @pickable.empty?
               Hint { t(".hint") }
               @rows.group_by { it.definition.group }.each { |name, rows| group(name, rows) }
             end

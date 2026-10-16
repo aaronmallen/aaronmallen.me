@@ -69,7 +69,7 @@ module Admin
           end
 
           def list
-            Card(class: "link-list") { @links.rows.empty? ? Empty { t(empty) } : @links.rows.each { row(it) } }
+            Card(empty: (t(empty) if @links.rows.empty?), class: "link-list") { @links.rows.each { row(it) } }
             @links.rows.each do |link|
               ShareDrawer(form: LinkForm, record: link, kind: :link) { LinkForm(link:, check: @checks[link.id]) }
             end

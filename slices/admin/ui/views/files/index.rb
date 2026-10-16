@@ -56,7 +56,7 @@ module Admin
             @shares.rows.each { |share| ShareDrawer(form: ShareForm, record: share, kind: :file) { ShareForm(share:) } }
           end
 
-          def listing = @shares.rows.empty? && @groups.empty? ? Card { Empty { t(empty) } } : grid
+          def listing = @shares.rows.empty? && @groups.empty? ? Card(empty: t(empty)) : grid
 
           def query = { kind: filter, search: }.compact
 

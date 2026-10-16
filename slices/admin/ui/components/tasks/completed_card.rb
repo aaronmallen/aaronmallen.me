@@ -13,14 +13,7 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            Card(data: { key_list: true }) do |card|
-              card.side { span(class: "card-note") { t(".shown", count: @tasks.rows.size) } }
-              if days.empty?
-                Empty { t(filtering? ? ".no_match" : ".empty") }
-              else
-                archived
-              end
-            end
+            Card(note: t(".shown", count: @tasks.rows.size), empty:, data: { key_list: true }) { archived }
           end
 
           private
@@ -31,6 +24,8 @@ module Admin
           end
 
           def days = @days ||= @tasks.rows.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
+
+          def empty = (t(filtering? ? ".no_match" : ".empty") if days.empty?)
 
           def filtering? = !@query.empty? || @range.any?
 

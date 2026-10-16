@@ -18,8 +18,7 @@ module Admin
           prop :span, Blog::Types::HealthSpan
 
           def view_template
-            Card(title: t(".title")) do |card|
-              card.side { span(class: "meta") { t(".span", count: @span) } }
+            Card(title: t(".title"), note: t(".span", count: @span)) do
               shown.empty? ? Empty { t(".empty") } : shown.each { pattern(*it) }
               Hint { t(".hint") }
             end

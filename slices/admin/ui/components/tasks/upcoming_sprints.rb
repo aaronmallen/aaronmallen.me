@@ -75,18 +75,15 @@ module Admin
             date = sprint.sprint_date
             data = { key_list: true, menu: path(:admin_sprint_menu, id: sprint.id) }
 
-            Card(title: relative(date), data:) do |card|
-              card.side { sprint_side(sprint, open) }
+            Card(title: relative(date), note: sprint_note(date, open), data:) do |card|
+              card.side { drop_form(sprint) }
               rows(sprint, open)
               QuickAdd(filter: NEXT, sprint_on: date, placeholder: t(".add_to", date: l(date, format: :short)))
               pull(sprint)
             end
           end
 
-          def sprint_side(sprint, open)
-            span(class: "card-note") { dotted(l(sprint.sprint_date, format: :weekday), t(".count", count: open.size)) }
-            drop_form(sprint)
-          end
+          def sprint_note(date, open) = dotted(l(date, format: :weekday), t(".count", count: open.size))
 
           def tomorrow = (@today + 1).iso8601
 

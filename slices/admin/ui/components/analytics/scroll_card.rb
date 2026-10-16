@@ -9,9 +9,7 @@ module Admin
           prop :views, Blog::Types::Integer
 
           def view_template
-            Card(title: t(".title")) do
-              next Empty { t(".empty") } if @views.zero?
-
+            Card(title: t(".title"), empty: (t(".empty") if @views.zero?)) do
               Meters(color: :blue, empty: t(".empty"), rows:, total: @views)
             end
           end

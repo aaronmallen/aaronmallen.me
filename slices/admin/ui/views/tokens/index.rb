@@ -31,8 +31,9 @@ module Admin
           private
 
           def live
-            Card(title: t(".live"), data: { key_list: true }) do |card|
-              card.side { span(class: "settings-count") { t(".count", count: @tokens.size) } }
+            note = t(".count", count: @tokens.size)
+
+            Card(title: t(".live"), note:, note_class: "settings-count", data: { key_list: true }) do
               Minted(value: @minted) if @minted
               @tokens.empty? ? Empty { t(".empty") } : @tokens.each { Row(token: it) }
             end

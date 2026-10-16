@@ -31,10 +31,7 @@ module Admin
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
           def group(kind, results)
-            Card(title: t(KINDS_KEYS.fetch(kind))) do |card|
-              card.side { span(class: "meta") { results.size.to_s } }
-              results.each { row(it) }
-            end
+            Card(title: t(KINDS_KEYS.fetch(kind)), note: results.size.to_s) { results.each { row(it) } }
           end
 
           def groups

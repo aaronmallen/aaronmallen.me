@@ -57,9 +57,7 @@ module Admin
           def sighted = @sighted ||= @sightings.group_by { [it.api_token_id, it.oauth_client_id] }
 
           def sign_ins
-            Card(title: t(".sign_ins")) do
-              next Empty { t(".no_sign_ins") } if @sign_ins.empty?
-
+            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if @sign_ins.empty?)) do
               @sign_ins.each { SignInRow(sign_in: it) }
             end
           end

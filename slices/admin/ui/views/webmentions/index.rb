@@ -53,7 +53,7 @@ module Admin
 
           def rows
             mentions = @inbox[:mentions]
-            return Card { Empty { t(EMPTIES.fetch(@filter)) } } if mentions.rows.empty?
+            return Card(empty: t(EMPTIES.fetch(@filter))) if mentions.rows.empty?
 
             Bulk(filter: @filter, page: mentions.number)
             div(class: "cols", data: { key_list: true }) { mentions.rows.each { |mention| row(mention) } }

@@ -18,8 +18,7 @@ module Admin
         def view_template
           return if total.zero?
 
-          Card(title: t(".title"), class: "today-need", data: { attention: "", key_list: true }) do |card|
-            card.side { span(class: "meta") { total.to_s } }
+          Card(title: t(".title"), note: total.to_s, class: "today-need", data: { attention: "", key_list: true }) do
             SyncFailures(failures: @failures)
             DeadJobs(dead_jobs: @dead_jobs)
             AttentionLines(

@@ -21,7 +21,7 @@ module Admin
           prop :keep, Blog::Types::Hash
 
           def view_template
-            section(class: "card review-heat", id: "review-heat", aria: { label: t(".label") }) do
+            Card(class: "review-heat", id: "review-heat", aria: { label: t(".label") }) do
               div(class: "review-heat-map", style: "--days: #{@days.size}") do
                 span
                 @days.each_key { head(it) }

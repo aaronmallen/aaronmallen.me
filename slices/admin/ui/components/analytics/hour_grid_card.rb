@@ -21,9 +21,7 @@ module Admin
           prop :hours, Blog::Types::Array.of(Blog::Types::Array.of(Blog::Types::Integer))
 
           def view_template
-            Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".window", count: @days) } }
-
+            Card(title: t(".title"), note: t(".window", count: @days)) do
               grid
               div(class: "heat-axis", aria: { hidden: "true" }) { AXIS.each { |number| span { hour(number) } } }
             end

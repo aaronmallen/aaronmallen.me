@@ -11,9 +11,7 @@ module Admin
           prop :series, Blog::Types::Array.of(Blog::Types::Hash)
 
           def view_template
-            Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".peak", views: Blog::Helpers::Figures.count(peak)) } }
-
+            Card(title: t(".title"), note: t(".peak", views: Blog::Helpers::Figures.count(peak))) do
               div(class: "chart") do
                 div(class: "chart-bars") { @series.each { bar(it) } }
                 div(class: "chart-dates") { labels.each { |day| span { short(day) } } }

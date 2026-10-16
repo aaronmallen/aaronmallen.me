@@ -4938,7 +4938,9 @@
 
 
 @utility wm-card {
-  @apply flex flex-col;
+  & > .card-body {
+    @apply flex flex-col;
+  }
 }
 
 @utility wm-kind {
@@ -5010,7 +5012,9 @@
 }
 
 @utility project-card {
-  @apply flex flex-col gap-2.5;
+  & > .card-body {
+    @apply flex flex-col gap-2.5;
+  }
 }
 
 @utility project-card-head {
@@ -6818,10 +6822,6 @@
 
 @utility chart {
   @apply flex flex-col gap-2;
-}
-
-@utility chart-peak {
-  @apply meta;
 }
 
 @utility chart-bars {

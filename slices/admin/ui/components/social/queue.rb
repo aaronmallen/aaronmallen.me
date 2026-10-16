@@ -15,10 +15,10 @@ module Admin
           prop :suggestion_counts, Blog::Types::Hash
 
           def view_template
-            Card(title: t(".title"), data: { key_list: true }) do |card|
-              card.side { filter_form }
-              next Empty { t(EMPTIES.fetch(@filter)) } if @page.rows.empty?
+            empty = t(EMPTIES.fetch(@filter)) if @page.rows.empty?
 
+            Card(title: t(".title"), empty:, data: { key_list: true }) do |card|
+              card.side { filter_form }
               @page.rows.each { item(it) }
               Pager(page: @page, route: :admin_social, params: { filter: @filter })
             end

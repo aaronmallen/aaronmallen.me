@@ -19,8 +19,9 @@ module Admin
           prop :settings, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            Card(title: t(".title"), id: "webmention-settings") do |card|
-              card.side { span(class: "settings-count") { t(".endpoint", path: path(:webmention)) } }
+            note = t(".endpoint", path: path(:webmention))
+
+            Card(title: t(".title"), note:, note_class: "settings-count", id: "webmention-settings") do
               AutoForm(method: "post", action: path(:admin_update_webmention_settings)) do
                 div(class: "form-stack") { fields }
                 noscript { Button(type: "submit", small: true) { t(".save") } }

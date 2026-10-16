@@ -9,8 +9,7 @@ module Admin
           prop :form, Blog::Types::Hash
 
           def view_template
-            Card(title: t(".title")) do |card|
-              card.side { span(class: "card-note") { @decision.options.size.to_s } }
+            Card(title: t(".title"), note: @decision.options.size.to_s) do
               list
               add if @decision.open?
             end

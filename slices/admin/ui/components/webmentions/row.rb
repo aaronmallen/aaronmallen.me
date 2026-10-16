@@ -15,8 +15,9 @@ module Admin
           prop :bulk, Blog::Types::String
 
           def view_template
-            article(id: "webmention-#{@mention.id}", class: "card wm-card",
-                    data: { key_row: true, menu: path(:admin_webmention_menu, id: @mention.id) }) do
+            data = { key_row: true, menu: path(:admin_webmention_menu, id: @mention.id) }
+
+            Card(id: "webmention-#{@mention.id}", class: "wm-card", data:) do
               p(class: "inbox-meta") { meta }
               p(class: "wm-who") { author }
               WebmentionExcerpt(mention: @mention)

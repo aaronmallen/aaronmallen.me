@@ -8,10 +8,10 @@ module Admin
           prop :series, Blog::Types::Array.of(Blog::Types::Hash)
 
           def view_template
-            Card(title: t(".title"), class: "task-list") do |card|
-              card.side { span(class: "card-note") { t(".count", count: @series.size) } }
-              p(class: "card-blurb") { t(".blurb") }
-              @series.empty? ? Empty { t(".empty") } : @series.each { row(**it) }
+            note = t(".count", count: @series.size)
+
+            Card(title: t(".title"), note:, blurb: t(".blurb"), empty:, class: "task-list") do
+              @series.each { row(**it) }
             end
           end
 
@@ -25,6 +25,8 @@ module Admin
 
             t([".cadence", series.cadence].join("."), **values)
           end
+
+          def empty = (t(".empty") if @series.empty?)
 
           def next_on(date) = date ? t(".next", date: l(date, format: :long)) : t(".unscheduled")
 

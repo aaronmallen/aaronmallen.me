@@ -41,9 +41,9 @@ module Admin
           private
 
           def list
-            Card(title: t(".title"), data: { key_list: true }) do |card|
-              card.side { span(class: "settings-count") { t(".count", count: @rules.size) } }
-              p(class: "card-blurb") { t(".sub") }
+            note = t(".count", count: @rules.size)
+
+            Card(title: t(".title"), note:, note_class: "settings-count", blurb: t(".sub"), data: { key_list: true }) do
               rows
               Hint { t(".note") }
             end

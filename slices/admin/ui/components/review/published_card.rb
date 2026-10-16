@@ -13,9 +13,9 @@ module Admin
           prop :days, Blog::Types::Array.of(Blog::Types::Date)
 
           def view_template
-            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(count)), id: "review-published") do
-              next Empty { t(".empty") } if count.zero?
+            title = dotted(t(".title"), Blog::Helpers::Figures.count(count))
 
+            Card(title:, empty: (t(".empty") if count.zero?), id: "review-published") do
               Capped(items: groups) { |name, records, href| group(name, records, href) }
             end
           end

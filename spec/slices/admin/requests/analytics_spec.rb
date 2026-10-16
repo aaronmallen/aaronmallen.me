@@ -69,7 +69,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "names the peak in the card head" do
-        expect(page).to have_css(".chart-peak", exact_text: "peak 30")
+        expect(page).to have_css(".card-note", exact_text: "peak 30")
       end
 
       it "labels each bar with its day and figures" do
@@ -363,7 +363,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "names the window and the time zone in the card head" do
         expect(page.find(".card", text: "Readers by hour"))
-          .to have_css(".chart-peak", exact_text: "last 90 days · Chicago time")
+          .to have_css(".card-note", exact_text: "last 90 days · Chicago time")
       end
 
       it "counts a late Sunday event in Sunday's 23 row, whatever its UTC date" do
@@ -426,7 +426,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "names the last whole day in the card head, leaving out today" do
-        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 46")
+        expect(feed_card).to have_css(".card-note", exact_text: "latest 46")
       end
 
       it "draws a point for each day" do
@@ -453,7 +453,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "reads yesterday's count in the card head" do
-        expect(page.find(".card", text: "Feed subscribers")).to have_css(".chart-peak", exact_text: "latest 40")
+        expect(page.find(".card", text: "Feed subscribers")).to have_css(".card-note", exact_text: "latest 40")
       end
 
       it "lists no direct readers row when none fetched that day" do
@@ -473,7 +473,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts the mentions received over the range and those still waiting in the card head" do
-        expect(meter_card("Webmentions per post")).to have_css(".chart-peak", exact_text: "4 received · 3 pending")
+        expect(meter_card("Webmentions per post")).to have_css(".card-note", exact_text: "4 received · 3 pending")
       end
 
       it "lists the posts with mentions, most first" do
@@ -497,7 +497,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       create(:webmention, :reply, post: create(:post, :published))
       get "/admin/analytics"
 
-      expect(meter_card("Webmentions per post")).to have_css(".chart-peak", exact_text: "1 received · 1 pending")
+      expect(meter_card("Webmentions per post")).to have_css(".card-note", exact_text: "1 received · 1 pending")
     end
 
     describe "with an ignored webmention" do
@@ -509,7 +509,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts it as received" do
-        expect(meter_card("Webmentions per post")).to have_css(".chart-peak", text: "2 received")
+        expect(meter_card("Webmentions per post")).to have_css(".card-note", text: "2 received")
       end
 
       it "counts it against its post" do
@@ -589,7 +589,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts no feed subscribers" do
-        expect(page.find(".card", text: "Feed subscribers")).to have_css(".chart-peak", exact_text: "latest 0")
+        expect(page.find(".card", text: "Feed subscribers")).to have_css(".card-note", exact_text: "latest 0")
       end
 
       it "says there is nothing in the cards", :aggregate_failures do

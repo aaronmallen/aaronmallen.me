@@ -8,9 +8,7 @@ module Admin
           prop :paths, Blog::Types::Array.of(Blog::Types::Hash)
 
           def view_template
-            Card(title: t(".title")) do
-              next Empty { t(".empty") } if @paths.empty?
-
+            Card(title: t(".title"), empty: (t(".empty") if @paths.empty?)) do
               div(class: "tbl-scroll") do
                 table(class: "tbl") do
                   thead { headings }

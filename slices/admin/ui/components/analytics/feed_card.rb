@@ -14,9 +14,7 @@ module Admin
           prop :readers, Blog::Types::Integer
 
           def view_template
-            Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".latest", count: Blog::Helpers::Figures.count(@latest)) } }
-
+            Card(title: t(".title"), note: t(".latest", count: Blog::Helpers::Figures.count(@latest))) do
               chart
               readings
               div(class: "feed-aggregators") { Meters(color: :blue, empty: t(".no_aggregators"), rows: aggregators) }
