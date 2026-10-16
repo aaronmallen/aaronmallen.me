@@ -46,6 +46,8 @@ module Projects
         tags.where(id: tagged.dataset).pluck(:name)
       end
 
+      def sitemap_boards = projects.in_public.with_board.in_order.to_a
+
       def tracked = with_tags.tracked.in_order.to_a
 
       private

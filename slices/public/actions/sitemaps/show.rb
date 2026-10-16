@@ -23,10 +23,14 @@ module Public
           posts = post_queries.sitemap_posts
           edited_at = post_queries.edited_at(posts.map(&:id))
 
-          response.body = render(pages + post_entries(posts, edited_at) + tag_pages)
+          response.body = render(pages + post_entries(posts, edited_at) + board_entries + tag_pages)
         end
 
         private
+
+        def board_entries
+          project_queries.sitemap_boards.filter_map { [routes.url(:project, slug: it.slug), it.updated_at] if it.slug }
+        end
 
         def pages = PAGES.map { [routes.url(it)] }
 

@@ -60,6 +60,21 @@ RSpec.describe "Sitemap", type: :request do
     expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
   end
 
+  it "lists each public project's published board, dated by its last change" do
+    create(:project, name: "Board", board_published: true, updated_at: Time.utc(2026, 9, 4))
+    get "/sitemap.xml"
+
+    expect(lastmod(site("/projects/board"))).to eq("2026-09-04T00:00:00Z")
+  end
+
+  it "leaves out private projects and unpublished boards" do
+    create(:project, :private, name: "Hidden", board_published: true)
+    create(:project, name: "Unpublished")
+    get "/sitemap.xml"
+
+    expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
+  end
+
   it "leaves out the admin, API and MCP paths" do
     get "/sitemap.xml"
 
