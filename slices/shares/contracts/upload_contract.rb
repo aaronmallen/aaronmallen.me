@@ -9,7 +9,7 @@ module Shares
         required(:content_type).filled(Blog::Types::Normalized::MediaType)
       end
 
-      rule(:filename).validate(:without_controls)
+      rule(:filename).validate(:without_controls, :bare_filename)
     end
   end
 end

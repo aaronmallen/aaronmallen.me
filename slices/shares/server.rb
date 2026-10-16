@@ -64,6 +64,8 @@ module Shares
 
     def disposition(share) = named(INLINE_TYPE.match?(share.content_type) ? "inline" : "attachment", share.filename)
 
+    def entry_name(filename) = filename.tr("/", "_").sub(/\A\.\.?\z/) { "_" * it.size }
+
     def group_file(request, code, id)
       file = share_group_queries.by_code(code)&.share_group_files&.find { it.id == id }
       return [404, {}, []] unless file
@@ -140,7 +142,9 @@ module Shares
 
     def zip_body(files)
       ZipKit::OutputEnumerator.new(auto_rename_duplicate_filenames: true) do |zip|
-        files.each { |file| zip.write_file(file.filename) { |sink| client.stream(file.key) { sink << it } } }
+        files.each do |file|
+          zip.write_file(entry_name(file.filename)) { |sink| client.stream(file.key) { sink << it } }
+        end
       end
     end
 

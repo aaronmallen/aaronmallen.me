@@ -71,6 +71,15 @@ RSpec.describe "API shares", type: :request do
       expect(answered.fetch("content_type")).to eq("image/png")
     end
 
+    %w[../notes.txt /etc/notes.txt . ..].each do |name|
+      it "refuses the filename #{name} and stores nothing", :aggregate_failures do
+        answered = call_api(:post, "/shares", file("data", name))
+
+        expect([status, answered.fetch("errors")]).to eq([422, { "filename" => ["is not valid"] }])
+        expect(shares).to be_empty
+      end
+    end
+
     it "refuses data that is not base64 and stores nothing", :aggregate_failures do
       answered = call_api(:post, "/shares", { data: "not*base64!", filename: "a.txt" })
 
@@ -281,6 +290,12 @@ RSpec.describe "API shares", type: :request do
     it "renames the file and keeps its link" do
       expect(call_api(:patch, "/share_groups/#{group.id}/files/#{file.id}", { filename: "b.txt" }).fetch("files"))
         .to contain_exactly(include("filename" => "b.txt", "url" => "http://shares.localhost/#{group.code}/#{file.id}"))
+    end
+
+    it "refuses a name with a folder part and keeps the old one", :aggregate_failures do
+      call_api(:patch, "/share_groups/#{group.id}/files/#{file.id}", { filename: "../../b.txt" })
+
+      expect([status, group_files.first[:filename]]).to eq([422, "a.txt"])
     end
 
     it "answers 404 for a file in another group", :aggregate_failures do

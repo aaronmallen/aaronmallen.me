@@ -561,6 +561,15 @@ RSpec.describe "The share host", type: :request do
         expect(unzip(last_response.body).keys).to eq(["beach.jpg", "beach (1).jpg", "notes.txt", "paper.pdf"])
       end
 
+      it "writes a stored name with a folder part as a bare name" do
+        files = Shares::Slice["relations.share_group_files"]
+        { "beach.jpg" => "../../beach.jpg", "dunes.png" => "/tmp/dunes.png", "notes.txt" => ".." }
+          .each { |from, to| files.by_pk(file(from).id).update(filename: to) }
+        fetch("/#{group.code}.zip")
+
+        expect(unzip(last_response.body).keys).to eq([".._.._beach.jpg", "_tmp_dunes.png", "__", "paper.pdf"])
+      end
+
       it "writes nothing to the bucket" do
         group
         WebMock::RequestRegistry.instance.reset!

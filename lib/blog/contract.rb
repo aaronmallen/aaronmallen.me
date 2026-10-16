@@ -13,12 +13,17 @@ module Blog
     SKIPPED = "skipped"
 
     CONTROLS = /[[:cntrl:]&&[^\t\n\r]]/
+    PATH_NAME = %r{/|\A\.\.?\z}
     VISIBLE = /[^[:space:]]/
 
     config.messages.load_paths << Hanami.app.root.join("config", "errors.yml")
 
     register_macro(:without_controls) do
       key.failure(CONTROL) if Array(value).any? { it.to_s.match?(CONTROLS) }
+    end
+
+    register_macro(:bare_filename) do
+      key.failure(FORMAT) if key? && value.to_s.match?(PATH_NAME)
     end
 
     register_macro(:visible) do

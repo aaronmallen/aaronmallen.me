@@ -886,6 +886,7 @@ en:
           filename:
             blank: "Give it a name."
             control: "Take out the control characters."
+            format: "Take out the slashes, and use a name other than . or .."
           name:
             control: "Take out the control characters."
         group_file:

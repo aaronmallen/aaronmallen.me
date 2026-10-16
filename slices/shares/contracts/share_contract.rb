@@ -17,6 +17,7 @@ module Shares
       end
 
       %i[alt_text filename name].each { rule(it).validate(:without_controls) }
+      rule(:filename).validate(:bare_filename)
     end
   end
 end
