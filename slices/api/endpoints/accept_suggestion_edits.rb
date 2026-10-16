@@ -26,6 +26,7 @@ module API
 
       include Deps[
         accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
+        post_queries: "posts.repos.post_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
@@ -43,6 +44,11 @@ module API
       private
 
       def ids(edits) = edits.map(&:id)
+
+      def public_in(fields)
+        post_id = suggestion_queries.by_id(fields[:suggestion_id])&.post_id
+        "this blog post" if post_id && post_queries.shown?(post_id)
+      end
 
       def refused(id, failure)
         case failure

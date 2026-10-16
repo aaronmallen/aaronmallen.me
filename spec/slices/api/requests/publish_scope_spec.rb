@@ -12,6 +12,12 @@ RSpec.describe "Changes that show in public", type: :request do
     call_api(verb, path, body, token: api_token(scopes)).then { last_response }
   end
 
+  def suggest(post) = Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, [typo])
+
+  def tag_on(post) = Posts::Slice["repos.post_queries"].by_id(post.id).tags.first
+
+  def typo = { original: "teh", replacement: "the", reason: "typo" }
+
   matcher :be_refused do
     match do |response|
       response.status == 403 &&
@@ -100,6 +106,61 @@ RSpec.describe "Changes that show in public", type: :request do
       body = { other_kind: "project", other_id: board.id }
 
       expect(response_to(:post, "/links/task/#{create(:task).id}", body)).to be_refused
+    end
+
+    it "cannot take a task off a published board", :aggregate_failures do
+      task = on_board
+
+      expect(response_to(:delete, "/links/task/#{task.id}/project/#{board.id}")).to be_refused
+      expect(Tasks::Slice["repos.task_queries"].public_board_slugs([task.id])).to eq(task.id => [board.slug])
+    end
+
+    it "cannot move a task off a published board into a private project" do
+      body = { other_kind: "project", other_id: create(:project, :private).id }
+
+      expect(response_to(:post, "/links/task/#{on_board.id}", body)).to be_refused
+    end
+
+    it "still links a task on no published board to a private project" do
+      body = { other_kind: "project", other_id: create(:project, :private).id }
+
+      expect(response_to(:post, "/links/task/#{create(:task).id}", body).status).to eq(201)
+    end
+
+    it "cannot add a task rule that files into a published board" do
+      expect(response_to(:post, "/task_rules", { pattern: "aaronmallen/*", projects: [board.id] })).to be_refused
+    end
+
+    it "still adds a task rule that files into a private project" do
+      body = { pattern: "aaronmallen/*", projects: [create(:project, :private).id] }
+
+      expect(response_to(:post, "/task_rules", body).status).to eq(201)
+    end
+
+    it "cannot accept edits to a scheduled post", :aggregate_failures do
+      post = create(:post, :scheduled, body: "teh cat sat", published_at: Time.now + 86_400)
+
+      expect(response_to(:post, "/suggestions/#{suggest(post).id}/accept")).to be_refused
+      expect(Posts::Slice["repos.post_queries"].by_id(post.id).body).to eq("teh cat sat")
+    end
+
+    it "still accepts edits to a draft" do
+      post = create(:post, :draft, body: "teh cat sat")
+
+      expect(response_to(:post, "/suggestions/#{suggest(post).id}/accept").status).to eq(200)
+    end
+
+    it "cannot rename a tag a published post carries", :aggregate_failures do
+      tag = tag_on(create(:post, :published, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" })).to be_refused
+      expect(Tags::Slice["repos.tag_queries"].find_in("public", tag.id).name).to eq("ruby")
+    end
+
+    it "still renames a tag only drafts carry" do
+      tag = tag_on(create(:post, :draft, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }).status).to eq(200)
     end
 
     it "still changes a task on no published board" do
@@ -211,6 +272,31 @@ RSpec.describe "Changes that show in public", type: :request do
       expect(response_to(:post, "/tasks/issues/sync", {}, scopes: %w[write publish]).status).to eq(200)
     end
 
+    it "takes a task off a published board" do
+      expect(response_to(:delete, "/links/task/#{on_board.id}/project/#{board.id}", {}, scopes: %w[write publish])
+        .status).to eq(200)
+    end
+
+    it "adds a task rule that files into a published board" do
+      body = { pattern: "aaronmallen/*", projects: [board.id] }
+
+      expect(response_to(:post, "/task_rules", body, scopes: %w[write publish]).status).to eq(201)
+    end
+
+    it "accepts edits to a scheduled post" do
+      post = create(:post, :scheduled, body: "teh cat sat", published_at: Time.now + 86_400)
+
+      expect(response_to(:post, "/suggestions/#{suggest(post).id}/accept", {}, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
+    it "renames a tag a published post carries" do
+      tag = tag_on(create(:post, :published, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
     it "changes a task on a published board" do
       expect(response_to(:patch, "/tasks/#{on_board.id}", { title: "changed" }, scopes: %w[write publish]).status)
         .to eq(200)
@@ -249,6 +335,30 @@ RSpec.describe "Changes that show in public", type: :request do
     it "is refused a comment on a task on a published board, naming publish" do
       expect(mcp_text("add_task_comment", id: on_board.id, body: "hello"))
         .to eq("a task on a published board shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused taking a task off a published board, naming publish" do
+      expect(mcp_text("unlink_records", kind: "task", id: on_board.id, other_kind: "project", other_id: board.id))
+        .to eq("a task on a published board shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused a task rule that files into a published board, naming publish" do
+      expect(mcp_text("save_task_rule", pattern: "aaronmallen/*", projects: [board.id]))
+        .to eq("a published board shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused accepting edits to a scheduled post, naming publish" do
+      post = create(:post, :scheduled, body: "teh cat sat", published_at: Time.now + 86_400)
+
+      expect(mcp_text("accept_suggestion_edits", suggestion_id: suggest(post).id))
+        .to eq("this blog post shows in public, so this change needs the publish scope")
+    end
+
+    it "is refused renaming a tag a published post carries, naming publish" do
+      tag = tag_on(create(:post, :published, tags: %w[ruby]))
+
+      expect(mcp_text("save_tag", id: tag.id, scope: "public", name: "rails"))
+        .to eq("a blog post with this tag shows in public, so this change needs the publish scope")
     end
   end
 end

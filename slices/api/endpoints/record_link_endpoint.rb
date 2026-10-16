@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class RecordLinkEndpoint < Endpoint
+      PLACED = %w[project task].freeze
       SCOPED = true
       PAIR = {
         additionalProperties: false,
@@ -20,7 +21,10 @@ module API
         { kind: RecordLinks::KIND, id: Helpers::Schema::INTEGER, links: Serializers::Link::GROUPS },
       ).freeze
 
-      include Deps[record_link_queries: "links.repos.record_link_queries"]
+      include Deps[
+        project_queries: "projects.repos.project_queries",
+        record_link_queries: "links.repos.record_link_queries",
+      ]
 
       private
 
@@ -34,6 +38,14 @@ module API
         return super if mail?(scopes) || !fields.values_at(:kind, :other_kind).include?(Serializers::Link::MAIL_THREAD)
 
         Failure(Structs::Refusal.unmailed)
+      end
+
+      def public_in(fields)
+        sides = { fields[:kind] => fields[:id], fields[:other_kind] => fields[:other_id] }
+        return unless PLACED.all? { sides.key?(it) }
+
+        on_board = task_queries.public_board_slugs([sides["task"]]).any?
+        PUBLIC_TASK if on_board || project_queries.public_boards([sides["project"]]).any?
       end
     end
   end

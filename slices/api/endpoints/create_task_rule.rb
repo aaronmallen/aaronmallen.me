@@ -16,7 +16,7 @@ module API
 
       REPLY = Serializers::TaskRule.reference
 
-      include Deps[save_task_rule: "tasks.operations.save_task_rule"]
+      include Deps[project_queries: "projects.repos.project_queries", save_task_rule: "tasks.operations.save_task_rule"]
 
       def handle(pattern:, provider: nil, tags: [], projects: [])
         case save_task_rule.call({ pattern:, provider:, tags: Helpers::Wording.tag_list(tags), projects: })
@@ -24,6 +24,12 @@ module API
           in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, TaskRules::COMPLAINTS))
           else failed(TaskRules::UNSAVED)
         end
+      end
+
+      private
+
+      def public_in(fields)
+        "a published board" if project_queries.public_boards(Array(fields[:projects]).first(1)).any?
       end
     end
   end
