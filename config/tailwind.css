@@ -550,10 +550,6 @@
   @apply ml-auto flex items-center gap-2.5;
 }
 
-@utility settings-menu {
-  @apply relative;
-}
-
 @utility settings-menu-toggle {
   @apply flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-full px-2.5 text-nav text-ink-muted;
   @apply hover:text-ink pub-focus;
@@ -577,11 +573,15 @@
 }
 
 @utility settings-menu-panel {
-  @apply absolute top-[calc(100%+10px)] right-0 z-50 hidden w-menu flex-col p-1.5;
+  @apply fixed inset-auto top-16 right-admin-gutter m-0 w-menu flex-col p-1.5 text-ink;
   @apply menu-surface;
 
-  :where(.settings-menu:has(.settings-menu-toggle[aria-expanded="true"])) & {
-    display: flex;
+  &:popover-open {
+    @apply flex;
+  }
+
+  @media (width < 43.75rem) {
+    @apply top-[4.25rem];
   }
 }
 

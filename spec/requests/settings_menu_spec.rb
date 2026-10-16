@@ -55,6 +55,14 @@ RSpec.describe "Settings menu", type: :request do
       get "/admin"
     end
 
+    it "opens the panel as a native popover from the gear" do
+      get "/about"
+
+      expect(page).to have_css(
+        "button.settings-menu-toggle[popovertarget='settings-menu'] + #settings-menu[popover]", visible: :all,
+      )
+    end
+
     it "shows Admin and Sign out below the theme options" do
       get "/about"
 

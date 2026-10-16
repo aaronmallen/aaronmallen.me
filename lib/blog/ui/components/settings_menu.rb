@@ -10,10 +10,8 @@ module Blog
         prop :session, Blog::Types.Interface(:csrf_token, :signed_in?)
 
         def view_template
-          div(class: "settings-menu") do
-            toggle
-            panel
-          end
+          toggle
+          panel
         end
 
         private
@@ -31,7 +29,7 @@ module Blog
         end
 
         def panel
-          div(id: PANEL_ID, class: "settings-menu-panel") do
+          div(id: PANEL_ID, class: "settings-menu-panel", popover: "auto") do
             div(role: "group", aria: { labelledby: APPEARANCE_ID }) do
               span(id: APPEARANCE_ID, class: "settings-menu-heading") { t(".appearance") }
               Layouts::Application::THEMES.each { |theme, attributes| theme_option(theme, **attributes) }
@@ -66,8 +64,8 @@ module Blog
           button(
             type: "button",
             class: "settings-menu-toggle",
-            aria: { controls: PANEL_ID, expanded: "false", label: t(".toggle_label") },
-            data: { disclosure: true },
+            popovertarget: PANEL_ID,
+            aria: { label: t(".toggle_label") },
           ) do
             Icon("fa-solid fa-gear")
           end

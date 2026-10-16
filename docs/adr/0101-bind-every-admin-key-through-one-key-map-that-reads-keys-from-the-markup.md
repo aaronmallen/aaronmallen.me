@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, assets]
 issue: "#297"
-amended: ["#745", "#915", "#1106", "#1362"]
+amended: ["#745", "#915", "#1106", "#1362", "#1525"]
 tags: [admin, keyboard, shortcuts, palette, help, accessibility, javascript]
 ---
 
@@ -31,9 +31,9 @@ and every label through the locale files ([ADR 0055][0055]).
 decides when keys stay quiet, finds the binding and runs it. `palette.js` and `task_order.js` drop their own
 listeners and bind through it.
 
-Since #915 one kind of listener sits beside it: one that only closes an open menu or disclosure on Escape, wherever
-focus sits. `social_account_picker.js` closes the account menu this way, and `app/assets/js/disclosure.js` closes
-each disclosure. A listener on the menu itself would miss Escape while focus is outside the menu.
+Since #915 one kind of listener sits beside it: one that only closes an open menu on Escape, wherever focus sits.
+`social_account_picker.js` closes the account menu this way. A listener on the menu itself would miss Escape while
+focus is outside the menu. A menu drawn as a native `popover` needs neither, since the browser closes it on Escape.
 
 **Keys live in the markup.** A view declares a key by putting `data-key` on the button, link or submit that
 already does the job, with `data-key-label` holding its label from the locale files. The key map runs a key by
