@@ -14,7 +14,7 @@ module Shares
         group = step found(group_queries.find(id))
         file = step found(group.share_group_files.find { it.id == file_id })
 
-        transaction { leave(file.id) }
+        transaction { ungroup(group, file) }
         share_queries.find(file.id)
       end
 
@@ -26,6 +26,11 @@ module Shares
         raise unless group_mutations.violated_constraint(e) == Code::KEY && attempts > 1
 
         leave(file_id, attempts - 1)
+      end
+
+      def ungroup(group, file)
+        leave(file.id)
+        group_mutations.delete(group.short_code_id) if group.share_group_files.one?
       end
     end
   end

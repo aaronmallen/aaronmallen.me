@@ -148,6 +148,21 @@ RSpec.describe "Admin file moves", type: :request do
       expect(page).to have_css("[data-toast]", text: "Moved out of the group under a new link")
     end
 
+    it "deletes the group and frees its code with its last file", :aggregate_failures do
+      server = Rack::MockRequest.new(Shares::Slice["server"])
+      ungroup
+
+      expect(groups).to be_empty
+      expect(server.get("/#{group.code}").status).to eq(404)
+    end
+
+    it "keeps the group while it holds files" do
+      Shares::Slice["operations.add_share_group_files"].call(group.id, [share_upload("d", "four.txt", "text/plain")])
+      ungroup
+
+      expect(groups.map { it[:id] }).to eq([group.id])
+    end
+
     it "answers 404 for a file outside the group" do
       post("/admin/files/groups/#{group.id}/files/#{first.id}/ungroup", {}, csrf)
 

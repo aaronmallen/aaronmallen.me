@@ -24,6 +24,7 @@ module Shares
       def remove(group, file)
         transaction do
           group_mutations.remove_file(file.id)
+          group_mutations.delete(group.short_code_id) if group.share_group_files.one?
           client.delete(file.key)
         end
         Success(group_queries.find(group.id))

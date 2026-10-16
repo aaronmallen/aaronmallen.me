@@ -224,6 +224,22 @@ RSpec.describe "Admin file groups", type: :request do
       expect(page).to have_css("[data-toast]", text: i18n.t("files_page.toasts.failed.delete"))
     end
 
+    it "keeps the group while it holds files" do
+      stub_request(:delete, share_store_url(text[:key]))
+      remove
+
+      expect(stored).not_to be_nil
+    end
+
+    it "deletes the group and frees its code with its last file", :aggregate_failures do
+      last = image
+      files.each { stub_request(:delete, share_store_url(it[:key])) }
+      [text[:id], last[:id]].each { remove(it) }
+
+      expect(stored).to be_nil
+      expect(Rack::MockRequest.new(Shares::Slice["server"]).get("/#{group.code}").status).to eq(404)
+    end
+
     it "answers 404 for a file in another group" do
       other = make_group(%w[b b.txt text/plain])
       remove(other.share_group_files.first.id)
