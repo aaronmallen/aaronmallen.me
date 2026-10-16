@@ -10,6 +10,7 @@ module Admin
           prop :rule, Blog::Types::Instance(ROM::Struct)
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tag_choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def self.toggle_id(id) = "rule-#{id}-edit"
 
@@ -53,7 +54,7 @@ module Admin
           def editor
             div(class: "rule-editor") do
               Form(action: path(:admin_update_task_rule, id: @rule.id), id: form_id) do
-                Fields(**values, choices: @choices, scope:)
+                Fields(**values, choices: @choices, tag_choices: @tag_choices, scope:)
               end
               foot
             end

@@ -187,7 +187,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "suggests the public tags and leaves the private ones out" do
         create(:tag, :private, name: "secret")
         get "/admin/posts/#{scheduled.id}/edit"
-        suggested = JSON.parse(page.find("[data-tag-field]", visible: :all)["data-tag-field"])
+        suggested = JSON.parse(page.find("[name='post[tags]'] + [data-tag-field]", visible: :all)["data-tag-field"])
 
         expect(suggested.map { it["name"] }).to eq(%w[hanami ruby])
       end

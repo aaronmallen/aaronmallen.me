@@ -93,4 +93,90 @@ RSpec.describe "Admin tag field", type: :feature do
 
     expect(results).to eq(["#rails", "#ruby", "New tag r"])
   end
+
+  describe "on the private forms" do
+    let(:tasks) { Tasks::Slice["repos.task_queries"] }
+
+    def open_drawer_editor(task)
+      visit "/admin/tasks?filter=next"
+      find(".task-title", text: task.title).click
+      find("dialog#task-panel[open]").click_link("Edit")
+      find("dialog#task-panel[open] [data-task-edit] [data-tag-field-input]")
+    end
+
+    before do
+      create(:tag, :private, name: "chores", color: "mk-green")
+      create(:message).tap { Mail::Slice["repos.message_tag_mutations"].add(it.id, "barn") }
+    end
+
+    describe "in the task modal" do
+      def modal = find("dialog#task-create[open]")
+
+      def modal_field = modal.find("[data-tag-field-input]")
+
+      before do
+        visit "/admin/tasks"
+        click_link "Create Task"
+      end
+
+      it "lists the private tags that match, each in its color", :aggregate_failures do
+        modal_field.send_keys("r")
+
+        expect(results).to eq(["#chores", "#rake", "New tag r"])
+        expect(page).to have_css(".tag-pick-result .tag.green", text: "#chores")
+      end
+
+      it "saves the pick" do
+        modal.fill_in "task[title]", with: "Sweep the porch"
+        modal_field.send_keys("cho", :down, :enter)
+        modal.click_button "Create task"
+        page.assert_selector(".task-title", text: "Sweep the porch")
+
+        expect(tasks.by_tag("chores").map(&:title)).to eq(["Sweep the porch"])
+      end
+    end
+
+    it "adds and saves a chip in the task drawer" do
+      task = create(:task, title: "Mop the floor", tags: %w[rake])
+      open_drawer_editor(task).send_keys("cho", :down, :enter)
+      find("dialog#task-panel[open]").click_button("Save")
+      find("dialog#task-panel[open] [data-task-read]")
+
+      expect(tasks.by_id(task.id).tags.map(&:name)).to eq(%w[chores rake])
+    end
+
+    it "binds the drawer's field once after a morph" do
+      open_drawer_editor(create(:task, title: "Mop the floor"))
+      execute_script('document.dispatchEvent(new Event("admin:morphed"));' * 2)
+      find("dialog#task-panel[open] [data-tag-field-input]").send_keys("r", :down)
+
+      expect(page).to have_css(".tag-pick-result[aria-selected='true']", exact_text: "#chores")
+    end
+
+    describe "in the journal dialog" do
+      def journal_field = find_by_id("journal-write-tags-search")
+
+      def journal_tags = Record::Slice["repos.journal_entry_queries"].today.flat_map { it.tags.map(&:name) }
+
+      before do
+        visit "/admin/posts"
+        page.driver.browser.keyboard.type("w")
+        fill_in "journal-write-body", with: "walked"
+      end
+
+      it "lists the private tags that match" do
+        journal_field.send_keys("r")
+
+        expect(results).to eq(["#chores", "#rake", "New tag r"])
+      end
+
+      it "saves the chips" do
+        journal_field.send_keys("cho", :down, :enter, "lake", :enter)
+        find("dialog#journal-write").click_button("Save")
+        page.assert_selector(".toast", text: "Journal entry saved")
+
+        expect(journal_tags).to eq(%w[chores lake])
+      end
+    end
+  end
 end

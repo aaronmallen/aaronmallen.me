@@ -1,3 +1,4 @@
+import { json } from "./fetching.js";
 import { countText, setupListbox } from "./listbox.js";
 
 const NAME = "{name}";
@@ -5,25 +6,28 @@ const OPTION = "[role='option']:not([aria-disabled])";
 const SEPARATOR = ", ";
 
 const ready = new WeakSet();
+const palettes = new WeakMap();
+const loads = new WeakMap();
 
-export function setupTagFields() {
-  for (const pick of document.querySelectorAll("[data-tag-field]")) setupTagField(pick);
+export function setupTagFields(root = document) {
+  for (const pick of root.querySelectorAll("[data-tag-field]")) setupTagField(pick);
 }
 
 const normalize = (name) => name.trim().toLowerCase();
 
 function setupTagField(pick) {
-  const field = pick.closest(".field");
-  const value = field.querySelector("[data-tag-field-value]");
+  const value = pick.previousElementSibling;
   const chips = pick.querySelector("[data-tag-field-chips]");
   const input = pick.querySelector("[data-tag-field-input]");
-  const colors = new Map(JSON.parse(pick.dataset.tagField).map(({ name, color }) => [name, color]));
+  const colors = colorsFor(pick);
   const names = () => [...new Set(value.value.split(",").map(normalize).filter(Boolean))];
   const write = (list) => (value.value = list.join(SEPARATOR));
 
+  const tagClass = (name) => ["tag", colors.get(name)].filter(Boolean).join(" ");
+
   const tag = (name) => {
     const element = document.createElement("span");
-    element.className = ["tag", colors.get(name)].filter(Boolean).join(" ");
+    element.className = tagClass(name);
     element.textContent = `#${name}`;
     return element;
   };
@@ -42,11 +46,15 @@ function setupTagField(pick) {
 
     const item = document.createElement("li");
     item.className = "tag-pick-chip";
+    item.dataset.tagFieldName = name;
     item.append(tag(name), remove);
     return item;
   };
 
   const showChips = () => chips.replaceChildren(...names().map(chip));
+  const recolor = () => {
+    for (const item of chips.children) item.querySelector(".tag").className = tagClass(item.dataset.tagFieldName);
+  };
 
   const add = (text) => {
     const name = normalize(text);
@@ -56,16 +64,49 @@ function setupTagField(pick) {
     showChips();
   };
 
+  const load = () =>
+    loadColors(pick, colors, () => {
+      recolor();
+      if (document.activeElement === input && input.value.trim()) input.dispatchEvent(new Event("input"));
+    });
+
   if (!ready.has(pick)) {
     ready.add(pick);
     setupSearch({ pick, input, colors, names, tag, add });
+    input.addEventListener("focus", load);
   }
+  if (names().length) load();
 
   value.hidden = true;
-  field.querySelector(":scope > label").htmlFor = input.id;
+  const label = pick.parentElement.querySelector(`label[for="${CSS.escape(value.id)}"]`);
+  if (label) label.htmlFor = input.id;
   pick.hidden = false;
   showChips();
 }
+
+function colorsFor(pick) {
+  const colors = palettes.get(pick) ?? new Map();
+  palettes.set(pick, colors);
+  for (const { name, color } of JSON.parse(pick.dataset.tagField || "[]")) colors.set(name, color);
+  return colors;
+}
+
+function loadColors(pick, colors, done) {
+  const url = pick.dataset.tagFieldSrc;
+  if (!url || loads.has(pick)) return;
+
+  loads.set(pick, false);
+  fetch(url, { headers: { Accept: "application/json" }, redirect: "manual" })
+    .then(json)
+    .then(({ tags }) => {
+      for (const { name, color } of tags) colors.set(name, color);
+      loads.set(pick, true);
+      done();
+    })
+    .catch(() => loads.delete(pick));
+}
+
+const waiting = (pick) => pick.dataset.tagFieldSrc && !loads.get(pick);
 
 function setupSearch({ pick, input, colors, names, tag, add }) {
   const list = pick.querySelector("[data-tag-field-results]");
@@ -104,6 +145,8 @@ function setupSearch({ pick, input, colors, names, tag, add }) {
   };
 
   const open = () => {
+    if (waiting(pick)) return;
+
     const query = normalize(input.value);
     const chosen = names();
     const found = [...colors.keys()]

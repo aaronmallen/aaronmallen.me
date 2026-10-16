@@ -11,7 +11,10 @@ module Tags
         task_queries: "tasks.repos.task_queries",
       ]
 
-      def all_in(scope) = tags.in_scope(scope).in_name_order.to_a
+      def all_in(scope, mail: true)
+        found = tags.in_scope(scope)
+        (mail ? found : found.outside_mail).in_name_order.to_a
+      end
 
       def count_matching(scope, text, mail: true) = matching(scope, text, mail).count
 

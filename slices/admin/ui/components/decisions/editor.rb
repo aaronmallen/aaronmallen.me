@@ -63,7 +63,9 @@ module Admin
 
           def tags_field
             Field(label: t(".tags"), name: :tags, errors: @errors, error: FieldError) do |control|
-              Input(name: "decision[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"), **control)
+              TagField(
+                control:, name: "decision[tags]", value: @values[:tags].to_s, placeholder: t(".tags_placeholder"),
+              )
             end
           end
 

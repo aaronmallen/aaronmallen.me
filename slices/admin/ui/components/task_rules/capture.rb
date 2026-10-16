@@ -10,13 +10,14 @@ module Admin
           prop :tags, Blog::Types::String
           prop :projects, Blog::Types::Array.of(Blog::Types::String)
           prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tag_choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :errors, Blog::Types::Hash
 
           def view_template
             Form(action: path(:admin_create_task_rule), class: "rule-capture") do
               Fields(
                 pattern: @pattern, provider: @provider, tags: @tags, projects: @projects, choices: @choices,
-                errors: @errors,
+                tag_choices: @tag_choices, errors: @errors,
               )
               div(class: "rule-capture-foot") do
                 Hint(inline: true) { t(".note") }

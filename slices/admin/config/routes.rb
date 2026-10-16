@@ -252,6 +252,7 @@ module Admin
     post "/social/:id/suggestions/reject", to: "social.reject_suggestions", as: :reject_social_suggestions, id: ID
     get "/tags", to: "tags.index", as: :tags
     post "/tags", to: "tags.create", as: :create_tag
+    get "/tags/private/choices", to: "tags.choices", as: :private_tag_choices
     get "/tags/:name", to: "tags.show", as: :tag, name: TAG
     get "/tags/:id/menu", to: "tags.menu", as: :tag_menu, id: ID
     post "/tags/:id", to: "tags.update", as: :update_tag, id: ID

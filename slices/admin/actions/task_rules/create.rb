@@ -9,6 +9,7 @@ module Admin
         include Deps[
           index_view: "ui.views.task_rules.index",
           save_task_rule: "tasks.operations.save_task_rule",
+          tag_queries: "tags.repos.tag_queries",
           task_rule_queries: "tasks.repos.task_rule_queries",
         ]
 
@@ -34,7 +35,8 @@ module Admin
 
           response.status = 422
           response.render(index_view, adding:, editing: nil, rules: task_rule_queries.all,
-                                      projects: task_rule_queries.project_choices)
+                                      projects: task_rule_queries.project_choices,
+                                      tags: tag_queries.all_in(Index::PRIVATE, mail: false))
         end
       end
     end

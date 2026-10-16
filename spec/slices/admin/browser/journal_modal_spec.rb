@@ -30,7 +30,7 @@ RSpec.describe "Admin journal modal", type: :feature do
   describe "saving" do
     before do
       modal.fill_in "journal-write-body", with: "walked to the lake"
-      modal.fill_in "journal-write-tags", with: "health"
+      modal.fill_in "journal-write-tags-search", with: "health"
       modal.click_button("Save")
     end
 
@@ -52,7 +52,7 @@ RSpec.describe "Admin journal modal", type: :feature do
   describe "a failed save" do
     before do
       modal.fill_in "journal-write-body", with: "walked"
-      modal.fill_in "journal-write-tags", with: "a/b"
+      modal.fill_in "journal-write-tags-search", with: "a/b"
       modal.click_button("Save")
     end
 

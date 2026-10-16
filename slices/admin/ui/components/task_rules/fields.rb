@@ -16,6 +16,7 @@ module Admin
           prop :tags, Blog::Types::String
           prop :projects, Blog::Types::Array.of(Blog::Types::String)
           prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tag_choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :errors, Blog::Types::Hash
           prop :scope, Blog::Types::String, default: FieldError::SCOPE
 
@@ -23,7 +24,7 @@ module Admin
             div(class: "rule-fields") do
               provider_field
               text_field(:pattern, @pattern)
-              text_field(:tags, @tags)
+              tags_field
               projects_field
             end
           end
@@ -45,6 +46,15 @@ module Admin
                 name: "rule[provider]",
                 options: PROVIDERS.transform_values { t(it) },
                 selected: @provider,
+              )
+            end
+          end
+
+          def tags_field
+            Field(label: t(LABELS.fetch(:tags)), **error_props(:tags)) do |control|
+              TagField(
+                control:, name: "rule[tags]", value: @tags, placeholder: t(PLACEHOLDERS.fetch(:tags)),
+                tags: @tag_choices,
               )
             end
           end

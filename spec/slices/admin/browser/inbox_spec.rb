@@ -16,7 +16,7 @@ RSpec.describe "Admin inbox", type: :feature do
       within(".inbox-row", text: "Fix the feed") { click_link("Edit") }
       panel.assert_selector("[data-task-edit]")
       expect(page).to have_current_path("/admin/inbox")
-      fields.each { |name, value| panel.fill_in("task[#{name}]", with: value) }
+      fields.each { |name, value| panel.fill_in(name == :tags ? "Tags" : "task[#{name}]", with: value) }
       panel.click_button("Save")
       panel.assert_selector("[data-task-read]")
     end

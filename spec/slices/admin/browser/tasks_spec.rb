@@ -28,12 +28,14 @@ RSpec.describe "Admin tasks", type: :feature do
     within("dialog#task-create") do
       fill_in("task[title]", with: title)
       select(list, from: "task[list]")
-      fields.each { |name, value| fill_in("task[#{name}]", with: value) }
+      fields.each { |name, value| fill_in(field_name(name), with: value) }
       click_button("Create task")
     end
   end
 
   def edit_form = find("dialog#task-panel[open] [data-task-edit]")
+
+  def field_name(name) = name == :tags ? "Tags" : "task[#{name}]"
 
   def modal = find("dialog#task-create[open]")
 
@@ -69,7 +71,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def tag_task(title, tags)
     open_editor(title)
-    fill_in("task[tags]", with: tags)
+    fill_in("Tags", with: tags)
     click_button("Save")
     close_panel
   end
@@ -732,7 +734,7 @@ RSpec.describe "Admin tasks", type: :feature do
     JS
 
     def save_with(**fields)
-      fields.each { |name, value| edit_form.fill_in("task[#{name}]", with: value) }
+      fields.each { |name, value| edit_form.fill_in(field_name(name), with: value) }
       panel.click_button(translate("ui.views.tasks.edit.save"))
     end
 
@@ -781,14 +783,15 @@ RSpec.describe "Admin tasks", type: :feature do
       fail_save
 
       expect(edit_form).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
-      expect(edit_form).to have_field("task[tags]", with: "not_a_tag")
+      expect(edit_form).to have_css(".tag-pick-chip", text: "#not_a_tag")
       expect(page).to have_current_path("/admin/tasks?filter=next")
     end
 
     it "saves once the errors are fixed" do
       fail_save
       edit_form.assert_selector(".field-error", count: 2)
-      save_with(title: "Email the bookkeeper", tags: "")
+      edit_form.find("button[aria-label='Remove not_a_tag']").click
+      save_with(title: "Email the bookkeeper")
 
       expect(panel).to have_css("[data-task-read] h1", exact_text: "Email the bookkeeper")
     end

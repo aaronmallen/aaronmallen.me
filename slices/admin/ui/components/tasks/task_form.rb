@@ -102,7 +102,7 @@ module Admin
 
           def tags_field
             Field(label: t(".tags"), **error_props(:tags)) do |control|
-              Input(**control, name: "task[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"))
+              TagField(control:, name: "task[tags]", value: @values[:tags].to_s, placeholder: t(".tags_placeholder"))
             end
           end
 

@@ -39,8 +39,8 @@ module Admin
 
           def tags_field
             label(class: "sr-only", for: FieldError.id_for(:tags, @scope)) { t(".tags") }
-            Input(
-              **FieldError.control_attributes(:tags, @errors, @scope),
+            TagField(
+              control: FieldError.control_attributes(:tags, @errors, @scope),
               name: "entry[tags]",
               value: @tags,
               placeholder: t(".tags_placeholder"),

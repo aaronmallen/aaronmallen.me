@@ -56,13 +56,11 @@ module Admin
             { action: path(:admin_create_journal_entry), class: "journal-modal-form", data: { journal_entry: "" } }
           end
 
-          def tags_attributes
-            { class: "journal-modal-tags", name: "entry[tags]", value: @tags, aria: { label: t(".tags") },
-              placeholder: t(".tags_placeholder") }
-          end
-
           def tags_field
-            input(**mix(control(:tags), tags_attributes))
+            TagField(
+              control: mix(control(:tags), class: "journal-modal-tags", aria: { label: t(".tags") }),
+              name: "entry[tags]", value: @tags, placeholder: t(".tags_placeholder"),
+            )
           end
 
           def title = t(".title", date: l(@today, format: :short))

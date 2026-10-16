@@ -18,7 +18,7 @@ RSpec.describe "Admin task rules", type: :feature do
 
   it "adds a rule" do
     fill_in "rule-pattern", with: "aaronmallen/aaronmallen.me"
-    fill_in "rule-tags", with: "ruby"
+    fill_in "rule-tags-search", with: "ruby"
     click_button "Add rule"
 
     expect(page).to have_css(".rule-pattern", text: "aaronmallen/aaronmallen.me")
@@ -31,7 +31,7 @@ RSpec.describe "Admin task rules", type: :feature do
 
     def results = capture.all(".project-pick-result").map { it.text.split.join(" ") }
 
-    def search(text, scope = capture) = scope.find("[role='combobox']").send_keys(text)
+    def search(text, scope = capture) = scope.find("[data-project-pick-input]").send_keys(text)
 
     before do
       create(:project, :archived, name: "Atlas")
@@ -40,7 +40,7 @@ RSpec.describe "Admin task rules", type: :feature do
     end
 
     it "shows a search box in place of the checkboxes", :aggregate_failures do
-      expect(capture).to have_css("[role='combobox']")
+      expect(capture).to have_css("[data-project-pick-input][role='combobox']")
       expect(capture).to have_no_css(".rule-projects", visible: :visible)
     end
 
@@ -107,7 +107,7 @@ RSpec.describe "Admin task rules", type: :feature do
 
   it "edits a rule's tags" do
     row.find(".rule-pattern").click
-    editor.fill_in("rule[tags]", with: "projects, ruby")
+    editor.fill_in("Tags", with: "projects, ruby")
     editor.click_on("Save")
 
     expect(page).to have_css(".rule-tags .tag", text: "#ruby")

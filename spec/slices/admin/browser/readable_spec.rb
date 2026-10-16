@@ -291,6 +291,22 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def record_tag_fields
+    {
+      "journal dialog tag suggestions" => lambda do
+        visit "/admin/posts"
+        page.driver.browser.keyboard.type("w")
+        find_by_id("journal-write-tags-search").send_keys("h", :enter, "h")
+        find("dialog#journal-write[open] [data-tag-field-results]", visible: :visible)
+      end,
+      "decision tag suggestions" => lambda do
+        visit "/admin/decisions/new"
+        find("[data-tag-field-input]").send_keys("q", :enter, "q")
+        find("[data-tag-field-results]", visible: :visible)
+      end,
+    }
+  end
+
   def recurring_screens
     {
       "recurring task editor" => -> { visit "/admin/tasks/#{recurring_task.id}/edit" },
@@ -310,8 +326,8 @@ RSpec.describe "Admin screens", type: :feature do
         create(:project, :archived, name: "Atlas")
         create(:project, name: "Bloom")
         visit "/admin/tasks/rules"
-        find(".rule-capture [role='combobox']").send_keys("atlas", :down, :enter, "b")
-        find(".rule-capture [role='listbox']", visible: :visible)
+        find(".rule-capture [data-project-pick-input]").send_keys("atlas", :down, :enter, "b")
+        find(".rule-capture [data-project-pick-results]", visible: :visible)
       end,
     }
   end
@@ -516,6 +532,27 @@ RSpec.describe "Admin screens", type: :feature do
         visit "/admin/projects/#{project.id}/edit"
         find("[data-tag-field-input]").send_keys("r", :enter, "r")
         find(".project-editor [role='listbox']", visible: :visible)
+      end,
+    }.merge(task_tag_fields, record_tag_fields)
+  end
+
+  def task_tag_fields
+    {
+      "task drawer tag suggestions" => lambda do
+        open_editor
+        find("dialog#task-panel[open] [data-tag-field-input]").send_keys("s", :enter, "s")
+        find("dialog#task-panel[open] [data-tag-field-results]", visible: :visible)
+      end,
+      "task modal tag suggestions" => lambda do
+        visit "/admin/tasks"
+        click_link "Create Task"
+        find("dialog#task-create[open] [data-tag-field-input]").send_keys("s", :enter, "s")
+        find("dialog#task-create[open] [data-tag-field-results]", visible: :visible)
+      end,
+      "task rule tag suggestions" => lambda do
+        visit "/admin/tasks/rules"
+        find_by_id("rule-tags-search").send_keys("s", :enter, "s")
+        find(".rule-capture [data-tag-field-results]", visible: :visible)
       end,
     }
   end

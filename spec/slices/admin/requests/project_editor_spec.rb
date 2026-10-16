@@ -158,7 +158,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       it "suggests the public tags and leaves the private ones out" do
         create(:tag, :private, name: "secret")
         get "/admin/projects/#{project.id}/edit"
-        suggested = JSON.parse(page.find("[data-tag-field]", visible: :all)["data-tag-field"])
+        suggested = JSON.parse(page.find("[name='project[tags]'] + [data-tag-field]", visible: :all)["data-tag-field"])
 
         expect(suggested.map { it["name"] }).to eq(%w[cli ruby])
       end

@@ -2377,6 +2377,10 @@
 
 @utility journal-modal-foot {
   @apply flex flex-wrap items-center gap-3 border-t border-line py-2.5 pr-3 pl-5 meta-badge;
+
+  & .tag-pick {
+    @apply min-w-0 flex-1;
+  }
 }
 
 @utility journal-modal-tags {
@@ -2434,6 +2438,10 @@
 
   & .inp[type="date"] {
     @apply w-36 border-b-0;
+  }
+
+  & .tag-pick {
+    @apply min-w-0 flex-1;
   }
 
   & > .bt {

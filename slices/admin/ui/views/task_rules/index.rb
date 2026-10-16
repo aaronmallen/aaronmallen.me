@@ -21,6 +21,7 @@ module Admin
           prop :editing, Blog::Types::Hash.optional
           prop :rules, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def self.typed(params)
             { **TYPED.to_h { [it, Blog::Types::Text[params[it]]] }, projects: Array(params[:projects]).map(&:to_s) }
@@ -31,7 +32,9 @@ module Admin
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list
-              Card(title: t(".add"), class: "settings-side") { Capture(**@adding, choices: @projects) }
+              Card(title: t(".add"), class: "settings-side") do
+                Capture(**@adding, choices: @projects, tag_choices: @tags)
+              end
             end
           end
 
@@ -49,7 +52,7 @@ module Admin
           def rows
             return Empty { t(".empty") } if @rules.empty?
 
-            @rules.each { Row(rule: it, editing: @editing, choices: @projects) }
+            @rules.each { Row(rule: it, editing: @editing, choices: @projects, tag_choices: @tags) }
           end
         end
       end

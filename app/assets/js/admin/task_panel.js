@@ -6,6 +6,7 @@ import { parse, plain, setupPost, setupVisit } from "./in_place.js";
 import { leavePage } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
+import { setupTagFields } from "./tag_field.js";
 import { setupTaskOrder } from "./task_order.js";
 import { showToast } from "./toast.js";
 
@@ -39,6 +40,7 @@ function bind(root) {
   setupConfirms(root);
   setupMarkdownEditors(root);
   setupRecordKeys(root);
+  setupTagFields(root);
   setupTaskOrder(root);
 }
 
