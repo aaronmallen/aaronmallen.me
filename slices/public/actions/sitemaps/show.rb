@@ -9,7 +9,10 @@ module Public
         NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
         PAGES = %i[root about projects contact writing].freeze
 
-        include Deps[post_queries: "posts.repos.post_queries"]
+        include Deps[
+          post_queries: "posts.repos.post_queries",
+          project_queries: "projects.repos.project_queries",
+        ]
 
         config.formats.clear.accept :xml
         answer_any_accept :xml
@@ -44,7 +47,9 @@ module Public
           end
         end
 
-        def tag_pages = post_queries.published_tag_names.map { [routes.url(:tag, tag: it)] }
+        def tag_pages
+          (post_queries.published_tag_names | project_queries.public_tag_names).sort.map { [routes.url(:tag, tag: it)] }
+        end
       end
     end
   end

@@ -40,6 +40,12 @@ module Projects
 
       def public_tag?(tag) = projects.in_public.live.tagged(tag).select(:id).exist?
 
+      def public_tag_names
+        tagged = project_tags.where(project_id: projects.in_public.live.select(:id).dataset).select(:tag_id)
+
+        tags.where(id: tagged.dataset).pluck(:name)
+      end
+
       def tracked = with_tags.tracked.in_order.to_a
 
       private

@@ -45,6 +45,21 @@ RSpec.describe "Sitemap", type: :request do
     expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
   end
 
+  it "lists the tags of live public projects" do
+    create(:project, tags: %w[elixir])
+    get "/sitemap.xml"
+
+    expect(locs).to include(site("/writing/tags/elixir"))
+  end
+
+  it "leaves out tags only private or archived projects carry" do
+    create(:project, :private, tags: %w[secret])
+    create(:project, :archived, tags: %w[retired])
+    get "/sitemap.xml"
+
+    expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
+  end
+
   it "leaves out the admin, API and MCP paths" do
     get "/sitemap.xml"
 
