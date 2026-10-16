@@ -259,6 +259,39 @@ RSpec.describe "Admin record links", type: :request do
 
       expect(picks).to be_empty
     end
+
+    describe "a task by its label" do
+      def in_project(**) = create(:task, project_id: Projects::Slice["relations.projects"].dataset.get(:id), **)
+
+      def renumber(task, number) = Tasks::Slice["relations.tasks"].dataset.where(id: task.id).update(number:)
+
+      before do
+        create(:project, name: "Podcast", repo: "aaronmallen/podcast")
+        renumber(create(:task, title: "Loose end"), 23)
+        renumber(in_project(title: "Record the intro"), 23)
+      end
+
+      it "finds every task with the number by n or #n" do
+        %w[23 #23].each do |query|
+          show(record_q: query)
+          expect(picks).to contain_exactly("Loose end", "Record the intro")
+        end
+      end
+
+      it "finds a task by KEY-n in any case" do
+        %w[POD-23 pod-23].each do |query|
+          show(record_q: query)
+          expect(picks).to eq(["Record the intro"])
+        end
+      end
+
+      it "lists label matches ahead of title matches" do
+        create(:task, title: "Plan 23 more")
+        show(record_q: "23")
+
+        expect([picks.size, picks.last]).to eq([3, "Plan 23 more"])
+      end
+    end
   end
 
   describe "on a post" do

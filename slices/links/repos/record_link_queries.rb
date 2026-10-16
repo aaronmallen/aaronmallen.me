@@ -28,7 +28,7 @@ module Links
         work_entry: "projects.repos.work_entry_queries",
         decision: "decisions.repos.decision_queries",
         pull_request: "record.repos.pull_request_queries",
-        task: "tasks.repos.task_queries",
+        task: "tasks.repos.task_label_queries",
         mail_thread: "mail.repos.thread_queries",
       ]
 

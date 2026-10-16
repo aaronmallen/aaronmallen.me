@@ -8,7 +8,7 @@ module Links
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
     import keys: %w[repos.commit_queries repos.journal_entry_queries repos.pull_request_queries], from: :record
     import keys: %w[repos.social_post_queries], from: :social
-    import keys: %w[operations.set_task_project repos.task_queries], from: :tasks
+    import keys: %w[operations.set_task_project repos.task_label_queries], from: :tasks
 
     export %w[operations.link_records operations.unlink_records repos.record_link_queries]
   end
