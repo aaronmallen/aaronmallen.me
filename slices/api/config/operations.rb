@@ -35,6 +35,7 @@ module API
       ["pause_task", "post", "/tasks/{id}/pause", OK],
       ["start_task", "post", "/tasks/{id}/start", OK],
       ["set_task_total", "post", "/tasks/{id}/total", OK],
+      ["add_work_session", "post", "/tasks/{id}/sessions", CREATED],
       ["update_work_session", "patch", "/tasks/{id}/sessions/{session_id}", OK],
       ["delete_work_session", "delete", "/tasks/{id}/sessions/{session_id}", OK],
       ["add_task_comment", "post", "/tasks/{id}/comments", CREATED],

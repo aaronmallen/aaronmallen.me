@@ -3,10 +3,8 @@
 module Tasks
   module Operations
     class EditWorkSession < Blog::Operation
-      FUTURE = "future"
-      ORDER = "order"
-
       include Deps[
+        check_session_times: "operations.check_session_times",
         contract: "contracts.work_session_contract",
         work_session_mutations: "repos.work_session_mutations",
       ]
@@ -30,8 +28,6 @@ module Tasks
 
       def find(task_id, id) = found(work_session_mutations.lock(task_id, id))
 
-      def future(time, now) = ([FUTURE] if time && time > now)
-
       def kept(saved, given) = Blog::TimeZone.input_value(saved) == Blog::TimeZone.input_value(given) ? saved : given
 
       def length(started_at, ended_at) = ended_at ? (ended_at - started_at).floor : 0
@@ -41,11 +37,7 @@ module Tasks
       def ordered(session, fields, now)
         started_at = kept(session.started_at, fields[:started_at])
         ended_at = session.ended_at && kept(session.ended_at, fields[:ended_at])
-        errors = { started_at: future(started_at, now), ended_at: future(ended_at, now) }.compact
-        return Failure[:invalid, errors] unless errors.empty?
-        return Failure[:invalid, { ended_at: [ORDER] }] if ended_at && ended_at < started_at
-
-        Success([started_at, ended_at])
+        check_session_times.call(started_at, ended_at, now)
       end
 
       def validate(session, params)

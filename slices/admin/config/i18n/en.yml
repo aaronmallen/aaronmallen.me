@@ -443,6 +443,7 @@ en:
       scheduled: "Scheduled for the %{date} sprint"
       series_paused: "Paused · closing %{task} makes no new copy"
       series_resumed: "Repeating %{task} again"
+      session_added: "Work added"
       session_deleted: "Session deleted"
       session_saved: "Session saved"
       sprint_ahead: "Plan a sprint for a day after today"
@@ -2499,6 +2500,12 @@ en:
           edit: "Edit"
           save: "Save"
       tasks:
+        add_session_form:
+          add: "Add work"
+          ended_at: "Ended"
+          hint: "Add time you forgot to track. The total grows by its length."
+          save: "Add work"
+          started_at: "Started"
         bulk:
           cancel: "Cancel"
           complete: "Done"

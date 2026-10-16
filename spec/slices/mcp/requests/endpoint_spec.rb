@@ -2282,6 +2282,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "add_shares_to_group" => { id: 1, ids: [2] },
         "add_task_comment" => { id: 1, body: "Blocked on review" },
         "add_work_entry" => { org: "Acme", role: "Engineer", from_year: 2019 },
+        "add_work_session" => { id: 1, started_at: "2026-01-01T09:00", ended_at: "2026-01-01T10:00" },
         "approve_webmentions" => { ids: [1] },
         "archive_project" => { id: 1 },
         "cancel_task" => { id: 1 },

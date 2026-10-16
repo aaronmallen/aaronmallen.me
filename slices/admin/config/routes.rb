@@ -303,6 +303,7 @@ module Admin
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID
     post "/tasks/:id/total", to: "tasks.update_total", as: :update_task_total, id: ID
+    post "/tasks/:id/sessions", to: "tasks.create_session", as: :create_task_session, id: ID
     get(
       "/tasks/:id/sessions/:session_id/menu",
       to: "tasks.session_menu", as: :task_session_menu, id: ID, session_id: ID,

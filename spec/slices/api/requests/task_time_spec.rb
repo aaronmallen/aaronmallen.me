@@ -6,6 +6,10 @@ RSpec.describe "API task time", type: :request do
 
   def act(id, verb, fields = {}) = call_api(:post, "/tasks/#{id}/#{verb}", JSON.generate(fields))
 
+  def add(id: task.id, **times)
+    call_api(:post, "/tasks/#{id}/sessions", JSON.generate(times.transform_values { local(it) }))
+  end
+
   def closed(from: started, to: started + 1800, on: task)
     create(:work_session, task_id: on.id, started_at: from, ended_at: to)
   end
@@ -139,6 +143,57 @@ RSpec.describe "API task time", type: :request do
     end
   end
 
+  describe "POST /api/v1/tasks/:id/sessions" do
+    it "adds a closed session and raises the total by its length", :aggregate_failures do
+      answer = add(started_at: started, ended_at: started + 2700)
+
+      expect([answer.fetch("worked_seconds"), status]).to eq([6300, 201])
+      expect(sessions.map { [it[:started_at], it[:ended_at]] }).to eq([[started, started + 2700]])
+    end
+
+    it "refuses an end before the start with a 422 and adds nothing", :aggregate_failures do
+      answer = add(started_at: started, ended_at: started - 60)
+
+      expect([answer.fetch("errors"), status]).to eq([{ "ended_at" => ["a session ends after it starts"] }, 422])
+      expect([sessions, total]).to eq([[], 3600])
+    end
+
+    it "refuses times later than now with a 422" do
+      errors = add(started_at: Time.now + 7200, ended_at: Time.now + 9000).fetch("errors")
+
+      expect(errors.transform_values(&:first)).to eq(
+        "started_at" => "a session cannot start later than now", "ended_at" => "a session cannot end later than now",
+      )
+    end
+
+    it "refuses a session with no end with a 422 and adds nothing", :aggregate_failures do
+      add(started_at: started)
+
+      expect([status, sessions]).to eq([422, []])
+    end
+
+    it "saves a session that overlaps the running one", :aggregate_failures do
+      found = running_task
+      add(id: found.id, started_at: started + 60, ended_at: started + 660)
+
+      expect(sessions(found).size).to eq(2)
+      expect(total(found)).to eq(1200)
+    end
+
+    it "leaves a done task done", :aggregate_failures do
+      found = create(:task, :done, completed_at: started - 60)
+      answer = add(id: found.id, started_at: started, ended_at: started + 600)
+
+      expect(answer).to include("status" => "done", "worked_seconds" => 600)
+      expect(Tasks::Slice["repos.task_queries"].by_id(found.id).completed_at).to eq(started - 60)
+    end
+
+    it "answers an unknown ID with a 404" do
+      expect([add(id: 999_999, started_at: started, ended_at: started).fetch("message"), status])
+        .to eq(["no task has the ID 999999", 404])
+    end
+  end
+
   describe "DELETE /api/v1/tasks/:id/sessions/:session_id" do
     it "drops the total by the session's length", :aggregate_failures do
       answer = remove(closed)
@@ -256,6 +311,16 @@ RSpec.describe "API task time", type: :request do
       answered = mcp_answer("update_work_session", id: task.id, session_id: sessions.first[:id], **times)
 
       expect(unstamped(trusted(answered))).to eq(unstamped(edited))
+    end
+
+    it "add a session as add_work_session does", :aggregate_failures do
+      times = { started_at: local(started), ended_at: local(started + 900) }
+      added = add(**times)
+
+      answered = mcp_answer("add_work_session", id: task.id, **times)
+
+      expect(unstamped(trusted(answered)).except("worked_seconds")).to eq(unstamped(added).except("worked_seconds"))
+      expect([added.fetch("worked_seconds"), total]).to eq([4500, 5400])
     end
 
     it "delete a session as delete_work_session does" do

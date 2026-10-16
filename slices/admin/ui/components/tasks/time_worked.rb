@@ -16,6 +16,7 @@ module Admin
               if sessions.empty? then Hint { t(".empty") }
               else ol(class: "task-sessions") { sessions.each { session(it) } }
               end
+              AddSessionForm(task: @task, adding: @forms[:adding], tab: @tab, origin: @origin)
               TotalForm(task: @task, totaling: @forms[:totaling], tab: @tab, origin: @origin)
             end
           end

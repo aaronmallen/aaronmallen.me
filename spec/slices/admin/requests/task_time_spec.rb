@@ -211,6 +211,105 @@ RSpec.describe "Admin task time", type: :request do
       end
     end
 
+    describe "adding work" do
+      def add(on: task, **times)
+        send_to("/admin/tasks/#{on.id}/sessions", session: times.transform_values { local(it) })
+      end
+
+      def add_error(field) = page.find("#task-#{task.id}-session-#{field.to_s.tr('_', '-')}-error")
+
+      def add_field(name) = page.find(".task-session-add input[name='session[#{name}]']", visible: :all)
+
+      def events(on = task) = Tasks::Slice["relations.task_events"].for_task(on.id).to_a
+
+      it "shows a blank form beside the total form", :aggregate_failures do
+        closed
+        read
+
+        expect(page).to have_css(".field > details.task-session-add + details.task-total-edit", visible: :all)
+        expect([add_field(:started_at)["value"], add_field(:ended_at)["value"]]).to eq(["", ""])
+        expect(add_field(:started_at)["type"]).to eq("datetime-local")
+      end
+
+      it "shows the form on the edit page too" do
+        get("/admin/tasks/#{task.id}/edit", filter: "next")
+
+        expect(page).to have_css(".task-session-add form[action$='/tasks/#{task.id}/sessions']", visible: :all)
+      end
+
+      it "adds a closed session and raises the total by its length", :aggregate_failures do
+        add(started_at: started, ended_at: started + 2700)
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=next"))
+        expect(sessions.map { [it[:started_at], it[:ended_at]] }).to eq([[started, started + 2700]])
+        expect(total).to eq(6300)
+      end
+
+      it "lists the new session under Time worked" do
+        add(started_at: started, ended_at: started + 600)
+        read
+
+        expect(page).to have_css("#task-session-#{sessions.first[:id]}")
+      end
+
+      it "refuses a start later than now with the session form's error", :aggregate_failures do
+        add(started_at: Time.now + 7200, ended_at: Time.now + 9000)
+
+        expect(last_response.status).to eq(422)
+        expect(add_error(:started_at)).to have_text(t("ui.components.tasks.field_error.started_at.future"))
+        expect(add_error(:ended_at)).to have_text(t("ui.components.tasks.field_error.ended_at.future"))
+        expect([sessions, total]).to eq([[], 3600])
+      end
+
+      it "refuses an end before the start with the session form's error", :aggregate_failures do
+        add(started_at: started, ended_at: started - 60)
+
+        expect(last_response.status).to eq(422)
+        expect(add_error(:ended_at)).to have_text(t("ui.components.tasks.field_error.ended_at.order"))
+        expect([sessions, total]).to eq([[], 3600])
+      end
+
+      it "refuses a missing end and keeps what was typed open", :aggregate_failures do
+        add(started_at: started, ended_at: "")
+
+        expect(add_error(:ended_at)).to have_text(t("ui.components.tasks.field_error.ended_at.blank"))
+        expect(page).to have_css("details.task-session-add[open]")
+        expect(add_field(:started_at)["value"]).to eq(local(started))
+        expect(sessions).to eq([])
+      end
+
+      it "saves a session that overlaps another and the running one", :aggregate_failures do
+        found = running_task(since: started)
+        closed(on: found)
+        add(on: found, started_at: started + 600, ended_at: started + 1200)
+
+        expect([sessions(found).size, sessions(found).count { it[:ended_at].nil? }, total(found)]).to eq([3, 1, 1200])
+      end
+
+      %i[done canceled].each do |state|
+        it "adds to a #{state} task and leaves its status and completion", :aggregate_failures do
+          found = create(:task, state, completed_at: started - 60)
+          add(on: found, started_at: started, ended_at: started + 600)
+
+          expect(repo.by_id(found.id)).to have_attributes(status: state.to_s, completed_at: started - 60)
+          expect(total(found)).to eq(600)
+        end
+      end
+
+      it "never starts the task and writes no task event", :aggregate_failures do
+        add(started_at: started, ended_at: started + 600)
+
+        expect(repo.by_id(task.id).status).to eq("open")
+        expect(events).to eq([])
+      end
+
+      it "answers 404 for an unknown task" do
+        send_to("/admin/tasks/999999/sessions", session: { started_at: local(started), ended_at: local(started) })
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
     describe "setting the total" do
       it "replaces the total" do
         set_total(hours: "2", minutes: "15")

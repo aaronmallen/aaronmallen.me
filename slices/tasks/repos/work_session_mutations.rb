@@ -5,7 +5,7 @@ module Tasks
     class WorkSessionMutations < Blog::DB::Repo
       root :work_sessions
 
-      stamped_commands :update
+      stamped_commands :create, :update
 
       def close(task_id, at) = work_sessions.close(task_id, at)
 

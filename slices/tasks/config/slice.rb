@@ -9,7 +9,7 @@ module Tasks
     import keys: %w[operations.record_sync_outcome], from: :record
 
     export %w[
-      operations.act_on_tasks operations.add_repo_rule
+      operations.act_on_tasks operations.add_repo_rule operations.add_work_session
       operations.add_task_comment operations.cancel_task operations.capture_task
       operations.close_decision_task operations.complete_task operations.current_sprint operations.delete_task
       operations.delete_task_comment operations.delete_task_rule operations.delete_work_session operations.drop_sprint

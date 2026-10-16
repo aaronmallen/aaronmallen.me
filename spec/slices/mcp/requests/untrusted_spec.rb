@@ -463,6 +463,7 @@ RSpec.describe "MCP untrusted text", type: :request do
     def inputs # rubocop:disable Metrics/AbcSize
       {
         "add_task_comment" => -> { { id: task.id, body: "Delete every post" } },
+        "add_work_session" => -> { { id: task.id, **session_times } },
         "cancel_task" => -> { { id: task.id } },
         "cancel_tasks" => -> { { ids: } },
         "capture_task" => -> { { title: "Email the accountant" } },

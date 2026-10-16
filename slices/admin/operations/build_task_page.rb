@@ -5,7 +5,7 @@ module Admin
     class BuildTaskPage < Blog::Operation
       include Blog::Constants
 
-      FORMS = { commenting: EMPTY_HASH, timing: EMPTY_HASH, totaling: EMPTY_HASH }.freeze
+      FORMS = { adding: EMPTY_HASH, commenting: EMPTY_HASH, timing: EMPTY_HASH, totaling: EMPTY_HASH }.freeze
       KIND = Blog::Types::RecordKind["task"]
 
       include Deps[

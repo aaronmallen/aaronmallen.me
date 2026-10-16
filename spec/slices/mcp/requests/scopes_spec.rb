@@ -19,7 +19,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "suggest" => %w[suggest_edits],
       "write" => %w[
-        accept_suggestion_edits add_decision_comment add_decision_option add_task_comment
+        accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_session
         archive_project cancel_task cancel_tasks capture_task
         clear_inbox
         complete_task complete_tasks
