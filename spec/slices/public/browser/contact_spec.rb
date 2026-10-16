@@ -44,9 +44,10 @@ RSpec.describe "Contact form", type: :feature do
     expect(message_queries.mail_threads.count).to eq(1)
   end
 
-  it "stores what was typed" do
+  it "stores what was typed", :aggregate_failures do
     send_message
 
+    expect(page).to have_current_path("/contact?sent=1")
     expect(stored).to have_attributes(reply_to: "ada@example.com", subject: "A question", body: "About the beacon")
   end
 
