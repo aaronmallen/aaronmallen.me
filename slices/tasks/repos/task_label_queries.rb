@@ -7,6 +7,8 @@ module Tasks
 
       include Deps[project_queries: "projects.repos.project_queries"]
 
+      def ids_labelled(text) = LABEL.match?(text.to_s) ? labelled_as(tasks, text).pluck(:id) : []
+
       def labelled_as(found, text)
         key, number = text.match(LABEL)&.captures
         project_id = project_queries.id_by_key(key) if key

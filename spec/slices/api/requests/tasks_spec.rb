@@ -235,6 +235,14 @@ RSpec.describe "API tasks", type: :request do
       expect(titles(list(query: "feed"))).to contain_exactly("Fix the feed", "Write a post")
     end
 
+    it "finds the task a label names first, then the title and note matches" do
+      project_id = create(:project, name: "Podcast").id
+      create(:task, title: "Record the intro", project_id:)
+      create(:task, title: "Mow the lawn", note: "after POD-1")
+
+      expect(titles(list(query: "pod-1"))).to eq(["Record the intro", "Mow the lawn"])
+    end
+
     describe "by contributor" do
       before do
         create(:task, title: "mine by default")

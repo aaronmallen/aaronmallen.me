@@ -2513,6 +2513,34 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to eq(["Ship the search"])
       end
 
+      describe "by label" do
+        def in_project(**) = create(:task, project_id: Projects::Slice["relations.projects"].dataset.get(:id), **)
+
+        before do
+          create(:project, name: "Podcast")
+          create(:task, title: "Mention POD-1 and 2 in the intro")
+          in_project(title: "Record the intro")
+        end
+
+        it "finds the task a label names first, then the title matches" do
+          search("POD-1")
+
+          expect(titles).to eq(["Record the intro", "Mention POD-1 and 2 in the intro"])
+        end
+
+        it "finds every task a bare number names first" do
+          search("2")
+
+          expect(titles).to eq(["Ship the search", "Mention POD-1 and 2 in the intro"])
+        end
+
+        it "finds no task for a key no project has" do
+          search("ZZZ-1")
+
+          expect(titles).to be_empty
+        end
+      end
+
       describe "by project" do
         def link(task, project)
           Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })

@@ -42,6 +42,14 @@ RSpec.describe "MCP task tools", type: :request do
     expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => mine.id)])
   end
 
+  it "finds the task a label names with list_tasks" do
+    task = create(:task, title: "Record the intro", project_id: create(:project, name: "Podcast").id)
+    create(:task, title: "Mow the lawn")
+    call_tool("list_tasks", query: "POD-1")
+
+    expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => task.id)])
+  end
+
   describe "a column change" do
     def first_task = Tasks::Slice["relations.tasks"].in_order.pluck(:id).first
 

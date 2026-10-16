@@ -35,12 +35,14 @@ module Blog
         end
       end
 
-      def containing(text, *columns)
+      def containing(text, *columns, ids: Constants::EMPTY_ARRAY)
         return none if unmatchable?(text)
 
         pattern = like_pattern(text)
+        found = columns.map { Sequel.ilike(it, pattern) }
+        found << { self[:id].qualified => ids } unless ids.empty?
 
-        where(Sequel.|(*columns.map { Sequel.ilike(it, pattern) }))
+        where(Sequel.|(*found))
       end
 
       def counts_by(column) = unordered.select(column) { integer.count(id).as(:count) }.group(column)
@@ -49,6 +51,10 @@ module Blog
 
       def find_linkable(ids: nil, text: nil, limit: nil)
         (text ? matching(text) : where(id: ids)).limit(limit).linkable
+      end
+
+      def ids_first(ids)
+        ids.empty? ? self : new(dataset.order_prepend(Sequel.case({ { self[:id].qualified => ids } => 0 }, 1)))
       end
 
       def latest_first(arrived, snoozed = self[:snoozed_until].qualified)

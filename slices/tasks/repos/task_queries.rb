@@ -46,9 +46,11 @@ module Tasks
       def exist?(id) = tasks.by_pk(id).exist?
 
       def filtered(page:, closed_in_window: false, **filters)
-        found = tasks.narrowed(**by_project(**filters))
-        found = found.closed(filters[:from]..filters[:to]) if closed_in_window && (filters[:from] || filters[:to])
-        rows = found.detailed.combine(:sprint).newest_first.paged(page).to_a
+        search = by_project(**filters)
+        from, to = filters.values_at(:from, :to)
+        found = tasks.narrowed(**search)
+        found = found.closed(from..to) if closed_in_window && (from || to)
+        rows = found.detailed.combine(:sprint).newest_first.ids_first(search[:label_ids]).paged(page).to_a
 
         Structs::FoundTasks.new(paged: page.fill(rows), total: found.count)
       end
@@ -56,9 +58,10 @@ module Tasks
       def finished(page:, from: nil, to: nil, **search)
         days = (from..to if from && to)
 
-        found = with_details.combine(:sprint).closed(days).searched(**by_project(**search))
+        search = by_project(**search)
+        found = with_details.combine(:sprint).closed(days).searched(**search)
 
-        page.fill(found.newest_first.paged(page).to_a)
+        page.fill(found.newest_first.ids_first(search[:label_ids]).paged(page).to_a)
       end
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
@@ -85,7 +88,10 @@ module Tasks
       end
 
       def list(filter, sprint:, page:, **search)
-        page.fill(pool(with_details, filter, sprint).searched(**by_project(**search)).in_order.paged(page).to_a)
+        search = by_project(**search)
+        found = pool(with_details, filter, sprint).searched(**search)
+
+        page.fill(found.in_order.ids_first(search[:label_ids]).paged(page).to_a)
       end
 
       def on_board(project_id, sizes)
@@ -113,7 +119,9 @@ module Tasks
       def open_in_list(list) = with_details.in_list(list).open.in_order.to_a
 
       def planned(sprints, **search)
-        with_details.for_sprint(sprints.map(&:id)).open.searched(**by_project(**search)).in_order.to_a
+        search = by_project(**search)
+
+        with_details.for_sprint(sprints.map(&:id)).open.searched(**search).in_order.ids_first(search[:label_ids]).to_a
       end
 
       def public_board_slugs(task_ids)
@@ -128,6 +136,7 @@ module Tasks
       private
 
       def by_project(projects: [], **search)
+        search = { **search, label_ids: task_label_queries.ids_labelled(search[:text]) }
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
       end
 

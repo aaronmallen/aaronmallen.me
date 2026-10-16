@@ -20,7 +20,10 @@ module API
             description: "next, someday or external; open tasks unless you name statuses; every list when left out",
           },
           page: Helpers::Paging::PAGE,
-          query: { type: "string", description: "words to find in the title or note" },
+          query: {
+            type: "string",
+            description: "a label such as POD-23, which comes first, or words to find in the title or note",
+          },
           sprint_on: { type: "string", description: "a sprint day, as YYYY-MM-DD; only the tasks planned into it" },
           statuses: {
             type: "array",

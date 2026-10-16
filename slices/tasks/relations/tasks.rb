@@ -91,7 +91,7 @@ module Tasks
                                                                                 MANUAL.as(:seconds)])
       end
 
-      def matching(text) = containing(text, :title, :note)
+      def matching(text, label_ids = []) = containing(text, :title, :note, ids: label_ids)
 
       def narrowed(statuses:, from:, to:, lists: [], sprint_on: nil, **search)
         found = searched(**search)
@@ -129,8 +129,8 @@ module Tasks
           .order(self[:position].desc, self[:id].desc)
       end
 
-      def searched(tags: [], project_ids: nil, text: "", **credits)
-        found = text.empty? ? credited(**credits) : credited(**credits).matching(text)
+      def searched(tags: [], project_ids: nil, text: "", label_ids: [], **credits)
+        found = text.empty? ? credited(**credits) : credited(**credits).matching(text, label_ids)
         found = found.where(self[:project_id] => project_ids) if project_ids
         tags.empty? ? found : found.tagged(tags)
       end
