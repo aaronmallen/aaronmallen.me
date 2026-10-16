@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "json"
 require "uri"
 
 module Public
@@ -27,6 +26,7 @@ module Public
         config.handle_exception Hanami::Action::BodyParsingError => :reject
 
         before :refuse_cross_site
+        before :refuse_oversized
 
         def handle(request, response) = respond(response, status_for(request))
 
@@ -55,10 +55,8 @@ module Public
           )
         end
 
-        def payload(request)
-          JSON.parse(request.body.read(MAX_BYTES).to_s)
-        rescue JSON::ParserError
-          nil
+        def refuse_oversized(request, _response)
+          halt REJECTED, Blog::Constants::EMPTY_STRING if request.content_length.to_i > MAX_BYTES
         end
 
         def reject(_request, response, _exception) = respond(response, REJECTED)
@@ -81,7 +79,7 @@ module Public
         def signed_in?(request) = session_reader.call(request).signed_in?
 
         def status_for(request)
-          visit = payload(request)
+          visit = request.env[ACTION_PARSED_BODY]
           route = route_for(visit)
           return REJECTED unless route
           return uncounted(visit) unless countable?(visit, route)

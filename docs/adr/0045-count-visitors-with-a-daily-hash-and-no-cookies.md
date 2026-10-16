@@ -37,12 +37,13 @@ through `navigator.sendBeacon` to `/pulse`, a neutral path. Each page load mints
 The view carries the path, the title and the referrer's origin. Each time the page hides, the beacon sends a read
 with the whole time the page has been on screen, under the same token (AA-492, AA-552).
 
-**What the site takes.** `Public::Actions::Visits::Create` reads at most 8 KB, refuses a beacon from another site,
-and turns away a path the public router does not answer (AA-470). `Analytics::Operations::RecordVisit` skips a hit
-while the operator is signed in, and from a known bot or a client with no user agent. It keeps only the referrer's
-host, and none when it is our own. A read lands on the newest view with its token and today's or yesterday's visitor
-hash, so a tab left open past midnight still counts (#183). It is capped at 20 minutes (AA-527), and the store keeps
-the greater of the old and new time, so a late or repeated read never lowers it.
+**What the site takes.** `Public::Actions::Visits::Create` refuses a body whose length runs past 8 KB and a
+beacon from another site, and turns away a path the public router does not answer (AA-470).
+`Analytics::Operations::RecordVisit` skips a hit while the operator is signed in, and from a known bot or a client
+with no user agent. It keeps only the referrer's host, and none when it is our own. A read lands on the newest view
+with its token and today's or yesterday's visitor hash, so a tab left open past midnight still counts (#183). It is
+capped at 20 minutes (AA-527), and the store keeps the greater of the old and new time, so a late or repeated read
+never lowers it.
 
 **Who a visitor is.** `Analytics::Operations::HashVisitor` hashes `analytics_salt`, the site day, the address and the
 user agent. The salt is its own setting of 64 characters or more, and the app refuses to boot if it repeats

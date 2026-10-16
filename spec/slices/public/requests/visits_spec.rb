@@ -1181,10 +1181,37 @@ RSpec.describe "Visits", type: :request do
       expect(last_response.status).to eq(400)
     end
 
+    it "answers nothing to read for a body too big to be a visit" do
+      beacon({ kind: "view", path: "/#{'a' * 9000}" })
+
+      expect(last_response.body).to be_empty
+    end
+
+    it "rejects a body whose stated length runs past the cap", :aggregate_failures do
+      beacon({ kind: "view", path: "/writing/hello", title: "Hello" }, headers: { "CONTENT_LENGTH" => "8193" })
+
+      expect(last_response.status).to eq(400)
+      expect(stored).to be_empty
+    end
+
     it "rejects an empty body" do
       post "/pulse", "", "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent
 
       expect(last_response.status).to eq(400)
+    end
+
+    it "answers nothing to read for an empty body" do
+      post "/pulse", "", "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent
+
+      expect(last_response.body).to be_empty
+    end
+
+    [["a JSON array", [{ kind: "view", path: "/writing/hello" }]], ["a JSON string", "view"]].each do |named, body|
+      it "rejects #{named}" do
+        beacon(body)
+
+        expect(last_response.status).to eq(400)
+      end
     end
 
     it "answers nothing to read for a body that is not JSON" do
