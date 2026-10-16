@@ -415,13 +415,13 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_button("Ignore")
       end
 
-      it "posts each button to its verdict", :aggregate_failures do
+      it "posts each button to its verdict and keeps the filter", :aggregate_failures do
         mention
-        get "/admin/webmentions"
+        get "/admin/webmentions", status: "pending"
 
-        %w[approve ignore spam].each do |verdict|
-          expect(page).to have_css("form[action='/admin/webmentions/#{mention.id}/#{verdict}']")
-        end
+        actions = page.all("form:has(input[name='status'][value='pending'])").map { it[:action] }
+
+        expect(actions).to include(*%w[approve ignore spam].map { "/admin/webmentions/#{mention.id}/#{it}" })
       end
 
       %w[pending approved ignored delete].each do |verdict|

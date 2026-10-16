@@ -61,11 +61,7 @@ module Admin
 
           def from_field
             label(class: "mail-reply-as", for: FieldError.id_for(:from, SCOPE)) { t(".reply_as") }
-            return span(class: "mail-head-none") { t(".no_sender") } if @senders.empty?
-
-            options = @senders.to_h { [it.id.to_s, it.address] }
-            attributes = { name: "mail[from]", options:, selected: from&.to_s, data: { mail_from: "" } }
-            Select(**FieldError.control_attributes(:from, errors, SCOPE), **attributes, class: "inp auto")
+            FromSelect(scope: SCOPE, senders: @senders, from:, errors:, none: t(".no_sender"), class: "inp auto")
           end
 
           def head

@@ -5,10 +5,6 @@ module Admin
     module Components
       module Inbox
         class MentionItem < Component
-          APPROVED = Blog::Types::WebmentionStatus["approved"]
-          IGNORED = Blog::Types::WebmentionStatus["ignored"]
-          SPAM = Blog::Types::WebmentionStatus["spam"]
-
           prop :mention, Blog::Types::Instance(ROM::Struct)
           prop :slug, Blog::Types::String
 
@@ -26,11 +22,7 @@ module Admin
           private
 
           def actions
-            moderate(APPROVED, nil)
-            moderate(IGNORED, :gh)
-            moderate(SPAM, :warn, class: "wm-spam") do
-              Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
-            end
+            WebmentionVerdicts(actions: verdicts, icons: false)
             Inbox::Snooze(kind: "webmention", id: @mention.id)
           end
 
@@ -39,17 +31,15 @@ module Admin
             span { summary }
           end
 
-          def moderate(verdict, variant, **attributes)
-            Form(action: path(:admin_inbox_moderate_webmention, id: @mention.id, verdict:), data: { morph: true },
-                 **attributes) do
-              yield if block_given?
-              WebmentionVerdict(verdict:, variant:, icon: false)
-            end
-          end
-
           def summary = t(".summary", type:, path: path(:post, slug: @slug))
 
           def type = t(WebmentionKind.label_key(@mention.type))
+
+          def verdicts
+            Blog::Types::WebmentionVerdict.values.to_h do |verdict|
+              [verdict, path(:admin_inbox_moderate_webmention, id: @mention.id, verdict:)]
+            end
+          end
         end
       end
     end

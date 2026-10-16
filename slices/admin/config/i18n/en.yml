@@ -1050,7 +1050,6 @@ en:
             task: "issue"
             webmention: "webmention"
         mention_item:
-          reason: "Why spam? (optional)"
           summary: "%{type} on %{path}"
         message_item:
           read: "Read"
@@ -2945,6 +2944,8 @@ en:
         approve: "Approve"
         ignore: "Ignore"
         spam: "Spam"
+      webmention_verdicts:
+        reason: "Why spam? (optional)"
       webmentions:
         bulk:
           label: "Ticked webmentions"
@@ -2955,7 +2956,6 @@ en:
           title: "Per post"
         row:
           pick: "Select %{author}"
-          reason: "Why spam? (optional)"
           spam_reason: "Spam: %{reason}"
         settings_card:
           accept_bridgy: "Accept Mastodon + Bluesky replies from Bridgy"

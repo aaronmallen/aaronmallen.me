@@ -71,20 +71,10 @@ module Admin
 
           def from = Blog::Types::IdParam[values[:from]] || @senders.first&.id
 
-          def from_attributes
-            options = @senders.to_h { [it.id.to_s, it.address] }
-
-            { name: "mail[from]", options:, selected: from&.to_s, class: "mail-head-input", data: { mail_from: "" } }
-          end
-
           def from_field
             div(class: "mail-head-row") do
               label(for: FieldError.id_for(:from, SCOPE)) { t(".from") }
-              if @senders.empty?
-                span(class: "mail-head-none") { t(".no_sender") }
-              else
-                Select(**FieldError.control_attributes(:from, errors, SCOPE), **from_attributes)
-              end
+              FromSelect(scope: SCOPE, senders: @senders, from:, errors:, none:, class: "mail-head-input")
               FieldError(field: :from, errors:, scope: SCOPE)
             end
           end
@@ -98,6 +88,8 @@ module Admin
           end
 
           def kept = (@draft unless @draft&.dig(:values, :thread))
+
+          def none = t(".no_sender")
 
           def reveals
             span(class: "mail-head-reveal", hidden: true, data: { mail_reveals: "" }) do

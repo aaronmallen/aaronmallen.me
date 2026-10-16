@@ -25,6 +25,8 @@ RSpec.describe "Admin mail sending", type: :request do
 
   def html_part = raw[%r{text/html.*?\r\n\r\n(.*?)\r\n--}m, 1].unpack1("m").force_encoding(Encoding::UTF_8)
 
+  def no_sender(form) = Admin::Slice["i18n"].t("no_sender", scope: ["ui", "components", "mail", form])
+
   def page = Capybara.string(last_response.body)
 
   def raw = Base64.urlsafe_decode64(sent.last.fetch("raw"))
@@ -85,10 +87,24 @@ RSpec.describe "Admin mail sending", type: :request do
         expect(page.all("#mail-compose-from option", visible: :all).map(&:text)).to eq(["aaron@work.example"])
       end
 
-      it "refuses a send from it" do
+      it "refuses a send from it", :aggregate_failures do
         compose(from: home.id)
 
         expect(page).to have_text(error("from.format"))
+        invalid = "#mail-compose-from[aria-invalid='true'][aria-describedby='mail-compose-from-error']"
+        expect(page).to have_css(invalid, visible: :all)
+      end
+    end
+
+    describe "with no account that may send" do
+      before { Mail::Slice["relations.mail_accounts"].where(id: work.id).update(sends: false) }
+
+      it "says so in place of From on compose and reply", :aggregate_failures do
+        get "/admin/mail", thread: gmail_thread.id
+
+        expect(page).to have_no_select("mail[from]", visible: :all)
+        expect(page).to have_css(".mail-head-row .mail-head-none", exact_text: no_sender("compose"), visible: :all)
+        expect(page).to have_css(".mail-reply-head .mail-head-none", exact_text: no_sender("reply"), visible: :all)
       end
     end
 
@@ -272,6 +288,7 @@ RSpec.describe "Admin mail sending", type: :request do
       reply(html: "")
 
       expect(page).to have_css("details.mail-reply[open]")
+      expect(page).to have_css("select#mail-reply-from.inp.auto option[selected]", text: work.address)
       expect(page).to have_no_css("#mail-compose[data-dialog-show]", visible: :all)
     end
 

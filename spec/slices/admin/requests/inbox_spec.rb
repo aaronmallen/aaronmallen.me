@@ -333,6 +333,14 @@ RSpec.describe "Admin inbox", type: :request do
         expect(row).to have_no_css("button.bt i")
       end
 
+      it "posts each verdict to the inbox with a note beside Spam", :aggregate_failures do
+        get "/admin/inbox"
+        forms = page.find("#webmention-#{mention.id}").all("form[action*='/moderate/']")
+
+        expect(forms.map { it[:action].split("/").last }).to eq(%w[approved ignored spam])
+        expect(forms.last).to match_css(".wm-spam").and have_field("reason", placeholder: "Why spam? (optional)")
+      end
+
       it "trusts the author of a webmention approved from the inbox" do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/approved")
 
