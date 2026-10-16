@@ -33,10 +33,6 @@ module Social
 
       def held = held_webmentions.oldest_first.to_a
 
-      def known_author?(author_url)
-        webmentions.by_author_url(normalize_author_url.call(author_url)).known_author?
-      end
-
       def listed_for(post_id) = approved_for(post_id, LISTED_TYPES).oldest_first.to_a
 
       def page_by_status(status, page) = page.fill(webmentions.with_status(status).newest_first.paged(page).to_a)
@@ -60,6 +56,8 @@ module Social
       def settings = stored_settings || created_settings
 
       def snoozed = webmentions.with_status(PENDING).unseen.asleep.to_a
+
+      def trusted_author?(author_url) = trusted_authors.by_pk(normalize_author_url.call(author_url)).exist?
 
       def unseen(limit) = unseen_pending.latest_first(:received_at).limit(limit).to_a
 

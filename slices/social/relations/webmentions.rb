@@ -5,12 +5,6 @@ module Social
     class Webmentions < Blog::DB::Relation
       APPROVED = Blog::Types::WebmentionStatus["approved"]
       PENDING = Blog::Types::WebmentionStatus["pending"]
-      SPAM = Blog::Types::WebmentionStatus["spam"]
-
-      APPROVED_NOT_SPAM = Sequel.&(
-        Sequel.function(:bool_or, Sequel.expr(status: APPROVED)),
-        Sequel.~(Sequel.function(:bool_or, Sequel.expr(status: SPAM))),
-      )
 
       schema :webmentions, infer: true
 
@@ -23,8 +17,6 @@ module Social
       def for_posts(post_ids) = where(post_id: post_ids)
 
       def from_source(source_url) = where(source_url:)
-
-      def known_author? = unordered.dataset.get(APPROVED_NOT_SPAM) || false
 
       def newest_first = order(self[:received_at].desc, self[:id].desc)
 

@@ -14,6 +14,20 @@ RSpec.describe "API webmention moderation and settings", type: :request do
       expect(webmention_queries.by_id(mention.id).spam_reason).to eq("link farm")
     end
 
+    it "trusts the author of a webmention it approves" do
+      mention = create(:webmention)
+      call_api(:post, "/webmentions/#{mention.id}/moderate", { verdict: "approved" })
+
+      expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
+    end
+
+    it "trusts the author of a webmention a bulk approve approves" do
+      mention = create(:webmention)
+      call_api(:post, "/webmentions/bulk/approve", JSON.generate(ids: [mention.id]))
+
+      expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
+    end
+
     it "refuses a verdict it does not know with a 422" do
       call_api(:post, "/webmentions/#{create(:webmention).id}/moderate", { verdict: "pending" })
 

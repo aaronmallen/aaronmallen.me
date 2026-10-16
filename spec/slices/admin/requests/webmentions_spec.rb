@@ -203,6 +203,106 @@ RSpec.describe "Admin webmentions", type: :request do
     describe "moderating" do
       let(:mention) { create(:webmention, post: target) }
 
+      describe "the trusted list" do
+        let(:ada) { "https://ada.example/about" }
+
+        def moderate(mention, action) = post "/admin/webmentions/#{mention.id}/#{action}", _csrf_token: admin_csrf_token
+
+        def status_of(mention) = Social::Slice["relations.webmentions"].by_pk(mention.id).one[:status]
+
+        def trusted? = webmention_queries.trusted_author?(ada)
+
+        %i[reply mention].each do |type|
+          it "adds the author of a #{type} approved by hand" do
+            moderate(create(:webmention, type, post: target, author_url: ada), "approve")
+
+            expect(trusted?).to be(true)
+          end
+        end
+
+        %i[like repost].each do |type|
+          it "leaves the author of a #{type} approved by hand off the list" do
+            moderate(create(:webmention, type, post: target, author_url: ada), "approve")
+
+            expect(trusted?).to be(false)
+          end
+        end
+
+        it "approves the author's other pending replies and mentions on joining" do
+          others = %i[reply mention].map { create(:webmention, it, post: target, author_url: ada) }
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+
+          expect(others.map { status_of(it) }).to eq(%w[approved approved])
+        end
+
+        it "leaves the author's pending likes and reposts and other authors' mentions waiting" do
+          others = [*%i[like repost].map { create(:webmention, it, post: target, author_url: ada) },
+                    create(:webmention, post: target)]
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+
+          expect(others.map { status_of(it) }).to eq(%w[pending pending pending])
+        end
+
+        it "leaves the author's other mentions waiting once auto-approve is off", :aggregate_failures do
+          webmention_mutations.update_settings(auto_approve_known_authors: false)
+          other = create(:webmention, post: target, author_url: ada)
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+
+          expect(trusted?).to be(true)
+          expect(status_of(other)).to eq("pending")
+        end
+
+        it "approves nothing more for an author already on the list" do
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+          waiting = create(:webmention, post: target, author_url: ada)
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+
+          expect(status_of(waiting)).to eq("pending")
+        end
+
+        it "removes the author once any of their webmentions is marked spam" do
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+          moderate(create(:webmention, :like, post: target, author_url: ada), "spam")
+
+          expect(trusted?).to be(false)
+        end
+
+        it "keeps the author's approved webmentions up once they are marked spam" do
+          approved = create(:webmention, post: target, author_url: ada)
+          moderate(approved, "approve")
+          moderate(create(:webmention, post: target, author_url: ada), "spam")
+
+          expect(status_of(approved)).to eq("approved")
+        end
+
+        it "puts the author back on a later approval" do
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+          moderate(create(:webmention, post: target, author_url: ada), "spam")
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+
+          expect(trusted?).to be(true)
+        end
+
+        it "keeps the author on the list when one of their webmentions is ignored" do
+          moderate(create(:webmention, post: target, author_url: ada), "approve")
+          moderate(create(:webmention, post: target, author_url: ada), "ignore")
+
+          expect(trusted?).to be(true)
+        end
+
+        it "adds no one when a webmention is ignored" do
+          moderate(create(:webmention, post: target, author_url: ada), "ignore")
+
+          expect(trusted?).to be(false)
+        end
+
+        it "adds no one for an approved webmention with no author URL" do
+          moderate(create(:webmention, post: target, author_url: nil), "approve")
+
+          expect(Social::Slice["relations.trusted_authors"].count).to eq(0)
+        end
+      end
+
       it "approves a mention" do
         post "/admin/webmentions/#{mention.id}/approve", _csrf_token: admin_csrf_token
 
@@ -515,7 +615,8 @@ RSpec.describe "Admin webmentions", type: :request do
 
         before do
           resolves_publicly("ada.example")
-          create(:webmention, :approved, post: target, author_url: "https://ada.example/")
+          mention = create(:webmention, post: target, author_url: "https://ada.example/")
+          post "/admin/webmentions/#{mention.id}/approve", _csrf_token: admin_csrf_token
         end
 
         it "waits for review from a page on a host not listed" do

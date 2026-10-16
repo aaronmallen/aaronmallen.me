@@ -508,6 +508,18 @@ RSpec.describe "MCP social tools", type: :request do
       expect(filed("spam", :spam_reason)).to eq(["link farm"])
     end
 
+    it "trusts the author of a webmention it approves" do
+      call_tool("moderate_webmention", id: mention.id, verdict: "approved")
+
+      expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
+    end
+
+    it "trusts the author of a webmention approve_webmentions approves" do
+      call_tool("approve_webmentions", ids: [mention.id])
+
+      expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
+    end
+
     it "refuses a verdict it does not know" do
       call_tool("moderate_webmention", id: mention.id, verdict: "pending")
 

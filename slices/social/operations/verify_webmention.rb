@@ -87,7 +87,7 @@ module Social
         return false unless settings.auto_approve_known_authors && author_url
 
         check_author_scope.call(author_url, [source, page.url], single_author_hosts: settings.single_author_hosts) &&
-          webmention_queries.known_author?(author_url)
+          webmention_queries.trusted_author?(author_url)
       end
     end
   end

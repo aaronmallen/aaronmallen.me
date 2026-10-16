@@ -139,20 +139,27 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       it "trusts an author once a batch approves them" do
         act("approved", mentions(1, author_url:))
 
-        expect(webmention_queries.known_author?(author_url)).to be(true)
+        expect(webmention_queries.trusted_author?(author_url)).to be(true)
+      end
+
+      it "approves the author's other pending mentions once a batch trusts them" do
+        waiting = mentions(1, author_url:)
+        act("approved", mentions(1, author_url:))
+
+        expect(waiting.map { status(it) }).to eq(%w[approved])
       end
 
       it "takes trust away once a batch marks them spam" do
-        create(:webmention, :approved, post_id: target.id, author_url:)
+        act("approved", mentions(1, author_url:))
         act("spam", mentions(1, author_url:))
 
-        expect(webmention_queries.known_author?(author_url)).to be(false)
+        expect(webmention_queries.trusted_author?(author_url)).to be(false)
       end
 
-      it "leaves an author unknown when a batch ignores them" do
+      it "leaves an author untrusted when a batch ignores them" do
         act("ignored", mentions(1, author_url:))
 
-        expect(webmention_queries.known_author?(author_url)).to be(false)
+        expect(webmention_queries.trusted_author?(author_url)).to be(false)
       end
     end
 

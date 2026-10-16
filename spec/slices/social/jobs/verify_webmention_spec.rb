@@ -49,6 +49,8 @@ RSpec.describe Social::Jobs::VerifyWebmention do
 
   def webmention_mutations = Social::Slice["repos.webmention_mutations"]
 
+  def webmention_queries = Social::Slice["repos.webmention_queries"]
+
   def webmentions = Social::Slice["relations.webmentions"].with(auto_struct: true, struct_namespace: Social::Structs)
 
   describe "a source that links to the target" do
@@ -574,7 +576,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     let(:ada) { "https://ada.example/~ada" }
     let(:source) { "https://ada.example/~ada/notes/1" }
 
-    def approve_author(url) = create(:webmention, :approved, post: create(:post, :published), author_url: url)
+    def approve_author(url) = webmention_mutations.trust(url, approve_pending: false)
 
     def verify_from(from, author:)
       stub_source(entry(author:), url: from)
@@ -682,11 +684,23 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       end
     end
 
-    it "leaves a known author waiting once that author has been marked spam as well" do
-      create(:webmention, :spam, post: create(:post, :published), author_url: ada)
+    it "leaves an author waiting whose mentions were approved but who is not on the list" do
+      create(:webmention, :approved, post: create(:post, :published), author_url: "https://grace.example/about")
+
+      expect(verify_from("https://grace.example/about/1", author: "https://grace.example/about")).to eq("pending")
+    end
+
+    it "leaves a mention waiting while the list is empty" do
+      webmention_mutations.distrust(ada)
       verify_page(entry(author: ada))
 
       expect(stored.status).to eq("pending")
+    end
+
+    it "never adds the author of a like it approves to the list" do
+      verify_page(entry(body: %(<a class="u-like-of" href="#{target}">x</a>), author: "https://grace.example/about"))
+
+      expect(webmention_queries.trusted_author?("https://grace.example/about")).to be(false)
     end
 
     it "leaves an author waiting whose only mention has been ignored" do
@@ -743,7 +757,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       end
 
       it "approves a #{type} from a known author on their own page once #{toggle} is off" do
-        create(:webmention, :approved, post: create(:post, :published), author_url: "https://grace.example/about")
+        webmention_mutations.trust("https://grace.example/about", approve_pending: false)
         webmention_mutations.update_settings(toggle => false)
         stub_source(reaction(type), url: "https://grace.example/about/1")
         verify(source: "https://grace.example/about/1")

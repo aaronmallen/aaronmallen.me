@@ -333,6 +333,12 @@ RSpec.describe "Admin inbox", type: :request do
         expect(row).to have_no_css("button.bt i")
       end
 
+      it "trusts the author of a webmention approved from the inbox" do
+        act("/admin/inbox/webmentions/#{mention.id}/moderate/approved")
+
+        expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
+      end
+
       { "approved" => "Approved", "ignored" => "Ignored", "spam" => "Marked as spam" }.each do |verdict, toast|
         it "moderates it #{verdict} and drops it", :aggregate_failures do
           act("/admin/inbox/webmentions/#{mention.id}/moderate/#{verdict}")

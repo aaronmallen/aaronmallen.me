@@ -29,6 +29,8 @@ module Social
 
       def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
 
+      def distrust(author_url) = trusted_authors.by_pk(author_url).delete
+
       def hold(**) = held_webmentions.hold(**)
 
       def ignore(id) = update(id, status: IGNORED, spam_reason: nil)
@@ -47,11 +49,22 @@ module Social
         webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, keep_approved:, **written)
       end
 
+      def trust(author_url, approve_pending:)
+        approve_pending_from(author_url) if trusted_authors.trust(author_url).any? && approve_pending
+      end
+
       def update_settings(**attrs)
         transaction do
           webmention_settings.claim(SETTINGS_ID)
           webmention_settings.by_pk(SETTINGS_ID).stamped(:update).call(**attrs)
         end
+      end
+
+      private
+
+      def approve_pending_from(author_url)
+        waiting = webmentions.with_status(WebmentionQueries::PENDING).with_types(WebmentionQueries::LISTED_TYPES)
+        waiting.by_author_url(author_url).update(status: APPROVED, spam_reason: nil, updated_at: Time.now)
       end
     end
   end
