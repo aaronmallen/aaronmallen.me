@@ -2,12 +2,7 @@ const HOUR = 3600;
 const MINUTE = 60;
 const SECOND = 1000;
 
-let started = false;
-
 export function setupTracked() {
-  if (started) return;
-
-  started = true;
   setInterval(tick, SECOND);
 }
 

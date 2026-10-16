@@ -24,7 +24,7 @@ module Social
     export %w[
       operations.act_on_webmentions operations.check_network_fit
       operations.compose_social_post operations.count_network_lengths operations.delete_person
-      operations.delete_social_post operations.expand_for_network operations.find_over_limit_network
+      operations.delete_social_post operations.find_over_limit_network
       operations.list_target_accounts operations.lock_editable_social_post
       operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention
       operations.move_social_post operations.receive_webmention operations.remove_trusted_author

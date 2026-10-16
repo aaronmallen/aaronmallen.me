@@ -96,7 +96,6 @@ Metrics/ClassLength:
   Exclude:
     - config/settings.rb
     - slices/admin/config/routes.rb
-    - slices/api/config/routes.rb
 
 Metrics/MethodLength:
   CountAsOne:
