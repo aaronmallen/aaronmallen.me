@@ -9,6 +9,8 @@ module API
 
       module_function
 
+      def filter(tag) = tag.to_s.strip.downcase.then { it unless it.empty? }
+
       def schema(scope) = { type: "string", description: "one #{scope} tag, #{FORMAT}" }.freeze
     end
   end

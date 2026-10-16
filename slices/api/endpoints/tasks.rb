@@ -15,6 +15,7 @@ module API
       ID = Helpers::Schema::ID
       IMPORTED = "an imported task cannot recur"
       LISTS = Blog::Types::TaskFilter.values.freeze
+      SPRINT_DAY = "give sprint_on as a day, such as 2026-01-01"
       SPRINT_PAST = "a sprint opens on today or a day after it"
       SERIES = "task series"
       TAG = Helpers::Tags.schema("private")

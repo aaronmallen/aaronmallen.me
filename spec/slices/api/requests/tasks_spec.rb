@@ -735,9 +735,10 @@ RSpec.describe "API tasks", type: :request do
     end
 
     it "refuses a sprint day it cannot read with a 422 and captures nothing" do
-      capture(title: "Someday", sprint_on: "next week")
+      answer = capture(title: "Someday", sprint_on: "next week")
 
-      expect([status, tasks.all_open]).to eq([422, []])
+      expect([answer.fetch("errors"), status, tasks.all_open])
+        .to eq([{ "sprint_on" => ["give sprint_on as a day, such as 2026-01-01"] }, 422, []])
     end
 
     describe "in a project" do
@@ -866,9 +867,10 @@ RSpec.describe "API tasks", type: :request do
     end
 
     it "keeps the title for a sprint day it cannot read" do
-      save(task.id, title: "Final", sprint_on: "next week")
+      answer = save(task.id, title: "Final", sprint_on: "next week")
 
-      expect([status, tasks.by_id(task.id).title]).to eq([422, "Draft"])
+      expect([answer.fetch("errors"), status, tasks.by_id(task.id).title])
+        .to eq([{ "sprint_on" => ["give sprint_on as a day, such as 2026-01-01"] }, 422, "Draft"])
     end
 
     describe "contributors" do
@@ -1021,6 +1023,11 @@ RSpec.describe "API tasks", type: :request do
     it "refuses a day in the past with a 422" do
       expect([act(create(:task).id, "schedule", sprint_on: (today - 1).iso8601).fetch("message"), status])
         .to eq(["a sprint opens on today or a day after it", 422])
+    end
+
+    it "refuses a day it cannot read with a 422 about the format" do
+      expect([act(create(:task).id, "schedule", sprint_on: "tomorrow").fetch("errors"), status])
+        .to eq([{ "sprint_on" => ["give sprint_on as a day, such as 2026-01-01"] }, 422])
     end
 
     it "refuses a request with no day" do

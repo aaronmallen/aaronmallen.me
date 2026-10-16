@@ -36,7 +36,7 @@ module API
       ]
 
       def handle(page: 1, query: nil, status: nil, tag: nil)
-        filters = { tag: tag&.downcase, text: query.to_s.strip.then { it unless it.empty? } }
+        filters = { tag: Helpers::Tags.filter(tag), text: query.to_s.strip.then { it unless it.empty? } }
         found = decision_queries.listed(page_of(page), status:, **filters)
 
         Success(

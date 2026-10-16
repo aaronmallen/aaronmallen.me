@@ -24,7 +24,8 @@ module API
 
       def placed(result, id)
         case result
-          in Failure(:past | :invalid) then sprint_past
+          in Failure(:past) then sprint_past
+          in Failure(:invalid) then sprint_unread
           else settled(result, id)
         end
       end
@@ -39,6 +40,8 @@ module API
       end
 
       def sprint_past = invalid(sprint_on: [Tasks::SPRINT_PAST])
+
+      def sprint_unread = invalid(sprint_on: [Tasks::SPRINT_DAY])
 
       def task_reply(task, **extra)
         comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id),

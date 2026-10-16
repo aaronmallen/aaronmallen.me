@@ -57,6 +57,15 @@ RSpec.describe "API search", type: :request do
         .to eq(screen_titles(q: "zeppelin", kind: "message"))
     end
 
+    it "refuses kind message from a token without mail with a 422 on kind" do
+      headers = { "HTTP_ACCEPT" => "application/json",
+                  "HTTP_AUTHORIZATION" => "Bearer #{api_token(Blog::Types::OAuthScope.values - %w[mail])}" }
+      get "/api/v1/search", { query: "zeppelin", kind: "message" }, headers
+
+      expect([JSON.parse(last_response.body).fetch("errors"), status])
+        .to eq([{ "kind" => ["message rows need the mail scope"] }, 422])
+    end
+
     it "finds a task by its label in MCP search" do
       found = mcp_answer("search", query: task.number.to_s).fetch("results")
 

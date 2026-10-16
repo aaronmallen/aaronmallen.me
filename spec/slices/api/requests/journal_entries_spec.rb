@@ -76,6 +76,21 @@ RSpec.describe "API journal entries", type: :request do
         .to eq([kept.id])
     end
 
+    it "matches a padded tag after trimming it" do
+      kept = create(:journal_entry, entry_date: Date.new(2026, 3, 2), tags: %w[ruby])
+      create(:journal_entry, entry_date: Date.new(2026, 3, 3))
+
+      expect(list(from: "2026-03-01", to: "2026-03-31", tag: " ruby ").fetch("entries").map { it.fetch("id") })
+        .to eq([kept.id])
+    end
+
+    it "treats a blank tag as no tag" do
+      entry = create(:journal_entry, entry_date: Date.new(2026, 3, 2))
+
+      expect(list(from: "2026-03-01", to: "2026-03-31", tag: "").fetch("entries").map { it.fetch("id") })
+        .to eq([entry.id])
+    end
+
     it "counts the whole journal, whatever the window and tag" do
       create(:journal_entry, entry_date: today, body: "one two three")
       create(:journal_entry, entry_date: today - 1, body: "four five")

@@ -3,7 +3,6 @@
 module API
   module Endpoints
     class ListTasks < Endpoint
-      BAD_SPRINT_DAY = "give sprint_on as a day, such as 2026-01-01"
       LISTS = Blog::Types::TaskList.values.freeze
       OPEN = Blog::Types::OpenTaskStatus.values.freeze
       STATUSES = Blog::Types::TaskStatus.values.freeze
@@ -51,7 +50,7 @@ module API
 
       def handle(from: nil, page: 1, sprint_on: nil, to: nil, **filters)
         day = sprint_on && Blog::TimeZone.parse_day(sprint_on)
-        return invalid(sprint_on: [BAD_SPRINT_DAY]) if sprint_on && day.nil?
+        return invalid(sprint_on: [Tasks::SPRINT_DAY]) if sprint_on && day.nil?
 
         case Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(narrowed(**filters, sprint_on: day), first, last, page))

@@ -19,7 +19,14 @@ RSpec.describe "MCP mail scope", type: :request do
     def mcp_scopes = %w[read write delete]
 
     it "finds no mail in search" do
-      expect([found_kinds, found_kinds(kind: "message")]).to eq([%w[task], []])
+      expect(found_kinds).to eq(%w[task])
+    end
+
+    it "refuses a search for kind message" do
+      result = mcp_call("search", query: "zeppelin", kind: "message")
+
+      expect([result.fetch("isError"), result.dig("content", 0, "text")])
+        .to eq([true, "message rows need the mail scope"])
     end
 
     it "finds no mail in activity, its summary or attention" do

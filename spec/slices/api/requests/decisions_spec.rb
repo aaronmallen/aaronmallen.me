@@ -396,6 +396,16 @@ RSpec.describe "API decisions", type: :request do
       expect(listed("tag=Queues")).to eq([open_one.id])
     end
 
+    it "matches a padded tag after trimming it" do
+      tag(open_one, "ruby")
+
+      expect(listed("tag=%20ruby%20")).to eq([open_one.id])
+    end
+
+    it "treats a blank tag as no tag" do
+      expect(listed("tag=")).to eq([dropped.id, open_one.id])
+    end
+
     it "narrows the list by status and tag together" do
       tag(open_one, "queues")
       tag(dropped, "queues")

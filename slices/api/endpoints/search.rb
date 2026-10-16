@@ -31,10 +31,7 @@ module API
       include Deps[search_queries: "search.repos.search_queries"]
 
       def handle(query:, scopes:, kind: nil, page: 1)
-        found = search_queries.search(text: query, page: page_of(page), kinds: kinds(kind, scopes))
-        results = serialized(Serializers::SearchHit, found.rows)
-
-        Success(count: results.length, results:, **Helpers::Paging.fields(found))
+        refuse_mail(:kind, kind == MESSAGE, scopes) || searched(query, kind, scopes, page)
       end
 
       private
@@ -42,6 +39,13 @@ module API
       def kinds(kind, scopes)
         chosen = kind ? [kind] : KINDS
         mail?(scopes) ? chosen : chosen - [MESSAGE]
+      end
+
+      def searched(query, kind, scopes, page)
+        found = search_queries.search(text: query, page: page_of(page), kinds: kinds(kind, scopes))
+        results = serialized(Serializers::SearchHit, found.rows)
+
+        Success(count: results.length, results:, **Helpers::Paging.fields(found))
       end
     end
   end

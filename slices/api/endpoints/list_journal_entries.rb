@@ -36,7 +36,7 @@ module API
 
       def handle(from:, to:, tag: nil)
         case Helpers::DayWindow.days(from, to)
-          in Success[first, last] then Success(listed(first, last, tag&.downcase))
+          in Success[first, last] then Success(listed(first, last, Helpers::Tags.filter(tag)))
           in Failure(message) then bad_window(message)
         end
       end

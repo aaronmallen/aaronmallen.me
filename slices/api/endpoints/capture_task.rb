@@ -31,7 +31,8 @@ module API
 
         case capture_task.call(fields, filter: list, sprint_on:)
           in Success[_, task, *] then answered(task.id)
-          in Failure(:past) | Failure(:invalid) then sprint_past
+          in Failure(:past) then sprint_past
+          in Failure(:invalid) then sprint_unread
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
           else failed(Helpers::Wording::UNSAVED)
         end
