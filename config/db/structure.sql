@@ -5246,6 +5246,14 @@ ALTER TABLE ONLY public.mail_attachments
 
 
 --
+-- Name: mail_labels mail_labels_mail_account_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mail_labels
+    ADD CONSTRAINT mail_labels_mail_account_id_name_key UNIQUE (mail_account_id, name) DEFERRABLE;
+
+
+--
 -- Name: mail_labels mail_labels_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6225,13 +6233,6 @@ CREATE UNIQUE INDEX mail_accounts_provider_index ON public.mail_accounts USING b
 --
 
 CREATE UNIQUE INDEX mail_labels_mail_account_id_gmail_id_index ON public.mail_labels USING btree (mail_account_id, gmail_id);
-
-
---
--- Name: mail_labels_mail_account_id_name_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX mail_labels_mail_account_id_name_index ON public.mail_labels USING btree (mail_account_id, name);
 
 
 --
@@ -8717,4 +8718,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016001474_notify_admin_changes_on_short_link_checks.rb'),
 ('20261016002022_add_auto_approve_likes_and_reposts_to_webmention_settings.rb'),
 ('20261016002032_create_trusted_authors.rb'),
-('20261016002057_add_synced_from_to_calendars.rb');
+('20261016002057_add_synced_from_to_calendars.rb'),
+('20261016002066_defer_mail_label_name_check.rb');
