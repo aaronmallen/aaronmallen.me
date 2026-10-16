@@ -31,8 +31,9 @@ module Admin
       def failing_links(rows)
         published = rows.select { it.status == PUBLISHED }
         checks = post_queries.failing_links(published.map(&:id))
+        bodies = post_queries.bodies(checks.keys)
 
-        published.select { checks.key?(it.id) }.to_h { [it.id, link_rows(it, checks.fetch(it.id))] }
+        checks.to_h { |id, found| [id, link_rows(bodies.fetch(id), found)] }
       end
 
       def link_check
@@ -44,8 +45,8 @@ module Admin
         }
       end
 
-      def link_rows(post, checks)
-        texts = check_post_links.links(post.body)
+      def link_rows(body, checks)
+        texts = check_post_links.links(body)
 
         checks.map { { url: it.url, text: texts.fetch(it.url, Blog::Constants::EMPTY_STRING), check: it } }
       end

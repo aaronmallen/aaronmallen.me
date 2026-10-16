@@ -4,6 +4,11 @@ module Posts
   module Relations
     class Posts < Blog::DB::Relation
       PUBLISHED = Blog::Types::PostStatus["published"]
+      ROW = %i[
+        id title slug status published_at created_at updated_at summary first_paragraph read_time word_count
+        webmentions_enabled webmention_targets unsent_webmention_targets syndication_enabled syndication_targets
+        og_title og_image_url canonical_url
+      ].freeze
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
       SHARED_TAG = Sequel[:post_tags][:tag_id]
       MOST_SHARED = Sequel.function(:count, SHARED_TAG).desc
@@ -31,6 +36,8 @@ module Posts
       def last_changed_at
         unordered.max(Sequel.function(:greatest, self[:published_at].qualified, self[:updated_at].qualified))
       end
+
+      def lean = select(*ROW).combine(:tags)
 
       def linkable = linkables(title: :title, day: self.class.site_day(:published_at, :created_at))
 

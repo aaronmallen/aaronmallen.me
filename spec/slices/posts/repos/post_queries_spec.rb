@@ -22,4 +22,25 @@ RSpec.describe Posts::Repos::PostQueries do
       expect(read.map(&:keys)).to all(contain_exactly(:id, :slug, :published_at, :updated_at))
     end
   end
+
+  describe "the lists" do
+    let!(:tagged) { Array.new(3) { create(:post, :published, tags: %w[ruby]) } }
+    let(:page) { Blog::Structs::Page.new(number: 1, size: 10) }
+    let(:window) { { from: Blog::TimeZone.today - 2, to: Blog::TimeZone.today } }
+    let(:lists) do
+      [
+        post_queries.by_tag("ruby"), post_queries.by_ids(tagged.map(&:id)), post_queries.by_filter("all", page).rows,
+        post_queries.dated_between(**window, page:).rows, post_queries.calendar_between(**window),
+      ]
+    end
+
+    it "reads no bodies", :aggregate_failures do
+      expect(lists.map(&:size)).to all(eq(3))
+      expect(lists.flatten.map { it.to_h.keys & %i[body body_html syndication_body search_vector] }).to all(be_empty)
+    end
+
+    it "keeps the tags" do
+      expect(lists.flatten.map { it.tags.map(&:name) }).to all(eq(%w[ruby]))
+    end
+  end
 end

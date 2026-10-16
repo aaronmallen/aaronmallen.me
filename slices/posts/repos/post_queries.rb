@@ -17,20 +17,20 @@ module Posts
 
       def all = with_tags.newest_first.to_a
 
+      def bodies(ids) = posts.select(*LINKS).with_ids(ids).to_a.to_h { [it.id, it.body] }
+
       def by_filter(filter, page) = page.fill(filtered(filter).newest_first.paged(page).to_a)
 
       def by_id(id) = with_tags.by_pk(id).one
 
-      def by_ids(ids) = with_tags.with_ids(ids).newest_first.to_a
+      def by_ids(ids) = posts.lean.with_ids(ids).newest_first.to_a
 
       def by_status(status) = with_tags.with_status(status).newest_first.to_a
 
-      def by_tag(tag) = with_tags.tagged(tag).newest_first.to_a
+      def by_tag(tag) = posts.lean.tagged(tag).newest_first.to_a
 
       def calendar_between(from:, to:)
-        dated = with_tags.scheduled_or_published
-
-        dated.dated_between(*Blog::TimeZone.day_bounds(from, to)).oldest_first.to_a
+        posts.lean.scheduled_or_published.dated_between(*Blog::TimeZone.day_bounds(from, to)).oldest_first.to_a
       end
 
       def count_by_status = posts.tally(:status)
@@ -40,7 +40,7 @@ module Posts
       end
 
       def dated_between(from:, to:, page:, status: nil)
-        found = with_tags.dated_between(*Blog::TimeZone.day_bounds(from, to))
+        found = posts.lean.dated_between(*Blog::TimeZone.day_bounds(from, to))
         found = found.with_status(status) if status
 
         page.fill(found.newest_first.paged(page).to_a)
@@ -147,9 +147,9 @@ module Posts
 
       def filtered(filter)
         case filter
-          when ALL then with_tags
-          when BROKEN then with_tags.published.with_ids(failing_checks.select(:post_id).dataset.unordered)
-          else with_tags.with_status(filter)
+          when ALL then posts.lean
+          when BROKEN then posts.lean.published.with_ids(failing_checks.select(:post_id).dataset.unordered)
+          else posts.lean.with_status(filter)
         end
       end
 
