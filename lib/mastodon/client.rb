@@ -8,7 +8,6 @@ module Mastodon
     IMAGE_SIZE_LIMIT = %w[configuration media_attachments image_size_limit].freeze
     INSTANCE_PATH = "/api/v2/instance"
     LIMIT = 500
-    MEDIA_PATH = "/api/v2/media"
     MENTION = /@(\w[\w.-]*)@[\w-]+(?:\.[\w-]+)+/
     PROVIDER = Blog::Types::ServiceProvider["mastodon"]
     RESERVED_PER_URL = 23
@@ -88,7 +87,7 @@ module Mastodon
     def answered(route)
       response = yield
 
-      return response.body if response.success? && response.body.is_a?(Hash)
+      return response if response.success? && response.body.is_a?(Hash)
       raise RateLimited, "Mastodon rate limited #{route}" if response.status == TOO_MANY_REQUESTS
 
       raise Error, error_message(route, response)
@@ -129,8 +128,10 @@ module Mastodon
       @image_size_limit ||= request(:get, INSTANCE_PATH).dig(*IMAGE_SIZE_LIMIT).to_i
     end
 
+    def media_status(path) = answered("GET #{path}") { connection.get(path) }.status
+
     def request(verb, path, key: nil, **payload)
-      answered("#{verb.upcase} #{path}") { send_request(verb, path, key, payload) }
+      answered("#{verb.upcase} #{path}") { send_request(verb, path, key, payload) }.body
     end
 
     def send_request(verb, path, key, payload)
@@ -143,11 +144,11 @@ module Mastodon
 
     def upload(photo)
       form = Form.new(file: [fitted(photo), photo.content_type], description: photo.alt)
-      body = answered("POST #{MEDIA_PATH}") do
-        connection.post(MEDIA_PATH, form.body) { it.headers["Content-Type"] = form.content_type }
+      uploaded = answered("POST #{Media::PATH}") do
+        connection.post(Media::PATH, form.body) { it.headers["Content-Type"] = form.content_type }
       end
 
-      body.fetch("id") { raise Error, "Mastodon answered #{MEDIA_PATH} without a media ID" }.to_s
+      Media.processed(uploaded) { media_status(it) }
     end
   end
 end

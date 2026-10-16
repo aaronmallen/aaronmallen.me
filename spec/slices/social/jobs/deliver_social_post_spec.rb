@@ -241,6 +241,51 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
       expect(delivery(social_post, "mastodon").error).to eq("Mastodon answered 422 for POST /api/v2/media")
     end
+
+    describe "a GIF Mastodon processes after the upload" do
+      let(:gif) do
+        create(:photo, key: format("%032x.gif", 998))
+          .tap { stub_stored(it, File.binread("spec/fixtures/photos/animated.gif"), type: "image/gif") }
+      end
+
+      before do
+        stub_const("Mastodon::Media::SECONDS", 0)
+        stub_request(:post, SocialNetworks::MASTODON_MEDIA).to_return(**json_response(status: 202, id: "m9", url: nil))
+      end
+
+      def media_status = "https://ruby.social/api/v1/media/m9"
+
+      context "when it finishes" do
+        before do
+          stub_request(:get, media_status).to_return(
+            json_response(status: 206, id: "m9", url: nil), json_response(id: "m9", url: "https://files/m9.mp4"),
+          )
+          deliver(with_photos({ part: 1, key: gif.key }, parts: %w[one]), "mastodon")
+        end
+
+        it "uploads the GIF as a GIF" do
+          expect(a_request(:post, SocialNetworks::MASTODON_MEDIA).with { it.body.b.include?("image/gif") })
+            .to have_been_made
+        end
+
+        it "asks after the GIF until Mastodon has processed it" do
+          expect(a_request(:get, media_status)).to have_been_made.twice
+        end
+
+        it "attaches the GIF to the status" do
+          expect(a_request(:post, statuses).with(body: hash_including("media_ids" => %w[m9]))).to have_been_made
+        end
+      end
+
+      it "keeps the error and sends no status when the GIF never finishes", :aggregate_failures do
+        stub_request(:get, media_status).to_return(**json_response(status: 206, id: "m9", url: nil))
+        social_post = with_photos({ part: 1, key: gif.key }, parts: %w[one])
+        refused(social_post, "mastodon")
+
+        expect(delivery(social_post, "mastodon").error).to eq("Mastodon did not finish processing media m9")
+        expect(a_request(:post, statuses)).not_to have_been_made
+      end
+    end
   end
 
   describe "Mastodon refusing the send" do
