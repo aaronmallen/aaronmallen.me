@@ -5,6 +5,7 @@ status: active
 created: 2026-10-08
 area: [tasks, activity, db]
 issue: "#776"
+amended: ["#1506"]
 tags: [tasks, activity, review, time, work-sessions, sql, schema]
 ---
 
@@ -33,7 +34,9 @@ tasks' sessions, so two overlapping tasks in one project give it one hour, and i
 total.
 
 Manual time is the gap between a task's total and its closed sessions. It goes on top of the merged time as it
-stands, in place of the scaling the report does now. A task with no sessions still lands on the day it closed.
+stands, in place of the scaling the report does now. A task with no sessions still lands on the day it closed. A
+total set below the sessions gives no manual time: a lowered total never takes time away, so no day or group shows
+less than its sessions ran.
 
 The time report's merge lives in the `tasks` slice. The review's lives in a new migration that rebuilds
 `work_session_days`, so the review stays one activity query, reading `work_sessions` as [ADR 0021][0021] allows.

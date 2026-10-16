@@ -4889,7 +4889,7 @@ UNION ALL
     (tasks.worked_seconds - COALESCE(closed.seconds, 0)) AS seconds
    FROM (public.tasks
      LEFT JOIN closed ON ((closed.task_id = tasks.id)))
-  WHERE ((tasks.worked_seconds <> COALESCE(closed.seconds, 0)) AND (COALESCE(tasks.completed_at, closed.ended_at) IS NOT NULL));
+  WHERE ((tasks.worked_seconds > COALESCE(closed.seconds, 0)) AND (COALESCE(tasks.completed_at, closed.ended_at) IS NOT NULL));
 
 
 --
@@ -8724,4 +8724,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002057_add_synced_from_to_calendars.rb'),
 ('20261016002066_defer_mail_label_name_check.rb'),
 ('20261016002072_claim_decision_photos.rb'),
-('20261016002074_add_description_to_tags.rb');
+('20261016002074_add_description_to_tags.rb'),
+('20261016002086_keep_manual_work_session_days_positive.rb');

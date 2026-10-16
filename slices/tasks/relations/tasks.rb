@@ -87,8 +87,8 @@ module Tasks
       def manual_between(first, last)
         found = dataset.unordered.left_join(work_sessions.totals_by_task.as(:sessions), task_id: :id)
 
-        found.where(MANUAL_DAY => first..last).exclude(MANUAL => 0).select_map([:id, MANUAL_DAY.as(:worked_on),
-                                                                                MANUAL.as(:seconds)])
+        found.where(MANUAL_DAY => first..last, MANUAL => 1..).select_map([:id, MANUAL_DAY.as(:worked_on),
+                                                                          MANUAL.as(:seconds)])
       end
 
       def matching(text, label_ids = []) = containing(text, :title, :note, ids: label_ids)

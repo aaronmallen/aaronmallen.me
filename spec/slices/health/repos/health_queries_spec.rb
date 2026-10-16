@@ -72,6 +72,14 @@ RSpec.describe Health::Repos::HealthQueries do
     )
   end
 
+  it "counts no manual time for a task whose total fell below its sessions" do
+    task = create(:task, :done, completed_at: at(monday + 8, 11), worked_seconds: 1800)
+    create(:work_session, task_id: task.id, started_at: at(monday, 9), ended_at: at(monday, 11))
+    create(:work_session, task_id: task.id, started_at: at(monday + 8, 9), ended_at: at(monday + 8, 10))
+
+    expect(report.days.values_at(0, 8).map(&:focus_minutes)).to eq([120, 60])
+  end
+
   it "splits a session that runs past midnight between its days" do
     worked(at(monday, 23), at(monday + 1, 1))
 

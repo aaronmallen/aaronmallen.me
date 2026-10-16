@@ -268,6 +268,14 @@ RSpec.describe "API review", type: :request do
       expect(seconds_on("2026-09-15", "2026-09-16")).to eq([3600, 5400])
     end
 
+    it "counts no manual time for a task whose total fell below its sessions" do
+      task = create(:task, :done, completed_at: at(wednesday, 11), worked_seconds: 1800)
+      work(at(Date.new(2026, 9, 7), 9), at(Date.new(2026, 9, 7), 11), task:)
+      work(at(wednesday, 9), at(wednesday, 10), task:)
+
+      expect([seconds_on("2026-09-16"), review.dig("totals", "worked_seconds")]).to eq([[3600], 3600])
+    end
+
     describe "tasks that ran at once" do
       def ran(from, to, **)
         work(from, to, task: create(:task, :done, completed_at: to, worked_seconds: (to - from).to_i, **))
@@ -307,10 +315,10 @@ RSpec.describe "API review", type: :request do
         expect([seconds_on("2026-09-16", "2026-09-17"), task.worked_seconds]).to eq([[3600, 1800], 5400])
       end
 
-      it "takes time set by hand off the day an open task last ran" do
+      it "never takes time set by hand off the day an open task last ran" do
         work(at(wednesday, 9), at(wednesday, 10), task: create(:task, worked_seconds: 2400))
 
-        expect(seconds_on("2026-09-16")).to eq([2400])
+        expect(seconds_on("2026-09-16")).to eq([3600])
       end
 
       it "keeps time set by hand on the day an open task last ran while a session runs" do

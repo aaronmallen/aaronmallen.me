@@ -215,6 +215,23 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
     end
 
+    describe "a task whose total fell below its sessions" do
+      before do
+        task = create(:task, :done, title: "Cut short", completed_at: at(3, 12), worked_seconds: 1800)
+        create(:work_session, task_id: task.id, started_at: at(2, 9), ended_at: at(2, 11))
+        create(:work_session, task_id: task.id, started_at: at(3, 9), ended_at: at(3, 10))
+        visit_time(from: "2026-03-03", to: "2026-03-03", by: "tag")
+      end
+
+      it "shows only the day's sessions, with no negative time" do
+        expect(rows).to eq([["No tag", "1h 00m"]])
+      end
+
+      it "totals the day's sessions" do
+        expect(page).to have_css(".page-head-sub", text: "Mar 3, 2026 → Mar 3, 2026 · 1h 00m")
+      end
+    end
+
     describe "tasks that ran at the same time" do
       before do
         2.times { link(worked("Side by side #{it}", at(2, 9), at(2, 10)), site) }

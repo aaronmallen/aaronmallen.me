@@ -250,11 +250,11 @@ RSpec.describe "API time report", type: :request do
       expect([read(**range).fetch("seconds"), sums(**range)]).to eq([3 * 3600, [["2026-03-02", 3 * 3600]]])
     end
 
-    it "takes from the merged total as it stands" do
+    it "never takes from the merged total when set below the sessions" do
       beside("Ran alongside")
       spent("Set by hand", [at(2, 9), at(2, 10)], total: 1800, completed_at: at(2, 10))
 
-      expect(read(**range).fetch("seconds")).to eq(1800)
+      expect([read(**range).fetch("seconds"), sums(**range)]).to eq([3600, [["2026-03-02", 3600]]])
     end
 
     it "lands on the day the task closed, not across its sessions" do
