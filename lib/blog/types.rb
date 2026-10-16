@@ -127,6 +127,7 @@ module Blog
     PhotoKey = Types::String.constrained(format: /\A[0-9a-f]{32}\.(?:#{PhotoType.values.join('|')})\z/)
     PhotoOwner = Types::String.enum(
       "post", "journal_entry", "task", "task_comment", "decision_comment", "review_note", "social_post_part",
+      "decision", "decision_option",
     )
     PostBulkAction = Types::String.enum("tag", "untag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")

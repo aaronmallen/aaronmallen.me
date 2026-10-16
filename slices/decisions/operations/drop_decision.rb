@@ -11,6 +11,7 @@ module Decisions
         contract: "contracts.reason_contract",
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
+        record_decision_event: "operations.record_decision_event",
       ]
 
       def call(id, params)
@@ -27,7 +28,7 @@ module Decisions
 
       def drop(id, reason)
         decision_mutations.update(id, status: STATUS)
-        decision_mutations.record(id, EVENT, reason:)
+        record_decision_event.call(id, EVENT, reason:)
         close_decision_task.call(id, canceled: true)
       end
 

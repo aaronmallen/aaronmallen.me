@@ -3,9 +3,9 @@ id: "0082"
 title: Tie a photo to the records whose Markdown points to it
 status: active
 created: 2026-09-30
-area: [media, posts, record, tasks]
+area: [media, posts, record, tasks, decisions]
 issue: "#134"
-amended: ["#140", "#247", "#911", "#1071"]
+amended: ["#140", "#247", "#911", "#1071", "#1493"]
 tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
 ---
 
@@ -34,10 +34,12 @@ A photo belongs to the records whose Markdown points to it, and to nothing else.
   field, so a `/media/<key>` URL there claims too, and a card image can be an upload. Since #247 a post's edit
   notes claim for the post too, so a photo in a note lives as long as the post. Decision comments and review notes
   claim the same way, as #911 records. A social post part has no Markdown, so it claims its photos by row, as
-  [ADR 0144][0144] records for #1071.
+  [ADR 0144][0144] records for #1071. Since #1493 a decision claims for its problem and for every reason and edit
+  note in its history, option edit notes among them, and an option claims for its body.
 - **Deleting releases, and the last release deletes.** Deleting a record drops its claims, and deletes from the
-  store and the table each photo left with no claim. Deleting a task does the same for its comments. Nothing deletes
-  a review note, so its claims last (#911).
+  store and the table each photo left with no claim. Deleting a task does the same for its comments, and
+  deleting an option drops its claims and those of its edit notes. Nothing deletes a review note or a decision, so
+  their claims last (#911, #1493).
 - **A sweep takes the rest.** A scheduled job deletes every photo that has no claim and was uploaded over 24 hours
   ago. That covers a draft abandoned before its first save and a photo an edit took out of the text. It never
   retries, and its next run catches up ([ADR 0012][0012]).

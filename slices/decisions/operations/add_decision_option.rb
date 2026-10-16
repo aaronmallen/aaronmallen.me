@@ -10,6 +10,7 @@ module Decisions
         contract: "contracts.decision_option_contract",
         decision_mutations: "repos.decision_mutations",
         decision_option_mutations: "repos.decision_option_mutations",
+        record_decision_event: "operations.record_decision_event",
       ]
 
       def call(decision_id, params)
@@ -18,7 +19,7 @@ module Decisions
         transaction do
           step find(decision_id)
           option = decision_option_mutations.create(decision_id:, **fields)
-          decision_mutations.record(decision_id, OPTION_ADDED, option_id: option.id)
+          record_decision_event.call(decision_id, OPTION_ADDED, option_id: option.id)
           option
         end
       end

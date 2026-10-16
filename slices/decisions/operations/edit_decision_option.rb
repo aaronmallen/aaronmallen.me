@@ -10,6 +10,7 @@ module Decisions
         decision_mutations: "repos.decision_mutations",
         decision_option_mutations: "repos.decision_option_mutations",
         decision_queries: "repos.decision_queries",
+        record_decision_event: "operations.record_decision_event",
         require_edit_note: "operations.require_edit_note",
       ]
 
@@ -36,7 +37,7 @@ module Decisions
 
         kept = step require_edit_note.call(needed: decision.closed?, note:)
         saved = decision_option_mutations.update(option.id, title:, body:)
-        decision_mutations.record(decision.id, OPTION_EDITED, option_id: option.id, note: kept)
+        record_decision_event.call(decision.id, OPTION_EDITED, option_id: option.id, note: kept)
         Success(saved)
       end
     end

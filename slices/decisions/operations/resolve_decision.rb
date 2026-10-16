@@ -12,6 +12,7 @@ module Decisions
         contract: "contracts.resolution_contract",
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
+        record_decision_event: "operations.record_decision_event",
       ]
 
       def call(id, params)
@@ -32,7 +33,7 @@ module Decisions
           step find(id)
           decision_mutations.update(id, status: STATUS, resolved_option_id: option_id)
           step close_decision_task.call(id)
-          Success(decision_mutations.record(id, EVENT, option_id:, reason:))
+          Success(record_decision_event.call(id, EVENT, option_id:, reason:))
         end
       rescue ROM::SQL::ForeignKeyConstraintError => e
         raise unless decision_mutations.violated_constraint(e) == CHOICE

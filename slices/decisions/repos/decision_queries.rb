@@ -26,10 +26,17 @@ module Decisions
         page.fill(found.newest_first.paged(page).to_a)
       end
 
+      def option_bodies(decision_id) = decision_options.for_decision(decision_id).pluck(:id, :body)
+
       def option_on_decision(decision_id, id) = decision_options.for_decision(decision_id).by_pk(id).one
 
       def page_by_status(status, page)
         page.fill(decisions.combine(:comments, :options, :tags).with_status(status).newest_first.paged(page).to_a)
+      end
+
+      def photo_texts(decision_id)
+        [*decisions.by_pk(decision_id).pluck(:problem),
+         *decision_events.where(decision_id:).pluck(:reason, :note).flatten]
       end
 
       def timeline(decision_id) = decision_timeline.for_decision(decision_id).oldest_first.to_a

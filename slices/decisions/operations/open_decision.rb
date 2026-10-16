@@ -11,21 +11,27 @@ module Decisions
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
         open_decision_task: "tasks.operations.open_decision_task",
+        record_decision_event: "operations.record_decision_event",
       ]
 
       def call(params)
         fields = step validate(params)
 
         transaction do
-          decision = decision_mutations.create(**fields.except(:tags))
-          decision_mutations.replace_tags(decision.id, fields.fetch(:tags))
-          decision_mutations.record(decision.id, OPENED)
+          decision = create(fields)
           step open_decision_task.call(decision.id, decision.title)
           decision_queries.by_id(decision.id)
         end
       end
 
       private
+
+      def create(fields)
+        decision = decision_mutations.create(**fields.except(:tags))
+        decision_mutations.replace_tags(decision.id, fields.fetch(:tags))
+        record_decision_event.call(decision.id, OPENED)
+        decision
+      end
 
       def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
     end

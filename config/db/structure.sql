@@ -254,7 +254,9 @@ CREATE TYPE public.photo_owner AS ENUM (
     'task_comment',
     'decision_comment',
     'review_note',
-    'social_post_part'
+    'social_post_part',
+    'decision',
+    'decision_option'
 );
 
 
@@ -8719,4 +8721,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002022_add_auto_approve_likes_and_reposts_to_webmention_settings.rb'),
 ('20261016002032_create_trusted_authors.rb'),
 ('20261016002057_add_synced_from_to_calendars.rb'),
-('20261016002066_defer_mail_label_name_check.rb');
+('20261016002066_defer_mail_label_name_check.rb'),
+('20261016002072_claim_decision_photos.rb');

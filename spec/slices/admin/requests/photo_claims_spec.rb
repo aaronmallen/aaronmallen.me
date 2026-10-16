@@ -291,4 +291,93 @@ RSpec.describe "Admin photo claims", type: :request do
       expect(a_request(:delete, media_store_url(other.key))).to have_been_made
     end
   end
+
+  describe "a decision" do
+    let(:decisions) { Decisions::Slice["relations.decisions"] }
+
+    def decision = decisions.to_a.first
+
+    def path = "/admin/decisions/#{decision[:id]}"
+
+    def update(problem, note: "") = send_to(path, decision: { title: "Pick a host", problem:, note: })
+
+    before { send_to("/admin/decisions", decision: { title: "Pick a host", problem: markdown(photo) }) }
+
+    it "claims the photos its problem points to" do
+      expect(claims_of("decision")).to eq([[decision[:id], photo.id]])
+    end
+
+    it "drops the claim on a photo taken out of its problem" do
+      update(markdown(other))
+
+      expect(claims_of("decision")).to eq([[decision[:id], other.id]])
+    end
+
+    it "claims the photo an edit note points to" do
+      send_to("#{path}/drop", decision: { reason: "No need" })
+      update("text only", note: markdown(other))
+
+      expect(claims_of("decision")).to eq([[decision[:id], other.id]])
+    end
+
+    %w[drop resolve].each do |kind|
+      it "claims the photo its #{kind} reason points to" do
+        option = create(:decision_option, decision_id: decision[:id], body: "")
+        send_to("#{path}/#{kind}", decision: { option_id: option.id, reason: markdown(other) })
+
+        expect(claims_of("decision")).to contain_exactly([decision[:id], photo.id], [decision[:id], other.id])
+      end
+    end
+
+    it "claims the photo its reopen reason points to" do
+      send_to("#{path}/drop", decision: { reason: "No need" })
+      send_to("#{path}/reopen", decision: { reason: markdown(other) })
+
+      expect(claims_of("decision")).to contain_exactly([decision[:id], photo.id], [decision[:id], other.id])
+    end
+
+    it "keeps the photo through the sweep", :aggregate_failures do
+      stub_store_delete(photo)
+      Media::Slice["operations.sweep_photos"].call(at: Time.now + (2 * 24 * 60 * 60))
+
+      expect(keys).to include(photo.key)
+      expect(a_request(:delete, media_store_url(photo.key))).not_to have_been_made
+    end
+  end
+
+  describe "a decision option" do
+    let(:decision) { create(:decision, problem: "text only") }
+    let(:options) { Decisions::Slice["relations.decision_options"] }
+
+    def option = options.to_a.first
+
+    def path = "/admin/decisions/#{decision.id}/options"
+
+    before { send_to(path, option: { title: "Good Job", body: markdown(photo, other) }) }
+
+    it "claims the photos its body points to" do
+      expect(claims_of("decision_option")).to contain_exactly([option[:id], photo.id], [option[:id], other.id])
+    end
+
+    it "drops the claim on a photo taken out of its body" do
+      send_to("#{path}/#{option[:id]}", option: { title: "Good Job", body: markdown(other), note: "" })
+
+      expect(claims_of("decision_option")).to eq([[option[:id], other.id]])
+    end
+
+    it "claims the photo its edit note points to for the decision" do
+      send_to("/admin/decisions/#{decision.id}/drop", decision: { reason: "No need" })
+      send_to("#{path}/#{option[:id]}", option: { title: "Good Job", body: "text only", note: markdown(other) })
+
+      expect(claims_of("decision")).to eq([[decision.id, other.id]])
+    end
+
+    it "deletes its photos with it", :aggregate_failures, :commits do
+      stub_store_delete(photo, other)
+      Decisions::Slice["operations.delete_decision_option"].call(decision.id, option[:id])
+
+      expect(keys).to be_empty
+      expect(claims.count).to eq(0)
+    end
+  end
 end

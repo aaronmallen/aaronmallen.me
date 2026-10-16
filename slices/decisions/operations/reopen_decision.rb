@@ -10,6 +10,7 @@ module Decisions
         contract: "contracts.reason_contract",
         decision_mutations: "repos.decision_mutations",
         decision_queries: "repos.decision_queries",
+        record_decision_event: "operations.record_decision_event",
         reopen_decision_task: "tasks.operations.reopen_decision_task",
       ]
 
@@ -30,7 +31,7 @@ module Decisions
 
       def reopen(decision, reason)
         decision_mutations.update(decision.id, status: OPEN, resolved_option_id: nil)
-        decision_mutations.record(decision.id, REOPENED, reason:)
+        record_decision_event.call(decision.id, REOPENED, reason:)
         reopen_decision_task.call(decision.id, decision.title)
       end
     end
