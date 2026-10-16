@@ -36,7 +36,7 @@ module Admin
             FilterSwitch(
               action: path(:admin_webmentions),
               name: "status",
-              options: FILTERS,
+              options: FILTERS.transform_values { t(it) },
               selected: @filter,
               label: t(".filter"),
             )

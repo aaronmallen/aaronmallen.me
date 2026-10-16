@@ -39,8 +39,8 @@ module Admin
 
           def filter_form
             FilterSwitch(
-              action: path(:admin_files), name: "kind", options: FILTERS, selected: filter, label: t(".filter"),
-              keep: { search: },
+              action: path(:admin_files), name: "kind", options: FILTERS.transform_values { t(it) }, selected: filter,
+              label: t(".filter"), keep: { search: },
             )
           end
 

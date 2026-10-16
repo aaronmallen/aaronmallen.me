@@ -108,8 +108,8 @@ module Admin
 
           def sort_form
             FilterSwitch(
-              action: path(:admin_links), name: "sort", options: SORTS, selected: sort, label: t(".sort"),
-              keep: { filter: (filter if failing?), search: },
+              action: path(:admin_links), name: "sort", options: SORTS.transform_values { t(it) }, selected: sort,
+              label: t(".sort"), keep: { filter: (filter if failing?), search: },
             )
           end
 

@@ -81,6 +81,14 @@ RSpec.describe "Admin recurring tasks", :frozen_clock, type: :request do
   end
 
   describe "the switch" do
+    it "posts itself when flipped and morphs the page", :aggregate_failures do
+      series = cadence(cadence: "days", every: 1)
+      form = recurring.find(".series-row form")
+
+      expect(form).to match_css("[method='post'][action='/admin/tasks/series/#{series.id}/switch'][data-autosubmit]")
+      expect(form).to match_css("[data-morph]").and have_field("_csrf_token", type: :hidden)
+    end
+
     it "pauses the series and keeps its cadence", :aggregate_failures do
       series = cadence(cadence: "days", every: 1)
 

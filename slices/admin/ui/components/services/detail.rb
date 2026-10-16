@@ -123,7 +123,9 @@ module Admin
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }
 
           def work
-            Form(action: path(:admin_work_service, id: @row.connection.id), data: { autosubmit: "", morph: true }) do
+            AutoForm(
+              method: "post", action: path(:admin_work_service, id: @row.connection.id), data: { morph: true },
+            ) do
               Checkbox(switch: true, label: t(".work"), name: "work", checked: @row.connection.work)
               noscript { Button(type: "submit", small: true) { t(".save") } }
             end

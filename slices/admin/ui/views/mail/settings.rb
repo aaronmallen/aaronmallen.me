@@ -18,7 +18,7 @@ module Admin
             PageHead(title: t(".heading"), sub: t(".sub")) do
               BackLink(href: path(:admin_mail), variant: :gh) { t(".back") }
             end
-            Form(action: path(:admin_update_mail_settings), data: { autosubmit: "" }) do
+            AutoForm(method: "post", action: path(:admin_update_mail_settings)) do
               cards
               noscript { Button(type: "submit", small: true) { t(".save") } }
             end

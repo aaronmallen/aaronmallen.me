@@ -7,7 +7,7 @@ module Blog
         prop :values, Blog::Types::Hash
 
         def view_template
-          @values.each do |name, value|
+          @values.compact.each do |name, value|
             (value.is_a?(Array) ? value : [value]).each { input(type: "hidden", name: name.to_s, value: it) }
           end
         end

@@ -32,7 +32,7 @@ module Admin
             FilterSwitch(
               action: path(:admin_social),
               name: "filter",
-              options: FILTERS,
+              options: FILTERS.transform_values { t(it) },
               selected: @filter,
               label: t(".filter"),
             )

@@ -13,14 +13,10 @@ module Admin
 
         def view_template
           AutoForm(action: @action) do
-            @keep.compact.each { |name, value| input(type: "hidden", name:, value:) }
-            SegmentedControl(label: @label, name: @name, options:, selected: @selected)
+            HiddenFields(values: @keep)
+            SegmentedControl(label: @label, name: @name, options: @options, selected: @selected)
           end
         end
-
-        private
-
-        def options = @options.transform_values { t(it) }
       end
     end
   end

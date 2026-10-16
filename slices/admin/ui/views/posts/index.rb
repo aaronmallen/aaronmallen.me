@@ -76,9 +76,9 @@ module Admin
           def empty = broken? ? ".no_broken_posts" : ".empty"
 
           def filter_form
-            AutoForm(action: path(:admin_posts)) do
-              SegmentedControl(label: t(".filter"), name: "status", options: filters, selected: @filter)
-            end
+            FilterSwitch(
+              action: path(:admin_posts), name: "status", options: filters, selected: @filter, label: t(".filter"),
+            )
           end
 
           def filters

@@ -41,7 +41,7 @@ module Admin
           end
 
           def switch(series, task)
-            Form(action: path(:admin_switch_task_series, id: series.id), data: { autosubmit: "", morph: true }) do
+            AutoForm(method: "post", action: path(:admin_switch_task_series, id: series.id), data: { morph: true }) do
               Checkbox(
                 switch: true, label: t(".label"), name: "on", checked: !series.paused,
                 aria: { label: t(".switch", title: task.title) },

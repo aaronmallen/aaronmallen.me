@@ -70,6 +70,13 @@ RSpec.describe "Admin mail settings", type: :request do
       end
     end
 
+    it "posts the settings when one changes", :aggregate_failures do
+      get "/admin/mail/settings"
+
+      expect(page).to have_css("form[method='post'][action='/admin/mail/settings'][data-autosubmit]")
+      expect(page.find("form[data-autosubmit]")).to have_field("_csrf_token", type: :hidden)
+    end
+
     it "shows the default rules without writing a settings row", :aggregate_failures do
       get "/admin/mail/settings"
 

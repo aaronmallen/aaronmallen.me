@@ -6,10 +6,12 @@ module Admin
       class AutoForm < Component
         HOOK = { autosubmit: "" }.freeze
 
+        prop :method, Blog::Types::String, default: Blog::UI::Components::Form::GET
+        prop :data, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template
-          Form(method: Blog::UI::Components::Form::GET, **@attributes, data: HOOK) { yield if block_given? }
+          Form(method: @method, **@attributes, data: { **@data, **HOOK }) { yield if block_given? }
         end
       end
     end
