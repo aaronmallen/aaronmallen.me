@@ -791,6 +791,51 @@ RSpec.describe "Visits", type: :request do
     end
   end
 
+  describe "a path to a project board" do
+    let(:board) { create(:project, name: "Doing It", board_published: true) }
+
+    before { create(:task, project_id: board.id) }
+
+    it "stores a view of a published board" do
+      beacon({ kind: "view", path: "/projects/doing-it" })
+
+      expect(stored.map(&:path)).to eq(["/projects/doing-it"])
+    end
+
+    it "stores a view of a task on a published board" do
+      beacon({ kind: "view", path: "/projects/doing-it/tasks/1" })
+
+      expect(stored.map(&:path)).to eq(["/projects/doing-it/tasks/1"])
+    end
+
+    {
+      "a board no project has" => "/projects/nothing-here",
+      "a task the board does not hold" => "/projects/doing-it/tasks/2",
+      "a task number no task can take" => "/projects/doing-it/tasks/abc",
+      "a slug that decodes to bad UTF-8" => "/projects/%FF",
+    }.each do |named, path|
+      it "stores nothing for #{named}" do
+        beacon({ kind: "view", path: })
+
+        expect(stored).to be_empty
+      end
+    end
+
+    it "stores nothing for a private board whose slug a published post shares" do
+      create(:project, :private, name: "hello", board_published: true)
+      beacon({ kind: "view", path: "/projects/hello" })
+
+      expect(stored).to be_empty
+    end
+
+    it "stores nothing for a public project whose board is unpublished and whose slug a published post shares" do
+      create(:project, name: "hello")
+      beacon({ kind: "view", path: "/projects/hello" })
+
+      expect(stored).to be_empty
+    end
+  end
+
   describe "a path the router answers that names nothing on the site" do
     before { create(:post, :draft, slug: "unfinished", tags: %w[secret]) }
 
