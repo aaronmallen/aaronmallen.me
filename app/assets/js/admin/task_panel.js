@@ -9,7 +9,7 @@ import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
 import { setupTagFields } from "./tag_field.js";
 import { setupTaskOrder } from "./task_order.js";
-import { showToast } from "./toast.js";
+import { showPageToast } from "./toast.js";
 
 const CANCEL = "a[data-task-cancel]";
 const DRAWER = { headers: { "X-Drawer": "1" } };
@@ -19,7 +19,6 @@ const EDIT_LINK = "footer a[data-task-open-edit]";
 const FIND = "[data-task-find]";
 const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
 const TASK = "[data-task-read], [data-task-edit]";
-const TOAST = "[data-toast]";
 
 const ready = new WeakSet();
 let bound = false;
@@ -99,9 +98,7 @@ function setupPanel(panel) {
     if (!task) return window.location.assign(here());
 
     show(task);
-
-    const toast = page.querySelector(TOAST);
-    if (toast) showToast(toast.textContent.trim());
+    showPageToast(page);
   };
 
   const post = setupPost({

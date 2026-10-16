@@ -1,7 +1,7 @@
 import { parse } from "./in_place.js";
 import { whilePosting } from "./live.js";
-import { followPointer } from "./pointer.js";
-import { showToast } from "./toast.js";
+import { floatGhost, followPointer, holdPage, moveGhost, releasePage } from "./pointer.js";
+import { showPageToast, showToast } from "./toast.js";
 
 const DAY = "a[data-calendar-day]";
 const DRAGGING = "cal-dragging";
@@ -12,6 +12,7 @@ const MORPHED = "admin:morphed";
 const PANEL = "[data-calendar-panel]";
 const REFUSED = "cal-refused";
 const TARGET = "cal-target";
+const TITLE = ".li-title, .cal-event-name";
 
 export function armGrips(root) {
   for (const grip of root.querySelectorAll(GRIP)) grip.hidden = false;
@@ -42,13 +43,14 @@ function drag(calendar, grip, press, drop) {
   let over = null;
 
   const move = (moved) => {
-    ghost.style.translate = `${moved.clientX + 12}px ${moved.clientY + 12}px`;
+    moveGhost(ghost, moved);
     over?.classList.remove(TARGET, REFUSED);
     over = dayAt(calendar, moved, from);
     over?.classList.add(refused(over) ? REFUSED : TARGET);
   };
 
   const end = (done, cancelled) => {
+    releasePage();
     ghost.remove();
     over?.classList.remove(TARGET, REFUSED);
 
@@ -59,26 +61,16 @@ function drag(calendar, grip, press, drop) {
     drop(day.dataset.calendarDay);
   };
 
-  if (followPointer(press, { element: row, dragging: DRAGGING, move, end })) ghost = floating(row, press);
+  if (!followPointer(press, { element: row, dragging: DRAGGING, move, end })) return;
+
+  holdPage();
+  ghost = floatGhost("cal-ghost", row.querySelector(TITLE)?.textContent ?? "", press);
 }
 
 function dayAt(calendar, event, from) {
   const day = document.elementFromPoint(event.clientX, event.clientY)?.closest(DAY);
 
   return day && calendar.contains(day) && day.dataset.calendarDay !== from ? day : null;
-}
-
-function floating(row, start) {
-  const ghost = document.createElement("div");
-
-  ghost.className = "cal-ghost";
-  ghost.setAttribute("aria-hidden", "true");
-  ghost.textContent = row.querySelector(".li-title, .cal-event-name")?.textContent ?? "";
-  ghost.style.left = "0";
-  ghost.style.top = "0";
-  ghost.style.translate = `${start.clientX + 12}px ${start.clientY + 12}px`;
-  document.body.append(ghost);
-  return ghost;
 }
 
 async function move(calendar, grip, day) {
@@ -104,8 +96,7 @@ async function move(calendar, grip, day) {
   document.dispatchEvent(new Event(MORPHED));
 
   const stayed = panel.querySelector(`[data-calendar-item="${item}"]`) !== null;
-  const message = page.querySelector("[data-toast]")?.textContent.trim();
-  if (message) showToast(message, { failed: stayed });
+  showPageToast(page, { failed: stayed });
 }
 
 function refused(day) {

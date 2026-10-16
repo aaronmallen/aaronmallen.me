@@ -1,11 +1,12 @@
 import { fresh } from "./fresh.js";
 
 const DURATION = 2400;
+const TOAST = "[data-toast]";
 
 const ready = new WeakSet();
 
 export function setupToasts() {
-  for (const region of fresh(ready, document.querySelectorAll("[data-toast]"))) {
+  for (const region of fresh(ready, document.querySelectorAll(TOAST))) {
     play(region);
   }
 }
@@ -27,6 +28,11 @@ export function showToast(message, { failed = false } = {}) {
   region.append(toast);
   document.body.append(region);
   play(region);
+}
+
+export function showPageToast(page, options) {
+  const message = page.querySelector(TOAST)?.textContent.trim();
+  if (message) showToast(message, options);
 }
 
 function play(region) {

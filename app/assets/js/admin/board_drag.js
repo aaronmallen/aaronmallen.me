@@ -1,4 +1,4 @@
-import { followPointer, GHOST_OFFSET, menu, still, swallowClick, waitForDrag } from "./pointer.js";
+import { floatGhost, followPointer, holdPage, moveGhost, releasePage, waitForDrag } from "./pointer.js";
 
 const CARD = "[data-board-card]";
 const COLUMN = "[data-board-column]";
@@ -26,16 +26,14 @@ function drag(card, press, at) {
   let over = null;
 
   const move = (moved) => {
-    ghost.style.translate = `${moved.clientX + GHOST_OFFSET}px ${moved.clientY + GHOST_OFFSET}px`;
+    moveGhost(ghost, moved);
     over?.classList.remove(OVER);
     over = columnAt(moved, from);
     over?.classList.add(OVER);
   };
 
   const end = (done, cancelled) => {
-    document.removeEventListener("touchmove", still);
-    document.removeEventListener("contextmenu", menu, true);
-    swallowClick();
+    releasePage();
     ghost.remove();
     over?.classList.remove(OVER);
 
@@ -45,28 +43,14 @@ function drag(card, press, at) {
 
   if (!followPointer(press, { element: card, dragging: DRAGGING, move, end })) return;
 
-  document.addEventListener("touchmove", still, { passive: false });
-  document.addEventListener("contextmenu", menu, true);
-  ghost = floating(card, at);
+  holdPage();
+  ghost = floatGhost("kc-ghost", card.querySelector(TITLE)?.textContent ?? "", at);
 }
 
 function columnAt(event, from) {
   const column = document.elementFromPoint(event.clientX, event.clientY)?.closest(COLUMN);
 
   return column && column !== from ? column : null;
-}
-
-function floating(card, start) {
-  const ghost = document.createElement("div");
-
-  ghost.className = "kc-ghost";
-  ghost.setAttribute("aria-hidden", "true");
-  ghost.textContent = card.querySelector(TITLE)?.textContent ?? "";
-  ghost.style.left = "0";
-  ghost.style.top = "0";
-  ghost.style.translate = `${start.clientX + GHOST_OFFSET}px ${start.clientY + GHOST_OFFSET}px`;
-  document.body.append(ghost);
-  return ghost;
 }
 
 function submitTo(card, column) {

@@ -1,6 +1,6 @@
 import { whilePosting } from "./live.js";
 import { postAndMorph } from "./morph_form.js";
-import { followPointer, GHOST_OFFSET, menu, still, swallowClick, waitForDrag } from "./pointer.js";
+import { floatGhost, followPointer, holdPage, moveGhost, releasePage, waitForDrag } from "./pointer.js";
 
 const BULK = "#mail-bulk";
 const DRAGGING = "mail-dragging";
@@ -34,16 +34,14 @@ function drag(row, press, at) {
   let over = null;
 
   const move = (moved) => {
-    ghost.style.translate = `${moved.clientX + GHOST_OFFSET}px ${moved.clientY + GHOST_OFFSET}px`;
+    moveGhost(ghost, moved);
     over?.classList.remove(OVER);
     over = dropAt(moved);
     over?.classList.add(OVER);
   };
 
   const end = async (done, cancelled) => {
-    document.removeEventListener("touchmove", still);
-    document.removeEventListener("contextmenu", menu, true);
-    swallowClick();
+    releasePage();
     ghost.remove();
     for (const target of targets) target.classList.remove(TARGET, OVER);
     for (const each of rows) each.classList.remove(DRAGGING);
@@ -61,11 +59,10 @@ function drag(row, press, at) {
 
   if (!followPointer(press, { element: row, dragging: DRAGGING, move, end })) return;
 
-  document.addEventListener("touchmove", still, { passive: false });
-  document.addEventListener("contextmenu", menu, true);
+  holdPage();
   for (const target of targets) target.classList.add(TARGET);
   for (const each of rows) each.classList.add(DRAGGING);
-  ghost = floating(ids.length === 1 ? row.dataset.mailDrag : many(ids.length), at);
+  ghost = floatGhost("mail-ghost", ids.length === 1 ? row.dataset.mailDrag : many(ids.length), at);
 }
 
 function dragged(form, row) {
@@ -81,19 +78,6 @@ function droppable() {
 
 function dropAt(event) {
   return document.elementFromPoint(event.clientX, event.clientY)?.closest(DROP) ?? null;
-}
-
-function floating(text, start) {
-  const ghost = document.createElement("div");
-
-  ghost.className = "mail-ghost";
-  ghost.setAttribute("aria-hidden", "true");
-  ghost.textContent = text;
-  ghost.style.left = "0";
-  ghost.style.top = "0";
-  ghost.style.translate = `${start.clientX + GHOST_OFFSET}px ${start.clientY + GHOST_OFFSET}px`;
-  document.body.append(ghost);
-  return ghost;
 }
 
 function many(count) {

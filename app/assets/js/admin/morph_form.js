@@ -3,7 +3,7 @@ import { MENU } from "./context_menu.js";
 import { focusField } from "./dialog.js";
 import { parse } from "./in_place.js";
 import { MORPHED_PARTS, morphPage, whilePosting } from "./live.js";
-import { showToast } from "./toast.js";
+import { showPageToast, showToast } from "./toast.js";
 
 const FAILED = "[data-morph-failed]";
 const FORM = "form[data-morph]";
@@ -11,7 +11,6 @@ const HIDDEN = "input[type=hidden]";
 const HOSTS = `${MORPHED_PARTS}, ${MENU}`;
 const OPEN = "[data-key-open]";
 const ROW = "[data-key-row]";
-const TOAST = "[data-toast]";
 const UNPROCESSABLE = 422;
 
 const busy = new WeakSet();
@@ -44,8 +43,7 @@ export async function postAndMorph(url, body, form = null) {
   morphPage(landed.page);
   if (form) refocus(form);
 
-  const toast = landed.page.querySelector(TOAST);
-  if (toast) showToast(toast.textContent.trim());
+  showPageToast(landed.page);
 }
 
 async function landing(url, body, id) {

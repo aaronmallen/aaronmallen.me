@@ -1,6 +1,6 @@
 const ENDS = ["pointerup", "pointercancel"];
 
-export const GHOST_OFFSET = 14;
+const GHOST_OFFSET = 14;
 export const HOLD = 300;
 const SLOP = 6;
 
@@ -59,16 +59,44 @@ export function waitForDrag(press, start) {
   for (const type of ENDS) document.addEventListener(type, stop);
 }
 
-export function menu(event) {
+export function floatGhost(className, text, at) {
+  const ghost = document.createElement("div");
+
+  ghost.className = className;
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.textContent = text;
+  ghost.style.left = "0";
+  ghost.style.top = "0";
+  moveGhost(ghost, at);
+  document.body.append(ghost);
+  return ghost;
+}
+
+export function moveGhost(ghost, event) {
+  ghost.style.translate = `${event.clientX + GHOST_OFFSET}px ${event.clientY + GHOST_OFFSET}px`;
+}
+
+export function holdPage() {
+  document.addEventListener("touchmove", still, { passive: false });
+  document.addEventListener("contextmenu", menu, true);
+}
+
+export function releasePage() {
+  document.removeEventListener("touchmove", still);
+  document.removeEventListener("contextmenu", menu, true);
+  swallowClick();
+}
+
+function menu(event) {
   event.preventDefault();
   event.stopPropagation();
 }
 
-export function still(event) {
+function still(event) {
   if (event.cancelable) event.preventDefault();
 }
 
-export function swallowClick() {
+function swallowClick() {
   const swallow = (event) => menu(event);
 
   document.addEventListener("click", swallow, true);
