@@ -542,10 +542,20 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(page).to have_no_css("[data-task-act='start']")
       end
 
-      it "opens the complete from a primary button" do
-        read(create(:task, :in_progress, :in_sprint))
+      it "closes a task with tracked time from a primary submit, with no question", :aggregate_failures do
+        read(create(:task, :in_progress, :in_sprint, worked_seconds: 1800))
 
-        expect(page).to have_css("details.task-complete > summary.bt.pri.sm")
+        expect(page).to have_css("form[data-task-act='complete'] > button.bt.pri.sm[type=submit]")
+        expect(page).to have_no_css(".task-complete, .task-complete-ask")
+      end
+
+      it "closes a task whose only time is a running session with no question", :aggregate_failures do
+        running = create(:task, :in_progress, :in_sprint)
+        create(:work_session, task_id: running.id, started_at: Time.now)
+        read(running)
+
+        expect(page).to have_css("form[data-task-act='complete'] > button.bt.pri.sm[type=submit]")
+        expect(page).to have_no_css(".task-complete, .task-complete-ask")
       end
 
       it "marks the pause the palette runs on a task in progress" do

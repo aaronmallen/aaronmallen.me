@@ -369,12 +369,27 @@ RSpec.describe "Admin task time", type: :request do
 
       def field(name) = page.find("form[action$='/complete'] input[name='worked[#{name}]']", visible: :all)
 
-      it "asks how long it took, filled with the tracked time", :aggregate_failures do
-        read
+      it "asks how long it took on a task with no tracked time", :aggregate_failures do
+        create(:task)
+        get("/admin/tasks", filter: "next")
 
         legend = page.find("form[action$='/complete'] legend", visible: :all)
         expect(legend.text(:all)).to eq(t("ui.components.tasks.complete_form.ask"))
-        expect([field(:hours)["value"], field(:minutes)["value"]]).to eq(%w[0 40])
+        expect([field(:hours)["value"], field(:minutes)["value"]]).to eq(%w[0 0])
+      end
+
+      it "asks nothing on a task with tracked time" do
+        read
+
+        expect(page).to have_no_css("form[action$='/complete'] legend", visible: :all)
+      end
+
+      it "keeps the tracked total when a task with closed sessions completes in one click" do
+        found = create(:task, worked_seconds: 1800)
+        closed(on: found)
+        send_to("/admin/tasks/#{found.id}/complete")
+
+        expect([repo.by_id(found.id).status, total(found)]).to eq(["done", 1800])
       end
 
       it "keeps the tracked total when the answer is left as it was", :aggregate_failures do

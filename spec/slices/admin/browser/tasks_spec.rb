@@ -1001,7 +1001,7 @@ RSpec.describe "Admin tasks", type: :feature do
       it "still completes while blocked" do
         row("Email the accountant").click_button(translate("ui.components.tasks.controls.start"))
         find(".toast", text: "Started")
-        complete_task(row("Email the accountant"))
+        row("Email the accountant").click_button(translate("ui.components.tasks.complete_form.complete"))
 
         expect(page).to have_css(".toast", text: "Done")
       end

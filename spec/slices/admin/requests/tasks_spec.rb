@@ -1058,6 +1058,23 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css("details.task-complete > summary.bt.sm[aria-keyshortcuts='x'][data-key='x']")
       end
 
+      it "closes a task with tracked time from a keyed submit, with no question", :aggregate_failures do
+        create(:task, worked_seconds: 1800)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-acts form[data-task-act='complete'] > button[type=submit][data-key='x']")
+        expect(page).to have_no_css(".task-complete, .task-complete-ask")
+      end
+
+      it "closes a task whose only time is a running session with no question", :aggregate_failures do
+        running = create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        create(:work_session, task_id: running.id, started_at: Time.now)
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task-acts form[data-task-act='complete'] > button[type=submit][data-key='x']")
+        expect(page).to have_no_css(".task-complete, .task-complete-ask")
+      end
+
       it "draws no box on any row" do
         create(:task)
         create(:task, :done)
