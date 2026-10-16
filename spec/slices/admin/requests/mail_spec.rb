@@ -661,6 +661,37 @@ RSpec.describe "Admin mail", type: :request do
         expect(status(thread)).to eq("unread")
       end
 
+      describe "a thread whose From line had no address" do
+        def senders = Mail::Slice["relations.spam_senders"].count
+
+        def unaddressed(gmail_id, **)
+          gmail(gmail_id:, **).tap { Mail::Slice["relations.mail_messages"].where(mail_thread_id: it.id).update(reply_to: nil) }
+        end
+
+        it "marks it spam and flags no sender", :aggregate_failures do
+          thread = unaddressed("t1")
+          change(thread, "spam")
+
+          expect(status(thread)).to eq("spam")
+          expect(senders).to eq(0)
+        end
+
+        it "moves every ticked one to spam and flags no sender", :aggregate_failures do
+          picked = [unaddressed("t1"), unaddressed("t2")]
+          bulk("move", picked, to: "spam")
+
+          expect(picked.map { status(it) }).to eq(%w[spam spam])
+          expect(senders).to eq(0)
+        end
+
+        it "marks it not spam" do
+          thread = unaddressed("t1", status: "spam", marked_spam_at: Time.now)
+          change(thread, "read")
+
+          expect(status(thread)).to eq("read")
+        end
+      end
+
       it "changes a contact form thread here only", :aggregate_failures do
         thread = create(:message)
         change(thread, "star")

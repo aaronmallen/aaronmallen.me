@@ -32,7 +32,7 @@ module Mail
 
       def mark(thread, status, at: Time.now)
         transaction do
-          status == SPAM ? spam_senders.flag(thread.reply_to, at:) : spam_senders.by_reply_to(thread.reply_to).delete
+          flag_sender(thread.reply_to, status, at) if thread.reply_to
           update(thread.id, status:, marked_spam_at: spam_marked_at(status, thread.marked_spam_at || at))
         end
       end
@@ -48,6 +48,10 @@ module Mail
       end
 
       private
+
+      def flag_sender(reply_to, status, at)
+        status == SPAM ? spam_senders.flag(reply_to, at:) : spam_senders.by_reply_to(reply_to).delete
+      end
 
       def spam_marked_at(status, at) = (at if status == SPAM)
     end
