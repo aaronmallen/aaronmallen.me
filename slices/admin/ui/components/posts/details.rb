@@ -15,13 +15,14 @@ module Admin
           prop :published, Blog::Types::Bool
           prop :scheduling, Blog::Types::Bool
           prop :syndication, Blog::Types::Hash
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :webmentions, Blog::Types::Hash
 
           def view_template
             Dialog(**dialog_attributes) do |dialog|
               dialog.foot { foot }
 
-              Publishing(values: @values, errors: @errors, published: @published, scheduling: @scheduling)
+              Publishing(values: @values, errors: @errors, published: @published, scheduling: @scheduling, tags: @tags)
               Seo(values: @values, errors: @errors)
               Syndication(errors: @errors, **@syndication)
               Webmentions(**@webmentions)

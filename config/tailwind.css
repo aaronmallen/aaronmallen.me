@@ -6489,6 +6489,34 @@
   @apply cursor-default text-badge text-ink-muted;
 }
 
+@utility tag-pick {
+  @apply project-pick;
+}
+
+@utility tag-pick-chips {
+  @apply project-pick-chips;
+}
+
+@utility tag-pick-chip {
+  @apply project-pick-chip;
+}
+
+@utility tag-pick-remove {
+  @apply project-pick-remove;
+}
+
+@utility tag-pick-results {
+  @apply project-pick-results;
+}
+
+@utility tag-pick-result {
+  @apply project-pick-result;
+}
+
+@utility tag-pick-note {
+  @apply project-pick-note;
+}
+
 @utility rule-acts {
   @apply col-start-2 row-start-1 row-span-2 flex shrink-0 items-center gap-1;
 }

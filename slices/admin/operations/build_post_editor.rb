@@ -16,9 +16,11 @@ module Admin
         preview_announcement: "operations.preview_announcement",
         resolve_mentions: "social.operations.resolve_mentions",
         suggestion_queries: "suggestions.repos.suggestion_queries",
+        tag_queries: "tags.repos.tag_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]
 
+      PUBLIC = Blog::Types::TagScope["public"]
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       def call(
@@ -39,6 +41,7 @@ module Admin
           preview:,
           suggestions: suggestions(post, review),
           syndication: syndication(values, post, params),
+          tags: tag_queries.all_in(PUBLIC),
           view:,
           webmentions: webmentions(post, params),
         }

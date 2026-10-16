@@ -9,6 +9,7 @@ module Admin
           prop :errors, Blog::Types::Hash
           prop :published, Blog::Types::Bool
           prop :scheduling, Blog::Types::Bool
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             Card(label: t(".heading")) do
@@ -56,7 +57,9 @@ module Admin
 
           def tags_field
             Field(label: t(".tags"), name: :tags, errors: @errors, error: FieldError) do |control|
-              Input(**control, name: "post[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"))
+              TagField(
+                control:, name: "post[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"), tags: @tags,
+              )
             end
           end
         end

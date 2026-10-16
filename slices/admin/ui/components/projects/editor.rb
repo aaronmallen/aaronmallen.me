@@ -8,6 +8,7 @@ module Admin
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template(&)
             BackLink(href: back_path, variant: :gh, small: true, class: "editor-back") do
@@ -32,7 +33,7 @@ module Admin
             PublicCopy(values: @values, errors: @errors)
             aside(class: "project-side") do
               Repository(values: @values, errors: @errors, release:, stars:)
-              Placement(values: @values, errors: @errors, archived: archived?)
+              Placement(values: @values, errors: @errors, archived: archived?, tags: @tags)
               Board(published: @values[:board_published] == Blog::Constants::CHECKED)
               Preview(values: @values, release:, stars:)
             end

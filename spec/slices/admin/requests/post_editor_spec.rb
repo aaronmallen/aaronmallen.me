@@ -184,6 +184,14 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_field("Body", with: "one two")
       end
 
+      it "suggests the public tags and leaves the private ones out" do
+        create(:tag, :private, name: "secret")
+        get "/admin/posts/#{scheduled.id}/edit"
+        suggested = JSON.parse(page.find("[data-tag-field]", visible: :all)["data-tag-field"])
+
+        expect(suggested.map { it["name"] }).to eq(%w[hanami ruby])
+      end
+
       it "renders the post in the preview", :aggregate_failures do
         preview = page.find("[data-post-editor] .preview", visible: :all)
 

@@ -2392,6 +2392,15 @@ en:
           mail: "Gmail sync"
           projects: "Project refresh"
           pull_requests: "Pull request import"
+      tag_field:
+        add: "New tag %{name}"
+        chosen: "Chosen tags"
+        no_match: "No tags match."
+        remove: "Remove %{name}"
+        results:
+          one: "{count} tag"
+          other: "{count} tags"
+        tags: "Tags"
       tags:
         capture:
           add: "Add tag"

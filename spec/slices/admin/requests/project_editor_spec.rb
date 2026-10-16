@@ -155,6 +155,14 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("input[name='project[tags]'][value='cli, ruby']")
       end
 
+      it "suggests the public tags and leaves the private ones out" do
+        create(:tag, :private, name: "secret")
+        get "/admin/projects/#{project.id}/edit"
+        suggested = JSON.parse(page.find("[data-tag-field]", visible: :all)["data-tag-field"])
+
+        expect(suggested.map { it["name"] }).to eq(%w[cli ruby])
+      end
+
       it "switches Publish Kanban on for a project whose board is published" do
         published = create(:project, board_published: true)
         get "/admin/projects/#{published.id}/edit"

@@ -19,6 +19,7 @@ module Admin
           prop :preview, Blog::Types::Hash
           prop :suggestions, Blog::Types::Hash
           prop :syndication, Blog::Types::Hash
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :view, Blog::Types::String.optional
           prop :webmentions, Blog::Types::Hash
 
@@ -51,7 +52,7 @@ module Admin
           def details_props
             {
               post: @post, values: @values, errors: @errors, notes: @notes, published: published?,
-              scheduling: scheduling?, syndication: @syndication, webmentions: @webmentions,
+              scheduling: scheduling?, syndication: @syndication, tags: @tags, webmentions: @webmentions,
             }
           end
 

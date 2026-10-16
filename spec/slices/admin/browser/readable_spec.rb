@@ -36,7 +36,7 @@ RSpec.describe "Admin screens", type: :feature do
         find(".compose-accounts summary").click
         find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
-    }.merge(files, short_links, recurring_screens)
+    }.merge(files, short_links, recurring_screens, tag_fields)
   end
 
   def decision(title, close: nil)
@@ -501,6 +501,22 @@ RSpec.describe "Admin screens", type: :feature do
         find("dialog[open].file-drawer [name='link[title]']")
       end,
       "link editor" => -> { visit "/admin/links/#{seed_short_links.value!.id}/edit" },
+    }
+  end
+
+  def tag_fields
+    {
+      "post tag suggestions" => lambda do
+        visit "/admin/posts/#{draft.id}/edit"
+        click_button "Details"
+        find("dialog#post-details[open] [data-tag-field-input]").send_keys("r", :enter, "r")
+        find("dialog#post-details[open] [role='listbox']", visible: :visible)
+      end,
+      "project tag suggestions" => lambda do
+        visit "/admin/projects/#{project.id}/edit"
+        find("[data-tag-field-input]").send_keys("r", :enter, "r")
+        find(".project-editor [role='listbox']", visible: :visible)
+      end,
     }
   end
 

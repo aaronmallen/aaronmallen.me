@@ -6,13 +6,16 @@ module Admin
       FIELDS = %i[board_published key name og_image_url repo started_on tagline url visibility].freeze
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
+      PUBLIC = Blog::Types::TagScope["public"]
       TAG_SEPARATOR = ", "
       UNCHECKED = "0"
+
+      include Deps[tag_queries: "tags.repos.tag_queries"]
 
       def call(project: nil, params: nil, errors: Blog::Constants::EMPTY_HASH)
         values = params ? from_params(params) : from_project(project)
 
-        { project:, values:, errors: }
+        { project:, values:, errors:, tags: tag_queries.all_in(PUBLIC) }
       end
 
       private
