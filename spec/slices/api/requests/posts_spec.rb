@@ -55,6 +55,14 @@ RSpec.describe "API blog posts", type: :request do
       expect(post_queries.by_id(post.id).then { [it.title, it.body] }).to eq(["Hello", "hello there"])
     end
 
+    it "changes the post in the path when the body names another ID", :aggregate_failures do
+      post, other = Array.new(2) { create(:post, :draft, title: "Hello") }
+      call_api(:patch, "/posts/#{post.id}", JSON.generate(id: other.id, title: "Changed"))
+
+      expect(post_queries.by_id(post.id).title).to eq("Changed")
+      expect(post_queries.by_id(other.id).title).to eq("Hello")
+    end
+
     it "refuses a past publish time on a scheduled post with a 422" do
       post = create(:post, :scheduled)
       call_api(:patch, "/posts/#{post.id}", JSON.generate(publish_at: "2020-01-01T09:00"))
@@ -75,6 +83,14 @@ RSpec.describe "API blog posts", type: :request do
 
       expect([call_api(:delete, "/posts/#{post.id}"), status]).to eq([{ "id" => post.id, "deleted" => true }, 200])
       expect(post_queries.by_id(post.id)).to be_nil
+    end
+
+    it "deletes the post in the path when the body names another ID", :aggregate_failures do
+      post, other = Array.new(2) { create(:post, :draft) }
+      call_api(:delete, "/posts/#{post.id}", JSON.generate(id: other.id))
+
+      expect(post_queries.by_id(post.id)).to be_nil
+      expect(post_queries.by_id(other.id)).not_to be_nil
     end
 
     it "answers an unknown ID with a 404" do

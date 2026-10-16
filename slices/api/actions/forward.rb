@@ -65,7 +65,8 @@ module API
       def descriptor = build_document.descriptor(operation)
 
       def input(request, response)
-        found = names.filter_map { |name| request.params[name]&.then { [name.to_s, param(name, it)] } }.to_h
+        route = request.env.fetch(ROUTER_PARAMS, Blog::Constants::EMPTY_HASH)
+        found = names.filter_map { |name| route[name]&.then { [name.to_s, param(name, it)] } }.to_h
 
         descriptor.body? ? body(request, response).merge(found) : found
       end
