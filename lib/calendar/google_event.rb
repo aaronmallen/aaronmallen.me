@@ -26,7 +26,7 @@ module Calendar
     end
 
     def timing(fields, date, span)
-      return { start: at(date, fields[:starts]), end: at(date, fields[:ends]) } unless fields[:all_day]
+      return { start: at(date, fields[:starts]), end: at(date + span, fields[:ends]) } unless fields[:all_day]
 
       { start: whole(date), end: whole(date + span + 1) }
     end

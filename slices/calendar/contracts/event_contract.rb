@@ -18,11 +18,12 @@ module Calendar
       rule(:title).validate(:without_controls, :visible)
       rule(:place).validate(:without_controls)
 
-      rule(:starts, :ends, :all_day) do
+      rule(:starts, :ends, :all_day) do |context:|
         next if values[:all_day]
 
         clocks = values.values_at(:starts, :ends)
-        next key(:ends).failure(ENDS_FIRST) if clocks.all? { it&.match?(CLOCK) } && clocks[1] <= clocks[0]
+        later_day = context[:span]&.positive?
+        next key(:ends).failure(ENDS_FIRST) if !later_day && clocks.all? { it&.match?(CLOCK) } && clocks[1] <= clocks[0]
 
         %i[starts ends].each { key(it).failure(FORMAT) unless values[it]&.match?(CLOCK) }
       end

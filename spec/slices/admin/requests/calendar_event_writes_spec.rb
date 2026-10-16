@@ -30,10 +30,16 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
   def send_form(path, **) = post(path, { _csrf_token: admin_csrf_token, day: day.iso8601, ** })
 
-  def timed(date, starts, ends)
+  def spanning(title, ends_on, starts, ends, **)
+    times = { starts_at: Time.iso8601(at(day, *starts)), ends_at: Time.iso8601(at(ends_on, *ends)) }
+
+    event(mine, title, ends_on:, **times, **)
+  end
+
+  def timed(date, starts, ends, last: date)
     {
       start: { date: nil, dateTime: at(date, *starts), timeZone: Blog::TimeZone::NAME },
-      end: { date: nil, dateTime: at(date, *ends), timeZone: Blog::TimeZone::NAME },
+      end: { date: nil, dateTime: at(last, *ends), timeZone: Blog::TimeZone::NAME },
     }
   end
 
@@ -170,6 +176,22 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
           .to have_been_made
       end
 
+      it "keeps an overnight event ending the next day" do
+        shift = spanning("Night shift", day + 1, 22, 2, google_id: "shift")
+        send_form("/admin/calendar/events/#{shift.id}", **fields(title: "Late shift", starts: "22:00", ends: "02:00"))
+
+        expect(a_request(:patch, "#{events_url}/shift").with(body: hash_including(timed(day, 22, 2, last: day + 1))))
+          .to have_been_made
+      end
+
+      it "keeps the days a timed event covers" do
+        offsite = spanning("Offsite", day + 2, 9, 17, google_id: "offsite")
+        send_form("/admin/calendar/events/#{offsite.id}", **fields(title: "Retreat", starts: "09:00", ends: "17:00"))
+
+        expect(a_request(:patch, "#{events_url}/offsite").with(body: hash_including(timed(day, 9, 17, last: day + 2))))
+          .to have_been_made
+      end
+
       describe "refused" do
         let(:standup) { event(mine, "Standup", google_id: "abc", recurring_id: "standup") }
 
@@ -233,6 +255,14 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
         expect(a_request(:patch, "#{events_url}/standup").with(body: hash_including(timed(day - 29, 12, 13))))
           .to have_been_made
+      end
+
+      it "keeps the days a timed series event covers" do
+        offsite = spanning("Offsite", day + 2, 9, 17, google_id: "offsite_20260714", recurring_id: "standup")
+        send_form("/admin/calendar/events/#{offsite.id}", scope: "all", **fields(starts: "09:00", ends: "17:00"))
+
+        expect(a_request(:patch, "#{events_url}/standup")
+          .with(body: hash_including(timed(day - 30, 9, 17, last: day - 28)))).to have_been_made
       end
     end
 
