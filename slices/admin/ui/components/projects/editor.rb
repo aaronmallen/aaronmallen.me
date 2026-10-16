@@ -72,15 +72,10 @@ module Admin
           def stars = @project&.stars || 0
 
           def sub_line
-            span(data: { editor_repo: t(".repo_placeholder") }) { text(:repo, ".repo_placeholder") }
-            sub_release
-          end
-
-          def sub_release
-            return unless written?(release)
-
-            plain DOT
-            span { release }
+            Dotted do |line|
+              line.part { span(data: { editor_repo: t(".repo_placeholder") }) { text(:repo, ".repo_placeholder") } }
+              line.part { span { release } if written?(release) }
+            end
           end
 
           def text(field, placeholder_key)

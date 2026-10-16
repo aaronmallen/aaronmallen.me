@@ -117,13 +117,11 @@ module Admin
           def sub_line
             writing = "#{path(:writing)}/"
 
-            span(data: { editor_path: writing }) { writing + slug }
-            plain DOT
-            span(data: { editor_words: "", one: t(".words.one"), other: t(".words.other") }) do
-              t(".words", count: word_count)
+            Dotted do |line|
+              line.part { span(data: { editor_path: writing }) { writing + slug } }
+              line.part { span(**word_count_attributes) { t(".words", count: word_count) } }
+              line.part { span(**read_time_attributes) { t(".read_time", count: read_time) } }
             end
-            plain DOT
-            span(**read_time_attributes) { t(".read_time", count: read_time) }
           end
 
           def suggestions? = @suggestions[:edits].any?
@@ -151,6 +149,8 @@ module Admin
           end
 
           def word_count = @counts[:words]
+
+          def word_count_attributes = { data: { editor_words: "", one: t(".words.one"), other: t(".words.other") } }
         end
       end
     end

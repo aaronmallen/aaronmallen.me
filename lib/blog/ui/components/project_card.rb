@@ -5,7 +5,6 @@ module Blog
     module Components
       class ProjectCard < Component
         SCHEME = %r{\A[a-z][a-z0-9+.-]*://}i
-        STARS = :stars
 
         prop :name, Blog::Types::String
         prop :tagline, Blog::Types::String.optional
@@ -51,21 +50,15 @@ module Blog
         end
 
         def meta
-          parts = meta_parts
+          parts = capture do
+            Dotted do |line|
+              @tags.each { |tag| line.part { tag if written?(tag) } }
+              line.part { stars if @stars.positive? }
+              line.part { @release if written?(@release) }
+            end
+          end
 
-          span(class: "ps") { parts.each_with_index { |part, index| meta_part(part, index) } } unless parts.empty?
-        end
-
-        def meta_part(part, index)
-          plain DOT if index.positive?
-          part == STARS ? stars : plain(part)
-        end
-
-        def meta_parts
-          parts = @tags.select { written?(it) }
-          parts << STARS if @stars.positive?
-          parts << @release if written?(@release)
-          parts
+          span(class: "ps") { raw(safe(parts)) } unless parts.empty?
         end
 
         def stars

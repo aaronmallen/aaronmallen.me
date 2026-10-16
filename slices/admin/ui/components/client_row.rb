@@ -37,11 +37,11 @@ module Admin
         end
 
         def sub
-          connected
-          plain(DOT)
-          last_used
-          plain(DOT)
-          a(class: "settings-link", href: path(:admin_security)) { t(".sightings") }
+          Dotted do |line|
+            line.part { connected }
+            line.part { last_used }
+            line.part { a(class: "settings-link", href: path(:admin_security)) { t(".sightings") } }
+          end
         end
       end
     end

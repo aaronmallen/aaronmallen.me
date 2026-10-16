@@ -23,9 +23,10 @@ module Admin
           private
 
           def seen
-            Stamped(text: t(".first_seen", time: Stamped::MARK), at: @sighting.first_seen_at)
-            plain(DOT)
-            Stamped(text: t(".last_seen", time: Stamped::MARK), at: @sighting.last_seen_at)
+            Dotted do |line|
+              line.part { Stamped(text: t(".first_seen", time: Stamped::MARK), at: @sighting.first_seen_at) }
+              line.part { Stamped(text: t(".last_seen", time: Stamped::MARK), at: @sighting.last_seen_at) }
+            end
           end
         end
       end

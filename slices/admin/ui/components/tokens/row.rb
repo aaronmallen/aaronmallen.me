@@ -19,16 +19,16 @@ module Admin
           def expiry
             return plain(t(".never_expires")) if @token.expires_at.nil?
 
-            stamped(".expires", @token.expires_at)
+            Stamped(text: t(".expires", time: Stamped::MARK), at: @token.expires_at)
           end
 
           def last_used
             return plain(t(".never_used")) if @token.last_used_at.nil?
 
-            stamped(".last_used", @token.last_used_at)
+            Stamped(text: t(".last_used", time: Stamped::MARK), at: @token.last_used_at)
           end
 
-          def minted = stamped(".minted", @token.created_at)
+          def minted = Stamped(text: t(".minted", time: Stamped::MARK), at: @token.created_at)
 
           def revoke_form
             ButtonForm(
@@ -37,20 +37,13 @@ module Admin
             )
           end
 
-          def stamped(key, time)
-            plain(t(key))
-            whitespace
-            Moment(at: time)
-          end
-
           def sub
-            plain(@token.scopes.join(", "))
-            plain(DOT)
-            minted
-            plain(DOT)
-            last_used
-            plain(DOT)
-            expiry
+            Dotted do |line|
+              line.part { @token.scopes.join(", ") }
+              line.part { minted }
+              line.part { last_used }
+              line.part { expiry }
+            end
           end
         end
       end

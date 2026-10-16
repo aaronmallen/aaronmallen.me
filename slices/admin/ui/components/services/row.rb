@@ -28,12 +28,12 @@ module Admin
           def link = @selected ? { aria: { current: "true" } } : Blog::Constants::EMPTY_HASH
 
           def sub
-            span(class: "svc-account") { @row.account } if @row.account
             used_at = @row.connection&.last_used_at
-            return unless used_at
 
-            plain(DOT)
-            Stamped(text: t(".used", time: Stamped::MARK), at: used_at)
+            Dotted do |line|
+              line.part { span(class: "svc-account") { @row.account } if @row.account }
+              line.part { Stamped(text: t(".used", time: Stamped::MARK), at: used_at) if used_at }
+            end
           end
         end
       end

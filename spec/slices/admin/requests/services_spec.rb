@@ -87,6 +87,13 @@ RSpec.describe "Admin connected services", type: :request do
       end
     end
 
+    it "dots the account and the last use apart" do
+      add_connection("linear", "ws-1", "ROOT workspace", last_used_at: Time.now - 3600)
+      get "/admin/services"
+
+      expect(row("ROOT workspace").find(".li-sub").text).to start_with("ROOT workspace · ")
+    end
+
     it "skips a connection whose service has no definition" do
       add_connection("myspace", "tom", "Tom")
       get "/admin/services"
