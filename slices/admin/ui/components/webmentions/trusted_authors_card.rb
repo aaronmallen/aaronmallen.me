@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Components
+      module Webmentions
+        class TrustedAuthorsCard < Component
+          prop :authors, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+
+          def view_template
+            Card(title: t(".title"), id: "trusted-authors") do |card|
+              card.side { span(class: "settings-count") { t(".count", count: @authors.size) } }
+              Hint { t(".hint") }
+              @authors.empty? ? Empty { t(".empty") } : @authors.each { row(it) }
+            end
+          end
+
+          private
+
+          def remove_form(url)
+            Form(action: path(:admin_remove_trusted_author), data: { confirm: t(".confirm", author: url) }) do
+              input(type: "hidden", name: "author_url", value: url)
+              Button(variant: :warn, small: true, type: "submit") { t(".remove") }
+            end
+          end
+
+          def row(author) = ListItem(title: author.author_url) { remove_form(author.author_url) }
+        end
+      end
+    end
+  end
+end

@@ -593,4 +593,44 @@ RSpec.describe "MCP social tools", type: :request do
       expect([refused?, message]).to eq([true, "nothing saved, since no setting changed"])
     end
   end
+
+  describe "trusted authors" do
+    let(:ada) { "https://ada.example/" }
+
+    before { webmention_mutations.trust(ada, approve_pending: false) }
+
+    it "lists each author with the URL marked untrusted" do
+      call_tool("list_trusted_authors")
+
+      expect(content.fetch("trusted_authors").first.fetch("author_url")).to eq({ "untrusted" => true, "text" => ada })
+    end
+
+    it "lists the newest author first" do
+      Social::Slice["relations.trusted_authors"].by_pk(ada).update(created_at: Time.now - 60)
+      webmention_mutations.trust("https://grace.example/", approve_pending: false)
+      call_tool("list_trusted_authors")
+
+      expect(content.fetch("trusted_authors").map { it.dig("author_url", "text") })
+        .to eq(["https://grace.example/", ada])
+    end
+
+    it "removes an author" do
+      call_tool("remove_trusted_author", author_url: ada)
+
+      expect(webmention_queries.trusted_author?(ada)).to be(false)
+    end
+
+    it "keeps the author's approved webmentions approved" do
+      mention = create(:webmention, :approved, author_url: ada)
+      call_tool("remove_trusted_author", author_url: ada)
+
+      expect(filed("approved", :id)).to eq([mention.id])
+    end
+
+    it "refuses an author not on the list" do
+      call_tool("remove_trusted_author", author_url: "https://grace.example/")
+
+      expect(message).to eq("no trusted author has the URL https://grace.example/")
+    end
+  end
 end

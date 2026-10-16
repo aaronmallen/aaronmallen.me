@@ -21,11 +21,12 @@ module API
       SCOPES = {
         "add_shares_to_group" => PUBLISH, "add_work_entry" => PUBLISH, "approve_webmentions" => PUBLISH,
         "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE, "group_shares" => PUBLISH,
-        "publish_post" => PUBLISH, "read_health_days" => HEALTH, "send_social_post" => PUBLISH,
-        "suggest_edits" => SUGGEST, "ungroup_share_file" => PUBLISH, "unlink_records" => WRITE,
-        "unlink_task" => WRITE, "untag_decision" => WRITE, "update_post_edit_note" => PUBLISH,
-        "update_share" => PUBLISH, "update_share_group" => PUBLISH, "update_share_group_file" => PUBLISH,
-        "update_webmention_settings" => PUBLISH, "upload_share" => PUBLISH, "upload_share_group" => PUBLISH,
+        "publish_post" => PUBLISH, "read_health_days" => HEALTH, "remove_trusted_author" => DELETE,
+        "send_social_post" => PUBLISH, "suggest_edits" => SUGGEST, "ungroup_share_file" => PUBLISH,
+        "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
+        "update_post_edit_note" => PUBLISH, "update_share" => PUBLISH, "update_share_group" => PUBLISH,
+        "update_share_group_file" => PUBLISH, "update_webmention_settings" => PUBLISH, "upload_share" => PUBLISH,
+        "upload_share_group" => PUBLISH,
         **MAIL_ENDPOINTS.to_h { [it, MAIL] },
       }.freeze
 

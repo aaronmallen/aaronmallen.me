@@ -10,7 +10,10 @@ module Admin
         ]
 
         def handle(_request, response)
-          response.render(view, posts: post_queries.summaries, settings: webmention_queries.settings)
+          response.render(
+            view,
+            posts: post_queries.summaries, settings: webmention_queries.settings, trusted: webmention_queries.trusted,
+          )
         end
       end
     end

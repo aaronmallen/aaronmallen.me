@@ -15,8 +15,9 @@ module MCP
         },
       )
       INSTRUCTIONS = [
-        "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings, the",
-        "journal, commits, pull requests and the sync state, API tokens and MCP clients, tasks, sprints, task rules,",
+        "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",
+        "trusted webmention authors, the journal, commits, pull requests and the sync state, API tokens and MCP",
+        "clients, tasks, sprints, task rules,",
         "work sessions and the time report, projects, work history, decisions, people, tags, record links, saved",
         "views, photos, shares, the inbox, attention, the calendar, the review, suggestions, analytics, performance",
         "timing and the whole activity feed. Search every kind by its words, and look up accounts on Mastodon and",
@@ -110,6 +111,7 @@ module MCP
         Tools::ListTaskRules,
         Tools::ListTaskSeries,
         Tools::ListTasks,
+        Tools::ListTrustedAuthors,
         Tools::ListWebmentions,
         Tools::ListWorkEntries,
         Tools::MarkMailThread,
@@ -153,6 +155,7 @@ module MCP
         Tools::ReadWorkEntry,
         Tools::RejectSuggestionEdits,
         Tools::RemoveTag,
+        Tools::RemoveTrustedAuthor,
         Tools::ReopenDecision,
         Tools::ReopenTask,
         Tools::ReorderTask,

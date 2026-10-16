@@ -9,6 +9,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         list_saved_views
         list_share_groups list_shares
         list_social_posts list_sprints list_suggestions list_tags list_task_rules list_task_series list_tasks
+        list_trusted_authors
         list_webmentions list_work_entries read_activity read_analytics read_commit read_current_sprint read_decision
         read_journal_entry read_performance read_person read_photo read_post read_project read_pull_request read_review
         read_saved_view
@@ -51,7 +52,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       "delete" => %w[
         delete_decision_comment delete_decision_option delete_journal_entry delete_person delete_post
         delete_posts delete_saved_view delete_social_post delete_task delete_task_comment delete_task_rule
-        delete_tasks delete_work_entry delete_work_session remove_tag
+        delete_tasks delete_work_entry delete_work_session remove_tag remove_trusted_author
       ],
     }
   end

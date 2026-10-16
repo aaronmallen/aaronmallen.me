@@ -57,6 +57,8 @@ module Social
 
       def snoozed = webmentions.with_status(PENDING).unseen.asleep.to_a
 
+      def trusted = trusted_authors.newest_first.to_a
+
       def trusted_author?(author_url) = trusted_authors.by_pk(normalize_author_url.call(author_url)).exist?
 
       def unseen(limit) = unseen_pending.latest_first(:received_at).limit(limit).to_a

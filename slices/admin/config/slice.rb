@@ -116,7 +116,7 @@ module Admin
       operations.act_on_webmentions operations.compose_social_post operations.count_network_lengths
       operations.delete_person operations.delete_social_post operations.find_over_limit_network
       operations.list_target_accounts operations.moderate_webmention operations.move_social_post
-      operations.resolve_mentions operations.save_person operations.search_accounts
+      operations.remove_trusted_author operations.resolve_mentions operations.save_person operations.search_accounts
       operations.update_webmention_settings repos.person_queries repos.social_post_queries repos.webmention_queries
     ], from: :social
 

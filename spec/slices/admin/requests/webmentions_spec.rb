@@ -681,6 +681,67 @@ RSpec.describe "Admin webmentions", type: :request do
       end
     end
 
+    describe "the trusted authors card" do
+      let(:ada) { "https://ada.example/" }
+
+      def remove(url) = post "/admin/webmentions/trusted_authors/remove", _csrf_token: admin_csrf_token, author_url: url
+
+      def trust(url) = webmention_mutations.trust(url, approve_pending: false)
+
+      it "lists the trusted authors, newest first" do
+        trust(ada)
+        Social::Slice["relations.trusted_authors"].by_pk(ada).update(created_at: Time.now - 60)
+        trust("https://grace.example/")
+        get "/admin/webmentions/settings"
+
+        expect(page.all("#trusted-authors .li-title").map(&:text)).to eq(["https://grace.example/", ada])
+      end
+
+      it "shows an empty state without trusted authors" do
+        get "/admin/webmentions/settings"
+
+        empty = i18n.t("ui.components.webmentions.trusted_authors_card.empty")
+
+        expect(page).to have_css("#trusted-authors .empty", exact_text: empty)
+      end
+
+      it "offers no field to add an author" do
+        trust(ada)
+        get "/admin/webmentions/settings"
+
+        expect(page).to have_no_css("#trusted-authors input:not([type='hidden'])")
+      end
+
+      it "removes an author" do
+        trust(ada)
+        remove(ada)
+
+        expect(webmention_queries.trusted_author?(ada)).to be(false)
+      end
+
+      it "returns to the settings screen with a toast", :aggregate_failures do
+        trust(ada)
+        remove(ada)
+
+        expect(last_response.location).to end_with("/admin/webmentions/settings")
+        expect(toast).to eq(i18n.t("webmentions_page.toasts.distrusted"))
+      end
+
+      it "keeps the author's approved webmentions approved" do
+        trust(ada)
+        mention = create(:webmention, :approved, post: target, author_url: ada)
+        remove(ada)
+
+        expect(filed("approved", :id)).to eq([mention.id])
+      end
+
+      it "answers an author not on the list with a 404" do
+        remove(ada)
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
     describe "loading posts" do
       before do
         create(:webmention, post: target)

@@ -331,6 +331,10 @@ module Admin
     get "/webmentions/:id/menu", to: "webmentions.menu", as: :webmention_menu, id: ID
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post(
+      "/webmentions/trusted_authors/remove",
+      to: "webmentions.remove_trusted_author", as: :remove_trusted_author,
+    )
+    post(
       "/webmentions/:id/:verdict",
       to: "webmentions.moderate", as: :moderate_webmention, id: ID, verdict: WEBMENTION_VERDICT,
     )

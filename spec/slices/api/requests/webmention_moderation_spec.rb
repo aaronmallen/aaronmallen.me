@@ -81,4 +81,43 @@ RSpec.describe "API webmention moderation and settings", type: :request do
         .to eq(["nothing saved, since no setting changed", 422])
     end
   end
+
+  describe "trusted authors" do
+    let(:ada) { "https://ada.example/" }
+
+    def trust(url) = Social::Slice["repos.webmention_mutations"].trust(url, approve_pending: false)
+
+    before { trust(ada) }
+
+    it "lists the trusted authors" do
+      expect(call_api(:get, "/trusted_authors").fetch("trusted_authors").map { it.fetch("author_url") }).to eq([ada])
+    end
+
+    it "lists them as list_trusted_authors does" do
+      expect(call_api(:get, "/trusted_authors")).to eq(trusted(mcp_answer("list_trusted_authors")))
+    end
+
+    it "removes an author", :aggregate_failures do
+      expect([call_api(:post, "/trusted_authors/remove", { author_url: ada }), status])
+        .to eq([{ "author_url" => ada, "removed" => true }, 200])
+      expect(webmention_queries.trusted_author?(ada)).to be(false)
+    end
+
+    it "removes an author given under another case" do
+      call_api(:post, "/trusted_authors/remove", { author_url: "https://ADA.example" })
+
+      expect(webmention_queries.trusted_author?(ada)).to be(false)
+    end
+
+    it "answers an author not on the list with a 404" do
+      expect([call_api(:post, "/trusted_authors/remove", { author_url: "https://grace.example/" }).fetch("message"),
+              status]).to eq(["no trusted author has the URL https://grace.example/", 404])
+    end
+
+    it "needs the delete scope to remove an author" do
+      call_api(:post, "/trusted_authors/remove", { author_url: ada }, token: api_token(%w[read write publish]))
+
+      expect(status).to eq(403)
+    end
+  end
 end

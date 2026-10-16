@@ -171,7 +171,6 @@ RSpec.describe "MCP reach", type: :app do
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",
       "social.operations.find_over_limit_network" => "warns the admin; accept_suggestion_edits checks the limits",
       "social.operations.move_social_post" => "the admin's calendar moves one a day; send_social_post sets any time",
-      "social.operations.normalize_author_url" => "verify_webmention and the webmention repos tidy an author URL",
       "social.operations.queue_syndication" => "the syndication job runs it after publish_post publishes a post",
       "social.operations.reap_webmention_receipts" => "a background job reaps old webmention receipts",
       "social.operations.receive_webmention" => "another site sends a webmention to the public endpoint",

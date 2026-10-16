@@ -71,7 +71,7 @@ module API
     import keys: %w[
       operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.list_target_accounts operations.mark_webmention_seen
-      operations.measure_parts operations.moderate_webmention operations.save_person
+      operations.measure_parts operations.moderate_webmention operations.remove_trusted_author operations.save_person
       operations.search_accounts operations.snooze_webmentions operations.update_webmention_settings
       operations.wake_webmention repos.person_queries
       repos.social_post_queries repos.webmention_queries
@@ -108,7 +108,8 @@ module API
       endpoints.add_work_entry endpoints.archive_project endpoints.create_project endpoints.delete_work_entry
       endpoints.list_projects endpoints.list_work_entries endpoints.restore_project endpoints.update_project
       endpoints.create_tag endpoints.list_tags endpoints.remove_tag endpoints.update_tag
-      endpoints.moderate_webmention endpoints.read_webmention_settings endpoints.update_webmention_settings
+      endpoints.list_trusted_authors endpoints.moderate_webmention endpoints.read_webmention_settings
+      endpoints.remove_trusted_author endpoints.update_webmention_settings
       endpoints.import_commits endpoints.list_api_tokens endpoints.list_commits endpoints.list_pull_requests
       endpoints.read_sync_state
       endpoints.accept_suggestion_edits endpoints.list_suggestions endpoints.reject_suggestion_edits

@@ -690,6 +690,13 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       expect(verify_from("https://grace.example/about/1", author: "https://grace.example/about")).to eq("pending")
     end
 
+    it "leaves a mention waiting once its author is removed from the list" do
+      Social::Slice["operations.remove_trusted_author"].call(ada)
+      verify_page(entry(author: ada))
+
+      expect(stored.status).to eq("pending")
+    end
+
     it "leaves a mention waiting while the list is empty" do
       webmention_mutations.distrust(ada)
       verify_page(entry(author: ada))

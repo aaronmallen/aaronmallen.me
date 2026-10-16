@@ -178,6 +178,8 @@ module API
         ["moderate_webmention", "post", "/webmentions/{id}/moderate", OK],
         ["read_webmention_settings", "get", "/webmention_settings", OK],
         ["update_webmention_settings", "patch", "/webmention_settings", OK],
+        ["list_trusted_authors", "get", "/trusted_authors", OK],
+        ["remove_trusted_author", "post", "/trusted_authors/remove", OK],
         ["list_work_entries", "get", "/work_entries", OK],
         ["add_work_entry", "post", "/work_entries", CREATED],
         ["read_work_entry", "get", "/work_entries/{id}", OK],

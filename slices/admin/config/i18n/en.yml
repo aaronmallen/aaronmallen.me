@@ -2963,6 +2963,15 @@ en:
           send_on_publish: "Send webmentions on publish"
           single_author_hosts: "One person's sites"
           title: "Settings"
+        trusted_authors_card:
+          confirm: "Stop trusting %{author}? Their approved webmentions stay up."
+          count:
+            one: "%{count} author"
+            other: "%{count} authors"
+          empty: "No trusted authors yet."
+          hint: "Approving a reply or mention by hand adds its author. Marking one of theirs as spam removes them. While auto-approve is on, their replies and mentions skip review."
+          remove: "Remove"
+          title: "Trusted authors"
       work_entries:
         entry_form:
           add: "Add role"
@@ -3893,6 +3902,7 @@ en:
         spam:
           one: "Marked %{count} webmention as spam"
           other: "Marked %{count} webmentions as spam"
+      distrusted: "Removed · their next reply or mention waits for review"
       ignored: "Ignored · hidden from the post"
       saved: "Settings saved"
       spam: "Marked as spam"

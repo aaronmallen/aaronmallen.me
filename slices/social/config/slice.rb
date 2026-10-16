@@ -27,7 +27,8 @@ module Social
       operations.delete_social_post operations.expand_for_network operations.find_over_limit_network
       operations.list_target_accounts operations.lock_editable_social_post
       operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention
-      operations.move_social_post operations.receive_webmention operations.replace_social_post_parts
+      operations.move_social_post operations.receive_webmention operations.remove_trusted_author
+      operations.replace_social_post_parts
       operations.resolve_mentions operations.save_person operations.search_accounts
       operations.snooze_webmentions operations.update_webmention_settings operations.wake_webmention
       repos.person_queries repos.social_post_queries repos.webmention_queries
