@@ -69,6 +69,7 @@ module API
       def handle(target:, id:, edits:)
         return invalid(edits: ["give at least one edit"]) if edits.empty?
 
+        edits = edits.map { it.transform_keys(&:to_sym) }
         target == Suggestions::POST ? for_post(id, edits) : for_social_post(id, edits)
       end
 

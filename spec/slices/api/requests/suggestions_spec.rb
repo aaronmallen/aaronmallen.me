@@ -100,6 +100,24 @@ RSpec.describe "API suggestions", type: :request do
 
       before { connect_social_networks }
 
+      it "stores an edit on the part it names" do
+        two_parts = compose("the cat sat", "teh dog ran")
+        body = { target: "social_post", id: two_parts.id, edits: [edit("teh", "the").merge(part: 2)] }
+        call_api(:post, "/suggestions", body)
+
+        expect(Suggestions::Slice["repos.suggestion_queries"].for_social_post(two_parts.id).edits.map(&:part))
+          .to eq([2])
+      end
+
+      it "refuses an edit on a part the post lacks with a 422 naming the part", :aggregate_failures do
+        two_parts = compose("the cat sat", "teh dog ran")
+        body = { target: "social_post", id: two_parts.id, edits: [edit("teh", "the").merge(part: 5)] }
+        found = call_api(:post, "/suggestions", body)
+
+        expect(found.fetch("message")).to include("social post #{two_parts.id} has no part 5")
+        expect(status).to eq(422)
+      end
+
       it "refuses with a 404 and stores nothing when the post sends before the lock", :aggregate_failures do
         around_lock { |id, lock| social_post_mutations.mark_posted(id).then { lock.call } }
         suggest_social
