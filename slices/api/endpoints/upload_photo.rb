@@ -6,14 +6,6 @@ require "stringio"
 module API
   module Endpoints
     class UploadPhoto < Endpoint
-      MESSAGES = {
-        "blank" => "photo_upload.errors.blank",
-        "large" => "photo_upload.errors.large",
-        "type" => "photo_upload.errors.type",
-        oversized: "photo_upload.errors.oversized",
-        unavailable: "photo_upload.errors.unavailable",
-        unreadable: "photo_upload.errors.unreadable",
-      }.freeze
       UNAVAILABLE = true
       WHITESPACE = /\s/
 
@@ -50,7 +42,7 @@ module API
         nil
       end
 
-      def message(code) = i18n.t(MESSAGES.fetch(code))
+      def message(code) = i18n.t(code, scope: "photo_upload.errors")
 
       def refuse(code) = invalid({ data: [message(code)] })
 

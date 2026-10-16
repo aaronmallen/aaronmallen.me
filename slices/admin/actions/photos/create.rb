@@ -7,14 +7,6 @@ module Admin
     module Photos
       class Create < Action
         CREATED = 201
-        MESSAGES = {
-          "blank" => "photo_upload.errors.blank",
-          "large" => "photo_upload.errors.large",
-          "type" => "photo_upload.errors.type",
-          oversized: "photo_upload.errors.oversized",
-          unavailable: "photo_upload.errors.unavailable",
-          unreadable: "photo_upload.errors.unreadable",
-        }.freeze
         REFUSED = 422
         STATUSES = { oversized: REFUSED, unavailable: 503, unreadable: REFUSED }.freeze
 
@@ -41,7 +33,7 @@ module Admin
           response.body = JSON.generate(body)
         end
 
-        def refuse(response, status, code) = answer(response, status, error: i18n.t(MESSAGES.fetch(code)))
+        def refuse(response, status, code) = answer(response, status, error: i18n.t(code, scope: "photo_upload.errors"))
       end
     end
   end
