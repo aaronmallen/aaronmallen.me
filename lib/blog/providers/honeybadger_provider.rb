@@ -52,7 +52,7 @@ module Blog
 
       class << self
         def agent(settings, env)
-          configure(settings.honeybadger, env.to_s)
+          configure(settings.honeybadger, env.to_s) { quiet(it, settings) }
           Honeybadger.load_plugins!
           Honeybadger.install_at_exit_callback
 
@@ -61,29 +61,31 @@ module Blog
 
         private
 
-        def configure(found, env)
+        def configure(found, env, &)
           Honeybadger.configure do |config|
             config.api_key = found[:api_key]
             config.env = env
             config.report_data = report_data?(found, env)
             config.revision = Blog::Version::CURRENT
-            config.before_notify { quiet_scheduler(it) }
+            config.before_notify(&)
             config.exceptions.ignore = IGNORE
             config.request.filter_keys = FILTERS
             config.sidekiq.attempt_threshold = ATTEMPT_THRESHOLD
           end
         end
 
-        def quiet_scheduler(notice)
-          return unless notice.exception.is_a?(RedisClient::ConnectionError) && Thread.current.name == SCHEDULER_THREAD
-
-          notice.halt!
+        def quiet(notice, settings)
+          notice.halt! if File.exist?(settings.maintenance[:flag_path]) || scheduler_lost_redis?(notice)
         end
 
         def report_data?(honeybadger, env)
           found = honeybadger[:report_data]
 
           found.nil? ? env == PRODUCTION : found
+        end
+
+        def scheduler_lost_redis?(notice)
+          notice.exception.is_a?(RedisClient::ConnectionError) && Thread.current.name == SCHEDULER_THREAD
         end
       end
     end

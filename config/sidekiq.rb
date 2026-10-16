@@ -11,6 +11,7 @@ Sidekiq.configure_server do |config|
   record = ->(**row) { Performance::Slice["operations.record_timing"].call(:job, **row) }
 
   config.server_middleware do |chain|
+    chain.add Blog::JobMaintenance, Hanami.app.settings.maintenance[:flag_path]
     chain.add Blog::JobConnection, database
     chain.add Blog::JobTimer, record
   end
