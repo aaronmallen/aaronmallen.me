@@ -32,12 +32,12 @@ module Admin
             return unless at.between?(0, COLUMNS.size - 1)
 
             to = COLUMNS[at]
-            label = t(".move", column: t(NAMES.fetch(to)))
 
-            Form(action: path(:admin_move_project_task, id: @project_id, task_id: @task.id), data: { morph: true }) do
-              HiddenFields(values: { to:, return_to: @return_to })
-              Button(type: "submit", variant: :gh, small: true, icon:, label:)
-            end
+            ButtonForm(
+              action: path(:admin_move_project_task, id: @project_id, task_id: @task.id),
+              label: t(".move", column: t(NAMES.fetch(to))), variant: :gh, icon:, icon_only: true, morph: true,
+              hidden: { to:, return_to: @return_to },
+            )
           end
 
           def classes = ["kc", ("doing" if @task.in_progress?), ("done" if @task.closed?)]

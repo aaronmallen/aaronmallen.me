@@ -127,6 +127,11 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         expect(arrows("ready")).to eq(%w[backlog in_progress])
       end
 
+      it "names each arrow by the column it moves to" do
+        expect(column("backlog")).to have_css("form button[aria-label='Move to ready'][title='Move to ready']",
+                                              exact_text: "")
+      end
+
       it "gives the end columns one arrow each", :aggregate_failures do
         expect(arrows("backlog")).to eq(%w[ready])
         expect(arrows("canceled")).to eq(%w[done])

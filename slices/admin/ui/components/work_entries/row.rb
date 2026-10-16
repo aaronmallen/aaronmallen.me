@@ -38,9 +38,7 @@ module Admin
           end
 
           def remove
-            Form(action: remove_path, data: { confirm: }) do
-              Button(type: "submit", variant: :warn, small: true, label: t(".remove"), icon: :trash)
-            end
+            DeleteForm(action: remove_path, label: t(".remove"), icon_only: true, confirm:)
           end
 
           def remove_path = path(:admin_delete_work_entry, id: @entry.id)

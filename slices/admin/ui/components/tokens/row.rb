@@ -30,17 +30,11 @@ module Admin
 
           def minted = stamped(".minted", @token.created_at)
 
-          def revoke_attributes
-            {
-              action: path(:admin_revoke_token, id: @token.id),
-              data: { confirm: t(".confirm_revoke", token: @token.name) },
-            }
-          end
-
           def revoke_form
-            Form(**revoke_attributes) do
-              Button(variant: :warn, small: true, type: "submit") { t(".revoke") }
-            end
+            ButtonForm(
+              action: path(:admin_revoke_token, id: @token.id), label: t(".revoke"), variant: :warn,
+              confirm: t(".confirm_revoke", token: @token.name),
+            )
           end
 
           def stamped(key, time)

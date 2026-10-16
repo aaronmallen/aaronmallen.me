@@ -41,19 +41,17 @@ module Admin
 
           def change(act, label_key)
             icon, variant = ICONS.fetch(label_key)
-            Form(action: path(:admin_change_mail, id: @thread.id, act:), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", variant:, small: true, icon:) { t(label_key) }
-            end
+            ButtonForm(
+              action: path(:admin_change_mail, id: @thread.id, act:), label: t(label_key), variant:, icon:, morph: true,
+              hidden: @list,
+            )
           end
 
           def delete(label_key, confirm_key)
-            Form(action: path(:admin_delete_mail, id: @thread.id), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", variant: :warn, small: true, icon: :trash, data: { confirm: t(confirm_key) }) do
-                t(label_key)
-              end
-            end
+            ButtonForm(
+              action: path(:admin_delete_mail, id: @thread.id), label: t(label_key), variant: :warn, icon: :trash,
+              morph: true, hidden: @list, button: { data: { confirm: t(confirm_key) } },
+            )
           end
 
           def edit
@@ -99,17 +97,17 @@ module Admin
           def star = @thread.starred ? change(ACT["unstar"], ".unstar") : change(ACT["star"], ".star")
 
           def trash
-            Form(action: path(:admin_bulk_mail), data: { morph: true }) do
-              HiddenFields(values: { **@list, "ids[]": @thread.id, act: ACT["trash"] })
-              Button(type: "submit", variant: :warn, small: true, icon: :trash) { t(".trash") }
-            end
+            ButtonForm(
+              action: path(:admin_bulk_mail), label: t(".trash"), variant: :warn, icon: :trash, morph: true,
+              hidden: { **@list, "ids[]": @thread.id, act: ACT["trash"] },
+            )
           end
 
           def wake
-            Form(action: path(:admin_wake_mail, id: @thread.id), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", small: true, icon: "fa-regular fa-clock") { t(".wake") }
-            end
+            ButtonForm(
+              action: path(:admin_wake_mail, id: @thread.id), label: t(".wake"), icon: "fa-regular fa-clock",
+              morph: true, hidden: @list,
+            )
           end
         end
       end

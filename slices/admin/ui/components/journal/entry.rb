@@ -39,17 +39,11 @@ module Admin
 
           def body = editing? ? @editing[:body] : @entry.body
 
-          def delete_attributes
-            {
-              action: path(:admin_delete_journal_entry, id: @entry.id),
-              data: { confirm: t(".confirm_delete") },
-            }
-          end
-
           def delete_form
-            Form(**delete_attributes) do
-              Button(**icon(t(".delete"), :trash), variant: :warn, type: "submit")
-            end
+            DeleteForm(
+              action: path(:admin_delete_journal_entry, id: @entry.id), label: t(".delete"), icon_only: true,
+              confirm: t(".confirm_delete"),
+            )
           end
 
           def edit_attributes

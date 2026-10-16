@@ -29,17 +29,11 @@ module Admin
 
         def redirect_host = @client.redirect_host.then { it unless it == name }
 
-        def revoke_attributes
-          {
-            action: path(:admin_revoke_client, id: @client.id),
-            data: { confirm: t(".confirm_revoke", client: name) },
-          }
-        end
-
         def revoke_form
-          Form(**revoke_attributes) do
-            Button(variant: :warn, small: true, type: "submit") { t(".revoke") }
-          end
+          ButtonForm(
+            action: path(:admin_revoke_client, id: @client.id), label: t(".revoke"), variant: :warn,
+            confirm: t(".confirm_revoke", client: name),
+          )
         end
 
         def sub

@@ -4,18 +4,9 @@ module Admin
   module UI
     module Components
       class DeleteForm < Component
-        prop :action, Blog::Types::String
-        prop :confirm, Blog::Types::String
-        prop :label, Blog::Types::String
-        prop :morph, Blog::Types::Bool, default: false
         prop :attributes, Blog::Types::Hash, :**
 
-        def view_template
-          Form(action: @action, **@attributes, data: { morph: (true if @morph), confirm: @confirm }) do
-            yield if block_given?
-            Button(variant: :warn, type: "submit", small: true, icon: :trash) { @label }
-          end
-        end
+        def view_template(&) = ButtonForm(variant: :warn, icon: :trash, **@attributes, &)
       end
     end
   end

@@ -41,37 +41,33 @@ module Admin
           def definition = @row.definition
 
           def disconnect
-            Form(**disconnect_attributes) do
-              Button(small: true, variant: :warn, type: "submit", icon: DISCONNECT_ICON) { t(".disconnect") }
-            end
-          end
-
-          def disconnect_attributes
-            {
+            ButtonForm(
               action: path(:admin_disconnect_service, id: connection.id), class: "svc-disconnect",
-              data: { confirm: t(".confirm_disconnect", name: definition.name, account: @row.account) },
-            }
+              label: t(".disconnect"), variant: :warn, icon: DISCONNECT_ICON,
+              confirm: t(".confirm_disconnect", name: definition.name, account: @row.account),
+            )
           end
 
           def external = { href: definition.dashboard, **OUTBOUND }
 
           def held
-            input(type: "hidden", name: "connection", value: connection.id)
+            return Blog::Constants::EMPTY_HASH unless connection
+
             granted = definition.scopes.select { definition.granted?(it, connection.scopes) }
-            granted.each { input(type: "hidden", name: "scopes[]", value: it[:id]) }
+            { connection: connection.id, "scopes[]": granted.map { it[:id] } }
           end
 
           def reconnect
-            Form(action: path(:admin_connect_service, provider: definition.id)) do
-              held if connection
-              Button(small: true, variant: :pri, type: "submit", icon: RECONNECT_ICON) { t(".reconnect") }
-            end
+            ButtonForm(
+              action: path(:admin_connect_service, provider: definition.id), label: t(".reconnect"), variant: :pri,
+              icon: RECONNECT_ICON, hidden: held,
+            )
           end
 
           def test
-            Form(action: path(:admin_test_service, id: connection.id)) do
-              Button(small: true, variant: :gh, type: "submit", icon: TEST_ICON) { t(".test") }
-            end
+            ButtonForm(
+              action: path(:admin_test_service, id: connection.id), label: t(".test"), variant: :gh, icon: TEST_ICON,
+            )
           end
         end
       end

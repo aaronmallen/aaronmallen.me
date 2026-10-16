@@ -48,12 +48,11 @@ module Admin
           end
 
           def pull_form(task, sprint)
-            Form(action: path(:admin_schedule_task, id: task.id), data: { morph: true }) do
-              input(type: "hidden", name: "sprint_on", value: sprint.sprint_date.iso8601)
-              Button(type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
-                IconLabel(icon: "fa-solid fa-arrow-turn-up") { t(".pull_in") }
-              end
-            end
+            ButtonForm(
+              action: path(:admin_schedule_task, id: task.id), label: t(".pull_in"), icon: "fa-solid fa-arrow-turn-up",
+              morph: true, hidden: { sprint_on: sprint.sprint_date.iso8601 },
+              button: { aria: { label: t(".pull_task", task: task.title) } },
+            )
           end
 
           def relative(date)
