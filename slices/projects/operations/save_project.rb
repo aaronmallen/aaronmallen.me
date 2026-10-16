@@ -69,9 +69,15 @@ module Projects
         Failure([:invalid, { field => [code] }])
       end
 
+      def refresh(saved, project)
+        return unless saved.repo && saved.repo != project&.repo
+
+        project_mutations.after_commit { Jobs::RefreshProject.perform_async(saved.id) }
+      end
+
       def repo_from(url) = Blog::Types::Normalized::GithubRepo.call(url) { Blog::Constants::EMPTY_STRING }
 
-      def save(project, attributes) = Success(create_or_update(project, attributes))
+      def save(project, attributes) = Success(create_or_update(project, attributes).tap { refresh(it, project) })
 
       def validate(params, now) = validated(contract.call(form(params), today: Blog::TimeZone.today(now)))
     end

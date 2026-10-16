@@ -122,6 +122,15 @@ RSpec.describe "MCP project and work entry tools", type: :request do
   end
 
   describe "save_project" do
+    it "fills in a new project's stars", :commits do
+      connect_github_token
+      stub_github_repo("aaronmallen/fresh", stars: 42, release: "v1.0.0")
+      call_tool("save_project", name: "fresh", repo: "aaronmallen/fresh", visibility: "private")
+      Projects::Jobs::RefreshProject.drain
+
+      expect(project_queries.by_id(content.fetch("id")).stars).to eq(42)
+    end
+
     it "adds an active project with the visibility it is given", :aggregate_failures do
       call_tool("save_project", name: "fresh", repo: "aaronmallen/fresh", visibility: "private", tags: %w[ruby cli])
 

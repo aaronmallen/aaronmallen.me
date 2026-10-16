@@ -119,6 +119,7 @@ RSpec.describe "MCP reach", type: :app do
       "posts.operations.queue_link_check" => "the links drawer checks a post again; the nightly job checks every post",
       "posts.operations.queue_link_check_run" => "the stopped early banner reruns the check; the nightly job runs it",
       "posts.operations.record_post_webmentions" => "the webmention delivery job records what it sent",
+      "projects.operations.refresh_project" => "a background job fetches one project's stars after its repo is set",
       "projects.operations.refresh_projects" => "a background job refreshes projects from GitHub",
       "projects.operations.tag_project" => "the admin's project rows tag it; save_project sets a project's tags",
       "projects.operations.untag_project" => "the admin's project rows untag it; save_project sets a project's tags",

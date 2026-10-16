@@ -33,6 +33,15 @@ RSpec.describe "API projects", type: :request do
       expect(project_queries.by_id(found.fetch("id")).board_published).to be(false)
     end
 
+    it "fills in the new project's stars", :commits do
+      connect_github_token
+      stub_github_repo("aaronmallen/blog", stars: 42, release: "v1.0.0")
+      found = call_api(:post, "/projects", { name: "blog", repo: "aaronmallen/blog", visibility: "private" })
+      Projects::Jobs::RefreshProject.drain
+
+      expect(project_queries.by_id(found.fetch("id")).stars).to eq(42)
+    end
+
     it "refuses a project with no visibility with a 422" do
       expect([call_api(:post, "/projects", { name: "blog" }).fetch("errors"), status])
         .to eq([{ "visibility" => ["pick public or private"] }, 422])

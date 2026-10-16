@@ -7,26 +7,15 @@ module Projects
 
       include Deps[
         client: "github.client",
-        project_mutations: "repos.project_mutations",
         project_queries: "repos.project_queries",
+        refresh_project: "operations.refresh_project",
       ]
 
       def call = step refresh
 
       private
 
-      def refresh = remote(client) { Success(project_queries.tracked.count { refreshed?(it) }) }
-
-      def refreshed?(project)
-        stars = client.stars(project.repo)
-        return false unless stars
-
-        release = client.latest_release(project.repo)
-        return false if project.stars == stars && project.release == release
-
-        project_mutations.update(project.id, stars:, release:)
-        true
-      end
+      def refresh = remote(client) { Success(project_queries.tracked.count { refresh_project.refreshed?(it) }) }
     end
   end
 end

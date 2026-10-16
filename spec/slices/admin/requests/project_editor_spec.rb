@@ -244,6 +244,15 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
     end
 
     describe "creating" do
+      it "fills in its stars", :commits do
+        connect_github_token
+        stub_github_repo("aaronmallen/sai", stars: 42, release: "v1.0.0")
+        save
+        Projects::Jobs::RefreshProject.drain
+
+        expect(tracking("aaronmallen/sai")).to have_attributes(stars: 42, release: "v1.0.0")
+      end
+
       it "links the issues already imported from its repo to it" do
         task_id = imported("AaronMallen/sai")
         save
