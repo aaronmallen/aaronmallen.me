@@ -3,7 +3,7 @@
 module Calendar
   module Relations
     class Calendars < Blog::DB::Relation
-      COLUMNS = %i[name writable sync_token updated_at].freeze
+      COLUMNS = %i[name writable sync_token synced_from updated_at].freeze
 
       schema :calendars, infer: true
 

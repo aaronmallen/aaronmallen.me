@@ -199,11 +199,11 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
         expect(calendars.map(&:hidden)).to all(be(true))
       end
 
-      it "keeps an event older than the window it reads" do
+      it "drops an event older than the window it reads" do
         old = create(:calendar_event, calendar_id: calendars.first.id, starts_on: today - 200, ends_on: today - 200)
         run
 
-        expect(events.map(&:id)).to include(old.id)
+        expect(events.map(&:id)).not_to include(old.id)
       end
 
       it "drops a calendar the account no longer lists, with its events" do
@@ -267,6 +267,60 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
         run
 
         expect(events.map { [it.google_id, it.title] }).to eq([["kept", "Moved standup"], %w[new Standup]])
+      end
+
+      describe "on the next day" do
+        let(:tomorrow) { today + 1 }
+
+        def series
+          timed("standup_last", local(tomorrow + 365, 9), local(tomorrow + 365, 10), recurringEventId: "standup")
+        end
+
+        def stub_refresh(account, token)
+          stub_request(:post, Spec::GoogleAccounts::TOKEN_URL)
+            .with(body: hash_including("refresh_token" => "1//#{account}"))
+            .to_return(google_json(access_token: token, expires_in: 3600, scope: scopes.join(" ")))
+        end
+
+        def window_from(day)
+          hash_including(
+            "timeMin" => Blog::TimeZone.day_start(day - 90).utc.iso8601,
+            "timeMax" => Blog::TimeZone.day_start(day + 366).utc.iso8601,
+          )
+        end
+
+        before do
+          stub_changes
+          stub_refresh("me@example.com", "ya29.me")
+          stub_refresh("work@example.com", "ya29.work")
+          create(:calendar_event, google_id: "old", calendar_id: calendars.first.id, starts_on: today - 90,
+                                  ends_on: today - 90)
+          stub_request(:get, %r{/calendars/me@example\.com/events\?.*timeMin=})
+            .to_return(google_json(items: [*mine, series], nextSyncToken: "moved"))
+          allow(Time).to receive(:now).and_return(local(tomorrow, 12))
+          run
+        end
+
+        it "reads the new window in full" do
+          expect(a_request(:get, %r{/me@example\.com/events}).with(query: window_from(tomorrow))).to have_been_made
+        end
+
+        it "uses the new token on the run after" do
+          stub_request(:get, %r{/calendars/me@example\.com/events\?.*syncToken=moved})
+            .to_return(google_json(items: [], nextSyncToken: "later"))
+          run
+
+          expect(a_request(:get, %r{/me@example\.com/events}).with(query: hash_including("syncToken" => "moved")))
+            .to have_been_made
+        end
+
+        it "keeps a weekly series up to a year after the new day" do
+          expect(events.map(&:google_id)).to include("standup_last")
+        end
+
+        it "drops events older than the new window" do
+          expect(events.map(&:google_id)).not_to include("old")
+        end
       end
 
       describe "when Google answers that the token expired" do

@@ -30,13 +30,13 @@ module Calendar
 
         {
           google_id: id, name: item["summaryOverride"] || item.fetch("summary"), writable: writable?(account, item),
-          **events(account, id, token, from, to),
+          synced_from: from, **events(account, id, token, from, to),
         }
       end
 
       def calendars(account, from, to)
         listed = pages(account, "#{API}/users/me/calendarList").fetch("items", [])
-        tokens = calendar_queries.sync_tokens(account)
+        tokens = calendar_queries.sync_tokens(account, from)
 
         listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, tokens[it["id"]], from, to) }
       end
@@ -90,7 +90,7 @@ module Calendar
       end
 
       def sync(account, from, to)
-        Success(calendar_mutations.store(account, calendars(account, from, to), from:, to:))
+        Success(calendar_mutations.store(account, calendars(account, from, to), to:))
       rescue Google::Error => e
         Failure([:google_calendar_failed, e.message])
       end

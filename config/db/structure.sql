@@ -2361,7 +2361,8 @@ CREATE TABLE public.calendars (
     hidden boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    sync_token text
+    sync_token text,
+    synced_from date
 );
 
 
@@ -8715,4 +8716,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016001473_notify_admin_changes_on_post_link_checks.rb'),
 ('20261016001474_notify_admin_changes_on_short_link_checks.rb'),
 ('20261016002022_add_auto_approve_likes_and_reposts_to_webmention_settings.rb'),
-('20261016002032_create_trusted_authors.rb');
+('20261016002032_create_trusted_authors.rb'),
+('20261016002057_add_synced_from_to_calendars.rb');

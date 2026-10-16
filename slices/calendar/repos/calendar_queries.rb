@@ -16,7 +16,9 @@ module Calendar
 
       def listed = calendars.in_list_order.to_a
 
-      def sync_tokens(account) = calendars.where(account:).dataset.to_hash(:google_id, :sync_token)
+      def sync_tokens(account, from)
+        calendars.where(account:, synced_from: from).dataset.to_hash(:google_id, :sync_token)
+      end
     end
   end
 end
