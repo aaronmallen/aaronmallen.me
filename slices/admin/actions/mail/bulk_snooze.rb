@@ -26,6 +26,8 @@ module Admin
 
           toast(response, SNOOZED, count: records.size, date:)
         end
+
+        def refusal(errors) = errors.key?(:pick) ? "past" : super
       end
     end
   end

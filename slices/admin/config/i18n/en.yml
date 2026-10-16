@@ -162,6 +162,7 @@ en:
           blank: "Tick a thread first"
           format: "Nothing changed · pick an action from the bar"
           long: "Tick 100 threads or fewer"
+          past: "Nothing changed · a snooze ends after now"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         label:

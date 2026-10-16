@@ -269,10 +269,20 @@ RSpec.describe "Admin mail menus", type: :request do
         expect(toast).to eq("Snoozed 2 threads until Oct 8, 2026")
       end
 
-      it "refuses a time in the past" do
+      it "refuses a time in the past with a toast that names the time", :aggregate_failures do
         act("/admin/mail/bulk/snooze", "ids[]": ids, pick: "2020-01-01T08:00", folder: "inbox")
 
         expect(ids.map { repo.by_id(it).snoozed_until }).to all(be_nil)
+        follow_redirect!
+        expect(toast).to eq("Nothing changed · a snooze ends after now")
+      end
+
+      it "refuses a time it cannot read with the same toast", :aggregate_failures do
+        act("/admin/mail/bulk/snooze", "ids[]": ids, pick: "soon", folder: "inbox")
+
+        expect(ids.map { repo.by_id(it).snoozed_until }).to all(be_nil)
+        follow_redirect!
+        expect(toast).to eq("Nothing changed · a snooze ends after now")
       end
     end
   end
