@@ -16,7 +16,8 @@ tags: [tasks, recurrence, series, cadence, schema, sprints, jobs]
 
 Every task is one-off. Spec #1274 lets the owner set a task to recur on a cadence, such as every Thursday or the
 first of each month. When the owner closes a copy, done or canceled, the next copy appears at once, dated for the
-next cadence date after today, in the sprint for that date. The owner can pause a series and resume it later.
+next cadence date after today, or after the closed copy's sprint day when it closes before that day, in the sprint
+for that date. The owner can pause a series and resume it later.
 
 The next copy takes its title, note, tags and project from the copy just closed, so a rename or a new tag carries
 forward. Comments, time, contributors, links and subtasks start fresh. Imported tasks from GitHub or Linear cannot
@@ -54,7 +55,8 @@ need ADR 0012's catch-up for every night it missed. The owner wanted the next co
 ## Consequences
 
 A series moves only when its copy closes, or when it starts on a task already closed. A copy left open stalls the
-series, with no backlog of missed dates, and a late close still dates the next copy after today.
+series, with no backlog of missed dates, and a late close still dates the next copy after today. An early close dates
+it after the closed copy's day, so a copy closed ahead of its day never lands a second copy on that day.
 
 `CompleteTask` and `CancelTask` grow a step and a dependency on series reads, and every close now writes in more
 than one table. A new way to close a task has to go through them, or a series stops.

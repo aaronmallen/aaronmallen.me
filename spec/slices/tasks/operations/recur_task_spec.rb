@@ -48,6 +48,31 @@ RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
     expect(sprint_on(copy_of(series))).to eq(today + 7)
   end
 
+  context "with a weekly copy in a sprint" do
+    def close_on(day)
+      dated = create(:task, list: nil, sprint_id: create(:sprint, sprint_date: day).id)
+      series = cadence(dated, cadence: "weeks", every: 1, weekday: day.wday, starts_on: (day - 7).iso8601)
+      complete(dated)
+      sprint_on(copy_of(series))
+    end
+
+    it "dates the next copy after its day when it closes early" do
+      expect(close_on(today + 2)).to eq(today + 9)
+    end
+
+    it "dates the next copy after today when it closes on its day" do
+      expect(close_on(today)).to eq(today + 7)
+    end
+  end
+
+  it "dates the next copy after today when the copy has no sprint day" do
+    series = cadence(cadence: "weeks", every: 1, weekday: (today + 2).wday, starts_on: (today - 5).iso8601)
+
+    complete
+
+    expect(sprint_on(copy_of(series))).to eq(today + 2)
+  end
+
   context "with a copy that has history" do
     let!(:series) { cadence(cadence: "month_end") }
     let(:copy) { copy_of(series) }
