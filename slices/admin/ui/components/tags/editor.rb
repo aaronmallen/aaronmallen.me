@@ -14,6 +14,7 @@ module Admin
           prop :uses, Blog::Types::Hash
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :page, Blog::Types::Integer, default: 1
+          prop :query, Blog::Types::String, default: ""
 
           def self.id_for(tag) = "tag-#{tag.id}-editor"
 
@@ -35,6 +36,7 @@ module Admin
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field") do
               scope_field
               page_field
+              query_field
               input(type: "hidden", name: "tag[name]", value: @tag.name)
               span(class: "f") { t(".color") }
               Swatches(name: "tag[color]", scope:, selected: @tag.color, submit: true)
@@ -74,6 +76,8 @@ module Admin
 
           def page_field = @page > 1 && input(type: "hidden", name: "page", value: @page)
 
+          def query_field = !@query.empty? && input(type: "hidden", name: "q", value: @query)
+
           def remove
             DeleteForm(
               action: path(:admin_delete_tag, id: @tag.id), label: t(".remove"),
@@ -85,6 +89,7 @@ module Admin
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field", id: rename_id) do
               scope_field
               page_field
+              query_field
               label(class: "f", for: FieldError.id_for(:name, scope)) { t(".rename") }
               Input(**FieldError.control_attributes(:name, errors, scope), name: "tag[name]", value: name)
             end

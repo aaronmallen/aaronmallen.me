@@ -65,6 +65,29 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css("#tag-#{named('ruby').id}-name-error")
       end
 
+      it "sends the search it is under with a rename and a colour", :aggregate_failures do
+        get "/admin/tags", q: "r"
+
+        expect(page).to have_css("#tag-#{named('rails').id}-form input[name='q'][value='r']", visible: :all)
+        editor = "#tag-#{named('rails').id}-editor"
+        expect(page).to have_css("#{editor} form:not([id]) input[name='q'][value='r']", visible: :all)
+      end
+
+      it "keeps the search when it refuses a rename", :aggregate_failures do
+        send_to("/admin/tags/#{named('rust').id}", tag: { name: " " }, q: "r", page: "2")
+
+        expect(last_response.status).to eq(422)
+        expect(names).to eq(%w[#ruby #rust])
+        expect(page).to have_css("#tag-#{named('rust').id}-editor.tag-editor-open", visible: :all)
+        expect(page).to have_css("#tag-#{named('rust').id}-name-error")
+      end
+
+      it "returns to the search after a rename" do
+        send_to("/admin/tags/#{named('rust').id}", tag: { name: "crab" }, scope: "public", q: "r")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+      end
+
       it "counts every tag that matches, not the page" do
         get "/admin/tags", q: "r"
 

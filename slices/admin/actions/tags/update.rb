@@ -17,26 +17,27 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:tag]]
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
+          query = Blog::Types::TrimmedText[request.params[:q]]
 
           result = save_tag.call(params, scope:, id:)
 
-          settle(response, result, saved_key(params), back(request, scope)) do |errors|
-            invalid(request, response, scope, editing(id, params, errors))
+          settle(response, result, saved_key(params), back(request, scope, query)) do |errors|
+            invalid(request, response, scope, query, editing(id, params, errors))
           end
         end
 
         private
 
-        def back(request, scope)
-          back_here(request) || routes.path(:admin_tags, scope:)
+        def back(request, scope, query)
+          back_here(request) || routes.path(:admin_tags, scope:, **(query.empty? ? {} : { q: query }))
         end
 
         def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
 
-        def invalid(request, response, scope, editing)
+        def invalid(request, response, scope, query, editing)
           page = requested_page(request, response)
           response.status = 422
-          response.render(index_view, **build_tags_page.call(scope:, page:, editing:))
+          response.render(index_view, **build_tags_page.call(scope:, page:, editing:, query:))
         end
 
         def saved_key(params) = Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED

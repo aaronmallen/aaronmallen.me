@@ -51,7 +51,7 @@ module Admin
             end
           end
 
-          def editor(tag) = Editor(tag:, uses: uses(tag), editing: @editing, page: @tags.number)
+          def editor(tag) = Editor(tag:, uses: uses(tag), editing: @editing, page: @tags.number, query: @query)
 
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
