@@ -54,7 +54,7 @@ module Blog
     config.actions.view_name_inference_base = "ui.views"
 
     config.logger.filters |= %w[\w*_key \w*_secret \w*_token code_challenge code_verifier ip]
-    config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS
+    config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS | Providers::HoneybadgerProvider::WHOLE_KEYS
 
     config.no_auto_register_paths += %w[helpers]
     config.shared_app_component_keys += %w[

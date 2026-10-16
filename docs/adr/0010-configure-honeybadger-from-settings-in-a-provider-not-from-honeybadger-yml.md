@@ -49,6 +49,9 @@ and registers `honeybadger.agent`. The app requires `honeybadger/ruby`, never `h
 - The logger alone filters `ip`, the visitor address Hanami's request logger writes on each line. Honeybadger
   already drops the address through `remote_addr` and `x_forwarded_for`, and as a substring `ip` would filter
   `description` and `recipient`.
+- `WHOLE_KEYS` holds the mail recipients, `to` and `cc`, which are too short to match as substrings: `to` would
+  filter `token` and `return_to`, `cc` would filter `account`. The logger takes them as they are, since it matches
+  whole keys, and Honeybadger takes them as one anchored pattern. #1501 added them with `bcc` and `html`.
 
 ## Alternatives
 

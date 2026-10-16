@@ -284,6 +284,46 @@ RSpec.describe "Secrets a request carries", type: :request do
     end
   end
 
+  describe "the owner sending mail or saving a draft" do
+    let(:fields) { { html: "<p>#{parts[:html]}</p>", **parts.except(:html) } }
+    let(:parts) { { html: secret, body: secret, **%i[to cc bcc].to_h { [it, "#{secret}@example.com"] } } }
+
+    def private_parts = parts.values
+
+    def save_draft = post("/admin/mail/draft", _csrf_token: admin_csrf_token, mail: fields)
+
+    def send_mail = post("/admin/mail/send", _csrf_token: admin_csrf_token, mail: fields)
+
+    before { sign_in_to_admin }
+
+    it "logs the send and the draft" do
+      expect(logged { send_mail && save_draft }).to include("/admin/mail/send", "/admin/mail/draft")
+    end
+
+    it "logs neither the body nor a recipient" do
+      expect(logged { send_mail && save_draft }).not_to include(*private_parts)
+    end
+
+    it "reports neither the body nor a recipient from a send" do
+      expect(reported("mail.operations.send_mail") { send_mail }).not_to include(*private_parts)
+    end
+
+    it "reports neither the body nor a recipient from a draft" do
+      expect(reported("mail.operations.save_draft") { save_draft }).not_to include(*private_parts)
+    end
+
+    it "reports what the send raised" do
+      expect(reported("mail.operations.send_mail") { send_mail }).to include("/admin/mail/send")
+    end
+
+    it "reports a key that only ends in to" do
+      return_to = "/admin/mail?q=#{secret}"
+      sending = -> { post("/admin/mail/send", _csrf_token: admin_csrf_token, return_to:, mail: fields) }
+
+      expect(reported("mail.operations.send_mail", &sending)).to include(return_to)
+    end
+  end
+
   describe "an agent uploading a photo" do
     let(:data) { Base64.strict_encode64(secret) }
 

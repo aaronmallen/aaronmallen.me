@@ -14,6 +14,7 @@ module Blog
         api_key
         app_password
         authorization
+        bcc
         bluesky_did
         bluesky_handle
         body
@@ -21,6 +22,7 @@ module Blog
         code
         cookie
         email
+        html
         license_key
         markdown
         mastodon_handle
@@ -39,6 +41,8 @@ module Blog
         visitor_hash
         x_forwarded_for
       ].freeze
+      WHOLE_KEYS = %w[cc to].freeze
+      FILTERS = [*FILTER_KEYS, /\A#{Regexp.union(WHOLE_KEYS)}\z/i].freeze
       IGNORE = (Honeybadger::Config::IGNORE_DEFAULT | %w[
         Hanami::Router::NotAllowedError
         Hanami::Router::NotFoundError
@@ -65,7 +69,7 @@ module Blog
             config.revision = Blog::Version::CURRENT
             config.before_notify { quiet_scheduler(it) }
             config.exceptions.ignore = IGNORE
-            config.request.filter_keys = FILTER_KEYS
+            config.request.filter_keys = FILTERS
             config.sidekiq.attempt_threshold = ATTEMPT_THRESHOLD
           end
         end
