@@ -18,7 +18,7 @@ module Admin
 
               bar.choose(
                 "group_id", ADD,
-                prompt: t(".pick_group"), options: @groups, icon: "fa-solid fa-plus", label: t(".add"),
+                prompt: t(".pick_group"), options: @groups, icon: :add, label: t(".add"),
               )
             end
           end

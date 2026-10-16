@@ -16,7 +16,7 @@ module Admin
               **control, name: "saved_view[name]", value: @value, required: true, maxlength: MAX, autocomplete: "off",
             )
           end
-          Button(type: "submit", variant: :pri, small: true, icon: "fa-regular fa-floppy-disk") { @submit }
+          Button(type: "submit", variant: :pri, small: true, icon: :save) { @submit }
         end
       end
     end

@@ -6,13 +6,9 @@ module Admin
       module Mail
         class ReaderActs < Component
           ACT = Blog::Types::MessageBulkAction
-          BACK = "fa-solid fa-rotate-left"
           GMAIL = "https://mail.google.com"
-          ICONS = {
-            ".archive" => ["fa-solid fa-box-archive"], ".mark_read" => ["fa-regular fa-envelope-open", :gh],
-            ".mark_unread" => ["fa-regular fa-envelope", :gh], ".not_spam" => [BACK], ".restore" => [BACK],
-            ".spam" => %i[ban warn], ".star" => ["fa-regular fa-star", :gh],
-            ".unstar" => ["fa-solid fa-star", :gh],
+          VARIANTS = {
+            ".mark_read" => :gh, ".mark_unread" => :gh, ".spam" => :warn, ".star" => :gh, ".unstar" => :gh,
           }.freeze
           READ = Blog::Types::MessageStatus["read"]
           SPAM = Blog::Types::MessageStatus["spam"]
@@ -39,8 +35,8 @@ module Admin
             div(class: "mail-acts-far") { @form ? form_acts : gmail_acts }
           end
 
-          def change(act, label_key)
-            icon, variant = ICONS.fetch(label_key)
+          def change(act, label_key, icon: ActIcon[act])
+            variant = VARIANTS[label_key]
             ButtonForm(
               action: path(:admin_change_mail, id: @thread.id, act:), label: t(label_key), variant:, icon:, morph: true,
               hidden: @list,
@@ -78,7 +74,7 @@ module Admin
           def gone? = spam? || @thread.trashed
 
           def gone_acts
-            spam? ? change(READ, ".not_spam") : change(ACT["inbox"], ".restore")
+            spam? ? change(READ, ".not_spam", icon: :restore) : change(ACT["inbox"], ".restore", icon: :restore)
             div(class: "mail-acts-far") { delete(".delete_forever", ".confirm_delete_forever") }
           end
 

@@ -31,7 +31,7 @@ module Admin
           Form(action:, class: "ctx-field", novalidate: true, data: { morph: true }) do
             hidden(fields)
             div(class: "contents", role: "menuitem", aria: { label: }) do
-              Icon("fa-solid fa-plus")
+              Icon(:add)
               input(
                 type: "text", name:, pattern:, placeholder: label, autocomplete: "off", class: "ctx-input",
                 tabindex: "-1", aria: { label: }, data: { context_item: true, invalid: },

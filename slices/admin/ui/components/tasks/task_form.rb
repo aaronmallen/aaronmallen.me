@@ -54,7 +54,7 @@ module Admin
               yield if block_given?
               Button(
                 variant: :pri, type: "submit", small: true,
-                icon: @task ? "fa-regular fa-floppy-disk" : "fa-solid fa-plus",
+                icon: @task ? :save : :add,
               ) do
                 t(@task ? ".update" : ".save")
               end

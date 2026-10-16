@@ -35,7 +35,7 @@ module Admin
           def actions
             div(class: "sg-actions person-form-actions") do
               delete_button if @person
-              Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@person ? ".save" : ".add") }
+              Button(variant: :pri, type: "submit", icon: :save) { t(@person ? ".save" : ".add") }
             end
           end
 

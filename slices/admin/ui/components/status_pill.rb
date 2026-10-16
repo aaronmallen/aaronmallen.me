@@ -20,7 +20,7 @@ module Admin
           resolved: [:green, "fa-solid fa-circle-check", ".resolved"],
           dropped: [nil, :ban, ".dropped"],
           active: [:green, "fa-solid fa-circle-check", ".active"],
-          archived: [nil, "fa-solid fa-box-archive", ".archived"],
+          archived: [nil, :archive, ".archived"],
         }.freeze
 
         prop :status, Blog::Types::Symbol.enum(*STATUSES.keys), &:to_sym

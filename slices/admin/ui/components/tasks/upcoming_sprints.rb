@@ -32,7 +32,7 @@ module Admin
             Form(action: path(:admin_plan_sprint), class: "sprint-plan") do
               label(class: "sprint-plan-label", for: "sprint-on") { t(".open_for") }
               Input(type: "date", id: "sprint-on", name: "sprint_on", min: tomorrow, value: tomorrow)
-              Button(type: "submit", small: true, icon: "fa-solid fa-plus") { t(".open") }
+              Button(type: "submit", small: true, icon: :add) { t(".open") }
               span(class: "sprint-plan-note") { t(".note") }
             end
           end

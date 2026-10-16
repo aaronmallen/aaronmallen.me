@@ -36,7 +36,7 @@ module Admin
           end
 
           def draft_and_publish_buttons
-            Button(type: "submit", name: "intent", value: DRAFT, icon: "fa-regular fa-floppy-disk") do
+            Button(type: "submit", name: "intent", value: DRAFT, icon: :save) do
               t(".save_draft")
             end
             publish_button
@@ -64,7 +64,7 @@ module Admin
           end
 
           def save_button
-            Button(variant: :pri, type: "submit", name: "intent", value: SAVE, icon: "fa-regular fa-floppy-disk") do
+            Button(variant: :pri, type: "submit", name: "intent", value: SAVE, icon: :save) do
               t(".save")
             end
           end

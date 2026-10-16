@@ -63,7 +63,7 @@ module Admin
           end
 
           def save_button
-            Button(variant: :pri, small: true, type: "submit", icon: "fa-regular fa-floppy-disk") do
+            Button(variant: :pri, small: true, type: "submit", icon: :save) do
               t(@saved ? ".update" : ".save")
             end
           end

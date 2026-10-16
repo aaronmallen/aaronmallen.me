@@ -12,7 +12,7 @@ module Admin
 
         def view_template
           Button(
-            href: @href, variant: :pri, icon: "fa-solid fa-plus",
+            href: @href, variant: :pri, icon: :add,
             **mix(Dialog.opens(@dialog), aria: { keyshortcuts: KEY }, data: { key: KEY, key_label: @label }),
           ) { @label }
         end

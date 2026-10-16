@@ -32,11 +32,9 @@ module Admin
           def act(route) = path(route, id: @project.id)
 
           def change(menu)
-            if @project.archived?
-              menu.post(t(".restore"), action: act(:admin_restore_project), icon: "fa-solid fa-rotate-left")
-            else
-              menu.post(t(".archive"), action: act(:admin_archive_project), icon: "fa-solid fa-box-archive")
-            end
+            row = Components::Projects::Row
+            route, _, icon, = @project.archived? ? row::RESTORE : row::ARCHIVE
+            menu.post(t(@project.archived? ? ".restore" : ".archive"), action: act(route), icon:)
           end
 
           def copy_repo(menu)

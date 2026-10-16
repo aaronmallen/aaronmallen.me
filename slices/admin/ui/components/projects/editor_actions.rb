@@ -18,16 +18,14 @@ module Admin
 
           def save_button
             Button(
-              variant: :pri, type: "submit", disabled: !@named, icon: "fa-regular fa-floppy-disk",
+              variant: :pri, type: "submit", disabled: !@named, icon: :save,
               data: { editor_save: "" },
             ) { t(@existing ? ".save" : ".create") }
           end
 
           def status_button
-            Button(
-              type: "submit", variant: (:gh unless @archived), form: StatusForm::ID,
-              icon: @archived ? "fa-solid fa-rotate-left" : "fa-solid fa-box-archive",
-            ) { t(@archived ? ".restore" : ".archive") }
+            *, icon, variant = @archived ? Row::RESTORE : Row::ARCHIVE
+            Button(type: "submit", variant:, form: StatusForm::ID, icon:) { t(@archived ? ".restore" : ".archive") }
           end
         end
       end

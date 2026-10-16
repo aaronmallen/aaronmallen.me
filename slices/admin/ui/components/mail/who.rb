@@ -32,7 +32,7 @@ module Admin
             name("fa-regular fa-user", dim: true) { plain t(@form ? ".stranger_form" : ".stranger", name: @sender) }
             return if @spam
 
-            Button(variant: :gh, small: true, icon: "fa-solid fa-plus", href: path(:admin_new_person)) do
+            Button(variant: :gh, small: true, icon: :add, href: path(:admin_new_person)) do
               t(".add_person")
             end
           end

@@ -109,7 +109,7 @@ module Admin
           def rename_id = "tag-#{@tag.id}-form"
 
           def save
-            Button(variant: :pri, type: "submit", small: true, form: rename_id, icon: "fa-regular fa-floppy-disk") do
+            Button(variant: :pri, type: "submit", small: true, form: rename_id, icon: :save) do
               t(".save")
             end
           end

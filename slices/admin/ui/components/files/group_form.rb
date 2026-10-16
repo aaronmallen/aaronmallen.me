@@ -38,7 +38,7 @@ module Admin
               input(type: "hidden", name: "group_id", value: @group.id)
               label(class: "f", for: "#{scope}-add") { t(".add_label") }
               input(id: "#{scope}-add", class: "file-drop-input", type: "file", name: "files[]", multiple: true)
-              Button(type: "submit", small: true, icon: "fa-solid fa-plus") { t(".add") }
+              Button(type: "submit", small: true, icon: :add) { t(".add") }
             end
           end
 

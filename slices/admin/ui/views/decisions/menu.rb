@@ -9,7 +9,7 @@ module Admin
 
           CLOSINGS = {
             drop: { label: ".drop", title: ".drop_title", icon: :ban, variant: :warn },
-            reopen: { label: ".reopen", title: ".reopen_title", icon: "fa-solid fa-rotate-left", variant: :pri },
+            reopen: { label: ".reopen", title: ".reopen_title", icon: :restore, variant: :pri },
           }.freeze
 
           layout nil

@@ -6,12 +6,7 @@ module Admin
       module Mail
         class MoveMenu < Component
           ACT = Blog::Types::MessageBulkAction
-          MOVES = {
-            ACT["inbox"] => ["fa-solid fa-inbox", ".inbox"],
-            ACT["archive"] => ["fa-solid fa-box-archive", ".archive"],
-            ACT["spam"] => [:ban, ".spam"],
-            ACT["trash"] => [:trash, ".trash"],
-          }.freeze
+          MOVES = %w[inbox archive spam trash].to_h { [ACT[it], ".#{it}"] }.freeze
 
           prop :menu, Blog::Types::Instance(ContextMenu)
           prop :fields, Blog::Types::Hash
@@ -19,8 +14,9 @@ module Admin
 
           def view_template
             @menu.sub(t(".move_to"), icon: "fa-solid fa-folder-open") do
-              MOVES.except(@except).each do |act, (icon, key)|
-                @menu.post(t(key), action: path(:admin_bulk_mail), icon:, fields: { **@fields, act: })
+              MOVES.except(@except).each do |act, key|
+                fields = { **@fields, act: }
+                @menu.post(t(key), action: path(:admin_bulk_mail), icon: ActIcon[act], fields:)
               end
             end
           end

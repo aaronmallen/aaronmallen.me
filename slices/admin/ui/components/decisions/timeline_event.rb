@@ -7,12 +7,12 @@ module Admin
         class TimelineEvent < Component
           EVENTS = {
             Blog::Types::DecisionEventKind["opened"] => ["fa-regular fa-circle", ".opened"],
-            Blog::Types::DecisionEventKind["option_added"] => ["fa-solid fa-plus", ".option_added"],
+            Blog::Types::DecisionEventKind["option_added"] => [:add, ".option_added"],
             Blog::Types::DecisionEventKind["option_edited"] => [:edit, ".option_edited"],
             Blog::Types::DecisionEventKind["edited"] => [:edit, ".edited"],
             Blog::Types::DecisionEventKind["resolved"] => ["fa-solid fa-circle-check", ".resolved"],
             Blog::Types::DecisionEventKind["dropped"] => [:ban, ".dropped"],
-            Blog::Types::DecisionEventKind["reopened"] => ["fa-solid fa-rotate-left", ".reopened"],
+            Blog::Types::DecisionEventKind["reopened"] => [:restore, ".reopened"],
           }.freeze
 
           prop :entry, Blog::Types::Instance(ROM::Struct)

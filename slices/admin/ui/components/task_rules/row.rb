@@ -80,7 +80,7 @@ module Admin
           def provider = t(Fields::PROVIDERS.fetch(@rule.provider))
 
           def save
-            Button(variant: :pri, type: "submit", small: true, form: form_id, icon: "fa-regular fa-floppy-disk") do
+            Button(variant: :pri, type: "submit", small: true, form: form_id, icon: :save) do
               t(".save")
             end
           end

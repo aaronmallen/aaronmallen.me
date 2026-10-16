@@ -6,12 +6,9 @@ module Admin
       module Mail
         class BulkMenu < View
           ACT = Blog::Types::MessageBulkAction
+          ICON = Components::Mail::ActIcon
           INBOX = Blog::Types::MailFolder["inbox"]
-          MARKS = [
-            [ACT["read"], "fa-regular fa-envelope-open", ".read"],
-            [ACT["unread"], "fa-regular fa-envelope", ".unread"],
-            [ACT["star"], "fa-regular fa-star", ".star"],
-          ].freeze
+          MARKS = { ACT["read"] => ".read", ACT["unread"] => ".unread", ACT["star"] => ".star" }.freeze
           TRASH = Blog::Types::MailFolder["trash"]
 
           layout nil
@@ -30,20 +27,20 @@ module Admin
 
           private
 
-          def act(menu, act, icon, label, **)
+          def act(menu, act, label, icon: ICON[act], **)
             menu.post(label, action: path(:admin_bulk_mail), icon:, fields: { **picked, act: }, **)
           end
 
           def count = @ids.size
 
           def filed(menu)
-            act(menu, ACT["archive"], "fa-solid fa-box-archive", t(".archive", count:))
-            MARKS.each { |act, icon, key| act(menu, act, icon, t(key)) }
+            act(menu, ACT["archive"], t(".archive", count:))
+            MARKS.each { |act, key| act(menu, act, t(key)) }
             snooze(menu)
             menu.separator
             files(menu)
             menu.separator
-            act(menu, ACT["trash"], :trash, t(".delete", count:), warn: true, confirm: t(".confirm"))
+            act(menu, ACT["trash"], t(".delete", count:), warn: true, confirm: t(".confirm"))
           end
 
           def files(menu)
@@ -76,9 +73,9 @@ module Admin
           end
 
           def trash(menu)
-            act(menu, ACT["inbox"], "fa-solid fa-rotate-left", t(".restore", count:))
+            act(menu, ACT["inbox"], t(".restore", count:), icon: :restore)
             menu.separator
-            act(menu, ACT["delete"], :trash, t(".delete_forever", count:), warn: true, confirm: t(".confirm_forever"))
+            act(menu, ACT["delete"], t(".delete_forever", count:), warn: true, confirm: t(".confirm_forever"))
           end
         end
       end

@@ -62,7 +62,7 @@ module Admin
             end
             Button(
               variant: :pri, type: "submit", small: true, form: "task-#{@task.id}-form",
-              icon: "fa-regular fa-floppy-disk",
+              icon: :save,
             ) { t(".save") }
           end
 

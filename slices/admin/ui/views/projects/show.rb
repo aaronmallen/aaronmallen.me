@@ -77,7 +77,7 @@ module Admin
           end
 
           def create_task
-            Button(href: path(:admin_new_task, project: @project.key), icon: "fa-solid fa-plus") { t(".create_task") }
+            Button(href: path(:admin_new_task, project: @project.key), icon: :add) { t(".create_task") }
           end
 
           def facts

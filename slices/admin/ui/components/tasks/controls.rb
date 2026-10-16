@@ -82,7 +82,7 @@ module Admin
             cancel
           end
 
-          def reopen = change(:admin_reopen_task, "fa-solid fa-rotate-left", t(".reopen"))
+          def reopen = change(:admin_reopen_task, :restore, t(".reopen"))
 
           def running? = @task.in_progress? && @task.in_sprint?
 

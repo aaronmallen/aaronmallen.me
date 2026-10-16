@@ -42,7 +42,7 @@ module Admin
               picked = { **@fields, record_q: @query, "record[other_kind]": kind, "record[other_id]": link.id }
               HiddenFields(values: picked.compact)
               button(type: "submit", class: "record-picker-target") do
-                Icon("fa-solid fa-plus")
+                Icon(:add)
                 span(class: "record-link-title") { link.title }
                 time(class: "record-link-day", datetime: link.day.iso8601) { l(link.day, format: :medium) }
               end

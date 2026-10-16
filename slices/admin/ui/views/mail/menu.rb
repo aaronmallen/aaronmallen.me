@@ -6,14 +6,7 @@ module Admin
       module Mail
         class Menu < View
           ACT = Blog::Types::MessageBulkAction
-          ICONS = {
-            ACT["archive"] => "fa-solid fa-box-archive",
-            ACT["inbox"] => "fa-solid fa-inbox",
-            ACT["read"] => "fa-regular fa-envelope-open",
-            ACT["star"] => "fa-regular fa-star",
-            ACT["unread"] => "fa-regular fa-envelope",
-            ACT["unstar"] => "fa-solid fa-star",
-          }.freeze
+          ICON = Components::Mail::ActIcon
           REPLY = Components::Mail::FieldError.id_for(:body, Components::Mail::Reply::SCOPE)
           SPAM = Blog::Types::MessageStatus["spam"]
           UNREAD = Blog::Types::MessageStatus["unread"]
@@ -44,8 +37,7 @@ module Admin
           private
 
           def act(menu, act, key = ".#{act}", **)
-            menu.post(t(key), action: path(:admin_bulk_mail), icon: ICONS.fetch(act, :trash),
-                              fields: { **picked, act: }, **)
+            menu.post(t(key), action: path(:admin_bulk_mail), icon: ICON[act], fields: { **picked, act: }, **)
           end
 
           def delete(menu)
@@ -80,7 +72,7 @@ module Admin
           end
 
           def opens(menu)
-            menu.post(t(".open"), action: path(:admin_open_mail, id: @thread.id), icon: ICONS[ACT["read"]],
+            menu.post(t(".open"), action: path(:admin_open_mail, id: @thread.id), icon: ICON[ACT["read"]],
                                   fields: shown)
             return if @thread.draft || place == ACT["spam"] || place == ACT["trash"]
 

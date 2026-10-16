@@ -5,11 +5,15 @@ module Blog
     module Components
       class Icon < Component
         ACTIONS = {
+          add: "fa-solid fa-plus",
+          archive: "fa-solid fa-box-archive",
           ban: "fa-solid fa-ban",
           close: "fa-solid fa-xmark",
           copy: "fa-regular fa-copy",
           edit: "fa-regular fa-pen-to-square",
           outbound: "fa-solid fa-arrow-up-right-from-square",
+          restore: "fa-solid fa-rotate-left",
+          save: "fa-regular fa-floppy-disk",
           trash: "fa-regular fa-trash-can",
         }.freeze
         INLINE = :inline_icons

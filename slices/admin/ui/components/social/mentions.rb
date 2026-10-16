@@ -26,7 +26,7 @@ module Admin
 
           def add_link(**)
             a(href: path(:admin_new_person), **) do
-              IconLabel(icon: "fa-solid fa-plus") { t(".add") }
+              IconLabel(icon: :add) { t(".add") }
             end
           end
 

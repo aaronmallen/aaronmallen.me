@@ -43,7 +43,7 @@ module Admin
           def action = editing? ? path(:admin_update_social_post, id: @editing) : path(:admin_create_social_post)
 
           def add_button
-            Button(variant: :gh, small: true, data: { social_add: "" }, icon: "fa-solid fa-plus") { t(".add") }
+            Button(variant: :gh, small: true, data: { social_add: "" }, icon: :add) { t(".add") }
           end
 
           def blank? = @values[:parts].none? { written?(it) }
@@ -60,7 +60,7 @@ module Admin
               type: "submit", name: "intent", value: DRAFT, small: true, disabled: draft_disabled?,
               data: { social_draft: "" },
             ) do
-              button_label("fa-regular fa-floppy-disk", ".save_draft")
+              button_label(:save, ".save_draft")
             end
             send_button
           end

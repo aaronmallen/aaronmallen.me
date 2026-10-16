@@ -5,9 +5,9 @@ module Admin
     module Components
       module Projects
         class Row < Component
-          ARCHIVE = [:admin_archive_project, ".archive", "fa-solid fa-box-archive", :gh].freeze
+          ARCHIVE = [:admin_archive_project, ".archive", :archive, :gh].freeze
           PRIVATE = Blog::Types::ProjectVisibility["private"]
-          RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
+          RESTORE = [:admin_restore_project, ".restore", :restore, nil].freeze
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String

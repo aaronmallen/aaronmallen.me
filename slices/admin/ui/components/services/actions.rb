@@ -5,7 +5,7 @@ module Admin
     module Components
       module Services
         class Actions < Component
-          ANOTHER_ICON = "fa-solid fa-plus"
+          ANOTHER_ICON = :add
           DISCONNECT_ICON = "fa-solid fa-link-slash"
           RECONNECT_ICON = "fa-solid fa-rotate"
           TEST_ICON = "fa-solid fa-plug-circle-check"

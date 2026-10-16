@@ -24,7 +24,7 @@ module Admin
 
           def add_button
             Button(
-              variant: :pri, type: "submit", disabled: !ready?, data: { work_add: "" }, icon: "fa-solid fa-plus",
+              variant: :pri, type: "submit", disabled: !ready?, data: { work_add: "" }, icon: :add,
             ) do
               t(".add")
             end

@@ -78,7 +78,7 @@ module Admin
 
           def progress(menu)
             if closed?
-              menu.post(t(".reopen"), action: act(:admin_reopen_task), icon: "fa-solid fa-rotate-left")
+              menu.post(t(".reopen"), action: act(:admin_reopen_task), icon: :restore)
             else
               start_or_pause(menu)
               menu.post(t(".complete"), action: act(:admin_complete_task), icon: "fa-solid fa-check")

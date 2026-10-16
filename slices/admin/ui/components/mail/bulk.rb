@@ -7,11 +7,11 @@ module Admin
         class Bulk < Component
           ACT = Blog::Types::MessageBulkAction
           CHOICES = {
-            "to" => [ACT["move"], ".move_to", ".move", "fa-solid fa-arrow-right"],
-            "label" => [ACT["label"], ".label_pick", ".label_as", "fa-solid fa-tag"],
+            "to" => [ACT["move"], ".move_to", ".move"],
+            "label" => [ACT["label"], ".label_pick", ".label_as"],
           }.freeze
           FILED = [
-            [ACT["archive"], "fa-solid fa-box-archive", ".archive", nil],
+            [ACT["archive"], ActIcon[ACT["archive"]], ".archive", nil],
             [ACT["read"], nil, ".read", :gh],
             [ACT["unread"], nil, ".unread", :gh],
           ].freeze
@@ -39,8 +39,8 @@ module Admin
           private
 
           def choose(bar, name, options)
-            act, prompt, label, icon = CHOICES.fetch(name)
-            bar.choose(name, act, prompt: t(prompt), options:, icon:, label: t(label))
+            act, prompt, label = CHOICES.fetch(name)
+            bar.choose(name, act, prompt: t(prompt), options:, icon: ActIcon[act], label: t(label))
           end
 
           def data = { confirm: t(".confirm_delete_forever") }
@@ -52,7 +52,7 @@ module Admin
             choose(bar, "to", moves)
             labels = label_options
             choose(bar, "label", labels) if labels.any?
-            bar.act(ACT["trash"], icon: :trash, label: t(".trash"), variant: :warn)
+            bar.act(ACT["trash"], icon: ActIcon[ACT["trash"]], label: t(".trash"), variant: :warn)
           end
 
           def label_options
@@ -69,8 +69,9 @@ module Admin
           end
 
           def trash(bar)
-            bar.act(ACT["inbox"], icon: "fa-solid fa-rotate-left", label: t(".restore"))
-            bar.act(ACT["delete"], icon: :trash, label: t(".delete_forever"), variant: :warn, data:)
+            bar.act(ACT["inbox"], icon: :restore, label: t(".restore"))
+            delete = ACT["delete"]
+            bar.act(delete, icon: ActIcon[delete], label: t(".delete_forever"), variant: :warn, data:)
           end
         end
       end
