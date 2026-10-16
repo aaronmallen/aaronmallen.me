@@ -899,6 +899,14 @@ RSpec.describe "Admin post editor", type: :request do
         expect(post_queries.all.last.status).to eq("published")
       end
 
+      it "shows the blank slug error for a title that gives no slug", :aggregate_failures do
+        save(intent: "publish", title: "日本語", **card, syndication_body: "")
+
+        expect([last_response.status, field_error])
+          .to eq([422, i18n.t("ui.components.posts.field_error.slug.blank")])
+        expect(post_queries.all).to be_empty
+      end
+
       it "names the title and link when the blank box is what goes over", :aggregate_failures do
         save(intent: "publish", title: "a" * 301, slug: "hello", **card, syndication_body: "")
 

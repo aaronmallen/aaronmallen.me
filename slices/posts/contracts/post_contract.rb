@@ -51,7 +51,7 @@ module Posts
 
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|
         next unless context[:announcing] && values[:syndication_enabled]
-        next if rule_error?(:syndication_body)
+        next if rule_error?(:syndication_body) || values[:slug].nil?
 
         typed = Blog::Types::Text[values[:syndication_body]]
         body = announcement.compose(body: typed, slug: values[:slug], title: values[:title])
