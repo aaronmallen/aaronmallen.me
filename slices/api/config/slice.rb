@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "operations"
+
 module API
   class Slice < Hanami::Slice
     config.no_auto_register_paths += %w[helpers serializers]
@@ -105,77 +107,11 @@ module API
       repos.task_series_queries repos.task_source_queries repos.task_timeline_queries repos.time_report_queries
     ], from: :tasks
 
-    export %w[
-      endpoints.add_work_entry endpoints.archive_project endpoints.create_project endpoints.delete_work_entry
-      endpoints.list_projects endpoints.list_work_entries endpoints.restore_project endpoints.update_project
-      endpoints.create_tag endpoints.list_tags endpoints.remove_tag endpoints.update_tag
-      endpoints.list_trusted_authors endpoints.moderate_webmention endpoints.read_webmention_settings
-      endpoints.remove_trusted_author endpoints.update_webmention_settings
-      endpoints.import_commits endpoints.list_api_tokens endpoints.list_commits endpoints.list_pull_requests
-      endpoints.read_sync_state
-      endpoints.accept_suggestion_edits endpoints.list_suggestions endpoints.reject_suggestion_edits
-      endpoints.suggest_edits
-      endpoints.compose_announcement endpoints.create_post endpoints.delete_post endpoints.list_posts
-      endpoints.update_post endpoints.write_post_seo
-      endpoints.list_mail_threads endpoints.mark_mail_thread endpoints.read_mail_thread
-      endpoints.list_clients endpoints.read_analytics endpoints.read_performance endpoints.read_photo
-      endpoints.list_share_groups endpoints.list_shares endpoints.read_share endpoints.read_share_group
-      endpoints.update_share endpoints.update_share_group endpoints.update_share_group_file
-      endpoints.upload_share endpoints.upload_share_group
-      endpoints.add_shares_to_group endpoints.group_shares endpoints.ungroup_share_file
-      endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
-      endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
-      endpoints.clear_inbox
-      endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_person
-      endpoints.create_saved_view endpoints.create_social_post endpoints.create_task_rule
-      endpoints.delete_decision_comment
-      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_mail_threads
-      endpoints.delete_person
-      endpoints.delete_posts endpoints.delete_saved_view endpoints.delete_social_post endpoints.delete_task
-      endpoints.delete_task_comment
-      endpoints.delete_task_rule endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision
-      endpoints.drop_sprint endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option
-      endpoints.edit_task_comment endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks
-      endpoints.list_attention endpoints.list_calendar endpoints.list_decisions endpoints.list_inbox
-      endpoints.list_journal_entries endpoints.list_links endpoints.list_people endpoints.list_saved_views
-      endpoints.list_social_posts
-      endpoints.list_sprints endpoints.list_task_rules endpoints.list_task_series endpoints.list_tasks
-      endpoints.list_webmentions
-      endpoints.mark_mail_threads_read endpoints.mark_mail_threads_unread endpoints.mark_task_seen
-      endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
-      endpoints.pause_task endpoints.pause_task_series endpoints.plan_sprint endpoints.publish_post
-      endpoints.read_activity endpoints.read_commit
-      endpoints.read_current_sprint endpoints.read_decision endpoints.read_health_days endpoints.read_journal_entry
-      endpoints.read_person
-      endpoints.read_post endpoints.read_project endpoints.read_pull_request endpoints.read_review
-      endpoints.read_saved_view
-      endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
-      endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
-      endpoints.reorder_task endpoints.resolve_decision endpoints.resume_task_series endpoints.save_review_note
-      endpoints.save_task
-      endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.send_social_post
-      endpoints.set_task_total
-      endpoints.snooze_attention
-      endpoints.snooze_inbox
-      endpoints.snooze_inbox_row
-      endpoints.snooze_mail_threads
-      endpoints.stage_task
-      endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
-      endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
-      endpoints.tag_mail_threads
-      endpoints.untag_mail_threads
-      endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
-      endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_social_post
-      endpoints.update_task_rule
-      endpoints.update_work_session endpoints.upload_photo
-      endpoints.wake_inbox_row
-      operations.clear_inbox
-      operations.mint_token operations.revoke_token
-      operations.snooze_inbox
-      operations.snooze_inbox_row
-      operations.summarize_analytics operations.summarize_page
-      operations.wake_inbox_row
-      repos.api_token_queries repos.inbox_queries
+    export [
+      *OperationTable::ENDPOINTS.map { "endpoints.#{it}" }, # rubocop:disable Hanami/SliceExports
+      "operations.clear_inbox", "operations.mint_token", "operations.revoke_token", "operations.snooze_inbox",
+      "operations.snooze_inbox_row", "operations.summarize_analytics", "operations.summarize_page",
+      "operations.wake_inbox_row", "repos.api_token_queries", "repos.inbox_queries",
     ]
   end
 end
