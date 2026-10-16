@@ -5,19 +5,30 @@ module Performance
     class TimingReportQueries < Blog::DB::Repo
       COUNT = Sequel.function(:count).*
       DAY = Blog::DB::Relation.site_day(:occurred_at)
+      EMPTY_DAY = { count: 0, p50: nil, p95: nil }.freeze
       METRICS = %i[load lcp ttfb dom_content_loaded].freeze
       QUERIES = %i[query_count query_time].freeze
       TOTAL = Sequel.function(:sum, :count)
 
-      def jobs(range, top) = ranked(performance_rollup_jobs.dataset, performance_jobs, range, top, keys: %i[job])
+      def days(range)
+        rolled = performance_rollup_requests.dataset
+        days = daily(rolled, performance_requests, range, keys: %i[route verb], extra: [], by_day: true)
+        found = combined(days, %i[day], []).to_a.to_h { [it.fetch(:day), rounded(it.except(:day))] }
 
-      def pages(range, top)
-        found = METRICS.to_h { |metric| [metric, page_figures(range, metric)] }
-
-        found.fetch(:load).keys.first(top).map { |route| { route:, **found.transform_values { it[route] } } }
+        range.map { { day: it, **found.fetch(it, EMPTY_DAY) } }
       end
 
-      def routes(range, top)
+      def jobs(range, top = nil) = ranked(performance_rollup_jobs.dataset, performance_jobs, range, top, keys: %i[job])
+
+      def pages(range, top = nil)
+        found = METRICS.to_h { |metric| [metric, page_figures(range, metric)] }
+
+        routes = found.fetch(:load).keys
+
+        routes.first(top || routes.size).map { |route| { route:, **found.transform_values { it[route] } } }
+      end
+
+      def routes(range, top = nil)
         ranked(performance_rollup_requests.dataset, performance_requests, range, top, keys: %i[route verb])
       end
 
@@ -30,11 +41,13 @@ module Performance
         )
       end
 
-      def daily(rolled, source, range, keys:, value: :duration, extra: QUERIES)
-        figures = [*keys, COUNT.as(:count), percentile(0.5, value).as(:p50), percentile(0.95, value).as(:p95),
-                   *extra.map { Sequel.function(:sum, it).as(it) }]
+      def daily(rolled, source, range, keys:, value: :duration, extra: QUERIES, by_day: false)
+        figures = [
+          *keys, *(DAY.as(:day) if by_day), COUNT.as(:count), percentile(0.5, value).as(:p50),
+          percentile(0.95, value).as(:p95), *extra.map { Sequel.function(:sum, it).as(it) },
+        ]
 
-        rolled.unordered.where(day: range).select(*keys, :count, :p50, :p95, *extra)
+        rolled.unordered.where(day: range).select(*keys, *(:day if by_day), :count, :p50, :p95, *extra)
               .union(raw(source, range, value).group(*keys, DAY).select(*figures), all: true)
       end
 

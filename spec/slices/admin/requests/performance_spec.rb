@@ -7,6 +7,12 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
   let(:today) { Blog::TimeZone.today }
   let(:writing_route) { ["GET /writing/:slug", "", "250 ms", "385 ms", "4", "2.0", "25 ms"] }
 
+  def api_cells(row)
+    figures = row.values_at("p50", "p95").map { "#{Blog::Helpers::Figures.count(it.round)} ms" }
+
+    ["#{row['verb']} #{row['route']}", *figures, row["count"].to_s]
+  end
+
   def card(title) = page.find(".card", text: title)
 
   def cells(row) = row.all("td").map(&:text)
@@ -21,13 +27,20 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
 
   def lede(view, count) = Admin::Slice["i18n"].t(["ui.views.performance", view, "lede"].join("."), count:)
 
+  def mixed_rows
+    [100.0, 200.0, 300.0, 400.0].each { request_row(it, on: today - 1) }
+    roll_up
+    request_row(1_000.0)
+    request_row(1_000.0, route: "/admin/tasks")
+  end
+
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
   def page = Capybara.string(last_response.body)
 
-  def page_row(load, lcp: nil, route: "/writing/:slug")
+  def page_row(load, lcp: nil, route: "/writing/:slug", on: today)
     relation(:performance_pages).insert(
-      route:, device_class: "desktop", ttfb: 10, dom_content_loaded: 20, load:, lcp:, occurred_at: noon(today),
+      route:, device_class: "desktop", ttfb: 10, dom_content_loaded: 20, load:, lcp:, occurred_at: noon(on),
     )
   end
 
@@ -38,6 +51,8 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       route:, verb:, status:, duration:, query_count:, query_time: duration / 10, occurred_at: noon(on),
     )
   end
+
+  def roll_up = Performance::Jobs::RollUpTiming.new.perform
 
   def rows(title) = card(title).all("tbody tr")
 
@@ -224,6 +239,38 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       it "labels the first, middle and last day" do
         expect(page.all(".perf-chart-dates span").map(&:text)).to eq([today - 6, today - 3, today].map { short(it) })
       end
+    end
+
+    describe "a rolled up day" do
+      before do
+        [10.0, 10.0, 10.0].each { request_row(it, on: today - 1) }
+        job_row(100.0, on: today - 1)
+        page_row(900.0, lcp: 400.0, on: today - 1)
+        roll_up
+        %i[performance_requests performance_jobs performance_pages].each { relation(it).delete }
+        request_row(50.0)
+        get "/admin/performance", range: "7"
+      end
+
+      it "weighs its rollup with today's raw rows the way read_performance does", :aggregate_failures do
+        expect(cells(rows("Routes").first)).to eq(
+          ["GET /writing/:slug", "", "20 ms", "20 ms", "4", "2.0", "2 ms", "900 ms", "900 ms", "400 ms", "400 ms"],
+        )
+        expect(cells(rows("Jobs").first)).to eq(["Spec::Job", "", "100 ms", "100 ms", "1", "3.0", "2 ms"])
+      end
+
+      it "charts the day from its rollup" do
+        expect(chart_tips[-2]).to eq("#{short(today - 1)} · p50 10 ms · p95 10 ms · 3 requests")
+      end
+    end
+
+    it "shows the figures read_performance gives for the same range" do
+      mixed_rows
+      get "/admin/performance", range: "7"
+      shown = rows("Routes").map { cells(it).values_at(0, 2, 3, 4) }
+      api = call_api(:get, "/performance", { from: (today - 6).to_s, to: today.to_s }, token: api_token(%w[read]))
+
+      expect(shown).to eq(api.fetch("routes").map { api_cells(it) })
     end
 
     it "keeps to the chosen range", :aggregate_failures do
