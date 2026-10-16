@@ -22,6 +22,7 @@ module Mail
       Sanitize::Config.merge(
         RELAXED,
         elements: RELAXED[:elements] - %w[style],
+        attributes: { all: RELAXED[:attributes][:all] - %w[class id] },
         css: { properties: RELAXED[:css][:properties] - %w[position z-index] },
       ),
     )

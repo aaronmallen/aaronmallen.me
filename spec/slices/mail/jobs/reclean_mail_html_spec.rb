@@ -40,7 +40,7 @@ RSpec.describe Mail::Jobs::RecleanMailHtml do
                           "t2" => [html("t2", "<p>Two</p>")] })
     reclean
 
-    expect(html_bodies).to eq([%(<p id="x">One</p>), "<p>Two</p>"])
+    expect(html_bodies).to eq(["<p>One</p>", "<p>Two</p>"])
   end
 
   it "leaves a thread Gmail no longer has as it is, and counts it", :aggregate_failures do

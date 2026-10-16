@@ -299,6 +299,13 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(message.html_body).to eq(%(<div style="  top: 0; color: red"><img src="https://example.com/a.png">Hi</div>))
     end
 
+    it "drops the class and id of a stored HTML body" do
+      html = %(<div class="fixed inset-0 z-50" id="main"><p class="x">Hi</p></div>)
+      sync_message(parts: [gmail_part("text/html", html)])
+
+      expect(message.html_body).to eq("<div><p>Hi</p></div>")
+    end
+
     it "reads a body in the charset its part names" do
       sync_message(parts: [gmail_part("text/plain", "Caf\xE9".b, charset: "ISO-8859-1")])
 

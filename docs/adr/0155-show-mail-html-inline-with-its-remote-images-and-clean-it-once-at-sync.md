@@ -5,7 +5,7 @@ status: active
 created: 2026-10-12
 area: [admin, lib, mail]
 issue: "#1157"
-amended: ["#1392"]
+amended: ["#1392", "#1499"]
 tags: [mail, gmail, html, sanitize, images, privacy, csp, reader]
 ---
 
@@ -35,6 +35,11 @@ message with no HTML, such as a contact form one, shows its plain `body` as it d
 **HTML is cleaned once, at sync, by `Mail::GmailThread`.** The reader trusts what the row holds and does not clean it
 again. Any change to what mail may carry goes in that class.
 
+**Mail keeps no `class` or `id` attributes.** The admin stylesheet ships classes that set `position: fixed`, so a
+class on mail markup could lay it over the admin as the `position` property once could, and an `id` could clash
+with one the admin scripts look up. Cleaning drops both, as `Markdown::Note` does. Queue
+`Mail::Jobs::RecleanMailHtml` once after this ships, so stored mail loses them too.
+
 **Clean stored mail again whenever the Sanitize config or gem changes.** Gmail mail keeps no raw HTML, so
 `Mail::Jobs::RecleanMailHtml` fetches each stored Gmail thread again, a page at a time, and rewrites each message's
 `html_body` through `Mail::GmailThread`. It leaves a thread Gmail no longer has as it is and logs how many it left.
@@ -56,8 +61,8 @@ second pass on every page. #1156 rules it out.
 The mail screen reads like the mail. In return, opening a message tells its sender, and any tracker it carries, that
 the owner read it, along with the owner's address and the time.
 
-Mail markup sits in the admin's document. Its `class` and `id` attributes survive cleaning, so the admin's CSS can
-restyle it, and an `id` can clash with one the admin uses.
+Mail markup sits in the admin's document. It carries no `class` or `id`, so the admin's CSS reaches it only
+through element selectors, and mail that leans on its own classes loses that styling.
 
 The sync is the only guard. A change to the Sanitize config reaches old rows only after they sync again or the
 clean job runs, and a bug there puts whatever it lets through straight into the admin. The job cannot reach a
