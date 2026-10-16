@@ -63,6 +63,14 @@ RSpec.describe "Admin mail sending", type: :request do
       expect(page.all("#mail-compose-from option", visible: :all).map(&:text)).to eq(["aaron@work.example"])
     end
 
+    it "leaves out an account that needs a reconnect" do
+      connect_google(account_id: "aaron@home.example", scopes: send_scopes, revoked_at: Time.now)
+      create(:mail_account, name: "aaron@home.example", address: "aaron@home.example")
+      get "/admin/mail"
+
+      expect(page.all("#mail-compose-from option", visible: :all).map(&:text)).to eq(["aaron@work.example"])
+    end
+
     describe "with an account set not to send" do
       let(:home) { create(:mail_account, name: "aaron@home.example", address: "aaron@home.example") }
 

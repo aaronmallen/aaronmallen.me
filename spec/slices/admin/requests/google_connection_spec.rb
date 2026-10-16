@@ -359,6 +359,13 @@ RSpec.describe "Admin Google connection", type: :request do
           .to eq(["full@example.com"])
         expect(client.holders(sleep_scope)).to eq(["health@example.com"])
       end
+
+      it "leaves out an account that needs a reconnect", :aggregate_failures do
+        connect_account(account_id: "lapsed@example.com", revoked_at: Time.now)
+
+        expect(client.holders(sleep_scope)).to eq(["health@example.com"])
+        expect(client.holding(sleep_scope)).to eq("health@example.com")
+      end
     end
 
     describe "reading with an expired access token" do

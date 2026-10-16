@@ -403,11 +403,12 @@ RSpec.describe Mail::Jobs::SyncGmail do
     expect(a_request(:any, /gmail/).with(headers: { "Authorization" => "Bearer ya29.health" })).not_to have_been_made
   end
 
-  it "records a revoked token as needing a reconnect" do
+  it "asks Google nothing and records nothing for an account that needs a reconnect", :aggregate_failures do
     connect(revoked_at: Time.now)
     run
 
-    expect(failure).to include(reason: "gmail_failed", message: "#{address} needs a reconnect")
+    expect(a_request(:any, /gmail\.googleapis\.com/)).not_to have_been_made
+    expect(failure).to be_nil
   end
 
   describe "a revoked account that sorts first" do
@@ -420,9 +421,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
 
     it("still syncs the next account") { expect(account.history_id).to eq("100") }
 
-    it "records the revoked one as needing a reconnect" do
-      expect(failure).to include(reason: "gmail_failed", message: "aa@example.com needs a reconnect")
-    end
+    it("records no failure") { expect(failure).to be_nil }
   end
 
   describe "a failing account that sorts first" do

@@ -98,9 +98,8 @@ module Calendar
       def synced(from, to)
         return Success(0) unless google.configured?
 
-        accounts = google.holders(*SCOPES)
-        calendar_mutations.forget_accounts_but(accounts)
-        results = accounts.map { sync(it, from, to) }
+        calendar_mutations.forget_accounts_but(google.holders(*SCOPES, lapsed: true))
+        results = google.holders(*SCOPES).map { sync(it, from, to) }
         results.find(&:failure?) || Success(results.sum(&:value!))
       end
 

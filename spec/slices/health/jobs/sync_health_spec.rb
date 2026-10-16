@@ -225,11 +225,12 @@ RSpec.describe Health::Jobs::SyncHealth do
     end
   end
 
-  it "records a revoked token as needing a reconnect" do
+  it "asks Google nothing and records nothing for an account that needs a reconnect", :aggregate_failures do
     connect_google(revoked_at: Time.now)
     run
 
-    expect(failure).to include(reason: "google_health_failed", message: "aaron@example.com needs a reconnect")
+    expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
+    expect(failure).to be_nil
   end
 
   it "reads from the account that granted Health and leaves the others alone" do

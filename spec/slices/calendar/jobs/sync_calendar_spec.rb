@@ -388,9 +388,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
       run
     end
 
-    it "says it needs a reconnect" do
-      expect(failure).to include(reason: "google_calendar_failed", message: "me@example.com needs a reconnect")
-    end
+    it("records no failure") { expect(failure).to be_nil }
 
     it("keeps its calendars") { expect(calendars.size).to eq(1) }
   end

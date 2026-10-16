@@ -62,10 +62,10 @@ module Google
       raise Error, e.message
     end
 
-    def holders(*scopes)
+    def holders(*scopes, lapsed: false)
       return [] unless configured?
 
-      connections.filter_map do |connection|
+      connections.reject { it.revoked_at unless lapsed }.filter_map do |connection|
         connection.account_id if scopes.all? { |scope| connection.scopes.any? { covers?(it, scope) } }
       end
     end
