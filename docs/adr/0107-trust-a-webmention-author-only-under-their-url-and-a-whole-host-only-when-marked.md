@@ -6,7 +6,7 @@ created: 2026-10-04
 area: [social, admin, mcp, lib, db]
 supersedes: ["0042"]
 issue: "#461"
-amended: ["#946", "#911"]
+amended: ["#946", "#911", "#1570"]
 tags: [webmentions, moderation, trust, spam, bridgy, security]
 ---
 
@@ -46,6 +46,10 @@ root half of this gap.
 Anything else waits as pending. Author URL normalization and the rule that a changed resend goes back to pending
 stay as ADR 0042 set them.
 
+[ADR 0182][0182] amends this record. Under #1570 a like or repost approves on receipt with no author check, Bridgy
+included, while its toggle is on. Trust in a reply or mention comes from a stored list of authors the owner approved
+by hand, in place of `known_author?`. The author check above still applies to replies and mentions.
+
 ## Alternatives
 
 **Trust the host.** ADR 0042's rule. One known author made every page on a shared host able to post as them.
@@ -69,4 +73,5 @@ Mentions approved under ADR 0042 keep their status. The new rule applies when a 
 again.
 
 [0042]: 0042-trust-a-webmention-author-by-exact-url-on-their-own-host.md
+[0182]: 0182-approve-likes-and-reposts-on-receipt-and-keep-trusted-webmention-authors-in-a-stored-list.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

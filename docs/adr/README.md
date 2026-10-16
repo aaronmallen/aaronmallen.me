@@ -179,6 +179,7 @@ one.
 | [0179][0179] | Fetch every outside page through one guarded app-level client | ![Active][active] | 2026-10-15 |
 | [0180][0180] | Search the public site through a view that holds only public rows and public text | ![Active][active] | 2026-10-15 |
 | [0181][0181] | Hold maintenance mode in a flag file on the Pi | ![Active][active] | 2026-10-16 |
+| [0182][0182] | Approve likes and reposts on receipt, and keep trusted webmention authors in a stored list | ![Active][active] | 2026-10-16 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -354,6 +355,7 @@ one.
 [0179]: 0179-fetch-every-outside-page-through-one-guarded-app-level-client.md
 [0180]: 0180-search-the-public-site-through-a-view-that-holds-only-public-rows-and-public-text.md
 [0181]: 0181-hold-maintenance-mode-in-a-flag-file-on-the-pi.md
+[0182]: 0182-approve-likes-and-reposts-on-receipt-and-keep-trusted-webmention-authors-in-a-stored-list.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
