@@ -26,9 +26,7 @@ module Admin
           def acts
             copied = t(".copied")
 
-            Button(small: true, icon: "fa-solid fa-link", data: { record_key: link, record_key_copied: copied }) do
-              t(".copy")
-            end
+            CopyButton(value: link, copied:, small: true, icon: "fa-solid fa-link") { t(".copy") }
             Button(
               href: link, small: true, variant: :gh, icon: :outbound,
               label: t(".open", name:), target: "_blank", rel: "noopener",

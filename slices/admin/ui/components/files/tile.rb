@@ -35,9 +35,7 @@ module Admin
             copied = t(".copied")
 
             BulkCheck(form: Bulk::ID, value: @share.id, label: t(".pick", name: @share.filename))
-            Button(small: true, icon: "fa-solid fa-link", data: { record_key: link, record_key_copied: copied }) do
-              t(".copy")
-            end
+            CopyButton(value: link, copied:, small: true, icon: "fa-solid fa-link") { t(".copy") }
             Button(
               href: link, small: true, variant: :gh, icon: :outbound,
               label: t(".open", name: @share.filename), target: "_blank", rel: "noopener",

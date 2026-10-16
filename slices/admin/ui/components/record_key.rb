@@ -20,11 +20,9 @@ module Admin
         prop :label, Blog::Types::String
 
         def view_template
-          button(
-            type: "button",
-            class: "record-key",
+          CopyButton(
+            value: key, copied: t(COPIED.fetch(@kind), key:), bare: true, class: "record-key",
             title: t(COPY.fetch(@kind), key:),
-            data: { record_key: key, record_key_copied: t(COPIED.fetch(@kind), key:) },
           ) { key }
         end
 

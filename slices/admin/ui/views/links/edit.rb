@@ -16,12 +16,11 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            BackLink(href: path(:admin_links), variant: :gh, small: true, class: "editor-back") { t(".all_links") }
-            PageHead(title: Helpers::ShareLink.bare(Helpers::ShareLink.for(@link.code)))
-            Card(class: "file-drawer") do
-              LinkForm(link: @link, check: @check, values: @values, errors: @errors)
-              div(class: "file-drawer-foot") { ShareFoot(form: LinkForm, record: @link, kind: :link) }
-            end
+            SharePage(
+              back: path(:admin_links), back_label: t(".all_links"),
+              title: Helpers::ShareLink.bare(Helpers::ShareLink.for(@link.code)),
+              form: LinkForm, record: @link, kind: :link,
+            ) { LinkForm(link: @link, check: @check, values: @values, errors: @errors) }
           end
         end
       end

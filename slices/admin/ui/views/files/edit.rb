@@ -15,12 +15,10 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            BackLink(href: path(:admin_files), variant: :gh, small: true, class: "editor-back") { t(".all_files") }
-            PageHead(title: @share.filename)
-            Card(class: "file-drawer") do
-              ShareForm(share: @share, values: @values, errors: @errors)
-              div(class: "file-drawer-foot") { ShareFoot(form: ShareForm, record: @share, kind: :file) }
-            end
+            SharePage(
+              back: path(:admin_files), back_label: t(".all_files"), title: @share.filename,
+              form: ShareForm, record: @share, kind: :file,
+            ) { ShareForm(share: @share, values: @values, errors: @errors) }
           end
         end
       end

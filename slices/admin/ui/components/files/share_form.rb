@@ -9,40 +9,18 @@ module Admin
           prop :values, Blog::Types::Hash.optional, default: nil
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
-          def self.delete_id(share) = "#{scope(share)}-delete"
+          extend ShareIds
 
-          def self.form_id(share) = "#{scope(share)}-form"
-
-          def self.scope(share) = "share-#{share.id}"
+          SCOPE = "share"
 
           def view_template
             preview
-            p(class: "file-drawer-name") { @share.filename }
-            p(class: "file-drawer-meta") { meta }
-            h3(class: "file-drawer-head") { t(".link") }
-            code(class: "file-drawer-link") { link }
-            div(class: "file-drawer-copy") { copy }
+            ShareSummary(kind: :file, name: @share.filename, link:, markdown:) { it.meta { meta } }
             edit_form
             delete_form
           end
 
           private
-
-          def copy
-            Button(
-              small: true, variant: :pri, icon: "fa-solid fa-link",
-              data: { record_key: link, record_key_copied: t(".link_copied") },
-            ) { t(".copy_link") }
-            return unless image?
-
-            Button(
-              small: true, icon: "fa-brands fa-markdown",
-              data: {
-                record_key: "!#{Helpers::ShareLink.markdown(@share.alt_text, link)}",
-                record_key_copied: t(".markdown_copied"),
-              },
-            ) { t(".copy_markdown") }
-          end
 
           def delete_form
             Form(
@@ -78,6 +56,8 @@ module Admin
           def image? = Tile::IMAGE.match?(@share.content_type)
 
           def link = Helpers::ShareLink.for(@share.code)
+
+          def markdown = ("!#{Helpers::ShareLink.markdown(@share.alt_text, link)}" if image?)
 
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }

@@ -28,9 +28,8 @@ module Admin
           private
 
           def acts
-            button(
-              type: "button", class: "link-chip", title: t(".copy", link: short),
-              data: { record_key: short, record_key_copied: t(".copied") },
+            CopyButton(
+              value: short, copied: t(".copied"), bare: true, class: "link-chip", title: t(".copy", link: short),
             ) do
               plain Helpers::ShareLink.bare(short)
               Icon(:copy)

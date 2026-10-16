@@ -9,22 +9,16 @@ module Admin
           prop :values, Blog::Types::Hash.optional, default: nil
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
-          def self.delete_id(group) = "#{scope(group)}-delete"
+          extend ShareIds
 
-          def self.form_id(group) = "#{scope(group)}-form"
+          SCOPE = "share-group"
 
           def self.remove_id(group, file) = "#{scope(group)}-remove-#{file.id}"
-
-          def self.scope(group) = "share-group-#{group.id}"
 
           def self.ungroup_id(group, file) = "#{scope(group)}-ungroup-#{file.id}"
 
           def view_template
-            p(class: "file-drawer-name") { title }
-            p(class: "file-drawer-meta") { meta }
-            h3(class: "file-drawer-head") { t(".link") }
-            code(class: "file-drawer-link") { link }
-            div(class: "file-drawer-copy") { copy }
+            ShareSummary(kind: :group, name: title, link:) { it.meta { meta } }
             edit_form
             add_form
             remove_forms
@@ -43,13 +37,6 @@ module Admin
           end
 
           def code_hint = t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host)
-
-          def copy
-            Button(
-              small: true, variant: :pri, icon: "fa-solid fa-link",
-              data: { record_key: link, record_key_copied: t(".link_copied") },
-            ) { t(".copy_link") }
-          end
 
           def count(value) = Blog::Helpers::Figures.count(value)
 
