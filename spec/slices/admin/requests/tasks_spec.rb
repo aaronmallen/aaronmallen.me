@@ -3201,6 +3201,31 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(repo.by_id(task.id).list).to eq("next")
       end
 
+      describe "a carried task in the dropped sprint" do
+        before do
+          sprint = create(:sprint, sprint_date: tomorrow)
+          create(:task, :in_sprint, sprint_id: sprint.id, carried_count: 4, title: "Carried task")
+          drop(sprint)
+        end
+
+        it "forgets how often the task was carried" do
+          expect(repo.open_in_list("next").map(&:carried_count)).to eq([0])
+        end
+
+        it "leaves the task out of attention" do
+          get "/admin"
+
+          expect(page).to have_no_css("section.card[data-attention] .li", text: "Carried task")
+        end
+
+        it "no longer marks the row carried", :aggregate_failures do
+          get "/admin/tasks", filter: "next"
+
+          expect(titles).to include("Carried task")
+          expect(page).to have_no_css(".task-meta .task-mark.sand", text: "carried")
+        end
+      end
+
       it "says where the dropped sprint's tasks went" do
         drop(create(:sprint, sprint_date: tomorrow))
         follow_redirect!

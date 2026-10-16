@@ -42,7 +42,7 @@ module Tasks
 
       def return_to(held, list, at)
         held.pause(at)
-        held.stamped(:update, result: :many).call(list:, sprint_id: nil)
+        held.stamped(:update, result: :many).call(list:, sprint_id: nil, carried_count: 0)
       end
 
       def start(date)
