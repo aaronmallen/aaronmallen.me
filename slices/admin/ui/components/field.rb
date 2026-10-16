@@ -41,7 +41,7 @@ module Admin
         def control_id = @name ? @error.id_for(@name, scope) : @id
 
         def label_text
-          i(class: "#{@icon} f-icon", aria: { hidden: "true" }) if @icon
+          Icon([@icon, "f-icon"]) if @icon
           @label.is_a?(Proc) ? @label.call : plain(@label)
         end
 

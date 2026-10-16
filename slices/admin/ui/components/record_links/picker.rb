@@ -44,7 +44,7 @@ module Admin
               button(type: "submit", class: "record-picker-target") do
                 Icon(:add)
                 span(class: "record-link-title") { link.title }
-                time(class: "record-link-day", datetime: link.day.iso8601) { l(link.day, format: :medium) }
+                Moment(at: link.day, class: "record-link-day")
               end
             end
           end

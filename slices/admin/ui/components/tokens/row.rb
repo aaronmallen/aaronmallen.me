@@ -9,7 +9,7 @@ module Admin
 
           def view_template
             ListItem(title: @token.name, data: { menu: path(:admin_token_menu, id: @token.id) }) do |item|
-              item.meta { p(class: "li-sub") { sub } }
+              item.sub { sub }
               revoke_form
             end
           end

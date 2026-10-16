@@ -12,7 +12,7 @@ module Admin
 
         def view_template
           h2(class: ["day-head", ("sunk" if @sunk)]) do
-            time(class: "day-date", datetime: @date.iso8601) { l(@date, format: @format) }
+            Moment(at: @date, format: @format, class: "day-date")
             span(class: "day-rule", aria: { hidden: "true" })
             span(class: "day-note") { note } unless note.empty?
           end

@@ -43,7 +43,7 @@ module Public
 
         def meta
           day = @hit.day
-          return time(datetime: day.iso8601) { l(day, format: :medium) } if @hit.kind == "post"
+          return Moment(at: day) if @hit.kind == "post"
           return span { t(".number", number: @hit.number) } unless project?
 
           span { t([".statuses", @hit.status].join(".")) }

@@ -8,7 +8,7 @@ module Admin
 
         def view_template
           ListItem(title: name, data: { menu: path(:admin_client_menu, id: @client.id) }) do |item|
-            item.meta { p(class: "li-sub") { sub } }
+            item.sub { sub }
             revoke_form
           end
         end

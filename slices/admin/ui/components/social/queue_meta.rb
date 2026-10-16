@@ -80,7 +80,7 @@ module Admin
             at = @social_post.posted_at || @social_post.created_at
             seconds = (at - @now).to_i
 
-            time(class: "sq-time", datetime: Blog::TimeZone.local(at).iso8601) do
+            Moment(at:, class: "sq-time") do
               seconds.positive? ? relative(seconds) : l(Blog::TimeZone.today(at), format: :short)
             end
           end

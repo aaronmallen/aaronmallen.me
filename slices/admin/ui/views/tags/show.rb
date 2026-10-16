@@ -59,7 +59,7 @@ module Admin
             href = Blog::Helpers::RecordKinds.journal_day(routes, day)
 
             ListItem(title: journal_title(entry), href:) do |item|
-              item.meta { p(class: "li-sub") { l(day, format: :medium) } }
+              item.sub { l(day, format: :medium) }
             end
           end
 
@@ -71,7 +71,7 @@ module Admin
 
           def post(post)
             ListItem(title: post.title, href: path(:admin_edit_post, id: post.id)) do |item|
-              item.meta { p(class: "li-sub") { Moment(at: post.published_at) } } if post.status == PUBLISHED
+              item.sub { Moment(at: post.published_at) } if post.status == PUBLISHED
               StatusPill(status: post.status)
             end
           end
@@ -84,7 +84,7 @@ module Admin
 
           def task(task)
             ListItem(title: task.title, href: path(:admin_task, id: task.id)) do |item|
-              item.meta { p(class: "li-sub") { Components::Tasks::Closed(task:) } } if task.closed?
+              item.sub { Components::Tasks::Closed(task:) } if task.closed?
             end
           end
         end

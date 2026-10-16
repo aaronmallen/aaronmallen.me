@@ -100,6 +100,10 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
         expect(cell(day + 1)).to have_no_css(".cal-mark")
       end
 
+      it "names the day in full for screen readers inside its time tag" do
+        expect(cell(day).find("time.cal-date .sr-only").text).to eq("Tuesday, July 14, 2026")
+      end
+
       it "links the day to its panel" do
         expect(cell(day).find("a.cal-link")[:href]).to eq("/admin/calendar?day=2026-07-14")
       end

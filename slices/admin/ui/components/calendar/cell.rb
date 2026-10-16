@@ -43,7 +43,7 @@ module Admin
           end
 
           def heading
-            time(class: "cal-date", datetime: date.iso8601) do
+            Moment(at: date, class: "cal-date") do
               span(class: "sr-only") { l(date, format: :full) }
               span(class: "cal-day-name", aria: { hidden: "true" }) { l(date, format: :day_name) }
               span(aria: { hidden: "true" }) { date.day.to_s }

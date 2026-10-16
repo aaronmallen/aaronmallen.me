@@ -56,7 +56,7 @@ module Admin
           def head
             div(class: "health-day-head") do
               h3(class: "health-day-title") { title }
-              time(class: "health-day-date", datetime: date.iso8601) { l(date, format: :full) }
+              Moment(at: date, format: :full, class: "health-day-date")
               SegmentedLinks(
                 label: t(".days"),
                 items: [

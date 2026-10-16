@@ -92,7 +92,7 @@ module Admin
           href = path(:admin_edit_post, id:)
 
           ListItem(title: row.title, href:, sub:, icon:, **hovered(row)) do |item|
-            item.meta { p(class: "li-sub") { reason } } if reason
+            item.sub { reason } if reason
             icon_link(href, t(".open"), :edit)
             snooze(row)
           end

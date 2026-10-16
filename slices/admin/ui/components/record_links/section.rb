@@ -35,7 +35,7 @@ module Admin
           def row(link)
             li(class: "record-link-row") do
               title(link)
-              time(class: "record-link-day", datetime: link.day.iso8601) { l(link.day, format: :medium) }
+              Moment(at: link.day, class: "record-link-day")
               unlink_form(link)
             end
           end

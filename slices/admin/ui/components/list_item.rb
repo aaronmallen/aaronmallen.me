@@ -18,6 +18,11 @@ module Admin
           nil
         end
 
+        def sub(&block)
+          @sub_slot = block
+          nil
+        end
+
         def view_template(&)
           side = capture(&)
 
@@ -29,7 +34,7 @@ module Admin
 
         private
 
-        def main? = @sub || @meta
+        def main? = @sub || @sub_slot || @meta
 
         def render_body = main? ? render_main : render_head
 
@@ -46,6 +51,7 @@ module Admin
           div(class: "li-main") do
             render_head
             p(class: "li-sub") { @sub } if @sub
+            p(class: "li-sub", &@sub_slot) if @sub_slot
             @meta&.call
           end
         end

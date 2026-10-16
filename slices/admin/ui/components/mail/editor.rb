@@ -52,7 +52,7 @@ module Admin
             button(
               type: "button", title: "#{name} #{key}", aria: { label: name, pressed: "false" },
               data: { mail_command: command },
-            ) { i(class: "fa-solid fa-#{icon}", aria: { hidden: "true" }) }
+            ) { Icon("fa-solid fa-#{icon}") }
           end
 
           def tools

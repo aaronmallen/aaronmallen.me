@@ -50,7 +50,7 @@ module Public
 
           li do
             a(href: path(:post, slug: post.slug)) { post.title }
-            time(datetime: day.iso8601) { l(day, format: :short) }
+            Moment(at: day, format: :short)
           end
         end
 

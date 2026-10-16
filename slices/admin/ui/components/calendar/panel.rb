@@ -55,7 +55,7 @@ module Admin
             data = { calendar_item: "#{kind}-#{record.id}", **item.fetch(:data, Blog::Constants::EMPTY_HASH) }
 
             ListItem(**item.except(:at, :data), data:) do |row|
-              row.meta { p(class: "li-sub") { dated(record, at) } } if at
+              row.sub { dated(record, at) } if at
               MoveForm(kind:, id: record.id, title: item[:title], date:, today: @today) if movable
             end
           end
