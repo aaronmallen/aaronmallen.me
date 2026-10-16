@@ -13,7 +13,7 @@ module Admin
           prop :review, Blog::Types::Bool
 
           def view_template
-            Dialog(**DIALOG, title: t(".heading"), data: { dialog: true, dialog_show: (true if @review) }) do |dialog|
+            Dialog(**DIALOG, title: t(".heading"), data: { dialog_show: (true if @review) }) do |dialog|
               dialog.foot { bulk_actions }
               div(class: "sg-edits") { @edits.each { suggestion(it) } }
             end

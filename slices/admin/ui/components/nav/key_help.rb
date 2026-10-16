@@ -20,7 +20,7 @@ module Admin
 
           def view_template
             Dialog(
-              id: ID, title: t(".title"), class: "modal", data: { dialog: true, key_help: true },
+              id: ID, title: t(".title"), class: "modal", data: { key_help: true },
             ) do
               dl(class: "keys", data: { key_help_list: true }) { FIXED.each { fixed(*it) } }
               row_template

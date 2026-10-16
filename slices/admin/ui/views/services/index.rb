@@ -31,7 +31,7 @@ module Admin
           private
 
           def connect_button
-            Button(small: true, icon: "fa-solid fa-plus", data: { dialog_open: Picker::ID }) { t(".connect") }
+            Button(small: true, icon: "fa-solid fa-plus", **Dialog.opens(Picker::ID)) { t(".connect") }
           end
 
           def connectable?(definition) = @connectable.include?(definition.id)

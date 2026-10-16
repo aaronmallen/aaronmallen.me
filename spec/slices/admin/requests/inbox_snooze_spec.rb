@@ -38,6 +38,12 @@ RSpec.describe "Admin inbox snooze", type: :request do
     expect(opened.map { page.has_css?("dialog##{it}[data-dialog]", visible: :all) }).to eq([true] * 3)
   end
 
+  it "tells screen readers that each Snooze button opens a dialog" do
+    get "/admin/inbox"
+
+    expect(page).to have_no_css("[data-dialog-open]:not([aria-haspopup='dialog'])", visible: :all)
+  end
+
   def snoozed_until(kind)
     record = records.fetch(kind)
     case kind

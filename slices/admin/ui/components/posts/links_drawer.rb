@@ -30,7 +30,7 @@ module Admin
           def dialog_attributes
             {
               id: ID, title: t(".title"), class: "wide", hidden: false,
-              data: { dialog: true, dialog_live: true, dialog_show: (true if @open) },
+              data: { dialog_live: true, dialog_show: (true if @open) },
             }
           end
 

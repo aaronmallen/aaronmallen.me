@@ -9,7 +9,7 @@ module Admin
             autocapitalize: "none", autocomplete: "off", name: "server", placeholder: "mastodon.social", required: true,
             spellcheck: "false",
           }.freeze
-          SHELL = { class: "modal", data: { dialog: true } }.freeze
+          SHELL = { class: "modal" }.freeze
 
           def self.id_for(definition, connection = nil) = [Picker::ID, definition.id, connection&.id].compact.join("-")
 

@@ -17,6 +17,7 @@ const OPEN = "[data-key-open]";
 const PICK = "input[name='ids[]'][form]";
 const ROW = "[data-menu], [data-key-row]";
 const STEPS = { ArrowDown: 1, ArrowUp: -1 };
+const SUB = "[aria-haspopup=menu]";
 
 let bound = false;
 let shown = null;
@@ -44,7 +45,7 @@ function clicked(event) {
   const item = event.target.closest(ITEM);
   if (!item || item.disabled) return;
 
-  if (item.hasAttribute("aria-haspopup")) return expand(item, event.detail === 0);
+  if (item.matches(SUB)) return expand(item, event.detail === 0);
   if ("confirmInline" in item.dataset && !("sure" in item.dataset)) {
     event.preventDefault();
     return sure(item);
@@ -126,7 +127,7 @@ function hovered(event) {
   const item = event.target.closest(ITEM);
   if (!item || item.disabled || typing()) return;
 
-  if (item.hasAttribute("aria-haspopup")) expand(item, false);
+  if (item.matches(SUB)) expand(item, false);
   else collapse(item.closest(LIST));
   if (document.activeElement !== item) focus(item);
 }
@@ -232,7 +233,7 @@ function press(event) {
   if (event.key === "ArrowLeft" && list !== shown.menu) {
     event.preventDefault();
     back(list);
-  } else if (event.key === "ArrowRight" && item?.hasAttribute("aria-haspopup")) {
+  } else if (event.key === "ArrowRight" && item?.matches(SUB)) {
     event.preventDefault();
     expand(item, true);
   } else if ((event.key === "Enter" || event.key === " ") && item) {

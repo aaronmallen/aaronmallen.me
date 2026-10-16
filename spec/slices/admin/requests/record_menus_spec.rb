@@ -119,6 +119,10 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
         expect(return_to(drop)).to eq("/admin/decisions?status=open")
       end
 
+      it "tells screen readers that Drop opens a dialog" do
+        expect(page.find("a", text: "Drop…", visible: :all)["aria-haspopup"]).to eq("dialog")
+      end
+
       it "tags through the decision's tag route" do
         expect(form("/admin/decisions/#{decision.id}/tags")).to have_css("input[name=tag][value=infra]", visible: :all)
       end

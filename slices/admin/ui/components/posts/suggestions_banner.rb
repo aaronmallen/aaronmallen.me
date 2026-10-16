@@ -12,8 +12,7 @@ module Admin
               Icon("fa-solid fa-robot")
               span(class: "post-banner-text") { t(".count", count: @count) }
               Button(
-                small: true, command: "show-modal", commandfor: Suggestions::ID,
-                data: { dialog_open: Suggestions::ID },
+                small: true, command: "show-modal", commandfor: Suggestions::ID, **Dialog.opens(Suggestions::ID),
               ) { t(".review") }
             end
           end

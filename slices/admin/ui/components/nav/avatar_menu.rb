@@ -53,11 +53,9 @@ module Admin
 
           def keys
             label = t(".keys")
+            data = { key: HELP_KEY, key_label: t(".show_keys"), key_help_open: true }
 
-            item(
-              "fa-keyboard",
-              data: { dialog_open: KeyHelp::ID, key: HELP_KEY, key_label: t(".show_keys"), key_help_open: true },
-            ) do
+            item("fa-keyboard", **mix(Dialog.opens(KeyHelp::ID), data:)) do
               plain label
               span(class: "avatar-menu-key", aria: { hidden: "true" }) { HELP_KEY }
             end

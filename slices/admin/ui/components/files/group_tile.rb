@@ -51,7 +51,7 @@ module Admin
 
           def opener
             a(href: path(:admin_edit_file_group, id: @group.id),
-              data: { dialog_open: ShareDrawer.id_for(GroupForm, @group) }) do
+              **Dialog.opens(ShareDrawer.id_for(GroupForm, @group))) do
               name
             end
           end

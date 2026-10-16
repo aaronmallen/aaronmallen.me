@@ -19,7 +19,7 @@ module Admin
 
           def view_template
             CreateLink(href: path(:admin_mail, **@list, **OPEN), label: t(".compose"), dialog: ID)
-            Dialog(id: ID, title: t(".title"), class: "modal mail-compose", data:) do
+            Dialog(id: ID, title: t(".title"), class: "modal mail-compose", static: true, data:) do
               Form(action: path(:admin_send_mail), enctype: MULTIPART, class: "mail-compose-form", data: form_data) do
                 fields
               end
@@ -44,7 +44,7 @@ module Admin
             mix(own, FieldError.control_attributes(name, errors, SCOPE))
           end
 
-          def data = { dialog: "static", dialog_show: (true if kept) }
+          def data = { dialog_show: (true if kept) }
 
           def errors = kept&.fetch(:errors) || Blog::Constants::EMPTY_HASH
 

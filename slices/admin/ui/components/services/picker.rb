@@ -11,7 +11,7 @@ module Admin
           prop :definitions, Blog::Types::Array.of(Blog::Types::Instance(::Services::Structs::Definition))
 
           def view_template
-            Dialog(id: ID, title: t(".title"), class: "modal", data: { dialog: true }) do
+            Dialog(id: ID, title: t(".title"), class: "modal") do
               @definitions.each { pick(it) }
               Hint { t(".hint") }
             end
@@ -31,7 +31,7 @@ module Admin
 
           def pick(definition)
             if definition.oauth?
-              button(type: "button", class: "svc-pick", data: { dialog_open: "#{ID}-#{definition.id}" }) do
+              button(type: "button", class: "svc-pick", **Dialog.opens("#{ID}-#{definition.id}")) do
                 line(definition)
               end
             else

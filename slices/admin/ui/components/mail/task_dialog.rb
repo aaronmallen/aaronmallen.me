@@ -13,9 +13,9 @@ module Admin
           prop :trigger, Blog::Types::Bool, default: true
 
           def view_template
-            Button(small: true, icon: "fa-solid fa-square-check", data: { dialog_open: id }) { t(".open") } if @trigger
+            Button(small: true, icon: "fa-solid fa-square-check", **Dialog.opens(id)) { t(".open") } if @trigger
             Dialog(
-              id:, title_id: "#{id}-heading", title: t(".title"), class: "modal", data: { dialog: true },
+              id:, title_id: "#{id}-heading", title: t(".title"), class: "modal",
             ) do |dialog|
               dialog.foot { foot }
               Form(id: form_id, action: path(:admin_make_mail_task, id: @thread.id), class: "form-stack") do

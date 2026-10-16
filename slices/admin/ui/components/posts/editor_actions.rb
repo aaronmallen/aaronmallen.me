@@ -31,8 +31,7 @@ module Admin
 
           def details_button
             Button(
-              icon: "fa-solid fa-sliders", command: "show-modal", commandfor: Details::ID,
-              data: { dialog_open: Details::ID },
+              icon: "fa-solid fa-sliders", command: "show-modal", commandfor: Details::ID, **Dialog.opens(Details::ID),
             ) { t(".details") }
           end
 
@@ -46,7 +45,7 @@ module Admin
           def links_button
             Button(
               icon: "fa-solid fa-link", command: "show-modal", commandfor: LinksDrawer::ID,
-              data: { dialog_open: LinksDrawer::ID },
+              **Dialog.opens(LinksDrawer::ID),
             ) do
               plain t(".links")
               span(class: "post-links-count") { t(".links_failing", count: @failing) } if @failing.positive?

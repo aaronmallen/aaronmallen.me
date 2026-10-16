@@ -13,7 +13,7 @@ module Admin
           def self.id_for(scope) = "#{scope}-drawer"
 
           def view_template
-            Dialog(id: self.class.id_for(scope), title_id: "#{scope}-title", title:, data: { dialog: true }) do
+            Dialog(id: self.class.id_for(scope), title_id: "#{scope}-title", title:) do
               Hint { t("ui.components.people.editor.sub") }
               @editor ? PersonForm(**@editor, scope:) : div(data: { person_edit_body: true })
             end

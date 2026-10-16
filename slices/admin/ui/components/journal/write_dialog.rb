@@ -16,7 +16,7 @@ module Admin
           prop :return_to, Blog::Types::String.optional, default: nil
 
           def view_template
-            Dialog(id: ID, title:, class: "modal journal-modal", data:) do
+            Dialog(id: ID, title:, class: "modal journal-modal", static: true, data:) do
               Form(**form_attributes) do
                 input(type: "hidden", name: "modal", value: Blog::Constants::CHECKED)
                 input(type: "hidden", name: "return_to", value: @return_to) if @return_to
@@ -38,7 +38,7 @@ module Admin
 
           def control(field) = FieldError.control_attributes(field, @errors, SCOPE)
 
-          def data = { dialog: "static", dialog_show: (true if @errors.any?) }
+          def data = { dialog_show: (true if @errors.any?) }
 
           def foot
             div(class: "journal-modal-foot") do

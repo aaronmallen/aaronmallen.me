@@ -31,7 +31,7 @@ module Admin
         def journal_line
           href = path(:admin_journal, write: Blog::Constants::CHECKED)
 
-          TodayLine(label: t(".journal"), href:, data: { dialog_open: Journal::WriteDialog::ID }) do
+          TodayLine(label: t(".journal"), href:, **Dialog.opens(Journal::WriteDialog::ID)) do
             plain t(".journal_count", count: @entries.size)
             whitespace
             kbd(class: "kbd", aria: { hidden: "true" }) { JOURNAL_KEY }

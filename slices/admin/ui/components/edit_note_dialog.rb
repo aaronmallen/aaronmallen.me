@@ -8,7 +8,7 @@ module Admin
 
         def view_template
           Dialog(
-            title_id: @title_id, title: t(".title"), class: "modal", data: { dialog: true, edit_note_dialog: true },
+            title_id: @title_id, title: t(".title"), class: "modal", data: { edit_note_dialog: true },
           ) do |dialog|
             dialog.foot do
               Button(variant: :gh, small: true, data: { dialog_close: true }) { t(".cancel") }

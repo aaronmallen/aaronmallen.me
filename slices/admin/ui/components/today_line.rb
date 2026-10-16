@@ -7,10 +7,10 @@ module Admin
         prop :label, Blog::Types::String
         prop :href, Blog::Types::String
         prop :warn, Blog::Types::Bool, default: false
-        prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
+        prop :attributes, Blog::Types::Hash, :**
 
         def view_template(&)
-          a(class: "today-line", href: @href, data: @data) do
+          a(class: "today-line", href: @href, **@attributes) do
             span { @label }
             span(class: ["today-line-value", ("warn" if @warn)], &)
           end

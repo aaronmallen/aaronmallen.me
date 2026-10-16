@@ -141,6 +141,26 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       )
     end
 
+    it "hooks every dialog shell for the dialog script", :aggregate_failures do
+      expect(page).to have_no_css("dialog.dialog:not([data-dialog])", visible: :all)
+      expect(page).to have_css("dialog#key-help[data-dialog]:not([data-dialog='static'])", visible: :all)
+      expect(page).to have_css("dialog#task-create[data-dialog='static']", visible: :all)
+      expect(page).to have_css("dialog#journal-write[data-dialog='static']", visible: :all)
+    end
+
+    it "tells screen readers that every dialog trigger opens a dialog", :aggregate_failures do
+      expect(page).to have_css("[data-dialog-open='key-help'][aria-haspopup='dialog']", visible: :all)
+      expect(page).to have_no_css("[data-dialog-open]:not([aria-haspopup='dialog'])", visible: :all)
+    end
+
+    it "draws the task panel in the dialog shell with its own label and body hook", :aggregate_failures do
+      shell = "dialog#task-panel.dialog.wide.task-panel[data-dialog][data-task-panel][aria-modal='true']"
+      expect(page).to have_css(
+        "#{shell}[aria-label] > .dialog-box > .dialog-body[tabindex='-1'][data-task-panel-body]:empty", visible: :all,
+      )
+      expect(page).to have_no_css("dialog#task-panel[aria-labelledby]", visible: :all)
+    end
+
     it "draws no task-dialog class" do
       expect(page).to have_no_css("[class*='task-dialog']", visible: :all)
     end

@@ -10,8 +10,8 @@ module Admin
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
 
           def view_template
-            Button(small: true, icon: "fa-solid fa-bell-slash", data: { dialog_open: DIALOG }) { t(".label") }
-            Dialog(id: DIALOG, title: t(".title"), data: { dialog: true }) do |dialog|
+            Button(small: true, icon: "fa-solid fa-bell-slash", **Dialog.opens(DIALOG)) { t(".label") }
+            Dialog(id: DIALOG, title: t(".title")) do |dialog|
               SnoozeForm(id: DIALOG, dialog:, action: path(:admin_inbox_snooze_all)) do
                 @rows.each { input(type: "hidden", name: SeeAll::FIELDS.fetch(it.kind), value: it.record.id) }
               end

@@ -10,8 +10,8 @@ module Admin
           prop :action, Blog::Types::String.optional, default: nil
 
           def view_template(&)
-            Button(small: true, data: { dialog_open: dialog_id }) { t(".open") }
-            Dialog(id: dialog_id, title: t(".title"), data: { dialog: true }) do |dialog|
+            Button(small: true, **Dialog.opens(dialog_id)) { t(".open") }
+            Dialog(id: dialog_id, title: t(".title")) do |dialog|
               SnoozeForm(id: dialog_id, dialog:, action: @action || path(:admin_inbox_snooze, kind: @kind, id: @id), &)
             end
           end

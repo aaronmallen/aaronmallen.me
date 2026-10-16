@@ -37,8 +37,8 @@ module Admin
             return if by_token? || !definition.optional?
 
             connection = @row.connection
-            data = { dialog_open: ConnectDialog.id_for(definition, connection) }
-            Button(small: true, variant: :gh, icon: CHANGE_ICON, data:) { t(".change") }
+            opener = Dialog.opens(ConnectDialog.id_for(definition, connection))
+            Button(small: true, variant: :gh, icon: CHANGE_ICON, **opener) { t(".change") }
             ConnectDialog(definition:, connection:)
           end
 

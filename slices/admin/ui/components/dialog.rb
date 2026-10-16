@@ -7,7 +7,15 @@ module Admin
         prop :id, Blog::Types::String.optional, default: nil
         prop :title_id, Blog::Types::String.optional, default: nil
         prop :title, Blog::Types::String.optional, default: nil
+        prop :static, Blog::Types::Bool, default: false
+        prop :body, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :attributes, Blog::Types::Hash, :**
+
+        def self.opens(dialog)
+          return Blog::Constants::EMPTY_HASH unless dialog
+
+          { data: { dialog_open: dialog }, aria: { haspopup: "dialog" } }
+        end
 
         def foot(&block)
           @foot = block
@@ -20,7 +28,7 @@ module Admin
           dialog(**mix(shell_attributes, @attributes)) do
             div(class: "dialog-box") do
               head if @title
-              div(class: "dialog-body") { yield(self) if block_given? }
+              div(**mix({ class: "dialog-body" }, @body)) { yield(self) if block_given? }
               div(class: "dialog-foot", &@foot) if @foot
             end
           end
@@ -39,7 +47,10 @@ module Admin
         end
 
         def shell_attributes
-          { id: @id, class: "dialog", role: "dialog", hidden: true, aria: { labelledby: title_id, modal: "true" } }
+          {
+            id: @id, class: "dialog", role: "dialog", hidden: true, data: { dialog: @static ? "static" : true },
+            aria: { labelledby: (title_id if @title), modal: "true" },
+          }
         end
 
         def title_id = @title_id || "#{@id}-title"

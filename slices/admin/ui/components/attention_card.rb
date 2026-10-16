@@ -55,7 +55,7 @@ module Admin
 
         def journal(row)
           href = path(:admin_journal, write: Blog::Constants::CHECKED)
-          link = { data: { dialog_open: Journal::WriteDialog::ID } }
+          link = Dialog.opens(Journal::WriteDialog::ID)
           sub = t(".journal_gap", count: row.days)
 
           ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", **hovered(row)) do
