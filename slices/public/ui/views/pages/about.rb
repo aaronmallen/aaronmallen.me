@@ -5,21 +5,13 @@ module Public
     module Views
       module Pages
         class About < View
-          HANAKAI_URL = "https://hanakai.org"
           HOBBIES = [
             %w[.hobbies.magic.name .hobbies.magic.body].freeze,
             %w[.hobbies.dnd.name .hobbies.dnd.body].freeze,
             %w[.hobbies.games.name .hobbies.games.body].freeze,
           ].freeze
-          PROFILES = {
-            github: ["fa-brands fa-github", ".cta.links.github"].freeze,
-            mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".cta.links.mastodon"].freeze,
-            bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".cta.links.bluesky"].freeze,
-          }.freeze
 
           prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-
-          include Deps["settings"]
 
           def view_template
             head_wording
@@ -61,7 +53,7 @@ module Public
               p { t(".cta.body") }
               ul(class: "links") do
                 li { link(path(:contact), "fa-solid fa-envelope", t(".cta.links.contact")) }
-                Profiles.call(settings, *PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
+                ProfileLinks(networks: %i[github mastodon bluesky])
               end
             end
           end
@@ -75,15 +67,11 @@ module Public
           def open_source
             h2 { t(".prose.open_source.heading") }
             open_source_line(".prose.open_source.rust", path(:projects), ".prose.open_source.projects_link")
-            open_source_line(".prose.open_source.ruby", HANAKAI_URL, ".prose.open_source.hanakai_link")
+            open_source_line(".prose.open_source.ruby", Blog::Constants::HANAKAI_URL, ".prose.open_source.hanakai_link")
           end
 
           def open_source_line(before, href, link)
             linked_line(before, href, link, ".prose.open_source.closing")
-          end
-
-          def profile(href, icon, key)
-            li { link(href, icon, t(key)) }
           end
 
           def prose

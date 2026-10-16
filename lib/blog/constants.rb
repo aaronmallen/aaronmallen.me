@@ -9,6 +9,7 @@ module Blog
     BEARER = /\ABearer +(?<token>\S+)\z/i
     CHECKED = "1"
     GAP = :gap
+    HANAKAI_URL = "https://hanakai.org"
     INTEGER_MAX = (2**31) - 1
     MAIL_BODY_MAX = 5000
     MAIL_SUBJECT_MAX = 200

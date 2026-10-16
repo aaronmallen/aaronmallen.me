@@ -23,10 +23,7 @@ en:
           long: "Shorten the subject."
       contact_info:
         elsewhere:
-          bluesky: "bluesky"
-          github: "github"
           heading: "Elsewhere"
-          mastodon: "mastodon"
         keep:
           detail: "No mailing list, no third party. Spam is gone after 30 days. "
           heading: "What I keep"
@@ -55,11 +52,6 @@ en:
         location: "· San Antonio, TX"
         privacy: "privacy"
         separator: "·"
-        networks:
-          bluesky: "bluesky"
-          github: "github"
-          linkedin: "linkedin"
-          mastodon: "mastodon"
       posts:
         edits:
           edited: "Edited"
@@ -88,6 +80,11 @@ en:
             mastodon: "Mastodon"
         toc:
           label: "On this page"
+      profile_links:
+        bluesky: "bluesky"
+        github: "github"
+        linkedin: "linkedin"
+        mastodon: "mastodon"
       search_bar:
         for: " for “%{query}”"
         kinds:
@@ -151,10 +148,7 @@ en:
             body: "Got a pattern to argue about, a project to build together, or a Commander deck to show me? I read everything."
             heading: "Say hello."
             links:
-              bluesky: "bluesky"
               contact: "contact form"
-              github: "github"
-              mastodon: "mastodon"
           description: "Who I am, how I work and what I do away from the keyboard."
           heading: "Hi, I’m Aaron"
           hobbies:

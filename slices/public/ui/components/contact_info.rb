@@ -4,15 +4,6 @@ module Public
   module UI
     module Components
       class ContactInfo < Component
-        HANAKAI_URL = "https://hanakai.org"
-        PROFILES = {
-          github: ["fa-brands fa-github", ".elsewhere.github"].freeze,
-          mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".elsewhere.mastodon"].freeze,
-          bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".elsewhere.bluesky"].freeze,
-        }.freeze
-
-        include Deps["settings"]
-
         def view_template
           dl(class: "ci") do
             row(".where.heading") { where }
@@ -26,7 +17,7 @@ module Public
 
         def elsewhere
           ul(class: "links") do
-            Profiles.call(settings, *PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
+            ProfileLinks(networks: %i[github mastodon bluesky])
           end
         end
 
@@ -41,12 +32,6 @@ module Public
 
             key, href = part
             a(href:) { t(key) }
-          end
-        end
-
-        def profile(href, icon, key)
-          li do
-            a(href:) { IconLabel(icon:) { t(key) } }
           end
         end
 
@@ -70,7 +55,7 @@ module Public
               ".work.ruby",
               [".work.employer", path(:about)],
               ".work.hanami",
-              [".work.hanakai", HANAKAI_URL],
+              [".work.hanakai", Blog::Constants::HANAKAI_URL],
               ".work.rust",
             )
           end

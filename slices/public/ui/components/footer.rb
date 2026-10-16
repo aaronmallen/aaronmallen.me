@@ -4,13 +4,6 @@ module Public
   module UI
     module Components
       class Footer < Component
-        PROFILES = {
-          github: ["fa-brands fa-github", ".networks.github"].freeze,
-          bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".networks.bluesky"].freeze,
-          mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".networks.mastodon"].freeze,
-          linkedin: [Blog::Constants::NETWORK_ICONS.fetch("linkedin"), ".networks.linkedin"].freeze,
-        }.freeze
-
         prop :year, Blog::Types::Integer
 
         include Deps["settings"]
@@ -59,15 +52,11 @@ module Public
         def identity
           span(class: "site-footer-group h-card") do
             copyright
-            Profiles.call(settings, *PROFILES.keys).each do |network, href|
-              profile_link(href, *PROFILES.fetch(network))
-            end
-          end
-        end
-
-        def profile_link(href, icon, label_key)
-          a(class: "site-footer-link", href:, rel: "me") do
-            IconLabel(icon:) { t(label_key) }
+            ProfileLinks(
+              networks: %i[github bluesky mastodon linkedin],
+              link: { class: "site-footer-link", rel: "me" },
+              listed: false,
+            )
           end
         end
       end
