@@ -186,7 +186,8 @@ RSpec.describe "Admin row context menu", type: :feature do
     let(:tagged) { [] }
 
     before do
-      create(:tag, :private, name: "home")
+      create(:tag, :private, name: "home", color: "mk-blue")
+      create(:tag, :private, name: "homework", color: "mk-pink")
       create(:tag, name: "ruby")
       Tasks::Slice["repos.task_mutations"].replace_tags(task.id, tagged)
       visit "/admin/tasks?filter=next"
@@ -221,6 +222,43 @@ RSpec.describe "Admin row context menu", type: :feature do
       menu.find(".ctx-input").send_keys("Errands", :enter)
 
       expect(page).to have_css(".toast", text: "Tagged 1 task errands")
+    end
+
+    describe "typing in the new tag box" do
+      def box = menu.find(".ctx-input")
+
+      def suggestions = menu.all(".ctx-suggest [role=menuitem]").map(&:text)
+
+      before { box.send_keys("hom") }
+
+      it "suggests the tags that match, each in its color", :aggregate_failures do
+        expect(suggestions).to eq(%w[#home #homework])
+        expect(menu).to have_css(".ctx-suggest .tag.pink", text: "#homework")
+      end
+
+      it "applies a picked tag" do
+        menu.find(".ctx-suggest [role=menuitem]", text: "#homework").click
+
+        expect(page).to have_css(".toast", text: "Tagged 1 task homework")
+      end
+
+      it "picks by keyboard alone", :aggregate_failures do
+        press(:down, :down, :up, :enter)
+
+        expect(page).to have_css(".toast", text: "Tagged 1 task home")
+        expect(repo.by_id(task.id).tags.map(&:name)).to eq(["home"])
+      end
+
+      it "closes the suggestions on Escape and keeps the menu", :aggregate_failures do
+        box.send_keys(:escape)
+
+        expect(menu).to have_no_css(".ctx-suggest [role=menuitem]")
+        expect(evaluate_script("document.activeElement.classList.contains('ctx-input')")).to be(true)
+      end
+
+      it "passes axe" do
+        expect(axe_breaches).to eq([])
+      end
     end
 
     it "refuses a bad name with an error toast", :aggregate_failures do

@@ -22,8 +22,9 @@ module Admin
 
         def new_tag
           pattern = ContextMenu::TAG_PATTERN
+          invalid = t("record_tags.toasts.format")
 
-          @menu.field(t(".new_tag"), action: @tag_path, name: "tag", pattern:, invalid: t("record_tags.toasts.format"))
+          @menu.field(t(".new_tag"), action: @tag_path, name: "tag", pattern:, invalid:, suggest: @tags)
         end
 
         def tick(name)

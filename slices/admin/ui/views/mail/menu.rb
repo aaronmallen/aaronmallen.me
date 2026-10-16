@@ -24,6 +24,7 @@ module Admin
           prop :account, Blog::Types::Instance(ROM::Struct)
           prop :list, Blog::Types::Hash
           prop :labels, Blog::Types::Array.of(Blog::Types::String)
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :task, Blog::Types::Integer.optional
           prop :return_to, Blog::Types::String.optional
 
@@ -55,7 +56,9 @@ module Admin
 
           def files(menu)
             Components::Mail::MoveMenu(menu:, fields: picked, except: place)
-            Components::Mail::MenuLabels(menu:, thread: @thread, account: @account, labels: @labels, fields: picked)
+            Components::Mail::MenuLabels(
+              menu:, thread: @thread, account: @account, labels: @labels, tags: @tags, fields: picked,
+            )
           end
 
           def from = @thread.draft ? t(".draft") : @thread.sender.to_s

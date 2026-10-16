@@ -52,7 +52,7 @@ module Admin
 
           def picked = { **@fields, "ids[]": @tasks.map(&:id) }
 
-          def tags(menu) = BulkTags(menu:, action:, fields: picked, tags: @tags.map(&:name), held:, invalid:)
+          def tags(menu) = BulkTags(menu:, action:, fields: picked, tags: @tags, held:, invalid:)
         end
       end
     end

@@ -11,6 +11,7 @@ module Admin
           prop :thread, Blog::Types::Instance(ROM::Struct)
           prop :account, Blog::Types::Instance(ROM::Struct)
           prop :labels, Blog::Types::Array.of(Blog::Types::String)
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :fields, Blog::Types::Hash
 
           def view_template
@@ -39,7 +40,7 @@ module Admin
             fields = { **@fields, act: ACT["tag"] }
             pattern = ContextMenu::TAG_PATTERN
 
-            @menu.field(t(".new"), action:, name: "tag", fields:, pattern:, invalid: t(".invalid"))
+            @menu.field(t(".new"), action:, name: "tag", fields:, pattern:, invalid: t(".invalid"), suggest: @tags)
           end
         end
       end

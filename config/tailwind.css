@@ -8254,9 +8254,9 @@
 }
 
 @utility ctx-field {
-  @apply flex items-center gap-2 rounded-md py-[3px] pr-1.5 pl-2.5;
+  @apply flex flex-wrap items-center gap-2 rounded-md py-[3px] pr-1.5 pl-2.5;
 
-  & > i {
+  & > [role="menuitem"] > i {
     @apply w-3.5 text-center text-icon-sm text-ink-muted;
   }
 }
@@ -8267,6 +8267,10 @@
   &:focus {
     @apply border-ink-muted;
   }
+}
+
+@utility ctx-suggest {
+  @apply flex basis-full flex-col;
 }
 
 @utility ctx-on {

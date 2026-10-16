@@ -1,6 +1,7 @@
 import { clear, picks } from "./bulk.js";
 import { focusField, openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
+import { setupMenuSuggest } from "./menu_suggest.js";
 import { copy } from "./record_key.js";
 import { showToast } from "./toast.js";
 
@@ -99,6 +100,12 @@ function expand(trigger, keys) {
   if (keys) focus(items(list)[0]);
 }
 
+function fit(list) {
+  const top = window.innerHeight - list.offsetHeight - EDGE;
+
+  if (list.getBoundingClientRect().top > top) list.style.top = `${Math.max(EDGE, top)}px`;
+}
+
 function focus(target) {
   if (!target) return;
 
@@ -117,11 +124,17 @@ function home(row) {
 
 function hovered(event) {
   const item = event.target.closest(ITEM);
-  if (!item || item.disabled) return;
+  if (!item || item.disabled || typing()) return;
 
   if (item.hasAttribute("aria-haspopup")) expand(item, false);
   else collapse(item.closest(LIST));
   if (document.activeElement !== item) focus(item);
+}
+
+function typing() {
+  const field = document.activeElement;
+
+  return field.matches("input") && field.value !== "" && shown.menu.contains(field);
 }
 
 function items(list) {
@@ -165,6 +178,7 @@ async function open(row, url, x, y, keys) {
   menu.addEventListener("keydown", press);
   menu.addEventListener("pointerover", hovered);
   menu.addEventListener("submit", submitted);
+  setupMenuSuggest(menu, fit);
   (row.closest("dialog[open]") ?? document.body).append(menu);
   row.classList.add("ctx-on");
   place(menu, x, y);

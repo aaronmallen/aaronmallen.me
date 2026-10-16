@@ -14,7 +14,7 @@ module Admin
         def handle(request, response)
           entry = journal_entry_queries.by_id(record_id(request)) || halt(404)
 
-          response.render(view, entry:, tags: tag_queries.all_in(PRIVATE), return_to: back_here(request))
+          response.render(view, entry:, tags: tag_queries.all_in(PRIVATE, mail: false), return_to: back_here(request))
         end
       end
     end

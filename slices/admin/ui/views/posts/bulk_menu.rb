@@ -15,7 +15,7 @@ module Admin
 
           def view_template
             ContextMenu(label: t(".label", count: @posts.size)) do |menu|
-              BulkTags(menu:, action:, fields: picked, tags: @tags.map(&:name), held:, invalid:)
+              BulkTags(menu:, action:, fields: picked, tags: @tags, held:, invalid:)
               menu.separator
               delete(menu)
             end

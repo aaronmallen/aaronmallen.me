@@ -21,7 +21,7 @@ module Admin
           response.render(
             view,
             task:, today:, return_to: back_here(request), board: board(request), **return_to(request),
-            sprints: sprint_queries.after(today + 1).first(AHEAD), tags: tag_queries.all_in(PRIVATE),
+            sprints: sprint_queries.after(today + 1).first(AHEAD), tags: tag_queries.all_in(PRIVATE, mail: false),
           )
         end
 

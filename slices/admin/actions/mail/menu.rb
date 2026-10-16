@@ -5,11 +5,13 @@ module Admin
     module Mail
       class Menu < Action
         INBOX = Blog::Types::TaskOrigin["inbox"]
+        PRIVATE = Blog::Types::TagScope["private"]
         TASK = Blog::Types::RecordKind["task"]
         THREAD = Blog::Types::RecordKind["mail_thread"]
 
         include Deps[
           record_link_queries: "links.repos.record_link_queries",
+          tag_queries: "tags.repos.tag_queries",
           thread_queries: "mail.repos.thread_queries",
         ]
 
@@ -27,6 +29,7 @@ module Admin
           {
             account: thread_queries.every_account.find { it.id == id },
             labels: thread_queries.labels.fetch(id, []).map(&:first),
+            tags: tag_queries.all_in(PRIVATE),
             task: record_link_queries.partner_ids(THREAD, [thread.id], TASK)[thread.id],
           }
         end

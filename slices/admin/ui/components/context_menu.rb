@@ -27,14 +27,17 @@ module Admin
           button(type: "button", **item(data: { copy: text, copied: })) { inner(label, icon:, hint:) }
         end
 
-        def field(label, action:, name:, pattern:, invalid:, fields: Blog::Constants::EMPTY_HASH)
+        def field(label, action:, name:, pattern:, invalid:, suggest:, fields: Blog::Constants::EMPTY_HASH)
           Form(action:, class: "ctx-field", novalidate: true, data: { morph: true }) do
             hidden(fields)
-            Icon("fa-solid fa-plus")
-            input(
-              type: "text", name:, pattern:, placeholder: label, autocomplete: "off", class: "ctx-input",
-              tabindex: "-1", aria: { label: }, data: { context_item: true, invalid: },
-            )
+            div(class: "contents", role: "menuitem", aria: { label: }) do
+              Icon("fa-solid fa-plus")
+              input(
+                type: "text", name:, pattern:, placeholder: label, autocomplete: "off", class: "ctx-input",
+                tabindex: "-1", aria: { label: }, data: { context_item: true, invalid: },
+              )
+            end
+            suggestions(suggest)
           end
         end
 
@@ -72,7 +75,7 @@ module Admin
               check("#{Tag::PREFIX}#{tag.name}", on:, **yield(tag.name, on))
             end
             separator unless tags.empty?
-            field(new_tag, name: "tag", pattern: TAG_PATTERN, invalid:, **yield(nil, false))
+            field(new_tag, name: "tag", pattern: TAG_PATTERN, invalid:, suggest: tags, **yield(nil, false))
           end
         end
 
@@ -99,6 +102,12 @@ module Admin
         def item(role: "menuitem", data: {}, warn: false, **attributes)
           { class: [ITEM, ("ctx-warn" if warn)], role:, tabindex: "-1", data: { context_item: true, **data },
             **attributes }
+        end
+
+        def suggestions(tags)
+          choices = tags.map { { name: it.name, color: Blog::UI::Components::Pill.for_tag_color(it.color)&.to_s } }
+
+          div(class: "ctx-suggest", hidden: true, data: { menu_suggest: JSON.generate(choices) })
         end
       end
     end
