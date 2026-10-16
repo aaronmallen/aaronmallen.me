@@ -7,11 +7,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
   let(:task) { create(:task, title: "Ship the links") }
   let(:other) { create(:task, title: "Write the migration") }
 
-  def chips(title)
-    row(title).all(".task-link").map do |chip|
-      [chip.find(".task-link-label").text, chip.find(".record-key").text, chip["title"]]
-    end
-  end
+  def count(title, tone) = row(title).first(".task-meta .task-mark.#{tone}", minimum: 0)
 
   def find_label = "ui.components.tasks.link_finder.find"
 
@@ -25,7 +21,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     send_to("/admin/tasks/#{task.id}/links", filter: "next", link: { kind:, other_id: other_id.to_s })
   end
 
-  def link_label(code) = i18n.t(["ui.components.tasks.links.labels", code].join("."))
+  def link_label(code) = i18n.t(["ui.components.tasks.link_row.labels", code].join("."))
 
   def links = Tasks::Slice["relations.task_links"]
 
@@ -37,106 +33,83 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
 
   def targets = page.all(".task-link-target").map { it.find(".record-key").text }
 
-  describe "the chips on a row" do
+  describe "the counts on a row" do
     before do
       sign_in_to_admin
       create(:task_link, from_task_id: task.id, to_task_id: other.id)
     end
 
-    it "reads the type and the other task's key, with its title as a tooltip, on the task that blocks" do
+    def blocked_by(count) = i18n.t("ui.components.tasks.meta.blocked_by", count:)
+
+    def blocking(count) = i18n.t("ui.components.tasks.meta.blocking", count:)
+
+    it "shows blocking on the task that blocks, after its comments", :aggregate_failures do
+      create(:task_comment, task_id: task.id)
       get "/admin/tasks", filter: "next"
 
-      expect(chips("Ship the links")).to eq([[link_label(:blocks), other.number.to_s, "Write the migration"]])
+      expect(count("Ship the links", :sand).text).to eq(blocking(1))
+      expect(count("Ship the links", :sand)).to have_css(".fa-arrow-right-long")
+      expect(row("Ship the links")).to have_css(".task-mark:has(.fa-comment) + .task-mark.sand")
     end
 
-    [
-      ["blocks", "blocks", "Ship the links", "Write the migration"],
-      ["duplicates", "duplicates", "Ship the links", "Write the migration"],
-      ["duplicated_by", "duplicates", "Write the migration", "Ship the links"],
-      ["relates", "relates", "Ship the links", "Write the migration"],
-      ["parent_of", "parent", "Ship the links", "Write the migration"],
-      ["child_of", "parent", "Write the migration", "Ship the links"],
-    ].each do |label, type, title, linked|
-      describe "a #{label} chip" do
-        def chip(title) = row(title).find(".task-link")
-
-        before do
-          links.where(from_task_id: task.id).update(type:)
-          get "/admin/tasks", filter: "next"
-        end
-
-        it "shows the key and no title", :aggregate_failures do
-          expect(chip(title).find(".task-link-label").text).to eq(link_label(label))
-          expect(chip(title)).to have_no_css(".task-link-title")
-        end
-
-        it "names the linked title for a screen reader" do
-          expect(chip(title).find(".sr-only").text).to eq(linked)
-        end
-
-        it "gives the linked title as a tooltip" do
-          expect(chip(title)["title"]).to eq(linked)
-        end
-      end
-    end
-
-    describe "on the task that is blocked" do
-      def chip = row("Write the migration").find(".task-link")
-
-      before { get "/admin/tasks", filter: "next" }
-
-      it "reads the reverse with the blocker's key and no title", :aggregate_failures do
-        expect([chip.find(".task-link-label").text, chip.find(".record-key").text])
-          .to eq([link_label(:blocked_by), task.number.to_s])
-        expect(chip).to have_no_css(".task-link-title")
-      end
-
-      it "names the blocker's title for a screen reader" do
-        expect(chip.find(".sr-only").text).to eq("Ship the links")
-      end
-
-      it "gives the blocker's title as a tooltip" do
-        expect(chip["title"]).to eq("Ship the links")
-      end
-
-      it "still shows the blocker's title on the task's page" do
-        get "/admin/tasks/#{other.id}", filter: "next"
-
-        expect(page.find(".task-link-row").find(".task-link-title").text).to eq("Ship the links")
-      end
-    end
-
-    it "draws the other task's key as a badge that copies it" do
+    it "shows blocked by with a lock on the task that is blocked", :aggregate_failures do
       get "/admin/tasks", filter: "next"
 
-      expect(row("Ship the links"))
-        .to have_css(".task-link .record-key[data-record-key='#{other.number}']")
+      expect(count("Write the migration", :pink).text).to eq(blocked_by(1))
+      expect(count("Write the migration", :pink)).to have_css(".fa-lock")
     end
 
-    it "draws no chips on a task with no links" do
+    it "lists the related tasks, one per line, on hover" do
+      create(:task_link, from_task_id: task.id, to_task_id: create(:task, title: "Run the migration").id)
+      get "/admin/tasks", filter: "next"
+
+      titles = count("Ship the links", :sand)["title"].split("\n")
+
+      expect(titles).to contain_exactly("Write the migration", "Run the migration")
+    end
+
+    it "counts each open block" do
+      create(:task_link, from_task_id: create(:task, title: "Run the migration").id, to_task_id: other.id)
+      get "/admin/tasks", filter: "next"
+
+      expect(count("Write the migration", :pink).text).to eq(blocked_by(2))
+    end
+
+    %w[duplicates relates parent].each do |type|
+      it "shows no chip and no count for a #{type} link", :aggregate_failures do
+        links.where(from_task_id: task.id).update(type:)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-meta .task-link-label")
+        expect(page).to have_no_css(".task-meta .task-mark.sand, .task-meta .task-mark.pink")
+      end
+    end
+
+    it "still lists the link with its type and title on the task's page", :aggregate_failures do
+      get "/admin/tasks/#{other.id}", filter: "next"
+
+      expect(page.find(".task-link-row .task-link-label").text).to eq(link_label(:blocked_by))
+      expect(page.find(".task-link-row").find(".task-link-title").text).to eq("Ship the links")
+    end
+
+    it "shows no count on a task with no links" do
       create(:task, title: "Alone")
       get "/admin/tasks", filter: "next"
 
-      expect(row("Alone")).to have_no_css(".task-links")
-    end
-
-    it "reads relates to on both tasks", :aggregate_failures do
-      links.where(from_task_id: task.id).update(type: "relates")
-      get "/admin/tasks", filter: "next"
-
-      expect(chips("Ship the links").first.first).to eq(link_label(:relates))
-      expect(chips("Write the migration").first.first).to eq(link_label(:relates))
+      expect(row("Alone")).to have_no_css(".task-meta .task-mark")
     end
   end
 
-  describe "the blocked pill" do
+  describe "the blocked by count" do
     before do
       sign_in_to_admin
       create(:task_link, from_task_id: other.id, to_task_id: task.id)
     end
 
+    def blocking?(title) = row(title).has_css?(".task-meta .task-mark.sand")
+
     def pill?(title)
-      row(title).has_css?(".task-meta .task-mark.pink", text: i18n.t("ui.components.tasks.meta.blocked"))
+      row(title).has_css?(".task-meta .task-mark.pink", text: i18n.t("ui.components.tasks.meta.blocked_by", count: 1))
     end
 
     it "shows while an open task blocks it" do
@@ -163,6 +136,13 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       get "/admin/tasks", filter: "next"
 
       expect(pill?("Ship the links")).to be(false)
+    end
+
+    it "hides blocking once the blocked task is canceled" do
+      send_to("/admin/tasks/#{task.id}/cancel", filter: "next")
+      get "/admin/tasks", filter: "next"
+
+      expect(blocking?("Write the migration")).to be(false)
     end
 
     it "stays while one blocker is canceled and another is open" do
@@ -410,11 +390,11 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       expect(page).to have_css("[data-toast]", text: i18n.t("tasks_page.toasts.linked"))
     end
 
-    it "shows the chip once the page comes back" do
+    it "shows the count once the page comes back" do
       link
       follow_redirect!
 
-      expect(chips("Ship the links")).to eq([[link_label(:blocks), other.number.to_s, "Write the migration"]])
+      expect(count("Ship the links", :sand).text).to eq(i18n.t("ui.components.tasks.meta.blocking", count: 1))
     end
 
     it "shows a waiting task's page with the error, keeping the upcoming tab", :aggregate_failures do

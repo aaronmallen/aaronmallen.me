@@ -3753,22 +3753,6 @@
   }
 }
 
-@utility task-link {
-  @apply inline-flex max-w-full min-w-0 items-center gap-1.5 whitespace-nowrap;
-
-  & .record-key {
-    @apply px-1.5 py-px;
-  }
-
-  &.blocker {
-    @apply text-mk-pink-text;
-  }
-
-  &.done {
-    @apply opacity-60;
-  }
-}
-
 @utility task-link-label {
   @apply whitespace-nowrap;
 }

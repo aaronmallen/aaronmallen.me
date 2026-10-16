@@ -952,6 +952,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
         task = create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, carried_count: 1, tags: %w[ruby])
         create(:task_link, from_task_id: create(:task).id, to_task_id: task.id)
+        create(:task_link, from_task_id: task.id, to_task_id: create(:task).id)
         create(:task_source, task:)
       end
 
@@ -1004,11 +1005,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       def meta_parts = page.find(".task.doing .task-meta").all(:xpath, "./*").map { meta_part(it[:class]) }
 
-      it "lays the meta line out in progress, blocked, carried, source, tags, links" do
+      it "lays the meta line out in progress, blocked by, carried, source, tags, blocking" do
         busy_task
         get "/admin/tasks"
 
-        expect(meta_parts).to eq(%w[blue pink sand task-source tag task-link])
+        expect(meta_parts).to eq(%w[blue pink sand task-source tag sand])
       end
 
       it "shows the time worked on a task not in progress" do

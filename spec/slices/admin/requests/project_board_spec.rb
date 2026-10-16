@@ -198,7 +198,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         end
 
         it "counts the open tasks it blocks and the open tasks that block it" do
-          expect(marks).to include("blocks 2", "blocked by 1")
+          expect(marks).to include("blocking 2", "blocked by 1")
         end
       end
 
@@ -224,8 +224,8 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
         end
 
         it "shows the count in place of link chips", :aggregate_failures do
-          expect(card).to have_no_css(".task-link")
-          expect(marks).to include("blocks 1")
+          expect(card).to have_no_css(".task-link-label")
+          expect(marks).to include("blocking 1")
         end
       end
     end

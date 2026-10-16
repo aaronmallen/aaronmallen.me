@@ -21,7 +21,7 @@ module Admin
                 data: { task_open: true, key_open: true }) do
                 @task.title
               end
-              Tasks::Meta(task: @task, counts: true)
+              Tasks::Meta(task: @task)
             end
           end
 

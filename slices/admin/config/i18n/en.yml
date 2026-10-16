@@ -2696,12 +2696,6 @@ en:
           no_match: "No unlinked task matches."
           placeholder: "Task number or title…"
         link_row:
-          places:
-            canceled: "canceled"
-            done: "done"
-            in_progress: "in progress"
-          remove: "Remove the link to %{key}"
-        links:
           labels:
             blocked_by: "blocked by"
             blocks: "blocks"
@@ -2710,14 +2704,18 @@ en:
             duplicates: "duplicates"
             parent_of: "parent of"
             relates: "relates to"
+          places:
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+          remove: "Remove the link to %{key}"
         meta:
-          blocked: "blocked"
           blocked_by:
             one: "blocked by %{count}"
             other: "blocked by %{count}"
-          blocks:
-            one: "blocks %{count}"
-            other: "blocks %{count}"
+          blocking:
+            one: "blocking %{count}"
+            other: "blocking %{count}"
           carried:
             one: "carried ×%{count}"
             other: "carried ×%{count}"

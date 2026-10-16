@@ -666,7 +666,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         read
 
         expect(page.find(".task-link-row .task-link-label").text)
-          .to eq(i18n.t("ui.components.tasks.links.labels.blocks"))
+          .to eq(i18n.t("ui.components.tasks.link_row.labels.blocks"))
       end
 
       it "links each linked task to its own page, keeping where the task was opened" do

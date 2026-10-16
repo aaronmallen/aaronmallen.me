@@ -927,14 +927,9 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.linked"))
       end
 
-      it "shows the chip on the row" do
+      it "shows the blocked by count while the blocker is open" do
         expect(row("Email the accountant"))
-          .to have_css(".task-link", text: translate("ui.components.tasks.links.labels.blocked_by"))
-      end
-
-      it "shows the blocked pill while the blocker is open" do
-        expect(row("Email the accountant"))
-          .to have_css(".task-meta .task-mark", text: translate("ui.components.tasks.meta.blocked"))
+          .to have_css(".task-meta .task-mark.pink", text: translate("ui.components.tasks.meta.blocked_by", count: 1))
       end
 
       it "saves one blocks link from the other task", :aggregate_failures do
@@ -994,7 +989,7 @@ RSpec.describe "Admin tasks", type: :feature do
         click_button(translate("ui.components.tasks.link_row.remove", key: key(other)))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.unlinked"))
-        expect(row("Email the accountant")).to have_no_css(".task-link")
+        expect(row("Email the accountant")).to have_no_css(".task-meta .task-mark.pink")
       end
 
       it "still moves while blocked" do
@@ -1011,7 +1006,7 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(page).to have_css(".toast", text: "Done")
       end
 
-      it "loses the blocked pill once the blocker is canceled" do
+      it "loses the blocked by count once the blocker is canceled" do
         visit "/admin/tasks?filter=someday"
         cancel_task(row("Learn Elixir"))
         find(".toast", text: "Canceled")

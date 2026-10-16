@@ -10,6 +10,7 @@ module Admin
             Blog::Types::TaskStatus["done"] => "ui.components.tasks.link_row.places.done",
             Blog::Types::TaskStatus["in_progress"] => "ui.components.tasks.link_row.places.in_progress",
           }.freeze
+          LABELS = "ui.components.tasks.link_row.labels"
           TODAY = Blog::Types::TaskFilter["today"]
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -17,11 +18,13 @@ module Admin
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
 
+          def self.label_key(link) = [LABELS, link.label].join(".")
+
           def self.place_key(task) = PLACES.fetch(task.status) { Helpers::TaskLists.name(task.list || TODAY) }
 
           def view_template
             div(class: "task-link-row") do
-              span(class: "task-link-label") { t(Links.label_key(@link)) }
+              span(class: "task-link-label") { t(self.class.label_key(@link)) }
               RecordKey(kind: "task", label: other.label)
               link_title
               span(class: "task-link-place") { t(self.class.place_key(other)) }

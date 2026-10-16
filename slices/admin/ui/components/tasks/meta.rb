@@ -7,7 +7,6 @@ module Admin
         class Meta < Component
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :scheduled, Blog::Types::Date.optional, default: nil
-          prop :counts, Blog::Types::Bool, default: false
 
           def view_template
             p(class: "task-meta") do
@@ -17,12 +16,14 @@ module Admin
               @task.tags.each { Tag(tag: it) }
               worked if worked?
               comments
-              links
+              blocking
               Closed(task: @task) if @task.closed?
             end
           end
 
           private
+
+          def blocking = related(:sand, "fa-solid fa-arrow-right-long", ".blocking", @task.links.select(&:blocking?))
 
           def carried = mark(:sand, "fa-solid fa-rotate-left") { t(".carried", count: @task.carried_count) }
 
@@ -47,17 +48,8 @@ module Admin
             end
           end
 
-          def links
-            return Links(links: @task.links) unless @counts
-
-            blocks = @task.links.count(&:blocking?)
-            blocked_by = @task.links.count(&:blocker?)
-            mark(nil, "fa-solid fa-arrow-right-long") { t(".blocks", count: blocks) } if blocks.positive?
-            mark(nil, "fa-solid fa-arrow-left-long") { t(".blocked_by", count: blocked_by) } if blocked_by.positive?
-          end
-
-          def mark(tone, icon, &)
-            span(class: ["task-mark", tone]) do
+          def mark(tone, icon, title: nil, &)
+            span(class: ["task-mark", tone], title:) do
               Icon(icon)
               plain(yield)
             end
@@ -66,13 +58,19 @@ module Admin
           def marks
             return if @task.closed?
 
-            mark(:pink, "fa-solid fa-lock") { t(".blocked") } if @task.blocked?
+            related(:pink, "fa-solid fa-lock", ".blocked_by", @task.links.select(&:blocker?))
             carried if @task.carried_count.positive?
             return unless @scheduled
 
             mark(:orange, "fa-regular fa-calendar") do
               t(".scheduled", date: l(@scheduled, format: :short))
             end
+          end
+
+          def related(tone, icon, key, links)
+            return if links.empty?
+
+            mark(tone, icon, title: links.map { it.task.title }.join("\n")) { t(key, count: links.size) }
           end
 
           def worked = mark(nil, "fa-regular fa-clock") { hours(@task.worked_seconds) }
