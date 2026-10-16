@@ -3,9 +3,10 @@
 module Health
   module Repos
     class HealthMutations < Blog::DB::Repo
-      def store(days:, workouts:, now: Time.now)
+      def store(days:, workouts:, window:, now: Time.now)
         transaction do
           health_days.store(days, now:)
+          self.workouts.prune(*window.minmax, keep: workouts.map { it[:google_id] })
           self.workouts.store(workouts, now:)
         end
         days.size + workouts.size

@@ -9,16 +9,22 @@ module Health
 
       schema :workouts, infer: true
 
-      def between(first, last)
-        from, to = Blog::TimeZone.day_bounds(first, last)
+      def between(first, last) = starting(first, last).order(self[:started_at].asc, self[:id].asc)
 
-        where(self[:started_at] >= from).where(self[:started_at] < to).order(self[:started_at].asc, self[:id].asc)
-      end
+      def prune(first, last, keep:) = starting(first, last).exclude(google_id: keep).delete
 
       def store(rows, now:)
         rows = rows.map { it.merge(created_at: now, updated_at: now) }
 
         dataset.insert_conflict(target: :google_id, update: excluded(COLUMNS)).multi_insert(rows)
+      end
+
+      private
+
+      def starting(first, last)
+        from, to = Blog::TimeZone.day_bounds(first, last)
+
+        where(self[:started_at] >= from).where(self[:started_at] < to)
       end
     end
   end

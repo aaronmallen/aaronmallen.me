@@ -116,6 +116,29 @@ RSpec.describe Health::Jobs::SyncHealth do
 
         expect(days).to contain_exactly(include(day: today, steps: 9000, minutes_asleep: nil))
       end
+
+      it "deletes a workout in the window that Google no longer returns" do
+        stub_google_health
+        run
+
+        expect(workouts).to be_empty
+      end
+    end
+
+    it "keeps the workouts Google still returns and deletes the rest of the window" do
+      create(:workout, started_at: local(today - 2, 0))
+      stub_google_health(exercise: { dataPoints: [run_workout("run-1", local(today, 6))] })
+      run
+
+      expect(workouts.map { it[:google_id] }).to contain_exactly(end_with("run-1"))
+    end
+
+    it "keeps workouts that started before the window" do
+      older = create(:workout, started_at: Blog::TimeZone.day_start(today - 2) - 1)
+      stub_google_health
+      run
+
+      expect(workouts.map { it[:id] }).to contain_exactly(older.id)
     end
 
     it "puts Monday night's sleep on Tuesday, the day I woke" do

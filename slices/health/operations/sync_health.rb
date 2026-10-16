@@ -94,7 +94,9 @@ module Health
       end
 
       def sync(account, first, last)
-        health_mutations.store(days: days(account, first, last), workouts: workouts(account, first, last))
+        health_mutations.store(
+          days: days(account, first, last), workouts: workouts(account, first, last), window: first..last,
+        )
       end
 
       def synced(first, last)
