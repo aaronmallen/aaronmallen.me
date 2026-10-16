@@ -19,8 +19,8 @@ module Social
         source_url = step url(source)
         target_url = step url(target)
         step distinct(source_url, target_url)
-        step accepted(source_url, webmention_queries.settings)
         post = step post_for(target_url)
+        step accepted(source_url, post)
         queue(source_url, target_url, post, visitor_hashes)
 
         post
@@ -28,11 +28,12 @@ module Social
 
       private
 
-      def accepted(source_url, webmention_settings)
+      def accepted(source_url, post)
+        webmention_settings = webmention_queries.settings
         return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source_url) && !webmention_settings.accept_bridgy
-        return Failure(:not_receiving) unless webmention_settings.receive
 
-        Success(source_url)
+        refusal = refusal(post, webmention_settings)
+        refusal && !webmention_queries.received?(post.id, source_url.to_s) ? Failure(refusal) : Success(post)
       end
 
       def distinct(source_url, target_url)
@@ -44,10 +45,7 @@ module Social
 
         slug = slug_in(target_url)
         post = slug && post_queries.published_by_slug(slug)
-        return Failure(:not_a_post) unless post
-        return Failure(:webmentions_off) unless post.webmentions_enabled
-
-        Success(post)
+        post ? Success(post) : Failure(:not_a_post)
       end
 
       def queue(source_url, target_url, post, visitor_hashes)
@@ -57,6 +55,12 @@ module Social
         )
 
         verify(post.id, source_url.to_s, target_url.to_s)
+      end
+
+      def refusal(post, webmention_settings)
+        return :not_receiving unless webmention_settings.receive
+
+        :webmentions_off unless post.webmentions_enabled
       end
 
       def slug_in(target_url)

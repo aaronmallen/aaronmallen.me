@@ -80,6 +80,31 @@ RSpec.describe "Social webmentions", type: :request do
 
       expect(last_response.status).to eq(400)
     end
+
+    it "rejects a source it never stored once the post turned webmentions off" do
+      Posts::Slice["repos.post_mutations"].update(article.id, webmentions_enabled: false)
+      notify
+
+      expect([last_response.status, queued]).to eq([400, []])
+    end
+  end
+
+  describe "a source it stored before webmentions closed" do
+    before { create(:webmention, post_id: article.id, source_url: source) }
+
+    def stop_receiving = webmention_mutations.update_settings(receive: false)
+
+    def turn_mentions_off = Posts::Slice["repos.post_mutations"].update(article.id, webmentions_enabled: false)
+
+    { "the post turned webmentions off" => :turn_mentions_off,
+      "receiving is off" => :stop_receiving }.each do |what, close|
+      it "queues the resend so a withdrawal lands once #{what}" do
+        send(close)
+        notify
+
+        expect([last_response.status, queued]).to eq([202, [source]])
+      end
+    end
   end
 
   describe "a target whose slug is no slug" do

@@ -16,22 +16,22 @@ module Social
 
       def call(source:, target:, post_id:)
         settings = webmention_queries.settings
-        step accepting(source, settings)
         post = step open_post(post_id)
+        refusal = step accepting(post, source, settings)
         response = step fetch(post, source)
         page = Webmentions::Source.new(url: response.url, target:, html: response.body)
-        step linking(page, post, source)
+        step linking(page, post, source, refusal)
 
         store(page, post, source, settings)
       end
 
       private
 
-      def accepting(source, settings)
+      def accepting(post, source, settings)
         return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
-        return Failure(:not_receiving) unless settings.receive
 
-        Success(settings)
+        refusal = refusal(post, settings)
+        refusal && !webmention_queries.received?(post.id, source) ? Failure(refusal) : Success(refusal)
       end
 
       def approved_type?(page, settings) = TYPE_TOGGLES.key?(page.type) && settings.public_send(TYPE_TOGGLES[page.type])
@@ -52,19 +52,27 @@ module Social
         Failure(reason)
       end
 
-      def linking(page, post, source)
-        page.links_to? ? Success(page) : forget(post, source, :no_link)
+      def linking(page, post, source, refusal)
+        return forget(post, source, :no_link) unless page.links_to?
+
+        refusal ? Failure(refusal) : Success(page)
       end
 
       def open_post(post_id)
         post = post_queries.by_id(post_id)
-        post&.published? && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
+        post&.published? ? Success(post) : Failure(:not_a_post)
       end
 
       def read(response)
         return Failure(:source_unreachable) if PageFetcher::Client::RETRY_STATUSES.include?(response.status)
 
         PageFetcher::Client::OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
+      end
+
+      def refusal(post, settings)
+        return :not_receiving unless settings.receive
+
+        :webmentions_off unless post.webmentions_enabled
       end
 
       def status(page, source, settings)

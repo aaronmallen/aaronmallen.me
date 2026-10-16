@@ -25,7 +25,9 @@ module Social
         receipt ? Success(receipt) : Failure(Blog::Throttle::THROTTLED)
       end
 
-      def delete_by_source(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).delete
+      def delete_by_source(post_id, source_url)
+        webmentions.for_post(post_id).from_source(source_url).without_status(SPAM).delete
+      end
 
       def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
 

@@ -39,6 +39,8 @@ module Social
 
       def pending_count = webmentions.with_status(PENDING).count
 
+      def received?(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).exist?
+
       def received_between(from:, to:) = in_days(from, to).count
 
       def received_by_post(from:, to:) = in_days(from, to).tally(:post_id)

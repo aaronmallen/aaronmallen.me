@@ -39,6 +39,8 @@ module Social
 
       def with_types(types) = where(type: types)
 
+      def without_status(status) = exclude(status:)
+
       private
 
       def changed(fields)

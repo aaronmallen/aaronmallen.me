@@ -278,6 +278,35 @@ RSpec.describe Social::Jobs::VerifyWebmention do
         expect(stored).to be_nil
       end
     end
+
+    describe "a mention marked as spam" do
+      let(:ada) { "https://ada.example/about" }
+
+      def moderate(id, verdict) = Social::Slice["operations.moderate_webmention"].call(id, verdict)
+
+      before do
+        moderate(create(:webmention, post_id: create(:post, :published).id, author_url: ada).id, "approved")
+        verify_page(entry(author: ada))
+        moderate(stored.id, "spam")
+        verify_page("gone", status: 410)
+      end
+
+      it "stays stored" do
+        expect(stored.status).to eq("spam")
+      end
+
+      it "leaves its author unknown" do
+        expect(webmention_queries.trusted_author?(ada)).to be(false)
+      end
+    end
+
+    it "keeps a mention marked as spam once the link is gone" do
+      verify_page(entry)
+      webmention_mutations.mark_spam(stored.id)
+      verify_page("<p>nothing here</p>")
+
+      expect(stored.status).to eq("spam")
+    end
   end
 
   describe "a source that can't be read" do
@@ -816,6 +845,46 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       verify(post_id: 0)
 
       expect(a_request(:get, source)).not_to have_been_made
+    end
+  end
+
+  describe "a withdrawal" do
+    def stop_receiving = webmention_mutations.update_settings(receive: false)
+
+    def turn_mentions_off = Posts::Slice["repos.post_mutations"].update(post.id, webmentions_enabled: false)
+
+    { "the post turned webmentions off" => :turn_mentions_off,
+      "receiving is off" => :stop_receiving }.each do |what, close|
+      context "with a mention stored before #{what}" do
+        before do
+          verify_page(entry(body: %(#{link}<p class="e-content">First</p>)))
+          send(close)
+        end
+
+        it "removes the mention once the source is gone" do
+          verify_page("gone", status: 410)
+
+          expect(stored).to be_nil
+        end
+
+        it "removes the mention once the source stops linking" do
+          verify_page("<p>nothing here</p>")
+
+          expect(stored).to be_nil
+        end
+
+        it "leaves the mention as it was while the source still links" do
+          verify_page(entry(body: %(#{link}<p class="e-content">Second</p>)))
+
+          expect(stored.excerpt).to eq("First")
+        end
+
+        it "fetches nothing for a source it never stored" do
+          verify(source: "https://grace.example/notes/1")
+
+          expect(a_request(:get, "https://grace.example/notes/1")).not_to have_been_made
+        end
+      end
     end
   end
 
