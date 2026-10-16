@@ -207,16 +207,53 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       other
     end
 
-    it "finds a task by its key" do
-      find_link("##{other.id}")
+    describe "by label" do
+      def in_project(**) = create(:task, project_id: Projects::Slice["relations.projects"].dataset.get(:id), **)
 
-      expect(targets).to eq([other.number.to_s])
-    end
+      def renumber(task, number) = Tasks::Slice["relations.tasks"].dataset.where(id: task.id).update(number:)
 
-    it "finds a task by its bare number" do
-      find_link(other.id.to_s)
+      before do
+        create(:project, name: "Podcast")
+        in_project(title: "Record the intro")
+        in_project(title: "Edit the intro")
+      end
 
-      expect(targets).to eq([other.number.to_s])
+      it "lists every task with the number, in a project or none, by n or #n", :aggregate_failures do
+        find_link("2")
+        expect(targets).to contain_exactly("2", "POD-2")
+
+        find_link("#2")
+        expect(targets).to contain_exactly("2", "POD-2")
+      end
+
+      it "finds a task by KEY-n in any case, with or without #" do
+        %w[POD-2 pod-2 #POD-2].each do |query|
+          find_link(query)
+          expect(targets).to eq(["POD-2"])
+        end
+      end
+
+      it "finds no task whose label only starts with the query" do
+        renumber(in_project(title: "Mix the outro"), 23)
+        find_link("POD-2")
+
+        expect(targets).to eq(["POD-2"])
+      end
+
+      it "finds no task by its database id" do
+        loose = create(:task, title: "Loose")
+        Tasks::Slice["relations.tasks"].dataset.where(id: loose.id).update(id: 900_001)
+        find_link("900001")
+
+        expect(targets).to be_empty
+      end
+
+      it "lists label matches ahead of title matches" do
+        create(:task, title: "Plan 2.0")
+        find_link("2")
+
+        expect([targets.size, targets.last]).to eq([3, "3"])
+      end
     end
 
     it "finds a task by its title" do
@@ -226,7 +263,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     end
 
     it "leaves the task itself out" do
-      find_link("##{task.id}")
+      find_link("##{task.number}")
 
       expect(targets).to be_empty
     end

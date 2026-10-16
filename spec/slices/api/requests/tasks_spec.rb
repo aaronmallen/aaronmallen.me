@@ -520,6 +520,14 @@ RSpec.describe "API tasks", type: :request do
       expect(trusted(mcp_answer("read_task", id: "2"))).to include("id" => second.id, "label" => "2")
     end
 
+    it "finds a task by its label with a leading # through MCP", :aggregate_failures do
+      task = in_project(podcast)
+      loose = create(:task)
+
+      expect(trusted(mcp_answer("read_task", id: "#POD-1")).fetch("id")).to eq(task.id)
+      expect(trusted(mcp_answer("read_task", id: "#1")).fetch("id")).to eq(loose.id)
+    end
+
     it "keeps a number in the path as the internal id" do
       in_project(podcast)
       task = in_project(podcast)

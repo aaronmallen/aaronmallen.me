@@ -7,8 +7,7 @@ module Tasks
       COLUMNS = Blog::Types::TaskColumn.values.freeze
       OPEN = Blog::Types::TaskStatus["open"]
       COLUMN = Sequel.case({ { status: OPEN } => Sequel.cast(:stage, String) }, Sequel.cast(:status, String))
-      KEY = /\A#?(\d{1,9})\z/
-      LABEL = /\A(?:(?<key>[A-Za-z][A-Za-z0-9]*)-)?(?<number>\d{1,9})\z/
+      LABEL = /\A#?(?:(?<key>[A-Za-z][A-Za-z0-9]*)-)?(?<number>\d{1,9})\z/
       LINK_LIMIT = 6
       TODAY = Blog::Types::TaskFilter["today"]
 
@@ -64,13 +63,7 @@ module Tasks
       def id_at(filter, sprint:, offset:) = pool(tasks, filter, sprint).in_order.limit(1, offset).pluck(:id).first
 
       def id_by_label(label)
-        key, number = label.match(LABEL)&.captures
-        return if number.nil?
-
-        project_id = project_queries.id_by_key(key) if key
-        return if key && project_id.nil?
-
-        tasks.where(project_id:, number: number.to_i).pluck(:id).first
+        labelled_as(label.include?("-") ? tasks : tasks.where(project_id: nil), label).pluck(:id).first
       end
 
       def in_progress = tasks.in_progress.in_order.to_a
@@ -81,11 +74,9 @@ module Tasks
         query = Blog::Types::TrimmedText[text]
         return Blog::Constants::EMPTY_ARRAY if query.empty?
 
-        found = tasks.labelled.linkable_from(id)
-        key = query[KEY, 1]
-        found = key ? found.where(id: key.to_i) : found.titled(query)
+        found = tasks.labelled.linkable_from(id).open_first.limit(LINK_LIMIT)
 
-        found.open_first.limit(LINK_LIMIT).to_a
+        (labelled_as(found, query).to_a + found.titled(query).to_a).uniq(&:id).first(LINK_LIMIT)
       end
 
       def list(filter, sprint:, page:, **search)
@@ -133,6 +124,14 @@ module Tasks
 
       def by_project(projects: [], **search)
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
+      end
+
+      def labelled_as(found, text)
+        key, number = text.match(LABEL)&.captures
+        project_id = project_queries.id_by_key(key) if key
+        return found.none if number.nil? || (key && project_id.nil?)
+
+        found.where({ number: number.to_i, project_id: }.compact)
       end
 
       def on_project(found, project_id) = recent(found.searched(project_ids: [project_id]))

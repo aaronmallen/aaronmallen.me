@@ -23,7 +23,7 @@ module API
         type: %w[integer string],
         minimum: 1,
         maximum: Blog::Constants::INTEGER_MAX,
-        pattern: "^([A-Za-z][A-Za-z0-9]{1,5}-)?[1-9][0-9]{0,8}$",
+        pattern: "^#?([A-Za-z][A-Za-z0-9]{1,5}-)?[1-9][0-9]{0,8}$",
         description: "a task's internal ID as a number, or its label as a string: KEY-n, or n with no project",
       }.freeze
 
