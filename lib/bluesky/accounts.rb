@@ -14,7 +14,7 @@ module Bluesky
     def any? = !first_credentials.nil?
 
     def sessions(author = nil, credentials = nil)
-      known = author && @lock.synchronize { @authors[author] }
+      known = !credentials && author && @lock.synchronize { @authors[author] }
       return known if known
 
       found = credentials || first_credentials or raise Error, "Bluesky has no connected account"

@@ -583,6 +583,41 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).to have_been_made.once
     end
 
+    describe "a retry after the account reconnects" do
+      before do
+        stub_request(:post, bluesky_url("com.atproto.repo.putRecord"))
+          .to_return(json_response(cid: "cid", uri: first), { status: 500 })
+        refused(social_post, "bluesky")
+        reconnect_bluesky
+        stub_bluesky_writes
+      end
+
+      def reconnect_bluesky
+        Services::Slice["repos.connection_mutations"]
+          .change(social_account("bluesky").id, credentials: { app_password: "pw-two", handle: "ada.example" })
+        stub_request(:post, bluesky_url("com.atproto.server.createSession"))
+          .with(body: hash_including("password" => "pw-two"))
+          .to_return(**json_response(accessJwt: "new", did: SocialNetworks::BLUESKY_DID, handle: "ada.example"))
+      end
+
+      def written_with(token)
+        a_request(:post, bluesky_url("com.atproto.repo.putRecord"))
+          .with(headers: { "Authorization" => "Bearer #{token}" })
+      end
+
+      it "replies with the credentials the account reconnected with" do
+        deliver(social_post, "bluesky")
+
+        expect(written_with("new")).to have_been_made.twice
+      end
+
+      it "signs in once more for the rest of the thread" do
+        deliver(social_post, "bluesky")
+
+        expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).to have_been_made.twice
+      end
+    end
+
     it "keeps the error when the parent comes back without a CID" do
       stub_request(:get, bluesky_url("com.atproto.repo.getRecord"))
         .with(query: hash_including({})).to_return(**json_response(uri: first))
