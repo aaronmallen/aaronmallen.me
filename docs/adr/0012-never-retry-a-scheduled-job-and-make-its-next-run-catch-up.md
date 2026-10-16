@@ -78,12 +78,13 @@ reaches Honeybadger.
 
 **A Honeybadger check-in shows a run that never happened** (#1375). Neither `sync_states` nor Honeybadger's error
 reports hear of a run that never starts: a worker that fails to boot, or a schedule that skips a run, since
-sidekiq-scheduler does not replay one. `Blog::ScheduledJob` sends each job's own check-in after a run that
-finishes, and none after one that raises, so Honeybadger alerts when a check-in comes late. It looks the check-in
-up in `honeybadger.check_ins` under the job's name and its arguments, such as `publish_due_posts` or
-`sync_issues_linear`, and each comes from a `HONEYBADGER_CHECK_IN_<NAME>` variable. A job with none set runs as
-before. The worker's schedule spec holds every entry to a name in that list. The owner makes each check-in and its
-schedule in Honeybadger by hand.
+sidekiq-scheduler does not replay one. The `Blog::JobCheckIn` Sidekiq middleware sends each job's own check-in
+after a run that finishes, and none after one that raises, so Honeybadger alerts when a check-in comes late. It
+sits outside `Blog::JobConnection` and `Blog::JobTimer` (#1518), so the call holds no connection and stays out of
+the job's timing. It looks the check-in up in `honeybadger.check_ins` under the job's name and its arguments,
+such as `publish_due_posts` or `sync_issues_linear`, and each comes from a `HONEYBADGER_CHECK_IN_<NAME>` variable.
+A job with none set runs as before. The worker's schedule spec holds every entry to a name in that list. The owner
+makes each check-in and its schedule in Honeybadger by hand.
 
 ## Alternatives
 

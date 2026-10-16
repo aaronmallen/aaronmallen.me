@@ -12,6 +12,7 @@ Sidekiq.configure_server do |config|
 
   config.server_middleware do |chain|
     chain.add Blog::JobMaintenance, Hanami.app.settings.maintenance[:flag_path]
+    chain.add Blog::JobCheckIn
     chain.add Blog::JobConnection, database
     chain.add Blog::JobTimer, record
   end
