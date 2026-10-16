@@ -31,8 +31,13 @@ RSpec.describe "API search", type: :request do
         .to contain_exactly("Track the zeppelin", "Zeppelins", "Zeppelin sighting")
     end
 
-    it "gives each result its kind, id, title, short match and date" do
-      expect(results(query: "zeppelin").map(&:keys).uniq).to eq([%w[kind id title match date]])
+    it "gives each result its kind, id, title, label, short match and date" do
+      expect(results(query: "zeppelin").map(&:keys).uniq).to eq([%w[kind id title label match date]])
+    end
+
+    it "gives a task its label and every other kind none" do
+      expect(results(query: "zeppelin").to_h { [it.fetch("kind"), it.fetch("label")] })
+        .to eq("task" => task.number.to_s, "post" => nil, "message" => nil)
     end
 
     it "gives a result the values search found for it" do
@@ -50,6 +55,12 @@ RSpec.describe "API search", type: :request do
     it "narrows to one kind, as the screen does" do
       expect(results(query: "zeppelin", kind: "message").map { it.fetch("title") })
         .to eq(screen_titles(q: "zeppelin", kind: "message"))
+    end
+
+    it "finds a task by its label in MCP search" do
+      found = mcp_answer("search", query: task.number.to_s).fetch("results")
+
+      expect(found.first.values_at("id", "label")).to eq([task.id, task.number.to_s])
     end
 
     it "gives an id the kind's read tool takes" do

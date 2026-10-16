@@ -11,6 +11,9 @@ module API
           kind: { type: "string", enum: Blog::Types::SearchKind.values },
           id: { type: "integer", description: "the record's ID, as the kind's read tool takes it" },
           title: Helpers::Schema::STRING,
+          label: Helpers::Schema.nullable(
+            { type: "string", description: "a task's label, KEY-n or n; null for every other kind" },
+          ),
           match: { type: "string", description: "the stretch of text around the words that matched" },
           date: Helpers::Schema::DAY,
         },

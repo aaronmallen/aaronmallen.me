@@ -54,6 +54,56 @@ RSpec.describe "Admin search", type: :request do
       end
     end
 
+    describe "a task label" do
+      let(:podcast) { create(:project, name: "Podcast", tagline: "Talk", repo: "me/podcast", url: "https://podcast.test") }
+
+      def in_project(title) = create(:task, project_id: podcast.id, title:)
+
+      def labels = page.all(".card .li").map { it.first(".li-side span").text }
+
+      before do
+        in_project("Record the intro")
+        in_project("Edit the intro")
+        create(:task, title: "Water the ferns")
+        create(:task, title: "Prune the roses")
+        create(:task, title: "Read chapter 2")
+      end
+
+      it "lists every task with the number above the tasks whose words match", :aggregate_failures do
+        get "/admin/search", q: "#2", kind: "task"
+
+        expect(titles.first(2)).to contain_exactly("Edit the intro", "Prune the roses")
+        expect(titles.last).to eq("Read chapter 2")
+      end
+
+      it "counts the label matches with the rest" do
+        get "/admin/search", q: "2"
+
+        expect(kinds).to include(["Tasks 3", nil])
+      end
+
+      it "finds a task by KEY-n in any case" do
+        %w[POD-2 pod-2 #POD-2].each do |query|
+          get "/admin/search", q: query, kind: "task"
+          expect(titles).to eq(["Edit the intro"])
+        end
+      end
+
+      it "shows each task's label" do
+        get "/admin/search", q: "2", kind: "task"
+
+        expect(labels).to contain_exactly("POD-2", "2", "3")
+      end
+
+      it "finds a task that moved by its new label" do
+        ferns = Tasks::Slice["relations.tasks"].dataset.where(title: "Water the ferns")
+        ferns.update(project_id: podcast.id)
+        get "/admin/search", q: "POD-3", kind: "task"
+
+        expect([titles, labels]).to eq([["Water the ferns"], ["POD-3"]])
+      end
+    end
+
     describe "a phrase a decision holds" do
       let!(:decision) { create(:decision, title: "Pick a blimp hangar", problem: "Where the airship sleeps") }
 

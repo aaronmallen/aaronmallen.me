@@ -67,6 +67,7 @@ module Admin
             hit = result.hit
 
             ListItem(title: hit.title, href: result.href, sub: hit.match) do
+              span { hit.label } if hit.label
               span { l(hit.day, format: :medium) }
             end
           end

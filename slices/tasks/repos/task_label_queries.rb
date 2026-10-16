@@ -17,6 +17,8 @@ module Tasks
         found.where({ number: number.to_i, project_id: }.compact)
       end
 
+      def labels(ids) = tasks.where(id: ids).labelled.to_a.to_h { [it.id, it.label] }
+
       def linkable(relation, text: nil, limit: nil, **)
         found = super
         return found unless text

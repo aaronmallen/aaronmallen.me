@@ -41,6 +41,19 @@ RSpec.describe "Admin palette search", type: :request do
       end
     end
 
+    describe "a task label" do
+      before do
+        project = create(:project, name: "Podcast")
+        create(:task, project_id: project.id, title: "Record the intro")
+        create(:task, title: "Read the intro")
+        search("POD-1")
+      end
+
+      it "lists the task first, with its label" do
+        expect(found.first).to include("kind" => "task", "title" => "Record the intro", "label" => "POD-1")
+      end
+    end
+
     describe "a phrase several kinds hold" do
       before do
         create(:task, title: "Track the zeppelin")

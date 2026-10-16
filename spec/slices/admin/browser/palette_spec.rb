@@ -304,6 +304,10 @@ RSpec.describe "Admin command palette", type: :feature do
     it "labels it with its kind" do
       expect(page).to have_css(".pal-r", text: "Email the accountant") { it.has_css?(".pal-r-sub", text: "task") }
     end
+
+    it "shows its label beside its kind" do
+      expect(page).to have_css(".pal-r", text: "Email the accountant") { it.has_css?(".pal-r-sub", text: /task 1\z/i) }
+    end
   end
 
   describe "searching the decisions" do

@@ -12,8 +12,9 @@ module MCP
 
       description "Find records of every kind the admin keeps by their words, best match first, as the admin's " \
                   "search screen does: tasks open and closed, posts, social posts, journal entries, commits, " \
-                  "projects, work entries, people, mail threads, webmentions, decisions and pull requests. Each " \
-                  "result gives its kind, id, title, a short match and its day; pass the id to the tool for its " \
+                  "projects, work entries, people, mail threads, webmentions, decisions and pull requests. A " \
+                  "task label such as POD-23, or a bare 23, lists those tasks first. Each result gives its kind, " \
+                  "id, title, a short match, its day and, for a task, its label; pass the id to the tool for its " \
                   "kind to read the whole record (#{READERS.map do |kind, tool|
                     "#{kind}: #{tool}"
                   end.join(', ')}). count gives the results on " \

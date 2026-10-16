@@ -9,7 +9,10 @@ module Admin
 
       def call(text)
         search_queries.search(text:, page: PAGE).rows.map do |hit|
-          { kind: hit.kind, id: hit.source_id, title: hit.title, match: hit.match, href: link_search_hit.call(hit) }
+          {
+            kind: hit.kind, id: hit.source_id, title: hit.title, label: hit.label, match: hit.match,
+            href: link_search_hit.call(hit),
+          }
         end
       end
     end

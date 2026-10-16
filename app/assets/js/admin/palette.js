@@ -243,7 +243,7 @@ function fillField(dialogId, name, value) {
   if (field) field.value = value;
 }
 
-function foundRow(group, { kind, id, title, match, href }) {
+function foundRow(group, { kind, id, title, label, match, href }) {
   const template = group.querySelector(`[data-palette-found-row="${kind}"]`);
   if (!template) return null;
 
@@ -253,6 +253,7 @@ function foundRow(group, { kind, id, title, match, href }) {
   row.dataset.paletteHref = href;
   row.querySelector(".pal-r-label").textContent = title;
   row.querySelector(".pal-r-match").textContent = match;
+  if (label) row.querySelector(".pal-r-sub").append(` ${label}`);
 
   return row;
 }
