@@ -2,8 +2,8 @@ import { fresh } from "./fresh.js";
 
 const ready = new WeakSet();
 
-export function setupCadences() {
-  for (const box of fresh(ready, document.querySelectorAll("[data-cadence]"))) {
+export function setupCadences(root = document) {
+  for (const box of fresh(ready, root.querySelectorAll("[data-cadence]"))) {
     const kind = box.querySelector("[data-cadence-kind]");
 
     kind.addEventListener("change", () => {

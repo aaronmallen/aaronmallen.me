@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin today pools", type: :feature do
+  let(:someday) { create(:task, :someday, title: "Learn Elixir") }
+
   before do
     create(:task, title: "Email the accountant")
-    create(:task, :someday, title: "Learn Elixir")
+    someday
     sign_in_to_admin
     visit "/admin"
   end
+
+  def copied = Admin::Slice["i18n"].t("ui.components.record_key.copied.task", key: someday.label)
 
   def panel = find("[data-sprint-panel]")
 
@@ -29,6 +33,14 @@ RSpec.describe "Admin today pools", type: :feature do
       expect(panel).to have_css(".li-title", text: "Learn Elixir")
       expect(evaluate_script("window.poolsLoaded")).to be(true)
       expect(evaluate_script("window.scrollY > 0 && window.scrollY === window.poolsScroll")).to be(true)
+    end
+
+    it "copies a task's key from the new pool", :aggregate_failures do
+      watch_clipboard
+      find("[data-pool-panel='someday'] .record-key").click
+
+      expect(page).to have_css(".toast", text: copied)
+      expect(evaluate_script("window.copiedKeys")).to eq([someday.label])
     end
 
     it "marks someday as the current page", :aggregate_failures do

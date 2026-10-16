@@ -4,6 +4,8 @@ RSpec.describe "Admin calendar drag", type: :feature do
   let(:day) { (today + 2).month == today.month ? today + 1 : Date.new(today.year, today.month).next_month }
   let(:target) { day + 1 }
 
+  def asked = translate("ui.components.calendar.event_row.confirm_delete", title: "Coffee")
+
   def at(date, hour) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour)
 
   def box(element)
@@ -136,6 +138,23 @@ RSpec.describe "Admin calendar drag", type: :feature do
       expect(panel).to have_no_text("Coffee")
       expect(a_request(:patch, patched).with(body: { start: timed(target, 9), end: timed(target, 10) }))
         .to have_been_made
+    end
+  end
+
+  describe "deleting an event after a drag" do
+    before do
+      create(:post, :scheduled, title: "Spread me out", published_at: at(day, 9))
+      calendar = create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron")
+      create(:calendar_event, calendar_id: calendar.id, title: "Coffee", starts_on: day, ends_on: day)
+      open_day(day)
+      drag("Spread me out", cell(target))
+      panel.assert_no_text("Spread me out")
+      panel.find(".cal-event-title", text: "Coffee").click
+      panel.click_button("Delete")
+    end
+
+    it "asks first" do
+      expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: asked)
     end
   end
 

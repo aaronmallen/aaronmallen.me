@@ -12,6 +12,8 @@ RSpec.describe "Admin calendar", type: :feature do
     find(".cal-day:has(time[datetime='2026-07-14']) a.cal-link").click
   end
 
+  def asked = Admin::Slice["i18n"].t("ui.components.calendar.event_row.confirm_delete", title: "Coffee")
+
   def panel = find("[data-calendar-panel]")
 
   it "opens the day's panel without loading the page", :aggregate_failures do
@@ -29,6 +31,20 @@ RSpec.describe "Admin calendar", type: :feature do
 
   it "moves focus to the panel" do
     expect(page).to have_css("[data-calendar-panel='2026-07-14']:focus")
+  end
+
+  describe "deleting an event on a day opened in place" do
+    before do
+      calendar = create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron")
+      create(:calendar_event, calendar_id: calendar.id, title: "Coffee", starts_on: day + 1, ends_on: day + 1)
+      find(".cal-day:has(time[datetime='2026-07-15']) a.cal-link").click
+      panel.find(".cal-event-title", text: "Coffee").click
+      panel.click_button("Delete")
+    end
+
+    it "asks first" do
+      expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: asked)
+    end
   end
 
   describe "when an earlier day answers after a later one" do

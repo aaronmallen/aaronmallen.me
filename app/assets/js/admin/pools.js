@@ -2,6 +2,7 @@ import { fresh } from "./fresh.js";
 import { plain, setupVisit } from "./in_place.js";
 
 const LINK = "[data-pool]";
+const MORPHED = "admin:morphed";
 const PANEL = "[data-pool-panel]";
 
 const ready = new WeakSet();
@@ -18,6 +19,7 @@ export function setupPools() {
       mark(pools, link.dataset.pool);
       visit(link.href, `${PANEL}[data-pool-panel="${link.dataset.pool}"]`, (panel) => {
         pools.querySelector(PANEL).replaceWith(panel);
+        document.dispatchEvent(new Event(MORPHED));
         history.replaceState(history.state, "", link.href);
       });
     });

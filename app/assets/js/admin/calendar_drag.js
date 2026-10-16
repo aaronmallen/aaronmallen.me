@@ -8,6 +8,7 @@ const DRAGGING = "cal-dragging";
 const GRIP = "[data-calendar-grip]";
 const ITEM = "[data-calendar-item]";
 const MONTH = ".cal-month";
+const MORPHED = "admin:morphed";
 const PANEL = "[data-calendar-panel]";
 const REFUSED = "cal-refused";
 const TARGET = "cal-target";
@@ -100,7 +101,7 @@ async function move(calendar, grip, day) {
 
   calendar.querySelector(MONTH).replaceWith(month);
   calendar.querySelector(PANEL).replaceWith(panel);
-  armGrips(panel);
+  document.dispatchEvent(new Event(MORPHED));
 
   const stayed = panel.querySelector(`[data-calendar-item="${item}"]`) !== null;
   const message = page.querySelector("[data-toast]")?.textContent.trim();
