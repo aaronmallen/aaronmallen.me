@@ -45,7 +45,7 @@ module Social
 
       def client_for(social_post, account)
         client = networks.fetch(account.provider).for(account)
-        retrying = social_post.deliveries.any? { it.connection_id == account.id }
+        retrying = (delivery = delivery_for(social_post, account.id)) && delivery.updated_at > delivery.created_at
 
         retrying && client.respond_to?(:retrying) ? client.retrying : client
       end

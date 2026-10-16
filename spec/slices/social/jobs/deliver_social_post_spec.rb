@@ -1722,6 +1722,34 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a claimed LinkedIn delivery" do
+    let(:social_post) { queued(targets: %w[linkedin], parts: %w[hello]) }
+
+    before do
+      connect_linkedin(scopes: %w[openid profile w_member_social r_member_social])
+      now = Time.now
+      social_post_mutations.claim_delivery(social_post.id, social_account("linkedin"), due_by: now, stale_before: now)
+      stub_linkedin_recent("hello")
+      stub_linkedin("urn:li:share:9")
+    end
+
+    it "posts on the first send even when a recent post has the same text", :aggregate_failures do
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:get, linkedin_posts).with(query: hash_including("q" => "author"))).not_to have_been_made
+      expect(delivery(social_post, "linkedin").remote_ids).to eq(%w[urn:li:share:9])
+    end
+
+    it "checks recent posts first on a send after a failed attempt", :aggregate_failures do
+      stub_request(:post, linkedin_posts).to_return(status: 500)
+      refused(social_post, "linkedin")
+      deliver(social_post, "linkedin")
+
+      expect(a_request(:post, linkedin_posts)).to have_been_made.once
+      expect(delivery(social_post, "linkedin").remote_ids).to eq(%w[urn:li:share:0])
+    end
+  end
+
   describe "a lapsed LinkedIn connection" do
     let(:social_post) { queued(targets: %w[linkedin], parts: %w[hello]) }
 
