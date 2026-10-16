@@ -27,6 +27,14 @@ module Shares
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
+      def discard(keys)
+        keys.each do |key|
+          client.delete(key)
+        rescue ObjectStore::Client::Error
+          next
+        end
+      end
+
       def form(upload)
         type = Blog::Types::TrimmedText[upload[:type]]
 
@@ -37,21 +45,23 @@ module Shares
       end
 
       def save(id, files)
+        stored = []
         files.each do |fields|
           key = SecureRandom.hex(UploadShare::KEY_BYTES)
           group_mutations.add_file(
             id, key:, filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
           )
-          step store(key, fields)
+          step store(key, fields, stored)
         end
         group_queries.find(id)
       end
 
-      def store(key, fields)
+      def store(key, fields, stored)
         fields[:file].rewind
         client.put(key, fields[:file], content_type: fields[:content_type])
-        Success(key)
+        Success(stored << key)
       rescue ObjectStore::Client::Error
+        discard(stored)
         Failure([:unavailable])
       end
 

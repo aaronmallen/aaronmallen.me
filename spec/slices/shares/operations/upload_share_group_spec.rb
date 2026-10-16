@@ -3,9 +3,25 @@
 RSpec.describe Shares::Operations::UploadShareGroup do
   let(:stored) { {} }
 
+  def fail_second_put
+    stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
+      next { status: 500 } unless stored.empty?
+
+      stored[File.basename(request.uri.path)] = request.body
+      { status: 200 }
+    end
+  end
+
   def files = Shares::Slice["relations.share_group_files"].to_a
 
   def groups = Shares::Slice["relations.share_groups"].to_a
+
+  def keep_deletes
+    stub_request(:delete, %r{\A#{share_store_url}/}).to_return do |request|
+      stored.delete(File.basename(request.uri.path))
+      { status: 204 }
+    end
+  end
 
   def keep_puts
     stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
@@ -71,13 +87,14 @@ RSpec.describe Shares::Operations::UploadShareGroup do
       expect(stored).to be_empty
     end
 
-    it "saves no rows when the store fails", :aggregate_failures do
-      stub_request(:put, %r{\A#{share_store_url}/}).to_return(status: 200).then.to_return(status: 500)
+    it "saves no rows and keeps no files when the store fails on the second", :aggregate_failures do
+      fail_second_put
+      keep_deletes
 
       result = upload(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain"))
 
       expect(result.failure).to eq([:unavailable])
-      expect([groups, files, Shares::Slice["relations.short_codes"].to_a]).to all(be_empty)
+      expect([groups, files, Shares::Slice["relations.short_codes"].to_a, stored]).to all(be_empty)
     end
   end
 
