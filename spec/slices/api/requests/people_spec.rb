@@ -220,20 +220,23 @@ RSpec.describe "API people", type: :request do
       expect(a_request(:get, /searchActorsTypeahead/)).not_to have_been_made
     end
 
-    it "refuses a network with no credentials with a 404" do
+    it "refuses a network with no credentials with a 503" do
       connect_social_networks(bluesky: {})
 
       expect([search("bluesky", "ada"), status]).to eq(
-        [{ "error" => "not_found", "message" => "Bluesky has no credentials, so it cannot be searched" }, 404],
+        [{ "error" => "unavailable", "message" => "Bluesky has no credentials, so it cannot be searched" }, 503],
       )
     end
 
-    it "refuses a network that rate limits" do
+    it "refuses a network that rate limits with a 503" do
       stub_mastodon_search("grace", status: 429)
+      message = "Mastodon has had too many searches; wait a minute and try again"
 
-      expect([search("mastodon", "grace"), status]).to eq(
-        [{ "error" => "failed", "message" => "Mastodon has had too many searches; wait a minute and try again" }, 500],
-      )
+      expect([search("mastodon", "grace"), status]).to eq([{ "error" => "unavailable", "message" => message }, 503])
+    end
+
+    it "lists 503 in the OpenAPI document" do
+      expect(OpenAPI.document.dig("paths", "/people/search/{network}", "get", "responses")).to include("503")
     end
 
     it "refuses a network that does not answer" do

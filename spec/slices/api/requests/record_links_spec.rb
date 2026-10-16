@@ -210,6 +210,10 @@ RSpec.describe "API record links", type: :request do
     it "refuses a kind it does not know with a 422" do
       expect([list("person", 1).fetch("errors").keys, status]).to eq([%w[kind], 422])
     end
+
+    it "answers an unknown record with a 404" do
+      expect([list("post", 999_999).fetch("message"), status]).to eq(["no post has the ID 999999", 404])
+    end
   end
 
   describe "the MCP tools" do
@@ -235,6 +239,10 @@ RSpec.describe "API record links", type: :request do
       link("post", post_record.id, other_kind: "commit", other_id: commit.id)
 
       expect(mcp_answer("list_links", kind: "commit", id: commit.id)).to eq(list("commit", commit.id))
+    end
+
+    it "answer an unknown record with the message the endpoint gives" do
+      expect(mcp_text("list_links", kind: "post", id: 999_999)).to eq(list("post", 999_999).fetch("message"))
     end
 
     it "refuse the same pair twice with the message the endpoint gives" do

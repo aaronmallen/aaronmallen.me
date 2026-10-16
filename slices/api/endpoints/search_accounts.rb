@@ -14,6 +14,7 @@ module API
         },
         required: %w[network query],
       }.freeze
+      UNAVAILABLE = true
 
       REPLY = Helpers::Schema.object({ accounts: Helpers::Schema.list(Serializers::Account.reference) }).freeze
 
@@ -24,11 +25,15 @@ module API
 
         case search_accounts.call(network:, query:)
           in Success(*accounts) then Success(accounts: serialized(Serializers::Account, accounts))
-          in Failure(:unconfigured) then not_found("#{name} has no credentials, so it cannot be searched")
-          in Failure(:rate_limited) then failed("#{name} has had too many searches; wait a minute and try again")
+          in Failure(:unconfigured) then unavailable("#{name} has no credentials, so it cannot be searched")
+          in Failure(:rate_limited) then unavailable("#{name} has had too many searches; wait a minute and try again")
           else failed("#{name} did not answer; try again")
         end
       end
+
+      private
+
+      def unavailable(message) = Failure(Structs::Refusal.unavailable(message))
     end
   end
 end
