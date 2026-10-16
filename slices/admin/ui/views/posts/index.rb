@@ -26,17 +26,12 @@ module Admin
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :failing_links, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Array)
+          prop :figures, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
           prop :link_check, Blog::Types::Hash
           prop :filter, Blog::Types::PostFilter
           prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
-          prop :read_through_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :saved_views, Blog::Types::Hash
           prop :suggestion_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
-          prop :unique_reader_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
-          prop :view_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
-          prop :visitor_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
-          prop :webmention_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
-          prop :word_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -123,17 +118,7 @@ module Admin
           end
 
           def stats(post)
-            id = post.id
-
-            {
-              mentions: @webmention_counts.fetch(id, 0),
-              read_throughs: @read_through_counts.fetch(id),
-              suggestions: @suggestion_counts.fetch(id, 0),
-              unique_readers: @unique_reader_counts.fetch(id),
-              views: @view_counts.fetch(id),
-              visitors: @visitor_counts.fetch(id),
-              words: @word_counts.fetch(id),
-            }
+            { **@figures.fetch(post.id), suggestions: @suggestion_counts.fetch(post.id, 0), words: post.word_count }
           end
 
           def sub

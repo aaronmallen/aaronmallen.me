@@ -87,17 +87,18 @@ module API
       def summaries(posts)
         figures = post_figure_queries.figures(posts)
 
-        posts.map { serialized(Serializers::Post, it).merge(draft: it.status == DRAFT, **tally(it.id, figures)) }
+        posts.map { serialized(Serializers::Post, it).merge(draft: it.status == DRAFT, **tally(it, figures)) }
       end
 
-      def tally(id, figures)
+      def tally(post, figures)
+        found = figures.fetch(post.id)
+
         {
-          word_count: figures.fetch(:word_counts).fetch(id),
-          views: figures.fetch(:view_counts).fetch(id),
-          visitors: figures.fetch(:visitor_counts).fetch(id),
-          readers: figures.fetch(:unique_reader_counts).fetch(id).fetch(:readers),
-          read_throughs: figures.fetch(:read_through_counts).fetch(id),
-          webmentions_received: figures.fetch(:webmention_counts).fetch(id, 0),
+          word_count: post.word_count,
+          **found.slice(:views, :visitors),
+          readers: found.fetch(:readers).fetch(:readers),
+          read_throughs: found.fetch(:read_throughs),
+          webmentions_received: found.fetch(:mentions),
         }
       end
     end

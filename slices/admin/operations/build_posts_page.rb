@@ -22,7 +22,7 @@ module Admin
           failing_links: failing_links(posts.rows),
           link_check: link_check,
           suggestion_counts: suggestion_counts(posts.rows),
-          **post_figure_queries.figures(posts.rows),
+          figures: post_figure_queries.figures(posts.rows),
         }
       end
 

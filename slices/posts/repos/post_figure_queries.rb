@@ -9,20 +9,15 @@ module Posts
         webmention_queries: "social.repos.webmention_queries",
       ]
 
-      COUNTS = { read_through_counts: :read_throughs, view_counts: :views, visitor_counts: :visitors }.freeze
-      UNSEEN = COUNTS.values.to_h { [it, 0] }.freeze
+      UNSEEN = { read_throughs: 0, views: 0, visitors: 0 }.freeze
 
       def figures(posts)
         ids = posts.map(&:id)
         seen = rollup_queries.views_by_post(ids)
-        figures = ids.to_h { [it, seen.fetch(it, UNSEEN)] }
+        readers = post_reader_queries.unique_readers(posts)
+        mentions = webmention_queries.count_by_post(ids)
 
-        {
-          **COUNTS.transform_values { |key| figures.transform_values { it.fetch(key) } },
-          unique_reader_counts: post_reader_queries.unique_readers(posts),
-          webmention_counts: webmention_queries.count_by_post(ids),
-          word_counts: posts.to_h { [it.id, it.word_count] },
-        }
+        ids.to_h { [it, { **seen.fetch(it, UNSEEN), readers: readers.fetch(it), mentions: mentions.fetch(it, 0) }] }
       end
     end
   end

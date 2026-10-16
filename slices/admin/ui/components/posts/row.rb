@@ -88,7 +88,7 @@ module Admin
           end
 
           def unique_readers
-            readers, final = @stats.fetch(:unique_readers).values_at(:readers, :final)
+            readers, final = @stats.fetch(:readers).values_at(:readers, :final)
             return t(".no_unique_readers") unless readers
 
             t(UNIQUE_READERS.fetch(final), count: readers)
