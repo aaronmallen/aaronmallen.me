@@ -8,6 +8,12 @@ module Calendar
 
     def series(event, scope) = scope == SERIES && event.recurring_id
 
+    def sync
+      Jobs::SyncCalendar.perform_async
+    rescue RedisClient::Error => e
+      honeybadger.notify(e)
+    end
+
     def writable(calendar)
       return Failure(:not_found) unless calendar
 
@@ -16,7 +22,7 @@ module Calendar
 
     def written(calendar)
       yield
-      Jobs::SyncCalendar.perform_async
+      sync
       Success(calendar)
     rescue Google::Error => e
       Failure([:google_failed, e.message])

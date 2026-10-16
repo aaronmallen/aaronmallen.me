@@ -27,6 +27,7 @@ Blog/UnusedDeps:
   AllowedNames:
     - act_on
     - contract
+    - honeybadger
     - queries
     - record_link_queries
     - record_sync_outcome

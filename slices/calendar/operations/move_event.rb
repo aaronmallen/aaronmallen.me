@@ -6,7 +6,7 @@ module Calendar
       include EventWrites
       include Deps[
         calendar_mutations: "repos.calendar_mutations", calendar_queries: "repos.calendar_queries",
-        google: "google.client",
+        google: "google.client", honeybadger: "honeybadger.agent",
       ]
 
       def call(id, date, now: Time.now)

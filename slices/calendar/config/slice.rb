@@ -4,6 +4,8 @@ module Calendar
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/calendar"), namespace: Calendar)
 
+    config.shared_app_component_keys += %w[honeybadger.agent]
+
     import keys: %w[repos.post_queries], from: :posts
 
     import keys: %w[operations.record_sync_outcome repos.journal_entry_queries], from: :record

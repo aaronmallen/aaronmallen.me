@@ -441,6 +441,42 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       end
     end
 
+    describe "while Redis is down" do
+      let(:standup) { event(mine, "Standup", google_id: "abc") }
+
+      def agent = Hanami.app["honeybadger.agent"]
+
+      before do
+        allow(agent).to receive(:notify)
+        allow(Calendar::Jobs::SyncCalendar).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+      end
+
+      it "still adds the event and tells Honeybadger the sync waits", :aggregate_failures do
+        send_form("/admin/calendar/events", calendar: mine.id, **fields)
+
+        expect(toast).to eq("Added to Aaron")
+        expect(agent).to have_received(:notify).with(RedisClient::CannotConnectError)
+      end
+
+      it "still saves an edit" do
+        send_form("/admin/calendar/events/#{standup.id}", **fields(title: "Standup"))
+
+        expect(toast).to eq("Saved to Aaron")
+      end
+
+      it "still moves an event" do
+        send_form("/admin/calendar/events/#{standup.id}/move", to: (Blog::TimeZone.today + 3).iso8601)
+
+        expect(toast).to start_with("Moved to")
+      end
+
+      it "still deletes an event" do
+        send_form("/admin/calendar/events/#{standup.id}/delete")
+
+        expect(toast).to eq("Deleted from Aaron")
+      end
+    end
+
     it "offers no new event when no calendar takes writes" do
       event(work, "Sync")
       get "/admin/calendar", day: day.iso8601

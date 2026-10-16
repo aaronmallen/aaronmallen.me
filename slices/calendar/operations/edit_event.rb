@@ -8,6 +8,7 @@ module Calendar
         calendar_queries: "repos.calendar_queries",
         contract: "contracts.event_contract",
         google: "google.client",
+        honeybadger: "honeybadger.agent",
       ]
 
       def call(id, params, scope: nil)

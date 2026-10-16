@@ -4,7 +4,9 @@ module Calendar
   module Operations
     class DeleteEvent < Blog::Operation
       include EventWrites
-      include Deps[google: "google.client", calendar_queries: "repos.calendar_queries"]
+      include Deps[
+        google: "google.client", calendar_queries: "repos.calendar_queries", honeybadger: "honeybadger.agent",
+      ]
 
       def call(id, scope: nil)
         event = step found(calendar_queries.event(id))
