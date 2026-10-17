@@ -16,7 +16,7 @@ module Record
       def call(now: Time.now)
         found = step authored(now)
 
-        pull_request_mutations.import(found)
+        pull_request_mutations.import(found, synced_through: now)
         found.size
       end
 
@@ -24,7 +24,7 @@ module Record
 
       def authored(now)
         remote(client) do
-          updated_since = pull_request_queries.newest_import_at&.-(OVERLAP)
+          updated_since = pull_request_queries.synced_through&.-(OVERLAP)
           Success(client.authored_pull_requests(updated_since:, now:))
         end
       end

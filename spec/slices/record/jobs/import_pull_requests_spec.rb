@@ -146,6 +146,15 @@ RSpec.describe Record::Jobs::ImportPullRequests do
       expect(Record::Slice["relations.pull_requests"].count).to eq(2)
     end
 
+    it "keeps the newest copy of one GitHub lists on two pages", :aggregate_failures do
+      stub_github(GitHubGraphQL::PULL_REQUESTS_QUERY, github_pull_request_search(github_pull_request(1), more: true),
+                  github_pull_request_search(github_pull_request(1, title: "New")))
+      import
+
+      expect(Record::Slice["relations.pull_requests"].count).to eq(1)
+      expect(stored(1).title).to eq("New")
+    end
+
     it "follows a window to its next page", :aggregate_failures do
       stub_github(GitHubGraphQL::PULL_REQUESTS_QUERY, github_pull_request_search(github_pull_request(1), more: true),
                   github_pull_request_search(github_pull_request(2)))
@@ -167,6 +176,31 @@ RSpec.describe Record::Jobs::ImportPullRequests do
       import
 
       expect(windows.map(&:first)).to contain_exactly(be_within(5).of(Time.now - day))
+    end
+
+    it "reads from a day before the last good run though nothing it compares has changed for weeks" do
+      Record::Slice["relations.pull_requests"].dataset.update(updated_at: Time.now - (30 * day))
+      stub_windows
+      import
+
+      expect(windows.map(&:first)).to contain_exactly(be_within(5).of(Time.now - day))
+    end
+
+    context "when a run fails after the last good one" do
+      let(:good_run) { Time.now - (5 * day) }
+
+      before do
+        Record::Slice["relations.sync_states"].update(synced_at: good_run)
+        stub_github(GitHubGraphQL::PULL_REQUESTS_QUERY, { status: 502 })
+        import
+      end
+
+      it "keeps the floor at the last good run" do
+        stub_windows
+        import
+
+        expect(windows.map(&:first)).to contain_exactly(be_within(5).of(good_run - day))
+      end
     end
 
     it "picks up a title and description I edited on GitHub" do

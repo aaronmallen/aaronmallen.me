@@ -461,7 +461,8 @@ CREATE TYPE public.sync_name AS ENUM (
 CREATE TYPE public.sync_state_kind AS ENUM (
     'commits',
     'backfill',
-    'failure'
+    'failure',
+    'pull_requests'
 );
 
 
@@ -8825,4 +8826,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002092_add_task_rules_for_project_repos.rb'),
 ('20261016002183_let_task_positions_go_below_one.rb'),
 ('20261016002186_index_commits_created_at.rb'),
-('20261016002204_create_held_title_fetches_and_backfills.rb');
+('20261016002204_create_held_title_fetches_and_backfills.rb'),
+('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb');

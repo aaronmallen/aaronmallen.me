@@ -202,7 +202,7 @@ module Blog
       "analytics_rollup", "commits", "country_database", "projects", "issues", "linear_issues", "backups",
       "pull_requests", "health", "mail", "calendar",
     )
-    SyncStateKind = Types::String.enum("commits", "backfill", "failure")
+    SyncStateKind = Types::String.enum("commits", "backfill", "failure", "pull_requests")
     Tag = Types::String.constrained(format: SLUG_FORMAT)
     TagColor = Types::String.enum("mk-pink", "mk-green", "mk-blue", "mk-violet", "mk-sand", "mk-orange")
     TagList = Types::Array.of(Types::String).constructor do |tags|

@@ -10,13 +10,15 @@ module Record
 
         relation :pull_requests
         register_as :import
-        result :one
+        result :many
         use :timestamps
         timestamps :created_at, :updated_at
 
         conflict_target %i[repo number]
         update_statement(RESTATED.to_h { [it, Sequel[:excluded][it]] })
         update_where(Sequel.is_distinct_from(*CHANGED))
+
+        def execute(tuples) = returning_dataset.insert_conflict(upsert_options).multi_insert(tuples.map { input[it] })
       end
     end
   end
