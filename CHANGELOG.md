@@ -5,6 +5,126 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.21] - 2026-10-17
+
+### Added
+
+- Maintenance mode. While the file `MAINTENANCE_FLAG_PATH` names exists, the site and the share host answer every
+  request with a 503 page, or a JSON body for the API and MCP, and never touch the database. Scheduled jobs skip their
+  run, other jobs wait and come back every five minutes, and Honeybadger stays quiet. Removing the file ends it with no
+  restart. `docs/maintenance.md` holds the Pi script and the NAS steps.
+- Likes and reposts approve on receipt, Bridgy ones too, through two new webmention settings that start on. Turned off,
+  they fall back to the known-author rule.
+- A trusted authors list. Approving a reply or mention adds its author, and marking a webmention as spam takes them
+  off. The webmention settings screen lists them with a remove button, as do `GET /api/v1/trusted_authors`,
+  `POST /api/v1/trusted_authors/remove` and the MCP tools `list_trusted_authors` and `remove_trusted_author`, which
+  need `delete`. The list starts empty.
+- Tag fields in the admin draw chips with suggestions in each tag's color: the post, project, task, journal, decision
+  and task rule forms. The new tag box in a row's context menu suggests matching tags too. With scripts off, each
+  stays the comma field it was.
+- Tasks turn up by their label, as `23`, `#23`, `POD-23` or `pod-23`, in the link finder, the record picker, the Tasks
+  search, global search, the palette and MCP `search`, with label matches first. Search hits show the task's label.
+- Tags take a Markdown description. The admin rename form, the API and MCP `save_tag` set it, `list_tags` and
+  `read_tag` return it, and the public tag page shows it under the heading and uses it for its description.
+- The new task form and the create dialog take a project, and so does `capture_task` in the API and MCP. A live
+  project's board gets a Create task button.
+- An Add work form under Time worked on the task drawer and edit page adds a closed work session. `POST
+  /api/v1/tasks/{id}/sessions` and the MCP tool `add_work_session` do the same.
+- Task rows and board cards show "blocked by N" and "blocking N", each with the related titles in its tooltip.
+- A dead jobs page at `/admin/attention/dead-jobs` lists every dead job. Today's attention card shows the newest five
+  and a Dead jobs line that counts the rest, and `list_attention` returns `dead_job_count`.
+- The sitemap lists published project boards.
+- `mise run deps:audit` checks the gems and node packages for known advisories. The weekly outdated workflow runs it.
+
+### Changed
+
+- Giving a project a repo saves a GitHub task rule for that repo and project, and issues reach a project only through
+  a rule. A migration adds a rule for every project with a repo that no rule names.
+- A new project with a repo fetches its stars and releases at once, not at the 02:00 run.
+- The admin tag page shows ten rows of each kind, with a link that pages through that kind alone.
+- Complete on a task with tracked time closes it at once, without asking for the time.
+- MCP task lists and `read_tag` leave each task's note out. `read_task` and `save_task` still return it.
+- `read_analytics` and `search_accounts` mark the text strangers wrote as untrusted, as the other MCP tools do.
+- `delete_mail_threads` moves threads to the Trash in Gmail and on the site, where the owner can restore them. Delete
+  forever stays in the admin alone.
+- The Performance screen reads the daily rollups and weighs each day's p50 and p95 by request counts, as
+  `read_performance` does.
+- Short link titles and health backfills that Redis refuses wait in Postgres and go out once Redis answers. Set up
+  the `HONEYBADGER_CHECK_IN_QUEUE_HELD_TITLE_FETCHES` and `HONEYBADGER_CHECK_IN_QUEUE_HELD_BACKFILLS` check-ins for a
+  run every minute.
+- Sync issues now, Import commits, Check links, Run it now and Check again show a toast when Redis is down, in place of
+  a 500. The `sync_issues` and `import_commits` endpoints and tools answer 503.
+- Admin Links rows show the host as written, `www.` included.
+- The Services page calls the MaxMind job "Country database refresh".
+- `WORKTREES_DIR` moves the workspaces for `dev:create-workspace`, `dev:remove-workspace` and `dev:prune-workspaces`
+  alike, and each refuses an id that is not a number.
+
+### Fixed
+
+- Turning on cross-posting for a post already published sent nothing, and a publish and a save close together could
+  cross-post twice.
+- A Mastodon post with a GIF failed with a 422, since the status went out before Mastodon finished the video.
+- Bluesky self-replies failed after a reconnect until the worker restarted.
+- The first LinkedIn send of a post skipped it when a recent post held the same text.
+- Closing a recurring task's copy early dated the next copy on the same day, and the Recurring tab named the wrong day.
+- Dropping a sprint left its tasks flagged as carried.
+- A task total set below its closed work sessions put a negative day in the time report, the review and health days.
+  It now adds nothing.
+- Saving an overnight or multi-day calendar event moved its end to the start day, and moving one to daytime hours
+  kept it ending the next day.
+- Weekly calendar series never gained their instance a year out, and held events older than 90 days never went.
+- A calendar create, edit, move or delete answered 500 when Redis was down, though Google held the change.
+- A workout deleted in the fitness app stayed in health, and a workout logged late at night far west of Chicago could
+  vanish.
+- A health backfill stopped at the first 90 days with no data and never fetched older history.
+- Mail, health and calendar sync failed for every account when one Google connection was revoked, and compose offered
+  it as a sender.
+- Gmail sync stopped when two labels swapped names, and dropped label changes past 100 pages of history.
+- Marking as spam a thread whose sender had no valid address raised, after Gmail had already labelled it.
+- Bulk snooze to a past time showed "pick an action from the bar".
+- An open mail draft refetched the page on each save, and asked Gmail for the drafts list on every live refresh.
+- Removing a Linear connection, or a token losing a repo, cancelled every open task that came from it.
+- A webmention source that removed its link or went away never withdrew the mention when mentions, receiving or Bridgy
+  were off, and a forget could remove one marked spam.
+- An empty share group kept its page, zip and code. Failed uploads left files in the bucket.
+- The share drawer offered no Markdown for a file that is not an image.
+- Photos on tasks and comments on a published board answered 404, and posts that held a sized photo URL such as
+  `/media/1280/...` never claimed the photo.
+- Photos in decisions were never claimed, so the photo sweep could delete them.
+- A note, comment or tag description that opened with `# Heading` put a second h1 on public pages.
+- Board and task page views went uncounted, or counted to a post that shared the slug.
+- Tag pages that only projects carried were missing from the sitemap.
+- A refused tag rename or journal edit dropped the search or page it came from and lost what was typed, and Cancel on
+  a journal edit kept dropped tags. Saving or removing the last tag on a page landed on a 404.
+- Archiving an archived project wrote a new archive day over the old one.
+- A post title with no letters or digits and a blank slug answered 500.
+- A project name that made no slug, or the same slug as another project, saved.
+- The Services page and Attention disagreed about a connection lapsing late on the window's last day.
+- Delete posted with no confirm, and record keys copied nothing, after a calendar day click, a calendar drag or a
+  Today pool switch. A cadence picked in the task panel showed no fields.
+- The calendar drag scrolled the page and opened the context menu on touch.
+- E did nothing in the task panel while a checkbox held focus.
+- Make task toasts named the task by its row id, not its label.
+- The feed subscribers card read 0 for a range of only today.
+- Stray dots on the public board stats, the review repos card, the activity feed's workout line and service rows.
+- Over REST, `suggest_edits` read every edit as part 1.
+- `search_accounts` answered 500 for a network with no credentials, and `list_links` answered an empty list for a
+  record that does not exist. Both now answer 503 and 404.
+- The API took a bad `sprint_on` day, and kind `message` from a token without mail, without a clear refusal.
+- Short link clicks, share downloads and visits counted fediverse preview fetchers and the site's own fetchers.
+
+### Security
+
+- A JSON body could change the record in an API call's path: `PATCH /posts/5` with `{"id": 9}` changed post 9.
+- A client with `write` but not `publish` could change public pages through grouping, ungrouping and renaming shares,
+  links on published boards, task rules, suggestions, tags, task capture and series. These now need `publish`.
+- A `write` client could drop a trusted author with a spam verdict. That now needs `delete`.
+- Mail bodies and `bcc` addresses no longer reach the request log or Honeybadger.
+- Share and group file names may no longer hold a slash or be `.` or `..`, and zips write each entry name bare.
+- Mail HTML loses its class and id attributes and its transforms, and stays inside its own box, so a message can no
+  longer lay over the admin. Queue `Mail::Jobs::RecleanMailHtml` once to clean stored mail.
+- Links in synced issue text and comments on public task pages carry `rel="nofollow ugc noopener"`.
+
 ## [26.10.20] - 2026-10-16
 
 ### Added
@@ -1220,7 +1340,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...HEAD
+[26.10.21]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...26.10.21
 [26.10.20]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...26.10.20
 [26.10.19]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...26.10.19
 [26.10.18]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...26.10.18
