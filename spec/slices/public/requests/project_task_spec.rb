@@ -10,6 +10,8 @@ RSpec.describe "Project task page", type: :request do
     Tasks::Slice["repos.task_queries"].by_id(task.id)
   end
 
+  def rels = %w[note comment].map { page.find_link(it)[:rel].to_s.split.sort }
+
   def visit_related(*others, type: "relates")
     task = link(create(:task), project)
     others.each { create(:task_link, from_task_id: task.id, to_task_id: it.id, type:) }
@@ -92,6 +94,23 @@ RSpec.describe "Project task page", type: :request do
       visit_task(task)
 
       expect(page).to have_css(".task-comment-head", text: "octocat")
+    end
+
+    it "marks links in synced notes and comments as user content" do
+      task = link(create(:task, note: "[note](https://example.com/n)"), project)
+      create(:task_source, task:, remote_id: "I_42")
+      create(:task_comment, :synced, task:, body: "<a href=\"https://example.com/c\" rel=\"me\">comment</a>")
+      visit_task(task)
+
+      expect(rels).to eq([%w[nofollow noopener ugc]] * 2)
+    end
+
+    it "leaves links in the owner's notes and comments alone" do
+      task = link(create(:task, note: "[note](https://example.com/n)"), project)
+      create(:task_comment, task:, body: "[comment](https://example.com/c)")
+      visit_task(task)
+
+      expect(rels).to eq([[]] * 2)
     end
 
     it "shows no tags, time or work hours", :aggregate_failures do

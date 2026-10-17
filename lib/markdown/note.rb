@@ -37,9 +37,14 @@ module Markdown
       end,
     )
 
+    UGC = Sanitize::Config.freeze_config(
+      Sanitize::Config.merge(SANITIZE, add_attributes: { "a" => { "rel" => "nofollow ugc noopener" } }),
+    )
+
     class << self
-      def to_html(markdown, origin:)
-        html = Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE)
+      def to_html(markdown, origin:, ugc: false)
+        rendered = Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS)
+        html = Sanitize.fragment(rendered, ugc ? UGC : SANITIZE)
         fragment = Nokogiri::HTML5.fragment(html)
         boxes = fragment.css(BOX)
         images = RemoteImages.find(fragment, origin:)

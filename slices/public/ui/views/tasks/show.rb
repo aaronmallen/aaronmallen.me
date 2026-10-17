@@ -43,7 +43,7 @@ module Public
                 whitespace
                 Moment(at: comment.created_at, format: :day)
               end
-              note_body(comment.body)
+              note_body(comment.body, ugc: comment.synced?)
             end
           end
 
@@ -76,15 +76,15 @@ module Public
             end
           end
 
-          def note_body(markdown)
-            html = ::Markdown::Note.to_html(markdown, origin: settings.site_origin).strip
+          def note_body(markdown, ugc:)
+            html = ::Markdown::Note.to_html(markdown, origin: settings.site_origin, ugc:).strip
             div(class: "post-body markdown-body") { raw(safe(html)) }
           end
 
           def notes
             section(class: "task-section") do
               h2(class: "kicker") { t(".notes") }
-              note_body(@task.note)
+              note_body(@task.note, ugc: !@task.source.nil?)
             end
           end
 
