@@ -11,12 +11,7 @@ RSpec.describe Health::Jobs::SyncHealth do
     a_request(:get, %r{dataTypes/#{field.tr('_', '-')}/dataPoints\?}).with(query: hash_including("filter" => filter))
   end
 
-  def asked_for_workouts_from(first)
-    field = "exercise.interval.civil_start_time"
-    filter = %(#{field} >= "#{first}" AND #{field} < "#{today + 1}")
-
-    a_request(:get, %r{dataTypes/exercise/dataPoints\?}).with(query: hash_including("filter" => filter))
-  end
+  def asked_for_workouts_from(first) = a_request(:get, %r{dataTypes/exercise/dataPoints\?}).with(workouts_query(first))
 
   def days = Health::Slice["relations.health_days"].to_a.map(&:to_h)
 
@@ -85,6 +80,12 @@ RSpec.describe Health::Jobs::SyncHealth do
 
   def workouts = Health::Slice["relations.workouts"].to_a.map(&:to_h)
 
+  def workouts_query(first)
+    field = "exercise.interval.civil_start_time"
+
+    { query: hash_including("filter" => %(#{field} >= "#{first - 1}" AND #{field} < "#{today + 2}")) }
+  end
+
   describe "with Google Health connected" do
     before { connect_google }
 
@@ -141,6 +142,20 @@ RSpec.describe Health::Jobs::SyncHealth do
       expect(workouts.map { it[:id] }).to contain_exactly(older.id)
     end
 
+    describe "a workout from the day before the window that started on its first day in Chicago" do
+      let(:start) { Time.new((today - 3).year, (today - 3).month, (today - 3).day, 21, 0, 0, "-10:00") }
+
+      before do
+        create(:workout, google_id: "users/me/dataTypes/exercise/dataPoints/hawaii", started_at: start)
+        stub_google_health
+        found = google_health_json({ dataPoints: [run_workout("hawaii", start)] })
+        stub_request(:get, %r{dataTypes/exercise/dataPoints\?}).with(workouts_query(today - 2)).to_return(found)
+        run
+      end
+
+      it("survives the sync") { expect(workouts.map { it[:google_id] }).to contain_exactly(end_with("hawaii")) }
+    end
+
     it "puts Monday night's sleep on Tuesday, the day I woke" do
       stub_google_health(sleep: { dataPoints: [night(local(yesterday, 22), local(today, 6), 450)] })
       run
@@ -165,7 +180,7 @@ RSpec.describe Health::Jobs::SyncHealth do
       expect(workouts.map { it[:google_id] }).to contain_exactly(end_with("run-1"), end_with("run-2"))
     end
 
-    it "asks Google for the last three days" do
+    it "asks Google for the last three days and a day either side" do
       stub_google_health
       run
 

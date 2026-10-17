@@ -126,7 +126,7 @@ module Health
 
       def workouts(account, first, last)
         field = "exercise.interval.civil_start_time"
-        filter = %(#{field} >= "#{first.iso8601}" AND #{field} < "#{(last + 1).iso8601}")
+        filter = %(#{field} >= "#{(first - 1).iso8601}" AND #{field} < "#{(last + 2).iso8601}")
 
         points(account, "exercise", filter).map { workout(it) }
       end
