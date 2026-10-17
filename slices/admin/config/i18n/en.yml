@@ -3668,6 +3668,7 @@ en:
           delete: "Delete tag"
           rename: "Rename…"
         show:
+          all: "All %{count}"
           back: "Tags"
           count:
             zero: "Nothing carries this tag"

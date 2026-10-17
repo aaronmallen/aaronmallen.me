@@ -7,9 +7,15 @@ module Tags
         decision_queries: "decisions.repos.decision_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         post_queries: "posts.repos.post_queries",
+        post_tag_queries: "posts.repos.post_tag_queries",
         project_queries: "projects.repos.project_queries",
         task_queries: "tasks.repos.task_queries",
       ]
+
+      KINDS = {
+        posts: :post_tag_queries, projects: :project_queries, tasks: :task_queries,
+        journal_entries: :journal_entry_queries, decisions: :decision_queries,
+      }.freeze
 
       def all_in(scope, mail: true)
         found = tags.in_scope(scope)
@@ -29,6 +35,16 @@ module Tags
       def named_in(scope, name) = tags.in_scope(scope).by_names(name).one
 
       def next_color(scope:) = tags.next_color(scope:)
+
+      def overview(name, page, kind: nil)
+        found = tags.by_names(name).to_a
+        return if found.empty?
+
+        kinds = kind ? [kind.to_sym] : KINDS.keys
+        pages = kinds.to_h { [it, public_send(KINDS.fetch(it)).page_by_tag(name, page)] }
+
+        Structs::Overview.new(name:, tags: found, counts: tags.counts_carrying(found.map(&:id)), pages:)
+      end
 
       def page_matching(scope, text, page, mail: true)
         page.fill(matching(scope, text, mail).in_name_order.paged(page).to_a)

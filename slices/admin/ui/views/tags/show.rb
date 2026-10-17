@@ -22,21 +22,34 @@ module Admin
           }.freeze
           SCOPES = { PUBLIC => ".scopes.public", PRIVATE => ".scopes.private" }.freeze
 
-          prop :summary, Blog::Types::Instance(::Tags::Structs::Summary)
+          prop :overview, Blog::Types::Instance(::Tags::Structs::Overview)
+          prop :kind, Blog::Types::TagKind.optional
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            BackLink(href: path(:admin_tags)) { t(".back") }
-            PageHead(title: Components::Tag::PREFIX + @summary.name, kicker: t(".kicker"), sub: t(".count", count:))
+            back
+            PageHead(title: heading, kicker: t(".kicker"), sub: t(".count", count: @overview.count))
 
-            return Empty { t(".empty") } if @summary.empty?
+            return Empty { t(".empty") } if @overview.empty?
 
-            KINDS.each { |kind, (scope, row, title)| group(kind, scope, row, title) }
+            groups
           end
 
           private
 
-          def count = KINDS.keys.sum { @summary.public_send(it).size }
+          def all_link(kind)
+            div(class: "review-foot") do
+              a(class: "today-link", href: path(:admin_tag, name:, kind:)) do
+                t(".all", count: @overview.counts.fetch(kind))
+              end
+            end
+          end
+
+          def back
+            return BackLink(href: path(:admin_tags)) { t(".back") } unless @kind
+
+            BackLink(href: path(:admin_tag, name:)) { heading }
+          end
 
           def decision(decision)
             ListItem(title: decision.title, href: path(:admin_decision, id: decision.id)) do
@@ -45,14 +58,22 @@ module Admin
           end
 
           def group(kind, scope, row, title)
-            records = @summary.public_send(kind)
-            return if records.empty?
+            records = @overview.pages.fetch(kind)
+            return if records.rows.empty?
 
             Card(label: t(SCOPES.fetch(scope)), title: t(title), data: { key_list: true }) do |card|
-              card.side { Tag(tag: @summary.tag(scope)) }
-              records.each { send(row, it) }
+              card.side { Tag(tag: @overview.tag(scope)) }
+              records.rows.each { send(row, it) }
+              all_link(kind) if records.more && !@kind
             end
           end
+
+          def groups
+            KINDS.slice(*@overview.pages.keys).each { |kind, (scope, row, title)| group(kind, scope, row, title) }
+            Pager(page: @overview.pages.values.first, route: :admin_tag, params: { name:, kind: @kind }) if @kind
+          end
+
+          def heading = Components::Tag::PREFIX + name
 
           def journal_entry(entry)
             day = entry.entry_date
@@ -68,6 +89,8 @@ module Admin
 
             Helpers::Short.title(line.to_s)
           end
+
+          def name = @overview.name
 
           def post(post)
             ListItem(title: post.title, href: path(:admin_edit_post, id: post.id)) do |item|

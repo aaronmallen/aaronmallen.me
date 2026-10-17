@@ -19,7 +19,7 @@ module Posts
       operations.lock_unpublished_post operations.move_post operations.publish_draft operations.queue_link_check
       operations.queue_link_check_run operations.record_post_webmentions operations.revise_edit_note
       operations.revise_post_body operations.save_post operations.save_post_seo repos.post_figure_queries
-      repos.post_queries
+      repos.post_queries repos.post_tag_queries
     ]
   end
 end

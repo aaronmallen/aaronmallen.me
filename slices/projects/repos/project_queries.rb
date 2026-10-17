@@ -23,6 +23,8 @@ module Projects
 
       def live_id_by_key(key) = projects.live.where(key:).pluck(:id).first
 
+      def page_by_tag(tag, page) = page.fill(projects.tagged(tag).in_order.paged(page).to_a)
+
       def public_archived = with_tags.in_public.archived.by_stars.to_a
 
       def public_board(slug)

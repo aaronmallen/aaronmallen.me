@@ -208,6 +208,8 @@ module Blog
     TagList = Types::Array.of(Types::String).constructor do |tags|
       tags.to_s.split(",").map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end
+    TagKind = Types::String.enum("posts", "projects", "tasks", "journal_entries", "decisions")
+    TagKindParam = TagKind.optional.fallback(nil)
     TagScope = Types::String.enum("public", "private")
     TagScopeParam = TagScope.fallback(TagScope.values.first)
     TaskAct = Types::String.enum("complete", "pause")

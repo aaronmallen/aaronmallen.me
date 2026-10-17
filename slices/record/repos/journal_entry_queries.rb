@@ -31,6 +31,8 @@ module Record
 
       def days_between(from, to) = journal_entries.between(from, to).days.pluck(:entry_date)
 
+      def page_by_tag(tag, page) = page.fill(journal_entries.tagged([tag]).newest_first.opening.paged(page).to_a)
+
       def streak(now: Time.now)
         today = Blog::TimeZone.today(now)
 

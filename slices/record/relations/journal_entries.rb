@@ -3,6 +3,8 @@
 module Record
   module Relations
     class JournalEntries < Blog::DB::Relation
+      OPENING = 160
+      OPENING_BLANKS = " \t\r\n"
       WORDS = Sequel.function(:regexp_count, :body, "\\S+")
 
       schema :journal_entries, infer: true do
@@ -29,6 +31,10 @@ module Record
       def oldest_first = order(self[:entry_date].asc, self[:entry_time].asc, self[:id].asc)
 
       def on(date) = where(entry_date: date)
+
+      def opening
+        select(:id, :entry_date).select_append { string.left(string.ltrim(body, OPENING_BLANKS), OPENING).as(:body) }
+      end
 
       def tagged(names)
         return none if unmatchable?(names)

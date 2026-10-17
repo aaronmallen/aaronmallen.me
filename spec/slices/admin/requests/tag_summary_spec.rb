@@ -85,6 +85,56 @@ RSpec.describe "Admin tag summary", type: :request do
       end
     end
 
+    describe "a busy tag" do
+      let(:all_tasks) { "/admin/tags/ruby?kind=tasks" }
+
+      before do
+        11.times { create(:task, title: "Ruby chore #{('a'..'k').to_a[it]}", tags: %w[ruby]) }
+        create(:journal_entry, body: "Ruby notes", tags: %w[ruby])
+      end
+
+      it "caps each kind and links to the rest", :aggregate_failures do
+        get "/admin/tags/ruby"
+
+        expect(titles_in(:tasks).size).to eq(Admin::Actions::Tags::Show::CAP)
+        expect(card(:tasks)).to have_link(says("all", count: 11), href: all_tasks)
+        expect(card(:journal_entries)).to have_no_link(says("all", count: 1))
+        expect(page).to have_css(".page-head-sub", text: says("count", count: 12))
+      end
+
+      it "reads only what the page draws", :aggregate_failures do
+        sql = logged_sql { get "/admin/tags/ruby" }
+
+        expect(sql).to include('SELECT "tasks"."id", "tasks"."title", "tasks"."status", "tasks"."completed_at" FROM')
+        expect(sql).not_to include("task_contributors")
+        expect(sql).to include('LEFT(LTRIM("journal_entries"."body"')
+      end
+
+      describe "one kind on its own" do
+        before { lower_page_size(:admin, to: 6) }
+
+        it "shows a page of that kind alone", :aggregate_failures do
+          get all_tasks
+
+          expect(titles_in(:tasks).size).to eq(6)
+          expect(page).to have_no_css(".card", text: says("kinds.journal_entries"))
+          expect(page).to have_link(href: "#{all_tasks}&page=2")
+        end
+
+        it "shows the rest on the next page" do
+          get "#{all_tasks}&page=2"
+
+          expect(titles_in(:tasks).size).to eq(5)
+        end
+      end
+
+      it "answers 404 past the last page" do
+        get "#{all_tasks}&page=3"
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
     it "cuts a long title to 80 characters" do
       create(:journal_entry, body: "a" * 85, tags: %w[ruby])
 
@@ -99,6 +149,14 @@ RSpec.describe "Admin tag summary", type: :request do
       get "/admin/tags/unused"
 
       expect(last_response.status).to eq(200)
+      expect(page).to have_css(".empty", text: says("empty"))
+    end
+
+    it "shows an empty state for a kind nothing carries the tag on" do
+      create(:task, title: "Bump ruby", tags: %w[ruby])
+
+      get "/admin/tags/ruby?kind=posts"
+
       expect(page).to have_css(".empty", text: says("empty"))
     end
 

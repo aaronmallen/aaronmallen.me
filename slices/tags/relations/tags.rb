@@ -14,6 +14,7 @@ module Tags
         task_rules: :task_rule_tags,
         messages: :mail_thread_tags,
       }.freeze
+      SUMMARY = Blog::Types::TagKind.values.map(&:to_sym).freeze
       SCOPES = Blog::DB::Plugins::Taggings::SCOPES
 
       schema :tags, infer: true
@@ -23,6 +24,8 @@ module Tags
           dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)
         end
       end
+
+      def counts_carrying(ids) = JOINS.slice(*SUMMARY).transform_values { dataset.db[it].where(tag_id: ids).count }
 
       def last_tag_of_rules(id)
         held = rules.where(id: rule_tags.where(tag_id: id).select(:task_rule_id))

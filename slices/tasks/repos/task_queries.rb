@@ -8,6 +8,7 @@ module Tasks
       OPEN = Blog::Types::TaskStatus["open"]
       COLUMN = Sequel.case({ { status: OPEN } => Sequel.cast(:stage, String) }, Sequel.cast(:status, String))
       LINK_LIMIT = 6
+      TAG_ROW = %i[id title status completed_at].freeze
       TODAY = Blog::Types::TaskFilter["today"]
 
       DAY = 86_400
@@ -117,6 +118,8 @@ module Tasks
       end
 
       def open_in_list(list) = with_details.in_list(list).open.in_order.to_a
+
+      def page_by_tag(tag, page) = page.fill(tasks.tagged([tag]).open_first.select(*TAG_ROW).paged(page).to_a)
 
       def planned(sprints, **search)
         search = by_project(**search)
