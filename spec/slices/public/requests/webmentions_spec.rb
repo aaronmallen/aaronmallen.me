@@ -38,6 +38,22 @@ RSpec.describe "Webmentions", type: :request do
       expect(last_response.status).to eq(202)
     end
 
+    it "counts the sender and the total in one query before the lock and one under it" do
+      sql = logged_sql { notify }
+
+      counts = sql.lines.grep(/count\(\*\).*"webmention_receipts"/)
+
+      expect(counts.map { it.include?("FILTER (WHERE") }).to eq([true, true])
+    end
+
+    it "reads only the target post's id and webmention switch" do
+      sql = logged_sql { notify }
+
+      expect(sql.lines.grep(/FROM "posts"/)).to contain_exactly(
+        include('SELECT "posts"."id", "posts"."webmentions_enabled" FROM "posts"'),
+      )
+    end
+
     it "answers with nothing to read" do
       notify
 

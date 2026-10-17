@@ -29,7 +29,8 @@ module Blog
       def capped_claim(fresh, visitor_hashes:, limit:, total_limit:)
         transaction do
           lock_until_commit
-          next unless fresh.where(visitor_hash: visitor_hashes).count < limit && fresh.count < total_limit
+          from_sender, total = fresh.sender_counts(visitor_hashes)
+          next unless from_sender < limit && total < total_limit
 
           yield
         end
@@ -69,6 +70,12 @@ module Blog
         dataset.select(*columns).order(*LINKABLE_ORDER).map { Structs::Linkable.new(**it) }
       end
 
+      def lock_senders_until_commit(senders)
+        locks = senders.sort.map { Sequel.function(:pg_advisory_xact_lock, table_key, self.class.lock_key(it)) }
+
+        dataset.db.select(*locks).first
+      end
+
       def lock_until_commit(*keys) = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, table_key, *keys))
 
       def newest_first = order(self[:created_at].desc, self[:id].desc)
@@ -78,6 +85,12 @@ module Blog
       def oldest_first = order(self[:created_at].asc, self[:id].asc)
 
       def paged(page) = limit(page.limit).offset(page.offset)
+
+      def sender_counts(visitor_hashes)
+        rows = Sequel.function(:count).*
+
+        unordered.dataset.get([rows.filter(visitor_hash: visitor_hashes).as(:from_sender), rows.as(:total)])
+      end
 
       def stamped(type, *columns, result: :one)
         timestamps = [*STAMPS.fetch(type), *columns]

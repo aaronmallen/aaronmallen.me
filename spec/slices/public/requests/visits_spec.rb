@@ -909,6 +909,12 @@ RSpec.describe "Visits", type: :request do
   end
 
   describe "the queries a beacon runs" do
+    it "locks both of a view's addresses in one statement" do
+      sql = logged_sql { beacon({ kind: "view", path: "/writing/hello", title: "Hello" }) }
+
+      expect(sql.lines.grep(/pg_advisory_xact_lock/).map { it.scan("pg_advisory_xact_lock").size }).to eq([2])
+    end
+
     it "reads no post for a read of a counted view" do
       view
 

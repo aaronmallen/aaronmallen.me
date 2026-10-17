@@ -7,7 +7,7 @@ module Search
 
       def claim(visitor_hashes:, since:, limit:, at: Time.now)
         transaction do
-          visitor_hashes.sort.each { lock_until_commit(Sequel.function(:hashtext, it)) }
+          lock_senders_until_commit(visitor_hashes)
           next unless where(visitor_hash: visitor_hashes).made_since(since).count < limit
 
           insert(visitor_hash: visitor_hashes.first, attempted_at: at)

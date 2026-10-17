@@ -16,11 +16,9 @@ module Social
 
       def count_by_status = webmentions.tally(:status)
 
-      def count_receipts_from_visitor_since(visitor_hashes, time)
-        webmention_receipts.for_visitor(visitor_hashes).received_since(time).count
+      def count_receipts_since(visitor_hashes, time)
+        webmention_receipts.received_since(time).sender_counts(visitor_hashes)
       end
-
-      def count_receipts_since(time) = webmention_receipts.received_since(time).count
 
       def count_received_in(from:, to:, post_id: nil)
         days = in_days(from, to)

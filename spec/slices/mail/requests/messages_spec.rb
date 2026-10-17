@@ -27,6 +27,14 @@ RSpec.describe "Contact messages", type: :request do
       expect(thread.mail_messages.map(&:visitor_hash)).to eq([sender])
     end
 
+    it "counts the sender and the total in one query before the lock and one under it" do
+      sql = logged_sql { send_message }
+
+      counts = sql.lines.grep(/count\(\*\).*"mail_messages"/)
+
+      expect(counts.map { it.include?("FILTER (WHERE") }).to eq([true, true])
+    end
+
     it "is stored with a subject at the cap" do
       send_message(subject: "a" * Blog::Constants::MAIL_SUBJECT_MAX)
 

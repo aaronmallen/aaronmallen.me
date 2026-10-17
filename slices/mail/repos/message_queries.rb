@@ -21,15 +21,13 @@ module Mail
         found.values_at(*ids)
       end
 
-      def count_from_visitor_since(visitor_hashes, time)
-        mail_messages.for_visitor(visitor_hashes).received_since(time).count
-      end
-
       def count_received_between(from:, to:) = in_days(from, to).tally(:status, Blog::Types::MessageStatus.values)
 
-      def count_since(time) = mail_messages.from_visitors.received_since(time).count
-
       def count_with_status(status) = mail_threads.with_status(status).count
+
+      def counts_since(visitor_hashes, time)
+        mail_messages.from_visitors.received_since(time).sender_counts(visitor_hashes)
+      end
 
       def exist?(id) = mail_threads.by_pk(id).exist?
 

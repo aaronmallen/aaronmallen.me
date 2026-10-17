@@ -44,7 +44,7 @@ module Social
         return Failure(:foreign_target) unless settings.owns?(target_url)
 
         slug = slug_in(target_url)
-        post = slug && post_queries.published_by_slug(slug)
+        post = slug && post_queries.webmention_target(slug)
         post ? Success(post) : Failure(:not_a_post)
       end
 
@@ -87,11 +87,7 @@ module Social
       end
 
       def within_limits(visitor_hashes)
-        since = throttle.since
-        under = throttle.under?(
-          webmention_queries.count_receipts_from_visitor_since(visitor_hashes, since),
-          webmention_queries.count_receipts_since(since),
-        )
+        under = throttle.under?(*webmention_queries.count_receipts_since(visitor_hashes, throttle.since))
 
         under ? Success(visitor_hashes) : Failure(Blog::Throttle::THROTTLED)
       end

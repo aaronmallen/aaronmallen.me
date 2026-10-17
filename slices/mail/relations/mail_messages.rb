@@ -13,8 +13,6 @@ module Mail
         end
       end
 
-      def for_visitor(visitor_hash) = where(visitor_hash:)
-
       def from_visitors = exclude(visitor_hash: nil)
 
       def matching(text) = containing(text, LETTER)

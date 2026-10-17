@@ -14,6 +14,7 @@ module Posts
       RELATED_TERMS = 16
       SITEMAP = %i[id slug published_at updated_at].freeze
       SUMMARY = %i[id title slug webmentions_enabled].freeze
+      WEBMENTION_TARGET = %i[id webmentions_enabled].freeze
 
       def all = with_tags.newest_first.to_a
 
@@ -64,10 +65,7 @@ module Posts
 
       def held_follow_ups = held_post_follow_ups.oldest_first.to_a
 
-      def last_changed_published_at(tag = nil)
-        published = posts.published
-        (tag ? published.tagged(tag) : published).last_changed_at
-      end
+      def last_changed_published_at(tag = nil) = (tag ? posts.published.tagged(tag) : posts.published).last_changed_at
 
       def last_deleted_at = post_deletions.last_deleted_at
 
@@ -138,6 +136,8 @@ module Posts
       def slugs(ids) = posts.with_ids(ids).select(:id, :slug).to_a.to_h { [it.id, it.slug] }
 
       def summaries = posts.newest_first.select(*SUMMARY).to_a
+
+      def webmention_target(slug) = posts.select(*WEBMENTION_TARGET).published.with_slug(slug).one
 
       private
 

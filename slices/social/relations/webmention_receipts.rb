@@ -11,8 +11,6 @@ module Social
         end
       end
 
-      def for_visitor(visitor_hash) = where(visitor_hash:)
-
       def received_before(time) = where { received_at < time }
 
       def received_since(time) = where { received_at >= time }

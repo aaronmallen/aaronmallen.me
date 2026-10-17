@@ -45,7 +45,7 @@ module Analytics
 
       def claim(address_hashes:, limit:, since:, **attrs)
         transaction do
-          address_hashes.sort.each { lock_until_commit(Sequel.function(:hashtext, it)) }
+          lock_senders_until_commit(address_hashes)
           next unless from_address(address_hashes).since(since).count < limit
 
           stamped(:create, :occurred_at).call(**attrs, address_hash: address_hashes.first)

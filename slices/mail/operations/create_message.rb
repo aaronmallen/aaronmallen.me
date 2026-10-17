@@ -38,10 +38,7 @@ module Mail
       def validate(params) = validated(contract.call(form(params)))
 
       def within_limits(visitor_hashes)
-        since = throttle.since
-        under = throttle.under?(
-          message_queries.count_from_visitor_since(visitor_hashes, since), message_queries.count_since(since),
-        )
+        under = throttle.under?(*message_queries.counts_since(visitor_hashes, throttle.since))
 
         under ? Success(visitor_hashes) : Failure(Blog::Throttle::THROTTLED)
       end
