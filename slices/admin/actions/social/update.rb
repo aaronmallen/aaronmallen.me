@@ -32,9 +32,8 @@ module Admin
         def intent(request) = Blog::Types::SocialIntentParam[request.params[:intent]]
 
         def invalid(response, id, params, errors)
-          response.status = :unprocessable_content
-          response.render(index_view,
-                          **build_social_page.call(params:, errors:, editing: social_post_queries.editable(id)))
+          unprocessable(response, index_view,
+                        **build_social_page.call(params:, errors:, editing: social_post_queries.editable(id)))
         end
 
         def saved(response, outcome, social_post)

@@ -27,8 +27,7 @@ module Admin
           group = share_group_queries.find(id)
           halt :not_found unless group
 
-          response.status = :unprocessable_content
-          response.render(edit_view, group:, values: values(params), errors:)
+          unprocessable(response, edit_view, group:, values: values(params), errors:)
         end
 
         def values(params)

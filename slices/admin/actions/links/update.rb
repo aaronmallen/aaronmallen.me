@@ -28,8 +28,7 @@ module Admin
           halt :not_found unless link
 
           values = %i[destination code title].to_h { [it, Blog::Types::Text[params[it]]] }
-          response.status = :unprocessable_content
-          response.render(edit_view, link:, check: short_link_queries.check(link), values:, errors:)
+          unprocessable(response, edit_view, link:, check: short_link_queries.check(link), values:, errors:)
         end
       end
     end

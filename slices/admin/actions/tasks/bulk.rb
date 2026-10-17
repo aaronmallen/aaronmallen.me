@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Tasks
-      class Bulk < BulkAction
+      class Bulk < TaskBulkAction
         DONE = {
           Blog::Types::TaskBulkAction["cancel"] => "tasks_page.toasts.bulk.canceled",
           Blog::Types::TaskBulkAction["complete"] => "tasks_page.toasts.bulk.completed",
@@ -20,7 +20,6 @@ module Admin
         include Deps[
           act_on_tasks: "tasks.operations.act_on_tasks",
           count_tasks: "operations.count_tasks",
-          task_queries: "tasks.repos.task_queries",
         ]
 
         private
@@ -43,16 +42,6 @@ module Admin
 
           routes.path(:admin_tasks, filter: tab, **pool, **(query.empty? ? {} : { q: query }),
                                     **Blog::Structs::Page.query(page))
-        end
-
-        def named(id)
-          task = task_queries.detailed(id)
-
-          { task: task ? "#{task.label} #{task.title}" : UI::Components::RecordKey.key(id) }
-        end
-
-        def refusal(errors)
-          errors.key?(:to) ? "to_#{Blog::Contract::BLANK}" : super
         end
       end
     end

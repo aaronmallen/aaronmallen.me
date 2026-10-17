@@ -29,8 +29,7 @@ module Admin
         def invalid(response, person, params, errors)
           halt :not_found unless person
 
-          response.status = :unprocessable_content
-          response.render(edit_view, **build_person_editor.call(person:, params:, errors:))
+          unprocessable(response, edit_view, **build_person_editor.call(person:, params:, errors:))
         end
       end
     end

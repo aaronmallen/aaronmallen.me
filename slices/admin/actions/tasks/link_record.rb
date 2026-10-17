@@ -19,7 +19,7 @@ module Admin
 
         def render_refused(request, response, id, errors)
           case build_task_page.call(id, records: records_query(request, errors))
-            in Success(page) then response.render(task_view, **page, **return_to(request))
+            in Success(page) then unprocessable(response, task_view, **page, **return_to(request))
             in Failure(:not_found) then halt :not_found
             else halt :internal_server_error
           end

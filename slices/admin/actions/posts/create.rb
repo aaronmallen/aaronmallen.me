@@ -17,8 +17,7 @@ module Admin
             in Success[outcome, post]
               saved(response, outcome, post)
             in Failure[:invalid, errors]
-              response.status = :unprocessable_content
-              response.render(view, **build_post_editor.call(params:, errors:, view: request.params[:view]))
+              unprocessable(response, view, **build_post_editor.call(params:, errors:, view: request.params[:view]))
             else halt :internal_server_error
           end
         end

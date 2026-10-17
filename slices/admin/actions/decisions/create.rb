@@ -20,8 +20,7 @@ module Admin
               toast(response, OPENED)
               response.redirect_to(routes.path(:admin_decision, id: decision.id))
             in Failure[:invalid, errors]
-              response.status = :unprocessable_content
-              response.render(view, **build_decision_editor.call(params:, errors:))
+              unprocessable(response, view, **build_decision_editor.call(params:, errors:))
             else halt :internal_server_error
           end
         end

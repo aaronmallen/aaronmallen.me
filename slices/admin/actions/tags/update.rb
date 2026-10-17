@@ -37,8 +37,7 @@ module Admin
 
         def invalid(request, response, scope, query, editing)
           page = requested_page(request, response)
-          response.status = :unprocessable_content
-          response.render(index_view, **build_tags_page.call(scope:, page:, editing:, query:))
+          unprocessable(response, index_view, **build_tags_page.call(scope:, page:, editing:, query:))
         end
 
         def list_path(request, scope, query)

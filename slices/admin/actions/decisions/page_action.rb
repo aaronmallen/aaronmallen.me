@@ -14,8 +14,7 @@ module Admin
           page = build_decision_page.call(record_id(request), form:)
           halt :not_found unless page
 
-          response.status = :unprocessable_content
-          response.render(show_view, **page)
+          unprocessable(response, show_view, **page)
         end
       end
     end

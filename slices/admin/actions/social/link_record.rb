@@ -23,7 +23,7 @@ module Admin
           halt :not_found unless editing
 
           page = build_social_page.call(filter: filter(request), editing:, records: records_query(request, errors))
-          response.render(index_view, **page)
+          unprocessable(response, index_view, **page)
         end
       end
     end

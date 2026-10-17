@@ -16,14 +16,8 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:work_entry]]
 
-          case add_work_entry.call(params)
-            in Success(_)
-              toast(response, ADDED)
-              response.redirect_to(routes.path(:admin_projects, filter: WORK))
-            in Failure[:invalid, errors]
-              response.status = :unprocessable_content
-              response.render(index_view, **build_projects_page.call(filter: WORK, params:, errors:))
-            else halt :internal_server_error
+          settle(response, add_work_entry.call(params), ADDED, routes.path(:admin_projects, filter: WORK)) do |errors|
+            unprocessable(response, index_view, **build_projects_page.call(filter: WORK, params:, errors:))
           end
         end
       end

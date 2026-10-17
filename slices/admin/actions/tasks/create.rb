@@ -39,9 +39,8 @@ module Admin
         def invalid(request, response, params, errors)
           values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }.merge(recur: Blog::Types::Fields[params[:recur]])
 
-          response.status = :unprocessable_content
-          response.render(
-            new_view, errors:, origin: task_origin(request), projects: project_queries.live_by_name, values:,
+          unprocessable(
+            response, new_view, errors:, origin: task_origin(request), projects: project_queries.live_by_name, values:,
           )
         end
       end

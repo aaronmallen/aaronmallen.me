@@ -34,9 +34,8 @@ module Admin
           post = post_queries.by_id(id)
           halt :not_found unless post
 
-          response.status = :unprocessable_content
           editor = build_post_editor.call(post:, params:, errors:, view: request.params[:view])
-          response.render(view, **editor, records: list_record_links.call(KIND, id))
+          unprocessable(response, view, **editor, records: list_record_links.call(KIND, id))
         end
 
         def saved(response, outcome, post)

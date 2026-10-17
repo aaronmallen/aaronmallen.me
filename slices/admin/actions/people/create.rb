@@ -21,8 +21,7 @@ module Admin
           case save_person.call(params)
             in Success(person) then added(request, response, person)
             in Failure[:invalid, errors]
-              response.status = :unprocessable_content
-              response.render(new_view, **build_person_editor.call(params:, errors:))
+              unprocessable(response, new_view, **build_person_editor.call(params:, errors:))
             else halt :internal_server_error
           end
         end

@@ -22,7 +22,7 @@ module Admin
           halt :not_found unless project
 
           records = list_record_links.call(KIND, id, **records_query(request, errors))
-          response.render(edit_view, **build_project_editor.call(project:), records:)
+          unprocessable(response, edit_view, **build_project_editor.call(project:), records:)
         end
       end
     end

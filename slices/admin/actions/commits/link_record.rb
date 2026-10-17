@@ -19,7 +19,7 @@ module Admin
           page = build_commit_page.call(id, records: records_query(request, errors))
           halt :not_found unless page
 
-          response.render(show_view, **page)
+          unprocessable(response, show_view, **page)
         end
       end
     end

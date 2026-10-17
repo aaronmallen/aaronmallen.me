@@ -26,9 +26,8 @@ module Admin
         private
 
         def retry_draft(request, response, fields, errors)
-          response.status = :unprocessable_content
           show(request, response, draft: { values: fields, errors: })
-          response.render(index_view)
+          unprocessable(response, index_view)
         end
 
         def sent(request, response, fields)

@@ -68,8 +68,7 @@ module Admin
           credits = credits(fields[:contributors])
           values[:contributors] = credits if credits
 
-          response.status = :unprocessable_content
-          response.render(edit_view, **page.slice(*Edit::PARTS), errors:, values:, **return_to(request))
+          unprocessable(response, edit_view, **page.slice(*Edit::PARTS), errors:, values:, **return_to(request))
         end
 
         def values(fields)

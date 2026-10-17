@@ -29,8 +29,7 @@ module Admin
           decision = decision_queries.by_id(record_id(request))
           halt :not_found unless decision
 
-          response.status = :unprocessable_content
-          response.render(view, **build_decision_editor.call(decision:, params:, errors:))
+          unprocessable(response, view, **build_decision_editor.call(decision:, params:, errors:))
         end
       end
     end

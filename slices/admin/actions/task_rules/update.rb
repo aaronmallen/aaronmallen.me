@@ -30,10 +30,9 @@ module Admin
         def invalid(response, id, params, errors)
           editing = { errors:, id:, **UI::Views::TaskRules::Index.typed(params) }
 
-          response.status = :unprocessable_content
-          response.render(index_view, adding: BLANK, editing:, rules: task_rule_queries.all,
-                                      projects: task_rule_queries.project_choices,
-                                      tags: tag_queries.all_in(Index::PRIVATE, mail: false))
+          unprocessable(response, index_view, adding: BLANK, editing:, rules: task_rule_queries.all,
+                                              projects: task_rule_queries.project_choices,
+                                              tags: tag_queries.all_in(Index::PRIVATE, mail: false))
         end
       end
     end

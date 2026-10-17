@@ -28,8 +28,7 @@ module Admin
           halt :not_found unless share
 
           values = %i[filename code alt_text].to_h { [it, Blog::Types::Text[params[it]]] }
-          response.status = :unprocessable_content
-          response.render(edit_view, share:, values:, errors:)
+          unprocessable(response, edit_view, share:, values:, errors:)
         end
       end
     end

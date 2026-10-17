@@ -35,8 +35,7 @@ module Admin
         def refusal(code, **) = i18n.t!(REFUSALS.fetch(code), **)
 
         def rejected(response, provider, **)
-          response.status = :unprocessable_content
-          response.render(index_view, **listing(provider, **))
+          unprocessable(response, index_view, **listing(provider, **))
         end
       end
     end

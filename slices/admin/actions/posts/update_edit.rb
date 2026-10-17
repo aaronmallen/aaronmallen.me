@@ -32,9 +32,8 @@ module Admin
         def invalid(response, post, id:, note:, errors:)
           noting = { id:, note: Blog::Types::Text[note], errors: }
 
-          response.status = :unprocessable_content
-          response.render(view, **build_post_editor.call(post:, noting:),
-records: list_record_links.call(KIND, post.id))
+          unprocessable(response, view, **build_post_editor.call(post:, noting:),
+                                        records: list_record_links.call(KIND, post.id))
         end
 
         def post_path(post) = routes.path(:admin_edit_post, id: post.id)

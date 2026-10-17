@@ -16,27 +16,19 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:rule]]
 
-          case save_task_rule.call(params)
-            in Success(_) then added(response)
-            in Failure[:invalid, errors] then invalid(response, params, errors)
-            else halt :internal_server_error
+          settle(response, save_task_rule.call(params), ADDED, routes.path(:admin_task_rules)) do |errors|
+            invalid(response, params, errors)
           end
         end
 
         private
 
-        def added(response)
-          toast(response, ADDED)
-          response.redirect_to(routes.path(:admin_task_rules))
-        end
-
         def invalid(response, params, errors)
           adding = { errors:, **UI::Views::TaskRules::Index.typed(params) }
 
-          response.status = :unprocessable_content
-          response.render(index_view, adding:, editing: nil, rules: task_rule_queries.all,
-                                      projects: task_rule_queries.project_choices,
-                                      tags: tag_queries.all_in(Index::PRIVATE, mail: false))
+          unprocessable(response, index_view, adding:, editing: nil, rules: task_rule_queries.all,
+                                              projects: task_rule_queries.project_choices,
+                                              tags: tag_queries.all_in(Index::PRIVATE, mail: false))
         end
       end
     end

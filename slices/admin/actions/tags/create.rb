@@ -16,25 +16,9 @@ module Admin
           params = Blog::Types::Fields[request.params[:tag]]
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
-          case save_tag.call(params, scope:)
-            in Success(_)
-              added(response, scope)
-            in Failure[:invalid, errors]
-              invalid(response, scope, params, errors)
-            else halt :internal_server_error
+          settle(response, save_tag.call(params, scope:), ADDED, routes.path(:admin_tags, scope:)) do |errors|
+            unprocessable(response, index_view, **build_tags_page.call(scope:, errors:, params:))
           end
-        end
-
-        private
-
-        def added(response, scope)
-          toast(response, ADDED)
-          response.redirect_to(routes.path(:admin_tags, scope:))
-        end
-
-        def invalid(response, scope, params, errors)
-          response.status = :unprocessable_content
-          response.render(index_view, **build_tags_page.call(scope:, errors:, params:))
         end
       end
     end

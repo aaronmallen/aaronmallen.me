@@ -20,8 +20,7 @@ module Admin
               toast(response, CREATED)
               response.redirect_to(routes.path(:admin_edit_project, id: project.id))
             in Failure[:invalid, errors]
-              response.status = :unprocessable_content
-              response.render(view, **build_project_editor.call(params:, errors:))
+              unprocessable(response, view, **build_project_editor.call(params:, errors:))
             else halt :internal_server_error
           end
         end

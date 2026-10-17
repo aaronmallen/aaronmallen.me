@@ -27,9 +27,8 @@ module Admin
         private
 
         def invalid(response, params, errors)
-          response.status = :unprocessable_content
-          response.render(
-            index_view,
+          unprocessable(
+            response, index_view,
             errors:, minted: nil, tokens: api_token_queries.live, name: params[:name].to_s,
             scopes: Array(params[:scopes]), expires_on: params[:expires_on].to_s,
           )

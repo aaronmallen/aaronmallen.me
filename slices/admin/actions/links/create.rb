@@ -46,9 +46,8 @@ module Admin
         end
 
         def refuse(response, params, **)
-          response.status = :unprocessable_content
           response.format = :html
-          response.render(index_view, **build_links_page.call(params:, **))
+          unprocessable(response, index_view, **build_links_page.call(params:, **))
         end
 
         def shortened_before(params)

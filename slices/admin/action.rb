@@ -99,5 +99,10 @@ module Admin
       toast(response, key)
       response.redirect_to(path)
     end
+
+    def unprocessable(response, view, **)
+      response.status = :unprocessable_content
+      response.render(view, **)
+    end
   end
 end

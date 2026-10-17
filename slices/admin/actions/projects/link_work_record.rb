@@ -20,7 +20,7 @@ module Admin
           page = build_projects_page.call(filter: WORK, linking: id, records: records_query(request, errors))
           halt :not_found unless page[:work_links]
 
-          response.render(index_view, **page)
+          unprocessable(response, index_view, **page)
         end
       end
     end

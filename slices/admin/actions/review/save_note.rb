@@ -29,10 +29,9 @@ module Admin
         private
 
         def invalid(response, period, on, body, errors)
-          response.status = :unprocessable_content
           page = build_review_page.call(period:, day: on.iso8601)
 
-          response.render(show_view, **page, note_body: body, errors:)
+          unprocessable(response, show_view, **page, note_body: body, errors:)
         end
 
         def review_params(period, on) = { period: (period if period == MONTH), day: on.iso8601 }.compact

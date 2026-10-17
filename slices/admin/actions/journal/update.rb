@@ -39,9 +39,8 @@ module Admin
         end
 
         def invalid(request, response, editing, to:, search:)
-          response.status = :unprocessable_content
           journal = summarize_journal.call(search:, to:, filters: request.params)
-          response.render(index_view, **journal, editing:, search:, to:)
+          unprocessable(response, index_view, **journal, editing:, search:, to:)
         end
       end
     end
