@@ -92,7 +92,7 @@ module Posts
 
         query = Sequel.cast(terms.map { quoted_term(it) }.join(" | "), :tsquery)
 
-        where(Sequel.lit("? @@ ?", VECTOR, query))
+        new(dataset.full_text_search(VECTOR, query, tsvector: true, tsquery: true))
           .order(Sequel.function(:ts_rank, VECTOR, query).desc, *newest_order)
       end
 

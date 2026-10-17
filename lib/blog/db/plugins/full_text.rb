@@ -42,9 +42,9 @@ module Blog
         def labelled_task(ids) = Sequel.&({ kind: TASK }, { source_id: ids })
 
         def matching(query, labelled)
-          found = Sequel.lit("search_vector @@ ?", query)
+          found = dataset.unordered.full_text_search(:search_vector, query, tsvector: true, tsquery: true)
 
-          dataset.unordered.where(labelled.empty? ? found : Sequel.|(found, labelled_task(labelled)))
+          labelled.empty? ? found : found.or(labelled_task(labelled))
         end
 
         def rank(query) = Sequel.function(:ts_rank, :search_vector, query)
