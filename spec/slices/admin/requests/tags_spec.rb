@@ -88,6 +88,46 @@ RSpec.describe "Admin tags", type: :request do
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
       end
 
+      it "returns to the page and search after a rename" do
+        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "rubyist" }, scope: "public", q: "r", page: "2")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+      end
+
+      it "returns to the page and search after a colour" do
+        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "ruby", color: "mk-pink" }, q: "r", page: "2")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+      end
+
+      it "returns to the last page when a rename empties the one it was on" do
+        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "gem" }, q: "r", page: "2")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+      end
+
+      it "sends the page and search it is under with a removal", :aggregate_failures do
+        get "/admin/tags", q: "r", page: "2"
+
+        remove = "#tag-#{named('ruby').id}-editor form[action$='/delete']"
+        expect(page).to have_css("#{remove} input[name='q'][value='r']", visible: :all)
+        expect(page).to have_css("#{remove} input[name='page'][value='2']", visible: :all)
+      end
+
+      it "returns to the page and search after a removal" do
+        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+      end
+
+      it "returns to the last page when a removal empties the one it was on" do
+        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+        send_to("/admin/tags/#{named('ruby').id}/delete", q: "r", page: "2")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+      end
+
       it "counts every tag that matches, not the page" do
         get "/admin/tags", q: "r"
 

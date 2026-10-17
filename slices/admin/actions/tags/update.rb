@@ -11,6 +11,7 @@ module Admin
           build_tags_page: "operations.build_tags_page",
           index_view: "ui.views.tags.index",
           save_tag: "tags.operations.save_tag",
+          tag_queries: "tags.repos.tag_queries",
         ]
 
         def handle(request, response)
@@ -28,9 +29,7 @@ module Admin
 
         private
 
-        def back(request, scope, query)
-          back_here(request) || routes.path(:admin_tags, scope:, **(query.empty? ? {} : { q: query }))
-        end
+        def back(request, scope, query) = back_here(request) || list_path(request, scope, query)
 
         def editing(id, params, errors)
           { errors:, id:, name: Blog::Types::Text[params[:name]], **params.slice(:description) }
@@ -40,6 +39,12 @@ module Admin
           page = requested_page(request, response)
           response.status = 422
           response.render(index_view, **build_tags_page.call(scope:, page:, editing:, query:))
+        end
+
+        def list_path(request, scope, query)
+          page = landing(request) { it.offset >= tag_queries.count_matching(scope, query.downcase) }
+
+          Helpers::TagList.back(routes, scope, query, page)
         end
 
         def saved_key(params) = Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED

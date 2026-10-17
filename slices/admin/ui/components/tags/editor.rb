@@ -92,7 +92,11 @@ module Admin
             DeleteForm(
               action: path(:admin_delete_tag, id: @tag.id), label: t(".remove"),
               confirm: t(".confirm_remove", tag: @tag.name, count: held, uses: losers),
-            ) { scope_field }
+            ) do
+              scope_field
+              page_field
+              query_field
+            end
           end
 
           def rename_form
