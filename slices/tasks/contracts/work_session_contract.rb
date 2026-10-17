@@ -8,26 +8,15 @@ module Tasks
         optional(:ended_at).value(Blog::Types::LocalTime)
       end
 
-      rule(:started_at) do
-        failure = moment_failure(value)
-        key.failure(failure) if failure
-      end
+      rule(:started_at).validate(:moment)
+      rule(:started_at) { key.failure(BLANK) if value.nil? }
 
-      rule(:ended_at) do |context:|
-        failure = moment_failure(value) unless context[:running]
-        key.failure(failure) if failure
-      end
+      rule(:ended_at).validate(moment: :closed?)
+      rule(:ended_at) { |context:| key.failure(BLANK) if value.nil? && closed?(values, context) }
 
       private
 
-      def moment_failure(value)
-        case value
-          when Time then nil
-          when nil then BLANK
-          when Blog::Constants::GAP then SKIPPED
-          else FORMAT
-        end
-      end
+      def closed?(_values, context) = !context[:running]
     end
   end
 end

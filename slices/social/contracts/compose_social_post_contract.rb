@@ -7,11 +7,10 @@ module Social
         text = Blog::Types::TrimmedText[value]
         text.empty? ? Blog::Types::SocialMode["now"] : text
       end
+      SCHEDULE = Blog::Types::SocialMode["schedule"]
       SEND = Blog::Types::SocialIntent["send"]
       SILENT_PART = "silent_part"
-      TOO_LONG = "too_long"
       UNAVAILABLE = "unavailable"
-      UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
         check_network_fit: "operations.check_network_fit",
@@ -28,11 +27,7 @@ module Social
         optional(:photos).value(:array)
       end
 
-      rule(:parts).validate(:without_controls, :visible)
-
-      rule(:parts) do
-        key.failure(UNKNOWN_MENTION) if resolve_mentions.unknown(value).any?
-      end
+      rule(:parts).validate(:without_controls, :visible, :known_mentions)
 
       rule(:photos) do
         next unless key?
@@ -40,11 +35,10 @@ module Social
         key.failure(SILENT_PART) if value.any? { it.is_a?(::Hash) && it[:part].nil? }
       end
 
-      rule(:schedule_at, :mode) do
-        next unless values[:mode] == Blog::Types::SocialMode["schedule"]
-        next if value.is_a?(Time)
+      rule(:schedule_at, :mode).validate(moment: :scheduled?)
 
-        key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
+      rule(:schedule_at, :mode) do
+        key.failure(FORMAT) if value.nil? && scheduled?(values)
       end
 
       rule(:targets) do
@@ -56,6 +50,10 @@ module Social
 
         key(:parts).failure(TOO_LONG) unless check_network_fit.call(*values.values_at(:parts, :targets))
       end
+
+      private
+
+      def scheduled?(values, _context = nil) = values[:mode] == SCHEDULE
     end
   end
 end

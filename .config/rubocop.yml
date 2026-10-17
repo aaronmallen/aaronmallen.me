@@ -33,6 +33,7 @@ Blog/UnusedDeps:
     - contract
     - queries
     - record_link_queries
+    - resolve_mentions
     - thread_queries
   Include:
     - app/**/*.rb

@@ -9,7 +9,6 @@ module Analytics
       MAX_HOST = 253
       MAX_PATH = 2048
       MAX_TITLE = 512
-      MISSING = "missing"
       PATH = %r{\A/\S*\z}
       READ = Blog::Types::VisitKind["read"]
       REF = Operations::TagRef::KEY.to_sym

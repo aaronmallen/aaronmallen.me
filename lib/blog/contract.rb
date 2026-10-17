@@ -9,8 +9,12 @@ module Blog
     BLANK = "blank"
     CONTROL = "control"
     FORMAT = "format"
+    FUTURE = "future"
     MAX_IDS = 100
+    MISSING = "missing"
     SKIPPED = "skipped"
+    TOO_LONG = "too_long"
+    UNKNOWN_MENTION = "unknown_mention"
 
     CONTROLS = /[[:cntrl:]&&[^\t\n\r]]/
     PATH_NAME = %r{/|\A\.\.?\z}
@@ -28,6 +32,20 @@ module Blog
 
     register_macro(:visible) do
       key.failure(BLANK) if Array(value).any? { it.is_a?(::String) && !it.empty? && !it.match?(VISIBLE) }
+    end
+
+    register_macro(:known_mentions) do
+      key.failure(UNKNOWN_MENTION) if resolve_mentions.unknown(value).any?
+    end
+
+    register_macro(:moment) do |context:, macro:|
+      next if value.nil? || value.is_a?(Time) || !macro.args.all? { _contract.__send__(it, values, context) }
+
+      key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
+    end
+
+    register_macro(:not_future) do |context:|
+      key.failure(FUTURE) if value && value > context.fetch(:today)
     end
 
     register_macro(:tag_slugs) do

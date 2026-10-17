@@ -4,7 +4,6 @@ module MCP
   module Contracts
     class TokenRequestContract < Blog::Contract
       AUTHORIZATION_CODE = Blog::Types::OAuthGrantType["authorization_code"]
-      MISSING = "missing"
       REFRESH_TOKEN = Blog::Types::OAuthGrantType["refresh_token"]
       NEEDED = {
         AUTHORIZATION_CODE => %i[code code_verifier],

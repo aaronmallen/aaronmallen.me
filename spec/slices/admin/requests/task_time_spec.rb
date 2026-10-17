@@ -83,6 +83,13 @@ RSpec.describe "Admin task time", type: :request do
         expect(total(found)).to eq(600)
       end
 
+      it "ignores an end it cannot read on a running session" do
+        found = running_task
+        edit(sessions(found).first, on: found, started_at: started - 600, ended_at: "soon")
+
+        expect(sessions(found).map { [it[:started_at], it[:ended_at]] }).to eq([[started - 600, nil]])
+      end
+
       it "refuses a running session that starts later than now" do
         found = running_task
         edit(sessions(found).first, on: found, started_at: Time.now + 7200)

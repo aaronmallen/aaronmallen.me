@@ -3,7 +3,6 @@
 module Tasks
   module Operations
     class CheckSessionTimes < Blog::Operation
-      FUTURE = "future"
       ORDER = "order"
 
       def call(started_at, ended_at, now)
@@ -13,7 +12,7 @@ module Tasks
 
       private
 
-      def future(time, now) = ([FUTURE] if time && time > now)
+      def future(time, now) = ([Blog::Contract::FUTURE] if time && time > now)
 
       def ordered(started_at, ended_at)
         return Failure[:invalid, { ended_at: [ORDER] }] if ended_at && ended_at < started_at

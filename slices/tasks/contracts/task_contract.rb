@@ -3,8 +3,6 @@
 module Tasks
   module Contracts
     class TaskContract < Blog::Contract
-      MISSING = "missing"
-
       include Deps[project_queries: "projects.repos.project_queries"]
 
       params do

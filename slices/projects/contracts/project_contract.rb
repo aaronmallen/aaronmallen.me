@@ -3,7 +3,6 @@
 module Projects
   module Contracts
     class ProjectContract < Blog::Contract
-      FUTURE = "future"
       MONTH = "%Y-%m"
       SLUG = Blog::Types::Normalized::Slug
       SLUGLESS = "slugless"
@@ -43,11 +42,7 @@ module Projects
       rule(:url).validate(:without_controls)
       rule(:og_image_url).validate(:without_controls)
 
-      rule(:started_on) do |context:|
-        next if value.nil?
-
-        key.failure(FUTURE) if value > context.fetch(:today)
-      end
+      rule(:started_on).validate(:not_future)
 
       rule(:tags).validate(:tag_slugs)
     end

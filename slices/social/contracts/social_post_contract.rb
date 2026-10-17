@@ -6,7 +6,6 @@ module Social
       DUPLICATE = "duplicate"
       MANY = "many"
       MAX_PHOTOS = 4
-      MISSING = "missing"
 
       include Deps[photo_queries: "media.repos.photo_queries"]
 

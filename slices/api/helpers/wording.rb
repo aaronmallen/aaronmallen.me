@@ -9,10 +9,10 @@ module API
       UNSAVED = "could not save the change"
 
       SHARED = {
-        "blank" => "is empty",
+        Blog::Contract::BLANK => "is empty",
         Blog::Contract::CONTROL => CONTROL,
         Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
-        "unknown_mention" => "mentions someone who is not in the directory",
+        Blog::Contract::UNKNOWN_MENTION => "mentions someone who is not in the directory",
       }.freeze
 
       module_function

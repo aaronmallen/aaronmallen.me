@@ -9,7 +9,6 @@ module Record
 
         Blog::TimeZone.parse_day(text) || text
       end
-      FUTURE = "future"
 
       params do
         required(:body).value(Blog::Types::TrimmedText, :filled?)
@@ -19,11 +18,7 @@ module Record
 
       rule(:body).validate(:without_controls, :visible)
 
-      rule(:entry_date) do |context:|
-        next if value.nil?
-
-        key.failure(FUTURE) if value > context.fetch(:today)
-      end
+      rule(:entry_date).validate(:not_future)
 
       rule(:tags).validate(:tag_slugs)
     end

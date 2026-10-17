@@ -5,8 +5,6 @@ module Posts
     class PostContract < PostSeoContract
       ANNOUNCEMENT_TOO_LONG = "announcement_too_long"
       EDIT_NOTE_LIMIT = 500
-      TOO_LONG = "too_long"
-      UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
         announcement: "operations.compose_announcement",
@@ -39,15 +37,8 @@ module Posts
       rule(:edit_note).validate(:without_controls, :visible)
       rule(:tags).validate(:tag_slugs)
 
-      rule(:publish_at) do
-        next if value.nil? || value.is_a?(Time)
-
-        key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
-      end
-
-      rule(:syndication_body) do
-        key.failure(UNKNOWN_MENTION) if resolve_mentions.unknown(value).any?
-      end
+      rule(:publish_at).validate(:moment)
+      rule(:syndication_body).validate(:known_mentions)
 
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|
         next unless context[:announcing] && values[:syndication_enabled]
