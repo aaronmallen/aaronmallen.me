@@ -5,6 +5,7 @@ status: active
 created: 2026-10-14
 area: [app, config, db, assets, analytics, public, admin, mcp]
 issue: "#1251"
+amended: ["#1735"]
 tags: [performance, timing, requests, jobs, sidekiq, puma, after-reply, beacon, lcp, retention, rollups, p95]
 ---
 
@@ -39,7 +40,8 @@ Largest Contentful Paint to what it posts to `/pulse`. The public action hands t
 stores them in its own table, not on `analytics_events`.
 
 **Raw rows stay 30 days, and daily p50 and p95 stay for good.** A scheduled job rolls each day into p50 and p95 per
-route and per job, as `analytics_rollup_*` does for readers, then prunes raw rows older than 30 days.
+route and per job, as `analytics_rollup_*` does for readers, then prunes raw rows older than 30 days. Since #1735 a
+failed job's raw row also keeps its error class and message, which go when the row does ([ADR 0185][0185]).
 
 ## Alternatives
 
@@ -72,4 +74,5 @@ keep, has 30 days to be asked.
 [0087]: 0087-widen-what-analytics-keeps-with-a-monthly-hash-and-roll-up-each-pages-breakdowns.md
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
+[0185]: 0185-keep-a-failed-jobs-error-on-its-performance-jobs-row.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
