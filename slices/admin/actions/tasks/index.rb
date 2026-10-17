@@ -14,7 +14,7 @@ module Admin
           case build(request, response)
             in Success(screen) then show_page(request, response, screen)
             in Failure(:past_end) then not_found(response)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

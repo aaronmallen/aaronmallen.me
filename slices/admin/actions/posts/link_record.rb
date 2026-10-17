@@ -19,7 +19,7 @@ module Admin
 
         def render_refused(request, response, id, errors)
           post = post_queries.by_id(id)
-          halt 404 unless post
+          halt :not_found unless post
 
           records = list_record_links.call(KIND, id, **records_query(request, errors))
           response.render(edit_view, **build_post_editor.call(post:), records:)

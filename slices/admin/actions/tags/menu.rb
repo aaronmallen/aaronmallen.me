@@ -8,7 +8,7 @@ module Admin
 
         def handle(request, response)
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
-          tag = tag_queries.find_in(scope, record_id(request)) || halt(404)
+          tag = tag_queries.find_in(scope, record_id(request)) || halt(:not_found)
 
           response.render(view, tag:, return_to: back_here(request))
         end

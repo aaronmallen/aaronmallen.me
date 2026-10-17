@@ -7,7 +7,7 @@ module Admin
         include Deps[person_queries: "social.repos.person_queries"]
 
         def handle(request, response)
-          person = person_queries.by_id(record_id(request)) || halt(404)
+          person = person_queries.by_id(record_id(request)) || halt(:not_found)
 
           response.render(view, person:, return_to: back_here(request))
         end

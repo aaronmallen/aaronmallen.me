@@ -20,8 +20,8 @@ module Admin
 
       case retag(id, tag)
         in Success(_) then self.class::DONE
-        in Failure(:not_found) then halt 404
-        else halt 500
+        in Failure(:not_found) then halt :not_found
+        else halt :internal_server_error
       end
     end
   end

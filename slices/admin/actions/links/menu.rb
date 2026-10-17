@@ -7,7 +7,7 @@ module Admin
         include Deps[short_link_queries: "shares.repos.short_link_queries"]
 
         def handle(request, response)
-          link = short_link_queries.find(record_id(request)) || halt(404)
+          link = short_link_queries.find(record_id(request)) || halt(:not_found)
 
           response.render(view, link:, return_to: back_here(request))
         end

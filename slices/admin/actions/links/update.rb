@@ -25,10 +25,10 @@ module Admin
 
         def invalid(response, id, params, errors)
           link = short_link_queries.find(id)
-          halt 404 unless link
+          halt :not_found unless link
 
           values = %i[destination code title].to_h { [it, Blog::Types::Text[params[it]]] }
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(edit_view, link:, check: short_link_queries.check(link), values:, errors:)
         end
       end

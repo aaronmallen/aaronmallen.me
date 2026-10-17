@@ -7,10 +7,9 @@ module MCP
         ALLOWED_HEADERS = "Authorization, Content-Type, MCP-Protocol-Version"
         ALLOWED_METHODS = "POST"
         CORS_PREFIX = "access-control-"
-        NO_CONTENT = 204
 
         def handle(_request, response)
-          response.status = NO_CONTENT
+          response.status = :no_content
           allow_any_origin(response)
           response.headers["Access-Control-Allow-Methods"] = ALLOWED_METHODS
           response.headers["Access-Control-Allow-Headers"] = ALLOWED_HEADERS

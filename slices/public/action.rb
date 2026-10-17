@@ -4,12 +4,8 @@
 module Public
   class Action < Blog::Action
     ANY_MEDIA_TYPE = "*/*"
-    FORBIDDEN = 403
     HTTP_DATE_FORMATS = %i[httpdate rfc2822].freeze
-    MOVED_PERMANENTLY = 301
-    NOT_MODIFIED = 304
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
-    OK = 200
     PERSONAL_COOKIES = [Blog::SessionCookie::KEY].freeze
     SAME_ORIGIN_FETCHES = %w[none same-origin].freeze
     SHARED_CACHE_LIFETIME = 300
@@ -60,7 +56,7 @@ module Public
       response.fresh(etag: version.etag)
       return if request.get_header(IF_NONE_MATCH)
 
-      halt NOT_MODIFIED if unchanged_since?(modified_since(request), last_modified)
+      halt :not_modified if unchanged_since?(modified_since(request), last_modified)
     end
 
     def keep_feed_from_caches(response)
@@ -85,11 +81,11 @@ module Public
     def redirect_to_own_path(request, response, name, page, **params)
       return if request.path == routes.path(name, **params)
 
-      response.redirect_to(routes.path(name, **params, **page.query), status: MOVED_PERMANENTLY)
+      response.redirect_to(routes.path(name, **params, **page.query), status: :moved_permanently)
     end
 
     def refuse_cross_site(request, _response)
-      halt FORBIDDEN if cross_site?(request)
+      halt :forbidden if cross_site?(request)
     end
 
     def set_cache_policy(request, response)
@@ -97,7 +93,7 @@ module Public
     end
 
     def share_with_caches(request, response)
-      return unless response.status == OK && !response.headers.key?(CACHE_CONTROL)
+      return unless response.ok? && !response.headers.key?(CACHE_CONTROL)
       return if request.cookies.keys.intersect?(PERSONAL_COOKIES)
 
       response.cache_control(:public, max_age: 0, s_maxage: SHARED_CACHE_LIFETIME)

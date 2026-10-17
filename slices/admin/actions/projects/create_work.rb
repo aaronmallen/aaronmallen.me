@@ -21,9 +21,9 @@ module Admin
               toast(response, ADDED)
               response.redirect_to(routes.path(:admin_projects, filter: WORK))
             in Failure[:invalid, errors]
-              response.status = 422
+              response.status = :unprocessable_content
               response.render(index_view, **build_projects_page.call(filter: WORK, params:, errors:))
-            else halt 500
+            else halt :internal_server_error
           end
         end
       end

@@ -10,7 +10,7 @@ module Admin
 
         def handle(request, response)
           kind = request.params[:kind]
-          halt 404 unless Blog::Types::AttentionKind.valid?(kind)
+          halt :not_found unless Blog::Types::AttentionKind.valid?(kind)
 
           result = snooze_attention.call(kind, Blog::Types::IdParam[request.params[:record_id]])
           settle(response, result, SNOOZED, routes.path(:admin_root))

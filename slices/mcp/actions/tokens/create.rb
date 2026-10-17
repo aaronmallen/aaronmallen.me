@@ -11,7 +11,7 @@ module MCP
 
           case issue_token.call(request.params.to_h)
             in Success(tokens) then render_json(response, tokens)
-            in Failure(Operations::IssueToken::REJECT, payload) then render_json(response, payload, status: REJECTED)
+            in Failure(Operations::IssueToken::REJECT, payload) then reject_json(response, payload)
             else reject_json(response)
           end
         end

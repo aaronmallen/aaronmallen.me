@@ -4,16 +4,14 @@ module Admin
   module Actions
     module Tasks
       class Place < Action
-        NO_CONTENT = 204
-
         include Deps[place_task: "tasks.operations.place_task"]
 
         def handle(request, response)
           case place_task.call(record_id(request), after_id(request))
-            in Success(_) then response.status = NO_CONTENT
-            in Failure(:not_found) then halt 404
-            in Failure(:not_placed | :apart | :after_not_found) then halt 422
-            else halt 500
+            in Success(_) then response.status = :no_content
+            in Failure(:not_found) then halt :not_found
+            in Failure(:not_placed | :apart | :after_not_found) then halt :unprocessable_content
+            else halt :internal_server_error
           end
         end
 
@@ -23,7 +21,7 @@ module Admin
           after = request.params[:after]
           return if after.to_s.empty?
 
-          Blog::Types::IdParam[after] || halt(422)
+          Blog::Types::IdParam[after] || halt(:unprocessable_content)
         end
       end
     end

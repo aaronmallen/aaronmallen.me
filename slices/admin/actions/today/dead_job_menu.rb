@@ -7,7 +7,7 @@ module Admin
         include Deps[attention_queries: "activity.repos.attention_queries"]
 
         def handle(request, response)
-          response.render(view, job: attention_queries.dead_job(request.params[:jid]) || halt(404))
+          response.render(view, job: attention_queries.dead_job(request.params[:jid]) || halt(:not_found))
         end
       end
     end

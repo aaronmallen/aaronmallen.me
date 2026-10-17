@@ -25,7 +25,7 @@ module Admin
             in Success[:pulled_in | :scheduled, *] then done(request, response, CAPTURED, filter: UPCOMING)
             in Failure(:past) | Failure(:invalid) then done(request, response, PAST, filter:)
             in Failure[:invalid, errors] then invalid(request, response, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -39,7 +39,7 @@ module Admin
         def invalid(request, response, params, errors)
           values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }.merge(recur: Blog::Types::Fields[params[:recur]])
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(
             new_view, errors:, origin: task_origin(request), projects: project_queries.live_by_name, values:,
           )

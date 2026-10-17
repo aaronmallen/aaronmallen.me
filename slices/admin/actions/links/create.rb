@@ -6,7 +6,6 @@ module Admin
   module Actions
     module Links
       class Create < Action
-        CREATED = 201
         JSON_TYPE = "application/json"
         SHORTENED = "links_page.toasts.shortened"
 
@@ -27,14 +26,14 @@ module Admin
           case create_short_link.call(params.slice(:destination, :code))
             in Success(link) then created(request, response, link)
             in Failure[:invalid, errors] then refuse(response, params, errors:)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
         private
 
         def answer(response, link)
-          response.status = CREATED
+          response.status = :created
           response.format = :json
           response.body = JSON.generate({ link: Helpers::ShareLink.for(link.code), message: i18n.t!(SHORTENED) })
         end
@@ -47,7 +46,7 @@ module Admin
         end
 
         def refuse(response, params, **)
-          response.status = 422
+          response.status = :unprocessable_content
           response.format = :html
           response.render(index_view, **build_links_page.call(params:, **))
         end

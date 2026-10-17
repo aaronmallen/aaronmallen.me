@@ -8,7 +8,7 @@ module Admin
 
         def handle(request, response)
           ids = picked_ids(request)
-          halt 404 if ids.empty?
+          halt :not_found if ids.empty?
 
           list = Helpers::MailList.from(request.params)
           response.render(view, ids:, list:, fields: list, labels:, accounts:)

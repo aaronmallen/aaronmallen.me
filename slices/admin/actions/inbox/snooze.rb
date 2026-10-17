@@ -14,8 +14,8 @@ module Admin
           case snooze_inbox_row.call(kind(request), record_id(request), picked)
             in Success(snooze) then done(request, response, :snoozed, **until_words(snooze.snoozed_until))
             in Failure(:invalid | :past => refusal) then done(request, response, refusal)
-            in Failure(:not_found) then halt 404
-            else halt 500
+            in Failure(:not_found) then halt :not_found
+            else halt :internal_server_error
           end
         end
 

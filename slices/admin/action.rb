@@ -39,7 +39,7 @@ module Admin
     end
 
     def handle_invalid_csrf_token(_request, response)
-      halt 403, response.render(rejected_view)
+      halt :forbidden, response.render(rejected_view)
     end
 
     def landing(request)
@@ -54,7 +54,7 @@ module Admin
 
     def not_found(response)
       response.format = :html
-      halt 404, response.render(not_found_view)
+      halt :not_found, response.render(not_found_view)
     end
 
     def page_number(request) = Blog::Types::PageParam.call(request.params[:page]) { 1 }
@@ -63,7 +63,7 @@ module Admin
 
     def picked_ids(request) = Array(request.params[:ids]).filter_map { Blog::Types::IdParam[it] }.uniq
 
-    def record_id(request, key = :id) = Blog::Types::IdParam[request.params[key]] || halt(404)
+    def record_id(request, key = :id) = Blog::Types::IdParam[request.params[key]] || halt(:not_found)
 
     def require_sign_in(request, response)
       return unless sign_in_required?
@@ -80,8 +80,8 @@ module Admin
         in Success(_) then toast_back(response, key, path)
         in Failure(:queue_unavailable) then toast_back(response, QUEUE_UNAVAILABLE, path)
         in Failure[:invalid, errors] if block_given? then yield errors
-        in Failure(:not_found) then halt 404
-        else halt 500
+        in Failure(:not_found) then halt :not_found
+        else halt :internal_server_error
       end
     end
 

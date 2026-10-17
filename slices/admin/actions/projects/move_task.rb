@@ -13,12 +13,12 @@ module Admin
 
         def handle(request, response)
           id = record_id(request, :task_id)
-          column = Blog::Types::TaskColumnParam[request.params[:to]] || halt(422)
+          column = Blog::Types::TaskColumnParam[request.params[:to]] || halt(:unprocessable_content)
 
           case set_task_column.call(id, column)
             in Success(_) then moved(request, response, id, column)
-            in Failure(:not_found) then halt 404
-            else halt 500
+            in Failure(:not_found) then halt :not_found
+            else halt :internal_server_error
           end
         end
 

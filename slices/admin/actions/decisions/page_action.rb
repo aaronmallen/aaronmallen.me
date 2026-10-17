@@ -12,9 +12,9 @@ module Admin
 
         def refuse_form(request, response, form)
           page = build_decision_page.call(record_id(request), form:)
-          halt 404 unless page
+          halt :not_found unless page
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(show_view, **page)
         end
       end

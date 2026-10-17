@@ -7,8 +7,6 @@ module Public
         CACHE_PUBLISHED = "public, max-age=31536000, s-maxage=86400, immutable"
         CACHE_MISS = "public, max-age=60"
         CACHE_PRIVATE = "private, max-age=3600"
-        NOT_FOUND = 404
-        NOT_MODIFIED = 304
 
         include Deps[photo_queries: "media.repos.photo_queries", store: "media_store.client"]
 
@@ -52,12 +50,12 @@ module Public
         def miss(response)
           response.headers.delete("ETag")
           response.headers["Cache-Control"] = CACHE_MISS
-          response.status = NOT_FOUND
+          response.status = :not_found
           response.body = Blog::Constants::EMPTY_STRING
         end
 
         def not_modified(response)
-          response.status = NOT_MODIFIED
+          response.status = :not_modified
           response.body = Blog::Constants::EMPTY_STRING
         end
 

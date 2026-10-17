@@ -14,7 +14,7 @@ module Admin
         ]
 
         def handle(request, response)
-          connection = connection_queries.by_id(record_id(request)) || halt(404)
+          connection = connection_queries.by_id(record_id(request)) || halt(:not_found)
 
           report(response, connection)
           response.redirect_to(routes.path(:admin_services, selected: connection.id))
@@ -23,12 +23,12 @@ module Admin
         private
 
         def report(response, connection)
-          name = definition_queries.find(connection.provider)&.name || halt(404)
+          name = definition_queries.find(connection.provider)&.name || halt(:not_found)
 
           case check_service.call(connection.provider, connection.credentials)
             in Success(_) then toast(response, ANSWERED, name:)
             in Failure[:refused, reason] then toast(response, UNANSWERED, name:, reason:)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
           end
         end
       end

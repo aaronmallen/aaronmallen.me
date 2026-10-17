@@ -7,7 +7,7 @@ module Admin
         include Deps[share_queries: "shares.repos.share_queries"]
 
         def handle(request, response)
-          share = share_queries.find(record_id(request)) || halt(404)
+          share = share_queries.find(record_id(request)) || halt(:not_found)
 
           response.render(view, share:, return_to: back_here(request))
         end

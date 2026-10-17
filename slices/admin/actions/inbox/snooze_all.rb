@@ -15,7 +15,7 @@ module Admin
               done(request, response, "see_all.failed.not_found", **named(kind), id:)
             in Failure[:invalid, _] then done(request, response, "see_all.empty")
             in Failure(:invalid | :past => refusal) then done(request, response, refusal)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

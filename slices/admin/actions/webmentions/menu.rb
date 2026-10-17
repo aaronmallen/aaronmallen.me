@@ -7,7 +7,7 @@ module Admin
         include Deps[webmention_queries: "social.repos.webmention_queries"]
 
         def handle(request, response)
-          mention = webmention_queries.by_id(record_id(request)) || halt(404)
+          mention = webmention_queries.by_id(record_id(request)) || halt(:not_found)
 
           response.render(view, mention:, return_to: back_here(request))
         end

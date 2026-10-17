@@ -10,7 +10,6 @@ module Admin
           Blog::Types::TaskAct["complete"] => :admin_complete_task,
           Blog::Types::TaskAct["pause"] => :admin_stop_task,
         }.freeze
-        UNAUTHORIZED = 401
 
         include Deps[task_queries: "tasks.repos.task_queries"]
 
@@ -26,7 +25,7 @@ module Admin
         private
 
         def require_sign_in(request, _response)
-          halt UNAUTHORIZED unless auth_session(request).signed_in?
+          halt :unauthorized unless auth_session(request).signed_in?
         end
 
         def row(task, route) = { id: task.id, title: task.title, href: routes.path(route, id: task.id) }

@@ -30,7 +30,7 @@ module Blog
 
     def not_found(response)
       response.format = :html
-      halt 404, Hanami.app.root.join(NOT_FOUND_PAGE).read
+      halt :not_found, Hanami.app.root.join(NOT_FOUND_PAGE).read
     end
 
     def path_param(request, name) = ::Rack::Utils.unescape_path(request.params[name])

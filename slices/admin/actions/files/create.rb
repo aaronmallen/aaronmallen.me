@@ -7,11 +7,13 @@ module Admin
     module Files
       class Create < Action
         ADDED = "files_page.toasts.added"
-        CREATED = 201
         GROUPED = "files_page.toasts.grouped"
         JSON_TYPE = "application/json"
-        REFUSED = 422
-        STATUSES = { blank: REFUSED, invalid: REFUSED, unavailable: 503 }.freeze
+        STATUSES = {
+          blank: :unprocessable_content,
+          invalid: :unprocessable_content,
+          unavailable: :service_unavailable,
+        }.freeze
         TOASTS = {
           nil => "files_page.toasts.uploaded",
           blank: "files_page.toasts.failed.blank",
@@ -39,13 +41,13 @@ module Admin
         def add(id, files)
           case add_share_group_files.call(id, files)
             in Success(group) then [[Helpers::ShareLink.for(group.code)], nil, ADDED, files.size]
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure[reason, *] then [[], reason, TOASTS.fetch(reason), 0]
           end
         end
 
         def answer(response, links, reason, message)
-          response.status = reason ? STATUSES.fetch(reason) : CREATED
+          response.status = reason ? STATUSES.fetch(reason) : :created
           response.format = :json
           response.body = JSON.generate({ links:, message: })
         end

@@ -18,15 +18,15 @@ module Admin
             in Success(_) then sent(request, response, fields)
             in Failure[:invalid, errors] then retry_draft(request, response, fields, errors)
             in Failure[:gmail_failed, _] then retry_draft(request, response, fields, GMAIL_FAILED)
-            in Failure(:not_found) then halt 404
-            else halt 500
+            in Failure(:not_found) then halt :not_found
+            else halt :internal_server_error
           end
         end
 
         private
 
         def retry_draft(request, response, fields, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           show(request, response, draft: { values: fields, errors: })
           response.render(index_view)
         end

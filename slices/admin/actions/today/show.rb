@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           case summarize(request)
             in Success(summary) then response.render(view, **summary)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

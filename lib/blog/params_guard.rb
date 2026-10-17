@@ -6,15 +6,12 @@ require "rack"
 module Blog
   class ParamsGuard
     AUTHORIZATION = "HTTP_AUTHORIZATION"
-    BAD_REQUEST = 400
     BODY_LIMIT = 1024 * 1024
     CHUNK = 64 * 1024
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
     SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
-    TOO_LARGE = 413
-    UNSUPPORTED = 415
     UPLOAD_LIMIT = 25 * 1024 * 1024
     ENCODED_UPLOAD_LIMIT = UPLOAD_LIMIT * 4 / 3
     UPLOADS = {
@@ -36,7 +33,7 @@ module Blog
       status = refusal(::Rack::Request.new(env))
       return @app.call(env) unless status
 
-      @errors_app.call(env.merge(::Rack::PATH_INFO => "/#{status}"))
+      @errors_app.call(env.merge(::Rack::PATH_INFO => "/#{::Rack::Utils.status_code(status)}"))
     end
 
     private
@@ -76,9 +73,9 @@ module Blog
     end
 
     def refusal(request)
-      if oversized?(request) then TOO_LARGE
-      elsif request.media_type == MULTIPART && !upload?(request) then UNSUPPORTED
-      elsif !readable?(request) then BAD_REQUEST
+      if oversized?(request) then :content_too_large
+      elsif request.media_type == MULTIPART && !upload?(request) then :unsupported_media_type
+      elsif !readable?(request) then :bad_request
       end
     end
 

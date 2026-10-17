@@ -19,7 +19,7 @@ module Admin
           case save_task_rule.call(params)
             in Success(_) then added(response)
             in Failure[:invalid, errors] then invalid(response, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -33,7 +33,7 @@ module Admin
         def invalid(response, params, errors)
           adding = { errors:, **UI::Views::TaskRules::Index.typed(params) }
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(index_view, adding:, editing: nil, rules: task_rule_queries.all,
                                       projects: task_rule_queries.project_choices,
                                       tags: tag_queries.all_in(Index::PRIVATE, mail: false))

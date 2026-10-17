@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           kind = request.params[:kind]
           record_id = Blog::Types::IdParam[request.params[:record_id]]
-          row = attention_queries.stalled.find { it.kind == kind && it.record_id == record_id } || halt(404)
+          row = attention_queries.stalled.find { it.kind == kind && it.record_id == record_id } || halt(:not_found)
 
           response.render(view, row:)
         end

@@ -17,7 +17,7 @@ module Admin
 
           case connect_service.call(provider, Blog::Types::Fields[request.params[:connection]])
             in Success(connection) then connected(response, connection)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure[:invalid, errors] then rejected(response, provider, errors:)
             in Failure[:refused, reason] then rejected(response, provider, refusal: refusal(:refused, reason:))
             in Failure(:single | :taken => code) then rejected(response, provider, refusal: refusal(code))
@@ -35,7 +35,7 @@ module Admin
         def refusal(code, **) = i18n.t!(REFUSALS.fetch(code), **)
 
         def rejected(response, provider, **)
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(index_view, **listing(provider, **))
         end
       end

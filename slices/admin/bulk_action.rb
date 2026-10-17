@@ -11,7 +11,7 @@ module Admin
         in Success[*records] then done(request, response, records)
         in Failure[:record, id, reason] then failed(response, id, reason)
         in Failure[:invalid, errors] then refuse(response, errors)
-        else halt 500
+        else halt :internal_server_error
       end
 
       response.redirect_to(back(request))

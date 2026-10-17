@@ -21,7 +21,7 @@ module Admin
               added(response, scope)
             in Failure[:invalid, errors]
               invalid(response, scope, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -33,7 +33,7 @@ module Admin
         end
 
         def invalid(response, scope, params, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(index_view, **build_tags_page.call(scope:, errors:, params:))
         end
       end

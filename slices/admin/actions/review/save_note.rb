@@ -16,20 +16,20 @@ module Admin
         def handle(request, response)
           params = request.params
           period = Blog::Types::ReviewPeriodParam[params[:period]]
-          on = Blog::Types::DateParam[params[:day]] || halt(400)
+          on = Blog::Types::DateParam[params[:day]] || halt(:bad_request)
           body = Blog::Types::Text[Blog::Types::Fields[params[:note]][:body]]
 
           case save_review_note.call(body, period:, on:)
             in Success(_) then saved(response, period, on)
             in Failure[:invalid, errors] then invalid(response, period, on, body, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
         private
 
         def invalid(response, period, on, body, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           page = build_review_page.call(period:, day: on.iso8601)
 
           response.render(show_view, **page, note_body: body, errors:)

@@ -11,7 +11,7 @@ module Admin
 
         def handle(request, response)
           result = disconnect_service.call(record_id(request))
-          halt 404 if result.failure?
+          halt :not_found if result.failure?
 
           connection = result.value!
           toast(response, connection.by_credentials? ? REVOKE : DISCONNECTED, name: connection.label)

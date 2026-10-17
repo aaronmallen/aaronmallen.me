@@ -11,7 +11,7 @@ module Admin
 
         def handle(request, response)
           tasks = task_queries.by_ids(picked_ids(request))
-          halt 404 if tasks.empty?
+          halt :not_found if tasks.empty?
 
           response.render(view, tasks:, tags: tag_queries.all_in(PRIVATE, mail: false),
                                 fields: request.params.to_h.slice(*FIELDS))

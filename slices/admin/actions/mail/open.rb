@@ -15,7 +15,7 @@ module Admin
 
         def handle(request, response)
           id = record_id(request)
-          thread = thread_queries.by_id(id) || halt(404)
+          thread = thread_queries.by_id(id) || halt(:not_found)
           read(id) if thread.status == UNREAD
 
           response.redirect_to(listed(request, thread: id))
@@ -26,7 +26,7 @@ module Admin
         def read(id)
           case mark_message.call(id, READ)
             in Success(_) | Failure(:gmail_failed) then nil
-            else halt 500
+            else halt :internal_server_error
           end
         end
       end

@@ -26,7 +26,7 @@ module Admin
 
           case save_task.call(id, form(id, fields))
             in Failure(:closed) then redirect_with(request, response, CLOSED)
-            in Failure(:imported) then halt 422
+            in Failure(:imported) then halt :unprocessable_content
             in Failure(:past) | Failure(:invalid) then redirect_with(request, response, PAST)
             in Failure[:invalid, errors] then invalid(request, response, id, fields, errors)
             in result then settle(response, result, SAVED, tasks_path(request))
@@ -63,12 +63,12 @@ module Admin
         end
 
         def invalid(request, response, id, fields, errors)
-          page = build_task_page.call(id).value_or { halt 404 }
+          page = build_task_page.call(id).value_or { halt :not_found }
           values = values(fields)
           credits = credits(fields[:contributors])
           values[:contributors] = credits if credits
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(edit_view, **page.slice(*Edit::PARTS), errors:, values:, **return_to(request))
         end
 

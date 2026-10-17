@@ -25,10 +25,10 @@ module Admin
 
         def invalid(response, id, params, errors)
           share = share_queries.find(id)
-          halt 404 unless share
+          halt :not_found unless share
 
           values = %i[filename code alt_text].to_h { [it, Blog::Types::Text[params[it]]] }
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(edit_view, share:, values:, errors:)
         end
       end

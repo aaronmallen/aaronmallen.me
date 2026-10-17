@@ -21,14 +21,14 @@ module Admin
               toast(response, SAVED)
               response.redirect_to(return_path(request))
             in Failure[:invalid, errors] then invalid(request, response, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
         private
 
         def invalid(request, response, params, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           values = values(params)
           return response.render(index_view, **summarize_journal.call, values:, errors:) unless modal?(request)
 

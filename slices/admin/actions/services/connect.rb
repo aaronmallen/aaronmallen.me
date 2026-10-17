@@ -18,7 +18,7 @@ module Admin
         ]
 
         def handle(request, response)
-          definition = definition_queries.find(request.params[:provider]) || halt(404)
+          definition = definition_queries.find(request.params[:provider]) || halt(:not_found)
 
           case connect_url(request, definition)
             in Success(url) then response.redirect_to(url)

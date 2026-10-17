@@ -16,7 +16,7 @@ module Admin
         ]
 
         def handle(request, response)
-          thread = thread_queries.by_id(record_id(request)) || halt(404)
+          thread = thread_queries.by_id(record_id(request)) || halt(:not_found)
 
           response.render(view, thread:, list: list(request), return_to: back_here(request), **about(thread))
         end

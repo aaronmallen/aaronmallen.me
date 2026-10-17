@@ -18,7 +18,7 @@ module Admin
 
         def render_refused(request, response, id, errors)
           page = build_decision_page.call(id, records: records_query(request, errors))
-          halt 404 unless page
+          halt :not_found unless page
 
           response.render(show_view, **page)
         end

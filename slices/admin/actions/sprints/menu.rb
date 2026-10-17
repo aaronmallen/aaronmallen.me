@@ -7,7 +7,7 @@ module Admin
         include Deps[sprint_queries: "tasks.repos.sprint_queries"]
 
         def handle(request, response)
-          sprint = sprint_queries.by_id(record_id(request)) || halt(404)
+          sprint = sprint_queries.by_id(record_id(request)) || halt(:not_found)
 
           response.render(view, sprint:)
         end

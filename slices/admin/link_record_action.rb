@@ -13,7 +13,7 @@ module Admin
       result = link_records.call(self.class::KIND, id, Blog::Types::Fields[request.params[:record]])
 
       settle(response, result, self.class::LINKED, record_path(request, id)) do |errors|
-        response.status = 422
+        response.status = :unprocessable_content
         render_refused(request, response, id, errors)
       end
     end

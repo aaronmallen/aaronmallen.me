@@ -20,7 +20,7 @@ module Admin
         private
 
         def not_configured(request, response)
-          response.status = 503
+          response.status = :service_unavailable
           response.render(failed_view, reason: :not_configured, provider: request.params[:provider].to_sym)
         end
 

@@ -4,7 +4,6 @@ module MCP
   module Actions
     module Messages
       class Create < Action
-        ACCEPTED = 202
         AUTHORIZATION = "HTTP_AUTHORIZATION"
         CHALLENGE = "WWW-Authenticate"
         EXPOSED_HEADERS = "Access-Control-Expose-Headers"
@@ -13,7 +12,6 @@ module MCP
         }.freeze
         MAX_BYTES = Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT
         NO_BODY = ""
-        UNAUTHORIZED = 401
         UNEXPECTED = { error: INVALID_REQUEST }.freeze
 
         include Deps[
@@ -38,7 +36,7 @@ module MCP
 
           payload = request.body.read(MAX_BYTES).to_s
           reply = handler.call(payload, scopes: token.scopes, oauth_client_id: token.oauth_client_id)
-          return render_body(response, NO_BODY, status: ACCEPTED) if reply.nil?
+          return render_body(response, NO_BODY, status: :accepted) if reply.nil?
 
           render_body(response, reply)
         end
@@ -53,7 +51,7 @@ module MCP
         def challenge(response, payload)
           response.headers[CHALLENGE] = bearer(payload)
           response.headers[EXPOSED_HEADERS] = CHALLENGE
-          render_json(response, payload, status: UNAUTHORIZED)
+          render_json(response, payload, status: :unauthorized)
         end
       end
     end

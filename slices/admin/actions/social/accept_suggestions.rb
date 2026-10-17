@@ -19,7 +19,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           social_post = social_post_queries.editable(id)
-          halt 404 unless social_post || claimed?(id)
+          halt :not_found unless social_post || claimed?(id)
 
           social_post ? accept(response, social_post, request.params[:edit_id].to_s) : toast(response, SENT)
           response.redirect_to(back_to(request, id))
@@ -28,7 +28,7 @@ module Admin
         private
 
         def accept(response, social_post, edit_id)
-          suggestion = suggestion_queries.for_social_post(social_post.id) || halt(404)
+          suggestion = suggestion_queries.for_social_post(social_post.id) || halt(:not_found)
 
           case accept_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
             in Success(accepted:, refused:) then applied(response, social_post, accepted, refused)
@@ -36,7 +36,7 @@ module Admin
             in Failure(:empty_part, part) then toast(response, EMPTY_PART, part:)
             in Failure(:stale) then toast(response, APPLIED, count: 0)
             in Failure(:not_found) then nil
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

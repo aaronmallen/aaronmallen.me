@@ -27,9 +27,9 @@ module Admin
         private
 
         def invalid(response, person, params, errors)
-          halt 404 unless person
+          halt :not_found unless person
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(edit_view, **build_person_editor.call(person:, params:, errors:))
         end
       end

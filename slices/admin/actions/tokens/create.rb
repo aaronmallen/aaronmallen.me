@@ -20,14 +20,14 @@ module Admin
               minted(response, value)
             in Failure[:invalid, errors]
               invalid(response, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
         private
 
         def invalid(response, params, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(
             index_view,
             errors:, minted: nil, tokens: api_token_queries.live, name: params[:name].to_s,

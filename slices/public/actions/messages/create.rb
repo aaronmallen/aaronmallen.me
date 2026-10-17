@@ -5,10 +5,8 @@ module Public
     module Messages
       class Create < Action
         HONEYPOT = UI::Views::Pages::Contact::HONEYPOT
-        REJECTED = 422
         SENT = Pages::Contact::SENT
         STAMP = UI::Views::Pages::Contact::STAMP
-        THROTTLED = 429
 
         include Deps[
           check_stamp: "operations.check_contact_stamp",
@@ -40,12 +38,12 @@ module Public
         def confirm(response) = response.redirect_to(routes.path(:contact, sent: SENT))
 
         def refuse(response)
-          response.status = THROTTLED
+          response.status = :too_many_requests
           response.render(contact_view, throttled: true)
         end
 
         def reject(response, params, errors)
-          response.status = REJECTED
+          response.status = :unprocessable_content
           response.render(contact_view, errors:, values: values(params))
         end
 

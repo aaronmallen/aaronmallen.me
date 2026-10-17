@@ -6,19 +6,19 @@ require "json"
 module API
   class Action < Blog::Action
     AUTHORIZATION = "HTTP_AUTHORIZATION"
-    BAD_REQUEST = 400
     CHALLENGE = "WWW-Authenticate"
-    CREATED = 201
-    FORBIDDEN = 403
     GONE_TOKEN = {
       error: Operations::Authenticate::INVALID_TOKEN, error_description: Operations::Authenticate::UNUSABLE_TOKEN,
     }.freeze
     INSUFFICIENT_SCOPE = "insufficient_scope"
     MISSING_SCOPE = "this endpoint needs a token with the %s scope"
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
-    OK = 200
-    STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
-    UNAUTHORIZED = 401
+    STATUSES = {
+      failed: :internal_server_error,
+      invalid: :unprocessable_content,
+      not_found: :not_found,
+      unavailable: :service_unavailable,
+    }.freeze
     VERB_SCOPES = { "DELETE" => Blog::Types::OAuthScope["delete"], "GET" => Blog::Types::OAuthScope["read"],
                     "HEAD" => Blog::Types::OAuthScope["read"] }.freeze
     WRITE = Blog::Types::OAuthScope["write"]
@@ -40,18 +40,18 @@ module API
     def insufficient(response, scope, description = format(MISSING_SCOPE, scope))
       response.format = :json
       response.headers[CHALLENGE] = %(Bearer error="#{INSUFFICIENT_SCOPE}", scope="#{scope}")
-      halt FORBIDDEN, JSON.generate({ error: INSUFFICIENT_SCOPE, error_description: description })
+      halt :forbidden, JSON.generate({ error: INSUFFICIENT_SCOPE, error_description: description })
     end
 
-    def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: BAD_REQUEST)
+    def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: :bad_request)
 
     def refuse_token(response, error)
       response.format = :json
       response.headers[CHALLENGE] = bearer(error)
-      halt UNAUTHORIZED, JSON.generate(error)
+      halt :unauthorized, JSON.generate(error)
     end
 
-    def render_json(response, payload, status: OK)
+    def render_json(response, payload, status: :ok)
       response.status = status
       response.format = :json
       response.body = JSON.generate(payload)

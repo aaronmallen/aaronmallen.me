@@ -8,7 +8,7 @@ module Admin
 
         def handle(request, response)
           ids = picked_ids(request)
-          halt 404 if ids.empty?
+          halt :not_found if ids.empty?
 
           filter = Blog::Types::WebmentionStatusParam[request.params[:status]]
           response.render(view, ids:, filter:, fields: request.params.to_h.slice(*FIELDS))

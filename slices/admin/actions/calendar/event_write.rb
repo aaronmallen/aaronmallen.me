@@ -17,7 +17,7 @@ module Admin
           values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }
           refused = { id:, menu: Blog::Types::Checkbox[params[:menu]], values:, errors: }
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(show_view, **build_calendar_page.call(day: params[:day]), refused:)
         end
       end

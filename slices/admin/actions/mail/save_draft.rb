@@ -14,8 +14,8 @@ module Admin
           response.format = :json
           case save_draft.call(Blog::Types::Fields[request.params[:mail]])
             in Success(id) then response.body = JSON.generate({ draft: id })
-            in Failure[:invalid, _] then halt 422
-            in Failure[:gmail_failed, _] then halt 502
+            in Failure[:invalid, _] then halt :unprocessable_content
+            in Failure[:gmail_failed, _] then halt :bad_gateway
           end
         end
       end

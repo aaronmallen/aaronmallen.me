@@ -7,7 +7,7 @@ module Admin
         include Deps[calendar_queries: "calendar.repos.calendar_queries"]
 
         def handle(request, response)
-          event = calendar_queries.event(record_id(request)) || halt(404)
+          event = calendar_queries.event(record_id(request)) || halt(:not_found)
           day = Blog::Types::DateParam[request.params[:day]] || event.starts_on
 
           response.render(view, event:, day:)

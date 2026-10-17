@@ -18,7 +18,7 @@ module Admin
 
         def render_refused(request, response, id, errors)
           page = build_projects_page.call(filter: WORK, linking: id, records: records_query(request, errors))
-          halt 404 unless page[:work_links]
+          halt :not_found unless page[:work_links]
 
           response.render(index_view, **page)
         end

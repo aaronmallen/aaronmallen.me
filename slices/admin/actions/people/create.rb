@@ -5,7 +5,6 @@ module Admin
     module People
       class Create < Action
         ADDED = "people_page.toasts.added"
-        CREATED = 201
         MENTION = "mention"
 
         include Deps[
@@ -22,9 +21,9 @@ module Admin
           case save_person.call(params)
             in Success(person) then added(request, response, person)
             in Failure[:invalid, errors]
-              response.status = 422
+              response.status = :unprocessable_content
               response.render(new_view, **build_person_editor.call(params:, errors:))
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -38,7 +37,7 @@ module Admin
         end
 
         def mention(response, person)
-          response.status = CREATED
+          response.status = :created
           response.render(mention_view, handles: resolve_mentions.handles([person]), person:)
         end
       end

@@ -27,9 +27,9 @@ module Admin
 
         def invalid(request, response, params, errors)
           decision = decision_queries.by_id(record_id(request))
-          halt 404 unless decision
+          halt :not_found unless decision
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(view, **build_decision_editor.call(decision:, params:, errors:))
         end
       end

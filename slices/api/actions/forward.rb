@@ -60,7 +60,7 @@ module API
         return parsed if parsed.is_a?(Hash)
 
         response.format = :json
-        halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
+        halt :bad_request, JSON.generate(NOT_AN_OBJECT)
       end
 
       def input(request, response)

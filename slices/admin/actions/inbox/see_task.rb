@@ -13,7 +13,7 @@ module Admin
           result = mark_task_seen.call(record_id(request))
 
           case result
-            in Failure(:unsourced) then halt 404
+            in Failure(:unsourced) then halt :not_found
             else settle(response, result, SEEN, back_here(request) || routes.path(:admin_inbox))
           end
         end

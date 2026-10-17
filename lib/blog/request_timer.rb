@@ -6,7 +6,6 @@ module Blog
   class RequestTimer
     AFTER_REPLY = "rack.after_reply"
     ROUTE = "blog.route"
-    SERVER_ERROR = 500
 
     def initialize(app, record)
       @app = app
@@ -16,7 +15,7 @@ module Blog
 
     def call(env)
       timer = Timer.start
-      status = SERVER_ERROR
+      status = ::Rack::Utils.status_code(:internal_server_error)
       status, = response = @app.call(env)
       response
     ensure

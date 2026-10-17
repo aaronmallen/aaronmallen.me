@@ -14,7 +14,7 @@ module MCP
             in Success(url) then response.redirect_to(url)
             in Failure(Operations::Authorize::SIGN_IN) then reject_form(request, response)
             in Failure(Operations::Authorize::REFUSE, refusal) then refuse(response, refusal)
-            in Failure(Operations::Authorize::REJECT, payload) then render_json(response, payload, status: REJECTED)
+            in Failure(Operations::Authorize::REJECT, payload) then reject_json(response, payload)
             else reject_json(response)
           end
         end

@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           id = record_id(request, :comment_id)
           decision_id = record_id(request)
-          comment = decision_queries.timeline_entry(decision_id, "comment", id) || halt(404)
+          comment = decision_queries.timeline_entry(decision_id, "comment", id) || halt(:not_found)
 
           response.render(view, comment:, owner: :decision, owner_id: decision_id, return_to: back_here(request))
         end

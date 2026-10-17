@@ -21,9 +21,9 @@ module Admin
           case compose_social_post.call(params, intent: intent(request), id:)
             in Success[outcome, social_post] then saved(response, outcome, social_post)
             in Failure(:already_posted) then sent(response)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure[:invalid, errors] then invalid(response, id, params, errors)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -32,7 +32,7 @@ module Admin
         def intent(request) = Blog::Types::SocialIntentParam[request.params[:intent]]
 
         def invalid(response, id, params, errors)
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(index_view,
                           **build_social_page.call(params:, errors:, editing: social_post_queries.editable(id)))
         end

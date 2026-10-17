@@ -8,8 +8,6 @@ module MCP
     ANY_ORIGIN = "*"
     INVALID_REQUEST = "invalid_request"
     JSON_TYPE = "application/json"
-    OK = 200
-    REJECTED = 400
 
     include Deps["settings"]
 
@@ -23,15 +21,17 @@ module MCP
 
     def issuer = settings.site_url.chomp("/")
 
-    def reject_json(response) = render_json(response, { error: INVALID_REQUEST }, status: REJECTED)
+    def reject_json(response, payload = { error: INVALID_REQUEST })
+      render_json(response, payload, status: :bad_request)
+    end
 
-    def render_body(response, body, status: OK)
+    def render_body(response, body, status: :ok)
       response.status = status
       allow_any_origin(response)
       response.headers["Content-Type"] = JSON_TYPE
       response.body = body
     end
 
-    def render_json(response, payload, status: OK) = render_body(response, JSON.generate(payload), status:)
+    def render_json(response, payload, status: :ok) = render_body(response, JSON.generate(payload), status:)
   end
 end

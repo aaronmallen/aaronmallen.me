@@ -6,13 +6,10 @@ module Public
   module Actions
     module Visits
       class Create < Action
-        ACCEPTED = 202
         CLICK = Blog::Types::VisitKind["click"]
         MALFORMED = :malformed
         MAX_BYTES = 8192
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
-        REJECTED = 400
-        THROTTLED = 429
         TIMING = "timing"
         VIEW = Blog::Types::VisitKind["view"]
 
@@ -35,7 +32,7 @@ module Public
 
         def follow_up(request, visit, route)
           result = outcome(request, visit)
-          return ACCEPTED if result.failure? && result.failure != MALFORMED && !find_page.call(route)
+          return :accepted if result.failure? && result.failure != MALFORMED && !find_page.call(route)
 
           store(request, visit, route, result)
         end
@@ -51,10 +48,10 @@ module Public
         end
 
         def refuse_oversized(request, _response)
-          halt REJECTED, Blog::Constants::EMPTY_STRING if request.content_length.to_i > MAX_BYTES
+          halt :bad_request, Blog::Constants::EMPTY_STRING if request.content_length.to_i > MAX_BYTES
         end
 
-        def reject(_request, response, _exception) = respond(response, REJECTED)
+        def reject(_request, response, _exception) = respond(response, :bad_request)
 
         def respond(response, status)
           response.status = status
@@ -76,7 +73,7 @@ module Public
         def status_for(request)
           visit = request.env[ACTION_PARSED_BODY]
           route = route_for(visit)
-          return REJECTED unless route
+          return :bad_request unless route
 
           case visit["kind"]
             in VIEW then find_page.call(route) ? store(request, visit, route) : uncounted(visit)
@@ -89,9 +86,9 @@ module Public
           case result
             in Success(counted)
               time(request, visit, route) if counted
-              ACCEPTED
-            in Failure(Blog::Throttle::THROTTLED) then THROTTLED
-            else REJECTED
+              :accepted
+            in Failure(Blog::Throttle::THROTTLED) then :too_many_requests
+            else :bad_request
           end
         end
 
@@ -105,7 +102,7 @@ module Public
           )
         end
 
-        def uncounted(visit) = check_visit.call(visit).success? ? ACCEPTED : REJECTED
+        def uncounted(visit) = check_visit.call(visit).success? ? :accepted : :bad_request
       end
     end
   end

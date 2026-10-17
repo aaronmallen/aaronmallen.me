@@ -5,7 +5,6 @@ module Public
     module Projects
       class Show < Action
         COLUMNS = Blog::Types::TaskColumn.values
-        NOT_PUBLIC = 404
 
         include Deps[project_queries: "projects.repos.project_queries", task_queries: "tasks.repos.task_queries"]
 
@@ -13,7 +12,7 @@ module Public
 
         def handle(request, response)
           project = project_queries.public_board(path_param(request, :slug))
-          response.status = NOT_PUBLIC unless project
+          response.status = :not_found unless project
 
           response[:project] = project
           expose_board(response, project&.id, sizes(request))

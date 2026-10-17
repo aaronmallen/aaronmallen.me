@@ -21,8 +21,8 @@ module Admin
             in Success[:scheduled, _, day] then done(request, response, SCHEDULED, date: i18n.l(day, format: :medium))
             in Failure(:closed) then done(request, response, CLOSED)
             in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
-            in Failure(:not_found) then halt 404
-            else halt 500
+            in Failure(:not_found) then halt :not_found
+            else halt :internal_server_error
           end
         end
 

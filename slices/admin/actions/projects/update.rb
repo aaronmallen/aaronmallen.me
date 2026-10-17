@@ -29,9 +29,9 @@ module Admin
         private
 
         def invalid(response, project, params, errors)
-          halt 404 unless project
+          halt :not_found unless project
 
-          response.status = 422
+          response.status = :unprocessable_content
           records = list_record_links.call(KIND, project.id)
           response.render(view, **build_project_editor.call(project:, params:, errors:), records:)
         end

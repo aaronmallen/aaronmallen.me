@@ -11,7 +11,7 @@ module Admin
 
         def handle(request, response)
           posts = post_queries.by_ids(picked_ids(request))
-          halt 404 if posts.empty?
+          halt :not_found if posts.empty?
 
           response.render(view, posts:, tags: tag_queries.all_in(PUBLIC), fields: request.params.to_h.slice(*FIELDS))
         end

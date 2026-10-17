@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
 
-          response.render(view, token: api_token_queries.live.find { it.id == id } || halt(404))
+          response.render(view, token: api_token_queries.live.find { it.id == id } || halt(:not_found))
         end
       end
     end

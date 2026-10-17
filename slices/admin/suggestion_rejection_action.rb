@@ -13,8 +13,8 @@ module Admin
       case reject_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
         in Success(*rejected) then toast(response, self.class::REJECTED, count: rejected.length)
         in Failure(:nothing_open) then toast(response, self.class::REJECTED, count: 0)
-        in Failure(:already_posted | :not_found) then halt 404
-        else halt 500
+        in Failure(:already_posted | :not_found) then halt :not_found
+        else halt :internal_server_error
       end
     end
   end

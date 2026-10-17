@@ -6,7 +6,6 @@ require "rack"
 
 module MCP
   class BrowserAction < Action
-    FORBIDDEN = 403
     ROBOTS = "noindex, nofollow"
 
     include Hanami::Action::CSRFProtection
@@ -37,13 +36,13 @@ module MCP
     end
 
     def refuse(response, refusal)
-      response.status = REJECTED
+      response.status = :bad_request
       response.render(refused_view, **refusal)
     end
 
     def reject_form(request, response)
       harden(request, response)
-      halt FORBIDDEN, response.render(rejected_view)
+      halt :forbidden, response.render(rejected_view)
     end
 
     def start_sign_in(request, response, session)

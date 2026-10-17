@@ -4,11 +4,9 @@ module Public
   module Actions
     module Search
       class Index < Action
-        FAILED = 503
         GROUP = Blog::Structs::Page.new(number: 1, size: 3)
         KINDS = Blog::Types::PublicSearchKind.values
         LATEST = 3
-        LIMITED = 429
 
         include Deps[
           claim_search_attempt: "search.operations.claim_search_attempt",
@@ -39,7 +37,7 @@ module Public
         def grouped(text, counts) = KINDS.select { counts[it] }.to_h { [it, search(text, it, GROUP)] }
 
         def limit(response, text, kind)
-          response.status = LIMITED
+          response.status = :too_many_requests
           { query: text, kind:, limited: true }.each { |key, value| response[key] = value }
         end
 
@@ -50,7 +48,7 @@ module Public
 
           { counts:, groups:, boards: boards(groups), failed: false }
         rescue Sequel::DatabaseError
-          response.status = FAILED
+          response.status = :service_unavailable
           { counts: {}, groups: {}, boards: [], failed: true }
         end
 

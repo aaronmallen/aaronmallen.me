@@ -18,10 +18,10 @@ module Admin
 
           case publish_draft.call(id)
             in Success[outcome, post] then published(response, outcome, post)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure(:published) then failed(response, id, :published)
             in Failure[:invalid, _] then failed(response, id, :invalid)
-            else halt 500
+            else halt :internal_server_error
           end
 
           response.redirect_to(back(request))

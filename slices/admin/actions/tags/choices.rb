@@ -7,7 +7,6 @@ module Admin
     module Tags
       class Choices < Action
         PRIVATE = Blog::Types::TagScope["private"]
-        UNAUTHORIZED = 401
 
         include Deps[tag_queries: "tags.repos.tag_queries"]
 
@@ -22,7 +21,7 @@ module Admin
         private
 
         def require_sign_in(request, _response)
-          halt UNAUTHORIZED unless auth_session(request).signed_in?
+          halt :unauthorized unless auth_session(request).signed_in?
         end
       end
     end

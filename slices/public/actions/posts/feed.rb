@@ -14,7 +14,7 @@ module Public
 
         def handle(request, response)
           posts = post_queries.published_versions(requested_page(request, response))
-          halt 404 if posts.past_end?
+          halt :not_found if posts.past_end?
           version = version_feed_or_halt(request, response, posts)
 
           response.body = atom_feed.call(

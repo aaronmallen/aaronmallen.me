@@ -25,9 +25,9 @@ module Admin
         def move(request, response, operation, at:)
           case operation.call(record_id(request), request.params[:to])
             in Success(record) then done(request, response, :moved, **moved_to(record[at]))
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure(:invalid | :not_scheduled | :past => refusal) then done(request, response, refusal)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -47,11 +47,11 @@ module Admin
         def written(request, response, result, key, &)
           case result
             in Success(calendar) then done(request, response, key, calendar: calendar.name)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure(:read_only) then done(request, response, :read_only)
             in Failure[:invalid, errors] then refused(request, response, errors, &)
             in Failure[:google_failed, _] then done(request, response, :google_failed)
-            else halt 500
+            else halt :internal_server_error
           end
         end
       end

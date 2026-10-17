@@ -17,7 +17,7 @@ module Admin
 
         def handle(request, response)
           act = request.params[:act]
-          halt 422 unless DONE.key?(act)
+          halt :unprocessable_content unless DONE.key?(act)
 
           key, details = moved(request, act, picked_ids(request))
           toast(response, key, **details)

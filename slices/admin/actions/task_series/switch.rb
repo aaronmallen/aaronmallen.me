@@ -17,10 +17,10 @@ module Admin
 
         def handle(request, response)
           series = task_series_queries.by_id(record_id(request))
-          halt 404 unless series
+          halt :not_found unless series
 
           on = request.params[:on] == Blog::Constants::CHECKED
-          halt 500 if switch(series.id, on).failure?
+          halt :internal_server_error if switch(series.id, on).failure?
 
           toast(response, on ? RESUMED : PAUSED, task: title(series))
           response.redirect_to(routes.path(:admin_tasks, filter: RECURRING))

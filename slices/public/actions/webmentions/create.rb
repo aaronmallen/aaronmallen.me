@@ -4,10 +4,6 @@ module Public
   module Actions
     module Webmentions
       class Create < Action
-        ACCEPTED = 202
-        REJECTED = 400
-        THROTTLED = 429
-
         include Deps[
           hash_visitor: "analytics.operations.hash_visitor",
           receive_webmention: "social.operations.receive_webmention",
@@ -28,9 +24,9 @@ module Public
 
         def status_for(outcome)
           case outcome
-            in Success(_) then ACCEPTED
-            in Failure(Blog::Throttle::THROTTLED) then THROTTLED
-            else REJECTED
+            in Success(_) then :accepted
+            in Failure(Blog::Throttle::THROTTLED) then :too_many_requests
+            else :bad_request
           end
         end
 

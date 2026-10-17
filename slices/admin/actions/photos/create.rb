@@ -6,9 +6,11 @@ module Admin
   module Actions
     module Photos
       class Create < Action
-        CREATED = 201
-        REFUSED = 422
-        STATUSES = { oversized: REFUSED, unavailable: 503, unreadable: REFUSED }.freeze
+        STATUSES = {
+          oversized: :unprocessable_content,
+          unavailable: :service_unavailable,
+          unreadable: :unprocessable_content,
+        }.freeze
 
         include Deps[upload_photo: "media.operations.upload_photo"]
 
@@ -17,9 +19,9 @@ module Admin
         def handle(request, response)
           case upload_photo.call(Blog::Types::UploadParam[request.params[:photo]])
             in Success(photo)
-              answer(response, CREATED, url: settings.site_url(photo.path), key: photo.key)
+              answer(response, :created, url: settings.site_url(photo.path), key: photo.key)
             in Failure[:invalid, { photo: [code, *] }]
-              refuse(response, REFUSED, code)
+              refuse(response, :unprocessable_content, code)
             in Failure[reason]
               refuse(response, STATUSES.fetch(reason), reason)
           end

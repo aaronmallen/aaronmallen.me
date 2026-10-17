@@ -8,7 +8,6 @@ module Blog
     JSON_PATHS = %r{\A/(?:api/|mcp\z|oauth/(?:register|token)\z|\.well-known/oauth-)}
     PAGE = File.expand_path("../../public/503.html", __dir__)
     RETRY_SECONDS = "300"
-    STATUS = 503
 
     def initialize(app, flag)
       @app = app
@@ -20,7 +19,8 @@ module Blog
       return @app.call(env) unless File.exist?(@flag)
 
       type, body = JSON_PATHS.match?(env[::Rack::PATH_INFO]) ? ["application/json", JSON_BODY] : ["text/html", @page]
-      [STATUS, { "cache-control" => "no-store", "content-type" => type, "retry-after" => RETRY_SECONDS }, [body]]
+      headers = { "cache-control" => "no-store", "content-type" => type, "retry-after" => RETRY_SECONDS }
+      [::Rack::Utils.status_code(:service_unavailable), headers, [body]]
     end
   end
 end

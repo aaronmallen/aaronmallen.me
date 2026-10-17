@@ -15,7 +15,7 @@ module Admin
 
         def handle(request, response)
           connection = connection_queries.by_id(record_id(request))
-          halt 404 unless connection&.provider == GOOGLE
+          halt :not_found unless connection&.provider == GOOGLE
 
           work = request.params[:work] == Blog::Constants::CHECKED
           change_connection.call(connection.id, work:)

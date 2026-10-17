@@ -12,8 +12,8 @@ module Admin
         def handle(request, response)
           case download_attachment.call(record_id(request), request.params[:part])
             in Success[attachment, data] then serve(response, attachment, data)
-            in Failure(:not_found) then halt 404
-            in Failure[:gmail_failed, _] then halt 502
+            in Failure(:not_found) then halt :not_found
+            in Failure[:gmail_failed, _] then halt :bad_gateway
           end
         end
 

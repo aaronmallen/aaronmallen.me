@@ -20,9 +20,9 @@ module Admin
 
           case save_post.call(params, id:, intent: intent(request))
             in Success[outcome, post] then saved(response, outcome, post)
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure[:invalid, errors] then invalid(request, response, params, errors, id:)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 
@@ -32,9 +32,9 @@ module Admin
 
         def invalid(request, response, params, errors, id:)
           post = post_queries.by_id(id)
-          halt 404 unless post
+          halt :not_found unless post
 
-          response.status = 422
+          response.status = :unprocessable_content
           editor = build_post_editor.call(post:, params:, errors:, view: request.params[:view])
           response.render(view, **editor, records: list_record_links.call(KIND, id))
         end

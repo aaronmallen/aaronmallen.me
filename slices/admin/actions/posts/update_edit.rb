@@ -16,7 +16,7 @@ module Admin
         ]
 
         def handle(request, response)
-          post = post_queries.by_id(record_id(request)) || halt(404)
+          post = post_queries.by_id(record_id(request)) || halt(:not_found)
           id = record_id(request, :edit_id)
           params = Blog::Types::Fields[request.params[:edit]]
 
@@ -32,7 +32,7 @@ module Admin
         def invalid(response, post, id:, note:, errors:)
           noting = { id:, note: Blog::Types::Text[note], errors: }
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(view, **build_post_editor.call(post:, noting:),
 records: list_record_links.call(KIND, post.id))
         end

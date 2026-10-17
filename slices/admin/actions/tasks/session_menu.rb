@@ -9,7 +9,7 @@ module Admin
         def handle(request, response)
           id = record_id(request, :session_id)
           task_id = record_id(request)
-          session = task_timeline_queries.entry(task_id, "session", id) || halt(404)
+          session = task_timeline_queries.entry(task_id, "session", id) || halt(:not_found)
 
           response.render(view, session:, task_id:, return_to: back_here(request))
         end

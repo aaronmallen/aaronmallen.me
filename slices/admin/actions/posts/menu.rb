@@ -9,7 +9,7 @@ module Admin
         include Deps[post_queries: "posts.repos.post_queries", tag_queries: "tags.repos.tag_queries"]
 
         def handle(request, response)
-          post = post_queries.by_id(record_id(request)) || halt(404)
+          post = post_queries.by_id(record_id(request)) || halt(:not_found)
           list = { status: Blog::Types::PostFilterParam[request.params[:status]], page: page_number(request) }
 
           response.render(view, post:, list:, tags: tag_queries.all_in(PUBLIC), return_to: back_here(request))

@@ -4,7 +4,7 @@ module Admin
   module Actions
     module People
       class Search < Action
-        STATUSES = { failed: 502, rate_limited: 429 }.freeze
+        STATUSES = { failed: :bad_gateway, rate_limited: :too_many_requests }.freeze
 
         include Deps[search_accounts: "social.operations.search_accounts"]
 
@@ -13,7 +13,7 @@ module Admin
 
           case search_accounts.call(network:, query: request.params[:q])
             in Success(*accounts) then response.render(view, network:, accounts:)
-            in Failure(:unconfigured) then halt 404
+            in Failure(:unconfigured) then halt :not_found
             in Failure(problem)
               response.status = STATUSES.fetch(problem)
               response.render(view, network:, problem:)

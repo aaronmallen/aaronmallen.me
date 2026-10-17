@@ -6,8 +6,6 @@ module Admin
   module Actions
     module SavedViews
       class Palette < Action
-        UNAUTHORIZED = 401
-
         include Deps[list_palette_saved_views: "operations.list_palette_saved_views"]
 
         config.formats.accept :json
@@ -20,7 +18,7 @@ module Admin
         private
 
         def require_sign_in(request, _response)
-          halt UNAUTHORIZED unless auth_session(request).signed_in?
+          halt :unauthorized unless auth_session(request).signed_in?
         end
       end
     end

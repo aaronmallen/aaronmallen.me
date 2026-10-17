@@ -15,7 +15,7 @@ module Admin
         ]
 
         def handle(request, response)
-          task = task_queries.detailed(record_id(request)) || halt(404)
+          task = task_queries.detailed(record_id(request)) || halt(:not_found)
           today = Blog::TimeZone.today
 
           response.render(

@@ -19,7 +19,7 @@ module Admin
 
         def render_refused(request, response, id, errors)
           project = project_queries.by_id(id)
-          halt 404 unless project
+          halt :not_found unless project
 
           records = list_record_links.call(KIND, id, **records_query(request, errors))
           response.render(edit_view, **build_project_editor.call(project:), records:)

@@ -11,7 +11,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           suggestion = suggestion_queries.for_social_post(id)
-          halt 404 unless suggestion
+          halt :not_found unless suggestion
 
           reject(response, suggestion, request.params[:edit_id].to_s)
           response.redirect_to(back_to(request, id))

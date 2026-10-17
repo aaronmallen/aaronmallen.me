@@ -22,11 +22,11 @@ module Admin
 
           case made(id, Blog::Types::Fields[request.params[:task]])
             in Success(task) then toast(response, MADE, key: label(task))
-            in Failure(:not_found) then halt 404
+            in Failure(:not_found) then halt :not_found
             in Failure[:unarchived, task] then toast(response, UNARCHIVED, key: label(task))
             in Failure(:tasked) then toast(response, ALREADY)
             in Failure[:invalid, _] then toast(response, UNTITLED)
-            else halt 500
+            else halt :internal_server_error
           end
           response.redirect_to(back(request, id))
         end

@@ -16,8 +16,6 @@ module API
 
       OPERATIONS = OperationTable::OPERATIONS
 
-      SOURCES = { "read_document" => Actions::Documents::Show, "read_token" => Actions::Tokens::Show }.freeze
-
       REFUSAL = Helpers::Schema.object(
         {
           error: { type: "string", enum: [*Action::STATUSES.keys.map(&:to_s), Action::NOT_AN_OBJECT.fetch(:error)] },
@@ -127,9 +125,7 @@ module API
 
       def descriptor(id)
         _, verb, path, status = OPERATIONS.assoc(id)
-        source = SOURCES.fetch(id) { Endpoints.const_get(inflector.camelize(id)) }
-
-        Descriptor.new(id:, verb:, path:, status:, source:)
+        Descriptor.new(id:, verb:, path:, status:, source: source(id))
       end
 
       private
@@ -154,6 +150,13 @@ module API
 
       def serializers
         Serializers.constants.sort.map { Serializers.const_get(it) }.to_h { [it.component, it::SCHEMA] }
+      end
+
+      def source(id)
+        action = OperationTable::ACTIONS[id]
+        return Endpoints.const_get(inflector.camelize(id)) unless action
+
+        Actions.const_get(inflector.camelize(action.tr(".", "/")))
       end
     end
   end

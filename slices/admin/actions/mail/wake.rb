@@ -15,7 +15,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           result = wake_message.call(id)
-          halt 422 if result in Failure(:not_snoozed)
+          halt :unprocessable_content if result in Failure(:not_snoozed)
 
           settle(response, result, WOKEN, back_here(request) || listed(request, thread: id))
         end

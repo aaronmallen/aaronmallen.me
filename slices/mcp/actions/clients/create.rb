@@ -6,9 +6,7 @@ module MCP
   module Actions
     module Clients
       class Create < Action
-        CREATED = 201
         MAX_BYTES = 16_384
-        THROTTLED = 429
         TOO_MANY = "temporarily_unavailable"
 
         include Deps[
@@ -20,11 +18,11 @@ module MCP
         def handle(request, response)
           case register_client.call(payload(request), visitor_hashes: visitor_hashes(request))
             in Success(client)
-              render_json(response, client, status: CREATED)
+              render_json(response, client, status: :created)
             in Failure(Operations::RegisterClient::REJECT, payload)
-              render_json(response, payload, status: REJECTED)
+              reject_json(response, payload)
             in Failure(Blog::Throttle::THROTTLED)
-              render_json(response, { error: TOO_MANY }, status: THROTTLED)
+              render_json(response, { error: TOO_MANY }, status: :too_many_requests)
             else
               reject_json(response)
           end

@@ -15,7 +15,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           suggestion = suggestion_queries.for_post(id)
-          halt 404 unless suggestion
+          halt :not_found unless suggestion
 
           edit_id = request.params[:edit_id].to_s
           accept(response, suggestion, edit_id)
@@ -30,7 +30,7 @@ module Admin
             in Failure(:stale) then toast(response, APPLIED, count: 0)
             in Failure(:published) then toast(response, LIVE)
             in Failure(:not_found) then nil
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

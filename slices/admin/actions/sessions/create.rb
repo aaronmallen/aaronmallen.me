@@ -6,11 +6,10 @@ module Admin
       class Create < Action
         ENDS_SESSION = :wrong_account
         STATUSES = {
-          denied: 401,
-          provider_failed: 502,
-          wrong_account: 403,
+          denied: :unauthorized,
+          provider_failed: :bad_gateway,
+          wrong_account: :forbidden,
         }.freeze
-        UNEXPECTED = 500
 
         include Deps[
           failed_view: "ui.views.sessions.failed",
@@ -58,7 +57,7 @@ module Admin
         def fail_sign_in(request, response, reason)
           record(request, Blog::Types::SignInOutcome.valid?(reason.to_s) ? reason : :unexpected)
           end_session(request, response) if reason == ENDS_SESSION
-          response.status = STATUSES.fetch(reason, UNEXPECTED)
+          response.status = STATUSES.fetch(reason, :internal_server_error)
           response.render(failed_view, reason:, provider: request.params[:provider].to_sym)
         end
 
@@ -66,7 +65,7 @@ module Admin
           case result
             in Success(email) then signed_in(request, response, email)
             in Failure(reason) then fail_sign_in(request, response, reason)
-            else halt 500
+            else halt :internal_server_error
           end
         end
 

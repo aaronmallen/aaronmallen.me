@@ -25,9 +25,9 @@ module Admin
 
         def invalid(response, id, params, errors)
           group = share_group_queries.find(id)
-          halt 404 unless group
+          halt :not_found unless group
 
-          response.status = 422
+          response.status = :unprocessable_content
           response.render(edit_view, group:, values: values(params), errors:)
         end
 

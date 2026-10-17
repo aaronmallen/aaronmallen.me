@@ -11,7 +11,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           suggestion = suggestion_queries.for_post(id)
-          halt 404 unless suggestion
+          halt :not_found unless suggestion
 
           edit_id = request.params[:edit_id].to_s
           reject(response, suggestion, edit_id)
