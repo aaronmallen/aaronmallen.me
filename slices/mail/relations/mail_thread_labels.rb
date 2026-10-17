@@ -8,6 +8,8 @@ module Mail
           belongs_to :mail_label
         end
       end
+
+      def add(rows) = dataset.insert_conflict.multi_insert(rows)
     end
   end
 end

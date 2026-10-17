@@ -4,30 +4,25 @@ module Mail
   module Repos
     class GmailMutations < Blog::DB::Repo
       GMAIL = Blog::Types::MailProvider["gmail"]
-      MESSAGE_COLUMNS = %i[subject reply_to from_name body html_body received_at updated_at].freeze
-      SPAM = Blog::Types::MessageStatus["spam"]
-      THREAD_COLUMNS = %i[
-        subject status starred archived trashed sent draft important category received_at updated_at
-      ].freeze
 
       def account(address)
-        mail_accounts.dataset.insert_conflict(target: :address).insert(provider: GMAIL, name: address, address:)
+        mail_accounts.add(address, provider: GMAIL)
         mail_accounts.where(address:).one
       end
 
       def add_label(thread_id, label_id)
-        mail_thread_labels.dataset.insert_conflict.insert(mail_thread_id: thread_id, mail_label_id: label_id)
+        mail_thread_labels.add([{ mail_thread_id: thread_id, mail_label_id: label_id }])
       end
 
       def delete_thread(account_id, gmail_id) = mail_threads.where(mail_account_id: account_id, gmail_id:).delete
 
       def follow(account_id, history_id)
-        mail_accounts.where(id: account_id).dataset.update(history_id:, updated_at: Time.now)
+        mail_accounts.where(id: account_id).update(history_id:, updated_at: Time.now)
       end
 
       def sign(account_id, signature, now: Time.now)
         signature = nil if signature.empty?
-        mail_accounts.where(id: account_id).dataset.update(signature:, settings_synced_at: now)
+        mail_accounts.where(id: account_id).update(signature:, settings_synced_at: now)
       end
 
       def store_draft(thread_id, draft, kept, now: Time.now)
@@ -37,7 +32,7 @@ module Mail
           mail_messages.where(mail_thread_id: thread_id).exclude(gmail_id: kept).delete
           upsert_messages(thread_id, [message], now)
           store_attachments(thread_id, draft.attachments)
-          restate(thread_id, message, now)
+          gmail_threads.where(id: thread_id).restate(message, now)
         end
       end
 
@@ -46,9 +41,7 @@ module Mail
 
         transaction do
           mail_labels.where(mail_account_id: account_id).exclude(gmail_id: rows.map { it[:gmail_id] }).delete
-          mail_labels.dataset.insert_conflict(
-            target: %i[mail_account_id gmail_id], update: mail_labels.excluded(%i[name updated_at]),
-          ).multi_insert(rows)
+          mail_labels.store(rows)
         end
       end
 
@@ -74,29 +67,12 @@ module Mail
         end
       end
 
-      def changed(table, columns)
-        Sequel.lit("? IS DISTINCT FROM ?", columns.map { Sequel[table][it] }, columns.map { Sequel[:excluded][it] })
-      end
-
       def label(id, account_id, gmail_ids)
         label_ids = mail_labels.where(mail_account_id: account_id, gmail_id: gmail_ids).pluck(:id)
 
         mail_thread_labels.where(mail_thread_id: id).exclude(mail_label_id: label_ids).delete
         rows = label_ids.map { |label_id| { mail_thread_id: id, mail_label_id: label_id } }
-        mail_thread_labels.dataset.insert_conflict.multi_insert(rows)
-      end
-
-      def marked_spam_at
-        kept = Sequel.function(:coalesce, Sequel[:mail_threads][:marked_spam_at], Sequel[:excluded][:marked_spam_at])
-
-        Sequel.case([[{ Sequel[:excluded][:status] => SPAM }, kept]], nil)
-      end
-
-      def restate(thread_id, message, now)
-        received_at = Sequel.function(:greatest, :received_at, message[:received_at])
-        subject = Sequel.case([[{ draft: true }, message[:subject]]], :subject)
-
-        mail_threads.where(id: thread_id).dataset.update(received_at:, subject:, updated_at: now)
+        mail_thread_labels.add(rows)
       end
 
       def store_attachments(thread_id, attachments)
@@ -105,7 +81,7 @@ module Mail
         rows.reject! { |id, files| files.to_set == stored.fetch(id, []).to_set }
 
         mail_attachments.where(mail_message_id: rows.keys).delete
-        mail_attachments.dataset.multi_insert(rows.values.flatten)
+        mail_attachments.multi_insert(rows.values.flatten)
       end
 
       def store_messages(id, messages, now)
@@ -118,20 +94,11 @@ module Mail
       end
 
       def upsert_messages(id, messages, now)
-        rows = messages.map { { **it, mail_thread_id: id, created_at: now, updated_at: now } }
-
-        mail_messages.dataset.insert_conflict(
-          target: %i[mail_thread_id gmail_id], update: mail_messages.excluded(MESSAGE_COLUMNS),
-          update_where: changed(:mail_messages, MESSAGE_COLUMNS - %i[updated_at]),
-        ).multi_insert(rows)
+        mail_messages.store(messages.map { { **it, mail_thread_id: id, created_at: now, updated_at: now } })
       end
 
       def upsert_thread(account_id, row, now)
-        update = { **mail_threads.excluded(THREAD_COLUMNS), marked_spam_at: }
-        update_where = changed(:mail_threads, THREAD_COLUMNS - %i[updated_at])
-        stored = mail_threads.dataset.returning(:id).insert_conflict(
-          target: %i[mail_account_id gmail_id], update:, update_where:,
-        ).insert(**row, mail_account_id: account_id, created_at: now, updated_at: now)
+        stored = gmail_threads.store({ **row, mail_account_id: account_id, created_at: now, updated_at: now })
 
         stored.first&.fetch(:id) || thread_id(account_id, row.fetch(:gmail_id))
       end

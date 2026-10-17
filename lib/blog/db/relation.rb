@@ -35,6 +35,10 @@ module Blog
         end
       end
 
+      def changed(columns)
+        Sequel.is_distinct_from(columns.map { self[it].qualified }, columns.map { Sequel[:excluded][it] })
+      end
+
       def containing(text, *columns, ids: Constants::EMPTY_ARRAY)
         return none if unmatchable?(text)
 

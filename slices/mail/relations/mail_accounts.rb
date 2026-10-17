@@ -8,6 +8,8 @@ module Mail
 
       schema :mail_accounts, infer: true
 
+      def add(address, provider:) = dataset.insert_conflict(target: :address).insert(provider:, name: address, address:)
+
       def contact_form = where(CONTACT_FORM)
 
       def contact_form_id

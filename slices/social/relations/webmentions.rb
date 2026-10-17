@@ -43,10 +43,6 @@ module Social
 
       private
 
-      def changed(fields)
-        Sequel.is_distinct_from(*%i[webmentions excluded].map { |table| fields.map { Sequel[table][it] } })
-      end
-
       def rechecked(fields)
         status = Sequel[:webmentions][:status]
 
