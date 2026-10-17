@@ -10,9 +10,9 @@ module Analytics
 
     export %w[
       operations.check_visit operations.classify_device operations.find_place operations.hash_visitor
-      operations.record_feed_fetch operations.record_visit operations.tag_ref repos.analytics_event_queries
-      repos.analytics_hour_queries repos.analytics_page_queries repos.analytics_rollup_queries repos.country_queries
-      repos.feed_fetch_queries repos.post_reader_queries
+      operations.queue_country_database operations.record_feed_fetch operations.record_visit operations.tag_ref
+      repos.analytics_event_queries repos.analytics_hour_queries repos.analytics_page_queries
+      repos.analytics_rollup_queries repos.country_queries repos.feed_fetch_queries repos.post_reader_queries
     ]
   end
 end

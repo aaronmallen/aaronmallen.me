@@ -3,10 +3,11 @@ id: "0159"
 title: Group shared lib code by service and register service clients at app level
 status: active
 created: 2026-10-12
-area: [config, lib, admin, backups, calendar, health, mail, media, posts, projects, record, services, shares, social,
-  suggestions, tasks]
+area: [config, lib, admin, analytics, backups, calendar, health, mail, media, performance, posts, projects, record,
+  services, shares, social, suggestions, tasks]
 supersedes: ["0149"]
 issue: "#1171"
+amended: ["#1576"]
 tags: [layout, lib, providers, clients, services, google, github, linear, mastodon, bluesky, object-store, markdown,
   errors, rubocop]
 ---
@@ -40,8 +41,17 @@ Shared `lib/` code groups by the service or job it does, not by slice, and the a
 - **Service clients and sign-in providers register in `config/providers`**: `google.client`, `github.client`,
   `linear.client`, the clients behind `networks.all`, `google.auth`, `github.auth` and `mastodon.auth`, plus one
   provider that registers `media_store.client`, `share_store.client` and `backup_store.client`. Slices take them
-  through `shared_app_component_keys`. A client looks up `services.repos.connection_queries` and
-  `services.operations.change_connection` when called, through `Hanami.app.slices[:services]`.
+  through `shared_app_component_keys`.
+- **App code looks up a slice's component when it calls it**, because the providers start before the slices boot.
+  Each lookup names an exported key:
+  - The service clients look up `services.repos.connection_queries` and `services.operations.change_connection`
+    through `Hanami.app.slices[:services]`.
+  - The Mastodon client looks up `social.operations.scan_links` and `media.operations.process_photo`, and the
+    Bluesky client `social.operations.scan_links` and `social.operations.scan_tags`, through `Hanami.app.slices`.
+  - The Sidekiq startup hook in `config/sidekiq.rb` calls `analytics.operations.queue_country_database`, and its job
+    timer calls `performance.operations.record_timing`.
+  - The middleware lambdas in `config/app.rb` call `performance.operations.record_timing` and
+    `admin.auth.session_reader`.
 - **`Blog::ServiceError` in `lib/blog` is the parent of every service error**, so a caller such as admin's
   `check_service` rescues one class. `lib/blog` holds the base classes slices inherit.
 - **The `google` slice goes away.** One `google` service definition with one `service_connections` row per account,
@@ -67,8 +77,9 @@ provider.
 A reader finds a service's code under the service's name, and a new slice that calls Google adds one shared key
 instead of an import.
 
-The `Hanami/SliceExports` cop cannot see the lookup of `services`, so a client's reach into another slice no longer
-shows as an import edge, and the cop's allow list drops the client keys.
+The `Hanami/SliceExports` cop cannot see these lookups, so app code's reach into a slice shows as no import edge,
+and the cop's allow list drops the client keys. The list above and the slices' exports stand in for the edges.
+Passing the scans into the clients would change the `networks.all` interface the length checks call.
 
 A boot-order break, such as a client that resolves `services` before the slice boots, fails only at runtime. Request
 specs have to cover every client path.
