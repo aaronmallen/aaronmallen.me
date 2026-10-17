@@ -25,7 +25,7 @@ module API
         ShareGroupFile.new(group.share_group_files, params: params.merge(code: group.code)).serializable_hash
       end
 
-      def url(group) = "#{params.fetch(:origin)}/#{group.code}"
+      def url(group) = params.fetch(:settings).share_url(group.code)
     end
   end
 end

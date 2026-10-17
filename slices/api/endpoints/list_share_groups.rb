@@ -16,7 +16,7 @@ module API
 
         Success(
           count: share_group_queries.count,
-          share_groups: serialized(Serializers::ShareGroup, groups.rows, origin: share_origin),
+          share_groups: serialized(Serializers::ShareGroup, groups.rows, settings:),
           **Helpers::Paging.fields(groups),
         )
       end

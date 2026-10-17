@@ -24,7 +24,7 @@ module API
 
         Success(
           count: share_queries.count_listed(**found),
-          shares: serialized(Serializers::Share, shares.rows, origin: share_origin),
+          shares: serialized(Serializers::Share, shares.rows, settings:),
           **Helpers::Paging.fields(shares),
         )
       end

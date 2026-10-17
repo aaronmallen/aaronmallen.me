@@ -22,7 +22,7 @@ module API
 
       def handle(ids:)
         case group_shares.call(ids)
-          in Success(group) then Success(serialized(Serializers::ShareGroup, group, origin: share_origin))
+          in Success(group) then Success(serialized(Serializers::ShareGroup, group, settings:))
           in Failure(:not_found) then invalid(ids: [NOT_SINGLE])
           in Failure[:invalid, errors] then rejected(errors, { ids: { "too_few" => TOO_FEW } })
         end

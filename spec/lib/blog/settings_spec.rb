@@ -310,4 +310,20 @@ RSpec.describe Blog::Settings do
       expect { transfers("0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
     end
   end
+
+  describe "#share_url" do
+    def share_url(*)
+      values = { share_site: { url: "https://aa.cool/" } }
+      store = Hanami::Settings::CompositeStore.new(values, Hanami.app.config.settings_store)
+      described_class.new(store).share_url(*)
+    end
+
+    it "joins a code to the share host" do
+      expect(share_url("abc")).to eq("https://aa.cool/abc")
+    end
+
+    it "joins a group file's ID after its group code" do
+      expect(share_url("abc", 7)).to eq("https://aa.cool/abc/7")
+    end
+  end
 end

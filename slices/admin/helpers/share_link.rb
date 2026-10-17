@@ -12,22 +12,18 @@ module Admin
       class << self
         def bare(link) = link.sub(SCHEME, "").chomp("/")
 
-        def for(code) = new.for(code)
+        def for(...) = new.for(...)
 
         def host = new.host
 
         def markdown(text, link) = "[#{text.to_s.gsub(MARKDOWN_SPECIAL) { "\\#{it}" }}](#{link})"
 
-        def origin = new.origin
-
         def preview(code) = new.preview(code)
       end
 
-      def for(code) = "#{origin}/#{code}"
+      def for(code, file_id = nil) = settings.share_url(code, file_id)
 
-      def host = self.class.bare(origin)
-
-      def origin = settings.share_site[:url].chomp("/")
+      def host = self.class.bare(settings.share_site[:url])
 
       def preview(code) = "#{self.for(code)}#{PREVIEW}"
     end

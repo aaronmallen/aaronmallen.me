@@ -12,7 +12,7 @@ module API
         share = share_queries.find(id)
         return missing("share", id) unless share
 
-        Success(serialized(Serializers::Share, share, origin: share_origin))
+        Success(serialized(Serializers::Share, share, settings:))
       end
     end
   end

@@ -26,12 +26,10 @@ module Social
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }
 
-      def origin = settings.share_site[:url].chomp("/")
-
       def short(url, make)
         code = code(url, make)
 
-        code ? "#{origin}/#{code}" : url
+        code ? settings.share_url(code) : url
       end
 
       def shortens?(url)

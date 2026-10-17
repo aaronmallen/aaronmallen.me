@@ -20,7 +20,7 @@ module API
         return missing("share group", id) unless share_group_queries.find(id)
 
         case ungroup_share_file.call(id, file_id)
-          in Success(share) then Success(serialized(Serializers::Share, share, origin: share_origin))
+          in Success(share) then Success(serialized(Serializers::Share, share, settings:))
           in Failure(:not_found) then not_found("share group #{id} has no file with the ID #{file_id}")
         end
       end

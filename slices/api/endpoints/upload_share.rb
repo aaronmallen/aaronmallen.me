@@ -16,7 +16,7 @@ module API
         return invalid(data: [Helpers::Upload::NOT_BASE64]) unless bytes
 
         case upload_share.call(Helpers::Upload.file(bytes, **fields))
-          in Success(share) then Success(serialized(Serializers::Share, share, origin: share_origin))
+          in Success(share) then Success(serialized(Serializers::Share, share, settings:))
           in Failure[:invalid, errors] then rejected(errors.transform_keys { FIELDS.fetch(it, it) }, {})
           in Failure[:unavailable] then Failure(Structs::Refusal.unavailable(Helpers::Upload::STORE_DOWN))
         end

@@ -20,7 +20,7 @@ module API
       schema_attributes
       stamps :created_at
 
-      def url(share) = "#{params.fetch(:origin)}/#{share.code}"
+      def url(share) = params.fetch(:settings).share_url(share.code)
     end
   end
 end

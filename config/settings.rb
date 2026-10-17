@@ -261,6 +261,8 @@ module Blog
       host.call(url) { return false } == host.call(site[:url]) { nil }
     end
 
+    def share_url(code, file_id = nil) = [share_site[:url].chomp("/"), code, file_id].compact.join("/")
+
     def site_origin = URI(site[:url]).origin
 
     def site_url(path = "/") = URI.join(site[:url], path).to_s

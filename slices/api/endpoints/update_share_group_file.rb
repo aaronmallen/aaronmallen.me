@@ -32,7 +32,7 @@ module API
 
       def held?(group, file_id) = group.share_group_files.any? { it.id == file_id }
 
-      def reply(id) = serialized(Serializers::ShareGroup, share_group_queries.find(id), origin: share_origin)
+      def reply(id) = serialized(Serializers::ShareGroup, share_group_queries.find(id), settings:)
     end
   end
 end

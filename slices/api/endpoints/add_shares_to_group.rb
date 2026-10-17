@@ -25,7 +25,7 @@ module API
         return missing("share group", id) unless share_group_queries.find(id)
 
         case add_shares_to_group.call(id, ids)
-          in Success(group) then Success(serialized(Serializers::ShareGroup, group, origin: share_origin))
+          in Success(group) then Success(serialized(Serializers::ShareGroup, group, settings:))
           in Failure(:not_found) then invalid(ids: [GroupShares::NOT_SINGLE])
           in Failure[:invalid, errors] then rejected(errors, {})
         end

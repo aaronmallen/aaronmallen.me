@@ -12,7 +12,7 @@ module API
         group = share_group_queries.find(id)
         return missing("share group", id) unless group
 
-        Success(serialized(Serializers::ShareGroup, group, origin: share_origin))
+        Success(serialized(Serializers::ShareGroup, group, settings:))
       end
     end
   end

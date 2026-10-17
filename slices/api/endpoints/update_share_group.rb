@@ -20,7 +20,7 @@ module API
 
       def handle(id:, name:)
         case name_share_group.call(id, { name: })
-          in Success(group) then Success(serialized(Serializers::ShareGroup, group, origin: share_origin))
+          in Success(group) then Success(serialized(Serializers::ShareGroup, group, settings:))
           in Failure(:not_found) then missing("share group", id)
           in Failure[:invalid, errors] then rejected(errors, {})
         end

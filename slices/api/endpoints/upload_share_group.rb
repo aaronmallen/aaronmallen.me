@@ -25,7 +25,7 @@ module API
         return invalid(files: [Helpers::Upload::NOT_BASE64]) unless uploads.all?
 
         case upload_share_group.call(uploads)
-          in Success(group) then Success(serialized(Serializers::ShareGroup, group, origin: share_origin))
+          in Success(group) then Success(serialized(Serializers::ShareGroup, group, settings:))
           in Failure[:invalid, errors] then refused(errors)
           in Failure[:unavailable] then Failure(Structs::Refusal.unavailable(Helpers::Upload::STORE_DOWN))
         end

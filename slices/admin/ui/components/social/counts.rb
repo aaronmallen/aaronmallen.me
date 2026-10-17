@@ -50,7 +50,7 @@ module Admin
             end
           end
 
-          def short_link = "#{Helpers::ShareLink.origin}/#{::Social::Operations::ShortenLinks::UNMADE}"
+          def short_link = Helpers::ShareLink.for(::Social::Operations::ShortenLinks::UNMADE)
 
           def template(network) = t(COUNTS.fetch(network.name)).sub(LIMIT, network.limit.to_s)
         end
