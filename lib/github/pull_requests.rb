@@ -10,7 +10,7 @@ module GitHub
         query($query: String!, $cursor: String) {
           search(query: $query, type: ISSUE, first: #{PAGE_SIZE}, after: $cursor) {
             issueCount
-            pageInfo { hasNextPage endCursor }
+            #{Blog::CursorPaging::PAGE_INFO}
             nodes {
               ... on PullRequest {
                 number title body url createdAt isDraft state mergedAt closedAt viewerDidAuthor
@@ -21,7 +21,7 @@ module GitHub
               }
             }
           }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
     end

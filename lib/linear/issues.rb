@@ -30,7 +30,7 @@ module Linear
               orderBy: createdAt
               filter: {state: {type: {nin: #{CLOSED_TYPES}}}}
             ) {
-              pageInfo { hasNextPage endCursor }
+              #{Blog::CursorPaging::PAGE_INFO}
               nodes { #{FIELDS} }
             }
           }

@@ -4,6 +4,7 @@ module Blog
   module CursorPaging
     Listing = Data.define(:items, :cut_short) { def cut_short? = cut_short }
     MAX_PAGES = 10
+    PAGE_INFO = "pageInfo { hasNextPage endCursor }"
 
     private
 

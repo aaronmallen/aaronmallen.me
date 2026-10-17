@@ -7,6 +7,7 @@ module GitHub
   class Transport
     EMPTY_STATUSES = [404, 410].freeze
     GRAPHQL_PATH = "/graphql"
+    RATE_LIMIT = "rateLimit { limit remaining resetAt }"
     RATE_LIMITED_ERROR = "RATE_LIMITED"
     RATE_LIMIT_STATUSES = [403, 429].freeze
     SKIPPABLE_ERRORS = %w[FORBIDDEN NOT_FOUND].freeze

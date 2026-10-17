@@ -14,8 +14,8 @@ module GitHub
       COMMIT_PAGE_SIZE = 100
       REPOSITORY_PAGE_SIZE = 100
 
-      COMMIT_FIELDS = <<~GRAPHQL
-        pageInfo { hasNextPage endCursor }
+      COMMIT_FIELDS = <<~GRAPHQL.freeze
+        #{Blog::CursorPaging::PAGE_INFO}
         nodes { oid message authoredDate committedDate additions deletions }
       GRAPHQL
 
@@ -26,7 +26,7 @@ module GitHub
             createdAt
             defaultBranchRef { name }
             refs(refPrefix: "refs/heads/", first: #{BRANCH_PAGE_SIZE}, after: $cursor) {
-              pageInfo { hasNextPage endCursor }
+              #{Blog::CursorPaging::PAGE_INFO}
               nodes {
                 name
                 target {
@@ -39,7 +39,7 @@ module GitHub
               }
             }
           }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
 
@@ -58,7 +58,7 @@ module GitHub
               }
             }
           }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
 
@@ -72,18 +72,18 @@ module GitHub
               ownerAffiliations: #{AFFILIATIONS}
               orderBy: {field: PUSHED_AT, direction: DESC}
             ) {
-              pageInfo { hasNextPage endCursor }
+              #{Blog::CursorPaging::PAGE_INFO}
               nodes { nameWithOwner pushedAt viewerPermission }
             }
           }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
 
-      VIEWER = <<~GRAPHQL
+      VIEWER = <<~GRAPHQL.freeze
         query {
           viewer { id }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
     end

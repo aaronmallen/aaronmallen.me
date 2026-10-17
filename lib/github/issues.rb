@@ -30,10 +30,10 @@ module GitHub
         query($cursor: String) {
           viewer { id }
           search(query: "#{ASSIGNED_SEARCH}", type: ISSUE, first: #{PAGE_SIZE}, after: $cursor) {
-            pageInfo { hasNextPage endCursor }
+            #{Blog::CursorPaging::PAGE_INFO}
             nodes { #{FIELDS} }
           }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
 
@@ -41,7 +41,7 @@ module GitHub
         query($ids: [ID!]!) {
           viewer { id }
           nodes(ids: $ids) { #{FIELDS} }
-          rateLimit { limit remaining resetAt }
+          #{Transport::RATE_LIMIT}
         }
       GRAPHQL
     end

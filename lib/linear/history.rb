@@ -5,8 +5,8 @@ module Linear
     module Queries
       PAGE_SIZE = 50
 
-      FIELDS = <<~GRAPHQL
-        pageInfo { hasNextPage endCursor }
+      FIELDS = <<~GRAPHQL.freeze
+        #{Blog::CursorPaging::PAGE_INFO}
         nodes { createdAt fromState { type } toState { type } }
       GRAPHQL
 
