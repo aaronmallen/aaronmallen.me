@@ -73,6 +73,18 @@ RSpec.describe "A short link on the share host", type: :request do
     expect(stored[:last_clicked_at]).not_to be_nil
   end
 
+  it "counts and reads a browser click in one statement" do
+    code = link.code
+
+    expect(counting { fetch(code) }).to contain_exactly(/\AUPDATE "short_links" .* RETURNING "destination"/)
+  end
+
+  it "reads a bot's click in one statement" do
+    code = link.code
+
+    expect(counting { fetch(code, "curl/8.4.0") }).to contain_exactly(/\ASELECT/)
+  end
+
   {
     "Slack" => "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
     "curl" => "curl/8.4.0",

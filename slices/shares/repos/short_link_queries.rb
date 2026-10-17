@@ -5,8 +5,6 @@ module Shares
     class ShortLinkQueries < Blog::DB::Repo
       CLICKS = Blog::Types::ShortLinkSort["clicks"]
 
-      def by_code(code) = short_links.with_code.where(Sequel[:short_codes][:code] => code).one
-
       def by_destination(destination)
         short_links.with_code.where(destination:).order(Sequel[:short_links][:id]).limit(1).one
       end

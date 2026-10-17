@@ -25,7 +25,7 @@ module Shares
       client: "share_store.client", share_group_mutations: "repos.share_group_mutations",
       share_group_queries: "repos.share_group_queries", share_mutations: "repos.share_mutations",
       share_queries: "repos.share_queries", settings: "settings",
-      short_link_mutations: "repos.short_link_mutations", short_link_queries: "repos.short_link_queries",
+      short_code_queries: "repos.short_code_queries", short_link_mutations: "repos.short_link_mutations",
     ]
 
     def initialize(**)
@@ -45,15 +45,17 @@ module Shares
     private
 
     def answer(request, code)
-      share = share_queries.by_code(code)
-      return stream(request, share) { share_mutations.count_download(share.id) } if share
+      destination = clicked?(request) && short_link_mutations.click(code)
+      return redirect(destination) if destination
 
-      group = share_group_queries.by_code(code)
-      return page(request, group) if group
+      owner = short_code_queries.owner(code) || {}
+      return share(request, owner[:share_id]) if owner[:share_id]
+      return page(request, owner[:share_group_id]) if owner[:share_group_id]
 
-      link = short_link_queries.by_code(code)
-      link ? redirect(request, link) : [404, {}, []]
+      owner[:destination] ? redirect(owner[:destination]) : [404, {}, []]
     end
+
+    def clicked?(request) = !request.head? && !Blog::Helpers::Bot.match?(request.user_agent)
 
     def counted?(request, range = nil)
       return false if request.head? || request.query_string == PREVIEW
@@ -67,10 +69,7 @@ module Shares
     def entry_name(filename) = filename.tr("/", "_").sub(/\A\.\.?\z/) { "_" * it.size }
 
     def group_file(request, code, id)
-      file = share_group_queries.by_code(code)&.share_group_files&.find { it.id == id }
-      return [404, {}, []] unless file
-
-      stream(request, file) { share_group_mutations.count_file_download(file.id) }
+      stream(request, share_group_queries.file_by_code(code, id)) { share_group_mutations.count_file_download(id) }
     end
 
     def named(kind, filename)
@@ -80,7 +79,10 @@ module Shares
 
     def note(request, range) = counted?(request, range) && yield
 
-    def page(request, group)
+    def page(request, id)
+      group = share_group_queries.find(id)
+      return [404, {}, []] unless group
+
       share_group_mutations.count_view(group.id) if counted?(request)
       html = GroupPage.new(group, settings).call
       [200, PAGE_HEADERS.merge("content-length" => html.bytesize.to_s), request.head? ? [] : [html]]
@@ -92,10 +94,7 @@ module Shares
       )
     end
 
-    def redirect(request, link)
-      short_link_mutations.count_click(link.id) unless request.head? || Blog::Helpers::Bot.match?(request.user_agent)
-      [302, { "location" => link.destination }, []]
-    end
+    def redirect(destination) = [302, { "location" => destination }, []]
 
     def requested_path(request)
       path = CODE_PATH.match(request.path_info)
@@ -112,6 +111,8 @@ module Shares
       range ? [206, partial(share, range), body] : [200, share_headers(share), body]
     end
 
+    def share(request, id) = stream(request, share_queries.find(id)) { share_mutations.count_download(id) }
+
     def share_headers(share)
       {
         "accept-ranges" => "bytes",
@@ -124,6 +125,7 @@ module Shares
     end
 
     def stream(request, file, &)
+      return [404, {}, []] unless file
       return [503, {}, []] unless client.configured?
 
       @transfers.call { client.exists?(file.key) ? serve(request, file, &) : [404, {}, []] }

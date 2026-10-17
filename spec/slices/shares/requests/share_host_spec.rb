@@ -251,9 +251,9 @@ RSpec.describe "The share host", type: :request do
     let(:crash) { RuntimeError.new("store down") }
 
     before do
-      queries = instance_double(Shares::Repos::ShareQueries)
-      allow(queries).to receive(:by_code).and_raise(crash)
-      replace_component("repos.share_queries", queries)
+      queries = instance_double(Shares::Repos::ShortCodeQueries)
+      allow(queries).to receive(:owner).and_raise(crash)
+      replace_component("repos.short_code_queries", queries)
       allow(agent).to receive(:notify)
     end
 
@@ -464,6 +464,12 @@ RSpec.describe "The share host", type: :request do
           .to change { file_downloads("paper.pdf") }.by(1)
         expect(file_downloads("notes.txt")).to eq(0)
         expect(views).to eq(0)
+      end
+
+      it "loads the file in one statement" do
+        path = "/#{group.code}/#{file('paper.pdf').id}"
+
+        expect(counting(/\ASELECT/) { fetch(path) }.size).to eq(1)
       end
 
       it "skips a range probe" do

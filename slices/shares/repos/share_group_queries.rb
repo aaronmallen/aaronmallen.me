@@ -15,6 +15,11 @@ module Shares
 
       def file(id) = share_group_files.by_pk(id).one
 
+      def file_by_code(code, id)
+        joined = share_group_files.join(:share_groups, id: :share_group_id).join(:short_codes, id: :short_code_id)
+        joined.where(Sequel[:share_group_files][:id] => id, Sequel[:short_codes][:code] => code).one
+      end
+
       def find(id)
         share_groups.with_code.by_pk(id).combine(:share_group_files).node(:share_group_files) { it.order(:id) }.one
       end

@@ -11,8 +11,10 @@ module Shares
         short_codes.by_pk(short_code_id).command(:update).call(code:, updated_at: Time.now)
       end
 
-      def count_click(id)
-        short_links.by_pk(id).update(click_count: Sequel[:click_count] + 1, last_clicked_at: Sequel::CURRENT_TIMESTAMP)
+      def click(code)
+        clicked = short_links.where(short_code_id: short_codes.where(code:).select(:id).dataset).dataset
+        counts = { click_count: Sequel[:click_count] + 1, last_clicked_at: Sequel::CURRENT_TIMESTAMP }
+        clicked.returning(:destination).update(counts).first&.fetch(:destination)
       end
 
       def create(code:, **fields)
