@@ -45,7 +45,7 @@ RSpec.describe "A short link on the share host", type: :request do
   describe "a changed code" do
     let!(:old) { link.code }
 
-    before { Shares::Slice["operations.change_short_link_code"].call(link.id, code: "talk") }
+    before { Shares::Slice["operations.change_code"].call(link, code: "talk") }
 
     it "answers 404 for the old code and forbids every cache to keep it", :aggregate_failures do
       fetch(old)

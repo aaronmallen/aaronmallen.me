@@ -72,7 +72,7 @@ raises again.
 | `record_links_record_missing` | trigger | `Links::Operations::LinkRecords` | `other_id: missing` |
 | `record_links_task_pair_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: task_pair` |
 | `service_connections_provider_host_account_id_index` | unique index | `Services::Operations::AddConnection` | the `taken` refusal |
-| `short_codes_code_key` | unique | `Shares::Operations::ChangeShareCode` | `code: taken` |
+| `short_codes_code_key` | unique | `Shares::Operations::ChangeCode` | `code: taken` |
 | `short_codes_code_key` | unique | `Shares::Operations::UploadShare` | a new random code, up to five tries |
 | `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |

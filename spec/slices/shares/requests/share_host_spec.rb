@@ -54,8 +54,7 @@ RSpec.describe "The share host", type: :request do
   end
 
   it "still serves a share under a 5-letter code", :aggregate_failures do
-    file = Shares::Slice["operations.change_share_code"].call(share.id, code: "abcde").value!
-    stub_object(file)
+    stub_object(share.tap { Shares::Slice["operations.change_code"].call(it, code: "abcde") })
     fetch("/abcde")
 
     expect(last_response.status).to eq(200)

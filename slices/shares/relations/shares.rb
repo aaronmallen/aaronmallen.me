@@ -5,6 +5,8 @@ module Shares
     class Shares < Blog::DB::Relation
       IMAGE = "image/%"
 
+      use :short_coded
+
       schema :share_group_files, as: :shares, infer: true do
         associations do
           belongs_to :short_code
@@ -22,8 +24,6 @@ module Shares
       def matching(text) = containing(text, self[:filename], self[:content_type], Sequel[:short_codes][:code])
 
       def others = exclude(Sequel.like(self[:content_type], IMAGE))
-
-      def with_code = qualified.join(:short_codes).select_append { |short_codes:| short_codes[:code] }
     end
   end
 end

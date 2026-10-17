@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Shares::Operations::ChangeShareCode do
+RSpec.describe Shares::Operations::ChangeCode do
   let(:share) { upload_share.value! }
 
-  def change(code, id: share.id) = described_class.new.call(id, code:)
+  def change(code, owner = share) = described_class.new.call(owner, code:)
 
   def codes = Shares::Slice["relations.short_codes"].pluck(:code)
 
@@ -15,9 +15,16 @@ RSpec.describe Shares::Operations::ChangeShareCode do
   it "changes the code and frees the old one", :aggregate_failures do
     old = share.code
 
-    expect(change(" Resume ").value!.code).to eq("resume")
+    expect(change(" Resume ").value!).to eq("resume")
     expect(codes).to eq(["resume"])
     expect(codes).not_to include(old)
+  end
+
+  it "changes a short link's code" do
+    link = Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/talk").value!
+    change("talk", link)
+
+    expect(Shares::Slice["repos.short_link_queries"].find(link.id).code).to eq("talk")
   end
 
   it "refuses a code that breaks the format", :aggregate_failures do
@@ -37,8 +44,9 @@ RSpec.describe Shares::Operations::ChangeShareCode do
     expect(change(other.code).failure).to eq([:invalid, { code: ["taken"] }])
   end
 
-  it "answers not found for a missing share" do
-    expect(change("resume", id: 0).failure).to eq(:not_found)
+  it "answers not found when saving a missing share or link", :aggregate_failures do
+    expect(Shares::Slice["operations.save_share"].call(0, code: "resume").failure).to eq(:not_found)
+    expect(Shares::Slice["operations.save_short_link"].call(0, code: "talk").failure).to eq(:not_found)
   end
 
   it "leaves the database to refuse a bad code no contract checked" do
