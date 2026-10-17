@@ -327,7 +327,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       it "keeps the page while it still has rows" do
         lower_page_size(:admin, to: 1)
         drafts(3)
-        act("delete", [post_queries.by_status("draft").last], page: 2)
+        act("delete", [posts_by_status("draft").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/posts?status=all&page=2")
       end
@@ -335,7 +335,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       it "steps back a page when the batch emptied the last one" do
         lower_page_size(:admin, to: 1)
         drafts(2)
-        act("delete", [post_queries.by_status("draft").last], page: 2)
+        act("delete", [posts_by_status("draft").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/posts?status=all")
       end
@@ -361,7 +361,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Tick 100 posts or fewer")
-        expect(post_queries.by_status("draft").size).to eq(101)
+        expect(posts_by_status("draft").size).to eq(101)
       end
 
       it "asks for a tag before a tag change" do

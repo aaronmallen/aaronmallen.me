@@ -10,7 +10,6 @@ RSpec.describe "Admin bulk context menu", type: :feature do
   before { sign_in_to_admin }
 
   describe "on tasks" do
-    let(:repo) { Tasks::Slice["repos.task_queries"] }
     let!(:tasks) do
       %w[first second third fourth].map.with_index(1) do |title, position|
         create(:task, title:, position:)
@@ -40,7 +39,7 @@ RSpec.describe "Admin bulk context menu", type: :feature do
       item("Complete").click
 
       expect(page).to have_css(".toast", text: "Finished 3 tasks")
-      expect(repo.all_open.map(&:title)).to eq(["fourth"])
+      expect(open_tasks.map(&:title)).to eq(["fourth"])
     end
 
     it "moves every picked task" do
@@ -67,14 +66,14 @@ RSpec.describe "Admin bulk context menu", type: :feature do
       end
 
       it "asks for a second click" do
-        expect(repo.all_open.size).to eq(4)
+        expect(open_tasks.size).to eq(4)
       end
 
       it "deletes every picked task on the second click", :aggregate_failures do
         item("Click again to delete").click
 
         expect(page).to have_css(".toast", text: "Deleted 3 tasks")
-        expect(repo.all_open.map(&:title)).to eq(["fourth"])
+        expect(open_tasks.map(&:title)).to eq(["fourth"])
       end
     end
 

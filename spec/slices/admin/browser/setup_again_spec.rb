@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin scripts after new markup", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_queries"] }
-
   def active = evaluate_script("document.querySelector('[data-palette-option][aria-selected=\"true\"]').id")
 
   def center(element)
@@ -34,7 +32,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
 
   def grip(title) = row(title).tap(&:hover).find("[data-task-grip]")
 
-  def place_path = "/admin/tasks/#{repo.all_open.find { it.title == 'first' }.id}/place"
+  def place_path = "/admin/tasks/#{open_tasks.find { it.title == 'first' }.id}/place"
 
   def press(*keys) = page.driver.browser.keyboard.type(*keys)
 

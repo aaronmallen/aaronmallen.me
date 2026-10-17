@@ -64,6 +64,8 @@ module Tasks
 
       def for_sprint(sprint_id) = where(sprint_id:)
 
+      def ids_first(ids) = ids.empty? ? self : new(dataset.order_prepend(Sequel.case({ { id: ids } => 0 }, 1)))
+
       def in_list(list) = where(list:)
 
       def in_order = order(self[:position].asc, self[:id].asc)
@@ -115,9 +117,8 @@ module Tasks
       def open_first = order(Sequel.case({ { status: CLOSED } => 1 }, 0), self[:position].asc, self[:id].asc)
 
       def pause(at)
-        running = in_progress
-        work_sessions.close(running.dataset.select(:id), at)
-        running.stamped(:update, result: :many).call(status: OPEN)
+        work_sessions.close(in_progress.dataset.select(:id), at)
+        in_progress.stamped(:update, result: :many).call(status: OPEN)
       end
 
       def preceding(task)

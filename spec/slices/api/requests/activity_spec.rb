@@ -162,7 +162,7 @@ RSpec.describe "API reading the activity feed", type: :request do
 
     it "refuses a range longer than a year with a 422" do
       expect([summarize(from: "2025-01-01", to: "2026-03-31").fetch("message"), status])
-        .to eq([Blog::Helpers::DayWindow::TOO_LONG, 422])
+        .to eq([API::Helpers::DayWindow::TOO_LONG, 422])
     end
   end
 

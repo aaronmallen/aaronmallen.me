@@ -15,11 +15,13 @@ module API
       BACKWARDS = "from comes after to"
       BAD_DAY = "give from and to as days, such as 2026-01-01"
       DAYS = { type: "string", description: "a day, as YYYY-MM-DD" }.freeze
+      LONGEST = 366
       PAGING_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                     "One answer carries about %<page_size>s rows, newest first, rounded out to the end of a day. " \
                     "Past that, partial comes back true and continue_to holds the day to send as to " \
                     "for the next window"
       RANGE = bounds("range")
+      TOO_LONG = "give a range of #{LONGEST} days or fewer".freeze
       WINDOW = bounds("window")
 
       extend Dry::Monads[:result]
@@ -31,9 +33,7 @@ module API
         last = Blog::TimeZone.parse_day(to)
         return Failure(BAD_DAY) unless first && last
         return Failure(BACKWARDS) if first > last
-        if capped && last - first >= Blog::Helpers::DayWindow::LONGEST
-          return Failure(Blog::Helpers::DayWindow::TOO_LONG)
-        end
+        return Failure(TOO_LONG) if capped && last - first >= LONGEST
 
         Success([first, last])
       end

@@ -19,8 +19,6 @@ module Tasks
         task_label_queries: "repos.task_label_queries",
       ]
 
-      def all_open = tasks.open.in_order.to_a
-
       def board_counts(project_id)
         counted = on_project(tasks, project_id).unordered
         counts = counted.select { COLUMNS.map { integer.count(id).filter(COLUMN => it).as(it.to_sym) } }.one
@@ -116,8 +114,6 @@ module Tasks
       def open_counts(sprint:, planned:)
         tasks.open_counts(sprint.id, planned.map(&:id)).one.to_h.transform_keys(&:to_s)
       end
-
-      def open_in_list(list) = with_details.in_list(list).open.in_order.to_a
 
       def page_by_tag(tag, page) = page.fill(tasks.tagged([tag]).open_first.select(*TAG_ROW).paged(page).to_a)
 

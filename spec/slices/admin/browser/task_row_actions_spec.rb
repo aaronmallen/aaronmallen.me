@@ -97,7 +97,7 @@ RSpec.describe "Admin task row actions", type: :feature do
 
       it "still takes key shortcuts after the update, closing the running task at once", :aggregate_failures do
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.completed"))
-        expect(Tasks::Slice["repos.task_queries"].all_open).to be_empty
+        expect(open_tasks).to be_empty
         expect(kept_page?).to be(true)
       end
     end

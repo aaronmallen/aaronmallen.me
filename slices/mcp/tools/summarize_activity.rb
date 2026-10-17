@@ -8,7 +8,7 @@ module MCP
                   "Counts only, so no commit message, journal entry or title comes back. Workouts count only for " \
                   "a connection granted health. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
-                  "#{Blog::Helpers::DayWindow::LONGEST} days. " \
+                  "#{API::Helpers::DayWindow::LONGEST} days. " \
                   "A year answers in one call, so call this first to see where the work sits, then read the " \
                   "months that matter with read_activity, one month at a time, newest first"
       endpoint scope: Blog::Types::OAuthScope["read"]

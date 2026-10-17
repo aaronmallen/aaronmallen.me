@@ -131,7 +131,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "creating a task from the dialog" do
-    let(:created) { repo.open_in_list("someday").find { it.title == "Call the #plumber" } }
+    let(:created) { open_in_list("someday").find { it.title == "Call the #plumber" } }
 
     before { create_task("Call the #plumber", list: "someday", note: "the sink leaks", tags: "home, chores") }
 
@@ -178,7 +178,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "the key" do
-    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { task.label }
 
     describe "clicking it" do
@@ -266,7 +266,7 @@ RSpec.describe "Admin tasks", type: :feature do
       it "puts it back on its list as open", :aggregate_failures do
         expect(page).to have_css(".task-title", text: "Email the accountant")
         expect(find(".task", text: "Email the accountant")).to have_no_css(".task-meta", text: mark)
-        expect(repo.all_open.map(&:title)).to include("Email the accountant")
+        expect(open_tasks.map(&:title)).to include("Email the accountant")
       end
     end
   end
@@ -274,13 +274,13 @@ RSpec.describe "Admin tasks", type: :feature do
   describe "confirming a cancel" do
     let(:cancel) { translate("ui.components.tasks.controls.cancel") }
     let(:message) { translate("ui.components.tasks.controls.confirm_cancel", task: "Email the accountant") }
-    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
 
     def focused_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
 
     def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
-    def still_open? = repo.all_open.map(&:title).include?("Email the accountant")
+    def still_open? = open_tasks.map(&:title).include?("Email the accountant")
 
     describe "from a row" do
       before { row("Email the accountant").click_button(cancel) }
@@ -369,7 +369,7 @@ RSpec.describe "Admin tasks", type: :feature do
   describe "moving an in-progress task out of today" do
     let(:message) { translate("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next") }
     let(:sprint) { sprint_repo.on(today) || create(:sprint, sprint_date: today) }
-    let(:task) { repo.all_open.find { it.title == "Ship the screen" } }
+    let(:task) { open_tasks.find { it.title == "Ship the screen" } }
 
     def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
@@ -446,7 +446,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "opening a task" do
-    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { task.label }
 
     def sideways?(selector) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{selector})")
@@ -510,7 +510,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "commenting from the panel" do
-    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
     let(:comments) { Tasks::Slice["relations.task_comments"] }
 
     def bodies = comments.to_a.map { it[:body] }
@@ -568,7 +568,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "writing Markdown in a task" do
-    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
 
     def add_label = translate("ui.components.comment_thread.add_label")
@@ -766,7 +766,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def sideways?(element) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{element})")
 
-    let!(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+    let!(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
 
     before { open_editor("Email the accountant") }
 
@@ -907,8 +907,8 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "linking tasks" do
-    let(:task) { repo.all_open.find { it.title == "Email the accountant" } }
-    let(:other) { repo.all_open.find { it.title == "Learn Elixir" } }
+    let(:task) { open_tasks.find { it.title == "Email the accountant" } }
+    let(:other) { open_tasks.find { it.title == "Learn Elixir" } }
 
     def blocker = create(:task_link, from_task_id: other.id, to_task_id: task.id)
 
@@ -1067,7 +1067,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "linking records" do
-    let(:task) { repo.all_open.find { it.title == "Email the accountant" } }
+    let(:task) { open_tasks.find { it.title == "Email the accountant" } }
     let!(:post_record) { create(:post, title: "Filing the quarterly taxes") }
 
     def find_record(query)

@@ -11,7 +11,7 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
     post "/admin/tasks", { _csrf_token: admin_csrf_token, task: { title: "Water the plants", list: "next", recur: } }
   end
 
-  def captured = repo.open_in_list("next").find { it.title == "Water the plants" }
+  def captured = open_in_list("next").find { it.title == "Water the plants" }
 
   def enabled(within) = page.all("#{within} [name^='task[recur]']:not([disabled])").map { it["name"][/\[(\w+)\]\z/, 1] }
 

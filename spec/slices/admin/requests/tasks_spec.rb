@@ -228,7 +228,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "files a quick added task in the list it was added to" do
         send_to("/admin/tasks", filter: "someday", task: { title: "Learn Rust" })
 
-        expect(repo.open_in_list("someday").map(&:title)).to include("Learn Rust")
+        expect(open_in_list("someday").map(&:title)).to include("Learn Rust")
       end
 
       it "offers the Select button with bulk mode off, so a list shows it with scripts off", :aggregate_failures do
@@ -420,7 +420,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "keeps external out of the edit form of a task written by hand" do
-        get "/admin/tasks/#{repo.open_in_list('next').first.id}/edit", filter: "next"
+        get "/admin/tasks/#{open_in_list('next').first.id}/edit", filter: "next"
 
         expect(page.all(".task-form select[name='task[list]'] option").map(&:text))
           .to eq(%w[today next someday])
@@ -782,13 +782,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "writes it down from one field" do
         capture("Email the accountant", filter: "next")
 
-        expect(repo.open_in_list("next").map(&:title)).to eq(["Email the accountant"])
+        expect(open_in_list("next").map(&:title)).to eq(["Email the accountant"])
       end
 
       it "captures into the list that was open" do
         capture("Learn Elixir", filter: "someday")
 
-        expect(repo.open_in_list("someday").map(&:title)).to eq(["Learn Elixir"])
+        expect(open_in_list("someday").map(&:title)).to eq(["Learn Elixir"])
       end
 
       it "captures into the current sprint from today" do
@@ -840,19 +840,19 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "writes nothing for a task with no text" do
         capture("", filter: "next")
 
-        expect(repo.open_in_list("next")).to be_empty
+        expect(open_in_list("next")).to be_empty
       end
 
       it "keeps a #word in the title" do
         capture("Email the accountant #admin", filter: "next")
 
-        expect(repo.open_in_list("next").first.title).to eq("Email the accountant #admin")
+        expect(open_in_list("next").first.title).to eq("Email the accountant #admin")
       end
 
       it "adds no tag for a #word in the title" do
         capture("Email the accountant #admin", filter: "next")
 
-        expect(repo.open_in_list("next").first.tags).to be_empty
+        expect(open_in_list("next").first.tags).to be_empty
       end
     end
 
@@ -861,7 +861,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         capture("Learn Elixir", list: "someday", note: "read the guide", tags: "elixir, learning", **fields)
       end
 
-      def created = repo.open_in_list("someday").first
+      def created = open_in_list("someday").first
 
       it "writes down the title, note and list" do
         create_task
@@ -898,7 +898,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "creating a task in a project" do
       let!(:podcast) { create(:project, name: "Podcast", key: "POD") }
 
-      def created = repo.open_in_list("next").first
+      def created = open_in_list("next").first
 
       it "numbers it in the project it names" do
         capture("Record the intro", list: "next", project: "POD")
@@ -917,7 +917,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         capture("Record the intro", list: "next", project: "GONE")
 
         expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.project.missing"))
-        expect(repo.open_in_list("next")).to be_empty
+        expect(open_in_list("next")).to be_empty
       end
 
       it "shows the chosen project again when the save fails" do
@@ -950,7 +950,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "writes nothing" do
-        expect(repo.open_in_list("someday")).to be_empty
+        expect(open_in_list("someday")).to be_empty
       end
     end
 
@@ -1212,8 +1212,8 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
-          .to eq(["/admin/tasks/#{repo.open_in_list('next').first.id}/move/today",
-                  "/admin/tasks/#{repo.open_in_list('next').first.id}/move/someday"])
+          .to eq(["/admin/tasks/#{open_in_list('next').first.id}/move/today",
+                  "/admin/tasks/#{open_in_list('next').first.id}/move/someday"])
       end
 
       it "offers only the list to the right from the first one" do
@@ -1229,7 +1229,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "someday"
 
         expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
-          .to eq(["/admin/tasks/#{repo.open_in_list('someday').first.id}/move/next"])
+          .to eq(["/admin/tasks/#{open_in_list('someday').first.id}/move/next"])
       end
 
       it "gives the move key to the move into next from today" do
@@ -2204,7 +2204,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "posts to the place route with the page's token", :aggregate_failures do
         get "/admin/tasks", filter: "next"
-        task = repo.open_in_list("next").first
+        task = open_in_list("next").first
 
         expect(grips.first["data-task-grip"]).to eq("/admin/tasks/#{task.id}/place")
         expect(grips.first["data-task-token"]).not_to be_empty
@@ -2245,7 +2245,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "placing a task" do
-      def listed(title) = repo.open_in_list("next").find { it.title == title }
+      def listed(title) = open_in_list("next").find { it.title == title }
 
       def next_titles = Tasks::Slice["relations.tasks"].in_list("next").in_order.pluck(:title)
 
@@ -2295,7 +2295,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, title: "fifth", position: 6)
         place("fifth", "third")
 
-        expect(repo.open_in_list("next").map(&:title)).to eq(%w[first second third fifth fourth])
+        expect(open_in_list("next").map(&:title)).to eq(%w[first second third fifth fourth])
       end
 
       it "places tasks that share a position" do
@@ -2344,7 +2344,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
           send_to("/admin/tasks/#{listed('first').id}/place", after: instance_exec(&after))
 
           expect(last_response.status).to eq(422)
-          expect(repo.open_in_list("next").map(&:title)).to eq(%w[first second third fourth])
+          expect(open_in_list("next").map(&:title)).to eq(%w[first second third fourth])
         end
       end
 
@@ -2359,7 +2359,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "paging a pool" do
       def leads = page.all("[data-task-grip]", visible: :all).map { it["data-task-lead"] }
 
-      def listed(title) = repo.open_in_list("next").find { it.title == title }
+      def listed(title) = open_in_list("next").find { it.title == title }
 
       def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]
 
@@ -2427,7 +2427,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         %w[one two three].each { create(:task, :in_sprint, sprint_id: sprint.id, title: it) }
         get "/admin/tasks", filter: "today", page: 2
 
-        expect(leads).to eq([repo.all_open.find { it.title == "two" }.id.to_s])
+        expect(leads).to eq([open_tasks.find { it.title == "two" }.id.to_s])
       end
 
       it "opens a task from a later page in its dialog" do
@@ -2478,7 +2478,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "writes nothing" do
         post "/admin/tasks", _csrf_token: "forged", task: { title: "Email the accountant" }
 
-        expect(repo.open_in_list("next")).to be_empty
+        expect(open_in_list("next")).to be_empty
       end
 
       it "refuses a move" do
@@ -3241,7 +3241,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         end
 
         it "forgets how often the task was carried" do
-          expect(repo.open_in_list("next").map(&:carried_count)).to eq([0])
+          expect(open_in_list("next").map(&:carried_count)).to eq([0])
         end
 
         it "leaves the task out of attention" do
@@ -3406,20 +3406,20 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "captures nothing when it refuses a date the day has passed" do
         capture("Yesterday's work", filter: "next", sprint_on: (today - 1).iso8601)
 
-        expect(repo.all_open).to be_empty
+        expect(open_tasks).to be_empty
       end
 
       it "captures nothing when it refuses a date it cannot read" do
         capture("Someday's work", filter: "next", sprint_on: "next week")
 
-        expect(repo.all_open).to be_empty
+        expect(open_tasks).to be_empty
       end
 
       it "captures one task when a refused capture is sent again with a good date" do
         capture("Tomorrow's work", filter: "next", sprint_on: (today - 1).iso8601)
         capture("Tomorrow's work", filter: "next", sprint_on: tomorrow.iso8601)
 
-        expect(repo.all_open.map(&:title)).to eq(["Tomorrow's work"])
+        expect(open_tasks.map(&:title)).to eq(["Tomorrow's work"])
       end
 
       it "unschedules a task from its editor" do

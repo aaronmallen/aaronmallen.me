@@ -108,7 +108,7 @@ RSpec.describe "API tasks", type: :request do
         create(:task, :done)
         paged = %w[1 2].flat_map { |page| list(statuses: "open", page:).fetch("tasks").map { it.fetch("id") } }
 
-        expect(paged).to match_array(tasks.all_open.map(&:id))
+        expect(paged).to match_array(open_tasks.map(&:id))
       end
     end
 
@@ -206,7 +206,7 @@ RSpec.describe "API tasks", type: :request do
       create(:task, :someday, :in_progress, title: "poking at it")
       create(:task, :someday, :done, title: "settled")
 
-      expect(titles(list(lists: "someday"))).to match_array(tasks.open_in_list("someday").map(&:title))
+      expect(titles(list(lists: "someday"))).to match_array(open_in_list("someday").map(&:title))
     end
 
     it "keeps finished tasks on a list when it names their status" do
@@ -699,7 +699,7 @@ RSpec.describe "API tasks", type: :request do
     it "refuses a sprint day in the past with a 422 and captures nothing" do
       answer = capture(title: "Too late", sprint_on: (today - 1).iso8601)
 
-      expect([answer.fetch("errors"), status, tasks.all_open])
+      expect([answer.fetch("errors"), status, open_tasks])
         .to eq([{ "sprint_on" => ["a sprint opens on today or a day after it"] }, 422, []])
     end
 
@@ -728,7 +728,7 @@ RSpec.describe "API tasks", type: :request do
     it "refuses a sprint day it cannot read with a 422 and captures nothing" do
       answer = capture(title: "Someday", sprint_on: "next week")
 
-      expect([answer.fetch("errors"), status, tasks.all_open])
+      expect([answer.fetch("errors"), status, open_tasks])
         .to eq([{ "sprint_on" => ["give sprint_on as a day, such as 2026-01-01"] }, 422, []])
     end
 
@@ -753,7 +753,7 @@ RSpec.describe "API tasks", type: :request do
       it "refuses a key no project has with a 422 and captures nothing" do
         answer = capture(title: "Record the intro", project: "NOPE")
 
-        expect([answer.fetch("errors"), status, tasks.all_open])
+        expect([answer.fetch("errors"), status, open_tasks])
           .to eq([{ "project" => [API::Endpoints::Tasks::COMPLAINTS.dig(:project, "missing")] }, 422, []])
       end
 
@@ -761,7 +761,7 @@ RSpec.describe "API tasks", type: :request do
         create(:project, :archived, name: "Gone", key: "GONE")
         answer = capture(title: "Record the intro", project: "GONE")
 
-        expect([answer.fetch("errors").keys, status, tasks.all_open]).to eq([%w[project], 422, []])
+        expect([answer.fetch("errors").keys, status, open_tasks]).to eq([%w[project], 422, []])
       end
 
       it "refuses a key it cannot read with a 422" do
@@ -1113,7 +1113,7 @@ RSpec.describe "API tasks", type: :request do
     it "moves the task past the one above it" do
       act(second.id, "reorder", direction: "up")
 
-      expect([tasks.open_in_list("next").map(&:title), JSON.parse(last_response.body).fetch("moved")])
+      expect([open_in_list("next").map(&:title), JSON.parse(last_response.body).fetch("moved")])
         .to eq([%w[second first], true])
     end
 
@@ -1130,13 +1130,13 @@ RSpec.describe "API tasks", type: :request do
       tied = create(:task, title: "tied", position: 2)
       act(tied.id, "reorder", direction: "up")
 
-      expect(tasks.open_in_list("next").map(&:title)).to eq(%w[first tied second])
+      expect(open_in_list("next").map(&:title)).to eq(%w[first tied second])
     end
 
     it "moves the task down past the one below it" do
       act(first.id, "reorder", direction: "down")
 
-      expect(tasks.open_in_list("next").map(&:title)).to eq(%w[second first])
+      expect(open_in_list("next").map(&:title)).to eq(%w[second first])
     end
 
     %i[done canceled].each do |closed|
@@ -1161,14 +1161,14 @@ RSpec.describe "API tasks", type: :request do
       third = create(:task, title: "third", position: 3)
       act(third.id, "reorder", after_id: first.id)
 
-      expect([tasks.open_in_list("next").map(&:title), JSON.parse(last_response.body).fetch("moved")])
+      expect([open_in_list("next").map(&:title), JSON.parse(last_response.body).fetch("moved")])
         .to eq([%w[first third second], true])
     end
 
     it "puts the task first when after_id is null" do
       act(second.id, "reorder", after_id: nil)
 
-      expect(tasks.open_in_list("next").map(&:title)).to eq(%w[second first])
+      expect(open_in_list("next").map(&:title)).to eq(%w[second first])
     end
 
     it "answers with the task's new position" do
@@ -1180,7 +1180,7 @@ RSpec.describe "API tasks", type: :request do
 
       expect([act(second.id, "reorder", after_id: elsewhere.id).fetch("errors"), status])
         .to eq([{ "after_id" => ["task #{elsewhere.id} is not in task #{second.id}'s list or sprint"] }, 422])
-      expect(tasks.open_in_list("next").map(&:title)).to eq(%w[first second])
+      expect(open_in_list("next").map(&:title)).to eq(%w[first second])
     end
 
     it "refuses an after_id from another sprint with a 422 that says so" do

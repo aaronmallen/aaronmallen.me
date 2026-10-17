@@ -20,7 +20,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
   def select_mode = click_button("Select")
 
   def tagged(name)
-    names = Tasks::Slice["relations.task_tags"].names_by_task(repo.all_open.map(&:id))
+    names = Tasks::Slice["relations.task_tags"].names_by_task(open_tasks.map(&:id))
 
     names.filter_map { |id, tags| repo.by_id(id).title if tags.include?(name) }
   end
@@ -114,7 +114,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       within("form#task-bulk") { click_button("Done") }
 
       expect(page).to have_css("[data-toast] .toast", text: "Finished 2 tasks")
-      expect(repo.all_open.map(&:title)).to contain_exactly("second", "elsewhere")
+      expect(open_tasks.map(&:title)).to contain_exactly("second", "elsewhere")
     end
 
     it "cancels every task on the page and none on another list", :aggregate_failures do
@@ -122,7 +122,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       within("form#task-bulk") { click_button("Cancel") }
 
       expect(page).to have_css("[data-toast] .toast", text: "Canceled 3 tasks")
-      expect(repo.all_open.map(&:title)).to eq(["elsewhere"])
+      expect(open_tasks.map(&:title)).to eq(["elsewhere"])
     end
 
     it "moves the ticked tasks to the list picked", :aggregate_failures do
@@ -130,7 +130,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       bulk("Move", to: "Someday")
 
       expect(page).to have_css("[data-toast] .toast", text: "Moved 1 task to someday")
-      expect(repo.open_in_list("someday").map(&:title)).to contain_exactly("first", "elsewhere")
+      expect(open_in_list("someday").map(&:title)).to contain_exactly("first", "elsewhere")
     end
 
     it "tags rather than finishes when Enter goes in the tag field", :aggregate_failures do
@@ -147,7 +147,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       confirm_yes
 
       expect(page).to have_css("[data-toast] .toast", text: "Deleted 1 task")
-      expect(repo.all_open.map(&:title)).to contain_exactly("first", "third", "elsewhere")
+      expect(open_tasks.map(&:title)).to contain_exactly("first", "third", "elsewhere")
     end
 
     it "keeps the tasks when the delete is declined" do
@@ -155,7 +155,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       within("form#task-bulk") { click_button("Delete") }
       confirm_no
 
-      expect(repo.all_open.size).to eq(4)
+      expect(open_tasks.size).to eq(4)
     end
   end
 
@@ -190,7 +190,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       within("form#task-bulk") { click_button("Done") }
 
       expect(page).to have_css("[data-toast] .toast", text: "Finished 2 tasks")
-      expect(repo.all_open.map(&:title)).to contain_exactly("third", "elsewhere")
+      expect(open_tasks.map(&:title)).to contain_exactly("third", "elsewhere")
     end
   end
 end

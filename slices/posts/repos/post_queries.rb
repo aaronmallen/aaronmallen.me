@@ -25,8 +25,6 @@ module Posts
 
       def by_ids(ids) = posts.lean.with_ids(ids).newest_first.to_a
 
-      def by_status(status) = with_tags.with_status(status).newest_first.to_a
-
       def by_tag(tag) = posts.lean.tagged(tag).newest_first.to_a
 
       def calendar_between(from:, to:)

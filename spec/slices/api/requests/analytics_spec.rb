@@ -47,6 +47,6 @@ RSpec.describe "API analytics", :frozen_clock, type: :request do
 
   it "refuses a range longer than a year with a 422" do
     expect([read(from: (today - 400).iso8601).fetch("message"), status])
-      .to eq([Blog::Helpers::DayWindow::TOO_LONG, 422])
+      .to eq([API::Helpers::DayWindow::TOO_LONG, 422])
   end
 end

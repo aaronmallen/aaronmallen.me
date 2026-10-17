@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin task order", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_queries"] }
-
   def center(element)
     box = evaluate_script(<<~JS, element)
       (r => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 }))(arguments[0].getBoundingClientRect())
@@ -28,14 +26,14 @@ RSpec.describe "Admin task order", type: :feature do
     JS
   end
 
-  def listed(list = "next") = repo.open_in_list(list).map(&:title)
+  def listed(list = "next") = open_in_list(list).map(&:title)
 
   def nudge(title, key)
     execute_script("arguments[0].focus()", row(title).find(".task-title"))
     page.driver.browser.keyboard.type([:alt, key])
   end
 
-  def place_path(title = "first") = "/admin/tasks/#{repo.all_open.find { it.title == title }.id}/place"
+  def place_path(title = "first") = "/admin/tasks/#{open_tasks.find { it.title == title }.id}/place"
 
   def row(title) = find(".task", text: title)
 
@@ -202,7 +200,7 @@ RSpec.describe "Admin task order", type: :feature do
 
   describe "a save that fails" do
     before do
-      Tasks::Slice["operations.complete_task"].call(repo.open_in_list("next").find { it.title == "first" }.id)
+      Tasks::Slice["operations.complete_task"].call(open_in_list("next").find { it.title == "first" }.id)
       nudge("first", :down)
     end
 
@@ -265,8 +263,8 @@ RSpec.describe "Admin task order", type: :feature do
       wait_for_save(title: "soon one")
 
       expect { sprints }.to eventually(eq([["soon two", "soon one"], ["later one"]]))
-      expect(repo.all_open.find { it.title == "soon one" }.sprint_id)
-        .to eq(repo.all_open.find { it.title == "soon two" }.sprint_id)
+      expect(open_tasks.find { it.title == "soon one" }.sprint_id)
+        .to eq(open_tasks.find { it.title == "soon two" }.sprint_id)
     end
   end
 end

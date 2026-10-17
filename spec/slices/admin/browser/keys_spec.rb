@@ -96,9 +96,7 @@ RSpec.describe "Admin keys", type: :feature do
   end
 
   describe "task row keys" do
-    let(:repo) { Tasks::Slice["repos.task_queries"] }
-
-    def task(title) = repo.all_open.find { it.title == title }
+    def task(title) = open_tasks.find { it.title == title }
 
     before do
       create(:task, title: "Write the brief")
@@ -144,7 +142,7 @@ RSpec.describe "Admin keys", type: :feature do
 
       it "starts nothing", :aggregate_failures do
         expect(page).to have_current_path("/admin/tasks?filter=next")
-        expect(repo.all_open.map(&:status)).to all(eq("open"))
+        expect(open_tasks.map(&:status)).to all(eq("open"))
       end
     end
   end
@@ -172,7 +170,7 @@ RSpec.describe "Admin keys", type: :feature do
       find("details.task-complete[open]").click_button(done)
       find(".toast", text: Admin::Slice["i18n"].t("tasks_page.toasts.completed"))
 
-      expect(Tasks::Slice["repos.task_queries"].all_open).to be_empty
+      expect(open_tasks).to be_empty
     end
   end
 

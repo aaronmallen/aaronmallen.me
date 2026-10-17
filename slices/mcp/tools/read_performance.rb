@@ -17,7 +17,7 @@ module MCP
                   "#{Performance::Operations::PruneTiming::RETENTION_DAYS} days and each day's p50 and p95 for good, " \
                   "so p50 and p95 over a range of more than one day weigh each day's figure by its count. Give from " \
                   "and to as YYYY-MM-DD; both days count, days run on #{Blog::TimeZone::NAME} time, and the range " \
-                  "runs at most #{Blog::Helpers::DayWindow::LONGEST} days"
+                  "runs at most #{API::Helpers::DayWindow::LONGEST} days"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
