@@ -9,7 +9,6 @@ const TOGGLE = "[data-bulk-toggle]";
 
 const pressed = new Set();
 const ready = new WeakSet();
-let bound = false;
 
 export function setupBulk() {
   for (const form of document.querySelectorAll(FORM)) {
@@ -34,10 +33,9 @@ export function setupBulk() {
       show(form);
     });
   }
+}
 
-  if (bound) return;
-
-  bound = true;
+export function bootBulk() {
   document.addEventListener("change", (event) => {
     const form = event.target.form;
     if (!form?.matches(FORM) || event.target === all(form)) return;

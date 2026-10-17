@@ -7,16 +7,14 @@ const FORM = "form[data-autosubmit]";
 const FILTER = `${FORM}[method="get"]`;
 
 const ready = new WeakSet();
-let bound = false;
 
 export function setupAutosubmit() {
   for (const form of fresh(ready, document.querySelectorAll(FORM))) {
     form.addEventListener("change", () => form.requestSubmit());
   }
+}
 
-  if (bound) return;
-
-  bound = true;
+export function bootAutosubmit() {
   const filter = setupFetch({
     request: (form) => ({ url: target(form) }),
     read: async (response) => ({ url: response.url, html: await text(response) }),

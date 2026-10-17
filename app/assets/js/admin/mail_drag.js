@@ -12,13 +12,9 @@ const PICK = "input, label";
 const ROW = "[data-mail-drag]";
 const TARGET = "mail-drop";
 
-let bound = false;
 let busy = false;
 
-export function setupMailDrag() {
-  if (bound) return;
-
-  bound = true;
+export function bootMailDrag() {
   document.addEventListener("pointerdown", (event) => {
     const row = event.target.closest(ROW);
     if (row && !busy && !event.target.closest(PICK) && droppable()) waitForDrag(event, (at) => drag(row, event, at));

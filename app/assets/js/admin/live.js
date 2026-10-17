@@ -20,7 +20,6 @@ let shown = drawnAt(document);
 let leaving = false;
 let posts = 0;
 let refetch = null;
-let started = false;
 let wanted = 0;
 
 export function forgetEdits(form) {
@@ -61,9 +60,8 @@ export function morphPage(next) {
 
 export function setupLive() {
   const url = document.querySelector("[data-live]")?.dataset.live;
-  if (started || !url) return;
+  if (!url) return;
 
-  started = true;
   let asked = 0;
   let next = null;
 

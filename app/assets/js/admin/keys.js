@@ -17,19 +17,17 @@ const STEPS = { j: 1, k: -1 };
 
 const chords = [];
 const ready = new WeakSet();
-let bound = false;
 let pending = "";
 
 export function bind(matches, run) {
   chords.push({ matches, run });
 }
 
-export function setupKeys() {
-  if (!bound) {
-    bound = true;
-    document.addEventListener("keydown", press);
-  }
+export function bootKeys() {
+  document.addEventListener("keydown", press);
+}
 
+export function setupKeys() {
   for (const trigger of fresh(ready, document.querySelectorAll("[data-key-help-open]"))) {
     trigger.addEventListener("click", () => {
       const help = document.querySelector("[data-key-help]");

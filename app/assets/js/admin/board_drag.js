@@ -8,12 +8,7 @@ const OVER = "kcol-over";
 const PRESS = "button, form, input, label";
 const TITLE = ".kc-title";
 
-let bound = false;
-
-export function setupBoardDrag() {
-  if (bound) return;
-
-  bound = true;
+export function bootBoardDrag() {
   document.addEventListener("pointerdown", (event) => {
     const card = event.target.closest(CARD);
     if (card && !event.target.closest(PRESS)) waitForDrag(event, (at) => drag(card, event, at));

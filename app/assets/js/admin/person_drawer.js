@@ -7,12 +7,7 @@ const DRAWER = "person-edit-drawer";
 const EDITOR = "[data-person-editor]";
 const OPEN = "a[data-person-edit]";
 
-let bound = false;
-
-export function setupPersonDrawer() {
-  if (bound) return;
-
-  bound = true;
+export function bootPersonDrawer() {
   const visit = setupVisit();
 
   document.addEventListener("click", (event) => {

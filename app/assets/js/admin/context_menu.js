@@ -19,13 +19,9 @@ const ROW = "[data-menu], [data-key-row]";
 const STEPS = { ArrowDown: 1, ArrowUp: -1 };
 const SUB = "[aria-haspopup=menu]";
 
-let bound = false;
 let shown = null;
 
-export function setupContextMenus() {
-  if (bound) return;
-
-  bound = true;
+export function bootContextMenus() {
   document.addEventListener("contextmenu", pointed);
   document.addEventListener("keydown", keyed);
   document.addEventListener("pointerdown", outside, true);

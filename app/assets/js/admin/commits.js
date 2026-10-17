@@ -3,7 +3,6 @@ import { fresh } from "./fresh.js";
 const FORM = "form[data-commits-import]";
 
 const ready = new WeakSet();
-let bound = false;
 
 export function setupCommitImports() {
   const forms = [...document.querySelectorAll(FORM)].filter((form) => !button(form).disabled);
@@ -11,10 +10,9 @@ export function setupCommitImports() {
   for (const form of fresh(ready, forms)) {
     form.addEventListener("submit", () => setImporting(form, true));
   }
+}
 
-  if (bound) return;
-
-  bound = true;
+export function bootCommitImports() {
   window.addEventListener("pageshow", () => {
     for (const form of document.querySelectorAll(FORM)) {
       if (ready.has(form)) setImporting(form, false);

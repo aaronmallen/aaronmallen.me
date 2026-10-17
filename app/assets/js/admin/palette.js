@@ -17,7 +17,6 @@ const TASK = "[data-task-read]";
 const TITLE = "{title}";
 
 const ready = new WeakSet();
-let bound = false;
 let palette = null;
 
 export function setupPalette() {
@@ -28,10 +27,9 @@ export function setupPalette() {
   for (const trigger of fresh(ready, document.querySelectorAll("[data-palette-open]"))) {
     trigger.addEventListener("click", () => palette?.open());
   }
+}
 
-  if (bound) return;
-
-  bound = true;
+export function bootPalette() {
   bind(opens, (event) => {
     if (!palette || palette.dialog.open) return;
 

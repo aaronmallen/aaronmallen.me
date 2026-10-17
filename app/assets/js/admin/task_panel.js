@@ -21,18 +21,16 @@ const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
 const TASK = "[data-task-read], [data-task-edit]";
 
 const ready = new WeakSet();
-let bound = false;
 let follow = null;
 
 export function setupTaskPanel() {
   for (const panel of fresh(ready, document.querySelectorAll("[data-task-panel]"))) {
     follow = setupPanel(panel);
   }
+}
 
-  if (bound || !follow) return;
-
-  bound = true;
-  document.addEventListener("click", (event) => follow(event));
+export function bootTaskPanel() {
+  document.addEventListener("click", (event) => follow?.(event));
 }
 
 function bind(root) {

@@ -4,19 +4,14 @@ import { slugify } from "./slug.js";
 const WORD = /[\p{L}\p{N}]/u;
 
 const ready = new WeakSet();
-let finding = false;
 
 export function setupPostEditors() {
   for (const form of fresh(ready, document.querySelectorAll("form[data-post-editor]"))) {
     setupPostEditor(form);
   }
-  setupFindLink();
 }
 
-function setupFindLink() {
-  if (finding) return;
-
-  finding = true;
+export function bootPostEditors() {
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-find-link]");
     const body = document.querySelector("form[data-post-editor] [data-post-body]");

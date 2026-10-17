@@ -11,7 +11,6 @@ const ROW = "[data-task-order]";
 
 const ready = new WeakSet();
 const saves = [];
-let bound = false;
 let saving = false;
 
 export function setupTaskOrder(root = document) {
@@ -20,10 +19,9 @@ export function setupTaskOrder(root = document) {
   for (const grip of fresh(ready, root.querySelectorAll(GRIP))) {
     grip.addEventListener("pointerdown", (event) => drag(event, grip));
   }
+}
 
-  if (bound) return;
-
-  bound = true;
+export function bootTaskOrder() {
   bind(nudges, nudge);
 }
 

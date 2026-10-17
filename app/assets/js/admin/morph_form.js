@@ -14,12 +14,8 @@ const ROW = "[data-key-row]";
 const UNPROCESSABLE = 422;
 
 const busy = new WeakSet();
-let bound = false;
 
-export function setupMorphForms() {
-  if (bound) return;
-
-  bound = true;
+export function bootMorphForms() {
   document.addEventListener("submit", (event) => {
     const form = event.target;
     if (event.defaultPrevented || !form.matches(FORM) || !form.closest(HOSTS)) return;

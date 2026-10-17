@@ -105,6 +105,20 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
     expect(focused_row).to include("second")
   end
 
+  it "counts the rows ticked in the new bulk form" do
+    click_button("Select")
+    row("first").find("input[name='ids[]']").check
+    row("second").find("input[name='ids[]']").check
+
+    expect(page).to have_css("[data-bulk-count]", exact_text: "2 ticked")
+  end
+
+  it "opens a task from the new list in the panel" do
+    find(".task-title", exact_text: "second").click
+
+    expect(page).to have_css("dialog#task-panel[open] h1", exact_text: "second")
+  end
+
   it "saves a drag once", :aggregate_failures do
     drag("first", below: "third")
     Timeout.timeout(5) { sleep 0.05 until request_gate.answered(place_path) >= 1 }
