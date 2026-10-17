@@ -43,6 +43,14 @@ RSpec.describe "Admin Markdown preview", type: :request do
       expect(page).to have_css(".post-body p", exact_text: "after")
     end
 
+    it "keeps the site's own image and links a remote one through the task renderer", :aggregate_failures do
+      own = Hanami.app.settings.site_url("/media/#{'a' * 32}.png")
+      preview("tasks", "![own](#{own}) ![shot](https://example.com/shot.png)")
+
+      expect(page).to have_css(".post-body img[src='#{own}'][alt='own']")
+      expect(page).to have_link("shot", href: "https://example.com/shot.png")
+    end
+
     it "renders an empty body for no markdown" do
       post "/admin/markdown/preview/posts", { _csrf_token: admin_csrf_token }
 

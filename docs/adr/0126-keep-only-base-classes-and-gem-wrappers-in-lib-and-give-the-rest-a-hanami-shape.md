@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
   projects, public, record, saved_views, search, security, social, suggestions, tags, tasks]
 issue: "#718"
-amended: ["#957", "#1171"]
+amended: ["#957", "#1171", "#1575"]
 tags: [layout, hanami, lib, app, rom, plugins, operations, contracts, structs, enums, helpers, markdown]
 ---
 
@@ -46,12 +46,13 @@ stay where they are. Everything else takes the shape its kind has:
 **Presentation helpers.** `Figures`, `Truncation` and `Whitespace` become modules under `app/helpers`, such as
 `Blog::Helpers::Figures`, kept out of the container through `no_auto_register_paths` as the api slice keeps out its
 serializers. Callers name them by constant. Views, components, operations, contracts and repos in eight slices call
-them, and a Phlex component takes no `Deps`.
+them. #1575 let a Phlex component take `Deps`, and the helpers stay modules all the same.
 
 **Markdown.** `Posts::Markdown` and `Tasks::Markdown` wrap Commonmarker, so they are library code and stay in
 `lib/posts` and `lib/tasks`. Other slices keep naming them by constant, since ADR 0002 lets a caller name a constant
-of the slice that owns it, and the admin and public components that render Markdown take no `Deps`. #1171 merges
-them into one wrapper in `lib/markdown` that every caller names ([ADR 0159][0159]).
+of the slice that owns it. Since #1575 the components that render Markdown take `Deps`, and hand `Markdown::Note`
+the site origin from `settings`. #1171 merges them into one wrapper in `lib/markdown` that every caller names
+([ADR 0159][0159]).
 
 **`Analytics::Device`.** Nothing crosses. `lib/security` names its own `Security::Device`, which reads the browser
 and system, and `Analytics::Device`, which sorts a visit into a device class, is named only from the development
@@ -68,8 +69,8 @@ back where ADR 0022 had one.
 **View parts or components for the presentation helpers.** Phlex views have no parts, and a component cannot serve
 the operations, contracts and repos that call `Figures` and `Truncation`.
 
-**An exported Markdown operation, or a move to `lib/blog`.** An operation cannot reach a component, which takes no
-`Deps`. A move to `lib/blog` takes a gem wrapper from the slice that owns it and gains nothing.
+**An exported Markdown operation, or a move to `lib/blog`.** An operation could not reach a component, which took no
+`Deps` until #1575. A move to `lib/blog` takes a gem wrapper from the slice that owns it and gains nothing.
 
 **Leave the rule as ADR 0002 had it.** Nothing moves, and `lib/blog` keeps growing.
 
@@ -80,8 +81,8 @@ and gem wrappers.
 
 Each move renames a constant and, for an operation, adds a container key, so every caller changes. Nothing checks a
 `Deps[...]` string until the code runs. A parser that answered with plain module functions now needs an instance
-from the container, so a class that cannot take `Deps`, such as a Phlex component, can no longer call it.
-`Admin::UI::Components::Social::Directory` builds `Social::Mentions` itself today, so its action has to hand it
+from the container, so a class that cannot take `Deps` can no longer call it. Until #1575 a Phlex component could
+not, so `Admin::UI::Components::Social::Directory`, which built `Social::Mentions` itself, had its action hand it
 the result instead.
 
 `app/` stops being assets alone. It holds `structs` and `helpers` too, and the app config grows a

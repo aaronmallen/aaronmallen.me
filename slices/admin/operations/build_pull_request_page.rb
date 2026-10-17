@@ -8,6 +8,7 @@ module Admin
       include Deps[
         list_record_links: "operations.list_record_links",
         pull_request_queries: "record.repos.pull_request_queries",
+        settings: "settings",
       ]
 
       def call(id, records: Blog::Constants::EMPTY_HASH)
@@ -24,7 +25,9 @@ module Admin
       private
 
       def body_html(body)
-        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body)) unless body.strip.empty?
+        return if body.strip.empty?
+
+        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body), origin: settings.site_origin)
       end
     end
   end

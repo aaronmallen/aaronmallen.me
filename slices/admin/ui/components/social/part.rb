@@ -15,6 +15,8 @@ module Admin
           prop :removable, Blog::Types::Bool, default: false
           prop :autofocus, Blog::Types::Bool, default: false
 
+          include Deps[media_store: "media_store.client"]
+
           def view_template
             div(class: "compose-part", data: { social_part: "" }) do
               div(class: "compose-part-head", data: { label: t(".label") }) { remove_button }
@@ -110,7 +112,7 @@ module Admin
             Button(variant: :gh, small: true, hidden: !@removable, data: { social_remove: "" }) { t(".remove") }
           end
 
-          def uploads? = slice["media_store.client"].configured?
+          def uploads? = media_store.configured?
         end
       end
     end

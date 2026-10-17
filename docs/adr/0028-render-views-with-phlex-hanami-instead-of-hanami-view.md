@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, admin, mcp, public]
 issue: AA-632
-amended: [AA-783, AA-809, "#570", "#941"]
+amended: [AA-783, AA-809, "#570", "#941", "#1575"]
 tags: [views, phlex, phlex-hanami, hanami-view, dry-types, props, components, layouts, ui]
 ---
 
@@ -65,9 +65,12 @@ A component and a contract share one set of type words, and a component can take
 is. A prop declared with `prop?` holds `Phlex::Hanami::Props::UNSET` when the caller leaves it out, so a component
 that must tell nil from a missing value, as `Blog::UI::Components::Form` does with its token, checks for `UNSET`.
 
-Nothing injects into a layout. phlex-hanami builds one with `layout_class.new`, so `Deps[]` never runs, and both
-layouts call `slice[...]` instead (`slices/admin/ui/layouts/application.rb`,
-`slices/public/ui/layouts/application.rb`). ADR 0003 says which keys they reach.
+A layout and a component take what they need through `Deps`, as any other class does. phlex-hanami builds a layout
+with `layout_class.new`, and dry-auto_inject fills the keys in `new`, so #1575 swapped the `slice[...]` calls this
+record once named for `Deps`: `Blog::UI::Layouts::Application` takes `settings`, and
+`slices/public/ui/layouts/application.rb` takes the admin session reader. Kit components read settings the same way,
+not through `Hanami.app.settings`. `Admin::UI::Navigated` keeps its `slice[...]` call, since a mixin cannot take
+`Deps`. ADR 0003 says which keys they reach.
 
 There is no `form_for`. `Phlex::Hanami::Helpers` requires hanami-view, so the app cannot include it. The kit's
 `Blog::UI::Components::Form` writes the `_csrf_token` field instead (AA-700), and no view or component under

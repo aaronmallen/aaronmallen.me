@@ -55,7 +55,7 @@ module Admin
                 div(class: "comment-acts hov") { edit(option) }
               end
               MarkdownBody(
-                source: option.body, markdown: ::Markdown::Note, class: "markdown-body decision-option-body",
+                source: option.body, renderer: "tasks", class: "markdown-body decision-option-body",
               )
             end
           end

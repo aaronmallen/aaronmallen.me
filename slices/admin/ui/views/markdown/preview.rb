@@ -7,10 +7,11 @@ module Admin
         class Preview < View
           layout nil
 
-          prop :html, Blog::Types::String
+          prop :source, Blog::Types::String
+          prop :renderer, Blog::Types::MarkdownRenderer
 
           def view_template
-            div(class: "post-body") { raw(safe(@html)) }
+            MarkdownBody(source: @source, renderer: @renderer)
           end
         end
       end

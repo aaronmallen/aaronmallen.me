@@ -14,7 +14,7 @@ module Markdown
 
     module_function
 
-    def find(fragment) = fragment.css(IMG).reject { own?(it[SRC]) }
+    def find(fragment, origin:) = fragment.css(IMG).reject { own?(it[SRC], origin) }
 
     def host?(src) = Blog::Types::Normalized::Host.valid?(src.to_s)
 
@@ -24,16 +24,14 @@ module Markdown
       false
     end
 
-    def own?(src)
+    def own?(src, origin)
       uri = URI(src.to_s)
       return false unless MEDIA.match?(uri.path) && uri.query.nil? && uri.fragment.nil?
 
-      uri.is_a?(URI::HTTP) ? uri.origin == site_origin : !host?(src) && uri.scheme.nil?
+      uri.is_a?(URI::HTTP) ? uri.origin == origin : !host?(src) && uri.scheme.nil?
     rescue URI::InvalidURIError
       false
     end
-
-    def site_origin = Hanami.app.settings.site_origin
 
     def stand_in(image)
       src = image[SRC].to_s
@@ -48,9 +46,9 @@ module Markdown
 
     def swap(images) = images.each { it.replace(stand_in(it)) }
 
-    def to_links(html)
+    def to_links(html, origin:)
       fragment = Nokogiri::HTML5.fragment(html)
-      images = find(fragment)
+      images = find(fragment, origin:)
       return html if images.empty?
 
       swap(images)

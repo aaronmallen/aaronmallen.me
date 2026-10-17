@@ -7,7 +7,6 @@ module Admin
         include Components
         include Components::Nav
         include Navigated
-        include Deps["settings"]
 
         DRAWER_HEADER = "HTTP_X_DRAWER"
         LIVE_TABLES = %w[

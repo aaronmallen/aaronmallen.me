@@ -4,12 +4,11 @@ module Admin
   module Actions
     module Markdown
       class Preview < Action
-        RENDERERS = { "posts" => ::Markdown, "tasks" => ::Markdown::Note }.freeze
-
         def handle(request, response)
-          renderer = RENDERERS.fetch(request.params[:renderer]) { halt 404 }
+          renderer = request.params[:renderer]
+          halt 404 unless Blog::Types::MarkdownRenderer.valid?(renderer)
 
-          response.render(view, html: renderer.to_html(Blog::Types::Text[request.params[:markdown]]).strip)
+          response.render(view, source: Blog::Types::Text[request.params[:markdown]], renderer:)
         end
       end
     end

@@ -14,6 +14,8 @@ module Public
           prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
+          include Deps["settings"]
+
           def view_template
             page_meta
 
@@ -32,7 +34,8 @@ module Public
           def described
             return unless @description
 
-            div(class: "ld prose") { raw(safe(::Markdown::Note.to_html(@description).strip)) }
+            html = ::Markdown::Note.to_html(@description, origin: settings.site_origin).strip
+            div(class: "ld prose") { raw(safe(html)) }
           end
 
           def page_meta

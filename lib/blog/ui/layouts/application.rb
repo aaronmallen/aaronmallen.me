@@ -5,6 +5,7 @@ module Blog
     module Layouts
       class Application < Phlex::Hanami::Layout
         include Components
+        include Deps["settings"]
 
         FEED_TYPE = "application/atom+xml"
         FONT_TYPE = "font/woff2"
@@ -90,7 +91,7 @@ module Blog
           link(rel: "webmention", href: page_webmention) if page_webmention
         end
 
-        def title_suffix = Hanami.app.settings.owner_name
+        def title_suffix = settings.owner_name
       end
     end
   end

@@ -4,8 +4,6 @@ module MCP
   module UI
     module Layouts
       class Application < Blog::UI::Layouts::Application
-        include Deps["settings"]
-
         def view_template(&)
           document { body { main(id: "main", class: "adm-main", &) } }
         end

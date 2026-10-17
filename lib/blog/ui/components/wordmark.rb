@@ -7,9 +7,11 @@ module Blog
         SLASH = "/"
         SPLIT = " "
 
+        include Deps["settings"]
+
         def view_template
           href = path(:root)
-          owner = Hanami.app.settings.owner_name
+          owner = settings.owner_name
 
           a(class: "wordmark", href:, aria: { label: t(".label", owner:), current: current(href) }) do
             name(owner)

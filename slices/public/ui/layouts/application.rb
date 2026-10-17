@@ -5,7 +5,7 @@ module Public
     module Layouts
       class Application < Blog::UI::Layouts::Application
         include Components
-        include Deps["settings"]
+        include Deps[session_reader: "admin.auth.session_reader"]
 
         ARTICLE = "article"
         BEACON_DEPTHS = Blog::Types::ScrollDepth.values.select(&:positive?).join(" ")
@@ -33,7 +33,7 @@ module Public
         private
 
         def admin_session
-          slice["admin.auth.session_reader"].call(request)
+          session_reader.call(request)
         end
 
         def article? = page_kind == ARTICLE

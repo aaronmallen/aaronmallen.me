@@ -5,7 +5,9 @@ module Admin
     class BuildCommitPage
       KIND = Blog::Types::RecordKind["commit"]
 
-      include Deps[commit_queries: "record.repos.commit_queries", list_record_links: "operations.list_record_links"]
+      include Deps[
+        "settings", commit_queries: "record.repos.commit_queries", list_record_links: "operations.list_record_links",
+      ]
 
       def call(id, records: Blog::Constants::EMPTY_HASH)
         commit = commit_queries.by_id(id)
@@ -19,7 +21,7 @@ module Admin
       def body_html(commit)
         body = Helpers::CommitMessage.body(commit.message)
 
-        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body)) if body
+        ::Markdown::RemoteImages.to_links(::Markdown.to_html(body), origin: settings.site_origin) if body
       end
     end
   end

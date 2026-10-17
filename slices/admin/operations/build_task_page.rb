@@ -14,6 +14,7 @@ module Admin
         task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
         task_timeline_queries: "tasks.repos.task_timeline_queries",
+        settings: "settings",
       ]
 
       def call(id, query: nil, kind: nil, errors: EMPTY_HASH, records: EMPTY_HASH, **forms)
@@ -35,7 +36,7 @@ module Admin
       def history(id) = { timeline: task_timeline_queries.for_task(id), edited: task_comment_queries.edited_ids(id) }
 
       def note_html(note)
-        html = ::Markdown::Note.to_html(note).strip
+        html = ::Markdown::Note.to_html(note, origin: settings.site_origin).strip
 
         html unless html.empty?
       end

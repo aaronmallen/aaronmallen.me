@@ -9,6 +9,8 @@ module Blog
           prop :tags, Blog::Types::Array.of(Blog::Types::String | Blog::Types::Instance(ROM::Struct))
           prop :read_time, Blog::Types::Integer
 
+          include Deps["settings"]
+
           def view_template
             div(class: "post-meta") do
               Date(time: @time)
@@ -22,7 +24,7 @@ module Blog
 
           def author
             a(class: "post-author p-author h-card", href: path(:root)) do
-              span(class: "p-name") { Hanami.app.settings.owner_name }
+              span(class: "p-name") { settings.owner_name }
             end
           end
         end

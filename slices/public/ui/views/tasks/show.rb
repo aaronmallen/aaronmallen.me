@@ -77,7 +77,8 @@ module Public
           end
 
           def note_body(markdown)
-            div(class: "post-body markdown-body") { raw(safe(::Markdown::Note.to_html(markdown).strip)) }
+            html = ::Markdown::Note.to_html(markdown, origin: settings.site_origin).strip
+            div(class: "post-body markdown-body") { raw(safe(html)) }
           end
 
           def notes

@@ -32,6 +32,8 @@ module Admin
         prop :view_name, Blog::Types::String.optional, default: nil
         prop :attributes, Blog::Types::Hash, :**
 
+        include Deps[media_store: "media_store.client"]
+
         def view_template(&)
           div(class: "edit", style: "--edit-height: #{@height}", data: editor_data) do
             pane_head
@@ -112,11 +114,7 @@ module Admin
           input(type: "file", accept: "image/*", multiple: true, hidden: true, data: { editor_file: "" })
         end
 
-        def uploads?
-          return @uploads if defined?(@uploads)
-
-          @uploads = slice["media_store.client"].configured?
-        end
+        def uploads? = media_store.configured?
 
         def view_name = @view_name || "#{control_id}-view"
 

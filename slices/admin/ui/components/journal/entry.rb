@@ -19,7 +19,7 @@ module Admin
             article(class: "journal-entry", data: { journal_item: "", menu: }) do
               head
               MarkdownBody(
-                source: @entry.body, markdown: ::Markdown, class: "journal-entry-body", hidden: editing?,
+                source: @entry.body, renderer: "posts", class: "journal-entry-body", hidden: editing?,
                 data: { journal_text: "" },
               )
               edit_form
