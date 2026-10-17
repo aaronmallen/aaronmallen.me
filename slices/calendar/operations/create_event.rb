@@ -3,12 +3,7 @@
 module Calendar
   module Operations
     class CreateEvent < EventOperation
-      include Deps[
-        calendar_queries: "repos.calendar_queries",
-        contract: "contracts.event_contract",
-        google: "google.client",
-        honeybadger: "honeybadger.agent",
-      ]
+      include Deps[calendar_queries: "repos.calendar_queries", contract: "contracts.event_contract"]
 
       def call(calendar_id, params)
         calendar = step writable(calendar_queries.calendar(calendar_id))

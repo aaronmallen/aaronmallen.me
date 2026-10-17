@@ -2,6 +2,8 @@
 
 module Calendar
   class EventOperation < Blog::Operation
+    include Deps[google: "google.client", honeybadger: "honeybadger.agent"]
+
     SERIES = "all"
 
     private

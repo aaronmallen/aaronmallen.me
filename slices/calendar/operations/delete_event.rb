@@ -3,9 +3,7 @@
 module Calendar
   module Operations
     class DeleteEvent < EventOperation
-      include Deps[
-        google: "google.client", calendar_queries: "repos.calendar_queries", honeybadger: "honeybadger.agent",
-      ]
+      include Deps[calendar_queries: "repos.calendar_queries"]
 
       def call(id, scope: nil)
         event = step found(calendar_queries.event(id))

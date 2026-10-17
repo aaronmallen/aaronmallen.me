@@ -31,10 +31,8 @@ Blog/UnusedDeps:
     - comment_photos
     - comment_queries
     - contract
-    - honeybadger
     - queries
     - record_link_queries
-    - record_sync_outcome
     - thread_queries
   Include:
     - app/**/*.rb

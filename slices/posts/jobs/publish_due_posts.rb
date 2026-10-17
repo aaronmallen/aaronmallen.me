@@ -3,9 +3,7 @@
 module Posts
   module Jobs
     class PublishDuePosts < Blog::ScheduledJob
-      include Deps[
-        honeybadger: "honeybadger.agent", post_queries: "repos.post_queries", publish_post: "operations.publish_post",
-      ]
+      include Deps[post_queries: "repos.post_queries", publish_post: "operations.publish_post"]
 
       def perform
         now = Time.now

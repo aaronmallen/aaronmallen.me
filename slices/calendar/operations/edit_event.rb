@@ -3,12 +3,7 @@
 module Calendar
   module Operations
     class EditEvent < EventOperation
-      include Deps[
-        calendar_queries: "repos.calendar_queries",
-        contract: "contracts.event_contract",
-        google: "google.client",
-        honeybadger: "honeybadger.agent",
-      ]
+      include Deps[calendar_queries: "repos.calendar_queries", contract: "contracts.event_contract"]
 
       def call(id, params, scope: nil)
         event = step found(calendar_queries.event(id))

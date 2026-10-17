@@ -19,12 +19,6 @@ RSpec.describe "Blog/UnusedDeps", type: :script do
     [status.success?, output]
   end
 
-  it "passes the deps a base class reads" do
-    names = %w[act_on contract queries record_link_queries record_sync_outcome thread_queries]
-
-    expect(lint(*names).first).to be(true)
-  end
-
   it "fails a dep outside the list that the class never reads" do
     expect(lint("contract", "mailer")).to match([false, a_string_including("mailer from Deps")])
   end

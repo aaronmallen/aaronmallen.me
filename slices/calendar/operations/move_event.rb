@@ -3,10 +3,7 @@
 module Calendar
   module Operations
     class MoveEvent < EventOperation
-      include Deps[
-        calendar_mutations: "repos.calendar_mutations", calendar_queries: "repos.calendar_queries",
-        google: "google.client", honeybadger: "honeybadger.agent",
-      ]
+      include Deps[calendar_mutations: "repos.calendar_mutations", calendar_queries: "repos.calendar_queries"]
 
       def call(id, date, now: Time.now)
         day = step upcoming_day(date, now)
