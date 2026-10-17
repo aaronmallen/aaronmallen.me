@@ -219,9 +219,10 @@ RSpec.describe "MCP post tools", type: :request do
 
     it "moves a scheduled post to a new publish time" do
       scheduled = create(:post, :scheduled)
-      mcp_call("update_post", id: scheduled.id, publish_at: future(5))
+      publish_at = future(5)
+      mcp_call("update_post", id: scheduled.id, publish_at:)
 
-      expect(Blog::TimeZone.input_value(stored(scheduled.id).published_at)).to eq(future(5))
+      expect(Blog::TimeZone.input_value(stored(scheduled.id).published_at)).to eq(publish_at)
     end
 
     it "refuses an empty publish time on a scheduled post and keeps its status and time", :aggregate_failures do
@@ -266,10 +267,11 @@ RSpec.describe "MCP post tools", type: :request do
 
     it "moves an overdue scheduled post to a publish time still to come", :aggregate_failures do
       overdue = create(:post, :scheduled, published_at: Time.now - 60)
-      mcp_call("update_post", id: overdue.id, publish_at: future(5))
+      publish_at = future(5)
+      mcp_call("update_post", id: overdue.id, publish_at:)
 
       expect(stored(overdue.id).status).to eq("scheduled")
-      expect(Blog::TimeZone.input_value(stored(overdue.id).published_at)).to eq(future(5))
+      expect(Blog::TimeZone.input_value(stored(overdue.id).published_at)).to eq(publish_at)
     end
 
     it "still clears the publish time of a draft" do

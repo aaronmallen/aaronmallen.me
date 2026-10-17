@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin bulk select mode", type: :feature do
+  def await_refresh
+    screen = path.split("?").first
+    asked = request_gate.count(screen)
+    yield.tap { Timeout.timeout(5) { sleep 0.05 until request_gate.answered(screen) > asked } }
+  end
+
   def boxes = page.all("input[name='ids[]']", visible: :all)
 
   def break_a_setup_step
@@ -123,7 +129,7 @@ RSpec.describe "Admin bulk select mode", type: :feature do
     let(:path) { "/admin/tasks?filter=next" }
     let(:row) { ".task" }
 
-    def arrive = find(".task", text: create(:task, title: "arrived", position: 9).title)
+    def arrive = find(".task", text: await_refresh { create(:task, title: "arrived", position: 9) }.title)
 
     before { %w[first second].each_with_index { |title, index| create(:task, title:, position: index + 1) } }
 
@@ -135,7 +141,7 @@ RSpec.describe "Admin bulk select mode", type: :feature do
     let(:path) { "/admin/mail" }
     let(:row) { ".mail-row" }
 
-    def arrive = find("#thread-#{create(:message, subject: 'Arrived').id}")
+    def arrive = find("#thread-#{await_refresh { create(:message, subject: 'Arrived') }.id}")
 
     before { Array.new(2) { create(:message) } }
 

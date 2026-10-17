@@ -10,6 +10,11 @@ RSpec.describe "Admin today pools", type: :feature do
     visit "/admin"
   end
 
+  def await_swap
+    expect(page).to have_current_path(/pool=someday/)
+    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin") >= request_gate.count("/admin") }
+  end
+
   def copied = Admin::Slice["i18n"].t("ui.components.record_key.copied.task", key: someday.label)
 
   def panel = find("[data-sprint-panel]")
@@ -27,6 +32,7 @@ RSpec.describe "Admin today pools", type: :feature do
       page.driver.resize(1024, 400)
       scroll_down
       panel.find(".seg-option", exact_text: "someday · 1").click
+      await_swap
     end
 
     it "switches without loading the page", :aggregate_failures do
