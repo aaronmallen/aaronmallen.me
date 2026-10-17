@@ -5,6 +5,7 @@ module Admin
     module Components
       module RecordLinks
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Links::Contracts::RecordLinkContract].freeze
           SCOPE = "record"
 
           def self.field_slug(field) = super.tr("_", "-")

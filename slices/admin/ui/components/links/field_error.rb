@@ -5,6 +5,7 @@ module Admin
     module Components
       module Links
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Shares::Contracts::ShortLinkContract].freeze
           SCOPE = "link"
         end
       end

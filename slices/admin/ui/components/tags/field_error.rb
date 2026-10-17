@@ -5,6 +5,7 @@ module Admin
     module Components
       module Tags
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Tags::Contracts::TagContract].freeze
           SCOPE = "tag"
         end
       end

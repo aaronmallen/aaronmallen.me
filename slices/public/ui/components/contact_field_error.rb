@@ -4,6 +4,7 @@ module Public
   module UI
     module Components
       class ContactFieldError < Blog::UI::FieldError
+        CONTRACTS = [::Mail::Contracts::MessageContract].freeze
         SCOPE = "cf"
         SLUGS = { body: "message", reply_to: "email" }.freeze
         BROWSER_CODES = %w[blank format].freeze

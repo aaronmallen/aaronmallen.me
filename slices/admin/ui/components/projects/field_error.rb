@@ -5,6 +5,7 @@ module Admin
     module Components
       module Projects
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Projects::Contracts::ProjectContract].freeze
           SCOPE = "project"
         end
       end

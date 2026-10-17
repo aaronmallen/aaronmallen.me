@@ -5,6 +5,7 @@ module Admin
     module Components
       module Files
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Shares::Contracts::ShareContract].freeze
           SCOPE = "share"
         end
       end

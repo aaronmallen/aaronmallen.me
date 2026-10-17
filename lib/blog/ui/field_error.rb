@@ -7,6 +7,7 @@ module Blog
       INVALID = "ui.field_error.invalid"
       LIMITS = Blog::Constants::EMPTY_HASH
       OVERRIDES = Blog::Constants::EMPTY_HASH
+      UNSHOWN = Blog::Constants::EMPTY_ARRAY
 
       prop :field, Blog::Types::Symbol
       prop :errors, Blog::Types::Hash

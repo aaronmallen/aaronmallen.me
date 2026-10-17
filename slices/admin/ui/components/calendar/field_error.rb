@@ -5,6 +5,7 @@ module Admin
     module Components
       module Calendar
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Calendar::Contracts::EventContract].freeze
           SCOPE = "cal-event"
         end
       end

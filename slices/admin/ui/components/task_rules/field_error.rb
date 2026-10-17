@@ -5,6 +5,7 @@ module Admin
     module Components
       module TaskRules
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Tasks::Contracts::TaskRuleContract].freeze
           SCOPE = "rule"
         end
       end

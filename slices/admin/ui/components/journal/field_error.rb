@@ -5,6 +5,7 @@ module Admin
     module Components
       module Journal
         class FieldError < Blog::UI::FieldError
+          CONTRACTS = [::Record::Contracts::JournalEditContract, ::Record::Contracts::JournalEntryContract].freeze
           SCOPE = "journal"
 
           def self.field_slug(field) = super.tr("_", "-")
