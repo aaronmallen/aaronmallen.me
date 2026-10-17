@@ -74,6 +74,8 @@ module Tasks
         task_label_queries.labelled_as(found, label).pluck(:id).first
       end
 
+      def ids_of(ids) = tasks.where(id: ids).select(:id).to_a
+
       def in_progress = tasks.in_progress.in_order.to_a
 
       def in_sprint(sprint_id) = listed.for_sprint(sprint_id).in_order.to_a
@@ -133,10 +135,7 @@ module Tasks
 
       private
 
-      def by_project(projects: [], **search)
-        search = { **search, label_ids: task_label_queries.ids_labelled(search[:text]) }
-        projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
-      end
+      def by_project(**) = task_label_queries.terms(**)
 
       def listed(found = tasks) = found.select(*found.schema.qualified.reject { it.name == :note }).detailed
 

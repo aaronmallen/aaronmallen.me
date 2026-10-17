@@ -26,6 +26,11 @@ module Tasks
         rows = (labelled_as(tasks, text).limit(limit).linkable + found).uniq(&:id)
         limit ? rows.first(limit) : rows
       end
+
+      def terms(projects: [], **search)
+        search = { **search, label_ids: ids_labelled(search[:text]) }
+        projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
+      end
     end
   end
 end

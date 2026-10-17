@@ -33,6 +33,7 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.connect_linkedin" => "connects LinkedIn profiles in the owner's browser; no tool takes tokens",
       "admin.operations.connect_mastodon" => "connects Mastodon through the owner's browser; no tool takes tokens",
       "admin.operations.connect_service" => "the owner connects a service in the admin; no tool takes credentials",
+      "admin.operations.count_tasks" => "the admin bulk bar counts a tab to find its landing page",
       "admin.operations.describe_post_save" => "words a post save for the admin's toast",
       "admin.operations.describe_social_post" => "words a social post for the admin's list",
       "admin.operations.disconnect_service" => "disconnects a service from the admin; no tool handles credentials",

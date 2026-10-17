@@ -254,6 +254,24 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       end
     end
 
+    describe "tag or untag on many tasks" do
+      def statements(name, count)
+        ticked = Array.new(count) { tagged("money") }
+
+        logged_sql { act(name, ticked, tag: "home") }.lines.grep(/SELECT|INSERT|DELETE|UPDATE/)
+      end
+
+      %w[tag untag].each do |name|
+        it "#{name} runs as many statements for five tasks as for one" do
+          expect(statements(name, 5).size).to eq(statements(name, 1).size)
+        end
+      end
+
+      it "writes every tag in one insert" do
+        expect(statements("tag", 5).grep(/INSERT INTO "task_tags"/).size).to eq(1)
+      end
+    end
+
     describe "tag on a task that has it already" do
       it "keeps one and records nothing", :aggregate_failures do
         task = tagged("money")
@@ -455,6 +473,22 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
         act("complete", [repo.open_in_list("next").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next")
+      end
+
+      it "keeps a page of finished tasks while it still has rows" do
+        lower_page_size(:admin, to: 1)
+        create(:task, :canceled, completed_at: Time.now - 60)
+        act("tag", [create(:task, :canceled, completed_at: Time.now - 60)], filter: "completed", tag: "home", page: 2)
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=completed&page=2")
+      end
+
+      it "steps back a page when the search no longer reaches it" do
+        lower_page_size(:admin, to: 1)
+        create(:task, title: "Water plants")
+        act("complete", [create(:task, title: "Water lawn")], q: "water", page: 2)
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next&q=water")
       end
 
       it "goes back the same way after a failure" do

@@ -135,8 +135,8 @@ module Admin
       operations.resume_task_series operations.save_task operations.save_task_rule
       operations.schedule_task operations.set_task_column operations.set_task_total operations.set_tasks_column
       operations.start_task operations.unlink_task
-      repos.sprint_queries repos.task_comment_queries repos.task_queries repos.task_rule_queries
-      repos.task_series_queries repos.task_timeline_queries repos.time_report_queries
+      repos.sprint_queries repos.task_comment_queries repos.task_count_queries repos.task_queries
+      repos.task_rule_queries repos.task_series_queries repos.task_timeline_queries repos.time_report_queries
     ], from: :tasks
 
     import keys: %w[operations.revoke_client repos.oauth_client_queries], from: :mcp

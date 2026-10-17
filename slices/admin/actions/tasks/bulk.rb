@@ -19,7 +19,7 @@ module Admin
         include Redirect
         include Deps[
           act_on_tasks: "tasks.operations.act_on_tasks",
-          build_tasks_page: "operations.build_tasks_page",
+          count_tasks: "operations.count_tasks",
           task_queries: "tasks.repos.task_queries",
         ]
 
@@ -38,7 +38,7 @@ module Admin
         def list_path(request)
           query = Blog::Types::TrimmedText[request.params[:q]]
           tab = task_tab(request)
-          page = landing(request) { build_tasks_page.call(page: it, tab:, query:).failure? }
+          page = landing(request) { it.offset >= count_tasks.call(tab:, query:).value_or(0) }
           pool = request.params[:pool]&.then { { pool: Blog::Types::TaskListParam[it] } }
 
           routes.path(:admin_tasks, filter: tab, **pool, **(query.empty? ? {} : { q: query }),
