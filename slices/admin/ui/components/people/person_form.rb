@@ -87,7 +87,7 @@ module Admin
 
           def network(name)
             net = NETWORKS[name]
-            net ? { class: "field-net #{net}", icon: "fa-brands fa-#{net}" } : Blog::Constants::EMPTY_HASH
+            net ? { class: "field-net #{net}", icon: Blog::Constants::NETWORK_ICONS.fetch(net) } : Blog::Constants::EMPTY_HASH
           end
         end
       end

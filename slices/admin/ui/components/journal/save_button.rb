@@ -5,7 +5,7 @@ module Admin
     module Components
       module Journal
         class SaveButton < Component
-          ICON = "fa-solid fa-feather"
+          ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('journal_entry')}".freeze
 
           prop :body, Blog::Types::String
           prop :feather, Blog::Types::Bool, default: false

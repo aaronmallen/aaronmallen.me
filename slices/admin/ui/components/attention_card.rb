@@ -6,6 +6,7 @@ module Admin
       class AttentionCard < Component
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
+        JOURNAL_ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('journal_entry')}".freeze
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
         prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
@@ -58,8 +59,8 @@ module Admin
           link = Dialog.opens(Journal::WriteDialog::ID)
           sub = t(".journal_gap", count: row.days)
 
-          ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", **hovered(row)) do
-            icon_link(href, t(".write"), "fa-solid fa-feather", **link)
+          ListItem(title: t(".journal"), href:, link:, sub:, icon: JOURNAL_ICON, **hovered(row)) do
+            icon_link(href, t(".write"), JOURNAL_ICON, **link)
             snooze(row)
           end
         end

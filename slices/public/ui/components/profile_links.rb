@@ -5,7 +5,7 @@ module Public
     module Components
       class ProfileLinks < Component
         PROFILES = {
-          github: ["fa-brands fa-github", ".github"].freeze,
+          github: [Blog::Constants::GITHUB_ICON, ".github"].freeze,
           bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".bluesky"].freeze,
           linkedin: [Blog::Constants::NETWORK_ICONS.fetch("linkedin"), ".linkedin"].freeze,
           mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".mastodon"].freeze,

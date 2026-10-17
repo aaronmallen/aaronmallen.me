@@ -5,7 +5,7 @@ module Admin
     module Views
       module Projects
         class Menu < View
-          REPO = "fa-brands fa-github"
+          REPO = Blog::Constants::GITHUB_ICON
 
           layout nil
 

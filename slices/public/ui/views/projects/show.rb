@@ -86,7 +86,7 @@ module Public
 
           def links
             repo = @project.repo_url
-            link(repo, @project.repo, "fa-brands fa-github") if repo
+            link(repo, @project.repo, Blog::Constants::GITHUB_ICON) if repo
             link(@project.url, bare_url(@project.url), :outbound) if url?(repo)
             stats
           end

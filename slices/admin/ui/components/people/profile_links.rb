@@ -26,7 +26,7 @@ module Admin
 
           def link(href, network, handle)
             a(class: ["person-link", network], href:, **OUTBOUND) do
-              IconLabel(icon: ["fa-brands", "fa-#{network}"]) { handle }
+              IconLabel(icon: Blog::Constants::NETWORK_ICONS.fetch(network)) { handle }
             end
           end
 

@@ -23,7 +23,7 @@ module Admin
           def change_button(link)
             Button(
               href: path(:admin_edit_link, id: link.id), small: true, variant: :gh,
-              icon: "fa-regular fa-pen-to-square", label: t(".change", link: link.destination),
+              icon: :edit, label: t(".change", link: link.destination),
             )
           end
 

@@ -15,6 +15,7 @@ module Blog
     MAIL_SUBJECT_MAX = 200
     MEDIA_PATH = "/media/"
     MEDIA_REFERENCE = %r{#{MEDIA_PATH}(?:\d+/)?(#{Types::PHOTO_KEY})}
+    GITHUB_ICON = "fa-brands fa-github"
     NETWORK_ICONS = {
       Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
       Types::NetworkName["linkedin"] => "fa-brands fa-linkedin",

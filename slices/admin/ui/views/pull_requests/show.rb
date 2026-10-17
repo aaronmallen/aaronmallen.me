@@ -15,7 +15,7 @@ module Admin
             content_for(:live_tables, LIVE_TABLES)
             PageHead(
               title: @pull_request.title, kicker: t(".kicker", number: @pull_request.number), sub: @pull_request.repo,
-              sub_icon: "fa-solid fa-code-pull-request",
+              sub_icon: "fa-solid #{Blog::Helpers::RecordKinds.icon('pull_request')}",
             ) do
               BackLink(href: path(:admin_activity)) { t(".back") }
               github_link
@@ -40,7 +40,7 @@ module Admin
           def github_link
             Button(
               href: @pull_request.url, **Blog::UI::Component::OUTBOUND, variant: :gh,
-              icon: "fa-brands fa-github",
+              icon: Blog::Constants::GITHUB_ICON,
             ) do
               t(".github")
             end

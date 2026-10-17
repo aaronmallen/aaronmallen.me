@@ -33,7 +33,7 @@ module Admin
           params: { filter: Blog::Types::TaskTab["upcoming"] },
         ),
         Entry.new(name: :import_commits, icon: "fa-rotate", route: :admin_import_commits, post: true),
-        Entry.new(name: :sync_issues, icon: "fa-code-pull-request", route: :admin_sync_issues, post: true),
+        Entry.new(name: :sync_issues, icon: KINDS.icon("pull_request"), route: :admin_sync_issues, post: true),
         Entry.new(name: :keyboard_shortcuts, icon: "fa-keyboard", click: "[data-key-help-open]", key: "?"),
         Entry.new(
           name: :toggle_theme, icon: "fa-circle-half-stroke", click: "[data-theme-choice][aria-pressed='false']",

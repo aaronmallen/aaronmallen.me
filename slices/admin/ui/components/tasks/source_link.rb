@@ -6,7 +6,7 @@ module Admin
       module Tasks
         class SourceLink < Component
           ICONS = {
-            Blog::Types::TaskSourceProvider["github"] => "fa-brands fa-github",
+            Blog::Types::TaskSourceProvider["github"] => Blog::Constants::GITHUB_ICON,
             Blog::Types::TaskSourceProvider["linear"] => "linear-mark",
           }.freeze
 

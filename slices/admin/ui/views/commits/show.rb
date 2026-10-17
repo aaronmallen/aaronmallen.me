@@ -6,6 +6,7 @@ module Admin
       module Commits
         class Show < View
           GITHUB_URL = "https://github.com/%s/commit/%s"
+          ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('commit')}".freeze
           LIVE_TABLES = %w[commits record_links].freeze
 
           prop :commit, Blog::Types::Instance(ROM::Struct)
@@ -14,7 +15,7 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            PageHead(title: subject, kicker: t(".kicker", sha: short_sha), sub:, sub_icon: "fa-solid fa-code-commit") do
+            PageHead(title: subject, kicker: t(".kicker", sha: short_sha), sub:, sub_icon: ICON) do
               BackLink(href: path(:admin_activity)) { t(".back") }
               github_link
             end
@@ -33,7 +34,7 @@ module Admin
 
           def github_link
             Button(
-              href: github_url, **Blog::UI::Component::OUTBOUND, variant: :gh, icon: "fa-brands fa-github",
+              href: github_url, **Blog::UI::Component::OUTBOUND, variant: :gh, icon: Blog::Constants::GITHUB_ICON,
             ) do
               t(".github")
             end

@@ -67,7 +67,7 @@ module Admin
 
           def repo
             span do
-              IconLabel(icon: "fa-brands fa-github") { @project.repo }
+              IconLabel(icon: Blog::Constants::GITHUB_ICON) { @project.repo }
             end
           end
 

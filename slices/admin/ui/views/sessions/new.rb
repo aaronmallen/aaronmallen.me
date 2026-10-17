@@ -6,7 +6,7 @@ module Admin
       module Sessions
         class New < View
           PROVIDERS = {
-            "github" => ["fa-brands fa-github", ".github"],
+            "github" => [Blog::Constants::GITHUB_ICON, ".github"],
             "google" => ["fa-brands fa-google", ".google"],
           }.freeze
 

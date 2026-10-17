@@ -80,7 +80,7 @@ module Admin
 
           def facts
             div(class: "kb-meta") do
-              link(@project.repo_url, @project.repo, "fa-brands fa-github") if @project.repo_url
+              link(@project.repo_url, @project.repo, Blog::Constants::GITHUB_ICON) if @project.repo_url
               link(@project.url, bare_url(@project.url), :outbound) if site?
               counts
               published

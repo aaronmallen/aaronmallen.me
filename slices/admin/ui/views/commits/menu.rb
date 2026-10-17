@@ -24,7 +24,7 @@ module Admin
 
           def opens(menu)
             menu.link(t(".open"), href: path(:admin_commit, id: @commit.id), icon: "fa-regular fa-folder-open")
-            menu.link(t(".github"), href: github, icon: "fa-brands fa-github", outbound: true)
+            menu.link(t(".github"), href: github, icon: Blog::Constants::GITHUB_ICON, outbound: true)
           end
 
           def sha = Helpers::Short.sha(@commit.sha)

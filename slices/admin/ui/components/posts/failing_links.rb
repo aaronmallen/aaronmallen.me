@@ -25,7 +25,7 @@ module Admin
           def fix_button(url)
             Button(
               href: path(:admin_edit_post, id: @post_id, links: Blog::Constants::CHECKED), small: true, variant: :gh,
-              icon: "fa-regular fa-pen-to-square", label: t(".fix", link: url),
+              icon: :edit, label: t(".fix", link: url),
             )
           end
         end

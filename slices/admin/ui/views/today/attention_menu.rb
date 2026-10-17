@@ -9,6 +9,7 @@ module Admin
           CARRIED = Blog::Types::AttentionKind["carried"]
           DRAFT = Blog::Types::AttentionKind["draft"]
           JOURNAL = Blog::Types::AttentionKind["journal"]
+          JOURNAL_ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('journal_entry')}".freeze
           LAPSING = Blog::Types::AttentionKind["lapsing"]
           NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
           NEXT = Blog::Types::TaskFilter["next"]
@@ -68,7 +69,7 @@ module Admin
           def write(menu)
             href = path(:admin_journal, write: Blog::Constants::CHECKED)
 
-            menu.link(t(".write"), href:, icon: "fa-solid fa-feather", dialog: Components::Journal::WriteDialog::ID)
+            menu.link(t(".write"), href:, icon: JOURNAL_ICON, dialog: Components::Journal::WriteDialog::ID)
           end
         end
       end

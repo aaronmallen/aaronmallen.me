@@ -8,7 +8,7 @@ module Admin
           PATTERNS = {
             short_nights: ["fa-moon", ".short_nights.text", ".short_nights.days"],
             morning_workouts: ["fa-person-running", ".morning_workouts.text", ".morning_workouts.days"],
-            late_commits: ["fa-code-commit", ".late_commits.text", ".late_commits.days"],
+            late_commits: [Blog::Helpers::RecordKinds.icon("commit"), ".late_commits.text", ".late_commits.days"],
             resting_heart_rate: ["fa-heart-pulse", ".resting_heart_rate.text", ".resting_heart_rate.days"],
           }.freeze
 
