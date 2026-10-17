@@ -38,6 +38,7 @@ RSpec.describe "Contact form", type: :feature do
 
   it "stores one message however often the page that follows is refreshed", :aggregate_failures do
     send_message
+    expect(page).to have_current_path("/contact?sent=1")
     2.times { page.refresh }
 
     expect(page).to have_css(".f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))

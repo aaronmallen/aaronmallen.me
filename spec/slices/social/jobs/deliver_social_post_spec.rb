@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "vips"
+
 RSpec.describe Social::Jobs::DeliverSocialPost do
   subject(:job) { described_class.new }
 
