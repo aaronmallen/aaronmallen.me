@@ -1,0 +1,62 @@
+---
+id: "0186"
+title: Keep agent memory, artifacts and sessions in an agents slice
+status: active
+created: 2026-10-17
+area: [db, admin, api, mcp, links]
+issue: "#1741"
+tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
+---
+
+# ADR 0186: Keep agent memory, artifacts and sessions in an agents slice
+
+![Active][status]
+
+## Context
+
+Agents work on the site through MCP, but nothing they learn outlives the run. Each session starts cold. Plans, specs
+and handoffs live in the repo or in chat, and the only trace of an agent is a task contributor row
+([ADR 0115][0115]). I cannot see, fix or undo what an agent knows, and one agent cannot pass context to the next.
+
+Spec #1739 adds three stores built for agents first: memory files of typed facts, numbered artifacts with versions,
+and sessions that tie the two to a run. MCP is the main way in. The admin lets me read, edit and revert.
+
+## Decision
+
+A new feature slice, `agents`, owns memory files, facts and their history, artifacts and their versions, and
+sessions ([ADR 0001][0001]). Its relations, repos, contracts and operations live in `slices/agents`. Other slices
+read it through its exported read repos and operations and never write its tables ([ADR 0123][0123]).
+
+- **MCP tools forward to API endpoints** in the `api` slice, as every tool does ([ADR 0088][0088]).
+- **Memory files and artifacts join `record_links`** as the `memory_file` and `artifact` kinds
+  ([ADR 0093][0093]), so they link to tasks, projects, commits and each other. They stay out of global search and
+  the activity feed.
+- **Nothing is public.** No public page reads the slice.
+- **Nothing expires.** History, versions and sessions stay. Caps on fact text (1,000 characters) and artifact bodies
+  (100,000) keep each row small.
+
+## Alternatives
+
+**Leave memory and handoffs in the repo as files.** That is how agents work today. The files belong to one checkout,
+so an agent on another machine or in another repo cannot read them, and nothing records who wrote a fact or lets me
+revert it.
+
+## Consequences
+
+Agent data sits in one place, so the `agents` scope ([ADR 0188][0188]) has one slice to guard.
+
+Deleting a task or project deletes the memory files scoped to it, so the slice reaches into rows another slice owns
+through foreign keys.
+
+With no pruning, history, versions and sessions grow for good.
+
+Leaving the slice out of search and the activity feed means I find a fact or an artifact only through the Agents
+screens, the MCP tools or a record link.
+
+[0001]: 0001-split-the-app-into-slices-by-feature.md
+[0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
+[0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
+[0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
+[0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
+[0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
+[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
