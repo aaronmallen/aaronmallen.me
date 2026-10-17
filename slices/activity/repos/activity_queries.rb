@@ -6,6 +6,7 @@ module Activity
       NONE = Blog::Constants::EMPTY_ARRAY
       POST = Blog::Types::ActivityKind["post"]
       TYPES = Blog::Types::ActivityKind.values
+      ZERO = { views: 0 }.freeze
 
       include Deps[rollup_queries: "analytics.repos.analytics_rollup_queries"]
 
@@ -39,7 +40,13 @@ module Activity
         tallied.map(&:month).uniq.sort.reverse.to_h { [it, month_counts(tallied, it, types)] }
       end
 
-      def views(rows) = rows.any? { it.type == POST } ? rollup_queries.views_by_path : Blog::Constants::EMPTY_HASH
+      def views(rows)
+        posts = rows.select { it.type == POST }
+        return Blog::Constants::EMPTY_HASH if posts.empty?
+
+        seen = rollup_queries.views_by_post(posts.map(&:source_id))
+        posts.to_h { [it.link, seen.fetch(it.source_id, ZERO).fetch(:views)] }
+      end
 
       private
 

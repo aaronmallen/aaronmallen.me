@@ -56,14 +56,6 @@ module Analytics
 
       def unrolled_summaries(from:, to:) = unrolled_days(from:, to:).map { event_queries.summary_for(it) }
 
-      def views_by_path(to: Blog::TimeZone.today)
-        from = to - (VIEW_DAYS - 1)
-        found = by_path(paths_between(from, to).views_by_path, :views)
-
-        live_views(from, to).each { found[it.fetch(:path)] = found.fetch(it.fetch(:path), 0) + it.fetch(:views) }
-        found
-      end
-
       def views_by_post(post_ids, to: Blog::TimeZone.today)
         from = to - (VIEW_DAYS - 1)
         found = paths_between(from, to).views_by_post(post_ids).to_a.to_h { [it.post_id, it.to_h.slice(*UNSEEN.keys)] }
@@ -82,7 +74,7 @@ module Analytics
 
       def by_path(rows, field) = rows.to_a.to_h { [it.path, it.public_send(field)] }
 
-      def live_views(from, to, paths: nil) = event_queries.views_on(unrolled_days(from:, to:), paths:)
+      def live_views(from, to, paths:) = event_queries.views_on(unrolled_days(from:, to:), paths:)
 
       def months(from, to) = (from..to).slice_when { |day, after| day.month != after.month }.map { it.first..it.last }
 

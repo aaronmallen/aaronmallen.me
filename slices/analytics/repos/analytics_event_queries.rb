@@ -67,7 +67,7 @@ module Analytics
         analytics_events.for_visitor(visitor_hashes).for_view(view_token).for_path(path).newest_id
       end
 
-      def views_on(days, paths: nil)
+      def views_on(days, paths:)
         return Blog::Constants::EMPTY_ARRAY if days.empty?
 
         window = scoped(analytics_events.between_days(days.min, days.max), paths)
