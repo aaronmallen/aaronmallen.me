@@ -18,4 +18,16 @@ RSpec.describe Blog::Extensions do
       expect(target.ancestors).not_to include(extension)
     end
   end
+
+  describe ".pin" do
+    def pin(version) = described_class.pin(Class.new, gem: "rack", version:, reason: "a bug", upstream: nil)
+
+    it "passes when the gem is at the version it was written against" do
+      expect { pin(Gem.loaded_specs.fetch("rack").version.to_s) }.not_to raise_error
+    end
+
+    it "raises naming the file to check when the gem is at another version" do
+      expect { pin("0.0.1") }.to raise_error(described_class::VersionMismatch, /#{Regexp.escape(__FILE__)}.*a bug/)
+    end
+  end
 end

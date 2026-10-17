@@ -1,10 +1,20 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "rom/sql"
 
 module Blog
   module DB
     class SchemaInferrer < ROM::SQL::Schema::Inferrer
+      Extensions.pin(
+        self,
+        gem: "rom-sql",
+        version: "3.7.0",
+        reason: "this subclass drops tsvector columns and the indexes left with a nil attribute over them, " \
+                "through rom-sql's private filter_columns, indexes_from_database and attributes_index",
+        upstream: nil,
+      )
+
       class AttributesInferrer < ROM::SQL::Schema::AttributesInferrer
         UNREAD = "tsvector"
 
