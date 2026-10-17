@@ -132,6 +132,37 @@ RSpec.describe Mail::Jobs::BackfillGmail do
       expect(queued).to be_empty
     end
 
+    describe "for an account that lost its Google connection" do
+      def connections = Services::Slice["relations.service_connections"].where(account_id: address).dataset
+
+      def revoke(at = Time.now) = connections.update(revoked_at: at)
+
+      it "is not queued again while the connection is revoked" do
+        revoke
+        an_hour_passes
+        sync
+
+        expect(queued).to be_empty
+      end
+
+      it "is not queued again once the connection is gone" do
+        connections.delete
+        an_hour_passes
+        sync
+
+        expect(queued).to be_empty
+      end
+
+      it "goes on from its saved page once the account reconnects" do
+        revoke
+        an_hour_passes
+        sync.then { revoke(nil) }
+        sync
+
+        expect(queued).to eq([[address, "page-2"]])
+      end
+    end
+
     it "is never queued again once it reads its last page" do
       stub_page([])
       backfill("page-2")

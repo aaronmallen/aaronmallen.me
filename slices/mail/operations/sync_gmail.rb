@@ -5,6 +5,7 @@ require "sanitize"
 module Mail
   module Operations
     class SyncGmail < Blog::Operation
+      BACKFILL_STALLED_AFTER = 60 * 60
       GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
       LABELS_ADDED = %w[messagesAdded labelsAdded].freeze
       PAGE_SIZE = 25
@@ -74,6 +75,10 @@ module Mail
         store_signature(mailbox, account_id)
       end
 
+      def resume_stalled_backfills(addresses)
+        gmail_backfills.resume(Time.now - BACKFILL_STALLED_AFTER, addresses).each { Jobs::BackfillGmail.perform_async(*it) }
+      end
+
       def stale?(account, records)
         return true if account.settings_synced_at.nil? || account.settings_synced_at < Time.now - SETTINGS_EVERY
 
@@ -118,7 +123,9 @@ module Mail
 
       def synced
         client = google.loaded
-        results = client.holders(SCOPE).map { sync(mailbox(it, client)) }
+        addresses = client.holders(SCOPE)
+        results = addresses.map { sync(mailbox(it, client)) }
+        resume_stalled_backfills(addresses)
         results.find(&:failure?) || Success(results.sum(&:value!))
       end
 
