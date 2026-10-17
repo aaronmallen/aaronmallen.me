@@ -5,7 +5,13 @@ module Tasks
     class TaskSourceQueries < Blog::DB::Repo
       include Deps[project_queries: "projects.repos.project_queries"]
 
-      def for_provider(provider) = task_sources.where(provider:).to_a
+      def followed_tasks(ids)
+        found = tasks.where(id: ids).select(:id, :title, :note, :status).to_a.to_h { [it.id, it] }
+
+        found.values_at(*ids)
+      end
+
+      def for_provider(provider) = task_sources.where(provider:).to_a.to_h { [it.remote_id, it] }
 
       def snoozed_tasks = tasks.open.where(id: task_sources.unseen.asleep.task_ids).combine(:source, :tags).to_a
 

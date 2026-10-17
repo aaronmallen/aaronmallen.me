@@ -21,6 +21,8 @@ module Tasks
         [history_cursor, updated_at, *history.map { it[:at] }].compact.max
       end
 
+      def quiet?(stamp) = stamp.nil? || stamp.except(:checked_at).all? { |name, value| self[name] == value }
+
       def restamp(state, issue, history, now)
         checked_at = now if CLOSED.valid?(state)
         history_cursor = next_cursor(issue[:updated_at], history, now)

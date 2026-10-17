@@ -22,7 +22,6 @@ module Tasks
         task_event_mutations: "repos.task_event_mutations",
         task_link_queries: "repos.task_link_queries",
         task_mutations: "repos.task_mutations",
-        task_queries: "repos.task_queries",
         task_source_mutations: "repos.task_source_mutations",
         task_source_queries: "repos.task_source_queries",
         task_rule_mutations: "repos.task_rule_mutations",
@@ -30,7 +29,7 @@ module Tasks
       ]
 
       def call(provider:, client:, now: Time.now)
-        run = Structs::IssueSyncRun.new(provider:, client:, now:, known: tracked(provider), held: {})
+        run = Structs::IssueSyncRun.new(provider:, client:, now:, known: task_source_queries.for_provider(provider))
         listing, checked, history = step fetch(run)
         count = settle(run, listing.items, checked, history)
 
@@ -49,17 +48,17 @@ module Tasks
         remote(run.client, run.provider) do
           listing = run.client.assigned_issues
           assigned = listing.items.uniq { it[:id] }
-          checked = run.client.issues(unseen(run, assigned))
+          checked = run.client.issues(run.unseen(assigned))
 
           Success([listing.with(items: assigned), checked, history(run, [*assigned, *checked])])
         end
       end
 
       def follow(run, source, task, issue, history: EMPTY_HASH, reached: false)
-        state = observed(task, source, issue.fetch(:remote_state), reached)
+        state = observed(run, task, source, issue, reached)
         changes = history[issue[:id]]
         stamp = source.restamp(state, issue, changes, run.now)
-        return if stamp.nil? && still?(run, source, task, issue, changes)
+        return run.check(source, stamp) if source.quiet?(stamp) && still?(run, source, task, issue, changes)
 
         transaction do
           task = settled(run, source, task, state, changes)
@@ -71,8 +70,10 @@ module Tasks
 
       def follow_all(run, issues, history)
         sources = issues.map { run.known.fetch(it[:id]) }
-        tasks = task_queries.detailed_in_order(sources.map(&:task_id))
-        sync_comments.hold(run, tasks.compact.map(&:id), issues)
+        task_ids = sources.map(&:task_id)
+        tasks = task_source_queries.followed_tasks(task_ids)
+        run.linked.concat(task_link_queries.synced_ids(task_ids))
+        sync_comments.hold(run, task_ids, issues)
 
         issues.zip(sources, tasks) { |issue, source, task| task && follow(run, source, task, issue, history:) }
       end
@@ -104,11 +105,12 @@ module Tasks
         task_rule_mutations.fill_project([task.id], project_ids.first)
       end
 
-      def observed(task, source, state, reached)
+      def observed(run, task, source, issue, reached)
+        state = issue.fetch(:remote_state)
         return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.valid?(state)
         return state unless state == UNASSIGNED && !task.closed?
 
-        reached || task_link_queries.synced?(task.id) ? OPEN : state
+        reached || run.linked.include?(task.id) ? OPEN : state
       end
 
       def reach(run, assigned)
@@ -130,6 +132,7 @@ module Tasks
 
         follow_all(run, [*held, *checked], history)
         import_all(run, fresh)
+        task_source_mutations.check(run.checked, run.now)
 
         fresh.size + step(relate(run, assigned:, checked:)).size
       end
@@ -140,12 +143,6 @@ module Tasks
 
       def still?(run, source, task, issue, changes)
         changes.to_a.empty? && !retitled?(task, issue) && sync_comments.quiet?(source, task, issue, run)
-      end
-
-      def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }
-
-      def unseen(run, assigned)
-        run.known.except(*assigned.map { it[:id] }).values.select { it.due?(run.now) }.to_h { [it.remote_id, it.url] }
       end
     end
   end

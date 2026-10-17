@@ -9,6 +9,10 @@ module Tasks
 
       stamped_commands :create, :update
 
+      def check(ids, at)
+        task_sources.where(id: ids).stamped(:update, result: :many).call(checked_at: at) unless ids.empty?
+      end
+
       def see(task_id, at) = task_sources.see(task_id, at)
 
       def snooze(task_id, ends_at)

@@ -100,6 +100,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(tasks.size).to eq(1)
     end
+
+    it "loads only the task columns the sync reads" do
+      tasks = counting { sync }.grep(/\ASELECT "tasks"."id", "tasks"."title"/)
+
+      expect(tasks.first).to start_with('SELECT "tasks"."id", "tasks"."title", "tasks"."note", "tasks"."status" FROM')
+    end
   end
 
   describe "issues that did not change since the last run" do
@@ -851,6 +857,23 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(repo.by_id(task.id).source.checked_at).to be_within(5).of(Time.now)
     end
 
+    def closed_yesterday(*numbers)
+      checked_at = Time.now - day - 60
+      nodes = numbers.map { github_issue("I_#{it}", number: it, state: "CLOSED", stateReason: "COMPLETED") }
+      nodes.each do |node|
+        task = create(:task, :done, list: "external", title: node[:title], note: node[:body])
+        create(:task_source, remote_id: node[:id], url: node[:url], remote_state: "completed", checked_at:, task:)
+      end
+      stub_known(*nodes)
+    end
+
+    it "restamps every unchanged one in one update", :aggregate_failures do
+      closed_yesterday(1, 2, 3)
+
+      expect(counting { sync }.grep(/\AUPDATE "task_sources"/).size).to eq(1)
+      expect(sources.pluck(:checked_at)).to all(be_within(5).of(Time.now))
+    end
+
     it "moves its task back when reopened upstream" do
       task = tracked(:done, state: "completed", checked_at: Time.now - day)
       stub_known(issue)
@@ -884,6 +907,14 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   describe "an issue taken off me" do
+    it "reads the synced links of every such issue in one query" do
+      taken = (1..3).map { github_issue("I_#{it}", number: it, assignees: ["MDQ6VXNlcjE="]) }
+      taken.each { create(:task_source, remote_id: it[:id], url: it[:url], task: create(:task, list: "external")) }
+      stub_known(*taken)
+
+      expect(counting { sync }.grep(/FROM "task_links" WHERE .*"synced"/).size).to eq(1)
+    end
+
     it "marks the task done when the issue was also closed as completed" do
       task = tracked
       stub_known(issue(assignees: ["MDQ6VXNlcjE="], state: "CLOSED", stateReason: "COMPLETED"))
