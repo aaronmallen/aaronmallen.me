@@ -90,24 +90,45 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     let!(:picked) { [create(:message, subject: "One"), create(:message, subject: "Two")] }
     let!(:left) { create(:message) }
 
-    it "deletes the messages it names and answers them" do
+    def trashed(message) = repo.by_id(message.id).trashed
+
+    it "trashes the messages it names and answers them" do
       answer = act("delete", ids(picked))
 
-      deleted = picked.map { { "id" => it.id, "subject" => it.subject, "deleted" => true } }
+      moved = picked.map { { "id" => it.id, "subject" => it.subject, "trashed" => true } }
 
-      expect([answer, picked.map { status_of(it) }]).to eq([{ "mail_threads" => deleted }, [nil, nil]])
+      expect([answer, picked.map { trashed(it) }]).to eq([{ "mail_threads" => moved }, [true, true]])
     end
 
     it "leaves the rest alone" do
       act("delete", ids(picked))
 
-      expect(status_of(left)).to eq("unread")
+      expect(trashed(left)).to be(false)
     end
 
-    it "deletes none when one ID is gone" do
+    it "trashes none when one ID is gone" do
       act("delete", [*ids(picked), gone_id])
 
-      expect([status, picked.map { status_of(it) }]).to eq([422, %w[unread unread]])
+      expect([status, picked.map { trashed(it) }]).to eq([422, [false, false]])
+    end
+
+    describe "on a Gmail thread" do
+      let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
+      let(:work) { create(:mail_account, name: "aaron@work.example", address: "aaron@work.example") }
+      let(:thread) { create(:message, mail_account_id: work.id, gmail_id: "t1") }
+
+      before do
+        connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+        stub_request(:post, %r{\A#{threads}/}o).to_return(google_health_json({}))
+      end
+
+      it "sends it to Gmail's Trash rather than deleting it", :aggregate_failures do
+        act("delete", [thread.id])
+
+        expect(a_request(:post, "#{threads}/t1/trash")).to have_been_made.once
+        expect(a_request(:delete, %r{\A#{threads}/}o)).not_to have_been_made
+        expect(trashed(thread)).to be(true)
+      end
     end
   end
 
@@ -279,10 +300,10 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     it "delete as delete_mail_threads does" do
       first = create(:message, subject: "same")
       last = create(:message, subject: "same")
-      deleted = act("delete", [first.id])
+      trashed = act("delete", [first.id])
 
       expect(trusted(mcp_answer("delete_mail_threads", ids: [last.id])))
-        .to eq("mail_threads" => deleted.fetch("mail_threads").map { it.merge("id" => last.id) })
+        .to eq("mail_threads" => trashed.fetch("mail_threads").map { it.merge("id" => last.id) })
     end
 
     it "tag as tag_mail_threads does" do

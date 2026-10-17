@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, db, admin, api, mcp, contact]
 issue: "#1123"
-amended: ["#1380"]
+amended: ["#1380", "#1598"]
 tags: [mail, gmail, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -32,6 +32,9 @@ at consent and the owner ticks it on an API token, as with `health`, and it take
 - **The mail tools** replace the message tools, and each names `mail`, whether it reads, marks, labels, archives,
   snoozes or deletes. `MCP::Protocol::ScopedServer` withholds them from a token without it. Mail bodies come back
   marked untrusted.
+- **A client's delete goes to the Trash.** `delete_mail_threads` runs the `trash` act, so a Gmail thread lands in
+  Gmail's Trash and every thread lands in the site's trash folder, where the owner can restore it. Only the admin's
+  "Delete forever" deletes for good.
 - **Tools on `read` that list rows of every kind** leave mail threads out unless the token also holds `mail`:
   `read_activity`, `summarize_activity`, `search`, `list_inbox`, `list_attention`, record links and saved views. The
   rest of each answer reads as it does now, as ADR 0147 does for workouts.
@@ -48,7 +51,8 @@ the sync shipped, with no consent screen in between. Spec #1119 asked for a scop
 ## Consequences
 
 `mail` grants writes as well as reads. A tool names one scope (ADR 0061), so a client that may read mail may also
-archive, label and delete it without `write` or `delete`.
+archive, label and delete it without `write` or `delete`. Since a message from a stranger can ask an agent to delete
+mail, and Gmail cannot bring back a thread it deleted, a client's delete stops at the Trash.
 
 A client that reads contact messages under `read` today loses them, and has to connect again asking for `mail`,
 since a refresh never widens a grant (ADR 0061).
