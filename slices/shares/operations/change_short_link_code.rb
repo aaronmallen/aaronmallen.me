@@ -18,12 +18,10 @@ module Shares
       private
 
       def change(link, code)
-        transaction { short_link_mutations.change_code(link.short_code_id, code) }
-        Success(short_link_queries.find(link.id))
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless short_link_mutations.violated_constraint(e) == Helpers::Code::KEY
-
-        Failure([:invalid, { code: [Helpers::Code::TAKEN] }])
+        Helpers::Code.taken(short_link_mutations) do
+          transaction { short_link_mutations.change_code(link.short_code_id, code) }
+          Success(short_link_queries.find(link.id))
+        end
       end
     end
   end

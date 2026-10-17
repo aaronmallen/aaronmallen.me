@@ -20,12 +20,8 @@ module Shares
 
       private
 
-      def leave(file_id, attempts = Helpers::Code::ATTEMPTS)
-        group_mutations.leave(file_id, code: short_code_queries.free_code)
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless group_mutations.violated_constraint(e) == Helpers::Code::KEY && attempts > 1
-
-        leave(file_id, attempts - 1)
+      def leave(file_id)
+        Helpers::Code.retrying(group_mutations) { group_mutations.leave(file_id, code: short_code_queries.free_code) }
       end
 
       def ungroup(group, file)

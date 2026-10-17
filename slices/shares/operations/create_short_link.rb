@@ -16,18 +16,21 @@ module Shares
 
       private
 
-      def create(fields, attempts = Helpers::Code::ATTEMPTS)
-        id = short_link_mutations.create(code: fields[:code] || short_code_queries.free_code, **fields.except(:code))
-        Success(short_link_queries.find(id))
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless short_link_mutations.violated_constraint(e) == Helpers::Code::KEY
-        return Failure([:invalid, { code: [Helpers::Code::TAKEN] }]) if fields[:code] || attempts == 1
+      def create(fields)
+        attempts = fields[:code] ? 1 : Helpers::Code::ATTEMPTS
 
-        create(fields, attempts - 1)
+        Helpers::Code.taken(short_link_mutations) do
+          Helpers::Code.retrying(short_link_mutations, attempts) { insert(fields) }
+        end
       end
 
       def fetch_title(link)
         short_link_mutations.after_commit { Jobs::FetchShortLinkTitle.perform_async(link.id) } unless link.title
+      end
+
+      def insert(fields)
+        id = short_link_mutations.create(code: fields[:code] || short_code_queries.free_code, **fields.except(:code))
+        Success(short_link_queries.find(id))
       end
 
       def validate(params)

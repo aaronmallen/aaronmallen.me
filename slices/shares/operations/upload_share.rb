@@ -24,15 +24,13 @@ module Shares
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def create(fields, attempts = Helpers::Code::ATTEMPTS)
-        share_mutations.create(
-          code: short_code_queries.free_code, key: ObjectStore::Key.generate,
-          filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
-        )
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless share_mutations.violated_constraint(e) == Helpers::Code::KEY && attempts > 1
-
-        create(fields, attempts - 1)
+      def create(fields)
+        Helpers::Code.retrying(share_mutations) do
+          share_mutations.create(
+            code: short_code_queries.free_code, key: ObjectStore::Key.generate,
+            filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
+          )
+        end
       end
 
       def form(upload)

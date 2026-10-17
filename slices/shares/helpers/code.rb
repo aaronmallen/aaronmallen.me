@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "dry/monads"
 require "securerandom"
 
 module Shares
@@ -10,6 +11,8 @@ module Shares
       KEY = "short_codes_code_key"
       MIN_LENGTH = 3
       TAKEN = "taken"
+
+      extend Dry::Monads[:result]
 
       def self.code(index, length)
         Array.new(length) do
@@ -26,6 +29,22 @@ module Shares
         index = SecureRandom.random_number(free)
         values.each { |value| value <= index ? index += 1 : break }
         code(index, length)
+      end
+
+      def self.retrying(repo, attempts = ATTEMPTS, &)
+        yield
+      rescue ROM::SQL::UniqueConstraintError => e
+        raise unless repo.violated_constraint(e) == KEY && attempts > 1
+
+        retrying(repo, attempts - 1, &)
+      end
+
+      def self.taken(repo)
+        yield
+      rescue ROM::SQL::UniqueConstraintError => e
+        raise unless repo.violated_constraint(e) == KEY
+
+        Failure([:invalid, { code: [TAKEN] }])
       end
 
       def self.value(code)

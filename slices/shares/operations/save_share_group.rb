@@ -38,12 +38,10 @@ module Shares
       def group_form(params) = params.slice(:name).merge(code: params[:code])
 
       def save(group, fields, files)
-        transaction { write(group, fields, files) }
-        Success(group_queries.find(group.id))
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless group_mutations.violated_constraint(e) == Helpers::Code::KEY
-
-        Failure([:invalid, { code: [Helpers::Code::TAKEN] }])
+        Helpers::Code.taken(group_mutations) do
+          transaction { write(group, fields, files) }
+          Success(group_queries.find(group.id))
+        end
       end
 
       def sent_files(files)

@@ -20,12 +20,8 @@ module Shares
 
       private
 
-      def create(attempts = Helpers::Code::ATTEMPTS)
-        group_mutations.create(code: short_code_queries.free_code)
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless group_mutations.violated_constraint(e) == Helpers::Code::KEY && attempts > 1
-
-        create(attempts - 1)
+      def create
+        Helpers::Code.retrying(group_mutations) { group_mutations.create(code: short_code_queries.free_code) }
       end
 
       def enough(ids) = ids.size < FEWEST ? Failure([:invalid, { ids: [TOO_FEW] }]) : Success(ids)
