@@ -1,4 +1,5 @@
 import { fresh } from "./fresh.js";
+import { whilePosting } from "./live.js";
 
 const DRAFT_WAIT = 900;
 const DROPPED = "script, style, meta, link, title, iframe, object, embed, template";
@@ -204,10 +205,20 @@ function setupAttach(form) {
   });
 }
 
+function dropResume() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("resume")) return;
+
+  url.searchParams.delete("resume");
+  window.history.replaceState(window.history.state, "", url);
+}
+
 function setupDraft(form) {
   const draft = form.querySelector("[data-mail-draft]");
   const status = form.querySelector("[data-mail-saved]");
   if (!draft) return;
+
+  dropResume();
 
   let timer = null;
   let saving = Promise.resolve();
@@ -218,11 +229,9 @@ function setupDraft(form) {
     body.delete("mail[files][]");
     if (!["mail[to]", "mail[subject]", "mail[body]"].some((name) => body.get(name)?.trim())) return;
 
-    const response = await fetch(form.dataset.mailDraftUrl, {
-      method: "POST",
-      body,
-      headers: { Accept: "application/json" },
-    });
+    const response = await whilePosting(
+      fetch(form.dataset.mailDraftUrl, { method: "POST", body, headers: { Accept: "application/json" } }),
+    );
     if (!response.ok) return;
 
     draft.value = (await response.json()).draft;

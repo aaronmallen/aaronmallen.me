@@ -176,4 +176,36 @@ RSpec.describe "Admin mail compose", type: :feature do
 
     expect(page).to have_css(".toast", text: "Sent")
   end
+
+  describe "resuming a draft" do
+    def drafts = %r{\A#{gmail}/drafts\?}
+
+    def live_update
+      click_button "Discard"
+      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      find("#thread-#{create(:message, subject: 'Hello there').id}")
+    end
+
+    before do
+      thread = create(:message, mail_account_id: work.id, gmail_id: "t5", subject: "Plans", visitor_hash: nil)
+      Mail::Slice["relations.mail_threads"].where(id: thread.id).update(draft: true)
+      stub_request(:get, drafts)
+        .to_return(google_health_json({ drafts: [{ id: "r1", message: { id: "d1", threadId: "t5" } }] }))
+      message = gmail_message("d1", labels: %w[DRAFT], To: "ada@example.com")
+      stub_request(:get, %r{\A#{gmail}/drafts/r1\?}).to_return(google_health_json({ id: "r1", message: }))
+      request_gate.reset
+      visit "/admin/mail?thread=#{thread.id}&resume=1"
+    end
+
+    it "drops resume from the URL once the form draws", :aggregate_failures do
+      expect(page).to have_field("to", with: "ada@example.com")
+      expect(URI(current_url).query).not_to include("resume")
+    end
+
+    it "asks Gmail for the draft no more on a live update" do
+      live_update
+
+      expect(a_request(:get, drafts)).to have_been_made.once
+    end
+  end
 end
