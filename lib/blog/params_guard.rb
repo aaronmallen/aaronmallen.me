@@ -10,28 +10,21 @@ module Blog
     BODY_LIMIT = 1024 * 1024
     CHUNK = 64 * 1024
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
-    MAIL_DRAFT_PATH = "/admin/mail/draft"
-    MAIL_SEND_PATH = "/admin/mail/send"
-    MCP_PATH = "/mcp"
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
     SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
-    SHARE_UPLOAD_PATH = "/admin/files"
-    TOKEN_UPLOAD_PATH = "/api/v1/photos"
-    TOKEN_UPLOAD_PATHS = [TOKEN_UPLOAD_PATH, MCP_PATH].freeze
     TOO_LARGE = 413
     UNSUPPORTED = 415
     UPLOAD_LIMIT = 25 * 1024 * 1024
     ENCODED_UPLOAD_LIMIT = UPLOAD_LIMIT * 4 / 3
-    UPLOAD_PATH = "/admin/photos"
-    UPLOAD_LIMITS = {
-      UPLOAD_PATH => UPLOAD_LIMIT,
-      TOKEN_UPLOAD_PATH => ENCODED_UPLOAD_LIMIT,
-      MCP_PATH => ENCODED_UPLOAD_LIMIT,
-      SHARE_UPLOAD_PATH => SHARE_UPLOAD_LIMIT,
-      MAIL_SEND_PATH => UPLOAD_LIMIT,
+    UPLOADS = {
+      "/admin/files" => { limit: SHARE_UPLOAD_LIMIT, auth: :session, multipart: true },
+      "/admin/mail/draft" => { limit: BODY_LIMIT, auth: :session, multipart: true },
+      "/admin/mail/send" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
+      "/admin/photos" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
+      "/api/v1/photos" => { limit: ENCODED_UPLOAD_LIMIT, auth: :token, multipart: false },
+      "/mcp" => { limit: ENCODED_UPLOAD_LIMIT, auth: :token, multipart: false },
     }.freeze
-    UPLOAD_PATHS = [UPLOAD_PATH, SHARE_UPLOAD_PATH, MAIL_SEND_PATH, MAIL_DRAFT_PATH].freeze
 
     def initialize(app, session_reader)
       @app = app
@@ -48,16 +41,15 @@ module Blog
 
     private
 
+    def authorized?(request, auth)
+      auth == :token ? !request.get_header(AUTHORIZATION).to_s.empty? : signed_in?(request)
+    end
+
     def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
     def limit(request)
-      return BODY_LIMIT unless request.post?
-      return BODY_LIMIT if UPLOAD_PATHS.include?(request.path_info) && !signed_in?(request)
-      if TOKEN_UPLOAD_PATHS.include?(request.path_info) && request.get_header(AUTHORIZATION).to_s.empty?
-        return BODY_LIMIT
-      end
-
-      UPLOAD_LIMITS.fetch(request.path_info, BODY_LIMIT)
+      rule = upload(request)
+      rule && authorized?(request, rule[:auth]) ? rule[:limit] : BODY_LIMIT
     end
 
     def oversized?(request)
@@ -94,7 +86,9 @@ module Blog
       @session_reader.call(::Rack::Request.new(request.env.dup)).signed_in?
     end
 
-    def upload?(request) = request.post? && UPLOAD_PATHS.include?(request.path_info)
+    def upload(request) = request.post? ? UPLOADS[request.path_info] : nil
+
+    def upload?(request) = upload(request)&.fetch(:multipart)
 
     def utf8?(value)
       case value

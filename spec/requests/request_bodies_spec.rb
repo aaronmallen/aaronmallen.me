@@ -151,6 +151,34 @@ RSpec.describe "A request body", type: :request do
     end
   end
 
+  %w[/mcp /api/v1/photos].each do |path|
+    describe "a multipart POST to #{path}" do
+      before { post path, { "photo" => file }, "HTTP_AUTHORIZATION" => "Bearer nope" }
+
+      it "answers 415" do
+        expect(last_response.status).to eq(415)
+      end
+    end
+  end
+
+  describe "a mail draft over 1 MB while signed in" do
+    before do
+      sign_in_to_admin
+      post "/admin/mail/draft", { attachments: [file] }, "CONTENT_LENGTH" => ((2 * megabyte) + 1).to_s
+    end
+
+    it_behaves_like "a refusal", 413
+  end
+
+  describe "a mail send over 25 MB while signed in" do
+    before do
+      sign_in_to_admin
+      post "/admin/mail/send", { attachments: [file] }, "CONTENT_LENGTH" => ((25 * megabyte) + 1).to_s
+    end
+
+    it_behaves_like "a refusal", 413
+  end
+
   describe "a photo upload over 1 MB" do
     before do
       sign_in_to_admin
