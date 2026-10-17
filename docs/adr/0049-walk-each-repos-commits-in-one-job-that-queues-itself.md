@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, record]
 issue: AA-684
-amended: [AA-758, AA-821, AA-823, "#248", "#941"]
+amended: [AA-758, AA-821, AA-823, "#248", "#941", "#1629"]
 tags: [commits, github, sync, walk, sidekiq, rate-limit, sync-states]
 ---
 
@@ -38,9 +38,11 @@ named by its `kind`, and `<repo>` stands for its `repo` column (AA-758); ADR 004
 `Record::Operations::ImportCommits` is the finder, and runs every 15 minutes. Its floor is the newest row in
 `commits`, minus one day. The newest row is the one stored last, by `created_at`, so a commit dated ahead of the
 clock cannot lift the floor (AA-823). It lists the repositories GitHub says were pushed since that floor, by push
-time, never by commit dates, and every repository when `commits` is empty. It adds every repository with a failure
-recorded for the `commits` sync, pushed or not, skips any whose walk is still going, and queues one walk for each
-of the rest.
+time, never by commit dates, and every repository when `commits` is empty. An index on `commits(created_at)` keeps
+that read off a full scan. It drops a repository GitHub last pushed no later than its last walk began, the
+`commits:<repo>` edge plus the one-day overlap, since that walk read everything the push brought (#1629). It adds
+every repository with a failure recorded for the `commits` sync, pushed or not, skips any whose walk is still going,
+and queues one walk for each of the rest.
 
 `Record::Jobs::BackfillRepoCommits` is the walk. The finder starts one by setting its back edge to the finder's
 own clock and passing that clock to the job, which hands it on to every chunk it queues. The walk reads back:
@@ -97,6 +99,9 @@ branches off every read, so no later walk could read below such a mark. AA-823 d
 would then need its first clock and the finder a second signal for a walk that stopped rather than stalled. A chunk
 costs a point or two, so a fresh walk from the top costs little.
 
+**Skip a repository not pushed since its forward edge last moved** (#1629). The row's `updated_at` says when the
+walk ended, not where it read from, so a push during the walk would look old and wait for the next push.
+
 **A backfill the operator starts from the admin.** It left a fresh database with one month of history until
 somebody pressed the button, kept a second set of edges for the same repositories, and let the 15-minute import
 spend the points the backfill held back. One walk that reads to its forward edge covers both jobs.
@@ -113,8 +118,12 @@ committed before it.
 queue for as many chunks as the history takes.
 
 **A quiet stretch widens the finder's window.** The floor follows the newest commit, not the clock, so after a
-month without one every run lists a month of pushes and walks each repository in it again. Each of those walks
-reads only down to its forward edge.
+month without one every run lists a month of pushes. Only the repositories pushed since their last walk began walk
+again, and each of those reads only down to its forward edge.
+
+**A repository walks once a push.** Before #1629 the finder walked every repository pushed in the last day on each
+run, about 20 walks a run that found nothing. The skip compares the push with the walk's clock, not with when the
+walk ended, since a push during a walk lands above the clock that walk read below.
 
 **The forward edge trails the walk by a day**, so every walk reads that day again to catch a late push. The
 `commits` insert skips a sha it already holds, so a commit read twice stays one row and its first write stands.

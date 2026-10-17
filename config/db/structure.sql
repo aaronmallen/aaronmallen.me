@@ -6091,6 +6091,13 @@ CREATE INDEX commits_commit_date_index ON public.commits USING btree (commit_dat
 
 
 --
+-- Name: commits_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX commits_created_at_index ON public.commits USING btree (created_at);
+
+
+--
 -- Name: commits_search_vector_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8726,4 +8733,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002074_add_description_to_tags.rb'),
 ('20261016002086_keep_manual_work_session_days_positive.rb'),
 ('20261016002092_add_task_rules_for_project_repos.rb'),
-('20261016002183_let_task_positions_go_below_one.rb');
+('20261016002183_let_task_positions_go_below_one.rb'),
+('20261016002186_index_commits_created_at.rb');

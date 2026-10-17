@@ -218,12 +218,12 @@ RSpec.describe Record::Jobs::ImportCommits do
 
     def inside?(time, since, before) = (since.nil? || time >= since) && (before.nil? || time <= before)
 
+    def push_again = stub_repos(github_repository(repo, pushed_at: Time.now + 60))
+
     def run_through
       import
       Record::Jobs::BackfillRepoCommits.drain
     end
-
-    def written(letter, ago) = github_commit(letter * 40, at: Time.now - ago)
 
     it "fills an empty table with every repository's whole history", :aggregate_failures do
       stub_repos(github_repository(repo), github_repository("aaronmallen/one", pushed_at: Time.now - (300 * day)))
@@ -239,9 +239,12 @@ RSpec.describe Record::Jobs::ImportCommits do
       expect(commit_queries.synced_through(repo)).to be_within(5).of(Time.now - day)
     end
 
+    def written(letter, ago) = github_commit(letter * 40, at: Time.now - ago)
+
     it "reads a repository again only down to its forward edge" do
       run_through
       edge = commit_queries.synced_through(repo).utc.iso8601
+      push_again
       run_through
 
       expect(github_request(GitHubGraphQL::REFS_QUERY, since: edge)).to have_been_made.at_least_once
@@ -249,12 +252,15 @@ RSpec.describe Record::Jobs::ImportCommits do
 
     it "sends the admin no notice when a run finds nothing new", :commits do
       run_through
+      push_again
 
       expect(admin_notice { run_through }).to be_nil
     end
 
     it "reads a commit twice into one row" do
-      2.times { run_through }
+      run_through
+      push_again
+      run_through
 
       expect(Record::Slice["relations.commits"].count).to eq(3)
     end
@@ -265,6 +271,28 @@ RSpec.describe Record::Jobs::ImportCommits do
       stub_github(GitHubGraphQL::REFS_QUERY, github_refs_page(*branches))
 
       expect(counting { run_through }.grep(/\ASELECT "commits"."sha" FROM "commits"/).size).to eq(1)
+    end
+
+    it "skips a repository no one pushed to since its last walk began" do
+      run_through
+
+      expect { import }.not_to(change { Record::Jobs::BackfillRepoCommits.jobs.size })
+    end
+
+    it "walks a repository again once someone pushes to it after its last walk began" do
+      run_through
+      push_again
+      import
+
+      expect(queued).to eq([repo])
+    end
+
+    it "walks a repository with a recorded failure though no one pushed since its last walk" do
+      run_through
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
+      import
+
+      expect(queued).to eq([repo])
     end
 
     describe "after an earlier run stored commits" do

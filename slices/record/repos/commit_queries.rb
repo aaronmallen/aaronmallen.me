@@ -19,6 +19,8 @@ module Record
 
       def by_id(id) = commits.by_pk(id).one
 
+      def forward_edges(repos) = sync_states.of_kind(SYNC_KIND).for_repos(repos).to_a.to_h { [it.repo, it.synced_at] }
+
       def known_shas(shas) = shas.empty? ? Set.new : commits.with_sha(shas).pluck(:sha).to_set
 
       def last_synced_at = sync_states.of_kind(SYNC_KIND).max(:updated_at)

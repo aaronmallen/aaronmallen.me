@@ -18,7 +18,7 @@ module Record
       def call(now: Time.now)
         pushed = step pushed_since_floor
         walks = commit_queries.walks
-        started = (pushed | sync_state_queries.failed_repos(SYNC) | walks.keys) - going(walks, now)
+        started = (unwalked(pushed) | sync_state_queries.failed_repos(SYNC) | walks.keys) - going(walks, now)
 
         started.each { start(it, now) }
         started.size
@@ -37,6 +37,12 @@ module Record
       def start(repo, now)
         commit_mutations.record_backfilled_to(repo, at: now)
         Jobs::BackfillRepoCommits.perform_async(repo, now.utc.iso8601)
+      end
+
+      def unwalked(pushed)
+        edges = commit_queries.forward_edges(pushed.keys)
+
+        pushed.filter_map { |repo, at| repo unless at && edges[repo] && at <= edges[repo] + PlanCommitWalk::OVERLAP }
       end
     end
   end

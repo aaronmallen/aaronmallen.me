@@ -128,11 +128,11 @@ module GitHub
         page = repository_page(cursor)
         nodes = repository_nodes(page)
         recent = pushed_since ? nodes.take_while { pushed_since?(it, pushed_since) } : nodes
-        found.concat(recent.select { pushable?(it) }.map { it.fetch("nameWithOwner") })
+        found.concat(recent.select { pushable?(it) }.map { [it.fetch("nameWithOwner"), pushed_at(it)] })
         page if recent.size == nodes.size
       end
 
-      listing.items
+      listing.items.to_h
     end
 
     def repository_names
@@ -206,10 +206,9 @@ module GitHub
 
     def pushable?(repo) = PUSH_PERMISSIONS.include?(repo["viewerPermission"])
 
-    def pushed_since?(repo, since)
-      pushed_at = repo["pushedAt"]
-      !pushed_at.nil? && Time.iso8601(pushed_at) >= since
-    end
+    def pushed_at(repo) = repo["pushedAt"]&.then { Time.iso8601(it) }
+
+    def pushed_since?(repo, since) = pushed_at(repo)&.then { it >= since }
 
     def read_to_end?(page) = !page.nil? && !more?(page)
 
