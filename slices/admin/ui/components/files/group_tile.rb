@@ -14,7 +14,7 @@ module Admin
               thumb
               div(class: "file-card-body") do
                 p(class: "file-card-name", title: name) { opener }
-                p(class: "file-card-link", title: link) { Helpers::ShareLink.bare(link) }
+                p(class: "file-card-link", title: link) { bare_url(link) }
                 p(class: "file-card-meta") { meta }
                 div(class: "file-card-acts") { acts }
               end

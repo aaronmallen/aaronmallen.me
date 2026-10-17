@@ -8,7 +8,6 @@ module Admin
       DECISION = Blog::Types::ActivityKind["decision"]
       DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
       DECISION_EVENTS = "activity_page.decision_events"
-      DOT = Blog::UI::Wording::DOT
       JOURNAL = Blog::Types::ActivityKind["journal"]
       TASK = Blog::Types::ActivityKind["task"]
       LINES = {
@@ -28,6 +27,7 @@ module Admin
       WEBMENTION = Blog::Types::ActivityKind["webmention"]
       WORKOUT = Blog::Types::ActivityKind["workout"]
 
+      include Blog::UI::Wording
       include Deps[
         "i18n",
         activity_queries: "activity.repos.activity_queries",
@@ -140,7 +140,7 @@ module Admin
         end
       end
 
-      def workout_line(row) = [hours(row.worked_seconds), row.excerpt].compact.join(DOT)
+      def workout_line(row) = dotted(hours(row.worked_seconds), row.excerpt)
     end
   end
 end

@@ -25,4 +25,10 @@ RSpec.describe Blog::UI::Wording do
     expect(wording.written?("")).to be(false)
     expect(wording.written?(" \n\t")).to be(false)
   end
+
+  it "shows a url without its scheme or trailing slash", :aggregate_failures do
+    expect(wording.send(:bare_url, "https://www.example.com/")).to eq("www.example.com")
+    expect(described_class.bare_url("ftp://example.com/files/")).to eq("example.com/files")
+    expect(described_class.bare_url(nil)).to eq("")
+  end
 end

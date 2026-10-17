@@ -49,7 +49,7 @@ RSpec.describe "Admin links", type: :request do
       get "/admin/links"
 
       expect(row).to have_css(".link-row-title", exact_text: "example.com")
-      expect(row).to have_css(".link-row-url[title='https://www.example.com/talk']", exact_text: "example.com/talk")
+      expect(row).to have_css(".link-row-url[title='https://www.example.com/talk']", exact_text: "www.example.com/talk")
       expect(row.find(".link-row-meta").text).to include("1,204 clicks", "made Sep 3, 2026")
       expect(row.find(".link-row-meta").text).not_to include("retargeted")
     end

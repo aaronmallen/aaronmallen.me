@@ -9,13 +9,11 @@ module Admin
 
           CLOSED = Blog::Types::ClosedTaskStatus.values
           COLUMNS = Blog::Types::TaskColumn.values
-          GITHUB = "https://github.com/%s"
           LIVE_TABLES = %w[
             project_tags projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
           ].freeze
           NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
-          SCHEME = %r{\Ahttps?://}
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -82,8 +80,8 @@ module Admin
 
           def facts
             div(class: "kb-meta") do
-              link(repo_url, @project.repo, "fa-brands fa-github") if repo_url
-              link(@project.url, @project.url.sub(SCHEME, ""), :outbound) if site?
+              link(@project.repo_url, @project.repo, "fa-brands fa-github") if @project.repo_url
+              link(@project.url, bare_url(@project.url), :outbound) if site?
               counts
               published
             end
@@ -125,9 +123,7 @@ module Admin
 
           def published? = @project.board_published && @project.visibility == PUBLIC
 
-          def repo_url = (format(GITHUB, @project.repo) if written?(@project.repo))
-
-          def site? = written?(@project.url) && @project.url != repo_url
+          def site? = written?(@project.url) && @project.url != @project.repo_url
 
           def tagline = written?(@project.tagline) ? @project.tagline : t(".no_tagline")
         end

@@ -5,9 +5,6 @@ module Public
     module Views
       module Projects
         class Show < View
-          GITHUB = "https://github.com/"
-          SCHEME = %r{\A[a-z][a-z0-9+.-]*://}i
-
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
@@ -88,9 +85,9 @@ module Public
           end
 
           def links
-            repo = "#{GITHUB}#{@project.repo}" if written?(@project.repo)
+            repo = @project.repo_url
             link(repo, @project.repo, "fa-brands fa-github") if repo
-            link(@project.url, @project.url.sub(SCHEME, ""), :outbound) if url?(repo)
+            link(@project.url, bare_url(@project.url), :outbound) if url?(repo)
             stats
           end
 
@@ -114,10 +111,9 @@ module Public
           end
 
           def stats
-            parts = []
-            parts << t(".stars", stars: Blog::Helpers::Figures.count(@project.stars)) if @project.stars.positive?
-            parts << @project.release if written?(@project.release)
-            span { parts.join(" · ") } unless parts.empty?
+            stars = t(".stars", stars: Blog::Helpers::Figures.count(@project.stars)) if @project.stars.positive?
+            line = dotted(stars, @project.release)
+            span { line } unless line.empty?
           end
 
           def url?(repo) = written?(@project.url) && @project.url != repo

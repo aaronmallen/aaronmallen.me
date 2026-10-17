@@ -37,7 +37,7 @@ module Admin
           def delete_form
             Form(
               id: self.class.delete_id(@link), action: path(:admin_delete_link, id: @link.id),
-              data: { morph: true, confirm: t(".confirm_delete", link: Helpers::ShareLink.bare(short)) },
+              data: { morph: true, confirm: t(".confirm_delete", link: bare_url(short)) },
             )
           end
 
@@ -62,7 +62,7 @@ module Admin
           end
 
           def fields
-            bare = Helpers::ShareLink.bare(short)
+            bare = bare_url(short)
 
             field(:destination, t(".destination"), t(".destination_hint", link: bare), inputmode: "url")
             field(:code, t(".code"), t(".code_hint", host: Helpers::ShareLink.host), spellcheck: "false")

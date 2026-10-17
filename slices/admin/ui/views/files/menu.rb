@@ -27,7 +27,7 @@ module Admin
           def act(route) = path(route, id: @share.id)
 
           def copies(menu)
-            hint = Helpers::ShareLink.bare(link)
+            hint = bare_url(link)
 
             menu.copy(t(".copy_link"), text: link, copied: t(".copied_link"), icon: "fa-solid fa-link", hint:)
             menu.copy(t(".copy_markdown"), text: markdown, copied: t(".copied_markdown"), icon: "fa-brands fa-markdown")

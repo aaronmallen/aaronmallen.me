@@ -13,7 +13,7 @@ module Admin
           prop :return_to, Blog::Types::String.optional
 
           def view_template
-            ContextMenu(label: Helpers::ShareLink.bare(short), return_to: @return_to) do |menu|
+            ContextMenu(label: bare_url(short), return_to: @return_to) do |menu|
               opens(menu)
               menu.separator
               copies(menu)

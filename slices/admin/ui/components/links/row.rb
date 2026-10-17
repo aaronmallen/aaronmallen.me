@@ -7,8 +7,6 @@ module Admin
     module Components
       module Links
         class Row < Component
-          SCHEME = %r{\Ahttps?://(www\.)?}
-
           prop :link, Blog::Types::Instance(ROM::Struct)
           prop :check, Blog::Types::Instance(ROM::Struct).optional, default: nil
 
@@ -18,7 +16,7 @@ module Admin
             div(class: "link-row", data: { menu: path(:admin_link_menu, id: @link.id) }) do
               div(class: "link-row-main") do
                 p(class: "link-row-title") { opener }
-                p(class: "link-row-url", title: @link.destination) { @link.destination.sub(SCHEME, "") }
+                p(class: "link-row-url", title: @link.destination) { bare_url(@link.destination) }
                 p(class: "link-row-meta") { meta }
               end
               div(class: "link-row-acts") { acts }
@@ -31,7 +29,7 @@ module Admin
             CopyButton(
               value: short, copied: t(".copied"), bare: true, class: "link-chip", title: t(".copy", link: short),
             ) do
-              plain Helpers::ShareLink.bare(short)
+              plain bare_url(short)
               Icon(:copy)
             end
             Button(

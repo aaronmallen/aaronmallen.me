@@ -5,7 +5,6 @@ module Admin
     module Views
       module Projects
         class Menu < View
-          GITHUB = "https://github.com/%s"
           REPO = "fa-brands fa-github"
 
           layout nil
@@ -42,7 +41,7 @@ module Admin
           end
 
           def opens(menu)
-            menu.link(t(".open_repo"), href: format(GITHUB, @project.repo), icon: REPO, outbound: true) if repo?
+            menu.link(t(".open_repo"), href: @project.repo_url, icon: REPO, outbound: true) if repo?
             menu.link(t(".open_site"), href: @project.url, icon: :outbound, outbound: true) if written?(@project.url)
           end
 

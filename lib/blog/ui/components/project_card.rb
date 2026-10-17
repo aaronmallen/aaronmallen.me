@@ -4,8 +4,6 @@ module Blog
   module UI
     module Components
       class ProjectCard < Component
-        SCHEME = %r{\A[a-z][a-z0-9+.-]*://}i
-
         prop :name, Blog::Types::String
         prop :tagline, Blog::Types::String.optional
         prop :tags, Blog::Types::Array.of(Blog::Types::String), default: -> { [] }
@@ -44,7 +42,7 @@ module Blog
           return unless written?(@url)
 
           span(class: "pu") do
-            plain @url.sub(SCHEME, "")
+            plain bare_url(@url)
             Icon(:outbound)
           end
         end

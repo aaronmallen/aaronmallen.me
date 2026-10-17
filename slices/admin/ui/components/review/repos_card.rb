@@ -23,7 +23,7 @@ module Admin
             div(class: "review-bar", title: repo) do
               span(class: "review-bar-name") { repo.split(OWNER_SEPARATOR).last }
               span(class: "review-bar-value") do
-                plain "#{t('.commits', count: totals[:commits])} · "
+                plain "#{t('.commits', count: totals[:commits])}#{DOT}"
                 span(class: "commit-added") { "+#{Blog::Helpers::Figures.count(totals[:additions])}" }
                 whitespace
                 span(class: "commit-removed") { "−#{Blog::Helpers::Figures.count(totals[:deletions])}" }
