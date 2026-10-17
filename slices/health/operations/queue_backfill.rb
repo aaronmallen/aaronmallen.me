@@ -3,7 +3,14 @@
 module Health
   module Operations
     class QueueBackfill
-      def call = Jobs::BackfillHealth.perform_async(Blog::TimeZone.today.iso8601)
+      include Deps[health_mutations: "repos.health_mutations", honeybadger: "honeybadger.agent"]
+
+      def call(last = Blog::TimeZone.today)
+        Jobs::BackfillHealth.perform_async(last.iso8601)
+      rescue RedisClient::Error => e
+        honeybadger.notify(e)
+        health_mutations.hold_backfill(last)
+      end
     end
   end
 end

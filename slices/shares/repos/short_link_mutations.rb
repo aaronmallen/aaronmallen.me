@@ -28,7 +28,11 @@ module Shares
         short_links.where(id:, destination:, title: nil).update(title:, updated_at: Time.now)
       end
 
+      def hold_title_fetch(short_link_id) = held_title_fetches.hold(short_link_id)
+
       def lock_destination(destination) = short_links.lock_until_commit(Sequel.function(:hashtext, destination))
+
+      def release_title_fetch(id) = held_title_fetches.by_pk(id).delete
     end
   end
 end

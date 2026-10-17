@@ -24,9 +24,15 @@ production:
     publish_due_posts:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::PublishDuePosts
+    queue_held_backfills:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Health::Jobs::QueueHeldBackfills
     queue_held_follow_ups:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::QueueHeldFollowUps
+    queue_held_title_fetches:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Shares::Jobs::QueueHeldTitleFetches
     queue_held_webmentions:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::QueueHeldWebmentions

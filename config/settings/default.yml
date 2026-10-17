@@ -52,7 +52,9 @@ honeybadger:
     import_pull_requests: <%= ENV["HONEYBADGER_CHECK_IN_IMPORT_PULL_REQUESTS"].to_json %>
     prune_access_records: <%= ENV["HONEYBADGER_CHECK_IN_PRUNE_ACCESS_RECORDS"].to_json %>
     publish_due_posts: <%= ENV["HONEYBADGER_CHECK_IN_PUBLISH_DUE_POSTS"].to_json %>
+    queue_held_backfills: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_BACKFILLS"].to_json %>
     queue_held_follow_ups: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_FOLLOW_UPS"].to_json %>
+    queue_held_title_fetches: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_TITLE_FETCHES"].to_json %>
     queue_held_webmentions: <%= ENV["HONEYBADGER_CHECK_IN_QUEUE_HELD_WEBMENTIONS"].to_json %>
     reap_expired_credentials: <%= ENV["HONEYBADGER_CHECK_IN_REAP_EXPIRED_CREDENTIALS"].to_json %>
     reap_spam_messages: <%= ENV["HONEYBADGER_CHECK_IN_REAP_SPAM_MESSAGES"].to_json %>

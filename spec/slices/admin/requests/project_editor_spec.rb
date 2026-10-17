@@ -266,6 +266,33 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(rules).to eq([["github", "aaronmallen/sai", [tracking("aaronmallen/sai").id]]])
       end
 
+      describe "while Redis is down", :commits do
+        let(:agent) { Hanami.app["honeybadger.agent"] }
+
+        before do
+          allow(agent).to receive(:notify)
+          allow(Projects::Jobs::RefreshProject).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+          save
+        end
+
+        it "saves the project", :aggregate_failures do
+          expect(last_response).to be_redirect
+          expect(tracking("aaronmallen/sai")).not_to be_nil
+        end
+
+        it "tells Honeybadger the refresh could not queue" do
+          expect(agent).to have_received(:notify).with(RedisClient::CannotConnectError)
+        end
+
+        it "still adds the repo's task rule" do
+          expect(rules).to eq([["github", "aaronmallen/sai", [tracking("aaronmallen/sai").id]]])
+        end
+
+        it "leaves the project for the nightly refresh" do
+          expect(repo.tracked.map(&:repo)).to eq(%w[aaronmallen/sai])
+        end
+      end
+
       it "gives a rule for its repo that holds no project the project, and its imported issues", :aggregate_failures do
         rule("aaronmallen/sai")
         task_id = imported("aaronmallen/sai")

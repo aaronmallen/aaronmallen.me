@@ -32,6 +32,8 @@ module Shares
 
       def find(id) = short_links.with_code.by_pk(id).one
 
+      def held_fetches = held_title_fetches.oldest_first.to_a
+
       def latest_to(destination) = short_links.with_code.where(destination:).newest_first.limit(1).one
 
       def page_listed(page, sort:, search: nil, failing: false)

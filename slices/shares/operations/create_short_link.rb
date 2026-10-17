@@ -5,7 +5,8 @@ module Shares
     class CreateShortLink < Blog::Operation
       include Deps[
         contract: "contracts.short_link_contract", short_code_queries: "repos.short_code_queries",
-        short_link_mutations: "repos.short_link_mutations", short_link_queries: "repos.short_link_queries",
+        queue_title_fetch: "operations.queue_title_fetch", short_link_mutations: "repos.short_link_mutations",
+        short_link_queries: "repos.short_link_queries",
       ]
 
       def call(params)
@@ -25,7 +26,7 @@ module Shares
       end
 
       def fetch_title(link)
-        short_link_mutations.after_commit { Jobs::FetchShortLinkTitle.perform_async(link.id) } unless link.title
+        short_link_mutations.after_commit { queue_title_fetch.call(link.id) } unless link.title
       end
 
       def insert(fields)

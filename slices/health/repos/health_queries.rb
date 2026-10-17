@@ -8,6 +8,8 @@ module Health
 
       def days(from:, to:) = health_days.where(day: from..to).to_a.to_h { [it.day, it] }
 
+      def held_backfills = held_health_backfills.oldest_first.to_a
+
       def report(from:, to:)
         days = health_days.with_work(from, to).map { Structs::Day.new(**it) }
         found = workouts.between(from, to).to_a

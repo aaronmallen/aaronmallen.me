@@ -7,6 +7,7 @@ module Projects
 
       include Deps[
         contract: "contracts.project_contract",
+        honeybadger: "honeybadger.agent",
         project_mutations: "repos.project_mutations",
         project_queries: "repos.project_queries",
       ]
@@ -69,10 +70,16 @@ module Projects
         Failure([:invalid, { field => [code] }])
       end
 
+      def queue_refresh(id)
+        Jobs::RefreshProject.perform_async(id)
+      rescue RedisClient::Error => e
+        honeybadger.notify(e)
+      end
+
       def refresh(saved, project)
         return unless saved.repo && saved.repo != project&.repo
 
-        project_mutations.after_commit { Jobs::RefreshProject.perform_async(saved.id) }
+        project_mutations.after_commit { queue_refresh(saved.id) }
       end
 
       def repo_from(url) = Blog::Types::Normalized::GithubRepo.call(url) { Blog::Constants::EMPTY_STRING }

@@ -191,6 +191,24 @@ RSpec.describe "Admin Google connection", type: :request do
       end
     end
 
+    describe "when Google grants access while Redis is down" do
+      before do
+        allow(Hanami.app["honeybadger.agent"]).to receive(:notify)
+        allow(Health::Jobs::BackfillHealth).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+        grant("aaron@example.com", [sleep_scope])
+        callback(code: "code", state: start_connect)
+      end
+
+      it "keeps the connection", :aggregate_failures do
+        expect(last_response).to be_redirect
+        expect(connection).to have_attributes(account_id: "aaron@example.com", scopes: [sleep_scope])
+      end
+
+      it "holds the backfill for the scheduled job" do
+        expect(Health::Slice["relations.held_health_backfills"].pluck(:last_day)).to eq([Blog::TimeZone.today])
+      end
+    end
+
     describe "connecting a second and a third account" do
       before do
         connect_account(account_id: "aaron@example.com")
