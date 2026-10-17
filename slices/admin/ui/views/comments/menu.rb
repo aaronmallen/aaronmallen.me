@@ -42,7 +42,7 @@ module Admin
             menu.link(t(".edit"), href:, icon: :edit, dialog: anchor)
           end
 
-          def label = Admin::Short.title(@comment.body.lines.first.to_s.strip)
+          def label = Helpers::Short.title(@comment.body.lines.first.to_s.strip)
 
           def source(menu)
             icon = :outbound

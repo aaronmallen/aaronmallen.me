@@ -13,6 +13,7 @@ module Mail
         google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
         gmail_queries: "repos.gmail_queries",
+        parse_gmail_thread: "operations.parse_gmail_thread",
         send_mail: "operations.send_mail",
       ]
 
@@ -49,13 +50,15 @@ module Mail
 
       def opened(id, message, thread)
         headers = message.dig("payload", "headers").to_h { [it["name"].downcase, it["value"]] }
-        letter = GmailThread.new({ "id" => thread.gmail_id, "messages" => [message] }).messages.first
+        letter = parsed(thread.gmail_id, message).messages.first
 
         {
           draft: id, from: thread.mail_account_id.to_s, html: letter[:html_body], body: letter[:body],
           **HEADERS.to_h { [it.to_sym, headers[it]] },
         }
       end
+
+      def parsed(gmail_id, message) = parse_gmail_thread.call({ "id" => gmail_id, "messages" => [message] })
 
       def saved(account, fields)
         html = fields[:body]
@@ -79,7 +82,7 @@ module Mail
 
         kept = kept(account, gmail_id)
         full = google.get("#{MESSAGES}/#{message.fetch('id')}", account: account.address, format: "full")
-        gmail_mutations.store_draft(id, GmailThread.new({ "id" => gmail_id, "messages" => [full] }), kept)
+        gmail_mutations.store_draft(id, parsed(gmail_id, full), kept)
       end
 
       def update(account, id, message)

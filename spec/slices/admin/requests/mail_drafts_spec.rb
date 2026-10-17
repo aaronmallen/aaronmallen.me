@@ -91,7 +91,8 @@ RSpec.describe "Admin mail drafts and attachments", type: :request do
 
     def seed(*messages, live:)
       json = JSON.parse({ id: "t5", messages: }.to_json)
-      Mail::Slice["repos.gmail_mutations"].store_thread(work.id, Mail::GmailThread.new(json), now: earlier)
+      parsed = Mail::Slice["operations.parse_gmail_thread"].call(json)
+      Mail::Slice["repos.gmail_mutations"].store_thread(work.id, parsed, now: earlier)
       stub_gmail_thread("t5", live)
     end
 

@@ -2,8 +2,7 @@
 
 module Calendar
   module Operations
-    class EditEvent < Blog::Operation
-      include EventWrites
+    class EditEvent < EventOperation
       include Deps[
         calendar_queries: "repos.calendar_queries",
         contract: "contracts.event_contract",
@@ -25,15 +24,15 @@ module Calendar
         target, date = series ? [series, shifted(calendar, event, fields)] : [event.google_id, fields[:date]]
         span = span(event)
 
-        google.patch(
-          GoogleEvent.url(calendar, target), GoogleEvent.body(fields, date:, span:), account: calendar.account,
-        )
+        body = Helpers::GoogleEvent.body(fields, date:, span:)
+
+        google.patch(Helpers::GoogleEvent.url(calendar, target), body, account: calendar.account)
       end
 
       def shifted(calendar, event, fields)
-        series = google.get(GoogleEvent.url(calendar, event.recurring_id), account: calendar.account)
+        series = google.get(Helpers::GoogleEvent.url(calendar, event.recurring_id), account: calendar.account)
 
-        GoogleEvent.first_day(series) + (fields[:date] - event.starts_on)
+        Helpers::GoogleEvent.first_day(series) + (fields[:date] - event.starts_on)
       end
 
       def span(event)

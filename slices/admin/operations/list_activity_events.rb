@@ -64,7 +64,7 @@ module Admin
       def commit_line(row)
         i18n.t!(
           "activity_page.sub_lines.commit",
-          repo: row.repo, sha: Admin::Short.sha(row.sha), additions: row.additions, deletions: row.deletions,
+          repo: row.repo, sha: Helpers::Short.sha(row.sha), additions: row.additions, deletions: row.deletions,
         )
       end
 

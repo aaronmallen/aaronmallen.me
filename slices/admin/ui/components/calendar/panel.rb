@@ -120,7 +120,7 @@ module Admin
 
           def social_item(social_post)
             {
-              title: Admin::Short.title(social_post.parts.first&.body.to_s),
+              title: Helpers::Short.title(social_post.parts.first&.body.to_s),
               href: social_href(social_post),
               at: social_post.posted_at,
               data: { menu: path(:admin_social_post_menu, id: social_post.id) },

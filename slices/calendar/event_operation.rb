@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Calendar
-  module EventWrites
+  class EventOperation < Blog::Operation
     SERIES = "all"
 
     private

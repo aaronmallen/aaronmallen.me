@@ -66,7 +66,7 @@ module Admin
           def journal_title(entry)
             line = entry.body.each_line.map(&:strip).find { !it.empty? }
 
-            Admin::Short.title(line.to_s)
+            Helpers::Short.title(line.to_s)
           end
 
           def post(post)

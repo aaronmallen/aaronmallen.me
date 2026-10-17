@@ -41,7 +41,7 @@ module Admin
 
           def github_url = format(GITHUB_URL, @commit.repo, @commit.sha)
 
-          def short_sha = Admin::Short.sha(@commit.sha)
+          def short_sha = Helpers::Short.sha(@commit.sha)
 
           def stats
             Stat(key: t(".added"), value: "+#{@commit.additions}")

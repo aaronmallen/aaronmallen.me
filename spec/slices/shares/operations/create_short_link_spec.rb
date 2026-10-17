@@ -12,21 +12,21 @@ RSpec.describe Shares::Operations::CreateShortLink do
   end
 
   it "takes the one three character code left free" do
-    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"]
+    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"]
     Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
 
     expect(create.value!.code).to eq("xyz")
   end
 
   it "moves to four characters once every three character code is taken" do
-    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join)
+    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join)
     Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
 
     expect(create.value!.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
   end
 
   it "counts no typed code outside the alphabet toward a full length" do
-    codes = Shares::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"] + ["abl"]
+    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"] + ["abl"]
     Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
 
     expect(create.value!.code).to eq("xyz")

@@ -54,7 +54,7 @@ RSpec.describe Shares::Operations::UploadShare do
 
     it "tries a new code when the first is taken", :aggregate_failures do
       Shares::Slice["relations.short_codes"].insert(code: "aaa")
-      allow(Shares::Code).to receive(:pick).and_return("aaa", "bbb")
+      allow(Shares::Helpers::Code).to receive(:pick).and_return("aaa", "bbb")
 
       expect(upload_share.value!.code).to eq("bbb")
       expect(shares.size).to eq(1)

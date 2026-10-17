@@ -2,8 +2,7 @@
 
 module Calendar
   module Operations
-    class CreateEvent < Blog::Operation
-      include EventWrites
+    class CreateEvent < EventOperation
       include Deps[
         calendar_queries: "repos.calendar_queries",
         contract: "contracts.event_contract",
@@ -16,8 +15,8 @@ module Calendar
         fields = step validate(params)
 
         step(written(calendar) do
-          body = GoogleEvent.body(fields, date: fields[:date])
-          google.post(GoogleEvent.url(calendar), body, account: calendar.account)
+          body = Helpers::GoogleEvent.body(fields, date: fields[:date])
+          google.post(Helpers::GoogleEvent.url(calendar), body, account: calendar.account)
         end)
       end
     end

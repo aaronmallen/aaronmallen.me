@@ -65,7 +65,7 @@ module Admin
         end
 
         def entry_meta(commit)
-          [Admin::Short.sha(commit.sha), repo(commit), l(commit.commit_time, format: :clock)].join(DOT)
+          [Helpers::Short.sha(commit.sha), repo(commit), l(commit.commit_time, format: :clock)].join(DOT)
         end
 
         def entry_row(commit)

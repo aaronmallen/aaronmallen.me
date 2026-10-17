@@ -3,7 +3,7 @@
 module Search
   module Relations
     class SearchDocuments < Blog::DB::Relation
-      include FullText
+      use :full_text
 
       LINKED = %i[kind source_id title day status].freeze
 

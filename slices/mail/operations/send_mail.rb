@@ -14,6 +14,7 @@ module Mail
         change_thread: "operations.change_thread",
         contract: "contracts.send_contract",
         gmail_mutations: "repos.gmail_mutations",
+        parse_gmail_thread: "operations.parse_gmail_thread",
         thread_queries: "repos.thread_queries",
       ]
 
@@ -37,7 +38,7 @@ module Mail
 
       def mirror(account, gmail_id)
         json = google.get("#{SyncGmail::GMAIL}/threads/#{gmail_id}", account: account.address, format: "full")
-        gmail_mutations.store_thread(account.id, GmailThread.new(json))
+        gmail_mutations.store_thread(account.id, parse_gmail_thread.call(json))
       end
 
       def senders(accounts = thread_queries.accounts)

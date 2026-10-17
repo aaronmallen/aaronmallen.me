@@ -41,9 +41,9 @@ module Shares
         transaction { write(group, fields, files) }
         Success(group_queries.find(group.id))
       rescue ROM::SQL::UniqueConstraintError => e
-        raise unless group_mutations.violated_constraint(e) == Code::KEY
+        raise unless group_mutations.violated_constraint(e) == Helpers::Code::KEY
 
-        Failure([:invalid, { code: [Code::TAKEN] }])
+        Failure([:invalid, { code: [Helpers::Code::TAKEN] }])
       end
 
       def sent_files(files)

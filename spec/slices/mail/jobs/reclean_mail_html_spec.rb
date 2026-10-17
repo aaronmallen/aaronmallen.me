@@ -22,7 +22,7 @@ RSpec.describe Mail::Jobs::RecleanMailHtml do
   def store(id)
     repo = Mail::Slice["repos.gmail_mutations"]
     thread = JSON.parse({ id:, messages: [html(id, "<p>#{id}</p>")] }.to_json)
-    repo.store_thread(repo.account(address).id, Mail::GmailThread.new(thread))
+    repo.store_thread(repo.account(address).id, Mail::Slice["operations.parse_gmail_thread"].call(thread))
   end
 
   def waits = described_class.jobs.map { (it["at"] - Time.now.to_f).round }

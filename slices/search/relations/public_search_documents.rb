@@ -3,7 +3,7 @@
 module Search
   module Relations
     class PublicSearchDocuments < Blog::DB::Relation
-      include FullText
+      use :full_text
 
       HIT = Structs::PublicHit
       HEADLINE = %(MaxWords=24, MinWords=12, StartSel="#{HIT::MARK}", StopSel="#{HIT::UNMARK}").freeze

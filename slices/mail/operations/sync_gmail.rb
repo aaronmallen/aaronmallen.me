@@ -25,6 +25,7 @@ module Mail
         gmail_backfills: "repos.gmail_backfills",
         gmail_mutations: "repos.gmail_mutations",
         gmail_queries: "repos.gmail_queries",
+        parse_gmail_thread: "operations.parse_gmail_thread",
       ]
 
       def backfill(address, page_token = nil)
@@ -89,7 +90,8 @@ module Mail
       end
 
       def store(mailbox, account_id, gmail_id)
-        gmail_mutations.store_thread(account_id, GmailThread.new(mailbox.get("threads/#{gmail_id}", format: "full")))
+        thread = parse_gmail_thread.call(mailbox.get("threads/#{gmail_id}", format: "full"))
+        gmail_mutations.store_thread(account_id, thread)
       rescue Google::NotFound
         gmail_mutations.delete_thread(account_id, gmail_id)
       end
@@ -103,7 +105,7 @@ module Mail
       def store_signature(mailbox, account_id)
         signature = mailbox.get("settings/sendAs/#{mailbox.address}")["signature"].to_s
 
-        gmail_mutations.sign(account_id, Sanitize.fragment(signature, GmailThread::SANITIZE).strip)
+        gmail_mutations.sign(account_id, Sanitize.fragment(signature, ParseGmailThread::SANITIZE).strip)
       end
 
       def sync(mailbox)

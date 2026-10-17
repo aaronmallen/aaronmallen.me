@@ -27,7 +27,7 @@ module Admin
             menu.link(t(".github"), href: github, icon: "fa-brands fa-github", outbound: true)
           end
 
-          def sha = Admin::Short.sha(@commit.sha)
+          def sha = Helpers::Short.sha(@commit.sha)
 
           def subject = Helpers::CommitMessage.subject(@commit.message)
         end

@@ -2,8 +2,7 @@
 
 module Calendar
   module Operations
-    class MoveEvent < Blog::Operation
-      include EventWrites
+    class MoveEvent < EventOperation
       include Deps[
         calendar_mutations: "repos.calendar_mutations", calendar_queries: "repos.calendar_queries",
         google: "google.client", honeybadger: "honeybadger.agent",
@@ -21,14 +20,13 @@ module Calendar
       private
 
       def body(times)
-        return { start: GoogleEvent.whole(times[:starts_on]), end: GoogleEvent.whole(times[:ends_on] + 1) } unless
-          times[:starts_at]
+        return { start: instant(times[:starts_at]), end: instant(times[:ends_at]) } if times[:starts_at]
 
-        { start: instant(times[:starts_at]), end: instant(times[:ends_at]) }
+        { start: Helpers::GoogleEvent.whole(times[:starts_on]), end: Helpers::GoogleEvent.whole(times[:ends_on] + 1) }
       end
 
       def change(calendar, event, times)
-        google.patch(GoogleEvent.url(calendar, event.google_id), body(times), account: calendar.account)
+        google.patch(Helpers::GoogleEvent.url(calendar, event.google_id), body(times), account: calendar.account)
         calendar_mutations.move_event(event.id, times)
       end
 

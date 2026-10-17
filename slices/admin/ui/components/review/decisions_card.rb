@@ -22,11 +22,11 @@ module Admin
           def outcome(decision)
             return t(".dropped") unless decision.outcome == RESOLVED
 
-            t(".resolved", option: Admin::Short.title(decision.chosen))
+            t(".resolved", option: Helpers::Short.title(decision.chosen))
           end
 
           def row(decision)
-            title = Admin::Short.title(decision.title)
+            title = Helpers::Short.title(decision.title)
 
             id = decision.decision_id
 

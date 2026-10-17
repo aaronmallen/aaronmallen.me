@@ -21,9 +21,9 @@ module Shares
         transaction { share_mutations.change_code(share.short_code_id, code) }
         Success(share_queries.find(share.id))
       rescue ROM::SQL::UniqueConstraintError => e
-        raise unless share_mutations.violated_constraint(e) == Code::KEY
+        raise unless share_mutations.violated_constraint(e) == Helpers::Code::KEY
 
-        Failure([:invalid, { code: [Code::TAKEN] }])
+        Failure([:invalid, { code: [Helpers::Code::TAKEN] }])
       end
 
       def validate(form) = validated(contract.call(form))

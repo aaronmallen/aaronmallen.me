@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Shares::Code do
+RSpec.describe Shares::Helpers::Code do
   it "never picks a taken code" do
     taken = described_class::ALPHABET.repeated_permutation(2).map(&:join) - %w[a2 z9]
 

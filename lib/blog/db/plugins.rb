@@ -8,6 +8,7 @@ module Blog
       ROM.plugins do
         adapter :sql do
           register :crediting, Crediting, type: :relation
+          register :full_text, FullText, type: :relation
           register :taggings, Taggings, type: :relation
           register :tags, Tags, type: :relation
         end

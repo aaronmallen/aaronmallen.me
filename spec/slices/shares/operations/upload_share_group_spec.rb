@@ -70,7 +70,7 @@ RSpec.describe Shares::Operations::UploadShareGroup do
 
     it "tries a new code when the first is taken" do
       Shares::Slice["relations.short_codes"].insert(code: "aaa")
-      allow(Shares::Code).to receive(:pick).and_return("aaa", "bbb")
+      allow(Shares::Helpers::Code).to receive(:pick).and_return("aaa", "bbb")
 
       expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbb")
     end

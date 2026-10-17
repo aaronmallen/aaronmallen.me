@@ -93,7 +93,7 @@ module Admin
           def social_text(social_post)
             at = l(Blog::TimeZone.local(social_post.posted_at), format: :clock)
 
-            "#{at} #{Admin::Short.title(social_post.parts.first&.body.to_s)}"
+            "#{at} #{Helpers::Short.title(social_post.parts.first&.body.to_s)}"
           end
 
           def sprint_mark

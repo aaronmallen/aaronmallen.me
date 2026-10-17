@@ -14,7 +14,7 @@ module Admin
           def view_template
             a(class: "review-line", href: @href, data: { menu: @menu }) do
               dated if @day
-              plain Admin::Short.title(@text.lines.first.to_s.strip)
+              plain Helpers::Short.title(@text.lines.first.to_s.strip)
             end
           end
 

@@ -25,7 +25,8 @@ RSpec.describe Mail::Repos::GmailMutations, "#store_thread" do
   end
 
   def store(*messages, at: Time.now)
-    repo.store_thread(account.id, Mail::GmailThread.new(JSON.parse({ id: "t1", messages: }.to_json)), now: at)
+    thread = Mail::Slice["operations.parse_gmail_thread"].call(JSON.parse({ id: "t1", messages: }.to_json))
+    repo.store_thread(account.id, thread, now: at)
   end
 
   def table(name) = Mail::Slice["relations.#{name}"].dataset.unordered

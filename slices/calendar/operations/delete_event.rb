@@ -2,8 +2,7 @@
 
 module Calendar
   module Operations
-    class DeleteEvent < Blog::Operation
-      include EventWrites
+    class DeleteEvent < EventOperation
       include Deps[
         google: "google.client", calendar_queries: "repos.calendar_queries", honeybadger: "honeybadger.agent",
       ]
@@ -13,7 +12,9 @@ module Calendar
         calendar = step writable(event.calendar)
         target = series(event, scope) || event.google_id
 
-        step(written(calendar) { google.delete(GoogleEvent.url(calendar, target), account: calendar.account) })
+        url = Helpers::GoogleEvent.url(calendar, target)
+
+        step(written(calendar) { google.delete(url, account: calendar.account) })
       end
     end
   end

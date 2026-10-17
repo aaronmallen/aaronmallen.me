@@ -3,7 +3,10 @@
 module Mail
   module Operations
     class RecleanMailHtml < Blog::Operation
-      include Deps[google: "google.client", gmail_recleans: "repos.gmail_recleans"]
+      include Deps[
+        google: "google.client", gmail_recleans: "repos.gmail_recleans",
+        parse_gmail_thread: "operations.parse_gmail_thread",
+      ]
 
       def call(after = 0) = step recleaned(after)
 
@@ -11,7 +14,7 @@ module Mail
 
       def reclean(client, id, address, gmail_id)
         thread = SyncGmail::Mailbox.new(client, address).get("threads/#{gmail_id}", format: "full")
-        gmail_recleans.reclean(id, GmailThread.new(thread).messages)
+        gmail_recleans.reclean(id, parse_gmail_thread.call(thread).messages)
       rescue Google::NotFound
         false
       end

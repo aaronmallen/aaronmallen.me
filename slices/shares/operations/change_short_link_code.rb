@@ -21,9 +21,9 @@ module Shares
         transaction { short_link_mutations.change_code(link.short_code_id, code) }
         Success(short_link_queries.find(link.id))
       rescue ROM::SQL::UniqueConstraintError => e
-        raise unless short_link_mutations.violated_constraint(e) == Code::KEY
+        raise unless short_link_mutations.violated_constraint(e) == Helpers::Code::KEY
 
-        Failure([:invalid, { code: [Code::TAKEN] }])
+        Failure([:invalid, { code: [Helpers::Code::TAKEN] }])
       end
     end
   end
