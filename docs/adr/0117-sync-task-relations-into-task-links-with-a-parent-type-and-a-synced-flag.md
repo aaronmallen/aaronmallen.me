@@ -44,8 +44,10 @@ since the pair index refuses a second row and the sync skips the pair.
 `kind` is one of `blocks`, `blocked_by`, `relates`, `duplicates`, `duplicated_by`, `parent_of` and `child_of`,
 named from the issue's own side. GitHub maps blocking, blocked by, parent and sub-issues, and skips tracked by.
 Linear maps `blocks`, `related`, `duplicate`, parent and children, from `relations` and `inverseRelations`, and skips
-`similar`. Each relation connection rides inside the issue's fields and reads one page, as comments do. A client
-that cannot read every relation of an issue leaves `relations` out, and the sync leaves that task's links alone, as
+`similar`. Each relation connection rides inside the issue's fields and reads one page, as comments do. Since #1700,
+Linear reads an issue's relations again on their own, 250 a page, when that page runs short: an epic with more than
+ten sub-issues or relations otherwise lost every one, so its unassigned sub-issues never came in. A client that still
+cannot read every relation of an issue leaves `relations` out, and the sync leaves that task's links alone, as
 `SyncComments` does for an issue with no `comments`. The listing walks stay on `Record::Paging`, which both clients
 share.
 

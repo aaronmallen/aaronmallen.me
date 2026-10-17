@@ -7,17 +7,26 @@ module Linear
       MAX_COMMENTS = 100
       MAX_LABELS = 50
       MAX_RELATIONS = 10
+      MAX_RELATIONS_ALONE = 250
       PAGE_SIZE = 25
       RELATED = "pageInfo { hasNextPage } nodes"
+
+      def self.relations(first) = <<~GRAPHQL
+        parent { id }
+        children(first: #{first}) { #{RELATED} { id } }
+        relations(first: #{first}) { #{RELATED} { type relatedIssue { id } } }
+        inverseRelations(first: #{first}) { #{RELATED} { type issue { id } } }
+      GRAPHQL
 
       FIELDS = <<~GRAPHQL.freeze
         id identifier url title description trashed updatedAt state { type } assignee { id }
         comments(first: #{MAX_COMMENTS}) { pageInfo { hasNextPage } nodes { id url body createdAt user { displayName } } }
         labels(first: #{MAX_LABELS}) { nodes { name } }
-        parent { id }
-        children(first: #{MAX_RELATIONS}) { #{RELATED} { id } }
-        relations(first: #{MAX_RELATIONS}) { #{RELATED} { type relatedIssue { id } } }
-        inverseRelations(first: #{MAX_RELATIONS}) { #{RELATED} { type issue { id } } }
+        #{relations(MAX_RELATIONS)}
+      GRAPHQL
+
+      RELATIONS_OF = <<~GRAPHQL.freeze
+        query($id: String!) { issue(id: $id) { #{relations(MAX_RELATIONS_ALONE)} } }
       GRAPHQL
 
       ASSIGNED = <<~GRAPHQL.freeze
@@ -91,7 +100,7 @@ module Linear
       walk(max_pages: nil) do |cursor, found|
         viewer = transport.query(Queries::ASSIGNED, cursor:)&.dig("viewer")
         page = viewer&.dig("assignedIssues")
-        page&.fetch("nodes")&.each { found << issue(it, viewer["id"]) }
+        page&.fetch("nodes")&.each { found << issue(it, viewer["id"], transport) }
         page
       end
     end
@@ -111,14 +120,14 @@ module Linear
       { id:, remote_state: DELETED, url: } if workspaces.include?(url.to_s[::Issues::LINEAR_URL, :workspace])
     end
 
-    def issue(node, viewer)
+    def issue(node, viewer, transport)
       key = node.fetch("identifier")
       url = node.fetch("url")
 
       {
         body: node["description"].to_s, **comments(node), id: node.fetch("id"), key:, labels: labels(node),
         origin: origin(url, key), reference: key, remote_state: remote_state(node, viewer),
-        title: node.fetch("title"), updated_at: updated_at(node), url:, **relations(node),
+        title: node.fetch("title"), updated_at: updated_at(node), url:, **relations(listed(node, transport)),
       }
     end
 
@@ -127,10 +136,18 @@ module Linear
       viewer = data&.dig("viewer", "id") || raise(Error, "Linear sent no viewer id")
       workspaces << data.dig("organization", "urlKey")
 
-      data.dig("issues", "nodes").to_a.to_h { [it.fetch("id"), issue(it, viewer)] }
+      data.dig("issues", "nodes").to_a.to_h { [it.fetch("id"), issue(it, viewer, transport)] }
     end
 
     def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
+
+    def listed(node, transport)
+      return node if listed_whole?(node)
+
+      node.merge(transport.query(Queries::RELATIONS_OF, id: node.fetch("id"))&.dig("issue").to_h)
+    end
+
+    def listed_whole?(node) = RELATIONS.all? { node[it] && !more?(node[it]) }
 
     def origin(url, key)
       workspace = url[::Issues::LINEAR_URL, :workspace]
@@ -149,7 +166,7 @@ module Linear
     end
 
     def relations(node)
-      return {} unless RELATIONS.all? { node[it] && !more?(node[it]) }
+      return {} unless listed_whole?(node)
 
       parent = node.dig("parent", "id")
       children = node.dig("children", "nodes").to_a.compact.map { { kind: "parent_of", remote_id: it.fetch("id") } }

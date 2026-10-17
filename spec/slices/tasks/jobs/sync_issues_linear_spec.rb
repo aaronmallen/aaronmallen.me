@@ -37,6 +37,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def status(task) = repo.by_id(task.id).status
 
+  def stub_alone(**fields)
+    related = linear_issue("L_one", **fields).slice(:parent, :children, :relations, :inverseRelations)
+    stub_linear("issue(id:", linear_json(data: { issue: related }))
+  end
+
   def stub_assigned(*nodes, &during)
     stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
       during&.call
@@ -321,12 +326,29 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     %w[children relations inverseRelations].each do |field|
-      it "are left out when #{field} holds more than one page" do
+      it "are read on their own, 250 a page, when #{field} holds more than one page", :aggregate_failures do
         stub_assigned(issue(field.to_sym => linear_related({ id: "L_x" }, more: true)))
+        stub_alone(children: linear_related({ id: "L_c1" }, { id: "L_c2" }))
+        sync
+
+        expect(handed_relations.map(&:values)).to eq([%w[parent_of L_c1], %w[parent_of L_c2]])
+        expect(linear_request("children(first: 250)", id: "L_one")).to have_been_made
+      end
+
+      it "are left out when #{field} holds more than one page of 250" do
+        stub_assigned(issue(field.to_sym => linear_related({ id: "L_x" }, more: true)))
+        stub_alone(field.to_sym => linear_related({ id: "L_x" }, more: true))
         sync
 
         expect(handed.find { it[:id] == "L_one" }).not_to have_key(:relations)
       end
+    end
+
+    it "are not read again on their own when one page holds them" do
+      stub_assigned(issue(children: linear_related({ id: "L_c1" })))
+      sync
+
+      expect(linear_request("issue(id:")).not_to have_been_made
     end
 
     it "are asked for 10 a page, so a page of 25 issues stays under Linear's complexity limit", :aggregate_failures do
@@ -369,6 +391,19 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(links).to eq([%w[L_two parent L_one]])
+    end
+
+    def stub_epic(children)
+      stub_assigned(issue(children: linear_related(*children.first(10).map { it.slice(:id) }, more: true)))
+      stub_alone(children: linear_related(*children.map { it.slice(:id) }))
+      stub_known(*children)
+    end
+
+    it "imports every sub-issue of a parent with more children than one page holds" do
+      stub_epic((2..12).map { node("L_c#{it}", "ABC-#{it}", assignee: nil) })
+      sync
+
+      expect(links.count { it[1] == "parent" }).to eq(11)
     end
 
     it "imports the other end when it is not in the app and keeps it open", :aggregate_failures do
