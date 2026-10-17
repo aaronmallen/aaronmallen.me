@@ -1,0 +1,3 @@
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "braces has no fixed version yet, and only the Tailwind watcher reads it, on the repo's own files"

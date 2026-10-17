@@ -26,7 +26,11 @@ jobs:
           echo "$GEM_HOME/bin" >>"$GITHUB_PATH"
           mise run setup:dependencies
 
+      - name: Check for known vulnerabilities
+        run: mise run deps:audit
+
       - name: List outdated dependencies
+        if: ${{ !cancelled() }}
         run: |-
           {
             echo '```text'

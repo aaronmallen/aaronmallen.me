@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#MISE description="Check the locked gems and node packages for known vulnerabilities"
+
+set -e
+
+echo "Gems"
+bundle exec bundle-audit check --update
+
+printf '\nNode packages\n'
+osv-scanner scan source --config .config/osv-scanner.toml --lockfile pnpm-lock.yaml:aube-lock.yaml

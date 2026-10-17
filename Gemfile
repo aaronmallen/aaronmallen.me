@@ -57,6 +57,7 @@ group :development do
 end
 
 group :lint do
+  gem "bundler-audit"
   gem "rubocop"
   gem "rubocop-capybara"
   gem "rubocop-hanami"
