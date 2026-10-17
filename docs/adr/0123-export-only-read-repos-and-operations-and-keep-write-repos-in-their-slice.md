@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917", "#994", "#911", "#1171"]
+amended: ["#917", "#994", "#911", "#1171", "#1604"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -43,7 +43,9 @@ its slice. The query classes and the `queries/` folders go.
 
 Four other kinds of key may cross, since none of them holds a write repo:
 
-- **`endpoints.*`**, which `api` exports so `mcp` can call its endpoints in process, as ADR 0088 decides.
+- **`endpoints.*`**, which `api` exports so `mcp` can call its endpoints in process, as ADR 0088 decides. The
+  keys come from `OperationTable::ENDPOINTS`, splatted into the export list, and the cop cannot read a splat, so
+  `slices/api/config/slice.rb` turns it off on that line and nothing checks those keys.
 - **`auth.session_reader`**, which `admin` exports so `public` and `mcp` can read the operator's GitHub session. ADR
   0003 names this edge.
 - **`networks.all`**, the provider `social` exports so `admin` can list each network and measure text against it.

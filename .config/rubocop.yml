@@ -127,7 +127,6 @@ RSpec/DescribeClass:
     type:
       - app
       - feature
-      - migration
       - request
       - script
 
@@ -144,9 +143,6 @@ RSpec/SpecFilePathFormat:
     GitHub: github
     LinkedIn: linkedin
     OAuth: oauth
-    OAuthClientRepo: oauth_client_repo
-    OAuthCodeRepo: oauth_code_repo
-    OAuthTokenRepo: oauth_token_repo
 
 Style/Documentation:
   Enabled: false
