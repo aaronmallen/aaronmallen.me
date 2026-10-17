@@ -6,7 +6,7 @@ module Analytics
       NONE = { readers: nil, final: true }.freeze
       UNREAD = { readers: 0, final: false }.freeze
 
-      include Deps[reader_window_start: "operations.find_reader_window_start"]
+      include Deps["routes", reader_window_start: "operations.find_reader_window_start"]
 
       def readers_by_path(paths)
         live = by_path(post_reader_hashes.for_paths(paths).counts_by_path)
@@ -29,7 +29,7 @@ module Analytics
 
       def counted?(post, since) = post.published_at.nil? || post.published_at > since
 
-      def path(post) = "#{Blog::Constants::WRITING_PATH}/#{post.slug}"
+      def path(post) = routes.path(:post, slug: post.slug)
     end
   end
 end

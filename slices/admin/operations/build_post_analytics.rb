@@ -5,11 +5,11 @@ module Admin
     class BuildPostAnalytics
       TOP_ROWS = 10
 
-      include Deps[summarize_page: "api.operations.summarize_page"]
+      include Deps["routes", summarize_page: "api.operations.summarize_page"]
 
       def call(post:, range:)
         to = Blog::TimeZone.today
-        path = "#{Blog::Constants::WRITING_PATH}/#{post.slug}"
+        path = routes.path(:post, slug: post.slug)
         found = summarize_page.call(path:, from: to - (range - 1), to:, top: TOP_ROWS, post:)
         totals = found.fetch(:totals)
 
