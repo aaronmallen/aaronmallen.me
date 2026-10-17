@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-require "securerandom"
-
 module Shares
   module Operations
     class UploadShare < Blog::Operation
-      KEY_BYTES = 16
       UNKNOWN_TYPE = "application/octet-stream"
 
       include Deps[
@@ -29,7 +26,7 @@ module Shares
 
       def create(fields, attempts = Code::ATTEMPTS)
         share_mutations.create(
-          code: short_code_queries.free_code, key: SecureRandom.hex(KEY_BYTES),
+          code: short_code_queries.free_code, key: ObjectStore::Key.generate,
           filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
         )
       rescue ROM::SQL::UniqueConstraintError => e

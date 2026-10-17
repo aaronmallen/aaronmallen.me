@@ -47,7 +47,7 @@ module Shares
       def save(id, files)
         stored = []
         files.each do |fields|
-          key = SecureRandom.hex(UploadShare::KEY_BYTES)
+          key = ObjectStore::Key.generate
           group_mutations.add_file(
             id, key:, filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
           )

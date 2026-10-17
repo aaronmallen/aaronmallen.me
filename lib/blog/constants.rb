@@ -14,7 +14,7 @@ module Blog
     MAIL_BODY_MAX = 5000
     MAIL_SUBJECT_MAX = 200
     MEDIA_PATH = "/media/"
-    MEDIA_REFERENCE = /#{MEDIA_PATH}([0-9a-f]{32}\.(?:#{Types::PhotoType.values.join('|')}))/
+    MEDIA_REFERENCE = /#{MEDIA_PATH}(#{Types::PHOTO_KEY})/
     NETWORK_ICONS = {
       Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
       Types::NetworkName["linkedin"] => "fa-brands fa-linkedin",

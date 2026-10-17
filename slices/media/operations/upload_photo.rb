@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
-require "securerandom"
-
 module Media
   module Operations
     class UploadPhoto < Blog::Operation
-      KEY_BYTES = 16
-
       include Deps[
         "operations.detect_photo_type",
         client: "media_store.client",
@@ -38,7 +34,7 @@ module Media
         end
       end
 
-      def key_for(type) = "#{SecureRandom.hex(KEY_BYTES)}.#{type}"
+      def key_for(type) = "#{ObjectStore::Key.generate}.#{type}"
 
       def measure(bytes, type)
         pixels = processor.pixels(bytes, type)

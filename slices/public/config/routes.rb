@@ -2,6 +2,7 @@
 
 module Public
   class Routes < Hanami::Routes
+    MEDIA = Blog::Constants::MEDIA_PATH
     TAG = %r{[^/]+}
     WRITING = Blog::Constants::WRITING_PATH
 
@@ -18,8 +19,8 @@ module Public
     get "/contact", to: "pages.contact", as: :contact
     get "/privacy", to: "pages.privacy", as: :privacy
     get "/search", to: "search.index", as: :search
-    get "/media/:key", to: "media.show", as: :media
-    get "/media/:width/:key", to: "media.show", as: :media_width, width: /\d+/
+    get "#{MEDIA}:key", to: "media.show", as: :media
+    get "#{MEDIA}:width/:key", to: "media.show", as: :media_width, width: /\d+/
     get "/site.webmanifest", to: "manifests.show", as: :manifest
     get "/sitemap.xml", to: "sitemaps.show", as: :sitemap
     get "/robots.txt", to: "robots.show", as: :robots

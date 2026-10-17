@@ -71,6 +71,10 @@ RSpec.describe "Admin photo upload", type: :request do
         expect(stored.values.first[:content_type]).to eq("image/jpeg")
       end
 
+      it "stores it under a key the photo claim scan reads" do
+        expect(json.fetch("url")[Blog::Constants::MEDIA_REFERENCE, 1]).to eq(stored.keys.first)
+      end
+
       it "stores it upright" do
         expect(image).to have_attributes(width: 20, height: 40)
       end

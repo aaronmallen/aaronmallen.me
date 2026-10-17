@@ -9,7 +9,7 @@ module Markdown
     ANCHOR = "a"
     HREF = "href"
     IMG = "img"
-    MEDIA = %r{\A/media/[\w.-]+\z}
+    MEDIA = /\A#{Blog::Constants::MEDIA_PATH}[\w.-]+\z/
     SRC = "src"
 
     module_function

@@ -91,7 +91,7 @@ module Admin
           end
 
           def preview_photo(photo)
-            img(class: "compose-preview-photo", src: "#{Blog::Constants::MEDIA_PATH}#{photo[:key]}", alt: photo[:alt])
+            img(class: "compose-preview-photo", src: ::Media::Helpers::MediaPath.for(photo[:key]), alt: photo[:alt])
           end
 
           def preview_photos

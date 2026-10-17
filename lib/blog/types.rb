@@ -127,7 +127,8 @@ module Blog
     PhotoType = Types::String.enum(
       "gif" => "image/gif", "jpg" => "image/jpeg", "png" => "image/png", "webp" => "image/webp",
     )
-    PhotoKey = Types::String.constrained(format: /\A[0-9a-f]{32}\.(?:#{PhotoType.values.join('|')})\z/)
+    PHOTO_KEY = /[0-9a-f]{32}\.(?:#{PhotoType.values.join('|')})/
+    PhotoKey = Types::String.constrained(format: /\A#{PHOTO_KEY}\z/)
     PhotoOwner = Types::String.enum(
       "post", "journal_entry", "task", "task_comment", "decision_comment", "review_note", "social_post_part",
       "decision", "decision_option",
