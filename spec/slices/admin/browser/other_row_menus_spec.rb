@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin menus for the remaining rows with actions", type: :feature do
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   def open_menu(target)
     scroll_to(target, align: :center)
     box = target.evaluate_script("JSON.parse(JSON.stringify(this.getBoundingClientRect()))")

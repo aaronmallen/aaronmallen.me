@@ -17,7 +17,6 @@ RSpec.describe "API performance", :frozen_clock, type: :request do
         "query_time" => 1.0 },
     ]
   end
-  let(:today) { Blog::TimeZone.today }
   let(:yesterday) { today - 1 }
 
   def figures(value) = { "count" => 1, "p50" => value, "p95" => value }

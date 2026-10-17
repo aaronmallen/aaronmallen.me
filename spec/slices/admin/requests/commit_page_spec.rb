@@ -3,7 +3,6 @@
 RSpec.describe "Admin commit page", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
 
   def bodies(selector) = page.all(".commit-body #{selector}").map(&:text)
 

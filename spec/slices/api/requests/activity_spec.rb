@@ -3,8 +3,6 @@
 RSpec.describe "API reading the activity feed", type: :request do
   let(:scopes) { nil }
 
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
   def credited(title, *contributors)
     task = create(:task, :done, title:, completed_at: at(march))
     contributors.each { create(:task_contributor, *Array(it[:trait]), task_id: task.id, **it.except(:trait)) }

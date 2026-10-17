@@ -2,7 +2,6 @@
 
 RSpec.describe Tasks::Relations::TaskEvents do
   let(:task) { create(:task) }
-  let(:today) { Blog::TimeZone.today }
   let(:relation) { Tasks::Slice["db.rom"].relations[:task_events] }
 
   def record(kind, **columns) = create(:task_event, task_id: task.id, kind:, tag_name: nil, **columns)

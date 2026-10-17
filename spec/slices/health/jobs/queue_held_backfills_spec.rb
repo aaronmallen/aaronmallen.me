@@ -3,7 +3,6 @@
 RSpec.describe Health::Jobs::QueueHeldBackfills, :commits do
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:backfills) { Health::Jobs::BackfillHealth }
-  let(:today) { Blog::TimeZone.today }
 
   def held = Health::Slice["relations.held_health_backfills"].to_a
 

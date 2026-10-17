@@ -5,7 +5,6 @@ RSpec.describe Tasks::Operations::CurrentSprint, :frozen_clock do
 
   let(:sprint_mutations) { Tasks::Slice["repos.sprint_mutations"] }
   let(:sprints) { Tasks::Slice["repos.sprint_queries"] }
-  let(:today) { Blog::TimeZone.today }
   let(:yesterday) { create(:sprint, sprint_date: today - 1) }
 
   before do

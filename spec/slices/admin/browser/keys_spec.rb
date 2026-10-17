@@ -5,8 +5,6 @@ RSpec.describe "Admin keys", type: :feature do
 
   def focused_row = evaluate_script("document.activeElement.closest('[data-key-row]')?.textContent")
 
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
-
   def titles = page.all(".li-title").map(&:text)
 
   before { sign_in_to_admin }

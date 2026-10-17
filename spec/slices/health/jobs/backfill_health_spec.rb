@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Health::Jobs::BackfillHealth do
-  let(:today) { Blog::TimeZone.today }
-
   def backfill(last = today) = described_class.new.perform(last.iso8601)
 
   def days = Health::Slice["relations.health_days"].to_a.map { it[:day] }

@@ -17,8 +17,6 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
-  def at(hour, minute) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, minute)
-
   def calendars
     { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{today.iso8601}" }
   end
@@ -386,8 +384,8 @@ RSpec.describe "Admin screens", type: :feature do
     create(:task, :in_sprint, sprint_id: sprint.id, carried_count: 4, title: "A task that keeps slipping to tomorrow")
     create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1), title: "Write tomorrow's plan")
     create(:post, :published, title: "A post published today with a title too long to fit its cell",
-                              published_at: at(0, 30))
-    create(:social_post, :posted, posted_at: at(0, 45))
+                              published_at: at(today, 0, 30))
+    create(:social_post, :posted, posted_at: at(today, 0, 45))
   end
 
   def seed_health
@@ -409,12 +407,12 @@ RSpec.describe "Admin screens", type: :feature do
       [204, 15.0, "/beacon", "POST"], [404, 4.0, nil, "GET"],
     ].each do |status, duration, route, verb|
       timing[:performance_requests].insert(
-        route:, verb:, status:, duration:, query_count: 2, query_time: 3.0, occurred_at: at(0, 30),
+        route:, verb:, status:, duration:, query_count: 2, query_time: 3.0, occurred_at: at(today, 0, 30),
       )
     end
     timing[:performance_jobs].insert(
       job: "Analytics::RollUpJob", outcome: "succeeded", duration: 1_800.0, query_count: 40, query_time: 90.0,
-      occurred_at: at(0, 30),
+      occurred_at: at(today, 0, 30),
     )
   end
 
@@ -479,7 +477,7 @@ RSpec.describe "Admin screens", type: :feature do
     create(:post, :scheduled, title: "A post scheduled for tomorrow")
     create(:social_post, :scheduled)
     Posts::Slice["relations.link_check_runs"].insert(
-      started_at: at(3, 0), finished_at: at(3, 4), links_checked: 290, links_due: 473,
+      started_at: at(today, 3, 0), finished_at: at(today, 3, 4), links_checked: 290, links_due: 473,
     )
   end
 

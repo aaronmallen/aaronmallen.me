@@ -315,8 +315,6 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
     end
 
     describe "the rows" do
-      let(:today) { Blog::TimeZone.today }
-
       def comment_menu(task, comment) = "/admin/tasks/#{task.id}/comments/#{comment.id}/menu"
 
       def rule = Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "ruby" }).value!

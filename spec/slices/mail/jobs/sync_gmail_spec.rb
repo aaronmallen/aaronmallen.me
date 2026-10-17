@@ -15,7 +15,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
 
   def connect(**) = connect_google(account_id: address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES, **)
 
-  def failure = Record::Slice["repos.sync_state_queries"].failure(sync)
+  def failure = sync_state_queries.failure(sync)
 
   def follow(history_id) = Mail::Slice["repos.gmail_mutations"].follow(account.id, history_id)
 

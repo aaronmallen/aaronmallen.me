@@ -8,10 +8,8 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
     create(:calendar, account: "work@example.com", google_id: "work@example.com", name: "Work", writable: false)
   end
 
-  def at(date, hour, minute = 0) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour, minute).iso8601
-
   def event(calendar, title, **)
-    times = { starts_at: Time.iso8601(at(day, 9)), ends_at: Time.iso8601(at(day, 9, 30)) }
+    times = { starts_at: at(day, 9), ends_at: at(day, 9, 30) }
 
     create(:calendar_event, calendar_id: calendar.id, title:, starts_on: day, ends_on: day, **times, **)
   end
@@ -31,15 +29,15 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
   def send_form(path, **) = post(path, { _csrf_token: admin_csrf_token, day: day.iso8601, ** })
 
   def spanning(title, ends_on, starts, ends, **)
-    times = { starts_at: Time.iso8601(at(day, *starts)), ends_at: Time.iso8601(at(ends_on, *ends)) }
+    times = { starts_at: at(day, *starts), ends_at: at(ends_on, *ends) }
 
     event(mine, title, ends_on:, **times, **)
   end
 
   def timed(date, starts, ends, last: date)
     {
-      start: { date: nil, dateTime: at(date, *starts), timeZone: Blog::TimeZone::NAME },
-      end: { date: nil, dateTime: at(last, *ends), timeZone: Blog::TimeZone::NAME },
+      start: { date: nil, dateTime: at(date, *starts).iso8601, timeZone: Blog::TimeZone::NAME },
+      end: { date: nil, dateTime: at(last, *ends).iso8601, timeZone: Blog::TimeZone::NAME },
     }
   end
 
@@ -284,7 +282,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
       before do
         stub_request(:get, "#{events_url}/standup")
-          .to_return(google_json(start: { dateTime: at(day - 30, 9), timeZone: Blog::TimeZone::NAME }))
+          .to_return(google_json(start: { dateTime: at(day - 30, 9).iso8601, timeZone: Blog::TimeZone::NAME }))
       end
 
       it "changes only this event", :aggregate_failures do
@@ -348,7 +346,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       def move_form(title) = row(title).first("form.cal-move", minimum: 0)
 
       def placed(date, **)
-        times = { starts_at: Time.iso8601(at(date, 9)), ends_at: Time.iso8601(at(date, 9, 30)) }
+        times = { starts_at: at(date, 9), ends_at: at(date, 9, 30) }
 
         event(mine, "Standup", google_id: "abc", starts_on: date, ends_on: date, **times, **)
       end
@@ -362,7 +360,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         move(standup)
 
         expect(a_request(:patch, "#{events_url}/abc").with(body: timed(target, 9, [9, 30]))).to have_been_made
-        expect([stored(standup).starts_at, queued]).to eq([Time.iso8601(at(target, 9)), 1])
+        expect([stored(standup).starts_at, queued]).to eq([at(target, 9), 1])
         expect(toast).to eq("Moved to #{target.strftime('%b %-d, %Y')}")
       end
 

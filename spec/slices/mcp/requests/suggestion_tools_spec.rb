@@ -22,8 +22,6 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
   def suggestion_queries = Suggestions::Slice["repos.suggestion_queries"]
 
-  def today = Blog::TimeZone.today
-
   describe "list_suggestions" do
     def listed(from: today, to: today)
       mcp_answer("list_suggestions", from: from.iso8601, to: to.iso8601).fetch("suggestions")

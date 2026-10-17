@@ -8,8 +8,6 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
   def month(date) = date.strftime("%Y-%m")
 
-  def today = Blog::TimeZone.today
-
   describe "list_projects" do
     def archived(name, on) = create(:project, :archived, name:, archived_on: on, started_on: on)
 

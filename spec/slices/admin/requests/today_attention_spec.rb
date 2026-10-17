@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
-  let(:today) { Blog::TimeZone.today }
-
   def card = page.find("section.card[data-attention]")
 
   def row(title) = card.find(".li", text: title)

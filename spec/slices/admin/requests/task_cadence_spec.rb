@@ -27,8 +27,6 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
     series_repo.by_task(task.id)&.then { it.to_h.slice(*Tasks::Relations::TaskSeries::CADENCE).compact }
   end
 
-  def today = Blog::TimeZone.today
-
   before { sign_in_to_admin }
 
   describe "creating a task" do

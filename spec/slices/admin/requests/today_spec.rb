@@ -3,7 +3,6 @@
 RSpec.describe "Admin today", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
   def card(title) = page.all("section.card").find { it.has_css?("h2.card-title", exact_text: title) }
@@ -544,8 +543,6 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         stub_linear(LinearGraphQL::ASSIGNED_QUERY, response)
         Tasks::Jobs::SyncIssues.new.perform("linear")
       end
-
-      def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
       it "says nothing while both syncs are healthy" do
         get "/admin"

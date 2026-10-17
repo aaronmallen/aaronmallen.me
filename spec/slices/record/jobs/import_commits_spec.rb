@@ -33,10 +33,6 @@ RSpec.describe Record::Jobs::ImportCommits do
 
   def stub_repos_answer(*responses) = stub_github(GitHubGraphQL::REPOS_QUERY, *responses)
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   describe "an empty commits table" do
     def long_quiet = github_repository("aaronmallen/one", pushed_at: "2015-01-01T00:00:00Z")
 

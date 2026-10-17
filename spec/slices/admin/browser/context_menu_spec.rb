@@ -8,21 +8,11 @@ RSpec.describe "Admin row context menu", type: :feature do
 
   def focus_row(title) = execute_script("arguments[0].focus()", find(".task-title", exact_text: title))
 
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   def menu_box
     evaluate_script("JSON.parse(JSON.stringify(document.querySelector('[data-context-menu]').getBoundingClientRect()))")
   end
 
   def open_menu(title = "Ship it") = row(title).find(".record-key").right_click
-
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
 
   def press_menu_key
     %w[keyDown keyUp].each do |type|

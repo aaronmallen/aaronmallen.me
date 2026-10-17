@@ -23,12 +23,6 @@ RSpec.describe "Admin project board", type: :feature do
     mouse.up
   end
 
-  def item(label) = find("[data-context-menu] .ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
   def link(task) = Tasks::Slice["operations.set_task_project"].call(task.id, project.id)
 
   def stroke(from, to)

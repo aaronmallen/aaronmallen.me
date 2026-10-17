@@ -4,8 +4,6 @@ RSpec.describe "Admin journal modal", type: :feature do
   let(:modal) { find("dialog#journal-write") }
   let(:repo) { Record::Slice["repos.journal_entry_queries"] }
 
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
-
   before do
     sign_in_to_admin
     visit "/admin/posts"

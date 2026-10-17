@@ -520,18 +520,16 @@ RSpec.describe "MCP endpoint", type: :request do
   end
 
   describe "a token that may read the activity feed" do
-    def at(hour, on: today) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, 0)
-
     def deciding
       decision = create(:decision)
-      create(:decision_event, decision_id: decision.id, created_at: at(11))
-      create(:decision_comment, decision_id: decision.id, created_at: at(11))
+      create(:decision_event, decision_id: decision.id, created_at: at(today, 11))
+      create(:decision_comment, decision_id: decision.id, created_at: at(today, 11))
     end
 
     def entries = mcp_content.fetch("activity")
 
     def finish_with_comment
-      create(:task_comment, task_id: create(:task, :done, completed_at: at(16)).id, created_at: at(10))
+      create(:task_comment, task_id: create(:task, :done, completed_at: at(today, 16)).id, created_at: at(today, 10))
     end
 
     def kinds = entries.map { it.fetch("kind") }
@@ -547,8 +545,8 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     def pulling
-      create(:pull_request, ready_at: at(9), merged_at: at(10))
-      create(:pull_request, ready_at: at(9, on: month_ago - 1), closed_at: at(11))
+      create(:pull_request, ready_at: at(today, 9), merged_at: at(today, 10))
+      create(:pull_request, ready_at: at(month_ago - 1, 9), closed_at: at(today, 11))
     end
 
     def read_activity(from: month_ago, to: today, **arguments)
@@ -564,29 +562,27 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def suggest_on(post_id, on: today)
       suggestion_mutations.replace_for_post(post_id, [typo])
-      Suggestions::Slice["db.rom"].relations[:suggestions].update(created_at: at(9, on:))
+      Suggestions::Slice["db.rom"].relations[:suggestions].update(created_at: at(on, 9))
     end
-
-    def today = Blog::TimeZone.today
 
     def typo = { original: "teh", replacement: "the", reason: "typo" }
 
     def whole_feed
-      article = create(:post, :published, published_at: at(9))
+      article = create(:post, :published, published_at: at(today, 9))
       create(:commit, commit_date: today)
       create(:journal_entry, entry_date: today)
-      create(:social_post, :posted, posted_at: at(12))
-      create(:webmention, :approved, post_id: article.id, received_at: at(8))
+      create(:social_post, :posted, posted_at: at(today, 12))
+      create(:webmention, :approved, post_id: article.id, received_at: at(today, 8))
       work_on_tasks
       deciding
       planning(article)
       pulling
-      create(:workout, started_at: at(7))
+      create(:workout, started_at: at(today, 7))
     end
 
     def work_on_tasks
       finish_with_comment
-      create(:work_session, started_at: at(9), ended_at: at(10))
+      create(:work_session, started_at: at(today, 9), ended_at: at(today, 10))
     end
 
     it "names the window it read" do
@@ -644,7 +640,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "sends a finished task with no type", :aggregate_failures do
-      create(:task, :done, completed_at: at(16), title: "Clear the inbox")
+      create(:task, :done, completed_at: at(today, 16), title: "Clear the inbox")
       read_activity
 
       expect(entries.first).to include("kind" => "task", "name" => "Clear the inbox")
@@ -652,8 +648,8 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "leaves a canceled task out" do
-      create(:task, :done, completed_at: at(16), title: "Clear the inbox")
-      create(:task, :canceled, completed_at: at(17), title: "Drop the idea")
+      create(:task, :done, completed_at: at(today, 16), title: "Clear the inbox")
+      create(:task, :canceled, completed_at: at(today, 17), title: "Drop the idea")
       read_activity
 
       expect(names).to eq(["Clear the inbox"])
@@ -662,7 +658,9 @@ RSpec.describe "MCP endpoint", type: :request do
     describe "a comment on a task" do
       let(:task) { create(:task, title: "Clear the inbox", tags: %w[home]) }
 
-      def comment(*traits, **attrs) = create(:task_comment, *traits, task_id: task.id, created_at: at(10), **attrs)
+      def comment(*traits, **attrs)
+        create(:task_comment, *traits, task_id: task.id, created_at: at(today, 10), **attrs)
+      end
 
       it "sends a local comment with its text, its task's title and its task's id" do
         comment(body: "Down to ten")
@@ -684,7 +682,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
       it "narrows to comments" do
         comment
-        create(:task, :done, completed_at: at(16))
+        create(:task, :done, completed_at: at(today, 16))
         read_activity(kinds: %w[comment])
 
         expect(kinds).to eq(%w[comment])
@@ -692,7 +690,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
       it "matches a comment by its task's tags" do
         comment(body: "Down to ten")
-        create(:task_comment, body: "Elsewhere", created_at: at(10))
+        create(:task_comment, body: "Elsewhere", created_at: at(today, 10))
         read_activity(tags: %w[home])
 
         expect(names).to eq([marked("Down to ten")])
@@ -718,13 +716,13 @@ RSpec.describe "MCP endpoint", type: :request do
       let(:task) { create(:task, :in_progress, title: "Clear the inbox", tags: %w[home]) }
 
       def event(kind, **columns)
-        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(9), **columns)
+        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(today, 9), **columns)
       end
 
       def session(started, ended) = create(:work_session, task_id: task.id, started_at: started, ended_at: ended)
 
       it "sends a closed session with its task's title, its task's id and how long it ran" do
-        session(at(9), at(10) + 1800)
+        session(at(today, 9), at(today, 10) + 1800)
         read_activity
 
         expect(entries).to contain_exactly(
@@ -733,7 +731,7 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       it "sends a session that crosses midnight on the day it started" do
-        session(at(23, on: today - 2), at(1, on: today - 1))
+        session(at(today - 2, 23), at(today - 1, 1))
         read_activity
 
         expect(entries).to contain_exactly(
@@ -742,14 +740,14 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       it "leaves out a session that is still running" do
-        create(:work_session, task_id: task.id, started_at: at(9, on: today - 1))
+        create(:work_session, task_id: task.id, started_at: at(today - 1, 9))
         read_activity
 
         expect(entries).to be_empty
       end
 
       it "gives a session its task's tags" do
-        session(at(9), at(10))
+        session(at(today, 9), at(today, 10))
         read_activity
 
         expect(entries).to contain_exactly(include("kind" => "session", "tags" => %w[home]))
@@ -767,7 +765,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     describe "a pull request" do
       def pull_request(**times)
-        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(9), **times)
+        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(today, 9), **times)
       end
 
       def row(pull, kind, time)
@@ -777,14 +775,14 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       it "sends an opened row and a merged row for a merged one" do
-        pull = pull_request(merged_at: at(10))
+        pull = pull_request(merged_at: at(today, 10))
         read_activity
 
         expect(entries).to contain_exactly(row(pull, "opened", "09:00"), row(pull, "merged", "10:00"))
       end
 
       it "sends a closed row for one closed without a merge" do
-        pull_request(closed_at: at(10))
+        pull_request(closed_at: at(today, 10))
         read_activity
 
         expect(entries.map { it.fetch("kind") }).to contain_exactly("pull_request_opened", "pull_request_closed")
@@ -795,9 +793,11 @@ RSpec.describe "MCP endpoint", type: :request do
       let(:decision) { create(:decision, title: "Pick a queue", tags: %w[infra]) }
       let(:option) { create(:decision_option, decision_id: decision.id, title: "Sidekiq") }
 
-      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(11), **attrs)
+      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(today, 11), **attrs)
 
-      def event(kind, **attrs) = create(:decision_event, decision_id: decision.id, kind:, created_at: at(10), **attrs)
+      def event(kind, **attrs)
+        create(:decision_event, decision_id: decision.id, kind:, created_at: at(today, 10), **attrs)
+      end
 
       def tagged_rows = entries.map { it.values_at("kind", "decision_id", "tags") }
 
@@ -843,7 +843,7 @@ RSpec.describe "MCP endpoint", type: :request do
       it "matches events and comments by the decision's tags" do
         event("opened")
         comment
-        create(:decision_event, kind: "opened", created_at: at(12))
+        create(:decision_event, kind: "opened", created_at: at(today, 12))
         read_activity(tags: %w[infra])
 
         expect(tagged_rows).to match_array(%w[decision decision_comment].map { [it, decision.id, %w[infra]] })
@@ -904,7 +904,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "reads no project, sprint or suggestion outside the window" do
-      create(:project, created_at: at(9, on: today - 300))
+      create(:project, created_at: at(today - 300, 9))
       create(:sprint, sprint_date: today - 300)
       suggest_on(create(:post, :draft).id, on: today - 300)
       read_activity
@@ -1020,14 +1020,14 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "gives a finished task its tags" do
-      create(:task, :done, completed_at: at(16), tags: %w[home errands])
+      create(:task, :done, completed_at: at(today, 16), tags: %w[home errands])
       read_activity
 
       expect(entries).to contain_exactly(include("kind" => "task", "tags" => %w[errands home]))
     end
 
     it "gives a published post its tags" do
-      create(:post, :published, published_at: at(9), tags: %w[ruby])
+      create(:post, :published, published_at: at(today, 9), tags: %w[ruby])
       read_activity
 
       expect(entries).to contain_exactly(include("kind" => "post", "tags" => %w[ruby]))
@@ -1042,10 +1042,10 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "reads the tags of the whole window in the same statements as one row" do
-      create(:task, :done, completed_at: at(16), tags: %w[home])
+      create(:task, :done, completed_at: at(today, 16), tags: %w[home])
       one = statements_to_read
       [today, today - 1].each { create(:journal_entry, entry_date: it, tags: %w[health work]) }
-      create(:task, :done, completed_at: at(15), tags: %w[errands])
+      create(:task, :done, completed_at: at(today, 15), tags: %w[errands])
 
       expect(statements_to_read).to eq(one)
     end
@@ -1200,7 +1200,7 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       it "counts a project, a sprint and a suggestion in the month each happened" do
-        create(:project, created_at: at(9, on: Date.new(2026, 1, 12)))
+        create(:project, created_at: at(Date.new(2026, 1, 12), 9))
         create(:sprint, sprint_date: Date.new(2026, 2, 3))
         suggest_on(create(:post, :draft).id, on: Date.new(2026, 3, 4))
         winter
@@ -1224,7 +1224,7 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       it "counts a finished task in the month it was finished" do
-        create(:task, :done, completed_at: at(16, on: Date.new(2026, 2, 9)))
+        create(:task, :done, completed_at: at(Date.new(2026, 2, 9), 16))
         winter
 
         expect(months).to eq("2026-02" => none.merge("task" => 1))
@@ -1232,8 +1232,8 @@ RSpec.describe "MCP endpoint", type: :request do
 
       it "counts local and synced comments in the month each was made" do
         task = create(:task)
-        create(:task_comment, task_id: task.id, created_at: at(10, on: Date.new(2026, 1, 12)))
-        create(:task_comment, :synced, task_id: task.id, created_at: at(10, on: Date.new(2026, 2, 3)))
+        create(:task_comment, task_id: task.id, created_at: at(Date.new(2026, 1, 12), 10))
+        create(:task_comment, :synced, task_id: task.id, created_at: at(Date.new(2026, 2, 3), 10))
         winter
 
         expect(months).to eq("2026-02" => none.merge("comment" => 1), "2026-01" => none.merge("comment" => 1))

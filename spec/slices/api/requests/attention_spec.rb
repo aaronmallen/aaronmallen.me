@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API attention", :frozen_clock, type: :request do
-  let(:today) { Blog::TimeZone.today }
-
   def card_titles
     sign_in_to_admin
     get "/admin"

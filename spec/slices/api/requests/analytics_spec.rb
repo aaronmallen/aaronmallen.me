@@ -10,8 +10,6 @@ RSpec.describe "API analytics", :frozen_clock, type: :request do
 
   def roll_up(day, views:, visitors:) = create(:analytics_rollup, day:, views:, visitors:, read_seconds: views * 10)
 
-  def today = Blog::TimeZone.today
-
   it "adds up the site's days inside the range with a 200" do
     roll_up(today - 1, views: 10, visitors: 4)
 

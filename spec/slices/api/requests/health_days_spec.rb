@@ -4,8 +4,6 @@ RSpec.describe "API health days", type: :request do
   let(:monday) { Date.new(2026, 9, 7) }
   let(:range) { { from: "2026-09-07", to: "2026-09-13" } }
 
-  def at(day, hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
-
   def read(token = api_token(%w[health]), **params) = call_api(:get, "/health/days", params, token:)
 
   describe "with the health scope" do

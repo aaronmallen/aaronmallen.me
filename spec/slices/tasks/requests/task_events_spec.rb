@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Task events", type: :request do
-  let(:today) { Blog::TimeZone.today }
   let(:at) { [Time.at(Time.now.to_i - 600), Blog::TimeZone.day_start(today)].max }
 
   def capture(**fields)

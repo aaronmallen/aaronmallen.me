@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API reading webmentions", type: :request do
-  def at(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, 12, 0)
-
   def counts(pending: 0, approved: 0, ignored: 0, spam: 0)
     { "pending" => pending, "approved" => approved, "ignored" => ignored, "spam" => spam }
   end

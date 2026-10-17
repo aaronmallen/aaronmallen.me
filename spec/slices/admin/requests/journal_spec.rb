@@ -3,7 +3,6 @@
 RSpec.describe "Admin journal", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:repo) { Record::Slice["repos.journal_entry_queries"] }
-  let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
   def bodies = page.all(".journal-entry-body").map(&:text)

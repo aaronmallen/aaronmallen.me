@@ -5,8 +5,6 @@ RSpec.describe "Admin calendar event menu", type: :feature do
   let(:calendar) { create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron") }
   let(:url) { "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events/abc" }
 
-  def at(hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
-
   def edit_title(to)
     item("Edit").click
     within("dialog[open]") do
@@ -15,18 +13,12 @@ RSpec.describe "Admin calendar event menu", type: :feature do
     end
   end
 
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   before do
     sign_in_to_admin
     connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES, token: "ya29.me")
     stub_request(:any, url).to_return(body: "{}", headers: { "Content-Type" => "application/json" })
     create(:calendar_event, calendar_id: calendar.id, google_id: "abc", title: "Coffee", starts_on: day, ends_on: day,
-                            starts_at: at(9), ends_at: at(10))
+                            starts_at: at(day, 9), ends_at: at(day, 10))
     visit "/admin/calendar?day=#{day.iso8601}"
     execute_script("window.kept = true")
     find("[data-calendar-panel] .cal-event-time", text: "09:00").right_click

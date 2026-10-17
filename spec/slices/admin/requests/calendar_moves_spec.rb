@@ -2,9 +2,6 @@
 
 RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
-
-  def at(date, hour, minute = 0) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour, minute)
 
   def clock(hour) = allow(Time).to receive(:now).and_return(at(today, hour))
 

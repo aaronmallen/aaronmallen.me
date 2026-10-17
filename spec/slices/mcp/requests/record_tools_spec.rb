@@ -11,8 +11,6 @@ RSpec.describe "MCP record tools", type: :request do
 
   def mcp_scopes = %w[read write publish delete]
 
-  def today = Blog::TimeZone.today
-
   describe "list_commits" do
     def fields_of(commit)
       {
@@ -260,8 +258,6 @@ RSpec.describe "MCP record tools", type: :request do
         "failing_since" => "2026-03-01T08:00:00Z", "last_failed_at" => "2026-03-02T08:00:00Z",
       }
     end
-
-    def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
     it "answers each failing sync with when it began failing" do
       fail_commits(1, "502")

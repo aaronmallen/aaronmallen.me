@@ -3,7 +3,6 @@
 RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Tasks::Slice["repos.task_queries"] }
-  let(:today) { Blog::TimeZone.today }
   let(:sprint) { create(:sprint, sprint_date: today) }
 
   def form(route) = page.first("form[action='#{route}']", visible: :all)

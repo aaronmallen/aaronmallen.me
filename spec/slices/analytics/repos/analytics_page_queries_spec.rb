@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Analytics::Repos::AnalyticsPageQueries do
-  let(:today) { Blog::TimeZone.today }
-
   def click(on, path: "/writing/hello", **)
     event = create(:analytics_event, path:, occurred_at: Blog::TimeZone.day_start(on) + (12 * 3_600))
     create(:analytics_click, event_id: event.id, **)

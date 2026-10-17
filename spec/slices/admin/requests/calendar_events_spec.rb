@@ -6,8 +6,6 @@ RSpec.describe "Admin calendar events", :frozen_clock, type: :request do
   let(:mine) { create(:calendar, account: "me@example.com", name: "Aaron") }
   let(:work) { create(:calendar, account: "work@example.com", name: "Work", writable: false) }
 
-  def at(date, hour, minute = 0) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour, minute)
-
   def cell(date) = page.find(".cal-day:has(time[datetime='#{date.iso8601}'])")
 
   def event(calendar, title, hour = nil, **)

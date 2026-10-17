@@ -4,7 +4,6 @@ require "digest"
 
 RSpec.describe Analytics::Repos::AnalyticsRollupQueries do
   let(:reader) { Digest::SHA256.hexdigest("reader") }
-  let(:today) { Blog::TimeZone.today }
 
   def read(on, path: "/writing/hello", visitor_hash: reader)
     create(

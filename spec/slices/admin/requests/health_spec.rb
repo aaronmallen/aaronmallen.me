@@ -2,13 +2,10 @@
 
 RSpec.describe "Admin health", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
 
   def agents
     page.find(".card", text: "What agents see").all(".li").map { [it.find(".li-title").text, it.find(".li-sub").text] }
   end
-
-  def at(day, hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
 
   def cells(row) = page.all(".health-grid-row")[row].all("a", visible: :all)
 

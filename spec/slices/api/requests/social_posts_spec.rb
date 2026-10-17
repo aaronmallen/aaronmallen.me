@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API social posts", type: :request do
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
   def compose(*parts, status: "draft", targets: %w[mastodon], **)
     Social::Slice["repos.social_post_mutations"].create_with_parts(parts:, status:, targets:, **)
   end

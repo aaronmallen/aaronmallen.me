@@ -3,7 +3,6 @@
 RSpec.describe "Tasks", :frozen_clock, type: :request do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:sprints) { Tasks::Slice["repos.sprint_queries"] }
-  let(:today) { Blog::TimeZone.today }
 
   before { sign_in_to_admin }
 

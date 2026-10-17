@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin posts", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
 
   def dated(day) = day.strftime("%b %-d, %Y")
 

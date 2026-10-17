@@ -30,8 +30,6 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
 
   def stored = country_database_path.binread
 
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   describe "a refresh MaxMind answers" do
     it "writes the database inside the archive" do
       refresh

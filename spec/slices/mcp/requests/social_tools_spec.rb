@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP social tools", type: :request do
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
   def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
 
   def mcp_scopes = %w[read write publish delete]

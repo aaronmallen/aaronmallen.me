@@ -116,6 +116,16 @@ module Spec
       assert_selector "h1", text: "Form expired"
     end
 
+    def item(label) = menu.first(".ctx-item", text: label)
+
+    def keep_page = execute_script("window.kept = true")
+
+    def kept_page? = evaluate_script("window.kept === true")
+
+    def menu = find("[data-context-menu]")
+
+    def press(*keys) = page.driver.browser.keyboard.type(*keys)
+
     def request_gate = Capybara.app
 
     def settle(selector)
@@ -137,8 +147,6 @@ module Spec
         path: Blog::SessionCookie::PATH,
       )
     end
-
-    def today = @today ||= Blog::TimeZone.today
 
     def watch_clipboard
       execute_script(<<~JS)

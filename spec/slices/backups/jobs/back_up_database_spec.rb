@@ -13,10 +13,6 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
 
   def failure = sync_state_queries.failure(Blog::Types::SyncName["backups"])
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   def upload = a_request(:put, %r{\A#{backup_store_url}/database-\d{8}T\d{6}Z\.dump\z})
 
   def with_dumper(**database)

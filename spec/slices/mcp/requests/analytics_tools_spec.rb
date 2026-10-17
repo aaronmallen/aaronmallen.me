@@ -5,8 +5,6 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     create(:analytics_rollup, day:, views:, visitors:, read_seconds: views * 10)
   end
 
-  def today = Blog::TimeZone.today
-
   describe "read_analytics" do
     def read(from: today - 6, to: today) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601)
 
@@ -952,8 +950,6 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
   describe "read_analytics hours and since" do
     let(:day) { today - 1 }
 
-    def at(hour, minute = 0, on: day) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, minute)
-
     def hour(time) = Blog::TimeZone.local(time).iso8601
 
     def read_raw(from: day, to: day, **) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **)
@@ -964,16 +960,16 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     it "gives the views and visitors of each Chicago hour that had a view, oldest first" do
-      2.times { view(at(9, 15), visitor_hash: "a" * 64) }
-      [at(9, 45), at(14, 5)].each { view(it) }
-      busy = { "hour" => hour(at(9)), "views" => 3, "visitors" => 2 }
+      2.times { view(at(day, 9, 15), visitor_hash: "a" * 64) }
+      [at(day, 9, 45), at(day, 14, 5)].each { view(it) }
+      busy = { "hour" => hour(at(day, 9)), "views" => 3, "visitors" => 2 }
 
-      expect(read_raw.fetch("hours")).to eq([busy, { "hour" => hour(at(14)), "views" => 1, "visitors" => 1 }])
+      expect(read_raw.fetch("hours")).to eq([busy, { "hour" => hour(at(day, 14)), "views" => 1, "visitors" => 1 }])
     end
 
     it "keeps apart the two hours a clock repeats when daylight saving ends" do
       fall_back = (today..(today + 366)).find { it.month == 11 && it.sunday? && it.mday <= 7 }
-      [0, 3_600].each { view(at(1, 30, on: fall_back) + it) }
+      [0, 3_600].each { view(at(fall_back, 1, 30) + it) }
 
       hours = read_raw(from: fall_back, to: fall_back).fetch("hours").map { it.fetch("hour") }
 
@@ -981,10 +977,10 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     it "counts one page's hours alone" do
-      view(at(9))
-      view(at(10), path: "/writing/other")
+      view(at(day, 9))
+      view(at(day, 10), path: "/writing/other")
 
-      expect(read_raw(path: "/writing/hello").fetch("hours").map { it.fetch("hour") }).to eq([hour(at(9))])
+      expect(read_raw(path: "/writing/hello").fetch("hours").map { it.fetch("hour") }).to eq([hour(at(day, 9))])
     end
 
     it "gives no since without one" do
@@ -993,23 +989,23 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
     describe "since" do
       before do
-        view(at(9))
-        2.times { view(at(15), path: "/writing/late") }
-        view(at(16))
+        view(at(day, 9))
+        2.times { view(at(day, 15), path: "/writing/late") }
+        view(at(day, 16))
       end
 
       it "counts only the views from that time" do
-        expect(read_raw(since: at(12).iso8601).fetch("since"))
-          .to include("at" => hour(at(12)), "views" => 3, "visitors" => 3, "read_seconds" => 30)
+        expect(read_raw(since: at(day, 12).iso8601).fetch("since"))
+          .to include("at" => hour(at(day, 12)), "views" => 3, "visitors" => 3, "read_seconds" => 30)
       end
 
       it "starts the hours there" do
-        expect(read_raw(since: at(12).iso8601).fetch("hours").map { it.fetch("hour") })
-          .to eq([hour(at(15)), hour(at(16))])
+        expect(read_raw(since: at(day, 12).iso8601).fetch("hours").map { it.fetch("hour") })
+          .to eq([hour(at(day, 15)), hour(at(day, 16))])
       end
 
       it "ranks the paths viewed since then" do
-        expect(read_raw(since: at(12).iso8601).fetch("since").fetch("paths"))
+        expect(read_raw(since: at(day, 12).iso8601).fetch("since").fetch("paths"))
           .to eq([{ "path" => marked("/writing/late"), "views" => 2, "visitors" => 2 },
                   { "path" => marked("/writing/hello"), "views" => 1, "visitors" => 1 }])
       end
@@ -1019,14 +1015,14 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "counts one page alone, with no paths" do
-        expect(read_raw(since: at(12).iso8601, path: "/writing/hello").fetch("since"))
-          .to eq("at" => hour(at(12)), "views" => 1, "visitors" => 1, "read_seconds" => 10)
+        expect(read_raw(since: at(day, 12).iso8601, path: "/writing/hello").fetch("since"))
+          .to eq("at" => hour(at(day, 12)), "views" => 1, "visitors" => 1, "read_seconds" => 10)
       end
 
       it "stops at the end of the range" do
-        view(at(9, on: today))
+        view(at(today, 9))
 
-        expect(read_raw(since: at(12).iso8601).fetch("since")).to include("views" => 3)
+        expect(read_raw(since: at(day, 12).iso8601).fetch("since")).to include("views" => 3)
       end
     end
 
@@ -1057,9 +1053,9 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "serves the hours from a since inside the raw visits" do
-        view(at(9))
+        view(at(day, 9))
 
-        expect(read_raw(from: old, to: day, since: at(8).iso8601).fetch("hours").length).to eq(1)
+        expect(read_raw(from: old, to: day, since: at(day, 8).iso8601).fetch("hours").length).to eq(1)
       end
     end
   end
@@ -1141,12 +1137,10 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
   describe "read_analytics navigation" do
     let(:day) { today - 1 }
 
-    def at(hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
     def read_raw(from: day, to: day, **) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **)
 
     def view(path, visitor, hour:, referrer_path: nil)
-      create(:analytics_event, path:, visitor_hash: visitor * 64, occurred_at: at(hour), referrer_path:)
+      create(:analytics_event, path:, visitor_hash: visitor * 64, occurred_at: at(day, hour), referrer_path:)
     end
 
     describe "a page's internal referrers" do
@@ -1165,7 +1159,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "counts only the views from since" do
-        expect(read_raw(path: "/about", since: at(11).iso8601).fetch("internal_referrers"))
+        expect(read_raw(path: "/about", since: at(day, 11).iso8601).fetch("internal_referrers"))
           .to eq([{ "path" => marked("/writing/old"), "views" => 2, "visitors" => 1 }])
       end
 
@@ -1197,7 +1191,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "starts from since" do
-        expect(read_raw(since: at(11).iso8601).fetch("entry_pages"))
+        expect(read_raw(since: at(day, 11).iso8601).fetch("entry_pages"))
           .to eq([{ "path" => marked("/about"), "visitors" => 1 },
                   { "path" => marked("/writing/new"), "visitors" => 1 }])
       end

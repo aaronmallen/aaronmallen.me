@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin activity filters", type: :feature do
-  def at(hour) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, 0)
-
   before do
-    create(:post, :published, title: "A published post", published_at: at(9))
+    create(:post, :published, title: "A published post", published_at: at(today, 9))
     create(:commit, commit_date: today, message: "add the view")
     sign_in_to_admin
     visit "/admin"

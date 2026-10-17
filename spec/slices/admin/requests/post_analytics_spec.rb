@@ -5,7 +5,6 @@ require "digest"
 RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
   let(:post) { create(:post, :published, title: "Hello", slug: "hello") }
 
   def card(title) = page.find(".card", text: title)

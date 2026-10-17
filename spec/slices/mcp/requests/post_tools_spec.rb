@@ -452,8 +452,6 @@ RSpec.describe "MCP post tools", type: :request do
   end
 
   describe "list_posts" do
-    let(:today) { Blog::TimeZone.today }
-
     def admin_row(slug)
       sign_in_to_admin
       get "/admin/posts"

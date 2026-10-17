@@ -79,7 +79,7 @@ RSpec.describe "API commits, pull requests and syncs", type: :request do
     end
 
     it "answers each failing sync" do
-      Record::Slice["repos.sync_state_mutations"].record_failure(
+      sync_state_mutations.record_failure(
         Blog::Types::SyncName["commits"], :github_failed, at: Time.utc(2026, 3, 1, 8), message: "502",
       )
 

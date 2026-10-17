@@ -35,10 +35,6 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     stub_request(:get, "#{api}/repos/#{repo}").to_return(response || json({ full_name: repo, stargazers_count: stars }))
   end
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   describe "a refresh GitHub answers" do
     it "stores the star count and the latest release GitHub reports" do
       refresh

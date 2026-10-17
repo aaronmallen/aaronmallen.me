@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Marking a synced task seen", type: :request do
-  let(:today) { Blog::TimeZone.today }
   let(:fields) { { title: "Sync my issues", list: "", note: "" } }
 
   def seen_at(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).source.seen_at

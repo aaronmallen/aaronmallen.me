@@ -3,7 +3,7 @@
 RSpec.describe Record::Jobs::ImportPullRequests do
   def day = 24 * 60 * 60
 
-  def failure = Record::Slice["repos.sync_state_queries"].failure(sync)
+  def failure = sync_state_queries.failure(sync)
 
   def import = described_class.new.perform
 
@@ -30,8 +30,6 @@ RSpec.describe Record::Jobs::ImportPullRequests do
   end
 
   def sync = Blog::Types::SyncName["pull_requests"]
-
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
   def windows = @windows ||= []
 

@@ -13,8 +13,6 @@ RSpec.describe "API sprints", type: :request do
 
   def stored(task) = Tasks::Slice["repos.task_queries"].detailed(task.id)
 
-  def today = Blog::TimeZone.today
-
   describe "GET /api/v1/sprints/current" do
     it "answers today's sprint with its tasks", :aggregate_failures do
       sprint = create(:sprint, sprint_date: today, carried_in: 2)

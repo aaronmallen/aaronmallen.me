@@ -3,8 +3,6 @@
 RSpec.describe "Admin bulk context menu", type: :feature do
   def item(label) = menu.first(".ctx-item", exact_text: label)
 
-  def menu = find("[data-context-menu]")
-
   def ticked = page.all("input[name='ids[]']:checked").size
 
   before { sign_in_to_admin }

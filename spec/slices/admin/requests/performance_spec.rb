@@ -4,7 +4,6 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
   let(:quick_job) { ["Quick::Job", "", "50 ms", "50 ms", "1", "3.0", "2 ms"] }
   let(:slow_job) { ["Spec::Job", "", "200 ms", "290 ms", "2", "3.0", "2 ms"] }
   let(:slow_route) { ["GET /admin/tasks", "", "1,000 ms", "1,000 ms", "1", "5.0", "100 ms"] }
-  let(:today) { Blog::TimeZone.today }
   let(:writing_route) { ["GET /writing/:slug", "", "250 ms", "385 ms", "4", "2.0", "25 ms"] }
 
   def api_cells(row)

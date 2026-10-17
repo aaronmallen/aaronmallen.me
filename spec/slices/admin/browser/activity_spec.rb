@@ -4,11 +4,9 @@ RSpec.describe "Admin activity", type: :feature do
   let(:task) { create(:task, :in_progress, title: "clear the gutters") }
   let!(:comments) do
     Array.new(12) do |n|
-      create(:task_comment, task_id: task.id, body: "note #{n}\n\n#{'Long line. ' * 40}", created_at: at(8, n))
+      create(:task_comment, task_id: task.id, body: "note #{n}\n\n#{'Long line. ' * 40}", created_at: at(today, 8, n))
     end
   end
-
-  def at(hour, minute) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, minute)
 
   def open_row(text)
     find(".activity-event", text:).click

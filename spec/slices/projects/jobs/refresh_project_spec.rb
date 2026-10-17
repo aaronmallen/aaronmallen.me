@@ -10,8 +10,6 @@ RSpec.describe Projects::Jobs::RefreshProject do
 
   def save(id: nil, **overrides) = Projects::Slice["operations.save_project"].call(fields(**overrides), id:).value!
 
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   describe "saving a project", :commits do
     it "queues a fetch for a new project with a repo" do
       project = save
@@ -63,7 +61,7 @@ RSpec.describe Projects::Jobs::RefreshProject do
     end
 
     it "leaves the stored stars and the projects sync state alone when GitHub fails", :aggregate_failures do
-      Record::Slice["repos.sync_state_mutations"].record_failure(Blog::Types::SyncName["projects"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       stub_request(:get, "https://api.github.com/repos/#{repo}").to_return(status: 502)
       fetch
 

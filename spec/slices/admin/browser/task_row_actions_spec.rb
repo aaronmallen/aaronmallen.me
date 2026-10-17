@@ -13,15 +13,9 @@ RSpec.describe "Admin task row actions", type: :feature do
 
   def item(selector, text) = find(selector, text:).tap(&:hover)
 
-  def keep_page = execute_script("window.kept = true")
-
   def kept_dialog? = evaluate_script("document.querySelector('dialog[data-palette]').open")
 
-  def kept_page? = evaluate_script("window.kept === true")
-
   def move(title, side) = row(title).find("button:has(.fa-arrow-#{side})").click
-
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
 
   def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 

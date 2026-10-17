@@ -2,10 +2,7 @@
 
 RSpec.describe "Admin calendar", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
   let(:day) { Date.new(2026, 7, 14) }
-
-  def at(date, hour = 12) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour)
 
   def cell(date) = page.find(".cal-day:has(time[datetime='#{date.iso8601}'])")
 

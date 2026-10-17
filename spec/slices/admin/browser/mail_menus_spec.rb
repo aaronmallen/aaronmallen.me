@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin mail menus", type: :feature do
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   def open_menu(subject) = find(".mail-row-subject", text: subject).right_click
 
   def pick_all

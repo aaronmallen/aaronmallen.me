@@ -2,7 +2,6 @@
 
 RSpec.describe Health::Jobs::SyncHealth do
   let(:sync) { Blog::Types::SyncName["health"] }
-  let(:today) { Blog::TimeZone.today }
   let(:yesterday) { today - 1 }
 
   def asked_for_summary(field)
@@ -15,7 +14,7 @@ RSpec.describe Health::Jobs::SyncHealth do
 
   def days = Health::Slice["relations.health_days"].to_a.map(&:to_h)
 
-  def failure = Record::Slice["repos.sync_state_queries"].failure(sync)
+  def failure = sync_state_queries.failure(sync)
 
   def full_day
     zones = { sumInFatBurnHeartZone: "10", sumInCardioHeartZone: "12" }
@@ -212,8 +211,7 @@ RSpec.describe Health::Jobs::SyncHealth do
 
     describe "after runs that failed" do
       before do
-        Record::Slice["repos.sync_state_mutations"]
-          .record_failure(sync, "google_health_failed", at: Blog::TimeZone.day_start(today - 10))
+        sync_state_mutations.record_failure(sync, "google_health_failed", at: Blog::TimeZone.day_start(today - 10))
         stub_google_health
         run
       end

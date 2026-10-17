@@ -12,8 +12,6 @@ RSpec.describe "Search page", type: :feature do
 
   def focused_id = evaluate_script("document.activeElement.id")
 
-  def press(key) = page.driver.browser.keyboard.type(key)
-
   it "focuses the search box on the / key" do
     visit "/search"
     press("/")

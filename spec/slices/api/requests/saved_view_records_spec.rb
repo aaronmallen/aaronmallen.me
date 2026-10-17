@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API saved view records", type: :request do
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
   def commit_row(commit)
     {
       "kind" => "commit", "source_id" => commit.id, "date" => today.iso8601, "time" => "09:00",
@@ -42,8 +40,6 @@ RSpec.describe "API saved view records", type: :request do
       day.all(".activity-event-name").map { [day.find(".day-date")[:datetime], it.text] }
     end
   end
-
-  def today = Blog::TimeZone.today
 
   describe "a tasks view" do
     it "answers the current copy of each series for the recurring tab" do

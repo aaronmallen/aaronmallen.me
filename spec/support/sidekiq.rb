@@ -35,6 +35,12 @@ module Spec
     def size = @entries.size
   end
 
+  module SyncStates
+    def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+    def sync_state_queries = Record::Slice["repos.sync_state_queries"]
+  end
+
   module SidekiqConfig
     def sidekiq_config(environment = :development)
       path = Hanami.app.root.join("config/sidekiq.yml.erb")
@@ -50,4 +56,5 @@ end
 RSpec.configure do |config|
   config.before { Sidekiq::Job.clear_all }
   config.include Spec::SidekiqConfig
+  config.include Spec::SyncStates
 end

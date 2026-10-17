@@ -5,7 +5,6 @@ RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
 
   let(:sprint_repo) { Tasks::Slice["repos.sprint_queries"] }
   let(:task_repo) { Tasks::Slice["repos.task_queries"] }
-  let(:today) { Blog::TimeZone.today }
   let(:yesterday) { create(:sprint, sprint_date: today - 1) }
 
   it "starts the day's sprint" do

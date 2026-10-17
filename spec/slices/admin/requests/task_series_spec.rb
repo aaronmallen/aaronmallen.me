@@ -26,8 +26,6 @@ RSpec.describe "Admin recurring tasks", :frozen_clock, type: :request do
 
   def switched_on = have_checked_field("on")
 
-  def today = Blog::TimeZone.today
-
   before { sign_in_to_admin }
 
   it "puts the recurring tab after external with its count" do

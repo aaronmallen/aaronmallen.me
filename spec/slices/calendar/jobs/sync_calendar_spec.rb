@@ -2,7 +2,6 @@
 
 RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
   let(:scopes) { Calendar::Operations::SyncCalendar::SCOPES }
-  let(:today) { Blog::TimeZone.today }
 
   def all_day(id, first, last, **)
     { id:, summary: "On-call", start: { date: first.iso8601 }, end: { date: (last + 1).iso8601 }, ** }
@@ -16,7 +15,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
 
   def events = queries.events_between(from: today - 1000, to: today + 1000)
 
-  def failure = Record::Slice["repos.sync_state_queries"].failure(sync)
+  def failure = sync_state_queries.failure(sync)
 
   def google_json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
 
@@ -395,7 +394,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
 
   describe "after a run that failed" do
     before do
-      Record::Slice["repos.sync_state_mutations"].record_failure(sync, "google_calendar_failed")
+      sync_state_mutations.record_failure(sync, "google_calendar_failed")
       connect("me@example.com", "ya29.me")
       stub_calendars("ya29.me")
       run

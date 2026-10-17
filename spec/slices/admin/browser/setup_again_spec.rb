@@ -34,8 +34,6 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
 
   def place_path = "/admin/tasks/#{open_tasks.find { it.title == 'first' }.id}/place"
 
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
-
   def row(title) = find(".task", text: title)
 
   def shown = page.all(".task-title").map(&:text)

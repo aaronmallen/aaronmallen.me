@@ -10,8 +10,6 @@ RSpec.describe "Admin row actions", type: :feature do
 
   def opacity(element = actions) = evaluate_script("getComputedStyle(arguments[0]).opacity", element).to_f
 
-  def press(*keys) = page.driver.browser.keyboard.type(*keys)
-
   def shown(read)
     evaluate_script(<<~JS, actions)
       [...arguments[0].querySelectorAll(".bt")].filter((b) => b.checkVisibility()).map((b) => #{read})

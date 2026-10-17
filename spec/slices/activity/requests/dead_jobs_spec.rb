@@ -120,8 +120,7 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
 
   describe "a commit backfill whose sync failure the card shows" do
     before do
-      Record::Slice["repos.sync_state_mutations"]
-        .record_failure(Blog::Types::SyncName["commits"], :github_failed, repo: "aaronmallen/one")
+      sync_state_mutations.record_failure(Blog::Types::SyncName["commits"], :github_failed, repo: "aaronmallen/one")
       clock = Time.now.utc.iso8601
       kill(Record::Jobs::BackfillRepoCommits.name, at: Time.now - 60, args: ["aaronmallen/one", clock])
       kill(Record::Jobs::BackfillRepoCommits.name, at: Time.now - 120, args: ["aaronmallen/two", clock])

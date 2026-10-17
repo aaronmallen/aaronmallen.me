@@ -31,10 +31,6 @@ RSpec.describe Record::Jobs::ReapSyncStates do
 
   def stub_repos_answer(*responses) = stub_github(GitHubGraphQL::REPOS_QUERY, *responses)
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   def traces(name) = [commit_queries.backfilled_to(name), sync_state_queries.failure(commits_sync, repo: name)]
 
   describe "a repository GitHub no longer lists" do

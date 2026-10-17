@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin list row actions", type: :feature do
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
   def morning(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, 9)
 
   before { sign_in_to_admin }

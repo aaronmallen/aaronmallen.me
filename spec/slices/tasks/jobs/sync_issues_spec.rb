@@ -60,10 +60,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def sync = described_class.new.perform("github")
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   def taken_off(**) = issue(assignees: ["MDQ6VXNlcjE="], **)
 
   def tracked(*traits, state: "open", checked_at: nil, **)

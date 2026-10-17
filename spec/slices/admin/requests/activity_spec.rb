@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin activity", :frozen_clock, type: :request do
-  let(:today) { Blog::TimeZone.today }
   let(:week_ago) { today - 6 }
-
-  def at(hour, minute = 0, on: today) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, minute)
 
   def count_for(type) = page.find(".activity-type:has(.fa-#{icon_for(type)}) .activity-type-count").text
 
@@ -90,7 +87,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "the timeline" do
       before do
-        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(today, 9))
         create(:journal_entry, entry_date: today - 1, entry_time: "21:15", body: "walked the dog")
         create(:commit, commit_date: today, commit_time: "08:00", message: "add the view")
         visit_activity
@@ -147,25 +144,25 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "tasks" do
       it "shows a completed task on the day it was finished" do
-        create(:task, :done, title: "clear the gutters", completed_at: at(16, on: today - 1))
+        create(:task, :done, title: "clear the gutters", completed_at: at(today - 1, 16))
         visit_activity
 
         expect(day_names(today - 1)).to eq(["clear the gutters"])
       end
 
       it "says it is done by me when it lists no one" do
-        create(:task, :done, completed_at: at(16))
+        create(:task, :done, completed_at: at(today, 16))
         visit_activity
 
         expect(event_subs).to eq(["done by me"])
       end
 
       def credit_tasks
-        create(:task, :done, title: "Mine", completed_at: at(16))
-        shared = create(:task, :done, title: "Shared", completed_at: at(15))
+        create(:task, :done, title: "Mine", completed_at: at(today, 16))
+        shared = create(:task, :done, title: "Shared", completed_at: at(today, 15))
         create(:task_contributor, :owner, task_id: shared.id)
         create(:task_contributor, task_id: shared.id)
-        sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(14))
+        sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(today, 14))
         create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
         create(:journal_entry, body: "A note", entry_date: today, entry_time: "09:00")
       end
@@ -201,7 +198,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "leaves out a canceled task" do
-        create(:task, :canceled, title: "clear the gutters", completed_at: at(16))
+        create(:task, :canceled, title: "clear the gutters", completed_at: at(today, 16))
         visit_activity
 
         expect(event_names).to be_empty
@@ -215,7 +212,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "counts the completed tasks in the range" do
-        create(:task, :done, completed_at: at(16))
+        create(:task, :done, completed_at: at(today, 16))
         create(:task, title: "still open")
         visit_activity
 
@@ -226,10 +223,12 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
     describe "comments" do
       let(:task) { create(:task, title: "clear the gutters", tags: %w[home]) }
 
-      def comment(*traits, **attrs) = create(:task_comment, *traits, task_id: task.id, created_at: at(10), **attrs)
+      def comment(*traits, **attrs)
+        create(:task_comment, *traits, task_id: task.id, created_at: at(today, 10), **attrs)
+      end
 
       it "shows a local comment on the day it was made" do
-        comment(body: "bought a ladder", created_at: at(10, on: today - 1))
+        comment(body: "bought a ladder", created_at: at(today - 1, 10))
         visit_activity
 
         expect(day_names(today - 1)).to eq(["bought a ladder"])
@@ -275,7 +274,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "counts the comments in the range" do
         comment
         comment(:synced)
-        comment(created_at: at(10, on: today - 30))
+        comment(created_at: at(today - 30, 10))
         visit_activity
 
         expect(count_for("comment")).to eq("2")
@@ -290,7 +289,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
       it "finds a comment by its task's tags" do
         comment(body: "bought a ladder")
-        create(:task_comment, body: "elsewhere", created_at: at(10))
+        create(:task_comment, body: "elsewhere", created_at: at(today, 10))
         visit_activity(q: "tag:home")
 
         expect(event_names).to eq(["bought a ladder"])
@@ -319,36 +318,36 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "shows a closed session on the day it started, named for its task" do
-        session(at(9, on: today - 1))
+        session(at(today - 1, 9))
         visit_activity
 
         expect(day_names(today - 1)).to eq(["clear the gutters"])
       end
 
       it "says how long it ran" do
-        session(at(9), at(10, 30))
+        session(at(today, 9), at(today, 10, 30))
         visit_activity
 
         expect(event_subs).to eq(["worked 1h 30m"])
       end
 
       it "shows a session on a task that is not done" do
-        session(at(9))
+        session(at(today, 9))
         visit_activity
 
         expect(event_names).to eq(["clear the gutters"])
       end
 
       it "shows a session on a task that is done beside the task" do
-        done = create(:task, :done, title: "paint the fence", completed_at: at(16))
-        create(:work_session, task_id: done.id, started_at: at(9), ended_at: at(10))
+        done = create(:task, :done, title: "paint the fence", completed_at: at(today, 16))
+        create(:work_session, task_id: done.id, started_at: at(today, 9), ended_at: at(today, 10))
         visit_activity
 
         expect(event_subs).to contain_exactly("done by me", "worked 1h 00m")
       end
 
       it "shows a session that crosses midnight on the day it started", :aggregate_failures do
-        session(at(23, on: today - 2), at(1, on: today - 1))
+        session(at(today - 2, 23), at(today - 1, 1))
         visit_activity
 
         expect(day_names(today - 2)).to eq(["clear the gutters"])
@@ -356,14 +355,14 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "leaves out a session that is still running" do
-        create(:work_session, task_id: task.id, started_at: at(9, on: today - 1))
+        create(:work_session, task_id: task.id, started_at: at(today - 1, 9))
         visit_activity
 
         expect(event_names).to be_empty
       end
 
       it "opens the session on its task" do
-        made = session(at(9))
+        made = session(at(today, 9))
         visit_activity
 
         expect(page).to have_css(
@@ -372,24 +371,24 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "counts the sessions in the range" do
-        session(at(9))
-        session(at(13))
-        session(at(9, on: today - 30))
+        session(at(today, 9))
+        session(at(today, 13))
+        session(at(today - 30, 9))
         visit_activity
 
         expect(count_for("session")).to eq("2")
       end
 
       it "finds a session by its task's tags" do
-        session(at(9))
-        create(:work_session, :closed, started_at: at(8), ended_at: at(9))
+        session(at(today, 9))
+        create(:work_session, :closed, started_at: at(today, 8), ended_at: at(today, 9))
         visit_activity(q: "tag:home")
 
         expect(event_names).to eq(["clear the gutters"])
       end
 
       it "drops the sessions when their type is unchecked" do
-        session(at(9))
+        session(at(today, 9))
         visit_activity(types: { comment: "1", session: "0" })
 
         expect(event_names).to be_empty
@@ -400,7 +399,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       let(:task) { create(:task, title: "clear the gutters") }
 
       def event(kind, **columns)
-        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(9), **columns)
+        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(today, 9), **columns)
       end
 
       before do
@@ -420,9 +419,11 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
     describe "decisions" do
       let(:decision) { create(:decision, title: "Pick a queue", tags: %w[infra]) }
 
-      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(11), **attrs)
+      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(today, 11), **attrs)
 
-      def event(kind, **attrs) = create(:decision_event, decision_id: decision.id, kind:, created_at: at(10), **attrs)
+      def event(kind, **attrs)
+        create(:decision_event, decision_id: decision.id, kind:, created_at: at(today, 10), **attrs)
+      end
 
       def every_event
         option_id = create(:decision_option, decision_id: decision.id, title: "Sidekiq").id
@@ -490,7 +491,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "finds a decision's events and comments by its tags" do
         event("opened")
         comment(body: "Ask ops first")
-        create(:decision_event, kind: "opened", created_at: at(12))
+        create(:decision_event, kind: "opened", created_at: at(today, 12))
         visit_activity(q: "tag:infra")
 
         expect(event_names).to contain_exactly("Pick a queue", "Ask ops first")
@@ -517,25 +518,25 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       def hrefs = page.all("a.activity-event").map { it[:href] }
 
       def pull_request(**times)
-        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(9), **times)
+        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(today, 9), **times)
       end
 
       it "opens each row on the pull request's page" do
-        pull = pull_request(merged_at: at(10))
+        pull = pull_request(merged_at: at(today, 10))
         visit_activity
 
         expect(hrefs).to eq(["/admin/pull-requests/#{pull.id}"] * 2)
       end
 
       it "shows an opened row and a merged row for a merged one" do
-        pull_request(merged_at: at(10))
+        pull_request(merged_at: at(today, 10))
         visit_activity
 
         expect(event_subs).to eq(["merged into aaronmallen/blog", "opened in aaronmallen/blog"])
       end
 
       it "shows an opened row and a closed row for one closed without a merge" do
-        pull_request(closed_at: at(10))
+        pull_request(closed_at: at(today, 10))
         visit_activity
 
         expect(event_subs).to eq(["closed in aaronmallen/blog", "opened in aaronmallen/blog"])
@@ -549,21 +550,21 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "shows nothing for one that was never ready" do
-        pull_request(ready_at: nil, closed_at: at(10))
+        pull_request(ready_at: nil, closed_at: at(today, 10))
         visit_activity
 
         expect(event_names).to be_empty
       end
 
       it "counts each kind apart" do
-        [{ merged_at: at(10) }, { closed_at: at(11) }].each { pull_request(**it) }
+        [{ merged_at: at(today, 10) }, { closed_at: at(today, 11) }].each { pull_request(**it) }
         visit_activity
 
         expect(%w[opened merged closed].map { count_for("pull_request_#{it}") }).to eq(%w[2 1 1])
       end
 
       it "drops a kind when its type is unchecked" do
-        pull_request(merged_at: at(10))
+        pull_request(merged_at: at(today, 10))
         visit_activity(types: { pull_request_opened: "0", pull_request_merged: "1" })
 
         expect(event_subs).to eq(["merged into aaronmallen/blog"])
@@ -572,7 +573,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "workouts and health" do
       before do
-        create(:workout, kind: "STRENGTH_TRAINING", started_at: at(7), minutes: 65, device: "Pixel Watch 3")
+        create(:workout, kind: "STRENGTH_TRAINING", started_at: at(today, 7), minutes: 65, device: "Pixel Watch 3")
         create(:commit, commit_date: today - 1, message: "add the view")
         create(:health_day, day: today, minutes_asleep: 425, hrv: 47.6, resting_heart_rate: 54, steps: 8421)
         visit_activity
@@ -899,7 +900,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       let(:without_posts) { { commit: "1", journal: "1", post: "0", social: "1", task: "1", webmention: "1" } }
 
       before do
-        create(:post, :published, title: "Hello", published_at: at(9))
+        create(:post, :published, title: "Hello", published_at: at(today, 9))
         create(:commit, commit_date: today, message: "add the view")
       end
 
@@ -968,7 +969,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         create(:commit, repo: "aaronmallen/one", commit_date: today, message: "in one")
         create(:commit, repo: "aaronmallen/two", commit_date: today, message: "in two")
         create(:journal_entry, entry_date: today, body: "read the docs", tags: %w[ruby])
-        create(:task_contributor, task_id: create(:task, :done, title: "Agent's", completed_at: at(14)).id)
+        create(:task_contributor, task_id: create(:task, :done, title: "Agent's", completed_at: at(today, 14)).id)
       end
 
       def found(query)
@@ -1082,7 +1083,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
     describe "contains" do
       before do
         create(:commit, commit_date: today, message: "add the Activities view")
-        create(:post, :published, title: "Hello", slug: "on-views", published_at: at(9))
+        create(:post, :published, title: "Hello", slug: "on-views", published_at: at(today, 9))
         create(:commit, commit_date: today, message: "nothing to see")
       end
 
@@ -1178,21 +1179,21 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "returns the completed tasks carrying the tag too" do
-        create(:task, :done, title: "clear the gutters", completed_at: at(16), tags: %w[ruby])
+        create(:task, :done, title: "clear the gutters", completed_at: at(today, 16), tags: %w[ruby])
         visit_activity(q: "tag:ruby")
 
         expect(event_names).to contain_exactly("read the docs", "clear the gutters")
       end
 
       it "leaves out a task carrying another tag" do
-        create(:task, :done, title: "clear the gutters", completed_at: at(16), tags: %w[home])
+        create(:task, :done, title: "clear the gutters", completed_at: at(today, 16), tags: %w[home])
         visit_activity(q: "tag:ruby")
 
         expect(event_names).to eq(["read the docs"])
       end
 
       it "counts the tagged tasks too" do
-        create(:task, :done, title: "clear the gutters", completed_at: at(16), tags: %w[ruby])
+        create(:task, :done, title: "clear the gutters", completed_at: at(today, 16), tags: %w[ruby])
         visit_activity(q: "tag:ruby")
 
         expect(count_for("task")).to eq("1")
@@ -1201,7 +1202,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "opening an event" do
       it "opens a post in the editor" do
-        post = create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        post = create(:post, :published, title: "Hello", slug: "hello", published_at: at(today, 9))
         visit_activity
 
         expect(page).to have_css("a.activity-event[href='/admin/posts/#{post.id}/edit']", text: "Hello")
@@ -1226,14 +1227,14 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "opens a social post in the queue" do
-        create(:social_post, :posted, posted_at: at(12))
+        create(:social_post, :posted, posted_at: at(today, 12))
         visit_activity
 
         expect(page).to have_link(class: "activity-event", href: "/admin/social?filter=posted")
       end
 
       it "opens a task in the task panel" do
-        task = create(:task, :done, title: "clear the gutters", completed_at: at(16))
+        task = create(:task, :done, title: "clear the gutters", completed_at: at(today, 16))
         visit_activity
 
         expect(page).to have_css(task_opener("/admin/tasks/#{task.id}"), text: "clear the gutters")
@@ -1241,7 +1242,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
       it "opens a webmention on the webmentions page" do
         post = create(:post, :published, slug: "hello")
-        create(:webmention, :approved, post_id: post.id, author_name: "Ada", received_at: at(8))
+        create(:webmention, :approved, post_id: post.id, author_name: "Ada", received_at: at(today, 8))
         visit_activity
 
         expect(page).to have_link("Ada", href: "/admin/webmentions")
@@ -1264,7 +1265,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "a post's sub-line" do
       before do
-        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(today, 9))
         create(:analytics_rollup, day: today)
         create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 12, visitors: 8, bounces: 2)
         visit_activity
@@ -1277,7 +1278,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "a post's sub-line with today's views not rolled up yet" do
       before do
-        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(today, 9))
         create(:analytics_rollup, day: today - 1)
         create(:analytics_rollup_path, day: today - 1, path: "/writing/hello", views: 12, visitors: 8, bounces: 2)
         create(:analytics_event, path: "/writing/hello", occurred_at: Blog::TimeZone.day_start(today - 1) + 60)
@@ -1292,7 +1293,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
     describe "a post's sub-line with one view" do
       before do
-        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(today, 9))
         create(:analytics_rollup, day: today)
         create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 1, visitors: 1, bounces: 1)
         visit_activity
@@ -1304,17 +1305,17 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
     end
 
     describe "a webmention's sub-line" do
-      let(:post) { create(:post, :published, slug: "hello", published_at: at(7, on: today - 1)) }
+      let(:post) { create(:post, :published, slug: "hello", published_at: at(today - 1, 7)) }
 
       it "names the post it is on and its excerpt" do
-        create(:webmention, :approved, post_id: post.id, excerpt: "nice work", received_at: at(8))
+        create(:webmention, :approved, post_id: post.id, excerpt: "nice work", received_at: at(today, 8))
         visit_activity(types: { webmention: "1" })
 
         expect(event_subs).to eq(["on /writing/hello · nice work"])
       end
 
       it "names only the post it is on without an excerpt" do
-        create(:webmention, :approved, post_id: post.id, excerpt: nil, received_at: at(8))
+        create(:webmention, :approved, post_id: post.id, excerpt: nil, received_at: at(today, 8))
         visit_activity(types: { webmention: "1" })
 
         expect(event_subs).to eq(["on /writing/hello"])

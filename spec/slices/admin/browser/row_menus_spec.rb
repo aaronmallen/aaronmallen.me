@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin post, social, project and person row menus", type: :feature do
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   def open_menu(row) = find(row).right_click
 
   before { sign_in_to_admin }

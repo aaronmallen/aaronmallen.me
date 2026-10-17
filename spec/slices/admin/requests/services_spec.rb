@@ -12,7 +12,7 @@ RSpec.describe "Admin connected services", type: :request do
   def connections = Services::Slice["repos.connection_queries"].for(:linear)
 
   def fail_sync(name)
-    Record::Slice["repos.sync_state_mutations"].record_failure(Blog::Types::SyncName[name], :unreachable)
+    sync_state_mutations.record_failure(Blog::Types::SyncName[name], :unreachable)
   end
 
   def form_action = last_response.headers["Content-Security-Policy"][/form-action [^;]*/]

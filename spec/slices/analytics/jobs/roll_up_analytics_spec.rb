@@ -4,7 +4,6 @@ require "digest"
 
 RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   let(:day) { Blog::TimeZone.today - 1 }
-  let(:today) { Blog::TimeZone.today }
   let(:visitor_hash) { Digest::SHA256.hexdigest("203.0.113.7 Mozilla/5.0") }
 
   def analytics_rollup = Blog::Types::SyncName["analytics_rollup"]
@@ -82,9 +81,6 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   def stored_visitors(table, key, on = day)
     rollup_repo.public_send(table).on(on).order(key).to_a.to_h { [it[key], it.visitors] }
   end
-
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   describe "yesterday" do
     it "stores the day's totals" do

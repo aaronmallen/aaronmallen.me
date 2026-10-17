@@ -3,8 +3,6 @@
 RSpec.describe "API review", type: :request do
   let(:wednesday) { Date.new(2026, 9, 16) }
 
-  def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
-
   def carried(*days) = create(:task, :in_sprint).tap { |task| days.each { carry(task, it) } }
 
   def carry(task, from, to = from + 1, at: at(to))
@@ -35,8 +33,6 @@ RSpec.describe "API review", type: :request do
     sub = Capybara.string(last_response.body).find(".page-head-sub").text
     sub.split(": ", 2).last.split(", ").map { it.sub(/ \S+\z/, "") }
   end
-
-  def today = Blog::TimeZone.today
 
   def work(from, to, task: create(:task, worked_seconds: (to - from).to_i))
     create(:work_session, task_id: task.id, started_at: from, ended_at: to)

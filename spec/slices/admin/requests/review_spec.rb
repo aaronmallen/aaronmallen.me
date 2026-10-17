@@ -2,10 +2,7 @@
 
 RSpec.describe "Admin review", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
   let(:wednesday) { Date.new(2026, 9, 16) }
-
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
 
   def card(name) = page.find("#review-#{name}")
 

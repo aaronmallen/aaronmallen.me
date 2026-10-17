@@ -3,8 +3,6 @@
 RSpec.describe "API tasks", type: :request do
   def act(id, verb, fields = {}) = call_api(:post, "/tasks/#{id}/#{verb}", JSON.generate(fields))
 
-  def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
-
   def capture(fields) = call_api(:post, "/tasks", JSON.generate(fields))
 
   def link(kind, id, other_kind, other_id)
@@ -20,8 +18,6 @@ RSpec.describe "API tasks", type: :request do
   def tasks = Tasks::Slice["repos.task_queries"]
 
   def titles(answer) = answer.fetch("tasks").map { it.fetch("title") }
-
-  def today = Blog::TimeZone.today
 
   describe "GET /api/v1/tasks" do
     it "lists tasks in every status, newest first" do

@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :feature do
-  def item(label) = menu.first(".ctx-item", text: label)
-
-  def keep_page = execute_script("window.kept = true")
-
-  def kept_page? = evaluate_script("window.kept === true")
-
-  def menu = find("[data-context-menu]")
-
   def open_menu(target)
     box = target.evaluate_script("JSON.parse(JSON.stringify(this.getBoundingClientRect()))")
     keep_page

@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP mail tools", type: :request do
-  def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
-
   def message_queries = Mail::Slice["repos.message_queries"]
-
-  def today = Blog::TimeZone.today
 
   def week = { from: (today - 6).iso8601, to: today.iso8601 }
 

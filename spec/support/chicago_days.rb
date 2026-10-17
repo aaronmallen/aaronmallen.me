@@ -2,6 +2,8 @@
 
 module Spec
   module ChicagoDays
+    def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
+
     def days_ago(days) = days_ahead(-days)
 
     def days_ahead(days)
@@ -12,6 +14,8 @@ module Spec
 
       Time.at([start + clock, Blog::TimeZone.day_start(today + days + 1) - 1].min)
     end
+
+    def today = @today ||= Blog::TimeZone.today
   end
 end
 

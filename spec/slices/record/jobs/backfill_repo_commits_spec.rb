@@ -43,9 +43,6 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def stub_refs_answer(*responses) = stub_github(GitHubGraphQL::REFS_QUERY, *responses)
 
-  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
-  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
-
   def walk(name = repo) = described_class.new.perform(name, clock.iso8601)
 
   def walking = [[[repo, clock.iso8601], nil]]

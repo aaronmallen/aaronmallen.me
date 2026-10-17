@@ -6,8 +6,6 @@ RSpec.describe "Admin calendar drag", type: :feature do
 
   def asked = admin_t("ui.components.calendar.event_row.confirm_delete", title: "Coffee")
 
-  def at(date, hour) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour)
-
   def box(element)
     evaluate_script(<<~JS, element)
       (r => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 }))(arguments[0].getBoundingClientRect())

@@ -3,7 +3,6 @@
 RSpec.describe Tasks::Operations::RecurTask, :frozen_clock do
   let(:project) { create(:project) }
   let(:task) { create(:task, title: "Water the plants", note: "the ferns too", project_id: project.id) }
-  let(:today) { Blog::TimeZone.today }
 
   def cadence(on = task, **fields) = slice("operations.set_task_cadence").call(on.id, fields).value!
 

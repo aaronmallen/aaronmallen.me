@@ -22,8 +22,6 @@ RSpec.describe "Admin review note", :frozen_clock, type: :request do
 
   def stored_notes = Record::Slice["relations.review_notes"].to_a
 
-  def today = Blog::TimeZone.today
-
   describe "signed in" do
     before { sign_in_to_admin }
 

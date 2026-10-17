@@ -4,8 +4,6 @@ RSpec.describe Health::Repos::HealthQueries do
   let(:monday) { Date.new(2026, 9, 7) }
   let(:sunday) { monday + 13 }
 
-  def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
-
   def compared(*groups)
     subject, rest = groups.map { |days, averages| Health::Structs::PatternGroup.new(days:, averages:) }
 

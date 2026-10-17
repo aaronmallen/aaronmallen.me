@@ -4,7 +4,6 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:site) { create(:project, name: "site") }
   let(:gem) { create(:project, name: "gem") }
-  let(:today) { Blog::TimeZone.today }
 
   def at(day, hour, minute = 0) = Blog::TimeZone.local_time(2026, 3, day, hour, minute)
 

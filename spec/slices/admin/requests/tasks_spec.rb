@@ -1935,8 +1935,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         admin_post("/admin/tasks/#{task.id}", filter: "today", task: fields)
       end
 
-      def today = Blog::TimeZone.today
-
       it "shows the sprint's date for a task in today's sprint" do
         task = create(:task, :in_sprint, sprint_id: sprint.id)
         get "/admin/tasks/#{task.id}/edit"
@@ -2048,8 +2046,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "the notes" do
-      let(:today) { Blog::TimeZone.today }
-
       def completed(title) = create(:task, title:).tap { admin_post("/admin/tasks/#{it.id}/complete") }
 
       def footnote = i18n.t("ui.views.tasks.index.footnote")
@@ -3087,8 +3083,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       def plan(on) = admin_post("/admin/tasks/sprints", sprint_on: on.to_s)
-
-      def today = Blog::TimeZone.today
 
       def tomorrow = today + 1
 

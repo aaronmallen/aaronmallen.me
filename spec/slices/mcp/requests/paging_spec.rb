@@ -13,8 +13,6 @@ RSpec.describe "MCP list tool paging", type: :request do
     Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, [edit])
   end
 
-  def today = Blog::TimeZone.today
-
   {
     "list_posts" => {
       key: "posts",

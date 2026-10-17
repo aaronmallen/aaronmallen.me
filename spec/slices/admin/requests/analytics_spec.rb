@@ -3,7 +3,6 @@
 RSpec.describe "Admin analytics", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
 
   def bars = page.all(".chart-bar").map { it[:style] }
 
@@ -331,8 +330,6 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
     describe "with events across the week" do
       let(:sunday) { today - (today.wday.zero? ? 7 : today.wday) }
-
-      def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
       def cell(hour, weekday) = grid.all("tbody tr")[weekday].all(".heat-cell")[hour]
 

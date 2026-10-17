@@ -2,10 +2,7 @@
 
 RSpec.describe "Activity", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:today) { Blog::TimeZone.today }
   let(:yesterday) { today - 1 }
-
-  def at(hour, minute = 0, on: today) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, minute)
 
   def count_for(icon) = page.find(".activity-type:has(.fa-#{icon}) .activity-type-count").text
 
@@ -55,7 +52,7 @@ RSpec.describe "Activity", type: :request do
     def mention(*traits, author:)
       create(
         :webmention, *traits,
-        post_id: post.id, author_name: author, excerpt: "#{author} says hi", received_at: at(8),
+        post_id: post.id, author_name: author, excerpt: "#{author} says hi", received_at: at(today, 8),
       )
     end
 
@@ -95,7 +92,7 @@ RSpec.describe "Activity", type: :request do
 
   describe "the day an event lands on" do
     it "reads a post published just before midnight in Chicago as that day" do
-      create(:post, :published, title: "Late", published_at: at(23, 59, on: yesterday))
+      create(:post, :published, title: "Late", published_at: at(yesterday, 23, 59))
       visit_activity
 
       expect(day_names(yesterday)).to eq(["Late"])

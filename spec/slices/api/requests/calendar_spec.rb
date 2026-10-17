@@ -5,8 +5,6 @@ RSpec.describe "API calendar", type: :request do
   let(:last) { Date.new(2026, 7, 19) }
   let(:range) { { from: first.iso8601, to: last.iso8601 } }
 
-  def at(date, hour, minute = 0) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour, minute)
-
   def day(date, **) = days(**).find { it.fetch("date") == date.iso8601 }
 
   def days(**params) = read(**range, **params).fetch("days")
