@@ -1,4 +1,5 @@
-import { countText, setupListbox } from "./listbox.js";
+import { fresh } from "./fresh.js";
+import { countText, removeButton, setupListbox, setupToggle } from "./listbox.js";
 
 const BOX = "[data-project-pick-boxes] input[type='checkbox']";
 const NAME = "{name}";
@@ -33,12 +34,8 @@ function setupProjectPick(pick) {
   };
 
   const chip = (box) => {
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "project-pick-remove";
-    remove.setAttribute("aria-label", pick.dataset.projectPickRemove.replace(NAME, box.dataset.projectName));
-    remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
-    remove.addEventListener("click", () => {
+    const label = pick.dataset.projectPickRemove.replace(NAME, box.dataset.projectName);
+    const remove = removeButton("project-pick-remove", label, () => {
       box.checked = false;
       showChips();
       input.focus();
@@ -57,8 +54,7 @@ function setupProjectPick(pick) {
         .map(chip),
     );
 
-  if (!ready.has(pick)) {
-    ready.add(pick);
+  if (fresh(ready, [pick]).length) {
     setupSearch({ pick, input, list, status, boxes, options, named, showChips });
   }
 
@@ -92,37 +88,22 @@ function setupSearch({ pick, input, list, status, boxes, options, named, showChi
     return row;
   };
 
-  const none = () => {
-    const row = document.createElement("div");
-    row.id = `${list.id}-none`;
-    row.className = "project-pick-result project-pick-note";
-    row.setAttribute("role", "option");
-    row.setAttribute("aria-disabled", "true");
-    row.setAttribute("aria-selected", "false");
-    row.textContent = pick.dataset.projectPickNone;
-    return row;
-  };
+  const { open: show, close } = setupToggle({
+    list,
+    input,
+    status,
+    select,
+    none: { className: "project-pick-result project-pick-note", text: pick.dataset.projectPickNone },
+    count: (count) => countText(pick, "projectPickResults", count),
+  });
 
   const open = () => {
     const query = input.value.trim().toLowerCase();
-    const found = boxes()
-      .filter((box) => !box.checked && box.dataset.projectName.toLowerCase().includes(query))
-      .map(option);
-
-    list.replaceChildren(...(found.length ? found : [none()]));
-    list.hidden = false;
-    input.setAttribute("aria-expanded", "true");
-    select(null);
-    status.textContent = found.length
-      ? countText(pick, "projectPickResults", found.length)
-      : pick.dataset.projectPickNone;
-  };
-
-  const close = () => {
-    select(null);
-    list.hidden = true;
-    list.replaceChildren();
-    input.setAttribute("aria-expanded", "false");
+    show(
+      boxes()
+        .filter((box) => !box.checked && box.dataset.projectName.toLowerCase().includes(query))
+        .map(option),
+    );
   };
 
   input.addEventListener("input", () => (input.value.trim() ? open() : close()));

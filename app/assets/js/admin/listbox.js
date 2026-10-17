@@ -51,3 +51,43 @@ export function setupListbox({ list, owner, choice, options, shown = options, ch
 
   return { active, select, step };
 }
+
+export function removeButton(className, label, remove) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.setAttribute("aria-label", label);
+  button.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+  button.addEventListener("click", remove);
+  return button;
+}
+
+export function noneRow(list, className, text) {
+  const row = document.createElement("div");
+  row.id = `${list.id}-none`;
+  row.className = className;
+  row.setAttribute("role", "option");
+  row.setAttribute("aria-disabled", "true");
+  row.setAttribute("aria-selected", "false");
+  row.textContent = text;
+  return row;
+}
+
+export function setupToggle({ list, input, status, select, none, count }) {
+  const open = (rows) => {
+    list.replaceChildren(...(rows.length ? rows : [noneRow(list, none.className, none.text)]));
+    list.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    select(null);
+    status.textContent = rows.length ? count(rows.length) : none.text;
+  };
+
+  const close = () => {
+    select(null);
+    list.hidden = true;
+    list.replaceChildren();
+    input.setAttribute("aria-expanded", "false");
+  };
+
+  return { open, close };
+}

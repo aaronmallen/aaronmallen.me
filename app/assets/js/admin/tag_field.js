@@ -1,5 +1,6 @@
 import { json } from "./fetching.js";
-import { countText, setupListbox } from "./listbox.js";
+import { fresh } from "./fresh.js";
+import { countText, removeButton, setupListbox, setupToggle } from "./listbox.js";
 
 const NAME = "{name}";
 const OPTION = "[role='option']:not([aria-disabled])";
@@ -33,12 +34,7 @@ function setupTagField(pick) {
   };
 
   const chip = (name) => {
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "tag-pick-remove";
-    remove.setAttribute("aria-label", pick.dataset.tagFieldRemove.replace(NAME, name));
-    remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
-    remove.addEventListener("click", () => {
+    const remove = removeButton("tag-pick-remove", pick.dataset.tagFieldRemove.replace(NAME, name), () => {
       write(names().filter((other) => other !== name));
       showChips();
       input.focus();
@@ -70,8 +66,7 @@ function setupTagField(pick) {
       if (document.activeElement === input && input.value.trim()) input.dispatchEvent(new Event("input"));
     });
 
-  if (!ready.has(pick)) {
-    ready.add(pick);
+  if (fresh(ready, [pick]).length) {
     setupSearch({ pick, input, colors, names, tag, add });
     input.addEventListener("focus", load);
   }
@@ -133,16 +128,14 @@ function setupSearch({ pick, input, colors, names, tag, add }) {
     return element;
   };
 
-  const none = () => {
-    const element = document.createElement("div");
-    element.id = `${list.id}-none`;
-    element.className = "tag-pick-result tag-pick-note";
-    element.setAttribute("role", "option");
-    element.setAttribute("aria-disabled", "true");
-    element.setAttribute("aria-selected", "false");
-    element.textContent = pick.dataset.tagFieldNone;
-    return element;
-  };
+  const { open: show, close } = setupToggle({
+    list,
+    input,
+    status,
+    select,
+    none: { className: "tag-pick-result tag-pick-note", text: pick.dataset.tagFieldNone },
+    count: (count) => countText(pick, "tagFieldResults", count),
+  });
 
   const open = () => {
     if (waiting(pick)) return;
@@ -156,18 +149,7 @@ function setupSearch({ pick, input, colors, names, tag, add }) {
       found.push(row(query, pick.dataset.tagFieldAdd.replace(NAME, query), found.length));
     }
 
-    list.replaceChildren(...(found.length ? found : [none()]));
-    list.hidden = false;
-    input.setAttribute("aria-expanded", "true");
-    select(null);
-    status.textContent = found.length ? countText(pick, "tagFieldResults", found.length) : pick.dataset.tagFieldNone;
-  };
-
-  const close = () => {
-    select(null);
-    list.hidden = true;
-    list.replaceChildren();
-    input.setAttribute("aria-expanded", "false");
+    show(found);
   };
 
   const commit = () => {
