@@ -20,7 +20,7 @@ running() {
 }
 
 if ! answering && ! running; then
-  scripts/util/compose up --detach --wait "$SERVICE"
+  scripts/db/start
 fi
 
 exec "$@"

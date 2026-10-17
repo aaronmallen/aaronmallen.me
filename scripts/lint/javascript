@@ -4,4 +4,4 @@
 
 set -e
 
-biome check --error-on-warnings --config-path .config app/assets/js config/assets.js
+exec scripts/util/biome --error-on-warnings

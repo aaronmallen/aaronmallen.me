@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+exec biome check --config-path .config "$@" app/assets/js config/assets.js

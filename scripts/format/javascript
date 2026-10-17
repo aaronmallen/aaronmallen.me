@@ -4,4 +4,4 @@
 
 set -e
 
-biome check --write --config-path .config app/assets/js config/assets.js
+exec scripts/util/biome --write

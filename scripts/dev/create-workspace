@@ -5,22 +5,15 @@
 
 set -e
 
-case "$1" in
-"" | *[!0-9]*)
-  echo "id must be a number" >&2
-  exit 1
-  ;;
-esac
-
 id="$1"
-dir=".claude/worktrees/ws${id}"
+dir="$(scripts/util/workspace "$id")"
 exclude="$(jj git root)/info/exclude"
 
 if ! grep -qE '^(\*\*/|/)?\.claude/worktrees/?$' "$exclude" 2>/dev/null; then
   echo '.claude/worktrees' >>"$exclude"
 fi
 
-mkdir -p .claude/worktrees
+mkdir -p "$(dirname "$dir")"
 jj workspace add "$dir" --name "ws${id}" -r "${2:-@-}"
 grep -v '^WORKSPACE_ID=' .env >"$dir/.env" || true
 echo "WORKSPACE_ID=${id}" >>"$dir/.env"

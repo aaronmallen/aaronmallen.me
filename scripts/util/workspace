@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+root="${WORKTREES_DIR:-$(dirname "$(jj git root)")/.claude/worktrees}"
+
+if [ "$#" -eq 0 ]; then
+  echo "$root"
+  exit
+fi
+
+case "$1" in
+"" | *[!0-9]*)
+  echo "id must be a number" >&2
+  exit 1
+  ;;
+esac
+
+echo "${root}/ws$1"

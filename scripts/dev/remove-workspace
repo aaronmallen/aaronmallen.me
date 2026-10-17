@@ -4,15 +4,9 @@
 
 set -e
 
-case "$1" in
-"" | *[!0-9]*)
-  echo "id must be a number" >&2
-  exit 1
-  ;;
-esac
-
 id="$1"
+dir="$(scripts/util/workspace "$id")"
 
 HANAMI_ENV="test" WORKSPACE_ID="$id" bundle exec parallel_test --exec scripts/db/drop
 jj workspace forget "ws${id}"
-rm -rf ".claude/worktrees/ws${id}"
+rm -rf "$dir"

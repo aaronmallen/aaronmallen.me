@@ -5,11 +5,7 @@ set -e
 
 export HANAMI_ENV="test"
 
-worktrees="${WORKTREES_DIR:-}"
-if [ -z "$worktrees" ]; then
-  git_dir="$(jj git root)"
-  worktrees="$(dirname "$git_dir")/.claude/worktrees"
-fi
+worktrees="$(scripts/util/workspace)"
 
 prefix="${DATABASE_NAME:-blog}_test_"
 names="$(scripts/util/psql -d postgres -Atc "select datname from pg_database order by datname")"
