@@ -2,13 +2,15 @@
 
 require "open3"
 require "securerandom"
+require "sequel"
 
 module Backups
   class Restorer
     class Error < Backups::Error; end
 
     TABLES = %w[schema_migrations posts tasks].freeze
-    QUERY = "SELECT #{TABLES.map { "(SELECT count(*) FROM #{it})" }.join(', ')}".freeze
+    SQL = Sequel.mock(host: "postgres")
+    QUERY = SQL.select(*TABLES.map { |table| SQL[table.to_sym].select { count.function.* } }).sql.freeze
 
     def initialize(database:)
       @database = database

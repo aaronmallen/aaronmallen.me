@@ -3,6 +3,7 @@
 require "blog/extensions"
 require "hanami/cli"
 require "hanami/cli/commands/app/db/utils/postgres"
+require "sequel"
 require "shellwords"
 require "uri"
 
@@ -14,6 +15,7 @@ module Blog
           module Postgres
             module Extension
               PERCENT_ENCODED_VARS = %w[PGUSER PGPASSWORD].freeze
+              SQL = Sequel.mock(host: "postgres")
 
               def exec_drop_command
                 result = super
@@ -26,7 +28,7 @@ module Blog
               end
 
               def exists?
-                sql = "SELECT 1 FROM pg_database WHERE datname = '#{name.gsub("'", "''")}'"
+                sql = SQL[:pg_database].where(datname: name).select(1).sql
                 command = "psql -t -A --no-psqlrc -c #{Shellwords.escape(sql)} template1"
                 result = system_call.call(command, env: cli_env_vars)
                 raise ::Hanami::CLI::DatabaseExistenceCheckError, result.err unless result.successful?
