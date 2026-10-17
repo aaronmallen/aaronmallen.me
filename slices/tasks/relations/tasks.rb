@@ -8,10 +8,6 @@ module Tasks
       CREATED_ON = site_day(:created_at)
       CLOSED = Blog::Types::ClosedTaskStatus.values.freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
-      LABEL = Sequel.function(
-        :concat_ws, "-", Sequel.lit("(SELECT key FROM projects WHERE projects.id = tasks.project_id)"),
-        Sequel[:tasks][:number],
-      )
       LISTS = Blog::Types::TaskList.values.freeze
       MANUAL = (Sequel[:worked_seconds] - Sequel.function(:coalesce, Sequel[:sessions][:seconds], 0)).cast(Integer)
       MANUAL_DAY = Sequel.function(:coalesce, COMPLETED_ON, site_day(Sequel[:sessions][:last_at]))
@@ -74,7 +70,7 @@ module Tasks
 
       def in_progress = where(status: IN_PROGRESS)
 
-      def labelled = select_append(ROM::SQL::Attribute[ROM::Types::String].meta(sql_expr: LABEL).as(:label))
+      def labelled = select_append { |tasks:| string.concat_ws("-", tasks.project_key, number.qualified).as(:label) }
 
       def last_position = unordered.max(:position).to_i
 
@@ -128,6 +124,8 @@ module Tasks
         where(Sequel.|(Sequel[:position] < task.position, Sequel.&({ position: task.position }, Sequel[:id] < task.id)))
           .order(self[:position].desc, self[:id].desc)
       end
+
+      def project_key = dataset.db[:projects].where(Sequel[:projects][:id] => self[:project_id].qualified).select(:key)
 
       def searched(tags: [], project_ids: nil, text: "", label_ids: [], **credits)
         found = text.empty? ? credited(**credits) : credited(**credits).matching(text, label_ids)
