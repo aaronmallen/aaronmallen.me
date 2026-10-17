@@ -9,7 +9,7 @@ module Admin
       case act(request.params.to_h)
         in Success[*records] then done(request, response, records)
         in Failure[:record, id, reason] then failed(response, id, reason)
-        in Failure[:invalid, errors] then toast(response, "#{self.class::INVALID}.#{refused(errors)}")
+        in Failure[:invalid, errors] then refuse(response, errors)
         else halt 500
       end
 
@@ -31,6 +31,10 @@ module Admin
     end
 
     def refusal(_errors) = Blog::Contract::FORMAT
+
+    def refuse(response, errors)
+      toast(response, "#{self.class::INVALID}.#{refused(errors)}", max: Blog::Contract::MAX_IDS)
+    end
 
     def refused(errors)
       case errors

@@ -299,6 +299,15 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
     end
 
+    it "refuses more than 100 ticked cards", :aggregate_failures do
+      task = linked
+      bulk((task.id..(task.id + 100)).to_a, "done")
+
+      expect(tasks.by_id(task.id).status).to eq("open")
+      follow_redirect!
+      expect(toast).to eq("Tick 100 cards or fewer")
+    end
+
     it "asks for a column before it moves ticked cards", :aggregate_failures do
       task = linked
       bulk([task.id], "")

@@ -5,7 +5,9 @@ RSpec.describe "Admin API tokens", type: :request do
 
   def checked(*scopes) = Blog::Types::OAuthScope.values.to_h { [it, scopes.include?(it) ? "1" : "0"] }
 
-  def error(code, field = "name") = Admin::Slice["i18n"].t(["ui.components.tokens.field_error", field, code].join("."))
+  def error(code, field = "name", **)
+    Admin::Slice["i18n"].t(["ui.components.tokens.field_error", field, code].join("."), **)
+  end
 
   def mint(name, **fields) = post("/admin/tokens", token: { name:, **fields }, _csrf_token: admin_csrf_token)
 
@@ -121,7 +123,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "refuses a name over 100 characters and keeps what I typed", :aggregate_failures do
       mint("a" * 101)
 
-      expect(page).to have_css(".field-error", text: error("long"))
+      expect(page).to have_css(".field-error", text: error("long", max: 100))
       expect(page).to have_field("token[name]", with: "a" * 101)
     end
 

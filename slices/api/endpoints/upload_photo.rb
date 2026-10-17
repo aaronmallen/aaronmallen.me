@@ -42,7 +42,7 @@ module API
         nil
       end
 
-      def message(code) = i18n.t(code, scope: "photo_upload.errors")
+      def message(code) = i18n.t(code, scope: "photo_upload.errors", **::Media::Operations::UploadPhoto::LIMITS)
 
       def refuse(code) = invalid({ data: [message(code)] })
 

@@ -5,6 +5,7 @@ module Blog
     class FieldError < Component
       CODES = "ui.field_error."
       INVALID = "ui.field_error.invalid"
+      LIMITS = Blog::Constants::EMPTY_HASH
       OVERRIDES = Blog::Constants::EMPTY_HASH
 
       prop :field, Blog::Types::Symbol
@@ -39,7 +40,8 @@ module Blog
 
       def message(code)
         keys = [convention_key(code), self.class::OVERRIDES.dig(@field, code), "#{CODES}#{code}"].compact
-        keys.lazy.filter_map { t(it, default: nil) }.first || t(INVALID)
+        limits = self.class::LIMITS.fetch(@field, Blog::Constants::EMPTY_HASH)
+        keys.lazy.filter_map { t(it, default: nil, **limits) }.first || t(INVALID)
       end
     end
   end

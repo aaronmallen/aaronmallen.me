@@ -5,6 +5,7 @@ module Public
     module Views
       module Pages
         class Privacy < View
+          READ_MINUTES = ::Analytics::Operations::RecordVisit::MAX_READ_SECONDS / Blog::Helpers::Figures::MINUTE
           SECTIONS = {
             cookies: { heading: ".cookies.heading", paragraphs: %w[.cookies.theme .cookies.admin] },
             address: { heading: ".address.heading", paragraphs: %w[.address.use .address.log] },
@@ -56,7 +57,7 @@ module Public
           def topic(heading:, paragraphs: [], items: [], closing: [])
             h2 { t(heading) }
             paragraphs(paragraphs)
-            ul { items.each { |item| li { t(item) } } } unless items.empty?
+            ul { items.each { |item| li { t(item, minutes: READ_MINUTES) } } } unless items.empty?
             paragraphs(closing)
           end
         end

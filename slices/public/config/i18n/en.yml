@@ -264,7 +264,7 @@ en:
               device: "your kind of device: desktop, phone, tablet or the browser inside an app"
               hashes: "the daily, monthly and network hashes"
               page: "the page and its title"
-              reading: "how long you read, up to 20 minutes, and how far you scrolled, in quarters"
+              reading: "how long you read, up to %{minutes} minutes, and how far you scrolled, in quarters"
               referrer: "the name of the site that sent you, or the page you came from on this one"
               source: "the ref tag on the link that brought you, such as ref=mastodon, if it has one"
             read_through: "A view that scrolls three quarters of the way down and stays 30 seconds counts as a read-through."

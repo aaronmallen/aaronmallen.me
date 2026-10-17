@@ -33,7 +33,11 @@ module Admin
           response.body = JSON.generate(body)
         end
 
-        def refuse(response, status, code) = answer(response, status, error: i18n.t(code, scope: "photo_upload.errors"))
+        def refuse(response, status, code)
+          error = i18n.t(code, scope: "photo_upload.errors", **::Media::Operations::UploadPhoto::LIMITS)
+
+          answer(response, status, error:)
+        end
       end
     end
   end

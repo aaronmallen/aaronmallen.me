@@ -742,6 +742,14 @@ RSpec.describe "Admin mail", type: :request do
           expect(toast).to eq("Moved 2 threads to Trash")
         end
 
+        it "refuses more than 100 threads before it writes to Gmail", :aggregate_failures do
+          act("/admin/mail/bulk", act: "read", ids: (1..101).to_a, folder: "inbox")
+          follow_redirect!
+
+          expect(toast).to eq("Tick 100 threads or fewer")
+          expect(a_request(:post, /gmail/)).not_to have_been_made
+        end
+
         it "restores a trashed thread to the inbox and wakes it", :aggregate_failures do
           thread = gmail(gmail_id: "t3", trashed: true, archived: true, snoozed_until: Time.now + 3600)
           bulk("inbox", [thread])

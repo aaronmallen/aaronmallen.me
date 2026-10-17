@@ -3,6 +3,12 @@
 module Media
   module Operations
     class UploadPhoto < Blog::Operation
+      MEGAPIXEL = 1_000_000
+      LIMITS = {
+        size: Blog::Helpers::Figures.size(Contracts::PhotoContract::MAX_BYTES),
+        megapixels: ProcessPhoto::MAX_PIXELS / MEGAPIXEL,
+      }.freeze
+
       include Deps[
         "operations.detect_photo_type",
         client: "media_store.client",

@@ -10,7 +10,7 @@ RSpec.describe "Admin mail sending", type: :request do
     send_mail(from: work.id, to: "ada@example.com", subject: "Engines", html: "<p>Hi</p>", **fields)
   end
 
-  def error(key) = Admin::Slice["i18n"].t(key, scope: "ui.components.mail.field_error")
+  def error(key, **) = Admin::Slice["i18n"].t(key, scope: "ui.components.mail.field_error", **)
 
   def form_thread = create(:message, subject: "Hello", reply_to: "visitor@example.com")
 
@@ -221,6 +221,12 @@ RSpec.describe "Admin mail sending", type: :request do
 
       expect(page).to have_text(error("to.blank"))
       expect(page).to have_text(error("body.blank"))
+    end
+
+    it "names the subject limit" do
+      compose(subject: "a" * 201)
+
+      expect(page).to have_text(error("subject.long", max: 200))
     end
 
     it "names a bad address" do

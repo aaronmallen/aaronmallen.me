@@ -1096,7 +1096,7 @@ RSpec.describe "Admin post editor", type: :request do
         create(:post, :published, title: "Hello", slug: "hello", body: "one", published_at: Time.utc(2026, 9, 1))
       end
 
-      def note_error(code) = i18n.t(code, scope: "ui.components.posts.field_error.edit_note")
+      def note_error(code, **) = i18n.t(code, scope: "ui.components.posts.field_error.edit_note", **)
 
       def save_published(**fields)
         save("/admin/posts/#{published.id}", intent: "save", title: "Hello", slug: "hello", body: "one", **fields)
@@ -1183,7 +1183,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "refuses a note over 500 characters", :aggregate_failures do
         save_published(body: "two", edit_note: "a" * 501)
 
-        expect(field_error).to eq(note_error("long"))
+        expect(field_error).to eq(note_error("long", max: 500))
         expect(post_queries.by_id(published.id).body).to eq("one")
       end
 

@@ -480,6 +480,14 @@ RSpec.describe "Admin decisions", type: :request do
         expect(reload.problem).to eq("Jobs **pile** up")
       end
 
+      it "names the note limit" do
+        update(title: "Pick a queue", problem: "Jobs pile up fast", note: "a" * 501)
+
+        said = t("ui.components.decisions.field_error.note.long", max: 500)
+
+        expect(page.find_by_id("decision-note-error").text).to eq(said)
+      end
+
       it "saves a new title without a note" do
         update(title: "Pick a job queue", problem: "Jobs **pile** up")
 

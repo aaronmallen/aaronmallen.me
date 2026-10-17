@@ -161,7 +161,7 @@ en:
         invalid:
           blank: "Tick a thread first"
           format: "Nothing changed · pick an action from the bar"
-          long: "Tick 100 threads or fewer"
+          long: "Tick %{max} threads or fewer"
           past: "Nothing changed · a snooze ends after now"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
@@ -250,7 +250,7 @@ en:
         invalid:
           blank: "Tick a post first"
           format: "Nothing changed · pick an action from the bar"
-          long: "Tick 100 posts or fewer"
+          long: "Tick %{max} posts or fewer"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         tagged:
@@ -278,7 +278,7 @@ en:
         invalid:
           blank: "Tick a card first"
           format: "Nothing changed · pick a column from the bar"
-          long: "Tick 100 cards or fewer"
+          long: "Tick %{max} cards or fewer"
           to_blank: "Pick a column first"
         moved:
           one: "Moved %{count} task to %{column}"
@@ -307,7 +307,7 @@ en:
     toasts:
       changed: "View now holds these filters"
       deleted: "View deleted"
-      invalid: "Nothing saved · give the view a name of 100 characters or fewer"
+      invalid: "Nothing saved · give the view a name of %{max} characters or fewer"
       renamed: "View renamed"
       saved: "View saved"
   services_page:
@@ -408,7 +408,7 @@ en:
         invalid:
           blank: "Tick a task first"
           format: "Nothing changed · pick an action from the bar"
-          long: "Tick 100 tasks or fewer"
+          long: "Tick %{max} tasks or fewer"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
           to_blank: "Pick a list first"
@@ -806,7 +806,7 @@ en:
             blank: "Write the comment first."
           note:
             blank: "Say what changed and why. A closed decision needs a note."
-            long: "Keep the note to 500 characters or fewer."
+            long: "Keep the note to %{max} characters or fewer."
           option_id:
             missing: "Pick one of this decision's options."
           problem:
@@ -1229,7 +1229,7 @@ en:
             gmail: "Gmail would not send it. Try again."
           subject:
             blank: "Add a subject."
-            long: "Keep the subject to 200 characters."
+            long: "Keep the subject to %{max} characters."
           to:
             blank: "Add someone to send to."
             format: "Use email addresses split by commas."
@@ -1642,7 +1642,7 @@ en:
             format: "Enter a link that starts with http:// or https://."
           edit_note:
             blank: "Say what changed and why. A published post needs a note when its body changes."
-            long: "Keep the note to 500 characters or fewer."
+            long: "Keep the note to %{max} characters or fewer."
           note:
             blank: "Say what changed and why. A note can't be blank."
           og_image_url:
@@ -2868,7 +2868,7 @@ en:
           name:
             blank: "Give the token a name first."
             control: "A name can't hold control characters."
-            long: "Keep the name to 100 characters."
+            long: "Keep the name to %{max} characters."
           scopes:
             blank: "Pick at least one permission."
             format: "Pick permissions from the list."
@@ -3869,7 +3869,7 @@ en:
         invalid:
           blank: "Tick a webmention first"
           format: "Nothing changed · pick an action from the bar"
-          long: "Tick 100 webmentions or fewer"
+          long: "Tick %{max} webmentions or fewer"
         spam:
           one: "Marked %{count} webmention as spam"
           other: "Marked %{count} webmentions as spam"

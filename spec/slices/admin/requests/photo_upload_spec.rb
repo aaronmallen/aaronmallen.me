@@ -28,7 +28,7 @@ RSpec.describe "Admin photo upload", type: :request do
     end
   end
 
-  def message(key) = Admin::Slice["i18n"].t(key)
+  def message(key) = Admin::Slice["i18n"].t(key, size: "20 MB", megapixels: 100)
 
   def photos = Media::Slice["relations.photos"].to_a
 

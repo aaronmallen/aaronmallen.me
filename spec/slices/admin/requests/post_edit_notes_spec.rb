@@ -10,7 +10,7 @@ RSpec.describe "Admin post edit notes", type: :request do
 
   def edit_path(edit, post_id: article.id) = "/admin/posts/#{post_id}/edits/#{edit.id}"
 
-  def message(key) = i18n.t(key, scope: "ui.components.posts.field_error")
+  def message(key, **) = i18n.t(key, scope: "ui.components.posts.field_error", **)
 
   def notes = post_queries.edits_for_post(article.id).map(&:note)
 
@@ -174,7 +174,7 @@ RSpec.describe "Admin post edit notes", type: :request do
 
       it "says why and keeps what was typed", :aggregate_failures do
         expect(last_response.status).to eq(422)
-        expect(page.find("#post-edit-#{edit.id}-note-error").text).to eq(message("edit_note.long"))
+        expect(page.find("#post-edit-#{edit.id}-note-error").text).to eq(message("edit_note.long", max: 500))
         expect(card.find("#post-edit-#{edit.id}-note").text).to eq("a" * 501)
       end
 

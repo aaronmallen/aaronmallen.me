@@ -12,7 +12,7 @@ module Admin
           result = change_saved_view.call(record_id(request), filters: request.params[:filters])
 
           settle(response, result, CHANGED, return_path(request)) do
-            answer(request, response, INVALID)
+            invalid(request, response)
           end
         end
       end

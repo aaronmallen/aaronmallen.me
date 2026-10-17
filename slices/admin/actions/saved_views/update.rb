@@ -12,7 +12,7 @@ module Admin
           result = rename_saved_view.call(record_id(request), name_params(request))
 
           settle(response, result, RENAMED, return_path(request)) do
-            answer(request, response, INVALID)
+            invalid(request, response)
           end
         end
       end

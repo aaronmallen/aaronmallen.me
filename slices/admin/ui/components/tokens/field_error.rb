@@ -5,6 +5,7 @@ module Admin
     module Components
       module Tokens
         class FieldError < Blog::UI::FieldError
+          LIMITS = { name: { max: ::API::Contracts::TokenContract::MAX_NAME } }.freeze
           SCOPE = "token"
         end
       end
