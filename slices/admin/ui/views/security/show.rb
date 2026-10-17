@@ -18,7 +18,7 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading")) { honeybadger_link if @honeybadger_url }
+            SettingsHead(tab: :security, title: t(".heading")) { honeybadger_link if @honeybadger_url }
             p(class: "settings-aside") { t(".sub") }
             div(class: "g-main even") do
               sign_ins

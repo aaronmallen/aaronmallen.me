@@ -201,7 +201,7 @@ RSpec.describe "Admin screens", type: :feature do
       "search" => "/admin/search",
       "search results" => "/admin/search?q=accountant",
       "search by kind" => "/admin/search?q=quarterly&kind=task",
-      "security" => "/admin/security",
+      "security" => "/admin/settings/security",
       "services" => "/admin/services",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",

@@ -131,7 +131,7 @@ RSpec.describe "Admin MCP clients", type: :request do
       connect(client_name: "Claude")
       get "/admin/clients"
 
-      expect(row).to have_link("sightings →", href: "/admin/security")
+      expect(row).to have_link("sightings →", href: "/admin/settings/security")
     end
 
     it "shows when the client was last used" do

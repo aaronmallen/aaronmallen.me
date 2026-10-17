@@ -13,7 +13,7 @@ RSpec.describe "Admin signed out", type: :request do
   def self.routes
     Admin::Slice.routes
     Admin::Routes.definitions.filter_map do |verb, (path), kwargs, _|
-      [verb, path, kwargs] if kwargs[:to] && !open.key?(kwargs[:to])
+      [verb, path, kwargs] if kwargs[:to] && !verb.start_with?("redirect") && !open.key?(kwargs[:to])
     end
   end
 

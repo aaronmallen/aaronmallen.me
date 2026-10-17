@@ -2138,6 +2138,9 @@ en:
       settings_head:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
+        tabs:
+          label: "Settings tabs"
+          security: "security"
       share_drawer:
         file: "Shared file"
         group: "Shared group"

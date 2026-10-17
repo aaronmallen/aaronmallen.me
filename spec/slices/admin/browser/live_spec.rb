@@ -129,7 +129,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
   end
 
   it "shows a new sign-in on the open security page" do
-    live "/admin/security"
+    live "/admin/settings/security"
     Security::Slice["repos.sign_in_mutations"].create(
       outcome: "denied", provider: "github", address: "203.0.113.9", user_agent: "FF", browser: "Firefox", os: "Linux",
     )

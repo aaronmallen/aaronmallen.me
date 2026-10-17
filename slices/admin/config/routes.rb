@@ -232,7 +232,7 @@ module Admin
     post "/saved-views/:id/delete", to: "saved_views.destroy", as: :delete_saved_view, id: ID
     get "/search", to: "search.index", as: :search
     get "/search/palette", to: "search.palette", as: :palette_search
-    get "/security", to: "security.show", as: :security
+    redirect_temporary "/security", to: "/settings/security"
     get "/services", to: "services.index", as: :services
     get "/services/:key/menu", to: "services.menu", as: :service_menu, key: SERVICE_KEY
     post "/services/:provider", to: "services.create", as: :create_service, provider: SERVICE
@@ -240,6 +240,8 @@ module Admin
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
+    redirect_temporary "/settings", to: "/settings/security"
+    get "/settings/security", to: "security.show", as: :security
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     get "/social/:id/menu", to: "social.menu", as: :social_post_menu, id: ID

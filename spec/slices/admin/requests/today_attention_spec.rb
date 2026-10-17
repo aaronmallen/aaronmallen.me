@@ -207,7 +207,8 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
     %w[Paris London].each { database[:known_devices].insert(browser: "Chrome", os: "macOS", city: it, country: "GB") }
     get "/admin"
 
-    expect(card.find(".li", text: "Chrome on macOS")).to have_link(href: "/admin/security", title: "Open security")
+    expect(card.find(".li", text: "Chrome on macOS"))
+      .to have_link(href: "/admin/settings/security", title: "Open security")
   end
 
   describe "snoozing" do

@@ -7,9 +7,9 @@ RSpec.describe "Admin live tables", type: :request do
       /admin /admin/activity /admin/analytics /admin/calendar /admin/clients /admin/decisions /admin/decisions/new
       /admin/files /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings
       /admin/people /admin/people/new /admin/performance /admin/performance/requests /admin/posts /admin/posts/new
-      /admin/projects /admin/projects/new /admin/review /admin/search /admin/security /admin/services /admin/social
-      /admin/tags /admin/tasks /admin/tasks/new /admin/tasks/rules /admin/time /admin/tokens /admin/webmentions
-      /admin/webmentions/settings
+      /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/security /admin/services
+      /admin/social /admin/tags /admin/tasks /admin/tasks/new /admin/tasks/rules /admin/time /admin/tokens
+      /admin/webmentions /admin/webmentions/settings
     ]
   end
   let(:records) do

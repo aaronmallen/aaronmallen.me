@@ -29,8 +29,29 @@ RSpec.describe "Admin security", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "says so when nobody has signed in" do
+    it "draws the security tab of the Settings page", :aggregate_failures do
+      get "/admin/settings/security"
+
+      expect(page).to have_css(".page-head h1", exact_text: "Settings")
+      expect(page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { [it.text, it["href"]] })
+        .to eq([["security", "/admin/settings/security"]])
+      expect(page).to have_css("nav[aria-label='Settings tabs'] a[aria-current='page']", exact_text: "security")
+    end
+
+    it "lands Settings on its first tab" do
+      get "/admin/settings"
+
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/security"])
+    end
+
+    it "sends the old security address to the tab" do
       get "/admin/security"
+
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/security"])
+    end
+
+    it "says so when nobody has signed in" do
+      get "/admin/settings/security"
 
       expect(card("Sign-ins")).to have_css(".empty")
     end
@@ -38,7 +59,7 @@ RSpec.describe "Admin security", type: :request do
     it "says it lists every sign-in, failed ones too, and where each token called from", :aggregate_failures do
       sign_in_row(outcome: "denied")
       sight(api_token_id: token("Terminal").id)
-      get "/admin/security"
+      get "/admin/settings/security"
       expect(page).to have_css(".settings-aside", exact_text: Admin::Slice["i18n"].t("ui.views.security.show.sub"))
       expect([card("Sign-ins"), credential("Terminal")]).to all(have_css(".li"))
     end
@@ -46,14 +67,14 @@ RSpec.describe "Admin security", type: :request do
     it "lists sign-ins newest first" do
       sign_in_row(browser: "Safari", created_at: Time.now - 60)
       sign_in_row(browser: "Firefox", outcome: "wrong_account")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Firefox · macOS", "Safari · macOS"])
     end
 
     it "shows each sign-in's outcome, place, address and time" do
       sign_in_row(outcome: "wrong_account", address: "203.0.113.9", city: "Paris", country: "FR")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li")).to have_text("wrong account").and have_text("Paris · FR · 203.0.113.9")
         .and have_css("time")
@@ -61,14 +82,14 @@ RSpec.describe "Admin security", type: :request do
 
     it "names the provider each sign-in went through" do
       sign_in_row(provider: "google")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li")).to have_text("Google · London · GB · 81.2.69.160")
     end
 
     it "names the provider that failed" do
       sign_in_row(provider: "google", outcome: "provider_failed")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li")).to have_css(".pill.pink", exact_text: "Google failed")
     end
@@ -76,7 +97,7 @@ RSpec.describe "Admin security", type: :request do
     it "pills a sign-in green when it went through and pink when it did not", :aggregate_failures do
       sign_in_row(browser: "Safari", created_at: Time.now - 60)
       sign_in_row(browser: "Firefox", outcome: "denied")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li", text: "Safari")).to have_css(".pill.green", exact_text: "signed in")
       expect(card("Sign-ins").find(".li", text: "Firefox")).to have_css(".pill.pink", exact_text: "denied")
@@ -84,21 +105,21 @@ RSpec.describe "Admin security", type: :request do
 
     it "shows a sign-in's country by name when it has one" do
       sign_in_row(country_name: "United Kingdom")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li")).to have_text("London · United Kingdom · 81.2.69.160")
     end
 
     it "names a device and place it could not read" do
       sign_in_row(browser: nil, os: nil, city: nil, country: nil)
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(card("Sign-ins").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
     end
 
     it "lists a token's sightings with place, calls, address and both times" do
       sight(api_token_id: token("Terminal").id)
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(credential("Terminal").find(".li")).to have_css(".li-title", text: "Firefox · Linux")
         .and have_text("London · GB · 3 calls · 81.2.69.160").and have_text("first seen").and have_text("last seen")
@@ -107,14 +128,14 @@ RSpec.describe "Admin security", type: :request do
 
     it "shows a sighting's country by name when it has one" do
       sight(api_token_id: token("Terminal").id, country_name: "United Kingdom")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(credential("Terminal").find(".li")).to have_text("London · United Kingdom · 3 calls")
     end
 
     it "names a sighting's device and place it could not read" do
       sight(api_token_id: token("Terminal").id, browser: nil, os: nil, city: nil, country: nil)
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(credential("Terminal").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
     end
@@ -123,42 +144,42 @@ RSpec.describe "Admin security", type: :request do
       found = client("Claude")
       sight(oauth_client_id: found.id, browser: "Chrome")
       sight(api_token_id: token("Terminal").id)
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(credential("Claude").all(".li-title").map(&:text)).to eq(["Chrome · Linux"])
     end
 
     it "names a client that registered no name by its redirect host" do
       client(nil)
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(page.find(".security-cred-name")).to have_text(/\Aclaude\.ai/)
     end
 
     it "shows a credential nothing has used" do
       token("Terminal")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(credential("Terminal")).to have_css(".empty")
     end
 
     it "links to the Honeybadger project when one is set" do
       allow(Hanami.app.settings).to receive(:honeybadger).and_return(project_url: "https://app.honeybadger.io/projects/1")
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(page).to have_link("Errors on Honeybadger", href: "https://app.honeybadger.io/projects/1")
     end
 
     it "leaves the Honeybadger link out when no project is set" do
-      get "/admin/security"
+      get "/admin/settings/security"
 
       expect(page).to have_no_link("Errors on Honeybadger")
     end
 
     it "shows in the navigation" do
-      get "/admin/security"
+      get "/admin/settings/security"
 
-      expect(page).to have_css("[data-palette-href='/admin/security']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/security']", visible: :all)
     end
   end
 end
