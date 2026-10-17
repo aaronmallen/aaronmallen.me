@@ -28,7 +28,7 @@ RSpec.describe "Admin inbox", type: :request do
       create(:message)
       create(:message, subject: "Starred", starred: true, status: "read")
 
-      expect(logged_sql { get "/admin/inbox" }.scan('FROM "mail_settings"').size).to eq(1)
+      expect(counting(/FROM "mail_settings"/) { get "/admin/inbox" }.size).to eq(1)
     end
 
     it "lists an unread message, a pending webmention and an unseen synced issue, newest first" do
@@ -90,7 +90,7 @@ RSpec.describe "Admin inbox", type: :request do
     it "limits the thread query past a large backlog" do
       150.times { create(:message, received_at: Time.now - it) }
 
-      expect(logged_sql { get "/admin/inbox" }).to match(/FROM "mail_threads" .*ORDER BY .* LIMIT 100\b/)
+      expect(counting(/FROM "mail_threads" .*ORDER BY .* LIMIT 100\b/) { get "/admin/inbox" }).not_to be_empty
     end
 
     {

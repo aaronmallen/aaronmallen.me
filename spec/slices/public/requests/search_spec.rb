@@ -215,9 +215,7 @@ RSpec.describe "Search", type: :request do
     end
 
     it "locks both of the searcher's addresses in one statement" do
-      sql = logged_sql { search }
-
-      expect(sql.lines.grep(/pg_advisory_xact_lock/).map { it.scan("pg_advisory_xact_lock").size }).to eq([2])
+      expect(counting(/pg_advisory_xact_lock/) { search }.map { it.scan("pg_advisory_xact_lock").size }).to eq([2])
     end
 
     it "records nothing for the blank page" do

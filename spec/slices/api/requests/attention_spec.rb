@@ -112,7 +112,7 @@ RSpec.describe "API attention", :frozen_clock, type: :request do
 
   it "follows the limits in settings" do
     create(:task, :carried, title: "Carried twice")
-    change_attention_limit(:carried_count, to: 2)
+    override_setting(:attention, :carried_count, to: 2)
 
     expect(rows.map { it.fetch("title") }).to eq(["Carried twice"])
   end

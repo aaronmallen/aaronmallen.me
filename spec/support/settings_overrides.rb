@@ -1,34 +1,13 @@
 # frozen_string_literal: true
 
 module SettingsOverrides
-  def change_attention_limit(limit, to:)
-    settings = Hanami.app["settings"]
-    allow(settings).to receive(:attention).and_return(settings.attention.merge(limit => to))
-  end
+  def lower_page_size(scope, to:) = override_setting(:page_size, scope, to:)
 
-  def change_board_setting(key, to:)
-    settings = Hanami.app["settings"]
-    allow(settings).to receive(:board).and_return(settings.board.merge(key => to))
-  end
+  def lower_throttle_limit(setting, to:) = override_setting(setting, :throttle_limit, to:)
 
-  def change_contact_setting(key, to:)
+  def override_setting(group, key, to:)
     settings = Hanami.app["settings"]
-    allow(settings).to receive(:contact).and_return(settings.contact.merge(key => to))
-  end
-
-  def change_mail_setting(key, to:)
-    settings = Hanami.app["settings"]
-    allow(settings).to receive(:mail).and_return(settings.mail.merge(key => to))
-  end
-
-  def lower_page_size(scope, to:)
-    settings = Hanami.app["settings"]
-    allow(settings).to receive(:page_size).and_return(settings.page_size.merge(scope => to))
-  end
-
-  def lower_throttle_limit(setting, to:)
-    settings = Hanami.app["settings"]
-    allow(settings).to receive(setting).and_return(settings.public_send(setting).merge(throttle_limit: to))
+    allow(settings).to receive(group).and_return(settings.public_send(group).merge(key => to))
   end
 end
 

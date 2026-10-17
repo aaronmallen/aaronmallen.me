@@ -82,7 +82,7 @@ RSpec.describe "Admin project board", type: :feature do
     def backlog_cards = column("backlog").all(".kc").size
 
     before do
-      change_board_setting(:column_size, to: 1)
+      override_setting(:board, :column_size, to: 1)
       link(create(:task, title: "Second brief"))
       visit "/admin/projects/#{project.id}"
       Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }

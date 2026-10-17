@@ -54,9 +54,9 @@ RSpec.describe "Admin tasks in progress", type: :request do
       before { 50.times { create(:task) } }
 
       it "asks for the started ones by status, not every open task", :aggregate_failures do
-        sql = logged_sql { ask }
+        sql = counting { ask }
 
-        expect(sql).to include("FROM \"tasks\" WHERE (\"status\" = 'in_progress')")
+        expect(sql).to include(a_string_including("FROM \"tasks\" WHERE (\"status\" = 'in_progress')"))
         expect(rows.map { it["id"] }).to eq([started.id])
       end
     end

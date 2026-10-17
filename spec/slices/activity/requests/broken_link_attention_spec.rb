@@ -55,7 +55,7 @@ RSpec.describe "Broken links on the attention list", :frozen_clock, type: :reque
   end
 
   it "follows the failure limit in settings" do
-    change_attention_limit(:broken_link_failures, to: 3)
+    override_setting(:attention, :broken_link_failures, to: 3)
     check(2)
 
     expect(rows).to eq([])

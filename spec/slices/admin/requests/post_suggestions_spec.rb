@@ -206,7 +206,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       def click_accept(article)
         posted = []
         browser = Capybara::Session.new(:rack_test, recorder(posted))
-        browser.driver.browser.set_cookie(session_cookie, URI(Capybara.default_host))
+        browser.driver.browser.set_cookie(admin_session_cookie, URI(Capybara.default_host))
         browser.visit("/admin/posts/#{article.id}/edit")
         browser.fill_in("Title", with: "Unsaved title")
         browser.find(".sg-actions").click_button("Accept")
@@ -220,8 +220,6 @@ RSpec.describe "Admin post suggestions", type: :request do
           Hanami.app.call(env)
         end
       end
-
-      def session_cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
 
       before { suggest(article, typo) }
 

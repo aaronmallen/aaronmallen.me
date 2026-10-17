@@ -1,34 +1,24 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP untrusted text", type: :request do
-  def self.link_tools
-    shapes = [JSON.generate(API::Serializers::Link.reference)]
-
-    MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
-      endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
-      tool.name_value if replies_with?(endpoint, shapes)
-    end
-  end
-
-  def self.replies_with?(endpoint, shapes) = shapes.any? { JSON.generate(endpoint::REPLY).include?(it) }
+  def self.link_tools = tools_replying_with(API::Serializers::Link)
 
   def self.task_tools
-    shapes = [API::Serializers::Task, API::Serializers::TaskComment].map { JSON.generate(it.reference) }
+    tools_replying_with(API::Serializers::Task, API::Serializers::TaskComment) { it <= API::Endpoints::TaskEndpoint }
+  end
+
+  def self.tools_replying_with(*serializers)
+    shapes = serializers.map { JSON.generate(it.reference) }
 
     MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
       endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
-      tool.name_value if endpoint <= API::Endpoints::TaskEndpoint || replies_with?(endpoint, shapes)
+      reply = JSON.generate(endpoint::REPLY)
+      tool.name_value if (block_given? && yield(endpoint)) || shapes.any? { reply.include?(it) }
     end
   end
 
   def self.visitor_tools
-    shapes = [API::Serializers::MailThread, API::Serializers::SocialDelivery, API::Serializers::Webmention]
-    shapes = shapes.map { JSON.generate(it.reference) }
-
-    MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
-      endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
-      tool.name_value if replies_with?(endpoint, shapes)
-    end
+    tools_replying_with(API::Serializers::MailThread, API::Serializers::SocialDelivery, API::Serializers::Webmention)
   end
 
   def link(kind, id, task)

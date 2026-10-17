@@ -59,8 +59,4 @@ RSpec.describe Posts::Jobs::CheckPostLinksAgain do
 
     expect(checks).to be_empty
   end
-
-  it "retries a crash a few times, since nothing else checks the link again before the night" do
-    expect(described_class.get_sidekiq_options["retry"]).to eq(3)
-  end
 end

@@ -40,7 +40,7 @@ RSpec.describe "Lapsing connections on the attention list", :frozen_clock, type:
   end
 
   it "follows the window in settings" do
-    change_attention_limit(:lapsing_days, to: 3)
+    override_setting(:attention, :lapsing_days, to: 3)
     connect_linkedin(lapses_at: days_ahead(4))
 
     expect(rows).to eq([])

@@ -959,11 +959,9 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(browser.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Entry deleted")
       end
 
-      def session_cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
-
       def signed_in_browser
         Capybara::Session.new(:rack_test, Hanami.app).tap do |browser|
-          browser.driver.browser.set_cookie(session_cookie, URI(Capybara.default_host))
+          browser.driver.browser.set_cookie(admin_session_cookie, URI(Capybara.default_host))
         end
       end
     end

@@ -54,11 +54,11 @@ RSpec.describe "Admin mail", type: :request do
       end
 
       it "reads accounts and settings once and counts folders in one query", :aggregate_failures do
-        sql = logged_sql { get "/admin/mail" }
+        sql = counting { get "/admin/mail" }
 
-        expect(sql.scan('SELECT "mail_accounts"."id"').size).to eq(1)
-        expect(sql.scan('FROM "mail_settings"').size).to eq(1)
-        expect(sql.scan("SELECT count(*) FILTER").size).to eq(1)
+        expect(sql.grep(/SELECT "mail_accounts"."id"/).size).to eq(1)
+        expect(sql.grep(/FROM "mail_settings"/).size).to eq(1)
+        expect(sql.grep(/SELECT count\(\*\) FILTER/).size).to eq(1)
       end
 
       it "narrows to one account" do
@@ -926,10 +926,9 @@ RSpec.describe "Admin mail", type: :request do
         end
 
         def make_in_thread
-          cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
           params = { _csrf_token: admin_csrf_token, folder: "inbox", task: { title: "Book lunch", list: "next" } }
 
-          Thread.new { Rack::MockRequest.new(app).post("/admin/mail/#{thread.id}/task", params:, "HTTP_COOKIE" => cookie) }
+          Thread.new { Rack::MockRequest.new(app).post("/admin/mail/#{thread.id}/task", params:, "HTTP_COOKIE" => admin_session_cookie) }
         end
 
         it "makes one task" do

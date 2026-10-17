@@ -469,7 +469,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       def more_fields(name) = more(name).all("input[type=hidden]", visible: :all).to_h { [it[:name], it.value] }
 
       before do
-        change_board_setting(:column_size, to: 2)
+        override_setting(:board, :column_size, to: 2)
         3.times { linked(title: "Plan #{it}") }
         3.times { linked(stage: "ready", title: "Ready #{it}") }
       end
@@ -581,7 +581,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
 
       it "reads the days from settings" do
-        change_board_setting(:closed_days, to: 1)
+        override_setting(:board, :closed_days, to: 1)
         linked(:done, title: "Shipped", completed_at: days_ago(2))
         get "/admin/projects/#{project.id}"
 

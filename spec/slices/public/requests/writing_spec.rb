@@ -37,10 +37,10 @@ RSpec.describe "Writing", type: :request do
 
     it "reads no post bodies for the list", :aggregate_failures do
       publish("hello", 1)
-      sql = logged_sql { get "/writing" }
+      sql = counting(/"posts"\./) { get "/writing" }
 
-      expect(sql).to include('"posts"."title"')
-      expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+      expect(sql).to include(a_string_including('"posts"."title"'))
+      expect(sql.grep(/"posts"\."body(_html)?"/)).to be_empty
     end
 
     it "links each title to its article" do

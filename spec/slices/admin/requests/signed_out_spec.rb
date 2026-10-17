@@ -29,12 +29,12 @@ RSpec.describe "Admin signed out", type: :request do
   routes.each do |verb, path, kwargs|
     it "turns away #{verb.upcase} /admin#{path} and writes nothing", :aggregate_failures do
       token = admin_csrf_token
-      sql = logged_sql { public_send(verb, self.class.url(path, kwargs), _csrf_token: token) }
+      sql = counting { public_send(verb, self.class.url(path, kwargs), _csrf_token: token) }
 
       turned_away = last_response.status == 401 || last_response.location.to_s.end_with?("/admin/sign-in")
 
       expect(turned_away).to be(true), "answered #{last_response.status} #{last_response.location}"
-      expect(sql).not_to match(/\b(INSERT|UPDATE|DELETE)\b/i)
+      expect(sql.grep(/\b(INSERT|UPDATE|DELETE)\b/i)).to be_empty
     end
   end
 

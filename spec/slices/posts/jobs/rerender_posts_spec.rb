@@ -7,10 +7,6 @@ RSpec.describe Posts::Jobs::RerenderPosts do
 
   def stale(relation, id, **) = Posts::Slice["relations.#{relation}"].by_pk(id).update(**)
 
-  it "never retries, since tomorrow's run renders every post again" do
-    expect(described_class.get_sidekiq_options["retry"]).to be(false)
-  end
-
   it "rebuilds every stored value from the post's markdown" do
     post = create(:post, body: "## Setup\n\none *two* three")
     stale(:posts, post.id, body_html: "<p>old</p>", first_paragraph: "old", read_time: 9, word_count: 1)

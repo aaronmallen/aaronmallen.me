@@ -103,11 +103,12 @@ RSpec.describe "Admin tag summary", type: :request do
       end
 
       it "reads only what the page draws", :aggregate_failures do
-        sql = logged_sql { get "/admin/tags/ruby" }
+        task_read = 'SELECT "tasks"."id", "tasks"."title", "tasks"."status", "tasks"."completed_at" FROM'
+        sql = counting { get "/admin/tags/ruby" }
 
-        expect(sql).to include('SELECT "tasks"."id", "tasks"."title", "tasks"."status", "tasks"."completed_at" FROM')
-        expect(sql).not_to include("task_contributors")
-        expect(sql).to include('LEFT(LTRIM("journal_entries"."body"')
+        expect(sql).to include(a_string_including(task_read))
+        expect(sql.grep(/task_contributors/)).to be_empty
+        expect(sql).to include(a_string_including('LEFT(LTRIM("journal_entries"."body"'))
       end
 
       describe "one kind on its own" do

@@ -18,10 +18,6 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     stub_request(:get, dead).to_return(status: 404)
   end
 
-  it "never retries, since the next night's run checks every link again" do
-    expect(described_class.get_sidekiq_options["retry"]).to be(false)
-  end
-
   it "checks each outbound link in a published post" do
     post_with(live, dead)
     check

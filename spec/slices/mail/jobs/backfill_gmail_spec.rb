@@ -36,7 +36,7 @@ RSpec.describe Mail::Jobs::BackfillGmail do
   end
 
   it "asks only for threads inside the window when a mail backfill window is set" do
-    change_mail_setting(:backfill_days, to: 90)
+    override_setting(:mail, :backfill_days, to: 90)
     stub_page([])
     backfill
 

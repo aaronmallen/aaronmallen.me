@@ -38,10 +38,10 @@ RSpec.describe "Home", type: :request do
 
     it "reads no post bodies for the list", :aggregate_failures do
       publish("hello", 1)
-      sql = logged_sql { get "/" }
+      sql = counting(/"posts"\./) { get "/" }
 
-      expect(sql).to include('"posts"."title"')
-      expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+      expect(sql).to include(a_string_including('"posts"."title"'))
+      expect(sql.grep(/"posts"\."body(_html)?"/)).to be_empty
     end
 
     it "names the section with a kicker and links to the writing page", :aggregate_failures do

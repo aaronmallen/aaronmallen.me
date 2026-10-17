@@ -910,27 +910,25 @@ RSpec.describe "Visits", type: :request do
 
   describe "the queries a beacon runs" do
     it "locks both of a view's addresses in one statement" do
-      sql = logged_sql { beacon({ kind: "view", path: "/writing/hello", title: "Hello" }) }
+      locks = counting(/pg_advisory_xact_lock/) { beacon({ kind: "view", path: "/writing/hello", title: "Hello" }) }
 
-      expect(sql.lines.grep(/pg_advisory_xact_lock/).map { it.scan("pg_advisory_xact_lock").size }).to eq([2])
+      expect(locks.map { it.scan("pg_advisory_xact_lock").size }).to eq([2])
     end
 
     it "reads no post for a read of a counted view" do
       view
 
-      expect(logged_sql { read(42) }).not_to include('"posts"')
+      expect(counting(/"posts"/) { read(42) }).to be_empty
     end
 
     it "reads no post for a scroll of a counted view" do
       view
 
-      expect(logged_sql { scroll(50) }).not_to include('"posts"')
+      expect(counting(/"posts"/) { scroll(50) }).to be_empty
     end
 
     it "loads no post body for a view of a tag page" do
-      sql = logged_sql { beacon({ kind: "view", path: "/writing/tags/ruby" }) }
-
-      expect(sql).not_to include("body_html")
+      expect(counting(/body_html/) { beacon({ kind: "view", path: "/writing/tags/ruby" }) }).to be_empty
     end
   end
 

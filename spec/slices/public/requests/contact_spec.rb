@@ -469,19 +469,19 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "drops a send faster than a minimum set in the settings" do
-      change_contact_setting(:minimum_submit_seconds, to: 30)
+      override_setting(:contact, :minimum_submit_seconds, to: 30)
 
       expect(caught(**stamped(fields, age: 10))).to eq([302, sent_path, 0])
     end
 
     it "drops a send older than an expiry set in the settings" do
-      change_contact_setting(:stamp_expiry_hours, to: 1)
+      override_setting(:contact, :stamp_expiry_hours, to: 1)
 
       expect(caught(**stamped(fields, age: 2 * 60 * 60))).to eq([302, sent_path, 0])
     end
 
     it "takes a send at once when the settings turn the wait off" do
-      change_contact_setting(:minimum_submit_seconds, to: 0)
+      override_setting(:contact, :minimum_submit_seconds, to: 0)
 
       expect(caught(**stamped(fields, age: 0))).to eq([302, sent_path, 1])
     end

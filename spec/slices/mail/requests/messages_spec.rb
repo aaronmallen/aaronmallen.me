@@ -28,9 +28,7 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "counts the sender and the total in one query before the lock and one under it" do
-      sql = logged_sql { send_message }
-
-      counts = sql.lines.grep(/count\(\*\).*"mail_messages"/)
+      counts = counting(/count\(\*\).*"mail_messages"/) { send_message }
 
       expect(counts.map { it.include?("FILTER (WHERE") }).to eq([true, true])
     end

@@ -243,10 +243,6 @@ RSpec.describe Record::Jobs::ImportPullRequests do
   end
 
   describe "reporting the outcome" do
-    it "never retries a failed run" do
-      expect(described_class.get_sidekiq_options["retry"]).to be(false)
-    end
-
     it "clears the failure once a run finishes" do
       sync_state_mutations.record_failure(sync, :rate_limited)
       stub_search

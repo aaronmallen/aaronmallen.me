@@ -258,7 +258,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       def statements(name, count)
         ticked = Array.new(count) { tagged("money") }
 
-        logged_sql { act(name, ticked, tag: "home") }.lines.grep(/SELECT|INSERT|DELETE|UPDATE/)
+        counting { act(name, ticked, tag: "home") }
       end
 
       %w[tag untag].each do |name|

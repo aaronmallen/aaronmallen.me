@@ -10,7 +10,7 @@ RSpec.describe "Contact form", type: :feature do
   let(:i18n) { Public::Slice["i18n"] }
   let(:message_queries) { Mail::Slice["repos.message_queries"] }
 
-  before { change_contact_setting(:minimum_submit_seconds, to: 0) }
+  before { override_setting(:contact, :minimum_submit_seconds, to: 0) }
 
   def error(key) = i18n.t(key, scope: "ui.components.contact_field_error")
 

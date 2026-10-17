@@ -39,10 +39,10 @@ RSpec.describe "Tags", type: :request do
 
   it "reads no post bodies for the list", :aggregate_failures do
     publish("hello", 1, tags: %w[ruby])
-    sql = logged_sql { get "/writing/tags/ruby" }
+    sql = counting(/"posts"\./) { get "/writing/tags/ruby" }
 
-    expect(sql).to include('"posts"."title"')
-    expect(sql).not_to include('"posts"."body"', '"posts"."body_html"')
+    expect(sql).to include(a_string_including('"posts"."title"'))
+    expect(sql.grep(/"posts"\."body(_html)?"/)).to be_empty
   end
 
   it "uses the summary the post carries as the blurb" do

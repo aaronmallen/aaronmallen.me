@@ -163,7 +163,7 @@ RSpec.describe "Project board", type: :request do
       def titles(key) = column(key).all(".board-title").map(&:text)
 
       before do
-        change_board_setting(:column_size, to: 2)
+        override_setting(:board, :column_size, to: 2)
         3.times { link(create(:task, title: "Plan #{it}"), project) }
         3.times { link(create(:task, stage: "ready", title: "Ready #{it}"), project) }
       end

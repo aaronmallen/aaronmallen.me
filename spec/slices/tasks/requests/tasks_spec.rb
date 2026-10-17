@@ -68,7 +68,7 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     it "reads no links or contributors for a task with no series" do
       task = create(:task)
 
-      expect(logged_sql { complete(task) }).not_to match(/FROM "task_(links|contributors)"/)
+      expect(counting(/FROM "task_(links|contributors)"/) { complete(task) }).to be_empty
     end
 
     it "fails a closed task with closed" do

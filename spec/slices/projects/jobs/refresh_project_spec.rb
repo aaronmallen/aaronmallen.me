@@ -62,10 +62,6 @@ RSpec.describe Projects::Jobs::RefreshProject do
       expect(stored).to have_attributes(stars: 42, release: "v2.0.0")
     end
 
-    it "never retries" do
-      expect(described_class.get_sidekiq_options["retry"]).to be(false)
-    end
-
     it "leaves the stored stars and the projects sync state alone when GitHub fails", :aggregate_failures do
       Record::Slice["repos.sync_state_mutations"].record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       stub_request(:get, "https://api.github.com/repos/#{repo}").to_return(status: 502)

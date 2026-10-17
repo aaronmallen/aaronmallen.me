@@ -7,10 +7,14 @@ module AdminSignIn
 
   def admin_csrf_token = @admin_csrf_token || session_csrf_token || seeded_csrf_token
 
+  def admin_session_cookie
+    "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
+  end
+
   def sign_in_to_admin
     stub_github_sign_in
     @admin_csrf_token = Spec::AdminSession.new_csrf_token
-    set_cookie("#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: @admin_csrf_token)}")
+    set_cookie(admin_session_cookie)
   end
 
   def sign_in_to_admin_with_github
