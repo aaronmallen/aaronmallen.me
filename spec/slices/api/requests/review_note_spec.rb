@@ -26,8 +26,6 @@ RSpec.describe "API review note", type: :request do
     { "body" => saved.body, **%w[created_at updated_at].to_h { [it, saved.public_send(it).utc.iso8601] } }
   end
 
-  def status = last_response.status
-
   def stored_notes = Record::Slice["relations.review_notes"].to_a
 
   describe "GET /api/v1/review" do

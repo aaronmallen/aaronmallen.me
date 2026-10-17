@@ -9,8 +9,6 @@ RSpec.describe "Admin Bluesky connection", type: :request do
 
   def connections = Services::Slice["repos.connection_queries"].for(:bluesky)
 
-  def page = Capybara.string(last_response.body)
-
   def refuse_sign_in
     stub_request(:post, sign_in_url).to_return(**json_response(
       status: 401, error: "AuthenticationRequired", message: "Invalid identifier or password",

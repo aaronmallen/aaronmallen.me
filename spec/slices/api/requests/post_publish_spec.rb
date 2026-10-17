@@ -12,8 +12,6 @@ RSpec.describe "API publishing a post", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   def stored(article) = post_queries.by_id(article.id)
 
   describe "POST /api/v1/posts/:id/publish" do

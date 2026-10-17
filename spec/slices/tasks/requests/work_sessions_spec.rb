@@ -15,12 +15,8 @@ RSpec.describe "Work sessions", type: :request do
 
   def send_at(time, path, **)
     allow(Time).to receive(:now).and_return(time)
-    send_to(path, **)
+    admin_post(path, **)
     allow(Time).to receive(:now).and_call_original
-  end
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
   end
 
   def sessions(task) = Tasks::Slice["relations.work_sessions"].for_task(task.id).order(:started_at).to_a
@@ -39,7 +35,7 @@ RSpec.describe "Work sessions", type: :request do
 
     it "opens no second session for a task already in progress" do
       task = running
-      send_to("/admin/tasks/#{task.id}/start")
+      admin_post("/admin/tasks/#{task.id}/start")
 
       expect(sessions(task).size).to eq(1)
     end
@@ -57,7 +53,7 @@ RSpec.describe "Work sessions", type: :request do
   describe "pausing a task" do
     it "ends the open session" do
       task = running
-      send_to("/admin/tasks/#{task.id}/stop")
+      admin_post("/admin/tasks/#{task.id}/stop")
 
       expect(sessions(task).first[:ended_at]).to be_within(5).of(Time.now)
     end
@@ -98,7 +94,7 @@ RSpec.describe "Work sessions", type: :request do
 
     it "leaves the total alone when no session is open" do
       task = create(:task, worked_seconds: 120)
-      send_to("/admin/tasks/#{task.id}/complete")
+      admin_post("/admin/tasks/#{task.id}/complete")
 
       expect(repo.by_id(task.id).worked_seconds).to eq(120)
     end
@@ -121,7 +117,7 @@ RSpec.describe "Work sessions", type: :request do
 
     it "ends the session when it moves out of Today" do
       task = running
-      send_to("/admin/tasks/#{task.id}/move/next")
+      admin_post("/admin/tasks/#{task.id}/move/next")
 
       expect(sessions(task).first[:ended_at]).to be_within(5).of(Time.now)
     end
@@ -129,7 +125,7 @@ RSpec.describe "Work sessions", type: :request do
     it "keeps the session open when it moves into Today" do
       task = create(:task, :in_progress)
       create(:work_session, task_id: task.id, started_at: started)
-      send_to("/admin/tasks/#{task.id}/move/today")
+      admin_post("/admin/tasks/#{task.id}/move/today")
 
       expect(open_sessions(task).size).to eq(1)
     end
@@ -164,7 +160,7 @@ RSpec.describe "Work sessions", type: :request do
 
     it "takes its sessions with it when it is deleted" do
       task = running
-      send_to("/admin/tasks/#{task.id}/delete")
+      admin_post("/admin/tasks/#{task.id}/delete")
 
       expect(sessions(task)).to be_empty
     end

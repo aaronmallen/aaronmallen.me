@@ -3,8 +3,6 @@
 RSpec.describe "Cache headers", type: :request do
   def cache_control = last_response.headers["Cache-Control"]
 
-  def page = Capybara.string(last_response.body)
-
   def shared = "public, max-age=0, s-maxage=300"
 
   def shared_paths(slug)

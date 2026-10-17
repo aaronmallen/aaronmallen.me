@@ -15,8 +15,6 @@ RSpec.describe "API search", type: :request do
     Capybara.string(last_response.body).all(".li-title").map(&:text)
   end
 
-  def status = last_response.status
-
   describe "a phrase several kinds hold" do
     let!(:task) { create(:task, :done, title: "Track the zeppelin") }
 

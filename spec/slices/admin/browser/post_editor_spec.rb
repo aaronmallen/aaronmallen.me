@@ -13,8 +13,6 @@ RSpec.describe "Admin post editor", type: :feature do
 
   def show_view(name) = find(".edit .seg-option", text: name).click
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before do
     sign_in_to_admin
     visit "/admin/posts/new"
@@ -98,7 +96,7 @@ RSpec.describe "Admin post editor", type: :feature do
       end
 
       it "hints instead while the title is blank" do
-        expect(details.find_field(field)[:placeholder]).to eq(translate("ui.components.posts.syndication.placeholder"))
+        expect(details.find_field(field)[:placeholder]).to eq(admin_t("ui.components.posts.syndication.placeholder"))
       end
 
       it "saves no post to preview one", :aggregate_failures do
@@ -275,7 +273,7 @@ RSpec.describe "Admin post editor", type: :feature do
     it "asks with the confirmation text" do
       message = confirm_no { click_button "Delete" }
 
-      expect(message).to eq(translate("ui.components.posts.delete_form.confirm"))
+      expect(message).to eq(admin_t("ui.components.posts.delete_form.confirm"))
     end
 
     it "names the webmentions it will destroy" do
@@ -284,7 +282,7 @@ RSpec.describe "Admin post editor", type: :feature do
       details
       message = confirm_no { click_button "Delete" }
 
-      expect(message).to eq(translate("ui.components.posts.delete_form.confirm_webmentions", count: 1))
+      expect(message).to eq(admin_t("ui.components.posts.delete_form.confirm_webmentions", count: 1))
     end
 
     it "keeps the post when I don't confirm", :aggregate_failures do

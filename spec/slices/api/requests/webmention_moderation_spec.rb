@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API webmention moderation and settings", type: :request do
-  def status = last_response.status
-
   def webmention_queries = Social::Slice["repos.webmention_queries"]
 
   describe "POST /api/v1/webmentions/:id/moderate" do

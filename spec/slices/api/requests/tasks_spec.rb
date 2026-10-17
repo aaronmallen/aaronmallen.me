@@ -17,8 +17,6 @@ RSpec.describe "API tasks", type: :request do
 
   def save(id, fields) = call_api(:patch, "/tasks/#{id}", JSON.generate(fields))
 
-  def status = last_response.status
-
   def tasks = Tasks::Slice["repos.task_queries"]
 
   def titles(answer) = answer.fetch("tasks").map { it.fetch("title") }

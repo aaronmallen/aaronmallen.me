@@ -3,15 +3,13 @@
 RSpec.describe "Admin post, social, project and person row menus", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, return_to: "/admin/x?y=1", **params })
+  def act(path, **) = admin_post(path, return_to: "/admin/x?y=1", **)
 
   def copies
     page.all("[data-copy]", visible: :all).to_h { [it.find(".ctx-label", visible: :all).text(:all), it["data-copy"]] }
   end
 
   def field(route, name) = page.find("form[action='#{route}'] input[name='#{name}']", visible: :all).value
-
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
 
   def menu(path) = get(path, return_to: "/admin/x?y=1")
 
@@ -53,8 +51,8 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       end
 
       it "holds what a published post takes", :aggregate_failures do
-        expect(items).to include("Edit", "Analytics", "View on site", "Tags", "Copy link")
-        expect(items).not_to include("Keep writing", "Delete draft")
+        expect(menu_items).to include("Edit", "Analytics", "View on site", "Tags", "Copy link")
+        expect(menu_items).not_to include("Keep writing", "Delete draft")
       end
 
       it "copies and opens the public link", :aggregate_failures do
@@ -84,8 +82,8 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       before { get "/admin/posts/#{draft.id}/menu", status: "draft", page: 2, return_to: "/admin/x?y=1" }
 
       it "offers keep writing and delete, and nothing that needs it live", :aggregate_failures do
-        expect(items).to include("Keep writing", "Tags", "Delete draft")
-        expect(items).not_to include("Edit", "Analytics", "View on site", "Copy link")
+        expect(menu_items).to include("Keep writing", "Tags", "Delete draft")
+        expect(menu_items).not_to include("Edit", "Analytics", "View on site", "Copy link")
       end
 
       it "asks before it deletes" do
@@ -107,7 +105,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       before { get "/admin/social/#{social_post.id}/menu", filter: "queued", return_to: "/admin/x?y=1" }
 
       it "holds what an unsent post takes", :aggregate_failures do
-        expect(items).to eq(["Edit", "Linked records", "Copy text", "Remove from queue"])
+        expect(menu_items).to eq(["Edit", "Linked records", "Copy text", "Remove from queue"])
         expect(page).to have_css("a.ctx-item[href='/admin/social?filter=queued&edit=#{social_post.id}#social-links']")
       end
 
@@ -127,7 +125,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it "deletes the draft" do
         menu("/admin/social/#{create(:social_post, :draft).id}/menu")
 
-        expect(items).to include("Delete draft")
+        expect(menu_items).to include("Delete draft")
       end
     end
 
@@ -135,7 +133,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it "offers only the copy" do
         menu("/admin/social/#{create(:social_post, :posted).id}/menu")
 
-        expect(items).to eq(["Copy text"])
+        expect(menu_items).to eq(["Copy text"])
       end
     end
 
@@ -152,7 +150,8 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it_behaves_like "a row menu"
 
       it "holds what a live project takes", :aggregate_failures do
-        expect(items).to eq(["Open board", "Edit", "Open repo", "Open site", "Tags", "#ruby", "Copy repo", "Archive"])
+        expect(menu_items).to eq(["Open board", "Edit", "Open repo", "Open site", "Tags", "#ruby", "Copy repo",
+                                  "Archive"])
       end
 
       it "opens and copies the repo", :aggregate_failures do
@@ -177,8 +176,8 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it "offers restore and nothing that needs the repo", :aggregate_failures do
         menu("/admin/projects/#{create(:project, :archived, repo: nil, url: nil).id}/menu")
 
-        expect(items).to include("Edit", "Tags", "Restore")
-        expect(items).not_to include("Archive", "Open repo", "Open site", "Copy repo")
+        expect(menu_items).to include("Edit", "Tags", "Restore")
+        expect(menu_items).not_to include("Archive", "Open repo", "Open site", "Copy repo")
       end
     end
 
@@ -190,7 +189,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it_behaves_like "a row menu"
 
       it "holds edit, copy mention and remove", :aggregate_failures do
-        expect(items).to eq(["Edit", "Copy mention", "Remove"])
+        expect(menu_items).to eq(["Edit", "Copy mention", "Remove"])
         expect(copies.fetch("Copy mention")).to eq("@{matz}")
       end
 

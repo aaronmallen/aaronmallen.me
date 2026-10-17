@@ -3,8 +3,6 @@
 RSpec.describe "Admin MCP clients", type: :feature do
   let(:row) { find(".li", text: "Claude") }
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before do
     create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
     sign_in_to_admin
@@ -14,7 +12,7 @@ RSpec.describe "Admin MCP clients", type: :feature do
   it "asks with the confirmation text" do
     message = confirm_no { row.click_button "Revoke" }
 
-    expect(message).to eq(translate("ui.components.client_row.confirm_revoke", client: "Claude"))
+    expect(message).to eq(admin_t("ui.components.client_row.confirm_revoke", client: "Claude"))
   end
 
   it "keeps the client listed when I don't confirm", :aggregate_failures do

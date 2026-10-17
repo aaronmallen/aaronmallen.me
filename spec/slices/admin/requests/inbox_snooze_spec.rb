@@ -11,8 +11,6 @@ RSpec.describe "Admin inbox snooze", type: :request do
     }
   end
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def dialog
     get "/admin/inbox"
     page.find("dialog#snooze-message-#{records['message'].id}", visible: :all)
@@ -23,7 +21,7 @@ RSpec.describe "Admin inbox snooze", type: :request do
     page.all(".inbox-row-title").map(&:text)
   end
 
-  def snooze(kind, **params) = act("/admin/inbox/#{kind}/#{records.fetch(kind).id}/snooze", **params)
+  def snooze(kind, **params) = admin_post("/admin/inbox/#{kind}/#{records.fetch(kind).id}/snooze", **params)
 
   before do
     allow(Time).to receive(:now).and_return(now)
@@ -108,10 +106,10 @@ RSpec.describe "Admin inbox snooze", type: :request do
   end
 
   it "answers 404 for a kind or a row that isn't there", :aggregate_failures do
-    act("/admin/inbox/post/#{records['message'].id}/snooze", pick: "2026-10-08T08:00")
+    admin_post("/admin/inbox/post/#{records['message'].id}/snooze", pick: "2026-10-08T08:00")
     expect(last_response.status).to eq(404)
 
-    act("/admin/inbox/message/0/snooze", pick: "2026-10-08T08:00")
+    admin_post("/admin/inbox/message/0/snooze", pick: "2026-10-08T08:00")
     expect(last_response.status).to eq(404)
   end
 end

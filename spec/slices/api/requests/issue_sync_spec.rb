@@ -3,8 +3,6 @@
 RSpec.describe "API issue sync", type: :request do
   def queued = %w[github linear].map { |provider| Tasks::Jobs::SyncIssues.jobs.count { it["args"] == [provider] } }
 
-  def status = last_response.status
-
   def sync
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"

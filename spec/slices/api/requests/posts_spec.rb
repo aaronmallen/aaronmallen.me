@@ -3,8 +3,6 @@
 RSpec.describe "API blog posts", type: :request do
   def post_queries = Posts::Slice["repos.post_queries"]
 
-  def status = last_response.status
-
   describe "GET /api/v1/posts" do
     it "lists the blog posts with their figures and the unsent social posts" do
       post = create(:post, :draft, body: "one two three")

@@ -63,8 +63,6 @@ RSpec.describe "MCP tool scopes", type: :request do
     ).fetch("access_token")
   end
 
-  def document = JSON.parse(last_response.body)
-
   def guarded = self.class.guarded
 
   def listed = tools.map { it.fetch("name") }

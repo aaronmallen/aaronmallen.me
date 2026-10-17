@@ -7,7 +7,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
 
   def act(name, posts, **params)
     ids = posts.map { it.is_a?(Integer) ? it : it.id }
-    post "/admin/posts/bulk", { _csrf_token: admin_csrf_token, act: name, ids:, status: "all", **params }
+    admin_post "/admin/posts/bulk", act: name, ids:, status: "all", **params
   end
 
   def drafts(count) = Array.new(count) { create(:post, :draft) }

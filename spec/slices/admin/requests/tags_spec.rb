@@ -19,9 +19,6 @@ RSpec.describe "Admin tags", type: :request do
   def named(name) = every_tag.find { it.name == name }
 
   def names = page.all(".tag-name").map(&:text)
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def stored(id) = every_tag.find { it.id == id }
 
   def uses_of(name, scope)
@@ -60,7 +57,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "says why it refused a rename against a row on a later page" do
-        send_to("/admin/tags/#{named('ruby').id}", tag: { name: " " }, page: "2")
+        admin_post("/admin/tags/#{named('ruby').id}", tag: { name: " " }, page: "2")
 
         expect(page).to have_css("#tag-#{named('ruby').id}-name-error")
       end
@@ -74,7 +71,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "keeps the search when it refuses a rename", :aggregate_failures do
-        send_to("/admin/tags/#{named('rust').id}", tag: { name: " " }, q: "r", page: "2")
+        admin_post("/admin/tags/#{named('rust').id}", tag: { name: " " }, q: "r", page: "2")
 
         expect(last_response.status).to eq(422)
         expect(names).to eq(%w[#ruby #rust])
@@ -83,26 +80,26 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "returns to the search after a rename" do
-        send_to("/admin/tags/#{named('rust').id}", tag: { name: "crab" }, scope: "public", q: "r")
+        admin_post("/admin/tags/#{named('rust').id}", tag: { name: "crab" }, scope: "public", q: "r")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
       end
 
       it "returns to the page and search after a rename" do
-        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "rubyist" }, scope: "public", q: "r", page: "2")
+        admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "rubyist" }, scope: "public", q: "r", page: "2")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
       end
 
       it "returns to the page and search after a colour" do
-        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "ruby", color: "mk-pink" }, q: "r", page: "2")
+        admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "ruby", color: "mk-pink" }, q: "r", page: "2")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
       end
 
       it "returns to the last page when a rename empties the one it was on" do
-        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
-        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "gem" }, q: "r", page: "2")
+        admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+        admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "gem" }, q: "r", page: "2")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
       end
@@ -116,14 +113,14 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "returns to the page and search after a removal" do
-        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+        admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
       end
 
       it "returns to the last page when a removal empties the one it was on" do
-        send_to("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
-        send_to("/admin/tags/#{named('ruby').id}/delete", q: "r", page: "2")
+        admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
+        admin_post("/admin/tags/#{named('ruby').id}/delete", q: "r", page: "2")
 
         expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
       end
@@ -473,13 +470,13 @@ RSpec.describe "Admin tags", type: :request do
       let(:tag) { create(:tag, name: "ruby") }
 
       it "rewrites the name" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "hanami" })
 
         expect(stored(tag.id).name).to eq("hanami")
       end
 
       it "says so" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "hanami" })
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Tag renamed")
@@ -487,59 +484,59 @@ RSpec.describe "Admin tags", type: :request do
 
       it "carries every tagged record with it, in one write" do
         article = create(:post, tags: %w[ruby])
-        send_to("/admin/tags/#{named('ruby').id}", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "hanami" })
 
         expect(post_queries.by_id(article.id).tags.map(&:name)).to eq(%w[hanami])
       end
 
       it "refuses a blank name" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: " " })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: " " })
 
         expect(last_response.status).to eq(422)
       end
 
       it "says why it refused, against the row it refused" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: " " })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: " " })
 
         expect(page).to have_css("#tag-#{tag.id}-name-error")
       end
 
       it "keeps the refused tag's editor open in the side panel" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: " " })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: " " })
 
         expect(page).to have_css("aside.settings-side #tag-#{tag.id}-editor.tag-editor-open #tag-#{tag.id}-name-error")
       end
 
       it "renames a private tag from the private tab" do
         tag = create(:tag, :private, name: "chores")
-        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
+        admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
 
         expect(stored(tag.id).name).to eq("errands")
       end
 
       it "goes back to the tab it renamed from" do
         tag = create(:tag, :private, name: "chores")
-        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
+        admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
 
         expect(last_response.location).to end_with("/admin/tags?scope=private")
       end
 
       it "takes a name the other scope holds" do
         create(:tag, :private, name: "hanami")
-        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "hanami" })
 
         expect(stored(tag.id).name).to eq("hanami")
       end
 
       it "says why it refused a name the same scope holds" do
         create(:tag, name: "hanami")
-        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "hanami" })
 
         expect(page).to have_css(".field-error", text: message("taken"))
       end
 
       it "answers 404 for a tag from the other scope" do
-        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "hanami" })
+        admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "hanami" })
 
         expect(last_response.status).to eq(404)
       end
@@ -558,31 +555,31 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "stores the description" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", description: "matz's *language*" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "ruby", description: "matz's *language*" })
 
         expect(stored(tag.id).description).to eq("matz's *language*")
       end
 
       it "clears the description when the field is emptied" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", description: " " })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "ruby", description: " " })
 
         expect(stored(tag.id).description).to be_nil
       end
 
       it "keeps the description through a rename" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "crystal" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "crystal" })
 
         expect(stored(tag.id)).to have_attributes(name: "crystal", description: "the language")
       end
 
       it "keeps the description through a recolour" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: "ruby", color: "mk-orange" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: "ruby", color: "mk-orange" })
 
         expect(stored(tag.id)).to have_attributes(color: "mk-orange", description: "the language")
       end
 
       it "keeps what was typed when it refuses a rename", :aggregate_failures do
-        send_to("/admin/tags/#{tag.id}", tag: { name: " ", description: "half written" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: " ", description: "half written" })
 
         expect(last_response.status).to eq(422)
         expect(field.text).to eq("half written")
@@ -591,7 +588,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "describes a private tag from the private tab" do
         tag = create(:tag, :private, name: "chores")
-        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "chores", description: "around the house" })
+        admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "chores", description: "around the house" })
 
         expect(stored(tag.id).description).to eq("around the house")
       end
@@ -601,20 +598,20 @@ RSpec.describe "Admin tags", type: :request do
       let(:tag) { create(:tag, name: "ruby", color: "mk-blue") }
 
       it "stores the colour that was clicked" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
 
         expect(stored(tag.id).color).to eq("mk-orange")
       end
 
       it "says so" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Tag recoloured")
       end
 
       it "keeps the name it already held" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
 
         expect(stored(tag.id).name).to eq("ruby")
       end
@@ -638,7 +635,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "leaves the tag of the same name in the other scope alone" do
         twin = create(:tag, :private, name: "ruby", color: "mk-blue")
-        send_to("/admin/tags/#{twin.id}", scope: "private", tag: { name: "ruby", color: "mk-orange" })
+        admin_post("/admin/tags/#{twin.id}", scope: "private", tag: { name: "ruby", color: "mk-orange" })
 
         expect(stored(tag.id).color).to eq("mk-blue")
       end
@@ -651,7 +648,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "refuses a colour that is not one of the six" do
-        send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "papaya" })
+        admin_post("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "papaya" })
 
         expect(stored(tag.id).color).to eq("mk-blue")
       end
@@ -661,13 +658,13 @@ RSpec.describe "Admin tags", type: :request do
       let(:tag) { create(:tag, name: "ruby") }
 
       it "takes away a tag nothing carries" do
-        send_to("/admin/tags/#{tag.id}/delete")
+        admin_post("/admin/tags/#{tag.id}/delete")
 
         expect(stored(tag.id)).to be_nil
       end
 
       it "says so" do
-        send_to("/admin/tags/#{tag.id}/delete")
+        admin_post("/admin/tags/#{tag.id}/delete")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Tag removed")
@@ -689,7 +686,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "takes away a tag two records carry" do
         2.times { create(:post, tags: %w[ruby]) }
-        send_to("/admin/tags/#{named('ruby').id}/delete")
+        admin_post("/admin/tags/#{named('ruby').id}/delete")
 
         expect(named("ruby")).to be_nil
       end
@@ -697,7 +694,7 @@ RSpec.describe "Admin tags", type: :request do
       it "takes it off every public record that carried it", :aggregate_failures do
         post = create(:post, tags: %w[ruby rails])
         project = create(:project, tags: %w[ruby])
-        send_to("/admin/tags/#{named('ruby').id}/delete")
+        admin_post("/admin/tags/#{named('ruby').id}/delete")
 
         expect(post_queries.by_id(post.id).tags.map(&:name)).to eq(%w[rails])
         expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
@@ -706,7 +703,7 @@ RSpec.describe "Admin tags", type: :request do
       it "takes it off every private record that carried it", :aggregate_failures do
         records = { journal_entry: create(:journal_entry, tags: %w[chores]), task: create(:task, tags: %w[chores]),
                     decision: create(:decision, tags: %w[chores]) }
-        send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
+        admin_post("/admin/tags/#{named('chores').id}/delete", scope: "private")
 
         records.each { |kind, record| expect(Spec::DB::Tagging.repo_for(kind).by_id(record.id).tags).to be_empty }
       end
@@ -714,28 +711,28 @@ RSpec.describe "Admin tags", type: :request do
       it "takes it off every message that carried it" do
         message = create(:message)
         Mail::Slice["repos.message_tag_mutations"].add(message.id, "chores")
-        send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
+        admin_post("/admin/tags/#{named('chores').id}/delete", scope: "private")
 
         expect(Mail::Slice["repos.message_queries"].by_id(message.id).tags).to be_empty
       end
 
       it "leaves a published post that loses the tag as it was updated" do
         post = create(:post, :published, tags: %w[ruby])
-        send_to("/admin/tags/#{named('ruby').id}/delete")
+        admin_post("/admin/tags/#{named('ruby').id}/delete")
 
         expect(post_queries.by_id(post.id).updated_at).to eq(post.updated_at)
       end
 
       it "takes away a tag while other tags are in use" do
         create(:post, tags: %w[rails])
-        send_to("/admin/tags/#{tag.id}/delete")
+        admin_post("/admin/tags/#{tag.id}/delete")
 
         expect(stored(tag.id)).to be_nil
       end
 
       it "says so for a tag records carry" do
         create(:post, tags: %w[ruby])
-        send_to("/admin/tags/#{named('ruby').id}/delete")
+        admin_post("/admin/tags/#{named('ruby').id}/delete")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Tag removed")
@@ -788,20 +785,20 @@ RSpec.describe "Admin tags", type: :request do
 
       it "takes away a private tag from the private tab" do
         chores = create(:tag, :private, name: "chores")
-        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+        admin_post("/admin/tags/#{chores.id}/delete", scope: "private")
 
         expect(stored(chores.id)).to be_nil
       end
 
       it "goes back to the tab it removed from" do
         chores = create(:tag, :private, name: "chores")
-        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+        admin_post("/admin/tags/#{chores.id}/delete", scope: "private")
 
         expect(last_response.location).to end_with("/admin/tags?scope=private")
       end
 
       it "answers 404 for a tag from the other scope" do
-        send_to("/admin/tags/#{tag.id}/delete", scope: "private")
+        admin_post("/admin/tags/#{tag.id}/delete", scope: "private")
 
         expect(last_response.status).to eq(404)
       end
@@ -809,7 +806,7 @@ RSpec.describe "Admin tags", type: :request do
       it "takes away a private tag a task carries" do
         create(:task, tags: %w[chores])
         chores = named("chores")
-        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+        admin_post("/admin/tags/#{chores.id}/delete", scope: "private")
 
         expect(stored(chores.id)).to be_nil
       end
@@ -821,8 +818,8 @@ RSpec.describe "Admin tags", type: :request do
       before do
         article
         Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "rules" }).value!
-        send_to("/admin/tags/#{named('ruby').id}/delete")
-        send_to("/admin/tags/#{named('rules').id}/delete", scope: "private")
+        admin_post("/admin/tags/#{named('ruby').id}/delete")
+        admin_post("/admin/tags/#{named('rules').id}/delete", scope: "private")
       end
 
       it "takes it off the post but keeps a task rule's only tag, as the note says" do
@@ -834,7 +831,7 @@ RSpec.describe "Admin tags", type: :request do
     end
 
     describe "removing the only tag on a task rule" do
-      def remove(name) = send_to("/admin/tags/#{named(name).id}/delete", scope: "private")
+      def remove(name) = admin_post("/admin/tags/#{named(name).id}/delete", scope: "private")
 
       def rule(pattern, tags) = Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags: }).value!
 
@@ -882,7 +879,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "takes away the tag once its rules are gone" do
-        rules.each { send_to("/admin/tasks/rules/#{it.id}/delete") }
+        rules.each { admin_post("/admin/tasks/rules/#{it.id}/delete") }
         remove("ruby")
 
         expect(named("ruby")).to be_nil

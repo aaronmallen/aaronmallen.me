@@ -30,8 +30,6 @@ RSpec.describe "API task time", type: :request do
 
   def sessions(on = task) = Tasks::Slice["relations.work_sessions"].for_task(on.id).order(:started_at).to_a
 
-  def status = last_response.status
-
   def total(on = task) = Tasks::Slice["repos.task_queries"].by_id(on.id).worked_seconds
 
   describe "POST /api/v1/tasks/:id/pause" do

@@ -27,8 +27,6 @@ RSpec.describe "Admin mail sending", type: :request do
 
   def no_sender(form) = Admin::Slice["i18n"].t("no_sender", scope: ["ui", "components", "mail", form])
 
-  def page = Capybara.string(last_response.body)
-
   def raw = Base64.urlsafe_decode64(sent.last.fetch("raw"))
 
   def read_only_thread

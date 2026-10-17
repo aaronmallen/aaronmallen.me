@@ -38,8 +38,6 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def content = JSON.parse(result.fetch("content").first.fetch("text"))
 
-  def document = JSON.parse(last_response.body)
-
   def fetch_prompt(name, **arguments) = rpc("prompts/get", { name:, arguments: })
 
   def issued = @issued ||= connect

@@ -18,8 +18,6 @@ RSpec.describe "API task recurrence", :frozen_clock, type: :request do
 
   def series = Tasks::Slice["relations.task_series"]
 
-  def status = last_response.status
-
   def tasks = Tasks::Slice["relations.tasks"]
 
   cadences.each do |kind, fields|

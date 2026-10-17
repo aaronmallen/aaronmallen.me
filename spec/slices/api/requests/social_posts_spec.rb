@@ -15,8 +15,6 @@ RSpec.describe "API social posts", type: :request do
 
   def send_social_post(id, fields = {}) = call_api(:post, "/social_posts/#{id}/send", JSON.generate(fields))
 
-  def status = last_response.status
-
   def status_of
     yield
     status

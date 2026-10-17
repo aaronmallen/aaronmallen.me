@@ -28,8 +28,6 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
 
   def owner_box = form.find("input[type='checkbox'][name='task[contributors][owner]']")
 
-  def page = Capybara.string(last_response.body)
-
   def save(**changes)
     open_edit
     post "/admin/tasks/#{task.id}", { _csrf_token: admin_csrf_token, filter: "next", **held, **changes }

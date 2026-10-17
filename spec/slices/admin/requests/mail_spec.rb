@@ -4,8 +4,6 @@ RSpec.describe "Admin mail", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:work) { create(:mail_account, name: "aaron@work.example", address: "aaron@work.example") }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def acts = page.all(".mail-acts button, .mail-acts a").map(&:text)
 
   def gmail(**) = create(:message, mail_account_id: work.id, **)
@@ -364,14 +362,14 @@ RSpec.describe "Admin mail", type: :request do
       end
 
       it "marks it read and lands on it in the same list", :aggregate_failures do
-        act("/admin/mail/#{thread.id}/open", folder: "inbox", show: "all")
+        admin_post("/admin/mail/#{thread.id}/open", folder: "inbox", show: "all")
 
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
         expect(status(thread)).to eq("read")
       end
 
       it "answers 404 for a thread that is gone" do
-        act("/admin/mail/999999/open")
+        admin_post("/admin/mail/999999/open")
 
         expect(last_response).to be_not_found
       end
@@ -483,20 +481,22 @@ RSpec.describe "Admin mail", type: :request do
       let(:thread) { create(:message) }
 
       it "marks a thread spam and lands back on it", :aggregate_failures do
-        act("/admin/mail/#{thread.id}/change/spam", folder: "inbox", show: "all")
+        admin_post("/admin/mail/#{thread.id}/change/spam", folder: "inbox", show: "all")
 
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
         expect(status(thread)).to eq("spam")
       end
 
       it "deletes a thread and keeps the list" do
-        act("/admin/mail/#{thread.id}/delete", folder: "spam", show: "all")
+        admin_post("/admin/mail/#{thread.id}/delete", folder: "spam", show: "all")
 
         expect([last_response.location, repo.by_id(thread.id)]).to eq(["/admin/mail?folder=spam&show=all", nil])
       end
 
       it "snoozes a thread from the reader", :aggregate_failures do
-        act("/admin/mail/#{thread.id}/snooze", pick: (Time.now + 86_400).strftime("%Y-%m-%dT%H:%M"), folder: "inbox")
+        admin_post(
+          "/admin/mail/#{thread.id}/snooze", pick: (Time.now + 86_400).strftime("%Y-%m-%dT%H:%M"), folder: "inbox",
+        )
 
         expect(last_response.location).to start_with("/admin/mail?folder=inbox&show=all&thread=#{thread.id}")
         expect(repo.by_id(thread.id).snoozed_until).to be > Time.now
@@ -524,7 +524,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "wakes a snoozed thread" do
         thread = create(:message, snoozed_until: Time.now + 3600)
-        act("/admin/mail/#{thread.id}/wake", folder: "snoozed")
+        admin_post("/admin/mail/#{thread.id}/wake", folder: "snoozed")
 
         expect(repo.by_id(thread.id).snoozed_until).to be <= Time.now
       end
@@ -533,9 +533,9 @@ RSpec.describe "Admin mail", type: :request do
     describe "writing to Gmail" do
       let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
 
-      def bulk(name, picked, **) = act("/admin/mail/bulk", act: name, ids: picked.map(&:id), folder: "inbox", **)
+      def bulk(name, picked, **) = admin_post("/admin/mail/bulk", act: name, ids: picked.map(&:id), folder: "inbox", **)
 
-      def change(thread, name) = act("/admin/mail/#{thread.id}/change/#{name}", folder: "inbox")
+      def change(thread, name) = admin_post("/admin/mail/#{thread.id}/change/#{name}", folder: "inbox")
 
       def changed(gmail_id, verb = "modify", **body)
         a_request(:post, "#{threads}/#{gmail_id}/#{verb}").with { body.empty? || JSON.parse(it.body) == body }
@@ -610,7 +610,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "deletes a Gmail thread forever in Gmail and here", :aggregate_failures do
         thread = gmail(gmail_id: "t1", trashed: true)
-        act("/admin/mail/#{thread.id}/delete", folder: "trash")
+        admin_post("/admin/mail/#{thread.id}/delete", folder: "trash")
 
         expect(a_request(:delete, "#{threads}/t1")).to have_been_made.once
         expect(stored(thread)).to be_nil
@@ -618,7 +618,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "keeps a thread Gmail refuses to delete and says so", :aggregate_failures do
         thread = gmail(gmail_id: "refused", trashed: true)
-        act("/admin/mail/#{thread.id}/delete", folder: "trash")
+        admin_post("/admin/mail/#{thread.id}/delete", folder: "trash")
         follow_redirect!
 
         expect(toast).to eq("Nothing changed · Gmail refused the change")
@@ -655,7 +655,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "still opens a thread when Gmail refuses to mark it read", :aggregate_failures do
         thread = gmail(gmail_id: "refused")
-        act("/admin/mail/#{thread.id}/open")
+        admin_post("/admin/mail/#{thread.id}/open")
 
         expect(last_response).to be_redirect
         expect(status(thread)).to eq("unread")
@@ -743,7 +743,7 @@ RSpec.describe "Admin mail", type: :request do
         end
 
         it "refuses more than 100 threads before it writes to Gmail", :aggregate_failures do
-          act("/admin/mail/bulk", act: "read", ids: (1..101).to_a, folder: "inbox")
+          admin_post("/admin/mail/bulk", act: "read", ids: (1..101).to_a, folder: "inbox")
           follow_redirect!
 
           expect(toast).to eq("Tick 100 threads or fewer")
@@ -838,7 +838,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "snoozes a Gmail thread here only and hides it until it wakes", :aggregate_failures do
         thread = gmail(gmail_id: "t1", subject: "Later")
-        act("/admin/mail/#{thread.id}/snooze", pick: (Time.now + 86_400).strftime("%Y-%m-%dT%H:%M"))
+        admin_post("/admin/mail/#{thread.id}/snooze", pick: (Time.now + 86_400).strftime("%Y-%m-%dT%H:%M"))
         get "/admin/mail", account: work.id
 
         expect(subjects).not_to include("Later")
@@ -854,7 +854,7 @@ RSpec.describe "Admin mail", type: :request do
       def links = Links::Slice["repos.record_link_queries"]
 
       def make(**fields)
-        act("/admin/mail/#{thread.id}/task", folder: "inbox", task: { title: "Book lunch", **fields })
+        admin_post("/admin/mail/#{thread.id}/task", folder: "inbox", task: { title: "Book lunch", **fields })
       end
 
       def task_of(thread) = links.partner_ids("mail_thread", [thread.id], "task")[thread.id]
@@ -957,7 +957,9 @@ RSpec.describe "Admin mail", type: :request do
           stub_request(:post, "#{threads}/refused/modify").to_return(status: 500)
         end
 
-        def make_on(thread) = act("/admin/mail/#{thread.id}/task", task: { title: "Reply", list: "next", archive: "1" })
+        def make_on(thread)
+          admin_post("/admin/mail/#{thread.id}/task", task: { title: "Reply", list: "next", archive: "1" })
+        end
 
         it "archives the thread in Gmail too", :aggregate_failures do
           thread = gmail(gmail_id: "t1")
@@ -979,7 +981,7 @@ RSpec.describe "Admin mail", type: :request do
       end
 
       it "answers 404 for a thread that is gone" do
-        act("/admin/mail/999999/task", task: { title: "Book lunch" })
+        admin_post("/admin/mail/999999/task", task: { title: "Book lunch" })
 
         expect(last_response).to be_not_found
       end
@@ -1011,7 +1013,7 @@ RSpec.describe "Admin mail", type: :request do
     describe "select mode" do
       let(:threads) { Array.new(2) { create(:message) } }
 
-      def bulk(name, **) = act("/admin/mail/bulk", act: name, ids: threads.map(&:id), folder: "inbox", **)
+      def bulk(name, **) = admin_post("/admin/mail/bulk", act: name, ids: threads.map(&:id), folder: "inbox", **)
 
       it "draws a Select toggle and a bar the row boxes join", :aggregate_failures do
         threads
@@ -1080,7 +1082,7 @@ RSpec.describe "Admin mail", type: :request do
 
       it "names a thread that is gone" do
         gone = create(:message).tap { Mail::Slice["repos.message_mutations"].delete(it.id) }
-        act("/admin/mail/bulk", act: "read", ids: [gone.id])
+        admin_post("/admin/mail/bulk", act: "read", ids: [gone.id])
         follow_redirect!
 
         expect(toast).to eq("Nothing changed · thread ##{gone.id} is gone")

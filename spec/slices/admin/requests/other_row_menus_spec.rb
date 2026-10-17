@@ -3,8 +3,6 @@
 require "securerandom"
 
 RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock, type: :request do
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def copies = page.all("[data-copy]", visible: :all).to_h { [it.find(".ctx-label").text(:all), it["data-copy"]] }
 
   def form(route) = page.first("form[action='#{route}']", visible: :all)
@@ -13,17 +11,11 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
   def inline_confirm(route) = form(route).find("button")["data-confirm-inline"]
 
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
-
   def menus = page.all("[data-menu]", visible: :all).map { it["data-menu"] }
-
-  def page = Capybara.string(last_response.body)
 
   def return_to(form) = form.first("input[name=return_to]", visible: :all)&.value
 
   def returns = page.all("[data-context-menu] form", visible: :all).map { return_to(it) }.uniq
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -50,7 +42,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "holds every action a comment takes", :aggregate_failures do
         expect(head).to eq("Looks right")
-        expect(items).to eq(["Edit", "Copy text", "Delete comment"])
+        expect(menu_items).to eq(["Edit", "Copy text", "Delete comment"])
         expect(copies["Copy text"]).to eq("Looks right\nmore")
         expect(returns).to eq(["/admin/tasks/#{task.id}"])
       end
@@ -63,15 +55,15 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       end
 
       it "asks before it deletes" do
-        expect(inline_confirm(delete)).to eq(translate("ui.components.context_menu.confirm.delete"))
+        expect(inline_confirm(delete)).to eq(admin_t("ui.components.context_menu.confirm.delete"))
       end
 
       it "lands a delete back on the page it opened on", :aggregate_failures do
-        act(delete, return_to: "/admin/activity")
+        admin_post(delete, return_to: "/admin/activity")
 
         expect(last_response.location).to eq("/admin/activity")
         follow_redirect!
-        expect(toast).to eq(translate("tasks_page.toasts.comment_deleted"))
+        expect(toast).to eq(admin_t("tasks_page.toasts.comment_deleted"))
       end
     end
 
@@ -80,7 +72,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       comment = create(:task_comment, :synced, task_id: task.id)
       get "/admin/tasks/#{task.id}/comments/#{comment.id}/menu"
 
-      expect(items).to eq(["View on source", "Copy text"])
+      expect(menu_items).to eq(["View on source", "Copy text"])
     end
 
     it "answers 404 for a comment on another task" do
@@ -121,16 +113,16 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       before { get "/admin/decisions/#{decision.id}/comments/#{comment.id}/menu" }
 
       it "holds every action a comment takes", :aggregate_failures do
-        expect(items).to eq(["Edit", "Copy text", "Delete comment"])
+        expect(menu_items).to eq(["Edit", "Copy text", "Delete comment"])
         expect(form(delete)).not_to be_nil
       end
 
       it "lands a delete back on the page it opened on", :aggregate_failures do
-        act(delete, return_to: "/admin/activity")
+        admin_post(delete, return_to: "/admin/activity")
 
         expect(last_response.location).to eq("/admin/activity")
         follow_redirect!
-        expect(toast).to eq(translate("decisions_page.toasts.comment_deleted"))
+        expect(toast).to eq(admin_t("decisions_page.toasts.comment_deleted"))
       end
     end
 
@@ -141,7 +133,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
         session = create(:work_session, :closed, task_id: task.id)
         get "/admin/tasks/#{task.id}/sessions/#{session.id}/menu", return_to: "/admin/activity"
 
-        expect(items).to eq(["Edit", "Delete session"])
+        expect(menu_items).to eq(["Edit", "Delete session"])
         expect(page).to have_css("a[data-dialog-open='task-session-#{session.id}']", visible: :all)
         expect(returns).to eq(["/admin/activity"])
       end
@@ -150,16 +142,16 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
         session = create(:work_session, task_id: task.id)
         get "/admin/tasks/#{task.id}/sessions/#{session.id}/menu"
 
-        expect(items).to eq(["Edit"])
+        expect(menu_items).to eq(["Edit"])
       end
 
       it "lands a delete back on the page it opened on", :aggregate_failures do
         session = create(:work_session, :closed, task_id: task.id)
-        act("/admin/tasks/#{task.id}/sessions/#{session.id}/delete", return_to: "/admin/activity")
+        admin_post("/admin/tasks/#{task.id}/sessions/#{session.id}/delete", return_to: "/admin/activity")
 
         expect(last_response.location).to eq("/admin/activity")
         follow_redirect!
-        expect(toast).to eq(translate("tasks_page.toasts.session_deleted"))
+        expect(toast).to eq(admin_t("tasks_page.toasts.session_deleted"))
       end
     end
 
@@ -170,7 +162,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "opens it on the calendar", :aggregate_failures do
         expect(head).to eq("Sprint · Oct 20, 2026")
-        expect(items).to eq(["Open on calendar", "Drop sprint"])
+        expect(menu_items).to eq(["Open on calendar", "Drop sprint"])
         expect(page).to have_link("Open on calendar", href: "/admin/calendar?day=2026-10-20", visible: :all)
       end
 
@@ -188,7 +180,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       it "opens it here and on GitHub", :aggregate_failures do
         href = "https://github.com/aaronmallen/blog/commit/#{sha}"
 
-        expect(items).to eq(["Open", "View on GitHub", "Copy SHA", "Copy message"])
+        expect(menu_items).to eq(["Open", "View on GitHub", "Copy SHA", "Copy message"])
         expect(page).to have_link("View on GitHub", href:, visible: :all)
       end
 
@@ -203,7 +195,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       before { get "/admin/tasks/rules/#{rule.id}/menu" }
 
       it "opens its editor and deletes it in place", :aggregate_failures do
-        expect(items).to eq(["Edit", "Delete rule"])
+        expect(menu_items).to eq(["Edit", "Delete rule"])
         expect(page).to have_css("a[data-dialog-open='rule-#{rule.id}-edit']", visible: :all)
         expect(form("/admin/tasks/rules/#{rule.id}/delete")["data-morph"]).not_to be_nil
       end
@@ -218,15 +210,15 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       it "revokes on the second click", :aggregate_failures do
         get "/admin/tokens/#{token.id}/menu"
 
-        expect(items).to eq(["Revoke"])
+        expect(menu_items).to eq(["Revoke"])
         expect(inline_confirm("/admin/tokens/#{token.id}/revoke")).to eq("Click again to revoke")
       end
 
       it "shows the toast it shows today" do
-        act("/admin/tokens/#{token.id}/revoke")
+        admin_post("/admin/tokens/#{token.id}/revoke")
         follow_redirect!
 
-        expect(toast).to eq(translate("tokens_page.toasts.revoked"))
+        expect(toast).to eq(admin_t("tokens_page.toasts.revoked"))
       end
     end
 
@@ -241,7 +233,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "opens sign-ins and revokes it", :aggregate_failures do
         expect(head).to eq("Desk")
-        expect(items).to eq(%w[Sign-ins Revoke])
+        expect(menu_items).to eq(%w[Sign-ins Revoke])
         expect(form("/admin/clients/#{client.id}/revoke")).not_to be_nil
       end
     end
@@ -256,7 +248,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       before { get "/admin/services/#{connection.id}/menu" }
 
       it "shows its details and disconnects on the second click", :aggregate_failures do
-        expect(items).to include("Details", "Disconnect")
+        expect(menu_items).to include("Details", "Disconnect")
         expect(page).to have_link("Details", href: "/admin/services?selected=#{connection.id}", visible: :all)
         expect(inline_confirm("/admin/services/#{connection.id}/disconnect")).to eq("Click again to disconnect")
       end
@@ -273,7 +265,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "opens, moves, cancels and snoozes it", :aggregate_failures do
         expect(head).to eq("Carried task")
-        expect(items).to eq(["Open", "Move to Next", "Cancel task", "Snooze"])
+        expect(menu_items).to eq(["Open", "Move to Next", "Cancel task", "Snooze"])
         expect(form("/admin/tasks/#{task.id}/move/next")).to have_field("origin", type: :hidden, with: "today")
       end
 
@@ -288,16 +280,16 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
         create(:journal_entry, entry_date: Blog::TimeZone.today - 3)
         get "/admin/attention/menu", kind: "journal"
 
-        expect(items).to eq(%w[Write Snooze])
+        expect(menu_items).to eq(%w[Write Snooze])
         expect(form("/admin/attention/snooze")).to have_no_field("record_id", type: :hidden)
       end
 
       it "snoozes in place with the toast it shows today" do
         task = create(:task, carried_count: 4)
-        act("/admin/attention/snooze", kind: "carried", record_id: task.id)
+        admin_post("/admin/attention/snooze", kind: "carried", record_id: task.id)
         follow_redirect!
 
-        expect(toast).to eq(translate("today_page.toasts.snoozed"))
+        expect(toast).to eq(admin_t("today_page.toasts.snoozed"))
       end
     end
 
@@ -316,7 +308,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       end
 
       it "retries, copies and discards it", :aggregate_failures do
-        expect(items).to eq(["Retry", "Copy error", "Discard"])
+        expect(menu_items).to eq(["Retry", "Copy error", "Discard"])
         expect(copies["Copy error"]).to eq("RuntimeError: boom")
         expect(inline_confirm("/admin/attention/dead-jobs/#{jid}/discard")).to eq("Click again to discard")
       end

@@ -22,8 +22,6 @@ RSpec.describe "Admin Mastodon connection", type: :request do
 
   def connections = Services::Slice["repos.connection_queries"].for(:mastodon)
 
-  def page = Capybara.string(last_response.body)
-
   def start_connect(server = "ruby.social")
     post "/admin/services/mastodon/connect", server:, _csrf_token: admin_csrf_token
     authorize_query["state"]

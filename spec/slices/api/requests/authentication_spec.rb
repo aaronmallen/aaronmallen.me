@@ -8,8 +8,6 @@ RSpec.describe "API authentication", type: :request do
 
   def challenge = last_response.headers["WWW-Authenticate"]
 
-  def document = JSON.parse(last_response.body)
-
   def mint(name = "Terminal") = API::Slice["operations.mint_token"].call(name:)
 
   def minted(name = "Terminal") = mint(name).value!

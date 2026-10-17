@@ -26,8 +26,6 @@ RSpec.describe "API shares", type: :request do
 
   def shares = Shares::Slice["relations.shares"].to_a
 
-  def status = last_response.status
-
   before do
     connect_share_store
     keep_puts

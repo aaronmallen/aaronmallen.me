@@ -7,8 +7,6 @@ RSpec.describe "Admin list row actions", type: :feature do
 
   def morning(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, 9)
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before { sign_in_to_admin }
 
   shared_examples "a row action in place" do |toast|
@@ -33,7 +31,7 @@ RSpec.describe "Admin list row actions", type: :feature do
     describe "moving an issue" do
       before { create(:task, title: "Fix the feed", list: "external").tap { create(:task_source, task: it) } }
 
-      def act = row("Fix the feed").click_button(translate("task_lists.titles.someday"))
+      def act = row("Fix the feed").click_button(admin_t("task_lists.titles.someday"))
 
       it_behaves_like "a row action in place", "Moved"
     end

@@ -5,8 +5,6 @@ RSpec.describe "Admin people", type: :feature do
 
   before { sign_in_to_admin }
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   it "fills the key from the name of a new person" do
     visit "/admin/people/new"
     fill_in("person[name]", with: "Ada Lovelace")
@@ -143,7 +141,7 @@ RSpec.describe "Admin people", type: :feature do
     it "shows the person's key in the key hint" do
       click_link "Ada Lovelace"
 
-      hint = translate("ui.components.people.person_form.key_note", key: "ada")
+      hint = admin_t("ui.components.people.person_form.key_note", key: "ada")
 
       expect(page).to have_css("#person-edit-drawer .hint", text: hint)
     end
@@ -169,7 +167,7 @@ RSpec.describe "Admin people", type: :feature do
       click_link "Ada Lovelace"
       message = confirm_no { within("#person-edit-drawer") { click_button "Remove" } }
 
-      expect(message).to eq(translate("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
+      expect(message).to eq(admin_t("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
     end
 
     it "puts Remove before Save" do
@@ -194,7 +192,7 @@ RSpec.describe "Admin people", type: :feature do
     it "asks with the confirmation text" do
       message = confirm_no { click_button "Remove" }
 
-      expect(message).to eq(translate("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
+      expect(message).to eq(admin_t("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
     end
 
     it "keeps them when I don't confirm" do

@@ -4,9 +4,7 @@ RSpec.describe "Admin decision keys", type: :feature do
   let(:decision) { create(:decision, title: "Pick a queue") }
   let(:key) { "##{decision.id}" }
 
-  def copied = translate("ui.components.record_key.copied.decision", key:)
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
+  def copied = admin_t("ui.components.record_key.copied.decision", key:)
 
   before { sign_in_to_admin }
 

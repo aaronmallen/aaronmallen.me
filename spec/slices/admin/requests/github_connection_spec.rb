@@ -34,8 +34,6 @@ RSpec.describe "Admin GitHub connection", type: :request do
 
   def hint(key, **) = Admin::Slice["i18n"].t(["ui.components.services", key].join("."), name: "GitHub", **)
 
-  def page = Capybara.string(last_response.body)
-
   def start_connect
     post "/admin/services/github/connect", _csrf_token: admin_csrf_token
     authorize_query.fetch("state")

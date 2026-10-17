@@ -16,8 +16,6 @@ RSpec.describe "API inbox snooze", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   def synced = create(:task, :external).tap { create(:task_source, task: it) }
 
   it "snoozes a row and drops it from the inbox", :aggregate_failures do

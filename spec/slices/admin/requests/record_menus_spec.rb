@@ -3,23 +3,17 @@
 RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
-  def blank = translate("ui.components.decisions.field_error.reason.blank")
+  def blank = admin_t("ui.components.decisions.field_error.reason.blank")
 
   def copies = page.all("[data-copy]", visible: :all).to_h { [it.find(".ctx-label").text(:all), it["data-copy"]] }
 
   def form(route) = page.first("form[action='#{route}']", visible: :all)
-
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
 
   def return_to(form) = form.find("input[name=return_to]", visible: :all).value
 
   def returns = page.all("[data-context-menu] form", visible: :all).map { return_to(it) }.uniq
 
   def short_link(destination, **) = Shares::Slice["operations.create_short_link"].call({ destination:, ** }).value!
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -50,7 +44,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "holds every action an entry takes" do
-        expect(items).to eq(["Edit", "Linked records", "Tags", "#home", "#work", "Copy text", "Delete entry"])
+        expect(menu_items).to eq(["Edit", "Linked records", "Tags", "#home", "#work", "Copy text", "Delete entry"])
       end
 
       it "edits and shows links on the entry's day", :aggregate_failures do
@@ -79,17 +73,17 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "asks before it deletes" do
-        confirm = translate("ui.components.context_menu.confirm.forever")
+        confirm = admin_t("ui.components.context_menu.confirm.forever")
 
         expect(form("/admin/journal/#{entry.id}/delete").find("button")["data-confirm-inline"]).to eq(confirm)
       end
 
       it "lands a delete back on the page it opened on", :aggregate_failures do
-        act("/admin/journal/#{entry.id}/delete", return_to: "/admin/journal?q=ship")
+        admin_post("/admin/journal/#{entry.id}/delete", return_to: "/admin/journal?q=ship")
 
         expect(last_response.location).to eq("/admin/journal?q=ship")
         follow_redirect!
-        expect(toast).to eq(translate("journal_page.toasts.deleted"))
+        expect(toast).to eq(admin_t("journal_page.toasts.deleted"))
       end
     end
 
@@ -106,7 +100,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "holds every action an open decision takes", :aggregate_failures do
-        expect(items).to eq(["Open", "Edit", "Copy number", "Tags", "#infra", "Drop…"])
+        expect(menu_items).to eq(["Open", "Edit", "Copy number", "Tags", "#infra", "Drop…"])
         expect(copies["Copy number"]).to eq("##{decision.id}")
       end
 
@@ -134,8 +128,8 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       before { get "/admin/decisions/#{decision.id}/menu" }
 
       it "offers reopen in place of drop", :aggregate_failures do
-        expect(items).to include("Reopen…")
-        expect(items).not_to include("Drop…")
+        expect(menu_items).to include("Reopen…")
+        expect(menu_items).not_to include("Drop…")
       end
 
       it "opens the reopen reason form" do
@@ -147,15 +141,15 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       let(:decision) { create(:decision) }
 
       it "lands back on the page it opened on", :aggregate_failures do
-        act("/admin/decisions/#{decision.id}/drop", decision: { reason: "moot" }, return_to: "/admin/decisions")
+        admin_post("/admin/decisions/#{decision.id}/drop", decision: { reason: "moot" }, return_to: "/admin/decisions")
 
         expect(last_response.location).to eq("/admin/decisions")
         follow_redirect!
-        expect(toast).to eq(translate("decisions_page.toasts.dropped"))
+        expect(toast).to eq(admin_t("decisions_page.toasts.dropped"))
       end
 
       it "refuses a blank reason with the form and its error", :aggregate_failures do
-        act("/admin/decisions/#{decision.id}/drop", decision: { reason: "" }, return_to: "/admin/decisions")
+        admin_post("/admin/decisions/#{decision.id}/drop", decision: { reason: "" }, return_to: "/admin/decisions")
 
         expect(last_response.status).to eq(422)
         expect(form("/admin/decisions/#{decision.id}/drop")[:id]).to eq("decision-drop-form")
@@ -178,7 +172,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
         before { get "/admin/files/#{file.id}/menu", return_to: "/admin/files?kind=other" }
 
         it "holds every action a file takes", :aggregate_failures do
-          expect(items).to eq(["Details", "Open file", "Copy link", "Copy as markdown", "Delete file"])
+          expect(menu_items).to eq(["Details", "Open file", "Copy link", "Copy as markdown", "Delete file"])
           expect(returns).to eq(["/admin/files?kind=other"])
         end
 
@@ -202,7 +196,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       it "lands a delete back on the page it opened on" do
         file = share("deck.pdf", "application/pdf")
         stub_request(:delete, share_store_url(file.key))
-        act("/admin/files/#{file.id}/delete", return_to: "/admin/files?kind=other")
+        admin_post("/admin/files/#{file.id}/delete", return_to: "/admin/files?kind=other")
 
         expect(last_response.location).to eq("/admin/files?kind=other")
       end
@@ -214,7 +208,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       before { get "/admin/links/#{link.id}/menu", return_to: "/admin/links?sort=clicks" }
 
       it "holds every action a link takes", :aggregate_failures do
-        expect(items).to eq(
+        expect(menu_items).to eq(
           ["Edit", "Open destination", "Copy short link", "Copy destination", "Copy as markdown", "Delete link"],
         )
         expect(page).to have_css("a[data-dialog-open='link-#{link.id}-drawer']", text: "Edit")
@@ -229,7 +223,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "lands a delete back on the page it opened on" do
-        act("/admin/links/#{link.id}/delete", return_to: "/admin/links?sort=clicks")
+        admin_post("/admin/links/#{link.id}/delete", return_to: "/admin/links?sort=clicks")
 
         expect(last_response.location).to eq("/admin/links?sort=clicks")
       end
@@ -241,7 +235,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       before { get "/admin/tags/#{tag.id}/menu", scope: "private", return_to: "/admin/tags?scope=private" }
 
       it "holds every action a tag takes", :aggregate_failures do
-        expect(items).to eq(%w[Rename… Colour Pink Green Blue Violet Sand Orange Copy] + ["Delete tag"])
+        expect(menu_items).to eq(%w[Rename… Colour Pink Green Blue Violet Sand Orange Copy] + ["Delete tag"])
         expect(copies["Copy"]).to eq("#home")
       end
 
@@ -256,16 +250,16 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "lands a new colour back on the page it opened on", :aggregate_failures do
-        recolour = { name: "home", color: "mk-pink" }
-        act("/admin/tags/#{tag.id}", scope: "private", tag: recolour, return_to: "/admin/tags?scope=private&q=ho")
+        back = "/admin/tags?scope=private&q=ho"
+        admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "home", color: "mk-pink" }, return_to: back)
 
-        expect(last_response.location).to eq("/admin/tags?scope=private&q=ho")
+        expect(last_response.location).to eq(back)
         follow_redirect!
-        expect(toast).to eq(translate("tags_page.toasts.recoloured"))
+        expect(toast).to eq(admin_t("tags_page.toasts.recoloured"))
       end
 
       it "lands a delete back on the page it opened on" do
-        act("/admin/tags/#{tag.id}/delete", scope: "private", return_to: "/admin/tags?scope=private&q=ho")
+        admin_post("/admin/tags/#{tag.id}/delete", scope: "private", return_to: "/admin/tags?scope=private&q=ho")
 
         expect(last_response.location).to eq("/admin/tags?scope=private&q=ho")
       end

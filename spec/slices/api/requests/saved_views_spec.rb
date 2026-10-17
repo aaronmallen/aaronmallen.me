@@ -7,8 +7,6 @@ RSpec.describe "API saved views", type: :request do
 
   def list(**query) = call_api(:get, "/saved_views", query)
 
-  def status = last_response.status
-
   def stored(id) = SavedViews::Slice["relations.saved_views"].by_pk(id).one
 
   def update_view(id, fields) = call_api(:patch, "/saved_views/#{id}", JSON.generate(fields))

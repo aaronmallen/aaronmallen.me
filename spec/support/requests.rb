@@ -18,9 +18,17 @@ module Spec
       JSON.parse(last_response.body) if last_response.media_type == "application/json"
     end
 
+    def document = JSON.parse(last_response.body)
+
+    def menu_items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
+
+    def page = Capybara.string(last_response.body)
+
+    def status = last_response.status
+
     def toast
       follow_redirect! if last_response.redirect?
-      Capybara.string(last_response.body).find("[data-toast] .toast", visible: :all).text(:all).strip
+      page.find("[data-toast] .toast", visible: :all).text(:all).strip
     end
   end
 end

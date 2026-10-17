@@ -5,7 +5,7 @@ RSpec.describe "Task events", type: :request do
   let(:at) { [Time.at(Time.now.to_i - 600), Blog::TimeZone.day_start(today)].max }
 
   def capture(**fields)
-    send_to("/admin/tasks", filter: "next", task: { note: "", tags: "", **fields })
+    admin_post("/admin/tasks", filter: "next", task: { note: "", tags: "", **fields })
     id = Tasks::Slice["relations.tasks"].where(title: fields.fetch(:title)).pluck(:id).first
     Tasks::Slice["repos.task_queries"].by_id(id)
   end
@@ -24,12 +24,8 @@ RSpec.describe "Task events", type: :request do
 
   def send_at(time, path, **)
     allow(Time).to receive(:now).and_return(time)
-    send_to(path, **)
+    admin_post(path, **)
     allow(Time).to receive(:now).and_call_original
-  end
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
   end
 
   def status(from, to) = { kind: "status_changed", from_status: from, to_status: to }
@@ -43,7 +39,7 @@ RSpec.describe "Task events", type: :request do
   describe "moving a task between lists" do
     it "records the from and to list" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/move/someday")
+      admin_post("/admin/tasks/#{task.id}/move/someday")
 
       expect(moves(task)).to eq([moved(from_list: "next", to_list: "someday")])
     end
@@ -57,7 +53,7 @@ RSpec.describe "Task events", type: :request do
 
     it "records nothing for a move to the list the task is already in" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/move/next")
+      admin_post("/admin/tasks/#{task.id}/move/next")
 
       expect(events(task)).to be_empty
     end
@@ -66,21 +62,21 @@ RSpec.describe "Task events", type: :request do
   describe "moving a task into or out of Today" do
     it "records a move into Today" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/move/today")
+      admin_post("/admin/tasks/#{task.id}/move/today")
 
       expect(moves(task)).to eq([moved(from_list: "next", to_sprint_on: today)])
     end
 
     it "records a move out of Today" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today))
-      send_to("/admin/tasks/#{task.id}/move/next")
+      admin_post("/admin/tasks/#{task.id}/move/next")
 
       expect(moves(task)).to eq([moved(from_sprint_on: today, to_list: "next")])
     end
 
     it "records the pause when a task in progress leaves Today" do
       task = create(:task, :in_progress, :in_sprint, sprint: create(:sprint, sprint_date: today))
-      send_to("/admin/tasks/#{task.id}/move/next")
+      admin_post("/admin/tasks/#{task.id}/move/next")
 
       expect(statuses(task)).to eq([status("in_progress", "open")])
     end
@@ -89,28 +85,28 @@ RSpec.describe "Task events", type: :request do
   describe "scheduling a task" do
     it "records a move into a later sprint" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
+      admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
 
       expect(moves(task)).to eq([moved(from_list: "next", to_sprint_on: today + 2)])
     end
 
     it "records a move from Today into a later sprint" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today))
-      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
+      admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
 
       expect(moves(task)).to eq([moved(from_sprint_on: today, to_sprint_on: today + 2)])
     end
 
     it "records a move out of a sprint when the task is unscheduled" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
-      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: "")
+      admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: "")
 
       expect(moves(task)).to eq([moved(from_sprint_on: today + 2, to_list: "next")])
     end
 
     it "records a move into Today for a task scheduled for today" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: today.iso8601)
+      admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: today.iso8601)
 
       expect(moves(task)).to eq([moved(from_list: "next", to_sprint_on: today)])
     end
@@ -125,14 +121,14 @@ RSpec.describe "Task events", type: :request do
   describe "dropping a sprint" do
     it "records the move back to a list" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
-      send_to("/admin/tasks/sprints/#{task.sprint_id}/delete")
+      admin_post("/admin/tasks/sprints/#{task.sprint_id}/delete")
 
       expect(moves(task)).to eq([moved(from_sprint_on: today + 2, to_list: "next")])
     end
 
     it "keeps the record after the sprint is gone" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
-      send_to("/admin/tasks/sprints/#{task.sprint_id}/delete")
+      admin_post("/admin/tasks/sprints/#{task.sprint_id}/delete")
 
       expect(moves(task).map { it[:from_sprint_on] }).to eq([today + 2])
     end
@@ -140,7 +136,7 @@ RSpec.describe "Task events", type: :request do
     it "records the move of a synced task back to External" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
       create(:task_source, task:)
-      send_to("/admin/tasks/sprints/#{task.sprint_id}/delete")
+      admin_post("/admin/tasks/sprints/#{task.sprint_id}/delete")
 
       expect(moves(task)).to eq([moved(from_sprint_on: today + 2, to_list: "external")])
     end
@@ -151,7 +147,7 @@ RSpec.describe "Task events", type: :request do
 
     it "records each tag added on save" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money, home" })
+      admin_post("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money, home" })
 
       expect(tag_changes(task)).to contain_exactly(
         { kind: "tagged", tag_name: "money" }, { kind: "tagged", tag_name: "home" },
@@ -160,16 +156,16 @@ RSpec.describe "Task events", type: :request do
 
     it "records a tag removed on save" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money, home" })
-      send_to("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
+      admin_post("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money, home" })
+      admin_post("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
 
       expect(tag_changes(task).last).to eq({ kind: "untagged", tag_name: "home" })
     end
 
     it "records nothing when the tags stay the same" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
-      send_to("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
+      admin_post("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
+      admin_post("/admin/tasks/#{task.id}", filter: "next", task: { **fields, tags: "money" })
 
       expect(tag_changes(task)).to eq([{ kind: "tagged", tag_name: "money" }])
     end
@@ -184,42 +180,42 @@ RSpec.describe "Task events", type: :request do
   describe "changing a task's status" do
     it "records a start" do
       task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today))
-      send_to("/admin/tasks/#{task.id}/start")
+      admin_post("/admin/tasks/#{task.id}/start")
 
       expect(statuses(task)).to eq([status("open", "in_progress")])
     end
 
     it "records the move into Today when a task in a list starts" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/start")
+      admin_post("/admin/tasks/#{task.id}/start")
 
       expect(moves(task)).to eq([moved(from_list: "next", to_sprint_on: today)])
     end
 
     it "records a pause" do
       task = create(:task, :in_progress, :in_sprint, sprint: create(:sprint, sprint_date: today))
-      send_to("/admin/tasks/#{task.id}/stop")
+      admin_post("/admin/tasks/#{task.id}/stop")
 
       expect(statuses(task)).to eq([status("in_progress", "open")])
     end
 
     it "records a complete" do
       task = create(:task, :in_progress)
-      send_to("/admin/tasks/#{task.id}/complete")
+      admin_post("/admin/tasks/#{task.id}/complete")
 
       expect(statuses(task)).to eq([status("in_progress", "done")])
     end
 
     it "records a cancel" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/cancel")
+      admin_post("/admin/tasks/#{task.id}/cancel")
 
       expect(statuses(task)).to eq([status("open", "canceled")])
     end
 
     it "records a reopen" do
       task = create(:task, :done)
-      send_to("/admin/tasks/#{task.id}/reopen")
+      admin_post("/admin/tasks/#{task.id}/reopen")
 
       expect(statuses(task)).to eq([status("done", "open")])
     end
@@ -236,8 +232,8 @@ RSpec.describe "Task events", type: :request do
   describe "deleting a task" do
     it "takes its events with it" do
       task = create(:task)
-      send_to("/admin/tasks/#{task.id}/move/someday")
-      send_to("/admin/tasks/#{task.id}/delete")
+      admin_post("/admin/tasks/#{task.id}/move/someday")
+      admin_post("/admin/tasks/#{task.id}/delete")
 
       expect(events(task)).to be_empty
     end

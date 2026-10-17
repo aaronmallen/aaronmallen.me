@@ -19,8 +19,6 @@ RSpec.describe "API inbox", type: :request do
 
   def source_url = "https://example.com/a"
 
-  def status = last_response.status
-
   def synced(*traits, title: "A synced issue", created_at: Time.now, seen_at: nil, tags: [])
     create(:task, *traits, title:, list: "external", created_at:, tags:).tap do |task|
       create(:task_source, task:, seen_at:, url: issue_url)

@@ -42,9 +42,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
     before { sign_in_to_admin }
 
     describe "the line on work sessions" do
-      def act(task, action, **params)
-        post("/admin/tasks/#{task.id}/#{action}", _csrf_token: admin_csrf_token, **params)
-      end
+      def act(task, action, **) = admin_post("/admin/tasks/#{task.id}/#{action}", **)
 
       def after(action)
         params = action == "schedule" ? { sprint_on: (today + 1).iso8601 } : {}

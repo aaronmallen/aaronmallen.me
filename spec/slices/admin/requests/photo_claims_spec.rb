@@ -11,9 +11,6 @@ RSpec.describe "Admin photo claims", type: :request do
   def keys = Media::Slice["relations.photos"].to_a.map { it[:key] }
 
   def markdown(*photos) = photos.map { "![A photo](/media/#{it.key})" }.join("\n\n")
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def stub_store_delete(*photos) = photos.each { stub_request(:delete, media_store_url(it.key)) }
 
   before do
@@ -26,9 +23,9 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def article = post_queries.all.first
 
-    def save(**fields) = send_to("/admin/posts", intent: "draft", post: { title: "Hello", **fields })
+    def save(**fields) = admin_post("/admin/posts", intent: "draft", post: { title: "Hello", **fields })
 
-    def update(**fields) = send_to("/admin/posts/#{article.id}", intent: "draft", post: { title: "Hello", **fields })
+    def update(**fields) = admin_post("/admin/posts/#{article.id}", intent: "draft", post: { title: "Hello", **fields })
 
     it "claims the photos its body points to" do
       save(body: markdown(photo, other))
@@ -66,7 +63,7 @@ RSpec.describe "Admin photo claims", type: :request do
       save(body: "a cat sat here")
       edit = { original: "a cat", replacement: "#{markdown(photo)} a cat", reason: "show it" }
       Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(article.id, [edit])
-      send_to("/admin/posts/#{article.id}/suggestions/accept")
+      admin_post("/admin/posts/#{article.id}/suggestions/accept")
 
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end
@@ -76,10 +73,10 @@ RSpec.describe "Admin photo claims", type: :request do
 
       def edit = post_queries.edits_for_post(published.id).first
 
-      def revise(note) = send_to("/admin/posts/#{published.id}/edits/#{edit.id}", edit: { note: })
+      def revise(note) = admin_post("/admin/posts/#{published.id}/edits/#{edit.id}", edit: { note: })
 
       def save_published(**fields)
-        send_to("/admin/posts/#{published.id}", intent: "save", post: { title: "Hello", slug: "hello", **fields })
+        admin_post("/admin/posts/#{published.id}", intent: "save", post: { title: "Hello", slug: "hello", **fields })
       end
 
       it "claims the photo a new edit note points to" do
@@ -132,7 +129,7 @@ RSpec.describe "Admin photo claims", type: :request do
         save(body: markdown(photo, other))
       end
 
-      def remove = send_to("/admin/posts/#{article.id}/delete")
+      def remove = admin_post("/admin/posts/#{article.id}/delete")
 
       it "deletes its photos from the table and the store", :aggregate_failures do
         remove
@@ -144,7 +141,7 @@ RSpec.describe "Admin photo claims", type: :request do
       end
 
       it "keeps a photo a journal entry also claims", :aggregate_failures do
-        send_to("/admin/journal", entry: { body: markdown(photo) })
+        admin_post("/admin/journal", entry: { body: markdown(photo) })
         remove
 
         expect(keys).to eq([photo.key])
@@ -174,21 +171,21 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def entry = repo.between(from: Blog::TimeZone.today - 1, to: Blog::TimeZone.today).first
 
-    before { send_to("/admin/journal", entry: { body: markdown(photo, other) }) }
+    before { admin_post("/admin/journal", entry: { body: markdown(photo, other) }) }
 
     it "claims the photos its body points to" do
       expect(claims_of("journal_entry")).to contain_exactly([entry.id, photo.id], [entry.id, other.id])
     end
 
     it "drops the claim on a photo taken out of its body" do
-      send_to("/admin/journal/#{entry.id}", entry: { body: markdown(other) })
+      admin_post("/admin/journal/#{entry.id}", entry: { body: markdown(other) })
 
       expect(claims_of("journal_entry")).to eq([[entry.id, other.id]])
     end
 
     it "deletes its photos with it", :aggregate_failures, :commits do
       stub_store_delete(photo, other)
-      send_to("/admin/journal/#{entry.id}/delete")
+      admin_post("/admin/journal/#{entry.id}/delete")
 
       expect(keys).to be_empty
       expect(a_request(:delete, media_store_url(photo.key))).to have_been_made
@@ -198,7 +195,7 @@ RSpec.describe "Admin photo claims", type: :request do
   describe "a review note" do
     def note = Record::Slice["relations.review_notes"].to_a.first
 
-    def save(body) = send_to("/admin/review/note", day: "2026-09-20", note: { body: })
+    def save(body) = admin_post("/admin/review/note", day: "2026-09-20", note: { body: })
 
     before { save(markdown(photo, other)) }
 
@@ -218,22 +215,22 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def task = tasks.to_a.first
 
-    before { send_to("/admin/tasks", filter: "next", task: { title: "Fix the gutter", note: markdown(photo) }) }
+    before { admin_post("/admin/tasks", filter: "next", task: { title: "Fix the gutter", note: markdown(photo) }) }
 
     it "claims the photos its note points to" do
       expect(claims_of("task")).to eq([[task[:id], photo.id]])
     end
 
     it "drops the claim on a photo taken out of its note" do
-      send_to("/admin/tasks/#{task[:id]}", filter: "next", task: { title: "Fix the gutter", note: markdown(other) })
+      admin_post("/admin/tasks/#{task[:id]}", filter: "next", task: { title: "Fix the gutter", note: markdown(other) })
 
       expect(claims_of("task")).to eq([[task[:id], other.id]])
     end
 
     it "deletes its photos and its comments' photos with it", :aggregate_failures, :commits do
       stub_store_delete(photo, other)
-      send_to("/admin/tasks/#{task[:id]}/comments", filter: "next", comment: { body: markdown(other) })
-      send_to("/admin/tasks/#{task[:id]}/delete", filter: "next")
+      admin_post("/admin/tasks/#{task[:id]}/comments", filter: "next", comment: { body: markdown(other) })
+      admin_post("/admin/tasks/#{task[:id]}/delete", filter: "next")
 
       expect(keys).to be_empty
       expect(claims.count).to eq(0)
@@ -248,21 +245,21 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def path = "/admin/tasks/#{task.id}/comments"
 
-    before { send_to(path, filter: "next", comment: { body: markdown(photo, other) }) }
+    before { admin_post(path, filter: "next", comment: { body: markdown(photo, other) }) }
 
     it "claims the photos its body points to" do
       expect(claims_of("task_comment")).to contain_exactly([comment[:id], photo.id], [comment[:id], other.id])
     end
 
     it "drops the claim on a photo taken out of its body" do
-      send_to("#{path}/#{comment[:id]}", filter: "next", comment: { body: markdown(other) })
+      admin_post("#{path}/#{comment[:id]}", filter: "next", comment: { body: markdown(other) })
 
       expect(claims_of("task_comment")).to eq([[comment[:id], other.id]])
     end
 
     it "deletes its photos with it", :aggregate_failures, :commits do
       stub_store_delete(photo, other)
-      send_to("#{path}/#{comment[:id]}/delete", filter: "next")
+      admin_post("#{path}/#{comment[:id]}/delete", filter: "next")
 
       expect(keys).to be_empty
       expect(a_request(:delete, media_store_url(other.key))).to have_been_made
@@ -277,21 +274,21 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def path = "/admin/decisions/#{decision.id}/comments"
 
-    before { send_to(path, comment: { body: markdown(photo, other) }) }
+    before { admin_post(path, comment: { body: markdown(photo, other) }) }
 
     it "claims the photos its body points to" do
       expect(claims_of("decision_comment")).to contain_exactly([comment[:id], photo.id], [comment[:id], other.id])
     end
 
     it "drops the claim on a photo taken out of its body" do
-      send_to("#{path}/#{comment[:id]}", comment: { body: markdown(other) })
+      admin_post("#{path}/#{comment[:id]}", comment: { body: markdown(other) })
 
       expect(claims_of("decision_comment")).to eq([[comment[:id], other.id]])
     end
 
     it "deletes its photos with it", :aggregate_failures, :commits do
       stub_store_delete(photo, other)
-      send_to("#{path}/#{comment[:id]}/delete")
+      admin_post("#{path}/#{comment[:id]}/delete")
 
       expect(keys).to be_empty
       expect(a_request(:delete, media_store_url(other.key))).to have_been_made
@@ -305,9 +302,9 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def path = "/admin/decisions/#{decision[:id]}"
 
-    def update(problem, note: "") = send_to(path, decision: { title: "Pick a host", problem:, note: })
+    def update(problem, note: "") = admin_post(path, decision: { title: "Pick a host", problem:, note: })
 
-    before { send_to("/admin/decisions", decision: { title: "Pick a host", problem: markdown(photo) }) }
+    before { admin_post("/admin/decisions", decision: { title: "Pick a host", problem: markdown(photo) }) }
 
     it "claims the photos its problem points to" do
       expect(claims_of("decision")).to eq([[decision[:id], photo.id]])
@@ -320,7 +317,7 @@ RSpec.describe "Admin photo claims", type: :request do
     end
 
     it "claims the photo an edit note points to" do
-      send_to("#{path}/drop", decision: { reason: "No need" })
+      admin_post("#{path}/drop", decision: { reason: "No need" })
       update("text only", note: markdown(other))
 
       expect(claims_of("decision")).to eq([[decision[:id], other.id]])
@@ -329,15 +326,15 @@ RSpec.describe "Admin photo claims", type: :request do
     %w[drop resolve].each do |kind|
       it "claims the photo its #{kind} reason points to" do
         option = create(:decision_option, decision_id: decision[:id], body: "")
-        send_to("#{path}/#{kind}", decision: { option_id: option.id, reason: markdown(other) })
+        admin_post("#{path}/#{kind}", decision: { option_id: option.id, reason: markdown(other) })
 
         expect(claims_of("decision")).to contain_exactly([decision[:id], photo.id], [decision[:id], other.id])
       end
     end
 
     it "claims the photo its reopen reason points to" do
-      send_to("#{path}/drop", decision: { reason: "No need" })
-      send_to("#{path}/reopen", decision: { reason: markdown(other) })
+      admin_post("#{path}/drop", decision: { reason: "No need" })
+      admin_post("#{path}/reopen", decision: { reason: markdown(other) })
 
       expect(claims_of("decision")).to contain_exactly([decision[:id], photo.id], [decision[:id], other.id])
     end
@@ -359,21 +356,21 @@ RSpec.describe "Admin photo claims", type: :request do
 
     def path = "/admin/decisions/#{decision.id}/options"
 
-    before { send_to(path, option: { title: "Good Job", body: markdown(photo, other) }) }
+    before { admin_post(path, option: { title: "Good Job", body: markdown(photo, other) }) }
 
     it "claims the photos its body points to" do
       expect(claims_of("decision_option")).to contain_exactly([option[:id], photo.id], [option[:id], other.id])
     end
 
     it "drops the claim on a photo taken out of its body" do
-      send_to("#{path}/#{option[:id]}", option: { title: "Good Job", body: markdown(other), note: "" })
+      admin_post("#{path}/#{option[:id]}", option: { title: "Good Job", body: markdown(other), note: "" })
 
       expect(claims_of("decision_option")).to eq([[option[:id], other.id]])
     end
 
     it "claims the photo its edit note points to for the decision" do
-      send_to("/admin/decisions/#{decision.id}/drop", decision: { reason: "No need" })
-      send_to("#{path}/#{option[:id]}", option: { title: "Good Job", body: "text only", note: markdown(other) })
+      admin_post("/admin/decisions/#{decision.id}/drop", decision: { reason: "No need" })
+      admin_post("#{path}/#{option[:id]}", option: { title: "Good Job", body: "text only", note: markdown(other) })
 
       expect(claims_of("decision")).to eq([[decision.id, other.id]])
     end

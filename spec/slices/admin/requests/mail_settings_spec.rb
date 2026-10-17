@@ -20,8 +20,6 @@ RSpec.describe "Admin mail settings", type: :request do
     page.all(".mail-row-subject").map { it.text.sub(/ · \d+\z/, "") }
   end
 
-  def page = Capybara.string(last_response.body)
-
   def save(**) = post("/admin/mail/settings", { _csrf_token: admin_csrf_token, ** })
 
   def why(thread)

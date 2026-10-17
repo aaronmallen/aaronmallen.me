@@ -9,8 +9,6 @@ RSpec.describe "API reading a tag", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   def titles(answer, kind) = answer.fetch(kind).map { it.fetch("title") }
 
   describe "GET /api/v1/tags/:name" do

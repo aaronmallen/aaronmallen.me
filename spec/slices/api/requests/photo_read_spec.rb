@@ -10,8 +10,6 @@ RSpec.describe "API reading a photo", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   describe "with the store connected" do
     before do
       connect_media_store

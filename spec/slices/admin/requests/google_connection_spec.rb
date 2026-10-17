@@ -50,8 +50,6 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def mail_scope = "https://mail.google.com/"
 
-  def page = Capybara.string(last_response.body)
-
   def pickable = page.all("#connect-service .svc-pick .svc-line-name", visible: :all).map(&:text)
 
   def read(account_id) = client.get(steps_url, account: account_id)

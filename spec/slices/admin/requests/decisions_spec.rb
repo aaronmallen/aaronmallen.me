@@ -6,14 +6,11 @@ RSpec.describe "Admin decisions", type: :request do
   let(:decision) { create(:decision, title: "Pick a queue", problem: "Jobs **pile** up") }
   let(:option) { create(:decision_option, decision_id: decision.id, title: "Sidekiq", body: "Runs *today*") }
 
-  def close(kind, **fields) = send_to("/admin/decisions/#{decision.id}/#{kind}", decision: fields)
+  def close(kind, **fields) = admin_post("/admin/decisions/#{decision.id}/#{kind}", decision: fields)
 
   def events(id = decision.id) = Decisions::Slice["relations.decision_events"].where(decision_id: id).order(:id).to_a
 
   def reload(id = decision.id) = Decisions::Slice["repos.decision_queries"].by_id(id)
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def t(key, **) = i18n.t(key, **)
 
   def titles = page.all(".decision-row .decision-row-title").map(&:text)
@@ -175,7 +172,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "saves it and goes to its page", :aggregate_failures do
-        send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
+        admin_post("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
         opened = Decisions::Slice["relations.decisions"].to_a.last
 
         expect(opened).to include(title: "Pick a host", problem: "The Pi is slow", status: "open")
@@ -183,20 +180,20 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "saves its tags" do
-        send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow", tags: "hosting" })
+        admin_post("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow", tags: "hosting" })
 
         expect(reload(Decisions::Slice["relations.decisions"].to_a.last[:id]).tags.map(&:name)).to eq(%w[hosting])
       end
 
       it "says so" do
-        send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
+        admin_post("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: t("decisions_page.toasts.opened"))
       end
 
       it "refuses a blank problem beside the field", :aggregate_failures do
-        send_to("/admin/decisions", decision: { title: "Pick a host", problem: " " })
+        admin_post("/admin/decisions", decision: { title: "Pick a host", problem: " " })
 
         expect(last_response.status).to eq(422)
         expect(page.find_by_id("decision-problem-error").text)
@@ -205,7 +202,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "ties the problem field to its error" do
-        send_to("/admin/decisions", decision: { title: "Pick a host", problem: " " })
+        admin_post("/admin/decisions", decision: { title: "Pick a host", problem: " " })
 
         expect(page).to have_css("#decision-problem[aria-invalid='true'][aria-describedby='decision-problem-error']")
       end
@@ -221,7 +218,7 @@ RSpec.describe "Admin decisions", type: :request do
 
         def links = Links::Slice["relations.record_links"].to_a
 
-        def open_one = send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
+        def open_one = admin_post("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
 
         def opened_id = Decisions::Slice["relations.decisions"].to_a.last[:id]
 
@@ -330,14 +327,14 @@ RSpec.describe "Admin decisions", type: :request do
 
     describe "adding an option" do
       it "saves it and comes back to the decision", :aggregate_failures do
-        send_to("/admin/decisions/#{decision.id}/options", option: { title: "Good Job", body: "Uses Postgres" })
+        admin_post("/admin/decisions/#{decision.id}/options", option: { title: "Good Job", body: "Uses Postgres" })
 
         expect(reload.options.map { [it.title, it.body] }).to eq([["Good Job", "Uses Postgres"]])
         expect(last_response.location).to end_with("/admin/decisions/#{decision.id}")
       end
 
       it "refuses a blank title on the page and keeps what was typed", :aggregate_failures do
-        send_to("/admin/decisions/#{decision.id}/options", option: { title: " ", body: "Uses Postgres" })
+        admin_post("/admin/decisions/#{decision.id}/options", option: { title: " ", body: "Uses Postgres" })
 
         expect(last_response.status).to eq(422)
         expect(page).to have_css("#decision-option-new-title-error")
@@ -346,7 +343,7 @@ RSpec.describe "Admin decisions", type: :request do
 
       it "turns away a closed decision" do
         close(:drop, reason: "No need")
-        send_to("/admin/decisions/#{decision.id}/options", option: { title: "Late", body: "" })
+        admin_post("/admin/decisions/#{decision.id}/options", option: { title: "Late", body: "" })
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: t("decisions_page.toasts.closed"))
@@ -354,7 +351,7 @@ RSpec.describe "Admin decisions", type: :request do
     end
 
     describe "editing an option" do
-      def edit(**fields) = send_to("/admin/decisions/#{decision.id}/options/#{option.id}", option: fields)
+      def edit(**fields) = admin_post("/admin/decisions/#{decision.id}/options/#{option.id}", option: fields)
 
       it "saves it on an open decision without a note" do
         edit(title: "Sidekiq 8", body: "Runs today")
@@ -364,14 +361,14 @@ RSpec.describe "Admin decisions", type: :request do
 
       it "answers 404 for an option on another decision" do
         other = create(:decision_option, title: "Elsewhere")
-        send_to("/admin/decisions/#{decision.id}/options/#{other.id}", option: { title: "Mine", body: "" })
+        admin_post("/admin/decisions/#{decision.id}/options/#{other.id}", option: { title: "Mine", body: "" })
 
         expect(last_response.status).to eq(404)
       end
     end
 
     describe "editing an option on a closed decision" do
-      def edit(**fields) = send_to("/admin/decisions/#{decision.id}/options/#{option.id}", option: fields)
+      def edit(**fields) = admin_post("/admin/decisions/#{decision.id}/options/#{option.id}", option: fields)
 
       before { close(:resolve, option_id: option.id, reason: "It runs") }
 
@@ -414,7 +411,7 @@ RSpec.describe "Admin decisions", type: :request do
     end
 
     describe "editing the decision" do
-      def update(**fields) = send_to("/admin/decisions/#{decision.id}", decision: fields)
+      def update(**fields) = admin_post("/admin/decisions/#{decision.id}", decision: fields)
 
       it "shows the form with no note while open", :aggregate_failures do
         get "/admin/decisions/#{decision.id}/edit"
@@ -431,7 +428,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "answers 404 for a decision that isn't there" do
-        send_to("/admin/decisions/999999", decision: { title: "Pick a queue", problem: "Jobs pile up" })
+        admin_post("/admin/decisions/999999", decision: { title: "Pick a queue", problem: "Jobs pile up" })
 
         expect(last_response.status).to eq(404)
       end
@@ -461,7 +458,7 @@ RSpec.describe "Admin decisions", type: :request do
     end
 
     describe "editing a closed decision" do
-      def update(**fields) = send_to("/admin/decisions/#{decision.id}", decision: fields)
+      def update(**fields) = admin_post("/admin/decisions/#{decision.id}", decision: fields)
 
       before { close(:drop, reason: "No need") }
 
@@ -634,7 +631,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       def rename
-        send_to("/admin/decisions/#{decision.id}", decision: { title: "Pick a job queue", problem: "Jobs pile up" })
+        admin_post("/admin/decisions/#{decision.id}", decision: { title: "Pick a job queue", problem: "Jobs pile up" })
       end
 
       def task(id = task_id) = Tasks::Slice["relations.tasks"].by_pk(id).one

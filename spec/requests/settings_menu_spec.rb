@@ -6,8 +6,6 @@ RSpec.describe "Settings menu", type: :request do
       "form[action='/admin/sign-out'][method='post'] button.settings-menu-option[type='submit']"
   end
 
-  def page = Capybara.string(last_response.body)
-
   def panel = page.find_by_id("settings-menu", visible: :all)
 
   def sign_out_from_menu(path, return_to: nil)

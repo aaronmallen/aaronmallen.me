@@ -8,11 +8,9 @@ RSpec.describe "Marking a synced task seen", type: :request do
 
   def send_at(time, path, **)
     allow(Time).to receive(:now).and_return(time)
-    send_to(path, **)
+    admin_post(path, **)
     allow(Time).to receive(:now).and_call_original
   end
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
   def synced(*traits, **attributes)
     task = create(:task, *traits, list: "external", **attributes)
@@ -25,35 +23,35 @@ RSpec.describe "Marking a synced task seen", type: :request do
   describe "moving a synced task" do
     it "marks it seen when it moves to another list" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/move/someday")
+      admin_post("/admin/tasks/#{task.id}/move/someday")
 
       expect(seen_at(task)).not_to be_nil
     end
 
     it "marks it seen when it moves into Today" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/move/today")
+      admin_post("/admin/tasks/#{task.id}/move/today")
 
       expect(seen_at(task)).not_to be_nil
     end
 
     it "marks it seen when it is scheduled" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
+      admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: (today + 2).iso8601)
 
       expect(seen_at(task)).not_to be_nil
     end
 
     it "marks it seen when it starts from a list" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/start")
+      admin_post("/admin/tasks/#{task.id}/start")
 
       expect(seen_at(task)).not_to be_nil
     end
 
     it "leaves it unseen for a move to the list it is already in" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/move/external")
+      admin_post("/admin/tasks/#{task.id}/move/external")
 
       expect(seen_at(task)).to be_nil
     end
@@ -62,7 +60,7 @@ RSpec.describe "Marking a synced task seen", type: :request do
       task = synced
       first = Time.at(Time.now.to_i - 600)
       send_at(first, "/admin/tasks/#{task.id}/move/someday")
-      send_to("/admin/tasks/#{task.id}/move/next")
+      admin_post("/admin/tasks/#{task.id}/move/next")
 
       expect(seen_at(task)).to eq(first)
     end
@@ -71,14 +69,14 @@ RSpec.describe "Marking a synced task seen", type: :request do
   describe "changing a synced task's tags" do
     it "marks it seen when a tag is added" do
       task = synced
-      send_to("/admin/tasks/#{task.id}", filter: "external", task: { **fields, tags: "work" })
+      admin_post("/admin/tasks/#{task.id}", filter: "external", task: { **fields, tags: "work" })
 
       expect(seen_at(task)).not_to be_nil
     end
 
     it "leaves it unseen when a save keeps the tags" do
       task = synced
-      send_to("/admin/tasks/#{task.id}", filter: "external", task: { **fields, tags: "" })
+      admin_post("/admin/tasks/#{task.id}", filter: "external", task: { **fields, tags: "" })
 
       expect(seen_at(task)).to be_nil
     end
@@ -87,7 +85,7 @@ RSpec.describe "Marking a synced task seen", type: :request do
   describe "a status change that keeps the task in place" do
     it "leaves it unseen" do
       task = synced
-      send_to("/admin/tasks/#{task.id}/complete")
+      admin_post("/admin/tasks/#{task.id}/complete")
 
       expect(seen_at(task)).to be_nil
     end

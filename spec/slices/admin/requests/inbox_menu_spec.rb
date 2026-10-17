@@ -4,10 +4,6 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:now) { Time.utc(2026, 10, 7, 15, 10) }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
-
   def snoozes(kind, id) = page.all("form[action='/admin/inbox/#{kind}/#{id}/snooze']", visible: :all)
 
   before do
@@ -28,7 +24,7 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
     it "adds Snooze to the task menu with the quick picks", :aggregate_failures do
       get "/admin/tasks/#{task.id}/menu", origin: "inbox", return_to: "/admin/inbox"
 
-      expect(items).to include("Open", "Mark seen", "Snooze", "Later today", "Tomorrow morning", "Next week")
+      expect(menu_items).to include("Open", "Mark seen", "Snooze", "Later today", "Tomorrow morning", "Next week")
       expect(snoozes("task", task.id).map { it.find("input[name=pick]", visible: :all).value })
         .to eq(%w[2026-10-07T13:00 2026-10-08T08:00 2026-10-12T08:00])
     end
@@ -36,7 +32,7 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
     it "leaves Snooze out of the task menu elsewhere" do
       get "/admin/tasks/#{task.id}/menu", origin: "tasks"
 
-      expect(items).not_to include("Snooze")
+      expect(menu_items).not_to include("Snooze")
     end
   end
 
@@ -65,7 +61,7 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
         expected = ["Open source", "Approve", "Ignore", "Mark spam", "Snooze", "Later today", "Tomorrow morning",
                     "Next week", "Copy source link", "Go to post"]
 
-        expect(items).to eq(expected)
+        expect(menu_items).to eq(expected)
       end
 
       it "opens, copies and goes to the right places", :aggregate_failures do
@@ -87,12 +83,12 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
       approved = create(:webmention, :approved)
       get "/admin/webmentions/#{approved.id}/menu"
 
-      expect(items).to include("Ignore", "Mark spam")
-      expect(items).not_to include("Approve", "Snooze")
+      expect(menu_items).to include("Ignore", "Mark spam")
+      expect(menu_items).not_to include("Approve", "Snooze")
     end
 
     it "lands a verdict back on the page the menu opened on with today's toast", :aggregate_failures do
-      act("/admin/webmentions/#{mention.id}/approve", return_to: "/admin/inbox")
+      admin_post("/admin/webmentions/#{mention.id}/approve", return_to: "/admin/inbox")
 
       expect(last_response.location).to eq("/admin/inbox")
       follow_redirect!
@@ -100,7 +96,9 @@ RSpec.describe "Admin inbox and webmention row menus", type: :request do
     end
 
     it "lands a snooze back on the page the menu opened on" do
-      act("/admin/inbox/webmention/#{mention.id}/snooze", pick: "2026-10-08T08:00", return_to: "/admin/webmentions")
+      admin_post(
+        "/admin/inbox/webmention/#{mention.id}/snooze", pick: "2026-10-08T08:00", return_to: "/admin/webmentions",
+      )
 
       expect(last_response.location).to eq("/admin/webmentions")
     end

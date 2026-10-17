@@ -6,7 +6,7 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
 
   def act(name, mentions, **params)
     ids = mentions.map { it.is_a?(Integer) ? it : it.id }
-    post "/admin/webmentions/bulk", { _csrf_token: admin_csrf_token, act: name, ids:, status: "pending", **params }
+    admin_post "/admin/webmentions/bulk", act: name, ids:, status: "pending", **params
   end
 
   def gone_id = mentions(1).first.id.tap { relation.by_pk(it).delete }

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin activity", :frozen_clock, type: :request do
-  let(:page) { Capybara.string(last_response.body) }
   let(:today) { Blog::TimeZone.today }
   let(:week_ago) { today - 6 }
 
@@ -694,8 +693,6 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       def newer_href = page.find("a.pager-link[rel='prev']")[:href]
 
       def older_href = page.find("a.pager-link[rel='next']")[:href]
-
-      def page = Capybara.string(last_response.body)
 
       before do
         lower_page_size(:admin, to: 2)

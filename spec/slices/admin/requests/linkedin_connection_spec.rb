@@ -22,8 +22,6 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
 
   def lifetime = 5_184_000
 
-  def page = Capybara.string(last_response.body)
-
   def pickable = page.all("#connect-service .svc-pick .svc-line-name", visible: :all).map(&:text)
 
   def start_connect

@@ -3,8 +3,6 @@
 RSpec.describe "API tags", type: :request do
   def mail_tagged(name) = create(:message).tap { Mail::Slice["repos.message_tag_mutations"].add(it.id, name) }
 
-  def status = last_response.status
-
   def tag_queries = Tags::Slice["repos.tag_queries"]
 
   describe "GET /api/v1/tags" do

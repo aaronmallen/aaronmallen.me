@@ -23,8 +23,6 @@ RSpec.describe "API reading a project", type: :request do
     }
   end
 
-  def status = last_response.status
-
   def whole_project
     create(
       :project, :archived, :private,

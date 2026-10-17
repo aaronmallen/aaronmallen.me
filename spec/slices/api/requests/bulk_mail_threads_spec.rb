@@ -19,8 +19,6 @@ RSpec.describe "API bulk mail thread actions", type: :request do
 
   def repo = Mail::Slice["repos.message_queries"]
 
-  def status = last_response.status
-
   def status_of(message) = repo.by_id(message.id)&.status
 
   def tag_names(message) = repo.by_id(message.id).tags.map(&:name)

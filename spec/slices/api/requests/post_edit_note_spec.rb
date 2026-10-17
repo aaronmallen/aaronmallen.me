@@ -18,8 +18,6 @@ RSpec.describe "API revising a post's edit note", type: :request do
     { "id" => edit.id, "note" => saved[:note], **%i[created_at updated_at].to_h { [it.to_s, saved[it].utc.iso8601] } }
   end
 
-  def status = last_response.status
-
   let(:published) { create(:post, :published) }
   let(:edit) { create(:post_edit, post_id: published.id, note: "Fixed a typo") }
 

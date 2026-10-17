@@ -14,11 +14,11 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
   def find_link(query, id: task.id) = get("/admin/tasks/#{id}", filter: "next", link_q: query)
 
   def find_link_as(kind, query)
-    send_to("/admin/tasks/#{task.id}/links", filter: "next", link_find: "1", link_q: query, link: { kind: })
+    admin_post("/admin/tasks/#{task.id}/links", filter: "next", link_find: "1", link_q: query, link: { kind: })
   end
 
   def link(kind: "blocks", other_id: other.id)
-    send_to("/admin/tasks/#{task.id}/links", filter: "next", link: { kind:, other_id: other_id.to_s })
+    admin_post("/admin/tasks/#{task.id}/links", filter: "next", link: { kind:, other_id: other_id.to_s })
   end
 
   def link_label(code) = i18n.t(["ui.components.tasks.link_row.labels", code].join("."))
@@ -26,11 +26,6 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
   def links = Tasks::Slice["relations.task_links"]
 
   def row(title) = page.find(".task-title", exact_text: title).ancestor(".task")
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
-  end
-
   def targets = page.all(".task-link-target").map { it.find(".record-key").text }
 
   describe "the counts on a row" do
@@ -125,21 +120,21 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     end
 
     it "goes once the blocker is complete" do
-      send_to("/admin/tasks/#{other.id}/complete", filter: "next")
+      admin_post("/admin/tasks/#{other.id}/complete", filter: "next")
       get "/admin/tasks", filter: "next"
 
       expect(pill?("Ship the links")).to be(false)
     end
 
     it "goes once the blocker is canceled" do
-      send_to("/admin/tasks/#{other.id}/cancel", filter: "next")
+      admin_post("/admin/tasks/#{other.id}/cancel", filter: "next")
       get "/admin/tasks", filter: "next"
 
       expect(pill?("Ship the links")).to be(false)
     end
 
     it "hides blocking once the blocked task is canceled" do
-      send_to("/admin/tasks/#{task.id}/cancel", filter: "next")
+      admin_post("/admin/tasks/#{task.id}/cancel", filter: "next")
       get "/admin/tasks", filter: "next"
 
       expect(blocking?("Write the migration")).to be(false)
@@ -160,13 +155,13 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     end
 
     it "still lets the blocked task move" do
-      send_to("/admin/tasks/#{task.id}/move/someday", filter: "next")
+      admin_post("/admin/tasks/#{task.id}/move/someday", filter: "next")
 
       expect(repo.by_id(task.id).list).to eq("someday")
     end
 
     it "still lets the blocked task complete" do
-      send_to("/admin/tasks/#{task.id}/complete", filter: "next")
+      admin_post("/admin/tasks/#{task.id}/complete", filter: "next")
 
       expect(repo.by_id(task.id).status).to eq("done")
     end
@@ -399,8 +394,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
 
     it "shows a waiting task's page with the error, keeping the upcoming tab", :aggregate_failures do
       waiting = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
-      send_to("/admin/tasks/#{waiting.id}/links", filter: "upcoming",
-                                                  link: { kind: "blocks", other_id: waiting.id.to_s })
+      admin_post("/admin/tasks/#{waiting.id}/links", filter: "upcoming", link: { kind: "blocks", other_id: waiting.id })
 
       expect(page).to have_css("#task-#{waiting.id}-link-other-id-error")
       expect(page.find(".task-drawer-foot a[data-task-close]")["href"]).to eq("/admin/tasks?filter=upcoming")
@@ -408,7 +402,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
 
     it "comes back to Today when it was added there" do
       link_from_today = { filter: "today", origin: "today", link: { kind: "blocks", other_id: other.id.to_s } }
-      send_to("/admin/tasks/#{task.id}/links", **link_from_today)
+      admin_post("/admin/tasks/#{task.id}/links", **link_from_today)
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
     end
@@ -486,7 +480,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     end
 
     def unlink(id = task.id, other_id = other.id)
-      send_to("/admin/tasks/#{id}/links/#{other_id}/delete", filter: "next")
+      admin_post("/admin/tasks/#{id}/links/#{other_id}/delete", filter: "next")
     end
 
     it "offers a remove on each link on the task's page" do

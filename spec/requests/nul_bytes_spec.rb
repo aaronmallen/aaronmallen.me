@@ -10,10 +10,6 @@ RSpec.describe "Text holding a NUL byte", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def page = Capybara.string(last_response.body)
-
-  def status = last_response.status
-
   def views = SavedViews::Slice["repos.saved_view_queries"].all
 
   before { create(:task, title: "Ship the deploy", note: "deploy") }

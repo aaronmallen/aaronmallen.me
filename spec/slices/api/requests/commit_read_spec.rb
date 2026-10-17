@@ -19,8 +19,6 @@ RSpec.describe "API reading a commit", type: :request do
     }
   end
 
-  def status = last_response.status
-
   def whole_commit
     create(
       :commit,

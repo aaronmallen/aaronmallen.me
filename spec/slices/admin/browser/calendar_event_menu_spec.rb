@@ -21,8 +21,6 @@ RSpec.describe "Admin calendar event menu", type: :feature do
 
   def menu = find("[data-context-menu]")
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before do
     sign_in_to_admin
     connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES, token: "ya29.me")
@@ -46,12 +44,12 @@ RSpec.describe "Admin calendar event menu", type: :feature do
     before { item("Delete event").click }
 
     it "asks for a second click", :aggregate_failures do
-      expect(item(translate("ui.views.calendar.event_menu.confirm_delete"))).to be_truthy
+      expect(item(admin_t("ui.views.calendar.event_menu.confirm_delete"))).to be_truthy
       expect(a_request(:delete, url)).not_to have_been_made
     end
 
     it "deletes on the second click and stays on the page", :aggregate_failures do
-      item(translate("ui.views.calendar.event_menu.confirm_delete")).click
+      item(admin_t("ui.views.calendar.event_menu.confirm_delete")).click
 
       expect(page).to have_css(".toast", text: "Deleted from Aaron")
       expect(a_request(:delete, url)).to have_been_made

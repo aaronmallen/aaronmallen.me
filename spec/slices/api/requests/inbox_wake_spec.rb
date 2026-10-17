@@ -14,8 +14,6 @@ RSpec.describe "API inbox wake", type: :request do
 
   def snoozed_message = create(:message, body: "Hi", reply_to: "a@example.com").tap { snooze(:message, it) }
 
-  def status = last_response.status
-
   def synced(title) = create(:task, title:, list: "external").tap { create(:task_source, task: it) }
 
   def wake(**body)

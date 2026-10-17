@@ -5,8 +5,6 @@ RSpec.describe "API suggestions", type: :request do
 
   def post_body(id) = Posts::Slice["repos.post_queries"].by_id(id).body
 
-  def status = last_response.status
-
   def suggest(post, *edits) = suggestion_mutations.replace_for_post(post.id, edits)
 
   def suggestion_mutations = Suggestions::Slice["repos.suggestion_mutations"]

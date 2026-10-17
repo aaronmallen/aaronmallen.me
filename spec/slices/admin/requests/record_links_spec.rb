@@ -12,7 +12,7 @@ RSpec.describe "Admin record links", type: :request do
   def kind_name(kind) = i18n.t(["ui.components.record_links.kinds", kind].join("."))
 
   def link(other_kind: "task", other_id: task.id, **)
-    send_to(records_path, record: { other_kind:, other_id: other_id.to_s }, **fields, **)
+    admin_post(records_path, record: { other_kind:, other_id: other_id.to_s }, **fields, **)
   end
 
   def link_records(other_kind, other_id)
@@ -28,13 +28,10 @@ RSpec.describe "Admin record links", type: :request do
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
 
   def section = page.find(".record-links")
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def show(**query) = get(page_path, **fields, **query)
 
   def unlink(other_kind = "task", other_id = task.id)
-    send_to("#{records_path}/#{other_kind}/#{other_id}/delete", **fields)
+    admin_post("#{records_path}/#{other_kind}/#{other_id}/delete", **fields)
   end
 
   shared_examples "a page with a Linked section" do
@@ -126,7 +123,7 @@ RSpec.describe "Admin record links", type: :request do
       end
 
       it "answers 404 for a record that isn't there" do
-        send_to(records_path.sub("/#{record.id}/", "/0/"), record: { other_kind: "task", other_id: task.id.to_s })
+        admin_post(records_path.sub("/#{record.id}/", "/0/"), record: { other_kind: "task", other_id: task.id.to_s })
 
         expect(last_response.status).to eq(404)
       end
@@ -391,7 +388,7 @@ RSpec.describe "Admin record links", type: :request do
       end
 
       it "keeps the section on a refused edit" do
-        send_to("/admin/journal/#{record.id}", entry: { body: " " })
+        admin_post("/admin/journal/#{record.id}", entry: { body: " " })
 
         expect(page).to have_css(".journal-entry .journal-links .record-links")
       end

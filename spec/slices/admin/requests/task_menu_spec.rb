@@ -8,13 +8,9 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
 
   def form(route) = page.first("form[action='#{route}']", visible: :all)
 
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
-
   def menu(task, **params) = get("/admin/tasks/#{task.id}/menu", params)
 
   def tag(task, *names) = Tasks::Slice["repos.task_mutations"].replace_tags(task.id, names)
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -43,8 +39,8 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
         expected = ["Open", "Start", "Complete", "Pull into today's sprint", "Move to", "Schedule", "Tags", "Copy",
                     "Cancel task", "Delete"]
 
-        expect(items).to include(*expected)
-        expect(items).not_to include("Reopen", "Pause", "Mark seen", "Open issue")
+        expect(menu_items).to include(*expected)
+        expect(menu_items).not_to include("Reopen", "Pause", "Mark seen", "Open issue")
       end
 
       it "opens the task with the row's tab" do
@@ -71,7 +67,7 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       end
 
       it "asks before it deletes" do
-        confirm = translate("ui.components.context_menu.confirm.delete")
+        confirm = admin_t("ui.components.context_menu.confirm.delete")
 
         expect(page).to have_css("button[data-confirm-inline='#{confirm}']")
       end
@@ -102,14 +98,14 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       it "offers pause in place of start", :aggregate_failures do
         menu(create(:task, :in_sprint, :in_progress, sprint_id: sprint.id))
 
-        expect(items).to include(translate("ui.views.tasks.menu.pause"))
-        expect(items).not_to include(translate("ui.views.tasks.menu.start"))
+        expect(menu_items).to include(admin_t("ui.views.tasks.menu.pause"))
+        expect(menu_items).not_to include(admin_t("ui.views.tasks.menu.start"))
       end
 
       it "leaves out the pull into today's sprint" do
         menu(create(:task, :in_sprint, sprint_id: sprint.id))
 
-        expect(items).not_to include(translate("ui.components.tasks.menu_plan.pull"))
+        expect(menu_items).not_to include(admin_t("ui.components.tasks.menu_plan.pull"))
       end
     end
 
@@ -117,8 +113,8 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       before { menu(create(:task, :done)) }
 
       it "offers reopen and nothing that needs it open", :aggregate_failures do
-        expect(items).to include(translate("ui.views.tasks.menu.reopen"))
-        expect(items).not_to include("Start", "Complete", "Cancel task", "Move to", "Schedule")
+        expect(menu_items).to include(admin_t("ui.views.tasks.menu.reopen"))
+        expect(menu_items).not_to include("Start", "Complete", "Cancel task", "Move to", "Schedule")
       end
     end
 
@@ -163,7 +159,7 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
     describe "acting from the menu" do
       let(:task) { create(:task) }
 
-      def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, return_to: "/admin", **params })
+      def act(path, **) = admin_post(path, return_to: "/admin", **)
 
       it "lands a move back on the page the menu opened on" do
         act("/admin/tasks/#{task.id}/move/someday")
@@ -182,7 +178,7 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
         act("/admin/tasks/bulk", act: "tag", ids: [task.id], tag: "no good")
         follow_redirect!
 
-        expect(toast).to eq(translate("bulk_refusals.tag_format"))
+        expect(toast).to eq(admin_t("bulk_refusals.tag_format"))
       end
 
       it "lands a seen issue back on the page the menu opened on" do

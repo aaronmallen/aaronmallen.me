@@ -7,7 +7,7 @@ RSpec.describe "Admin tasks", type: :feature do
   def active = evaluate_script("document.activeElement.textContent.trim()")
 
   def cancel_task(scope)
-    scope.click_button(translate("ui.components.tasks.controls.cancel"))
+    scope.click_button(admin_t("ui.components.tasks.controls.cancel"))
     confirm_yes
   end
 
@@ -17,7 +17,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   def complete_task(scope)
-    done = translate("ui.components.tasks.complete_form.complete")
+    done = admin_t("ui.components.tasks.complete_form.complete")
 
     scope.find("summary", text: done).click
     scope.click_button(done)
@@ -39,17 +39,17 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def modal = find("dialog#task-create[open]")
 
-  def modal_x = "button[aria-label='#{translate('ui.components.dialog.close')}']"
+  def modal_x = "button[aria-label='#{admin_t('ui.components.dialog.close')}']"
 
   def move_to(list)
-    named = translate(["task_lists.titles", list].join("."))
+    named = admin_t(["task_lists.titles", list].join("."))
 
-    translate("ui.components.tasks.controls.move", list: named)
+    admin_t("ui.components.tasks.controls.move", list: named)
   end
 
   def open_editor(title)
     open_task(title)
-    panel.click_link(translate("ui.views.tasks.show.edit"))
+    panel.click_link(admin_t("ui.views.tasks.show.edit"))
     edit_form
   end
 
@@ -75,8 +75,6 @@ RSpec.describe "Admin tasks", type: :feature do
     click_button("Save")
     close_panel
   end
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   before do
     create(:task, title: "Email the accountant")
@@ -188,7 +186,7 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "copies the key", :aggregate_failures do
-        expect(page).to have_css(".toast", text: translate("ui.components.record_key.copied.task", key:))
+        expect(page).to have_css(".toast", text: admin_t("ui.components.record_key.copied.task", key:))
         expect(page.evaluate_script("window.copiedKeys")).to eq([key])
       end
     end
@@ -243,7 +241,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "canceling a task" do
-    let(:mark) { translate("ui.components.tasks.closed.canceled") }
+    let(:mark) { admin_t("ui.components.tasks.closed.canceled") }
 
     before do
       cancel_task(find(".task", text: "Email the accountant").tap(&:hover))
@@ -258,7 +256,7 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "reopening it" do
       before do
         row = find(".task", text: "Email the accountant").tap(&:hover)
-        row.click_button(translate("ui.components.tasks.controls.reopen"))
+        row.click_button(admin_t("ui.components.tasks.controls.reopen"))
         find(".toast", text: "Reopened")
         find(".task-tabs .screen-tab", text: "next").click
       end
@@ -272,8 +270,8 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "confirming a cancel" do
-    let(:cancel) { translate("ui.components.tasks.controls.cancel") }
-    let(:message) { translate("ui.components.tasks.controls.confirm_cancel", task: "Email the accountant") }
+    let(:cancel) { admin_t("ui.components.tasks.controls.cancel") }
+    let(:message) { admin_t("ui.components.tasks.controls.confirm_cancel", task: "Email the accountant") }
     let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
 
     def focused_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
@@ -367,7 +365,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "moving an in-progress task out of today" do
-    let(:message) { translate("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next") }
+    let(:message) { admin_t("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next") }
     let(:sprint) { sprint_repo.on(today) || create(:sprint, sprint_date: today) }
     let(:task) { open_tasks.find { it.title == "Ship the screen" } }
 
@@ -439,7 +437,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "asks inline" do
-      asked = confirm_no { click_button(translate("ui.components.tasks.upcoming_sprints.drop")) }
+      asked = confirm_no { click_button(admin_t("ui.components.tasks.upcoming_sprints.drop")) }
 
       expect(asked).to start_with("Drop the sprint for")
     end
@@ -473,7 +471,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "closes on the footer's Close" do
-      panel.find(".task-drawer-foot").click_link(translate("ui.views.tasks.show.close"))
+      panel.find(".task-drawer-foot").click_link(admin_t("ui.views.tasks.show.close"))
 
       expect(page).to have_no_css("dialog#task-panel[open]").and have_current_path("/admin/tasks?filter=next")
     end
@@ -482,7 +480,7 @@ RSpec.describe "Admin tasks", type: :feature do
       watch_clipboard
       panel.find(".record-key").click
 
-      expect(page).to have_css(".toast", text: translate("ui.components.record_key.copied.task", key:))
+      expect(page).to have_css(".toast", text: admin_t("ui.components.record_key.copied.task", key:))
     end
 
     it "comes back to the list after an action in the panel", :aggregate_failures do
@@ -521,22 +519,22 @@ RSpec.describe "Admin tasks", type: :feature do
       before { open_task("Email the accountant") }
 
       it "hides the add button while the box is blank" do
-        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "  ")
+        panel.fill_in(admin_t("ui.components.comment_thread.add_label"), with: "  ")
 
-        expect(panel).to have_no_button(translate("ui.components.comment_thread.add"))
+        expect(panel).to have_no_button(admin_t("ui.components.comment_thread.add"))
       end
 
       it "shows the add button once the box holds text" do
-        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "Sent")
+        panel.fill_in(admin_t("ui.components.comment_thread.add_label"), with: "Sent")
 
-        expect(panel).to have_button(translate("ui.components.comment_thread.add"))
+        expect(panel).to have_button(admin_t("ui.components.comment_thread.add"))
       end
 
       it "adds a comment and comes back to the list", :aggregate_failures do
-        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "Sent the **forms**")
-        panel.click_button(translate("ui.components.comment_thread.add"))
+        panel.fill_in(admin_t("ui.components.comment_thread.add_label"), with: "Sent the **forms**")
+        panel.click_button(admin_t("ui.components.comment_thread.add"))
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_added"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.comment_added"))
         expect(page).to have_current_path("/admin/tasks?filter=next")
         expect(bodies).to eq(["Sent the **forms**"])
       end
@@ -549,19 +547,19 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "edits it", :aggregate_failures do
-        comment_on(panel).find("summary", text: translate("ui.components.comment_thread.edit")).click
-        comment_on(panel).fill_in(translate("ui.components.comment_thread.edit_label"), with: "Sent the forms twice")
-        comment_on(panel).click_button(translate("ui.components.comment_thread.save"))
+        comment_on(panel).find("summary", text: admin_t("ui.components.comment_thread.edit")).click
+        comment_on(panel).fill_in(admin_t("ui.components.comment_thread.edit_label"), with: "Sent the forms twice")
+        comment_on(panel).click_button(admin_t("ui.components.comment_thread.save"))
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_saved"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.comment_saved"))
         expect(bodies).to eq(["Sent the forms twice"])
       end
 
       it "deletes it once asked", :aggregate_failures do
-        comment_on(panel).click_button(translate("ui.components.comment_thread.delete"))
+        comment_on(panel).click_button(admin_t("ui.components.comment_thread.delete"))
         confirm_yes
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_deleted"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.comment_deleted"))
         expect(bodies).to be_empty
       end
     end
@@ -571,7 +569,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:task) { open_in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
 
-    def add_label = translate("ui.components.comment_thread.add_label")
+    def add_label = admin_t("ui.components.comment_thread.add_label")
 
     def bold(editor) = editor.find("[role='toolbar'] button[aria-label='Bold']").click
 
@@ -579,7 +577,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def write_and_preview(editor, label, text)
       editor.fill_in(label, with: text)
-      editor.find(".seg-option", text: translate("ui.components.markdown_editor.preview")).click
+      editor.find(".seg-option", text: admin_t("ui.components.markdown_editor.preview")).click
     end
 
     shared_examples "a comment editor" do
@@ -616,7 +614,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     describe "the note in the drawer's editor" do
-      def note_label = translate("ui.components.tasks.task_form.note")
+      def note_label = admin_t("ui.components.tasks.task_form.note")
 
       before { open_editor("Email the accountant") }
 
@@ -658,7 +656,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "comes back to Today after an action in the panel", :aggregate_failures do
-      panel.click_button(translate("ui.components.tasks.controls.start"))
+      panel.click_button(admin_t("ui.components.tasks.controls.start"))
 
       expect(page).to have_css(".toast", text: "Started")
       expect(page).to have_current_path("/admin")
@@ -716,7 +714,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "comes back to the archive after an action in the panel", :aggregate_failures do
-      panel.click_button(translate("ui.components.tasks.controls.reopen"))
+      panel.click_button(admin_t("ui.components.tasks.controls.reopen"))
 
       expect(page).to have_css(".toast", text: "Reopened")
       expect(page).to have_current_path("/admin/tasks?filter=completed")
@@ -761,7 +759,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def save_with(**fields)
       fields.each { |name, value| edit_form.fill_in(field_name(name), with: value) }
-      panel.click_button(translate("ui.views.tasks.edit.save"))
+      panel.click_button(admin_t("ui.views.tasks.edit.save"))
     end
 
     def sideways?(element) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{element})")
@@ -777,8 +775,8 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "footers Cancel and Save" do
-      expect(panel.find(".task-drawer-foot")).to have_link(translate("ui.views.tasks.edit.cancel"))
-        .and have_button(translate("ui.views.tasks.edit.save"))
+      expect(panel.find(".task-drawer-foot")).to have_link(admin_t("ui.views.tasks.edit.cancel"))
+        .and have_button(admin_t("ui.views.tasks.edit.save"))
     end
 
     it "saves and returns the drawer to reading the new values", :aggregate_failures do
@@ -808,7 +806,7 @@ RSpec.describe "Admin tasks", type: :feature do
     it "stays in the form and says what went wrong when the save fails", :aggregate_failures do
       fail_save
 
-      expect(edit_form).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
+      expect(edit_form).to have_css(".field-error", text: admin_t("ui.components.tasks.field_error.title.blank"))
       expect(edit_form).to have_css(".tag-pick-chip", text: "#not_a_tag")
       expect(page).to have_current_path("/admin/tasks?filter=next")
     end
@@ -825,14 +823,14 @@ RSpec.describe "Admin tasks", type: :feature do
     it "finds a task to link without leaving the form" do
       create(:task, title: "Book the flight")
       edit_form.find("[name='link_q']").set("flight")
-      edit_form.click_button(translate("ui.components.tasks.link_finder.find"))
+      edit_form.click_button(admin_t("ui.components.tasks.link_finder.find"))
 
       expect(panel).to have_css("[data-task-edit] .task-link-target", text: "Book the flight")
     end
 
     it "returns to reading on Cancel without saving", :aggregate_failures do
       edit_form.fill_in("task[title]", with: "Something else")
-      panel.click_link(translate("ui.views.tasks.edit.cancel"))
+      panel.click_link(admin_t("ui.views.tasks.edit.cancel"))
 
       expect(panel).to have_css("[data-task-read] h1", exact_text: "Email the accountant")
       expect(repo.by_id(task.id).title).to eq("Email the accountant")
@@ -857,7 +855,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "types an e into a field instead" do
-      panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "the")
+      panel.fill_in(admin_t("ui.components.comment_thread.add_label"), with: "the")
 
       expect(panel).to have_no_css("[data-task-edit]")
     end
@@ -882,7 +880,7 @@ RSpec.describe "Admin tasks", type: :feature do
       panel.send_keys(:escape)
 
       expect(page).to have_no_css("dialog#task-panel[open]")
-      expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
+      expect(pen_label).to eq(admin_t("ui.components.tasks.row.edit"))
     end
   end
 
@@ -912,7 +910,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def blocker = create(:task_link, from_task_id: other.id, to_task_id: task.id)
 
-    def editor(name) = translate(["ui.components.tasks.link_editor", name].join("."))
+    def editor(name) = admin_t(["ui.components.tasks.link_editor", name].join("."))
 
     def find_task(query)
       open_task("Email the accountant")
@@ -920,11 +918,11 @@ RSpec.describe "Admin tasks", type: :feature do
       click_button(finder(:find))
     end
 
-    def finder(name) = translate(["ui.components.tasks.link_finder", name].join("."))
+    def finder(name) = admin_t(["ui.components.tasks.link_finder", name].join("."))
 
     def key(task) = task.number.to_s
 
-    def kind(name) = translate(["ui.components.tasks.link_finder.kinds", name].join("."))
+    def kind(name) = admin_t(["ui.components.tasks.link_finder.kinds", name].join("."))
 
     def kind_select = find("#task-#{task.id}-link-kind")
 
@@ -950,12 +948,12 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "says so" do
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.linked"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.linked"))
       end
 
       it "shows the blocked by count while the blocker is open" do
         expect(row("Email the accountant"))
-          .to have_css(".task-meta .task-mark.pink", text: translate("ui.components.tasks.meta.blocked_by", count: 1))
+          .to have_css(".task-meta .task-mark.pink", text: admin_t("ui.components.tasks.meta.blocked_by", count: 1))
       end
 
       it "saves one blocks link from the other task", :aggregate_failures do
@@ -978,7 +976,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "adds the link with that type" do
         pick("Learn Elixir")
-        find(".toast", text: translate("tasks_page.toasts.linked"))
+        find(".toast", text: admin_t("tasks_page.toasts.linked"))
 
         expect(stored).to eq([[other.id, task.id, "blocks"]])
       end
@@ -1012,9 +1010,9 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "removes it from the task's page", :aggregate_failures do
         open_task("Email the accountant")
-        click_button(translate("ui.components.tasks.link_row.remove", key: key(other)))
+        click_button(admin_t("ui.components.tasks.link_row.remove", key: key(other)))
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.unlinked"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.unlinked"))
         expect(row("Email the accountant")).to have_no_css(".task-meta .task-mark.pink")
       end
 
@@ -1025,9 +1023,9 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "still completes while blocked" do
-        row("Email the accountant").click_button(translate("ui.components.tasks.controls.start"))
+        row("Email the accountant").click_button(admin_t("ui.components.tasks.controls.start"))
         find(".toast", text: "Started")
-        row("Email the accountant").click_button(translate("ui.components.tasks.complete_form.complete"))
+        row("Email the accountant").click_button(admin_t("ui.components.tasks.complete_form.complete"))
 
         expect(page).to have_css(".toast", text: "Done")
       end
@@ -1054,14 +1052,14 @@ RSpec.describe "Admin tasks", type: :feature do
         create(:task_link, from_task_id: other.id, to_task_id: task.id, type: "relates")
         pick("Learn Elixir")
 
-        expect(error).to have_text(translate("ui.components.tasks.field_error.other_id.taken"))
+        expect(error).to have_text(admin_t("ui.components.tasks.field_error.other_id.taken"))
       end
 
       it "says a task cannot link to itself" do
         page.execute_script("document.querySelector('.task-link-target').value = arguments[0]", task.id.to_s)
         pick("Learn Elixir")
 
-        expect(error).to have_text(translate("ui.components.tasks.field_error.other_id.self"))
+        expect(error).to have_text(admin_t("ui.components.tasks.field_error.other_id.self"))
       end
     end
   end
@@ -1080,9 +1078,9 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def linked = Links::Slice["repos.record_link_queries"].for_record("task", task.id)
 
-    def picker(name) = translate(["ui.components.record_links.picker", name].join("."))
+    def picker(name) = admin_t(["ui.components.record_links.picker", name].join("."))
 
-    def remove_label = translate("ui.components.record_links.section.remove", title: "Filing the quarterly taxes")
+    def remove_label = admin_t("ui.components.record_links.section.remove", title: "Filing the quarterly taxes")
 
     describe "in the panel" do
       before do
@@ -1098,7 +1096,7 @@ RSpec.describe "Admin tasks", type: :feature do
       it "links the record I pick", :aggregate_failures do
         find(".record-picker-target", text: "Filing the quarterly taxes").click
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.record_linked"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.record_linked"))
         expect(linked.fetch("post").map(&:id)).to eq([post_record.id])
       end
 
@@ -1126,7 +1124,7 @@ RSpec.describe "Admin tasks", type: :feature do
       it "removes it", :aggregate_failures do
         click_button(remove_label)
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.record_unlinked"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.record_unlinked"))
         expect(linked).to be_empty
       end
     end
@@ -1141,7 +1139,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "says it is linked already beside the picker" do
         expect(find(".record-picker #task-#{task.id}-record-other-id-error"))
-          .to have_text(translate("ui.components.record_links.field_error.other_id.taken"))
+          .to have_text(admin_t("ui.components.record_links.field_error.other_id.taken"))
       end
     end
   end
@@ -1152,7 +1150,7 @@ RSpec.describe "Admin tasks", type: :feature do
     it "asks with the confirmation text" do
       message = confirm_no { click_button("Delete") }
 
-      expect(message).to eq(translate("ui.views.tasks.edit.confirm_delete", task: "Email the accountant"))
+      expect(message).to eq(admin_t("ui.views.tasks.edit.confirm_delete", task: "Email the accountant"))
     end
 
     it "keeps the task when I don't confirm", :aggregate_failures do

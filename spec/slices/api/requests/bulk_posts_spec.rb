@@ -20,8 +20,6 @@ RSpec.describe "API bulk post actions", type: :request do
   def post_queries = Posts::Slice["repos.post_queries"]
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
-  def status = last_response.status
-
   def tag_names(article) = post_queries.by_id(article.id).tags.map(&:name).sort
 
   def tagged(*names, **attributes) = create(:post, **attributes).tap { post_mutations.replace_tags(it.id, names) }

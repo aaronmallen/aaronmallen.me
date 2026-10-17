@@ -29,8 +29,6 @@ RSpec.describe "API clear inbox", type: :request do
 
   def marks = [task_unseen?, Mail::Slice["repos.message_queries"].by_id(message.id).status, webmention_marks]
 
-  def status = last_response.status
-
   def synced = create(:task, :external).tap { create(:task_source, task: it) }
 
   def task_unseen? = Tasks::Slice["repos.task_queries"].by_id(task.id).source.seen_at.nil?

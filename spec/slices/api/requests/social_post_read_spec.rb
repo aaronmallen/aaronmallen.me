@@ -72,8 +72,6 @@ RSpec.describe "API reading a social post", type: :request do
     }
   end
 
-  def status = last_response.status
-
   def stored(id) = Social::Slice["repos.social_post_queries"].by_id(id)
 
   def suggest(social_post, *edits)

@@ -6,7 +6,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
 
   def act(name, tasks, **params)
     ids = tasks.map { it.is_a?(Integer) ? it : it.id }
-    post "/admin/tasks/bulk", { _csrf_token: admin_csrf_token, act: name, ids:, filter: "next", **params }
+    admin_post "/admin/tasks/bulk", act: name, ids:, filter: "next", **params
   end
 
   def event(kind, from_list: nil, to_list: nil, tag_name: nil) = { kind:, from_list:, to_list:, tag_name: }

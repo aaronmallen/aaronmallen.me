@@ -27,8 +27,6 @@ RSpec.describe "API reading a post", type: :request do
     }
   end
 
-  def status = last_response.status
-
   def suggest(article, *edits) = Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(article.id, edits)
 
   def typo(original, replacement) = { original:, replacement:, reason: "typo" }

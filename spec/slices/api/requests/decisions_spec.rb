@@ -33,8 +33,6 @@ RSpec.describe "API decisions", type: :request do
 
   def reload(decision) = Decisions::Slice["repos.decision_queries"].by_id(decision.id)
 
-  def status = last_response.status
-
   def tag(decision, *names) = Decisions::Slice["repos.decision_mutations"].replace_tags(decision.id, names)
 
   def whole_timeline

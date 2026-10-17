@@ -3,8 +3,6 @@
 RSpec.describe "An unknown failure reason", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
-  def document = JSON.parse(last_response.body)
-
   def refuse(key, operation, reason = :gone_wrong)
     replace_component(key, instance_double(operation, call: Failure(reason)))
   end

@@ -27,8 +27,6 @@ RSpec.describe "Admin task drawer", type: :feature do
 
   def sideways?(selector) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{selector})")
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before do
     12.times { create(:task_comment, task_id: task.id, body: "note #{it}\n\n#{'Long line. ' * 40}") }
     sign_in_to_admin
@@ -55,19 +53,19 @@ RSpec.describe "Admin task drawer", type: :feature do
   describe "Delete" do
     before do
       open_task("Clear the gutters")
-      panel.find(".task-drawer-foot").click_button(translate("ui.views.tasks.show.delete"))
+      panel.find(".task-drawer-foot").click_button(admin_t("ui.views.tasks.show.delete"))
     end
 
     it "asks first" do
       key = task.number.to_s
 
-      expect(confirm_ask).to have_text(translate("ui.views.tasks.show.confirm_delete", key:))
+      expect(confirm_ask).to have_text(admin_t("ui.views.tasks.show.confirm_delete", key:))
     end
 
     it "deletes the task and closes the drawer once I say yes", :aggregate_failures do
       confirm_yes
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.deleted"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.deleted"))
       expect(page).to have_no_css("dialog#task-panel[open]")
       expect(repo.by_id(task.id)).to be_nil
     end

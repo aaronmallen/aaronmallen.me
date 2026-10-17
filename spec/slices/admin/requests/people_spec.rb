@@ -5,7 +5,7 @@ RSpec.describe "Admin people", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:person_queries) { Social::Slice["repos.person_queries"] }
 
-  def add(**fields) = send_to("/admin/people", person: { **blank, **fields })
+  def add(**fields) = admin_post("/admin/people", person: { **blank, **fields })
 
   def blank = { name: "", key: "", mastodon_handle: "", bluesky_handle: "" }
 
@@ -18,8 +18,6 @@ RSpec.describe "Admin people", type: :request do
       .with(query: { handle: })
       .to_return(**json_response(did:))
   end
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
   def unknown(handle)
     stub_request(:get, "#{SocialNetworks::BLUESKY_PUBLIC}/com.atproto.identity.resolveHandle")
@@ -306,7 +304,7 @@ RSpec.describe "Admin people", type: :request do
     end
 
     describe "adding a person from the social composer" do
-      def mention(**fields) = send_to("/admin/people", reply: "mention", person: { **blank, **fields })
+      def mention(**fields) = admin_post("/admin/people", reply: "mention", person: { **blank, **fields })
 
       it "answers with the new option for the mention list", :aggregate_failures do
         mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
@@ -522,7 +520,7 @@ RSpec.describe "Admin people", type: :request do
       def save(**fields)
         stored = person.to_h.slice(:name, :key, :mastodon_handle, :bluesky_handle)
 
-        send_to("/admin/people/#{person.id}", person: stored.merge(fields))
+        admin_post("/admin/people/#{person.id}", person: stored.merge(fields))
       end
 
       it "fills the form with what is stored" do
@@ -608,7 +606,7 @@ RSpec.describe "Admin people", type: :request do
       end
 
       it "removes them and says so", :aggregate_failures do
-        send_to("/admin/people/#{person.id}/delete")
+        admin_post("/admin/people/#{person.id}/delete")
         follow_redirect!
 
         expect(everyone).to be_empty
@@ -666,8 +664,8 @@ RSpec.describe "Admin people", type: :request do
         end
 
         it "keeps the DID without a lookup when the handle stays the same" do
-          send_to("/admin/people/#{person.id}",
-                  person: { **blank, name: "Ada L", key: "ada", bluesky_handle: "ada.bsky.social" })
+          changes = { **blank, name: "Ada L", key: "ada", bluesky_handle: "ada.bsky.social" }
+          admin_post("/admin/people/#{person.id}", person: changes)
 
           expect(person_queries.by_id(person.id)).to have_attributes(name: "Ada L", bluesky_did: "did:plc:ada")
         end

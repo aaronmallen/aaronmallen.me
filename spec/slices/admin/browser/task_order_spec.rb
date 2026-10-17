@@ -59,8 +59,6 @@ RSpec.describe "Admin task order", type: :feature do
     touch(finish, nil)
   end
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   def wait_for_save(count = 1, title: "first")
     path = place_path(title)
     Timeout.timeout(5) { sleep 0.05 until request_gate.answered(path) >= count }
@@ -210,7 +208,7 @@ RSpec.describe "Admin task order", type: :feature do
     end
 
     it "says the order did not save" do
-      expect(page).to have_css(".toast-failed", text: translate("ui.components.tasks.grip.failed"))
+      expect(page).to have_css(".toast-failed", text: admin_t("ui.components.tasks.grip.failed"))
     end
   end
 

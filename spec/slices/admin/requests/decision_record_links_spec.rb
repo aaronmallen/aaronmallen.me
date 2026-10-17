@@ -14,7 +14,7 @@ RSpec.describe "Admin decision record links", type: :request do
   def kind_name(kind) = i18n.t(["ui.components.record_links.kinds", kind].join("."))
 
   def link(other_kind: "task", other_id: task.id, **)
-    send_to("/admin/decisions/#{decision.id}/records", record: { other_kind:, other_id: other_id.to_s }, **)
+    admin_post("/admin/decisions/#{decision.id}/records", record: { other_kind:, other_id: other_id.to_s }, **)
   end
 
   def link_records(kind, id)
@@ -30,10 +30,7 @@ RSpec.describe "Admin decision record links", type: :request do
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
 
   def section = page.find(".record-links")
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
-  def unlink(kind = "task", id = task.id) = send_to("/admin/decisions/#{decision.id}/records/#{kind}/#{id}/delete")
+  def unlink(kind = "task", id = task.id) = admin_post("/admin/decisions/#{decision.id}/records/#{kind}/#{id}/delete")
 
   describe "the Linked section" do
     before { sign_in_to_admin }
@@ -130,7 +127,7 @@ RSpec.describe "Admin decision record links", type: :request do
     end
 
     it "answers 404 for a decision that isn't there" do
-      send_to("/admin/decisions/0/records", record: { other_kind: "task", other_id: task.id.to_s })
+      admin_post("/admin/decisions/0/records", record: { other_kind: "task", other_id: task.id.to_s })
 
       expect(last_response.status).to eq(404)
     end
@@ -200,7 +197,7 @@ RSpec.describe "Admin decision record links", type: :request do
     end
 
     it "drops the link" do
-      send_to("/admin/tasks/#{task.id}/delete")
+      admin_post("/admin/tasks/#{task.id}/delete")
 
       expect(links.to_a).to be_empty
     end

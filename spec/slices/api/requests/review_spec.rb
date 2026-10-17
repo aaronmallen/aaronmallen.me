@@ -36,8 +36,6 @@ RSpec.describe "API review", type: :request do
     sub.split(": ", 2).last.split(", ").map { it.sub(/ \S+\z/, "") }
   end
 
-  def status = last_response.status
-
   def today = Blog::TimeZone.today
 
   def work(from, to, task: create(:task, worked_seconds: (to - from).to_i))

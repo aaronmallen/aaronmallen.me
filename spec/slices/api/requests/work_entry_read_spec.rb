@@ -18,8 +18,6 @@ RSpec.describe "API reading a work entry", type: :request do
     }
   end
 
-  def status = last_response.status
-
   describe "GET /api/v1/work_entries/:id" do
     it "answers the work entry" do
       entry = create(:work_entry, org: "Acme", role: "Staff", blurb: "built things", from_year: 2018, to_year: 2021)

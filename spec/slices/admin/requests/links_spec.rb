@@ -17,8 +17,6 @@ RSpec.describe "Admin links", type: :request do
 
   def links = relation.with_code.to_a
 
-  def page = Capybara.string(last_response.body)
-
   def relation = Shares::Slice["relations.short_links"]
 
   def shorten(accept: "text/html", **fields)

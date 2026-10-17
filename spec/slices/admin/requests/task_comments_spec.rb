@@ -7,7 +7,7 @@ RSpec.describe "Admin task comments", type: :request do
   let(:task) { create(:task, title: "Ship the comments") }
 
   def add(body, id: task.id, **returns)
-    send_to("/admin/tasks/#{id}/comments", filter: "next", **returns, comment: { body: })
+    admin_post("/admin/tasks/#{id}/comments", filter: "next", **returns, comment: { body: })
   end
 
   def bodies = comments.order(:id).to_a.map { it[:body] }
@@ -16,18 +16,13 @@ RSpec.describe "Admin task comments", type: :request do
 
   def comment_on_page(comment) = page.find("[data-task-comment='#{comment.id}']")
 
-  def delete(comment) = send_to("/admin/tasks/#{task.id}/comments/#{comment.id}/delete", filter: "next")
+  def delete(comment) = admin_post("/admin/tasks/#{task.id}/comments/#{comment.id}/delete", filter: "next")
 
   def edit(comment, body)
-    send_to("/admin/tasks/#{task.id}/comments/#{comment.id}", filter: "next", comment: { body: })
+    admin_post("/admin/tasks/#{task.id}/comments/#{comment.id}", filter: "next", comment: { body: })
   end
 
   def read = get("/admin/tasks/#{task.id}", filter: "next")
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
-  end
-
   def t(key, **) = i18n.t(key, **)
 
   describe "signed in" do
@@ -240,7 +235,7 @@ RSpec.describe "Admin task comments", type: :request do
       end
 
       it "keeps nothing when the body is missing" do
-        send_to("/admin/tasks/#{task.id}/comments", filter: "next")
+        admin_post("/admin/tasks/#{task.id}/comments", filter: "next")
 
         expect([last_response.status, bodies]).to eq([422, []])
       end
@@ -341,7 +336,7 @@ RSpec.describe "Admin task comments", type: :request do
       end
 
       it "answers 404 for a comment id that is not a number", :aggregate_failures do
-        send_to("/admin/tasks/#{task.id}/comments/nope/delete", filter: "next")
+        admin_post("/admin/tasks/#{task.id}/comments/nope/delete", filter: "next")
 
         expect([last_response.status, bodies.size]).to eq([404, 1])
       end
@@ -349,7 +344,7 @@ RSpec.describe "Admin task comments", type: :request do
 
     it "removes a task's comments with the task" do
       create(:task_comment, task_id: task.id)
-      send_to("/admin/tasks/#{task.id}/delete", filter: "next")
+      admin_post("/admin/tasks/#{task.id}/delete", filter: "next")
 
       expect(comments.to_a).to be_empty
     end

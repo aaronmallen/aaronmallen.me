@@ -8,8 +8,6 @@ RSpec.describe "Admin tag summary", type: :request do
     "/admin/journal?to=#{day}#day-#{day}"
   end
 
-  def page = Capybara.string(last_response.body)
-
   def says(key, **) = Admin::Slice["i18n"].t(["ui.views.tags.show", key].join("."), **)
 
   def tag_named(name, scope) = Tags::Slice["repos.tag_queries"].all_in(scope).find { it.name == name }

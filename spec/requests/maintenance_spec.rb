@@ -17,8 +17,6 @@ RSpec.describe "Maintenance mode", type: :request do
 
   def fetch(path, **env) = get(path, {}, { "rack.after_reply" => hooks }.merge(env))
 
-  def page = Capybara.string(last_response.body)
-
   shared_examples "a maintenance reply" do
     it "answers 503" do
       expect(last_response.status).to eq(503)

@@ -14,8 +14,6 @@ RSpec.describe "API token scopes", type: :request do
 
   def all_scopes = Blog::Types::OAuthScope.values
 
-  def document = JSON.parse(last_response.body)
-
   def needed(id)
     return Blog::Types::OAuthScope["read"] if self.class.unscoped.include?(id)
 

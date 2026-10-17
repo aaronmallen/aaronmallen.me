@@ -12,8 +12,6 @@ RSpec.describe "Admin mail drafts and attachments", type: :request do
 
   def fields(**) = { from: work.id, to: "ada@example.com", subject: "Plans", html: "<p>Go</p>", ** }
 
-  def page = Capybara.string(last_response.body)
-
   def raw = Base64.urlsafe_decode64(requests.last.dig("message", "raw") || requests.last.fetch("raw"))
 
   def save_draft(**)

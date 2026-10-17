@@ -27,7 +27,7 @@ RSpec.describe "Admin task time", type: :request do
     found
   end
 
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, filter: "next", **params })
+  def send_to(path, **) = admin_post(path, filter: "next", **)
 
   def sessions(on = task) = Tasks::Slice["relations.work_sessions"].for_task(on.id).order(:started_at).to_a
 

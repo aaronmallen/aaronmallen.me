@@ -37,8 +37,6 @@ RSpec.describe "API page and ID bounds", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   def tool_inputs
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
     post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers

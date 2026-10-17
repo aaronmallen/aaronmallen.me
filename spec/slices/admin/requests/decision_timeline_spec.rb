@@ -6,7 +6,7 @@ RSpec.describe "Admin decision timeline", type: :request do
   let(:decision) { create(:decision, title: "Pick a queue", problem: "Jobs pile up") }
   let(:ten) { Time.at(Time.now.to_i - 86_400) }
 
-  def add(body, id: decision.id) = send_to("/admin/decisions/#{id}/comments", comment: { body: })
+  def add(body, id: decision.id) = admin_post("/admin/decisions/#{id}/comments", comment: { body: })
 
   def bodies = comments.order(:id).to_a.map { it[:body] }
 
@@ -14,9 +14,9 @@ RSpec.describe "Admin decision timeline", type: :request do
 
   def comments = Decisions::Slice["relations.decision_comments"]
 
-  def delete(comment) = send_to("/admin/decisions/#{decision.id}/comments/#{comment.id}/delete")
+  def delete(comment) = admin_post("/admin/decisions/#{decision.id}/comments/#{comment.id}/delete")
 
-  def edit(comment, body) = send_to("/admin/decisions/#{decision.id}/comments/#{comment.id}", comment: { body: })
+  def edit(comment, body) = admin_post("/admin/decisions/#{decision.id}/comments/#{comment.id}", comment: { body: })
 
   def entries = page.all(".timeline > li")
 
@@ -31,9 +31,6 @@ RSpec.describe "Admin decision timeline", type: :request do
   def option_id(title) = create(:decision_option, decision_id: decision.id, title:).id
 
   def read = get("/admin/decisions/#{decision.id}")
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def t(key, **) = i18n.t(key, **)
 
   describe "signed in" do

@@ -26,8 +26,6 @@ RSpec.describe "API attention", :frozen_clock, type: :request do
 
   def snoozes = Activity::Slice["db.rom"].relations[:attention_snoozes]
 
-  def status = last_response.status
-
   describe "with one row of each kind" do
     let!(:records) do
       {

@@ -7,8 +7,6 @@ RSpec.describe "Admin task rules", type: :feature do
 
   def rules = Tasks::Slice["repos.task_rule_queries"].all
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before do
     Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "projects" })
     create(:project, name: "Blog")
@@ -118,7 +116,7 @@ RSpec.describe "Admin task rules", type: :feature do
     message = confirm_no { editor.click_button "Delete" }
 
     expect(message)
-      .to eq(translate("ui.components.task_rules.row.confirm_delete", pattern: "aaronmallen/*", provider: "GitHub"))
+      .to eq(admin_t("ui.components.task_rules.row.confirm_delete", pattern: "aaronmallen/*", provider: "GitHub"))
   end
 
   it "keeps the rule when I don't confirm" do

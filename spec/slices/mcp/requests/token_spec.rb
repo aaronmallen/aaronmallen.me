@@ -32,8 +32,6 @@ RSpec.describe "OAuth token", type: :request do
 
   def codes = MCP::Slice["db.rom"].relations[:oauth_codes]
 
-  def document = JSON.parse(last_response.body)
-
   def exchange(**overrides)
     post "/oauth/token", {
       client_id: client.client_id,

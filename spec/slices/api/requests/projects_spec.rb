@@ -3,8 +3,6 @@
 RSpec.describe "API projects", type: :request do
   def project_queries = Projects::Slice["repos.project_queries"]
 
-  def status = last_response.status
-
   def today = Blog::TimeZone.today
 
   describe "GET /api/v1/projects" do

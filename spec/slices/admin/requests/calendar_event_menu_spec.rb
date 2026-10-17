@@ -13,8 +13,6 @@ RSpec.describe "Admin calendar event menu", type: :request do
 
   def field(form, name) = form.find("input[name=#{name}]", visible: :all).value
 
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
-
   describe "signed in" do
     before { sign_in_to_admin }
 
@@ -36,7 +34,7 @@ RSpec.describe "Admin calendar event menu", type: :request do
       end
 
       it "holds every action the event takes" do
-        expect(items).to eq(["Edit", "Join Meet", "Open in Google Calendar", "Delete event"])
+        expect(menu_items).to eq(["Edit", "Join Meet", "Open in Google Calendar", "Delete event"])
       end
 
       it "opens Google Calendar and Meet in a new tab", :aggregate_failures do
@@ -64,7 +62,7 @@ RSpec.describe "Admin calendar event menu", type: :request do
       standup = event(mine, "Standup", google_id: "standup_20260714", recurring_id: "standup")
       get "/admin/calendar/events/#{standup.id}/menu", day: day.iso8601
 
-      expect(items).to eq(["Edit", "Delete this one", "Delete the whole series"])
+      expect(menu_items).to eq(["Edit", "Delete this one", "Delete the whole series"])
       expect(deletes.map { field(it, "scope") }).to eq(%w[this all])
     end
 
@@ -73,7 +71,7 @@ RSpec.describe "Admin calendar event menu", type: :request do
       sync = event(work, "Sync", link: "https://calendar.google.com/event?eid=sync")
       get "/admin/calendar/events/#{sync.id}/menu"
 
-      expect(items).to eq(["Open in Google Calendar"])
+      expect(menu_items).to eq(["Open in Google Calendar"])
     end
 
     it "points each event row on the calendar at its menu" do

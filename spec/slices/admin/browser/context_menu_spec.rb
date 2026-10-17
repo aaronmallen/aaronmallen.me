@@ -34,8 +34,6 @@ RSpec.describe "Admin row context menu", type: :feature do
 
   def row(title) = find(".task-title", exact_text: title).ancestor(".task")
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   def watch_menus = execute_script(<<~JS)
     window.prevented = [];
     window.addEventListener("contextmenu", (event) => window.prevented.push(event.defaultPrevented));
@@ -139,18 +137,18 @@ RSpec.describe "Admin row context menu", type: :feature do
       end
 
       it "opens a submenu with the right arrow and leaves it with the left", :aggregate_failures do
-        press(:down) until active_text.include?(translate("ui.components.tasks.menu_plan.move"))
+        press(:down) until active_text.include?(admin_t("ui.components.tasks.menu_plan.move"))
         press(:right)
         expect(active_text).to include("Today")
 
         press(:left)
-        expect(active_text).to include(translate("ui.components.tasks.menu_plan.move"))
+        expect(active_text).to include(admin_t("ui.components.tasks.menu_plan.move"))
       end
 
       it "runs an item on Enter" do
         press(:down, :enter)
 
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.started"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.started"))
       end
 
       it "closes on Escape and hands focus back to the row", :aggregate_failures do
@@ -176,8 +174,8 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "switches its row to pause with no page load", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.started"))
-      expect(row("Ship it")).to have_button(translate("ui.components.tasks.controls.stop"), visible: :all)
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.started"))
+      expect(row("Ship it")).to have_button(admin_t("ui.components.tasks.controls.stop"), visible: :all)
       expect(kept_page?).to be(true)
     end
   end
@@ -264,7 +262,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     it "refuses a bad name with an error toast", :aggregate_failures do
       menu.find(".ctx-input").send_keys("no good", :enter)
 
-      expect(page).to have_css(".toast-failed", text: translate("bulk_refusals.tag_format"))
+      expect(page).to have_css(".toast-failed", text: admin_t("bulk_refusals.tag_format"))
       expect(repo.by_id(task.id).tags).to be_empty
     end
   end
@@ -277,7 +275,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "asks for a second click", :aggregate_failures do
-      expect(item(translate("ui.components.context_menu.confirm.delete"))).to be_truthy
+      expect(item(admin_t("ui.components.context_menu.confirm.delete"))).to be_truthy
       expect(repo.by_id(task.id)).not_to be_nil
     end
 
@@ -289,9 +287,9 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "deletes on the second click" do
-      item(translate("ui.components.context_menu.confirm.delete")).click
+      item(admin_t("ui.components.context_menu.confirm.delete")).click
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.deleted"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.deleted"))
     end
   end
 
@@ -305,7 +303,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "puts the text on the clipboard and shows a toast", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("ui.views.tasks.menu.copied_title"))
+      expect(page).to have_css(".toast", text: admin_t("ui.views.tasks.menu.copied_title"))
       expect(evaluate_script("window.copiedKeys")).to eq(["Ship it"])
     end
   end

@@ -17,8 +17,6 @@ RSpec.describe "OAuth discovery metadata", type: :request do
     }
   end
 
-  def document = JSON.parse(last_response.body)
-
   def protected_resource
     {
       "authorization_servers" => [issuer],

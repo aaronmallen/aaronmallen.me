@@ -5,8 +5,6 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
 
   def card = page.find("section.card[data-attention]")
 
-  def page = Capybara.string(last_response.body)
-
   def row(title) = card.find(".li", text: title)
 
   def sub(title) = row(title).find(".li-sub").text

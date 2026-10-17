@@ -7,6 +7,8 @@ module AdminSignIn
 
   def admin_csrf_token = @admin_csrf_token || session_csrf_token || seeded_csrf_token
 
+  def admin_post(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
+
   def admin_session_cookie
     "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
   end

@@ -20,8 +20,6 @@ RSpec.describe "API reading a pull request", type: :request do
     }
   end
 
-  def status = last_response.status
-
   def whole_pull_request
     create(
       :pull_request,

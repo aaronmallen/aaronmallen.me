@@ -30,8 +30,6 @@ RSpec.describe "API reading the activity feed", type: :request do
 
   def read(**params) = get_json("/activity", { **range, **params })
 
-  def status = last_response.status
-
   def summarize(**params) = get_json("/activity/summary", { **range, **params })
 
   def viewed(slug, views)

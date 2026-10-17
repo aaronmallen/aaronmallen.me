@@ -29,8 +29,6 @@ RSpec.describe "API people", type: :request do
 
   def search(network, text) = call_api(:get, "/people/search/#{network}", { query: text })
 
-  def status = last_response.status
-
   def unknown(handle)
     stub_request(:get, "#{SocialNetworks::BLUESKY_PUBLIC}/com.atproto.identity.resolveHandle")
       .with(query: { handle: })

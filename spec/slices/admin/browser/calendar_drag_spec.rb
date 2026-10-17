@@ -4,7 +4,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
   let(:day) { (today + 2).month == today.month ? today + 1 : Date.new(today.year, today.month).next_month }
   let(:target) { day + 1 }
 
-  def asked = translate("ui.components.calendar.event_row.confirm_delete", title: "Coffee")
+  def asked = admin_t("ui.components.calendar.event_row.confirm_delete", title: "Coffee")
 
   def at(date, hour) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour)
 
@@ -61,8 +61,6 @@ RSpec.describe "Admin calendar drag", type: :feature do
     stroke(from, box(onto)).each { touch("touchMove", it) }
     touch("touchCancel", nil)
   end
-
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   before { sign_in_to_admin }
 
@@ -211,7 +209,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     it "is refused and leaves the task on its day", :aggregate_failures do
       drag("Stay put", cell(past + 1))
 
-      expect(page).to have_css(".toast-failed", text: translate("calendar_page.toasts.past"))
+      expect(page).to have_css(".toast-failed", text: admin_t("calendar_page.toasts.past"))
       expect(panel).to have_text("Stay put")
       expect(sprint_on(task)).to eq(past)
     end
@@ -226,7 +224,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
       execute_script("arguments[0].closest('form').action = '/admin/calendar/posts/0/move'", grip("Hold still"))
       drag("Hold still", cell(target))
 
-      expect(page).to have_css(".toast-failed", text: translate("ui.components.calendar.move_form.failed"))
+      expect(page).to have_css(".toast-failed", text: admin_t("ui.components.calendar.move_form.failed"))
       expect(panel).to have_text("Hold still")
       expect(cell(day)).to have_css(".cal-mark.post", text: "Hold still")
     end
@@ -235,7 +233,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
       Posts::Slice["repos.post_mutations"].update(scheduled.id, status: "published")
       drag("Hold still", cell(target))
 
-      expect(page).to have_css(".toast-failed", text: translate("calendar_page.toasts.not_scheduled"))
+      expect(page).to have_css(".toast-failed", text: admin_t("calendar_page.toasts.not_scheduled"))
       expect(panel).to have_text("Hold still")
     end
   end

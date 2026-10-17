@@ -6,8 +6,6 @@ RSpec.describe "Admin inbox", type: :request do
   let(:tasks) { Tasks::Slice["repos.task_queries"] }
   let(:webmention_queries) { Social::Slice["repos.webmention_queries"] }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def arrived = Time.utc(2026, 9, 7, 17, 30)
 
   def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
@@ -190,14 +188,14 @@ RSpec.describe "Admin inbox", type: :request do
 
       %i[message webmention issue].each do |kind|
         it "drops by one when a #{kind} is acted on" do
-          act(paths.fetch(kind))
+          admin_post(paths.fetch(kind))
 
           expect(count_on(:inbox)).to eq(["2 waiting"])
         end
       end
 
       it "says nothing once nothing waits" do
-        paths.each_value { act(it) }
+        paths.each_value { admin_post(it) }
 
         expect(count_on(:inbox)).to be_empty
       end
@@ -236,7 +234,7 @@ RSpec.describe "Admin inbox", type: :request do
 
       %w[read spam].each do |status|
         it "marks it #{status} and drops it", :aggregate_failures do
-          act("/admin/inbox/messages/#{message.id}/mark/#{status}")
+          admin_post("/admin/inbox/messages/#{message.id}/mark/#{status}")
 
           expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/inbox"))
           expect(messages.by_id(message.id).status).to eq(status)
@@ -245,20 +243,20 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "says so" do
-        act("/admin/inbox/messages/#{message.id}/mark/read")
+        admin_post("/admin/inbox/messages/#{message.id}/mark/read")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Marked read")
       end
 
       it "refuses to mark it unread" do
-        act("/admin/inbox/messages/#{message.id}/mark/unread")
+        admin_post("/admin/inbox/messages/#{message.id}/mark/unread")
 
         expect(last_response.status).to eq(404)
       end
 
       it "answers 404 for a message that isn't there" do
-        act("/admin/inbox/messages/0/mark/read")
+        admin_post("/admin/inbox/messages/0/mark/read")
 
         expect(last_response.status).to eq(404)
       end
@@ -282,14 +280,14 @@ RSpec.describe "Admin inbox", type: :request do
         end
 
         it "makes the task and lands back on Waiting", :aggregate_failures do
-          act("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
+          admin_post("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
 
           expect(last_response.location).to eq("/admin/inbox")
           expect(task_of(message)).to have_key(message.id)
         end
 
         it "trades the button for a link once the thread has a task", :aggregate_failures do
-          act("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
+          admin_post("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
           get "/admin/inbox"
 
           id = task_of(message).fetch(message.id)
@@ -342,14 +340,14 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "trusts the author of a webmention approved from the inbox" do
-        act("/admin/inbox/webmentions/#{mention.id}/moderate/approved")
+        admin_post("/admin/inbox/webmentions/#{mention.id}/moderate/approved")
 
         expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
       end
 
       { "approved" => "Approved", "ignored" => "Ignored", "spam" => "Marked as spam" }.each do |verdict, toast|
         it "moderates it #{verdict} and drops it", :aggregate_failures do
-          act("/admin/inbox/webmentions/#{mention.id}/moderate/#{verdict}")
+          admin_post("/admin/inbox/webmentions/#{mention.id}/moderate/#{verdict}")
           follow_redirect!
 
           expect(page).to have_css("[data-toast]", text: toast)
@@ -359,26 +357,26 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "keeps the reason it was spam" do
-        act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "Selling pills")
+        admin_post("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "Selling pills")
 
         expect(filed("spam", :spam_reason)).to eq(["Selling pills"])
       end
 
       it "keeps no reason when it holds only Unicode spaces", :aggregate_failures do
-        act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "\u3000\u00a0")
+        admin_post("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "\u3000\u00a0")
 
         expect(last_response).to be_redirect
         expect(filed("spam", :spam_reason)).to eq([nil])
       end
 
       it "refuses to set it back to pending" do
-        act("/admin/inbox/webmentions/#{mention.id}/moderate/pending")
+        admin_post("/admin/inbox/webmentions/#{mention.id}/moderate/pending")
 
         expect(last_response.status).to eq(404)
       end
 
       it "answers 404 for a webmention that isn't there" do
-        act("/admin/inbox/webmentions/0/moderate/approved")
+        admin_post("/admin/inbox/webmentions/0/moderate/approved")
 
         expect(last_response.status).to eq(404)
       end
@@ -396,7 +394,7 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "moves it and drops it", :aggregate_failures do
-        act("/admin/inbox/tasks/#{task.id}/move/next")
+        admin_post("/admin/inbox/tasks/#{task.id}/move/next")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Moved")
@@ -412,7 +410,7 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "tags it from the task form, drops it and stays on the inbox", :aggregate_failures do
-        act("/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", tags: "feeds, bugs" })
+        admin_post("/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", tags: "feeds, bugs" })
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/inbox"))
         expect(tasks.by_id(task.id).tags.map(&:name)).to contain_exactly("feeds", "bugs")
@@ -420,19 +418,21 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "keeps it when the task form saves only a note" do
-        act("/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", note: "Look at the cache" })
+        admin_post(
+          "/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", note: "Look at the cache" },
+        )
 
         expect(inbox).to eq(["Fix the feed"])
       end
 
       it "answers 404 for the old tag route" do
-        act("/admin/inbox/tasks/#{task.id}/tags", tags: "feeds")
+        admin_post("/admin/inbox/tasks/#{task.id}/tags", tags: "feeds")
 
         expect(last_response.status).to eq(404)
       end
 
       it "marks it seen without moving it", :aggregate_failures do
-        act("/admin/inbox/tasks/#{task.id}/seen")
+        admin_post("/admin/inbox/tasks/#{task.id}/seen")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Marked seen")
@@ -441,14 +441,14 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "answers 404 when marking a task with no source seen" do
-        act("/admin/inbox/tasks/#{create(:task).id}/seen")
+        admin_post("/admin/inbox/tasks/#{create(:task).id}/seen")
 
         expect(last_response.status).to eq(404)
       end
 
       it "answers 404 for a task that isn't there", :aggregate_failures do
         %w[move/next seen].each do |verb|
-          act("/admin/inbox/tasks/0/#{verb}")
+          admin_post("/admin/inbox/tasks/0/#{verb}")
 
           expect(last_response.status).to eq(404), verb
         end

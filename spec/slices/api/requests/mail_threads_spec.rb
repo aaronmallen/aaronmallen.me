@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API mail threads", type: :request do
-  def status = last_response.status
-
   def status_of(message) = Mail::Slice["repos.message_queries"].by_id(message.id).status
 
   describe "GET /api/v1/mail/threads" do

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API work entries", type: :request do
-  def status = last_response.status
-
   def work_entry_queries = Projects::Slice["repos.work_entry_queries"]
 
   describe "GET /api/v1/work_entries" do

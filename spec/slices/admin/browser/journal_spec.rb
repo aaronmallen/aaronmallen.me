@@ -39,8 +39,6 @@ RSpec.describe "Admin journal", type: :feature do
 
   def top(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().top")
 
-  def translate(key) = Admin::Slice["i18n"].t(key)
-
   before do
     sign_in_to_admin
     visit "/admin/journal"
@@ -346,7 +344,7 @@ RSpec.describe "Admin journal", type: :feature do
         form.querySelector("textarea").value = " ";
         form.submit();
       JS
-      page.assert_selector(".field-error", text: translate("ui.components.journal.field_error.body.blank"))
+      page.assert_selector(".field-error", text: admin_t("ui.components.journal.field_error.body.blank"))
     end
 
     it "clears the error on Cancel", :aggregate_failures do
@@ -370,7 +368,7 @@ RSpec.describe "Admin journal", type: :feature do
     it "asks with the confirmation text" do
       message = confirm_no { item.click_button "Delete" }
 
-      expect(message).to eq(translate("ui.components.journal.entry.confirm_delete"))
+      expect(message).to eq(admin_t("ui.components.journal.entry.confirm_delete"))
     end
 
     it "keeps the entry when I don't confirm", :aggregate_failures do

@@ -16,8 +16,6 @@ RSpec.describe "API snooze inbox", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   it "snoozes every row it names until the time", :aggregate_failures do
     reply = snooze(**everything, snoozed_until: ends_at.iso8601)
 

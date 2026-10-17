@@ -29,11 +29,6 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   def read(record = task, **) = get("/admin/tasks/#{record.id}", **)
 
   def read_note(note) = read(create(:task, note:))
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
-  end
-
   def stamp(time) = Blog::TimeZone.local(time).strftime("%b %-d, %Y, %H:%M")
 
   describe "signed out" do
@@ -168,7 +163,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       end
 
       it "sends the toast a save leaves" do
-        send_to("/admin/tasks/#{task.id}", task: { title: "Changed" })
+        admin_post("/admin/tasks/#{task.id}", task: { title: "Changed" })
         get("/admin/tasks/#{task.id}", {}, drawer)
 
         expect(page).to have_css("[data-toast] .toast", exact_text: "Task saved", visible: :all)
@@ -594,7 +589,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       }.each do |name, (back, trait)|
         it "sends #{name} back to the list it was opened from" do
           record = create(:task, *[trait].compact)
-          send_to("/admin/tasks/#{record.id}/#{name}", filter: "next", origin: "tasks")
+          admin_post("/admin/tasks/#{record.id}/#{name}", filter: "next", origin: "tasks")
 
           expect(last_response).to be_redirect.and have_attributes(location: end_with(back))
         end
@@ -602,7 +597,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
 
       %w[complete cancel start].each do |name|
         it "sends #{name} back to Today when it was opened there" do
-          send_to("/admin/tasks/#{task.id}/#{name}", filter: "today", origin: "today")
+          admin_post("/admin/tasks/#{task.id}/#{name}", filter: "today", origin: "today")
 
           expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
         end
@@ -619,14 +614,14 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         "stop" => "/admin/tasks?filter=next",
       }.each do |name, back|
         it "sends #{name} back to the admin page it was run from" do
-          send_to("/admin/tasks/#{task.id}/#{name}", return_to: "/admin/posts?status=draft", filter: "next")
+          admin_post("/admin/tasks/#{task.id}/#{name}", return_to: "/admin/posts?status=draft", filter: "next")
 
           expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/posts?status=draft"))
         end
 
         away.each do |what, path|
           it "ignores a #{name} sent back to #{what}" do
-            send_to("/admin/tasks/#{task.id}/#{name}", return_to: path, filter: "next")
+            admin_post("/admin/tasks/#{task.id}/#{name}", return_to: path, filter: "next")
 
             expect(last_response.location).to end_with(back)
           end
@@ -659,7 +654,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
 
       def link(kind: "blocks", other_id: other.id)
         fields = { filter: "next", origin: "tasks", link: { kind:, other_id: other_id.to_s } }
-        send_to("/admin/tasks/#{task.id}/links", **fields)
+        admin_post("/admin/tasks/#{task.id}/links", **fields)
       end
 
       def targets = page.all(".task-link-target").map { it.find(".record-key").text }
@@ -668,7 +663,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         create(:task_link, from_task_id: task.id, to_task_id: other.id)
         read(task, filter: "next")
         path = "/admin/tasks/#{task.id}/links/#{other.id}/delete"
-        send_to(path, **hidden_fields(page.find(".task-link-row form[action='#{path}']")).except(:_csrf_token))
+        admin_post(path, **hidden_fields(page.find(".task-link-row form[action='#{path}']")).except(:_csrf_token))
       end
 
       it "lists each link with its type" do
@@ -688,7 +683,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
 
       it "finds tasks to link through a GET to the page itself", :aggregate_failures do
         other
-        send_to("/admin/tasks/#{task.id}/links", link_find: "1", link_q: "migration")
+        admin_post("/admin/tasks/#{task.id}/links", link_find: "1", link_q: "migration")
 
         expect(last_response.location).to start_with("/admin/tasks/#{task.id}?")
         follow_redirect!

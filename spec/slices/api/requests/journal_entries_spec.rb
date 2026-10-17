@@ -18,8 +18,6 @@ RSpec.describe "API journal entries", type: :request do
 
   def read(id) = call_api(:get, "/journal_entries/#{id}")
 
-  def status = last_response.status
-
   def today = Blog::TimeZone.today
 
   def update_entry(id, fields) = call_api(:patch, "/journal_entries/#{id}", JSON.generate(fields))

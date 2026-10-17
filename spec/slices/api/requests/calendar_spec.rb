@@ -37,8 +37,6 @@ RSpec.describe "API calendar", type: :request do
     items.grep(/\A(post|social)-/)
   end
 
-  def status = last_response.status
-
   it "answers the range and every day in it, empty days included, oldest first" do
     found = read(**range)
 

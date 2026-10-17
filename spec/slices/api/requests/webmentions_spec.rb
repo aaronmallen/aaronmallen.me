@@ -35,8 +35,6 @@ RSpec.describe "API reading webmentions", type: :request do
 
   def read(id) = get_json("/api/v1/webmentions/#{id}")
 
-  def status = last_response.status
-
   describe "GET /api/v1/webmentions" do
     it "lists the webmentions received in the range, newest first" do
       older = create(:webmention, received_at: at(Date.new(2026, 3, 2)))

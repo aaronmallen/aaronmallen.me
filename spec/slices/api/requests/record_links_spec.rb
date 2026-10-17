@@ -32,8 +32,6 @@ RSpec.describe "API record links", type: :request do
     [403, 'Bearer error="insufficient_scope", scope="mail"', body]
   end
 
-  def status = last_response.status
-
   def stored = Links::Slice["relations.record_links"].count
 
   def titles(answered) = answered.fetch("links").transform_values { it.map { it.fetch("title") } }

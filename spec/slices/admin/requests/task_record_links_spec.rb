@@ -18,7 +18,7 @@ RSpec.describe "Admin task record links", type: :request do
   def kind_name(kind) = i18n.t(["ui.components.record_links.kinds", kind].join("."))
 
   def link(other_kind: "post", other_id: post_record.id, **)
-    send_to("/admin/tasks/#{task.id}/records", filter: "next", record: { other_kind:, other_id: other_id.to_s }, **)
+    admin_post("/admin/tasks/#{task.id}/records", filter: "next", record: { other_kind:, other_id: other_id.to_s }, **)
   end
 
   def link_records(kind, id)
@@ -33,12 +33,8 @@ RSpec.describe "Admin task record links", type: :request do
 
   def section = page.find(".record-links")
 
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
-  end
-
   def unlink(kind = "post", id = post_record.id)
-    send_to("/admin/tasks/#{task.id}/records/#{kind}/#{id}/delete", filter: "next")
+    admin_post("/admin/tasks/#{task.id}/records/#{kind}/#{id}/delete", filter: "next")
   end
 
   describe "the Linked section" do
@@ -235,7 +231,7 @@ RSpec.describe "Admin task record links", type: :request do
     end
 
     it "answers 404 for a task that isn't there" do
-      send_to("/admin/tasks/0/records", filter: "next", record: { other_kind: "post", other_id: post_record.id.to_s })
+      admin_post("/admin/tasks/0/records", filter: "next", record: { other_kind: "post", other_id: post_record.id })
 
       expect(last_response.status).to eq(404)
     end

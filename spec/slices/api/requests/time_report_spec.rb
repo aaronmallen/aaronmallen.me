@@ -34,8 +34,6 @@ RSpec.describe "API time report", type: :request do
     task
   end
 
-  def status = last_response.status
-
   def sums(**) = groups(**, by: "day").map { it.values_at("key", "seconds") }
 
   def worked(title, from, to, tags: []) = spent(title, [from, to], tags:)

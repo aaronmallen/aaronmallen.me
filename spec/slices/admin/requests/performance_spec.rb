@@ -36,8 +36,6 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
 
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
-  def page = Capybara.string(last_response.body)
-
   def page_row(load, lcp: nil, route: "/writing/:slug", on: today)
     relation(:performance_pages).insert(
       route:, device_class: "desktop", ttfb: 10, dom_content_loaded: 20, load:, lcp:, occurred_at: noon(on),

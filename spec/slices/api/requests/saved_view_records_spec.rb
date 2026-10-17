@@ -43,8 +43,6 @@ RSpec.describe "API saved view records", type: :request do
     end
   end
 
-  def status = last_response.status
-
   def today = Blog::TimeZone.today
 
   describe "a tasks view" do

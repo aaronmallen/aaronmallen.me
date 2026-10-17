@@ -3,8 +3,6 @@
 RSpec.describe "API commits, pull requests and syncs", type: :request do
   def march = { from: "2026-03-01", to: "2026-03-31" }
 
-  def status = last_response.status
-
   describe "GET /api/v1/commits" do
     it "lists the window's commits, newest first, with a 200" do
       older = create(:commit, commit_date: Date.new(2026, 3, 1))

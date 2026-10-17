@@ -16,8 +16,6 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     menu
   end
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before { sign_in_to_admin }
 
   describe "a journal entry" do
@@ -56,7 +54,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     it "copies the text with a toast", :aggregate_failures do
       item("Copy text").click
 
-      expect(page).to have_css(".toast", text: translate("ui.views.journal.menu.copied_text"))
+      expect(page).to have_css(".toast", text: admin_t("ui.views.journal.menu.copied_text"))
       expect(evaluate_script("window.copiedKeys")).to eq(["shipped it"])
     end
 
@@ -64,13 +62,13 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
       before { item("Delete entry").click }
 
       it "asks for a second click" do
-        expect(item(translate("ui.components.context_menu.confirm.forever"))).to be_truthy
+        expect(item(admin_t("ui.components.context_menu.confirm.forever"))).to be_truthy
       end
 
       it "deletes in place on the second click", :aggregate_failures do
-        item(translate("ui.components.context_menu.confirm.forever")).click
+        item(admin_t("ui.components.context_menu.confirm.forever")).click
 
-        expect(page).to have_css(".toast", text: translate("journal_page.toasts.deleted"))
+        expect(page).to have_css(".toast", text: admin_t("journal_page.toasts.deleted"))
         expect(page).to have_no_css(".journal-entry")
         expect(kept_page?).to be(true)
       end
@@ -81,7 +79,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     let(:decision) { create(:decision, title: "Pick a queue") }
     let(:dialog) { find("dialog#decision-#{decision.id}-drop") }
 
-    def drop = dialog.click_button(translate("ui.components.decisions.reason_form.submit.drop"))
+    def drop = dialog.click_button(admin_t("ui.components.decisions.reason_form.submit.drop"))
 
     before do
       decision
@@ -97,7 +95,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     it "shows the error it shows today when the reason is blank", :aggregate_failures do
       drop
 
-      expect(dialog).to have_css(".field-error", text: translate("ui.components.decisions.field_error.reason.blank"))
+      expect(dialog).to have_css(".field-error", text: admin_t("ui.components.decisions.field_error.reason.blank"))
       expect(Decisions::Slice["repos.decision_queries"].by_id(decision.id).status).to eq("open")
     end
 
@@ -105,7 +103,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
       dialog.fill_in("decision[reason]", with: "moot")
       drop
 
-      expect(page).to have_css(".toast", text: translate("decisions_page.toasts.dropped"))
+      expect(page).to have_css(".toast", text: admin_t("decisions_page.toasts.dropped"))
       expect(page).to have_no_css(".decision-row", text: "Pick a queue")
       expect(kept_page?).to be(true)
     end
@@ -116,7 +114,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
       dialog.fill_in("decision[reason]", with: "moot")
       drop
 
-      expect(page).to have_css(".toast", text: translate("decisions_page.toasts.dropped"))
+      expect(page).to have_css(".toast", text: admin_t("decisions_page.toasts.dropped"))
     end
   end
 
@@ -139,7 +137,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     it "copies its link with a toast", :aggregate_failures do
       item("Copy link").click
 
-      expect(page).to have_css(".toast", text: translate("ui.views.files.menu.copied_link"))
+      expect(page).to have_css(".toast", text: admin_t("ui.views.files.menu.copied_link"))
       expect(evaluate_script("window.copiedKeys").first).to start_with("http://shares.localhost/")
     end
   end
@@ -153,9 +151,9 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
 
     it "deletes in place on the second click", :aggregate_failures do
       item("Delete link").click
-      item(translate("ui.views.links.menu.confirm_delete")).click
+      item(admin_t("ui.views.links.menu.confirm_delete")).click
 
-      expect(page).to have_css(".toast", text: translate("links_page.toasts.deleted"))
+      expect(page).to have_css(".toast", text: admin_t("links_page.toasts.deleted"))
       expect(page).to have_no_css(".link-row")
       expect(kept_page?).to be(true)
     end
@@ -184,7 +182,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
     end
 
     it "recolours it in place", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("tags_page.toasts.recoloured"))
+      expect(page).to have_css(".toast", text: admin_t("tags_page.toasts.recoloured"))
       expect(Tags::Slice["repos.tag_queries"].all_in("private").map(&:color)).to eq(["mk-pink"])
       expect(kept_page?).to be(true)
     end

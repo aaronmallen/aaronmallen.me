@@ -16,8 +16,6 @@ RSpec.describe "MCP connection tools", type: :request do
 
   def content = JSON.parse(message)
 
-  def document = JSON.parse(last_response.body)
-
   def marked(text) = { "untrusted" => true, "text" => text }
 
   def message = document.dig("result", "content").first.fetch("text")

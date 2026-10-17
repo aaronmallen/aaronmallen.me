@@ -29,8 +29,6 @@ RSpec.describe "API photo upload", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def status = last_response.status
-
   def store_url = %r{\Ahttps://store\.example(?::443)?/photos/[0-9a-f]{32}\.[a-z]+\z}
 
   def upload(bytes = nil, data: Base64.strict_encode64(bytes), filename: "photo.png", token: api_token)

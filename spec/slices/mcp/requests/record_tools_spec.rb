@@ -13,8 +13,6 @@ RSpec.describe "MCP record tools", type: :request do
 
   def content = JSON.parse(message)
 
-  def document = JSON.parse(last_response.body)
-
   def entries = Record::Slice["relations.journal_entries"]
 
   def error? = document.dig("result", "isError")

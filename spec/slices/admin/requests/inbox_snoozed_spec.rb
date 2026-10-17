@@ -3,8 +3,6 @@
 RSpec.describe "Admin inbox snoozed section", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def inbox = page.all("[data-key-list] .inbox-row-title").map(&:text)
 
   def show
@@ -30,7 +28,7 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
   def synced(title) = create(:task, title:, list: "external").tap { create(:task_source, task: it) }
 
   def wake(kind, record)
-    act("/admin/inbox/wake/#{kind}/#{record.id}")
+    admin_post("/admin/inbox/wake/#{kind}/#{record.id}")
     follow_redirect!
   end
 
@@ -100,16 +98,16 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
   end
 
   it "answers 422 for a row that is not snoozed" do
-    act("/admin/inbox/wake/message/#{create(:message).id}")
+    admin_post("/admin/inbox/wake/message/#{create(:message).id}")
 
     expect(last_response.status).to eq(422)
   end
 
   it "answers 404 for a row that isn't there or a kind it does not know", :aggregate_failures do
-    act("/admin/inbox/wake/message/0")
+    admin_post("/admin/inbox/wake/message/0")
     expect(last_response.status).to eq(404)
 
-    act("/admin/inbox/wake/comet/#{create(:message).id}")
+    admin_post("/admin/inbox/wake/comet/#{create(:message).id}")
     expect(last_response.status).to eq(404)
   end
 end

@@ -7,7 +7,7 @@ RSpec.describe "Admin task row actions", type: :feature do
   def complete(title)
     within(row(title)) do
       find("summary[aria-keyshortcuts='x']").click
-      click_button(translate("ui.components.tasks.complete_form.complete"))
+      click_button(admin_t("ui.components.tasks.complete_form.complete"))
     end
   end
 
@@ -25,8 +25,6 @@ RSpec.describe "Admin task row actions", type: :feature do
 
   def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
-  def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
   before { sign_in_to_admin }
 
   describe "starting a task" do
@@ -37,12 +35,12 @@ RSpec.describe "Admin task row actions", type: :feature do
         before do
           visit screen
           keep_page
-          row("Ship it").click_button(translate("ui.components.tasks.controls.start"))
+          row("Ship it").click_button(admin_t("ui.components.tasks.controls.start"))
         end
 
         it "switches it to pause with no page load", :aggregate_failures do
-          expect(page).to have_css(".toast", text: translate("tasks_page.toasts.started"))
-          expect(row("Ship it")).to have_button(translate("ui.components.tasks.controls.stop"))
+          expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.started"))
+          expect(row("Ship it")).to have_button(admin_t("ui.components.tasks.controls.stop"))
           expect(kept_page?).to be(true)
         end
       end
@@ -52,13 +50,13 @@ RSpec.describe "Admin task row actions", type: :feature do
       before do
         page.driver.resize(1024, 300)
         visit "/admin/tasks?filter=today"
-        execute_script(<<~JS, row("Ship it").find_button(translate("ui.components.tasks.controls.start")))
+        execute_script(<<~JS, row("Ship it").find_button(admin_t("ui.components.tasks.controls.start")))
           arguments[0].focus();
           window.scrollTo(0, 120);
           window.scrolled = window.scrollY;
           arguments[0].click();
         JS
-        find(".toast", text: translate("tasks_page.toasts.started"))
+        find(".toast", text: admin_t("tasks_page.toasts.started"))
       end
 
       it "keeps the scroll" do
@@ -78,7 +76,7 @@ RSpec.describe "Admin task row actions", type: :feature do
         execute_script(<<~JS)
           document.querySelector(".task form[data-task-act='start']").requestSubmit();
         JS
-        find(".toast", text: translate("tasks_page.toasts.started"))
+        find(".toast", text: admin_t("tasks_page.toasts.started"))
       end
 
       it "keeps it open" do
@@ -91,12 +89,12 @@ RSpec.describe "Admin task row actions", type: :feature do
         visit "/admin/tasks?filter=today"
         keep_page
         press("j", "s")
-        find(".toast", text: translate("tasks_page.toasts.started"))
+        find(".toast", text: admin_t("tasks_page.toasts.started"))
         press("j", "x")
       end
 
       it "still takes key shortcuts after the update, closing the running task at once", :aggregate_failures do
-        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.completed"))
+        expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.completed"))
         expect(open_tasks).to be_empty
         expect(kept_page?).to be(true)
       end
@@ -107,18 +105,18 @@ RSpec.describe "Admin task row actions", type: :feature do
         create(:task, title: "Plan it")
         visit "/admin/tasks?filter=next"
         landing = request_gate.hold("/admin/tasks")
-        row("Plan it").click_button(translate("ui.components.tasks.controls.start"))
+        row("Plan it").click_button(admin_t("ui.components.tasks.controls.start"))
         landing.wait_for_arrival
         sleep 1
         landing.release
-        find(".toast", text: translate("tasks_page.toasts.started"))
+        find(".toast", text: admin_t("tasks_page.toasts.started"))
         sleep 1
       end
 
       it "asks for no refresh and keeps the list it landed on", :aggregate_failures do
         expect(request_gate.answered("/admin/tasks")).to eq(2)
         expect(page).to have_css(".task-tabs [aria-current]", text: "today")
-        expect(row("Plan it")).to have_button(translate("ui.components.tasks.complete_form.complete"))
+        expect(row("Plan it")).to have_button(admin_t("ui.components.tasks.complete_form.complete"))
       end
     end
   end
@@ -128,11 +126,11 @@ RSpec.describe "Admin task row actions", type: :feature do
       create(:task, title: "Email the accountant")
       visit "/admin"
       keep_page
-      item("[data-pools] .li", "Email the accountant").click_button(translate("ui.components.tasks.pools.pull"))
+      item("[data-pools] .li", "Email the accountant").click_button(admin_t("ui.components.tasks.pools.pull"))
     end
 
     it "moves it into the sprint with no page load", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.moved"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.moved"))
       expect(find("[data-sprint-panel]")).to have_css(".task-title", text: "Email the accountant")
       expect(kept_page?).to be(true)
     end
@@ -147,17 +145,17 @@ RSpec.describe "Admin task row actions", type: :feature do
     end
 
     it "pauses it in place", :aggregate_failures do
-      row("Ship it").click_button(translate("ui.components.tasks.controls.stop"))
+      row("Ship it").click_button(admin_t("ui.components.tasks.controls.stop"))
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.stopped"))
-      expect(row("Ship it")).to have_button(translate("ui.components.tasks.controls.start"), visible: :all)
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.stopped"))
+      expect(row("Ship it")).to have_button(admin_t("ui.components.tasks.controls.start"), visible: :all)
       expect(kept_page?).to be(true)
     end
 
     it "completes it in place", :aggregate_failures do
       complete("Ship it")
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.completed"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.completed"))
       expect(kept_page?).to be(true)
       expect(repo.by_id(task.id)).to be_done
     end
@@ -172,9 +170,9 @@ RSpec.describe "Admin task row actions", type: :feature do
     end
 
     it "cancels it in place after asking", :aggregate_failures do
-      confirm_yes { row("Write the brief").click_button(translate("ui.components.tasks.controls.cancel")) }
+      confirm_yes { row("Write the brief").click_button(admin_t("ui.components.tasks.controls.cancel")) }
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.canceled"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.canceled"))
       expect(kept_page?).to be(true)
       expect(repo.by_id(task.id)).to be_canceled
     end
@@ -182,7 +180,7 @@ RSpec.describe "Admin task row actions", type: :feature do
     it "completes it in place without asking for time", :aggregate_failures do
       complete("Write the brief")
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.completed"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.completed"))
       expect(kept_page?).to be(true)
       expect(repo.by_id(task.id)).to be_done
     end
@@ -190,7 +188,7 @@ RSpec.describe "Admin task row actions", type: :feature do
     it "moves it right in place", :aggregate_failures do
       move("Write the brief", "right")
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.moved"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.moved"))
       expect(page).to have_current_path("/admin/tasks?filter=someday")
       expect(page).to have_css(".task", text: "Write the brief")
       expect(kept_page?).to be(true)
@@ -199,7 +197,7 @@ RSpec.describe "Admin task row actions", type: :feature do
     it "moves it left in place", :aggregate_failures do
       move("Write the brief", "left")
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.moved"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.moved"))
       expect(page).to have_current_path("/admin/tasks?filter=today")
       expect(page).to have_css(".task", text: "Write the brief")
       expect(kept_page?).to be(true)
@@ -209,7 +207,7 @@ RSpec.describe "Admin task row actions", type: :feature do
       Tasks::Slice["operations.delete_task"].call(task.id)
       move("Write the brief", "right")
 
-      expect(page).to have_css(".toast-failed", text: translate("ui.layouts.application.morph_failed"))
+      expect(page).to have_css(".toast-failed", text: admin_t("ui.layouts.application.morph_failed"))
       expect(page).to have_css(".task", text: "Write the brief")
       expect(kept_page?).to be(true)
     end
@@ -220,11 +218,11 @@ RSpec.describe "Admin task row actions", type: :feature do
       create(:task, :done, title: "Filed the taxes")
       visit "/admin/tasks?filter=completed"
       keep_page
-      row("Filed the taxes").click_button(translate("ui.components.tasks.controls.reopen"))
+      row("Filed the taxes").click_button(admin_t("ui.components.tasks.controls.reopen"))
     end
 
     it "reopens it in place from its hover bar", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.reopened"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.reopened"))
       expect(kept_page?).to be(true)
     end
   end
@@ -238,13 +236,13 @@ RSpec.describe "Admin task row actions", type: :feature do
       visit "/admin/tasks?filter=upcoming"
       keep_page
       find(".sprint-pull summary").click
-      item(".sprint-pull .li", "Plan the trip").click_button(translate("ui.components.tasks.upcoming_sprints.pull_in"))
+      item(".sprint-pull .li", "Plan the trip").click_button(admin_t("ui.components.tasks.upcoming_sprints.pull_in"))
     end
 
     it "schedules it in place", :aggregate_failures do
       date = Admin::Slice["i18n"].l(later, format: :medium)
 
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.scheduled", date:))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.scheduled", date:))
       expect(kept_page?).to be(true)
     end
   end
@@ -261,7 +259,7 @@ RSpec.describe "Admin task row actions", type: :feature do
     end
 
     it "still posts and loads the page", :aggregate_failures do
-      expect(page).to have_css(".toast", text: translate("tasks_page.toasts.captured"))
+      expect(page).to have_css(".toast", text: admin_t("tasks_page.toasts.captured"))
       expect(kept_page?).to be(false)
     end
   end

@@ -15,8 +15,6 @@ RSpec.describe "Admin API tokens", type: :request do
 
   def names = page.all(".li-title").map(&:text)
 
-  def page = Capybara.string(last_response.body)
-
   def revealed = page.first("#minted-token")&.[](:value)
 
   def revoke(id) = post("/admin/tokens/#{id}/revoke", _csrf_token: admin_csrf_token)

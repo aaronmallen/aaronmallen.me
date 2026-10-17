@@ -23,11 +23,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
   def move_keys = page.all(".task-acts form[action*='/move/']:has(button[data-key='m'])").map { it["action"] }
 
   def pooled = page.all(".task-pull .li-title").map(&:text)
-
-  def send_to(path, **params)
-    post path, { _csrf_token: admin_csrf_token, **params }
-  end
-
   def titles = page.all(".task-title").map(&:text)
 
   describe "signed in" do
@@ -226,7 +221,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "files a quick added task in the list it was added to" do
-        send_to("/admin/tasks", filter: "someday", task: { title: "Learn Rust" })
+        admin_post("/admin/tasks", filter: "someday", task: { title: "Learn Rust" })
 
         expect(open_in_list("someday").map(&:title)).to include("Learn Rust")
       end
@@ -428,7 +423,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "saves its tags and keeps it on external", :aggregate_failures do
         get "/admin/tasks/#{imported.id}/edit", filter: "external"
-        send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "tags" => "site, bug" })
+        admin_post("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "tags" => "site, bug" })
 
         expect(repo.by_id(imported.id).tags.map(&:name)).to contain_exactly("site", "bug")
         expect(repo.by_id(imported.id).list).to eq("external")
@@ -436,7 +431,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "moves it to next through the edit form" do
         get "/admin/tasks/#{imported.id}/edit", filter: "external"
-        send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "list" => "next" })
+        admin_post("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "list" => "next" })
 
         expect(repo.by_id(imported.id).list).to eq("next")
       end
@@ -555,7 +550,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "returns to the pool a task was pulled from" do
         task = create(:task, :someday)
-        send_to("/admin/tasks/#{task.id}/move/today", filter: "today", origin: "tasks", pool: "someday")
+        admin_post("/admin/tasks/#{task.id}/move/today", filter: "today", origin: "tasks", pool: "someday")
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=today&pool=someday")
       end
@@ -655,7 +650,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "pulls one into today's sprint", :aggregate_failures do
-        send_to("/admin/tasks/#{task.id}/move/today", origin: "tasks")
+        admin_post("/admin/tasks/#{task.id}/move/today", origin: "tasks")
         get "/admin/tasks", filter: "today"
 
         expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
@@ -663,7 +658,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "keeps the issue link on the task once it is in the sprint" do
-        send_to("/admin/tasks/#{task.id}/move/today", origin: "tasks")
+        admin_post("/admin/tasks/#{task.id}/move/today", origin: "tasks")
         get "/admin/tasks", filter: "today"
 
         expect(page.find(".task .task-meta a.task-source")["href"]).to eq(issue_url)
@@ -1188,21 +1183,21 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "moving a task" do
       it "moves it to someday" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/move/someday")
+        admin_post("/admin/tasks/#{task.id}/move/someday")
 
         expect(repo.by_id(task.id).list).to eq("someday")
       end
 
       it "joins the current sprint on the way to today" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/move/today")
+        admin_post("/admin/tasks/#{task.id}/move/today")
 
         expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
       end
 
       it "follows the task to the list it went to" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/move/someday")
+        admin_post("/admin/tasks/#{task.id}/move/someday")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
       end
@@ -1278,7 +1273,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "answers 404 for a list that isn't one" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/move/later")
+        admin_post("/admin/tasks/#{task.id}/move/later")
 
         expect(last_response.status).to eq(404)
       end
@@ -1287,21 +1282,21 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "starting a task" do
       it "sets it in progress" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/start")
+        admin_post("/admin/tasks/#{task.id}/start")
 
         expect(repo.by_id(task.id).status).to eq("in_progress")
       end
 
       it "puts it in today" do
         task = create(:task, :someday)
-        send_to("/admin/tasks/#{task.id}/start")
+        admin_post("/admin/tasks/#{task.id}/start")
 
         expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
       end
 
       it "lands on today" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/start")
+        admin_post("/admin/tasks/#{task.id}/start")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=today"))
       end
@@ -1315,7 +1310,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "offers start again on a task moved out of today while in progress" do
         task = create(:task, :in_progress, :in_sprint)
-        send_to("/admin/tasks/#{task.id}/move/someday")
+        admin_post("/admin/tasks/#{task.id}/move/someday")
         get "/admin/tasks", filter: "someday"
 
         expect(page).to have_css("form[action$='/start']")
@@ -1324,7 +1319,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       %i[done canceled].each do |status|
         it "clears the close time on a #{status} task" do
           task = create(:task, status)
-          send_to("/admin/tasks/#{task.id}/start", filter: "completed")
+          admin_post("/admin/tasks/#{task.id}/start", filter: "completed")
 
           expect(repo.by_id(task.id)).to have_attributes(status: "in_progress", completed_at: nil)
         end
@@ -1337,26 +1332,26 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "takes it out of progress" do
-        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+        admin_post("/admin/tasks/#{task.id}/stop", filter: "today")
 
         expect(repo.by_id(task.id).status).to eq("open")
       end
 
       it "keeps it in the sprint" do
-        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+        admin_post("/admin/tasks/#{task.id}/stop", filter: "today")
 
         expect(repo.by_id(task.id).sprint_id).to eq(task.sprint_id)
       end
 
       it "says it stopped" do
-        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+        admin_post("/admin/tasks/#{task.id}/stop", filter: "today")
         follow_redirect!
 
         expect(page).to have_css("[data-toast] .toast", exact_text: "Stopped · it waits in the sprint", visible: :all)
       end
 
       it "keeps the list that was open" do
-        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+        admin_post("/admin/tasks/#{task.id}/stop", filter: "today")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=today"))
       end
@@ -1364,7 +1359,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       %i[done canceled].each do |status|
         it "leaves a #{status} task #{status} and says it is not in progress", :aggregate_failures do
           closed = create(:task, status, :in_sprint, sprint_id: task.sprint_id, completed_at: Time.now - 60)
-          send_to("/admin/tasks/#{closed.id}/stop", filter: "today")
+          admin_post("/admin/tasks/#{closed.id}/stop", filter: "today")
           follow_redirect!
 
           expect(repo.by_id(closed.id)).to have_attributes(status: status.to_s, completed_at: be_a(Time))
@@ -1374,7 +1369,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "leaves an open task open and says it is not in progress", :aggregate_failures do
         open = create(:task)
-        send_to("/admin/tasks/#{open.id}/stop", filter: "next")
+        admin_post("/admin/tasks/#{open.id}/stop", filter: "next")
         follow_redirect!
 
         expect(repo.by_id(open.id)).to have_attributes(status: "open", list: "next")
@@ -1385,14 +1380,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "finishing a task" do
       it "marks it done" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/complete", filter: "next")
+        admin_post("/admin/tasks/#{task.id}/complete", filter: "next")
 
         expect(repo.by_id(task.id).status).to eq("done")
       end
 
       it "writes when it was finished" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/complete", filter: "next")
+        admin_post("/admin/tasks/#{task.id}/complete", filter: "next")
 
         expect(repo.by_id(task.id).completed_at).not_to be_nil
       end
@@ -1400,14 +1395,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       %i[done canceled].each do |status|
         it "opens a #{status} task again" do
           task = create(:task, status)
-          send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+          admin_post("/admin/tasks/#{task.id}/reopen", filter: "completed")
 
           expect(repo.by_id(task.id).status).to eq("open")
         end
 
         it "clears the time when a #{status} task is opened again" do
           task = create(:task, status)
-          send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+          admin_post("/admin/tasks/#{task.id}/reopen", filter: "completed")
 
           expect(repo.by_id(task.id).completed_at).to be_nil
         end
@@ -1415,7 +1410,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "says it reopened" do
         task = create(:task, :done)
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+        admin_post("/admin/tasks/#{task.id}/reopen", filter: "completed")
         follow_redirect!
 
         expect(page).to have_css("[data-toast] .toast", exact_text: "Reopened", visible: :all)
@@ -1437,14 +1432,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "keeps the list that was open" do
         task = create(:task, :someday)
-        send_to("/admin/tasks/#{task.id}/complete", filter: "someday")
+        admin_post("/admin/tasks/#{task.id}/complete", filter: "someday")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
       end
 
       it "comes back to the archive from the archive" do
         task = create(:task, :done)
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+        admin_post("/admin/tasks/#{task.id}/reopen", filter: "completed")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=completed"))
       end
@@ -1453,7 +1448,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "completing a closed task" do
       let(:closed_at) { Time.now.round - 86_400 }
 
-      def complete(task) = send_to("/admin/tasks/#{task.id}/complete", filter: "completed")
+      def complete(task) = admin_post("/admin/tasks/#{task.id}/complete", filter: "completed")
 
       %i[done canceled].each do |status|
         it "leaves a #{status} task as it was" do
@@ -1473,7 +1468,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "canceling a task" do
-      def cancel(task, filter: "next") = send_to("/admin/tasks/#{task.id}/cancel", filter:)
+      def cancel(task, filter: "next") = admin_post("/admin/tasks/#{task.id}/cancel", filter:)
 
       it "offers a cancel on an open task" do
         create(:task)
@@ -1564,7 +1559,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "puts it back on its list once opened again" do
         task = create(:task, :canceled, title: "Dropped")
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+        admin_post("/admin/tasks/#{task.id}/reopen", filter: "completed")
         get "/admin/tasks", filter: "next"
 
         expect(titles).to eq(["Dropped"])
@@ -1778,7 +1773,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       def edit(**fields)
         written = { title: "Email the accountant", list: "", note: "", tags: "", **fields }
 
-        send_to("/admin/tasks/#{task.id}", filter: "next", task: written)
+        admin_post("/admin/tasks/#{task.id}", filter: "next", task: written)
       end
 
       it "rewrites the text" do
@@ -1842,7 +1837,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "comes back to Today when it was opened there" do
-        send_to("/admin/tasks/#{task.id}", filter: "today", origin: "today", task: { title: "Email the accountant" })
+        admin_post("/admin/tasks/#{task.id}", filter: "today", origin: "today", task: { title: "Email the accountant" })
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
       end
@@ -1877,7 +1872,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       let(:task) { create(:task, title: "Email accountant") }
 
       before do
-        send_to(
+        admin_post(
           "/admin/tasks/#{task.id}",
           filter: "someday", origin: "tasks",
           task: { title: " ", note: "Ring before ten", list: "someday", tags: "not_a_tag", sprint_on: "" },
@@ -1930,14 +1925,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       def save(task, filter:, **changes)
         get "/admin/tasks/#{task.id}/edit", filter: filter
-        send_to("/admin/tasks/#{task.id}", filter:, task: { **held(task), **changes })
+        admin_post("/admin/tasks/#{task.id}", filter:, task: { **held(task), **changes })
       end
 
       def save_after_the_list_rolls(task)
         get "/admin/tasks/#{task.id}/edit", filter: "today"
         fields = held(task)
         get "/admin/tasks"
-        send_to("/admin/tasks/#{task.id}", filter: "today", task: fields)
+        admin_post("/admin/tasks/#{task.id}", filter: "today", task: fields)
       end
 
       def today = Blog::TimeZone.today
@@ -2055,7 +2050,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "the notes" do
       let(:today) { Blog::TimeZone.today }
 
-      def completed(title) = create(:task, title:).tap { send_to("/admin/tasks/#{it.id}/complete") }
+      def completed(title) = create(:task, title:).tap { admin_post("/admin/tasks/#{it.id}/complete") }
 
       def footnote = i18n.t("ui.views.tasks.index.footnote")
 
@@ -2075,7 +2070,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "says starting a task pulls it into today", :aggregate_failures do
         task = in_sprint_on(today + 3)
-        send_to("/admin/tasks/#{task.id}/start")
+        admin_post("/admin/tasks/#{task.id}/start")
         follow_redirect!
 
         expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today).id)
@@ -2167,7 +2162,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "deleting a task" do
       it "takes it away" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}/delete", filter: "next")
+        admin_post("/admin/tasks/#{task.id}/delete", filter: "next")
 
         expect(repo.by_id(task.id)).to be_nil
       end
@@ -2250,7 +2245,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       def next_titles = Tasks::Slice["relations.tasks"].in_list("next").in_order.pluck(:title)
 
       def place(title, after = nil)
-        send_to("/admin/tasks/#{listed(title).id}/place", after: after && listed(after).id)
+        admin_post("/admin/tasks/#{listed(title).id}/place", after: after && listed(after).id)
       end
 
       before do
@@ -2325,7 +2320,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       }.each do |kind, make|
         it "refuses #{kind} with no change", :aggregate_failures do
           closed = instance_exec(&make)
-          send_to("/admin/tasks/#{closed.id}/place", after: "")
+          admin_post("/admin/tasks/#{closed.id}/place", after: "")
 
           expect(last_response.status).to eq(422)
           expect(next_titles).to eq(["first", "second", "third", "fourth", closed.title])
@@ -2341,7 +2336,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         "an id that isn't one" => -> { "third" },
       }.each do |kind, after|
         it "refuses to follow #{kind} with no change", :aggregate_failures do
-          send_to("/admin/tasks/#{listed('first').id}/place", after: instance_exec(&after))
+          admin_post("/admin/tasks/#{listed('first').id}/place", after: instance_exec(&after))
 
           expect(last_response.status).to eq(422)
           expect(open_in_list("next").map(&:title)).to eq(%w[first second third fourth])
@@ -3083,15 +3078,15 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "planning a sprint ahead" do
-      def drop(sprint) = send_to("/admin/tasks/sprints/#{sprint.id}/delete")
+      def drop(sprint) = admin_post("/admin/tasks/sprints/#{sprint.id}/delete")
 
       def drop_form(sprint) = upcoming && page.find("form[action='/admin/tasks/sprints/#{sprint.id}/delete']")
 
       def edit(task, **fields)
-        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, **fields })
+        admin_post("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, **fields })
       end
 
-      def plan(on) = send_to("/admin/tasks/sprints", sprint_on: on.to_s)
+      def plan(on) = admin_post("/admin/tasks/sprints", sprint_on: on.to_s)
 
       def today = Blog::TimeZone.today
 
@@ -3306,7 +3301,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       }.each do |named, (asked, toast)|
         it "says #{named} when a task is scheduled" do
           task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
-          send_to("/admin/tasks/#{task.id}/schedule", sprint_on: instance_exec(&asked))
+          admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: instance_exec(&asked))
           follow_redirect!
 
           expect(page).to have_css("[data-toast] .toast", text: toast, visible: :all)
@@ -3316,7 +3311,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says an imported task went back to external when its date is cleared" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
         create(:task_source, task:)
-        send_to("/admin/tasks/#{task.id}/schedule", sprint_on: "")
+        admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: "")
         follow_redirect!
 
         expect(page).to have_css("[data-toast] .toast", text: "Unscheduled · back in external", visible: :all)
@@ -3325,7 +3320,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "pulls a task out of next onto a planned sprint" do
         sprint = create(:sprint, sprint_date: tomorrow)
         task = create(:task, title: "Email the accountant")
-        send_to("/admin/tasks/#{task.id}/schedule", sprint_on: tomorrow.iso8601)
+        admin_post("/admin/tasks/#{task.id}/schedule", sprint_on: tomorrow.iso8601)
 
         expect(repo.by_id(task.id).sprint_id).to eq(sprint.id)
       end
@@ -3355,7 +3350,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "schedules a task from its editor" do
         task = create(:task)
-        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: tomorrow.iso8601 })
+        admin_post("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: tomorrow.iso8601 })
 
         expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(tomorrow).id)
       end
@@ -3424,14 +3419,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "unschedules a task from its editor" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow))
-        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: "" })
+        admin_post("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: "" })
 
         expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
       end
 
       it "leaves a someday task where it is when its editor carries no date" do
         task = create(:task, :someday)
-        send_to("/admin/tasks/#{task.id}", filter: "someday", task: { title: task.title, sprint_on: "" })
+        admin_post("/admin/tasks/#{task.id}", filter: "someday", task: { title: task.title, sprint_on: "" })
 
         expect(repo.by_id(task.id).list).to eq("someday")
       end

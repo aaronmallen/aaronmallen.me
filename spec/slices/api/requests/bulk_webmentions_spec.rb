@@ -28,8 +28,6 @@ RSpec.describe "API bulk webmention actions", type: :request do
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
-  def status = last_response.status
-
   def status_of(mention) = Social::Slice["relations.webmentions"].by_pk(mention.id).one.fetch(:status)
 
   def twins

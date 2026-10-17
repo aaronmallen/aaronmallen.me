@@ -8,8 +8,6 @@ RSpec.describe "API health days", type: :request do
 
   def read(token = api_token(%w[health]), **params) = call_api(:get, "/health/days", params, token:)
 
-  def status = last_response.status
-
   describe "with the health scope" do
     let!(:workout) { create(:workout, kind: "RUNNING", started_at: at(monday, 7), minutes: 42, device: "Watch") }
 

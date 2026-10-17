@@ -11,8 +11,6 @@ RSpec.describe "API sprints", type: :request do
 
   def sprints = Tasks::Slice["repos.sprint_queries"]
 
-  def status = last_response.status
-
   def stored(task) = Tasks::Slice["repos.task_queries"].detailed(task.id)
 
   def today = Blog::TimeZone.today

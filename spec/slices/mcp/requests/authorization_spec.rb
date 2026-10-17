@@ -36,10 +36,6 @@ RSpec.describe "OAuth authorization", type: :request do
 
   def copy(key, **) = i18n.t(key, scope: "ui.views.authorizations.new", **)
 
-  def document = JSON.parse(last_response.body)
-
-  def page = Capybara.string(last_response.body)
-
   def policy = last_response.headers["Content-Security-Policy"].split(";")
 
   def redirect_uri = client.redirect_uris.first

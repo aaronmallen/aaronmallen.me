@@ -5,8 +5,6 @@ RSpec.describe "Admin search", type: :request do
 
   def kinds = page.all(".search-kind").map { [it.text, it["aria-current"]] }
 
-  def page = Capybara.string(last_response.body)
-
   def says(key, **) = i18n.t(["ui.views.search.index", key].join("."), **)
 
   def titles = page.all(".li-title").map(&:text)

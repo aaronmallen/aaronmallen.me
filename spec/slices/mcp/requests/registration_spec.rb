@@ -7,8 +7,6 @@ RSpec.describe "Dynamic client registration", type: :request do
   let(:limit) { Hanami.app["settings"].client_registration[:throttle_limit] }
   let(:redirect_uri) { "https://claude.ai/api/mcp/auth_callback" }
 
-  def document = JSON.parse(last_response.body)
-
   def register(payload, env = {})
     body = payload.is_a?(String) ? payload : payload.to_json
     post "/oauth/register", body, { "CONTENT_TYPE" => "application/json" }.merge(env)

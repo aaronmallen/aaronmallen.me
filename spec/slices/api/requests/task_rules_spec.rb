@@ -23,8 +23,6 @@ RSpec.describe "API task rules", type: :request do
     create(:task, :external).tap { create(:task_source, task: it, provider:, url:) }
   end
 
-  def status = last_response.status
-
   def tag_names(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).tags.map(&:name)
 
   def update_rule(id, fields) = call_api(:patch, "/task_rules/#{id}", JSON.generate(fields))

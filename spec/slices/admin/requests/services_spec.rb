@@ -21,8 +21,6 @@ RSpec.describe "Admin connected services", type: :request do
 
   def names(label) = group(label).all(".li-title").map(&:text)
 
-  def page = Capybara.string(last_response.body)
-
   def pickable = page.all("#connect-service .svc-pick .svc-line-name", visible: :all).map(&:text)
 
   def row(name) = page.find(".li", text: name)

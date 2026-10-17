@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin mail menus", type: :request do
-  def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def bulk
     [
       "Archive 2", "Mark read", "Mark unread", "Star", "Snooze", "Later today", "Tomorrow morning", "Next week",
@@ -17,8 +15,6 @@ RSpec.describe "Admin mail menus", type: :request do
   def fields(form) = form.all("input", visible: :all).to_h { [it[:name], it.value] }
 
   def head = page.find("[data-context-menu] > .ctx-head").text
-
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
 
   def menu_form(label, within: page)
     within.find(".ctx-label", exact_text: label, visible: :all).ancestor("form", visible: :all)
@@ -92,7 +88,7 @@ RSpec.describe "Admin mail menus", type: :request do
       end
 
       it "holds every action an unread thread in the inbox takes" do
-        expect(items).to eq(single)
+        expect(menu_items).to eq(single)
       end
 
       it "posts list actions to the bulk route with the list's place in place of return_to", :aggregate_failures do
@@ -141,8 +137,8 @@ RSpec.describe "Admin mail menus", type: :request do
       thread = create(:message, :read, starred: true, snoozed_until: now + 3600)
       get "/admin/mail/#{thread.id}/menu"
 
-      expect(items).to include("Mark unread", "Unstar", "Wake now")
-      expect(items).not_to include("Snooze")
+      expect(menu_items).to include("Mark unread", "Unstar", "Wake now")
+      expect(menu_items).not_to include("Snooze")
     end
 
     it "moves an archived thread back to the inbox and opens its task", :aggregate_failures do
@@ -150,15 +146,15 @@ RSpec.describe "Admin mail menus", type: :request do
       task = create(:task).tap { Links::Slice["repos.record_link_mutations"].link(["mail_thread", thread.id], ["task", it.id]) }
       get "/admin/mail/#{thread.id}/menu"
 
-      expect(items).to include("Move to Inbox", "Open task ##{task.id}")
-      expect(items).not_to include("Make a task")
+      expect(menu_items).to include("Move to Inbox", "Open task ##{task.id}")
+      expect(menu_items).not_to include("Make a task")
     end
 
     it "deletes a trashed thread forever after a second click", :aggregate_failures do
       thread = create(:message, trashed: true)
       get "/admin/mail/#{thread.id}/menu"
 
-      expect(items).not_to include("Reply")
+      expect(menu_items).not_to include("Reply")
       expect(fields(menu_form("Delete forever"))).to include("act" => "delete")
       expect(page).to have_css("button[data-confirm-inline=\"Click again · can't undo\"]", text: "Delete forever")
     end
@@ -188,7 +184,7 @@ RSpec.describe "Admin mail menus", type: :request do
       end
 
       it "lands a bulk-route action back on the inbox with its toast", :aggregate_failures do
-        act("/admin/mail/bulk", "ids[]": thread.id, act: "star", return_to: "/admin/inbox")
+        admin_post("/admin/mail/bulk", "ids[]": thread.id, act: "star", return_to: "/admin/inbox")
 
         expect(last_response.location).to eq("/admin/inbox")
         follow_redirect!
@@ -198,7 +194,7 @@ RSpec.describe "Admin mail menus", type: :request do
 
     it "unstars a thread with its toast", :aggregate_failures do
       thread = create(:message, starred: true)
-      act("/admin/mail/bulk", "ids[]": thread.id, act: "unstar", folder: "inbox")
+      admin_post("/admin/mail/bulk", "ids[]": thread.id, act: "unstar", folder: "inbox")
 
       follow_redirect!
       expect(toast).to eq("Unstarred 1 thread")
@@ -207,7 +203,7 @@ RSpec.describe "Admin mail menus", type: :request do
 
     it "wakes a thread back to the page the menu opened on" do
       thread = create(:message, snoozed_until: now + 3600)
-      act("/admin/mail/#{thread.id}/wake", return_to: "/admin/mail?folder=snoozed")
+      admin_post("/admin/mail/#{thread.id}/wake", return_to: "/admin/mail?folder=snoozed")
 
       expect(last_response.location).to eq("/admin/mail?folder=snoozed")
     end
@@ -225,7 +221,7 @@ RSpec.describe "Admin mail menus", type: :request do
       end
 
       it "holds every bulk action" do
-        expect(items).to eq(bulk)
+        expect(menu_items).to eq(bulk)
       end
 
       it "posts to the bulk route with every picked thread and the list's place", :aggregate_failures do
@@ -255,14 +251,14 @@ RSpec.describe "Admin mail menus", type: :request do
       ids = [create(:message, trashed: true), create(:message, trashed: true)].map(&:id)
       get "/admin/mail/bulk/menu", ids:, folder: "trash"
 
-      expect(items).to eq(["Restore 2", "Delete 2 forever"])
+      expect(menu_items).to eq(["Restore 2", "Delete 2 forever"])
     end
 
     describe "snoozing picked threads" do
       let(:ids) { [create(:message), create(:message)].map(&:id) }
 
       it "snoozes every one with a toast", :aggregate_failures do
-        act("/admin/mail/bulk/snooze", "ids[]": ids, pick: "2026-10-08T08:00", folder: "inbox")
+        admin_post("/admin/mail/bulk/snooze", "ids[]": ids, pick: "2026-10-08T08:00", folder: "inbox")
 
         expect(ids.map { repo.by_id(it).snoozed_until }).to all(be > now)
         follow_redirect!
@@ -270,7 +266,7 @@ RSpec.describe "Admin mail menus", type: :request do
       end
 
       it "refuses a time in the past with a toast that names the time", :aggregate_failures do
-        act("/admin/mail/bulk/snooze", "ids[]": ids, pick: "2020-01-01T08:00", folder: "inbox")
+        admin_post("/admin/mail/bulk/snooze", "ids[]": ids, pick: "2020-01-01T08:00", folder: "inbox")
 
         expect(ids.map { repo.by_id(it).snoozed_until }).to all(be_nil)
         follow_redirect!
@@ -278,7 +274,7 @@ RSpec.describe "Admin mail menus", type: :request do
       end
 
       it "refuses a time it cannot read with the same toast", :aggregate_failures do
-        act("/admin/mail/bulk/snooze", "ids[]": ids, pick: "soon", folder: "inbox")
+        admin_post("/admin/mail/bulk/snooze", "ids[]": ids, pick: "soon", folder: "inbox")
 
         expect(ids.map { repo.by_id(it).snoozed_until }).to all(be_nil)
         follow_redirect!

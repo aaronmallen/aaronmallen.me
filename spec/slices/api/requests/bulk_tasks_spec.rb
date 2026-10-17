@@ -27,8 +27,6 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def repo = Tasks::Slice["repos.task_queries"]
 
-  def status = last_response.status
-
   def status_of(task) = repo.by_id(task.id)&.status
 
   def tag_names(task) = Tasks::Slice["relations.task_tags"].names_by_task([task.id]).fetch(task.id, [])

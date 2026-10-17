@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin journal", :frozen_clock, type: :request do
-  let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
   let(:repo) { Record::Slice["repos.journal_entry_queries"] }
   let(:today) { Blog::TimeZone.today }
@@ -521,8 +520,6 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         hrefs << last_request.fullpath while follow("next")
         hrefs
       end
-
-      def page = Capybara.string(last_response.body)
 
       def pager_href(rel) = page.find("nav.pager a[rel='#{rel}']")["href"]
 

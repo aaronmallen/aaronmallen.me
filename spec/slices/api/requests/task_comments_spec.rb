@@ -13,8 +13,6 @@ RSpec.describe "API task comments", type: :request do
 
   def stamps(saved) = { "created_at" => saved.created_at.utc.iso8601, "updated_at" => saved.updated_at.utc.iso8601 }
 
-  def status = last_response.status
-
   def stored(task) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
 
   let(:task) { create(:task) }

@@ -7,8 +7,6 @@ RSpec.describe "Admin bulk menus", type: :request do
 
   def head = page.find("[data-context-menu] > .ctx-head").text
 
-  def items = page.all(".ctx-label", visible: :all).map { it.text(:all) }
-
   def menu_form(label, within: page)
     within.find(".ctx-item", exact_text: label, visible: :all).ancestor("form", visible: :all)
   end
@@ -42,7 +40,8 @@ RSpec.describe "Admin bulk menus", type: :request do
       end
 
       it "holds every bulk action" do
-        expect(items).to include("Complete", "Move to", "Add tag", "Remove tag", "Cancel", "Delete", "Clear selection")
+        expect(menu_items).to include("Complete", "Move to", "Add tag", "Remove tag", "Cancel", "Delete",
+                                      "Clear selection")
       end
 
       it "posts each action to the bulk route with every picked task and the list's place", :aggregate_failures do
@@ -62,7 +61,7 @@ RSpec.describe "Admin bulk menus", type: :request do
         expect(fields(menu_form("#home", within: submenu("Add tag")))).to include(%w[act tag], %w[tag home])
         expect(fields(menu_form("#work", within: submenu("Remove tag")))).to include(%w[act untag], %w[tag work])
         expect(submenu("Remove tag")).to have_no_text("#home", wait: 0)
-        expect(items).not_to include("#ruby")
+        expect(menu_items).not_to include("#ruby")
       end
 
       it "asks before it deletes" do
@@ -89,7 +88,7 @@ RSpec.describe "Admin bulk menus", type: :request do
 
       it "adds only public tags and holds no remove when no post has a tag", :aggregate_failures do
         expect(fields(menu_form("#ruby"))).to include(%w[act tag], %w[tag ruby], %w[status draft])
-        expect(items).not_to include("#home", "Remove tag")
+        expect(menu_items).not_to include("#home", "Remove tag")
       end
 
       it "deletes every picked post on a second click", :aggregate_failures do
@@ -110,14 +109,14 @@ RSpec.describe "Admin bulk menus", type: :request do
       end
 
       it "offers each verdict the list has not reached", :aggregate_failures do
-        expect(items).to eq(%w[Approve Ignore Spam])
+        expect(menu_items).to eq(%w[Approve Ignore Spam])
         expect(fields(menu_form("Approve"))).to include(*mentions.map { ["ids[]", it.id.to_s] }, %w[act approved])
       end
 
       it "leaves out the verdict of the list it opened on" do
         get "/admin/webmentions/bulk/menu", ids: mentions.map(&:id), status: "spam"
 
-        expect(items).to eq(%w[Approve Ignore])
+        expect(menu_items).to eq(%w[Approve Ignore])
       end
     end
 

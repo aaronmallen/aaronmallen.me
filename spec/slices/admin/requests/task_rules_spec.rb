@@ -5,7 +5,7 @@ RSpec.describe "Admin task rules", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
   def add(pattern, tags, provider: "github", projects: nil)
-    send_to("/admin/tasks/rules", rule: { pattern:, provider:, tags:, projects: }.compact)
+    admin_post("/admin/tasks/rules", rule: { pattern:, provider:, tags:, projects: }.compact)
   end
 
   def message(field, key) = i18n.t(["ui.components.task_rules.field_error", field, key].join("."))
@@ -15,9 +15,6 @@ RSpec.describe "Admin task rules", type: :request do
   end
 
   def rules = Tasks::Slice["repos.task_rule_queries"].all
-
-  def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
-
   def stored(id) = rules.find { it.id == id }
 
   def ticked(id)
@@ -144,8 +141,8 @@ RSpec.describe "Admin task rules", type: :request do
       let!(:task) { create(:task, :external).tap { create(:task_source, task: it, url: "https://github.com/x/blog/issues/1") } }
 
       def edit_then_delete(id)
-        send_to("/admin/tasks/rules/#{id}", rule: { pattern: "x/*", tags: "ruby" })
-        send_to("/admin/tasks/rules/#{id}/delete")
+        admin_post("/admin/tasks/rules/#{id}", rule: { pattern: "x/*", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{id}/delete")
       end
 
       def held = Tasks::Slice["repos.task_queries"].by_id(task.id).then { [it.tags.map(&:name), it.project_id] }
@@ -301,7 +298,7 @@ RSpec.describe "Admin task rules", type: :request do
       let!(:existing) { rule("aaronmallen/*", "projects") }
 
       it "rewrites the pattern and tags" do
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/aaronmallen.me", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/aaronmallen.me", tags: "ruby" })
 
         expect([stored(existing.id).pattern, stored(existing.id).tags.map(&:name)])
           .to eq(["aaronmallen/aaronmallen.me", %w[ruby]])
@@ -309,7 +306,7 @@ RSpec.describe "Admin task rules", type: :request do
 
       it "replaces the projects" do
         blog = create(:project)
-        send_to(
+        admin_post(
           "/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/*", tags: "", projects: [blog.id.to_s] },
         )
 
@@ -318,26 +315,26 @@ RSpec.describe "Admin task rules", type: :request do
 
       it "takes every project out when none is ticked" do
         rule = rule("octocat/*", "ruby", projects: [create(:project).id])
-        send_to("/admin/tasks/rules/#{rule.id}", rule: { pattern: "octocat/*", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{rule.id}", rule: { pattern: "octocat/*", tags: "ruby" })
 
         expect(stored(rule.id).projects).to be_empty
       end
 
       it "changes the provider" do
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "acme/*", provider: "linear", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "acme/*", provider: "linear", tags: "ruby" })
 
         expect(stored(existing.id).provider).to eq("linear")
       end
 
       it "says so" do
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/*", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/*", tags: "ruby" })
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule saved")
       end
 
       it "refuses a bad pattern and keeps the rule as it was", :aggregate_failures do
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen", tags: "ruby" })
 
         expect(last_response.status).to eq(422)
         expect([stored(existing.id).pattern,
@@ -345,7 +342,7 @@ RSpec.describe "Admin task rules", type: :request do
       end
 
       it "says why it refused, against the row it refused, with what was typed", :aggregate_failures do
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen", tags: "ruby" })
+        admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen", tags: "ruby" })
 
         expect(page).to have_css("#rule-#{existing.id}-pattern-error", text: message(:pattern, "format"))
         expect(page).to have_css("#rule-#{existing.id}-pattern[value='aaronmallen']")
@@ -353,7 +350,7 @@ RSpec.describe "Admin task rules", type: :request do
       end
 
       it "answers 404 for a rule that isn't there" do
-        send_to("/admin/tasks/rules/999999", rule: { pattern: "aaronmallen/*", tags: "ruby" })
+        admin_post("/admin/tasks/rules/999999", rule: { pattern: "aaronmallen/*", tags: "ruby" })
 
         expect(last_response.status).to eq(404)
       end
@@ -363,13 +360,13 @@ RSpec.describe "Admin task rules", type: :request do
       let!(:existing) { rule("aaronmallen/*", "projects") }
 
       it "takes it away" do
-        send_to("/admin/tasks/rules/#{existing.id}/delete")
+        admin_post("/admin/tasks/rules/#{existing.id}/delete")
 
         expect(rules).to be_empty
       end
 
       it "says so" do
-        send_to("/admin/tasks/rules/#{existing.id}/delete")
+        admin_post("/admin/tasks/rules/#{existing.id}/delete")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule deleted")
@@ -383,7 +380,7 @@ RSpec.describe "Admin task rules", type: :request do
       end
 
       it "answers 404 for a rule that isn't there" do
-        send_to("/admin/tasks/rules/0/delete")
+        admin_post("/admin/tasks/rules/0/delete")
 
         expect(last_response.status).to eq(404)
       end
