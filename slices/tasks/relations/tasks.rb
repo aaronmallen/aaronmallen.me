@@ -6,6 +6,7 @@ module Tasks
       COMPLETED_ON = site_day(:completed_at)
       CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       CREATED_ON = site_day(:created_at)
+      DETAILS = %i[contributors running_session series source tags incoming_links outgoing_links].freeze
       CLOSED = Blog::Types::ClosedTaskStatus.values.freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze
@@ -17,8 +18,8 @@ module Tasks
         associations do
           belongs_to :sprint
           has_many :task_contributors, as: :contributors, view: :in_order
-          has_many :task_links, as: :incoming_links, foreign_key: :to_task_id
-          has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id
+          has_many :task_links, as: :incoming_links, foreign_key: :to_task_id, view: :from_partners
+          has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id, view: :to_partners
           has_many :task_tags
           has_many :tags, through: :task_tags, view: :in_name_order
           has_one :task_series, as: :series
@@ -46,9 +47,8 @@ module Tasks
         comments = dataset.db[:task_comments].where(task_id: Sequel[:tasks][:id]).select { count.function.* }
 
         counted = select_append(ROM::SQL::Attribute[ROM::Types::Integer].meta(sql_expr: comments).as(:comment_count))
-        links = { incoming_links: :from_task, outgoing_links: :to_task }
 
-        counted.labelled.combine(:contributors, :running_session, :series, :source, :tags, **links)
+        counted.labelled.combine(*DETAILS)
       end
 
       def finished_counts(day)

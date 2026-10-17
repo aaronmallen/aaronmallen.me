@@ -11,10 +11,13 @@ module Tasks
         Blog::Types::TaskLinkType["relates"] => { outgoing: "relates", incoming: "relates" },
       }.freeze
       ORDER = LABELS.keys.freeze
+      Partner = Data.define(:id, :label, :list, :number, :status, :title)
 
-      def self.incoming(row) = new(direction: :incoming, task: row.from_task, type: row.type)
+      def self.incoming(row) = new(direction: :incoming, task: partner(row), type: row.type)
 
-      def self.outgoing(row) = new(direction: :outgoing, task: row.to_task, type: row.type)
+      def self.outgoing(row) = new(direction: :outgoing, task: partner(row), type: row.type)
+
+      def self.partner(row) = Partner.new(**Partner.members.to_h { [it, row[:"partner_#{it}"]] })
 
       def blocker? = incoming? && open_block?
 

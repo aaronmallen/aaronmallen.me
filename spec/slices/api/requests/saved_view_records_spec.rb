@@ -103,13 +103,13 @@ RSpec.describe "API saved view records", type: :request do
       expect(first_record("tasks", filter: "upcoming")).to include("id" => task.id, "sprint_on" => later.iso8601)
     end
 
-    it "gives each task the JSON read_task gives, less its comments, record links and timeline" do
+    it "gives each task the JSON read_task gives, less its note, comments, record links and timeline" do
       task = create(:task, title: "linked", tags: %w[ops])
       create(:task_link, from_task_id: create(:task, :done).id, to_task_id: task.id)
       found = records(filter: "next").fetch("records")
       task_read = trusted(mcp_answer("read_task", id: task.id))
 
-      expect(found).to eq([task_read.except("comments", "record_links", "timeline")])
+      expect(found).to eq([task_read.except("note", "comments", "record_links", "timeline")])
     end
 
     it "pages as list_tasks does" do

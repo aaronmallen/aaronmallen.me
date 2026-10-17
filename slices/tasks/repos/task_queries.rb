@@ -33,7 +33,7 @@ module Tasks
 
       def by_ids(ids) = tasks.where(id: ids).combine(:tags).to_a
 
-      def by_tag(tag) = with_details.combine(:sprint).tagged([tag]).open_first.to_a
+      def by_tag(tag) = listed.combine(:sprint).tagged([tag]).open_first.to_a
 
       def detailed(id) = with_details.combine(:sprint).by_pk(id).one
 
@@ -50,7 +50,7 @@ module Tasks
         from, to = filters.values_at(:from, :to)
         found = tasks.narrowed(**search)
         found = found.closed(from..to) if closed_in_window && (from || to)
-        rows = found.detailed.combine(:sprint).newest_first.ids_first(search[:label_ids]).paged(page).to_a
+        rows = listed(found).combine(:sprint).newest_first.ids_first(search[:label_ids]).paged(page).to_a
 
         Structs::FoundTasks.new(paged: page.fill(rows), total: found.count)
       end
@@ -59,7 +59,7 @@ module Tasks
         days = (from..to if from && to)
 
         search = by_project(**search)
-        found = with_details.combine(:sprint).closed(days).searched(**search)
+        found = listed.combine(:sprint).closed(days).searched(**search)
 
         page.fill(found.newest_first.ids_first(search[:label_ids]).paged(page).to_a)
       end
@@ -76,7 +76,7 @@ module Tasks
 
       def in_progress = tasks.in_progress.in_order.to_a
 
-      def in_sprint(sprint_id) = with_details.for_sprint(sprint_id).in_order.to_a
+      def in_sprint(sprint_id) = listed.for_sprint(sprint_id).in_order.to_a
 
       def link_targets(id, text)
         query = Blog::Types::TrimmedText[text]
@@ -89,13 +89,13 @@ module Tasks
 
       def list(filter, sprint:, page:, **search)
         search = by_project(**search)
-        found = pool(with_details, filter, sprint).searched(**search)
+        found = pool(listed, filter, sprint).searched(**search)
 
         page.fill(found.in_order.ids_first(search[:label_ids]).paged(page).to_a)
       end
 
       def on_board(project_id, sizes)
-        on_project(with_details, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
+        on_project(listed, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
       end
 
       def on_public_board(project_id, sizes)
@@ -103,9 +103,7 @@ module Tasks
       end
 
       def on_public_board_by_number(project_id, number)
-        links = { incoming_links: :from_task, outgoing_links: :to_task }
-
-        tasks.labelled.where(project_id:, number:).combine(:source, **links).one
+        tasks.labelled.where(project_id:, number:).combine(:source, :incoming_links, :outgoing_links).one
       end
 
       def open_after(task) = tasks.beside(task).following(task).limit(1).one
@@ -121,7 +119,7 @@ module Tasks
       def planned(sprints, **search)
         search = by_project(**search)
 
-        with_details.for_sprint(sprints.map(&:id)).open.searched(**search).in_order.ids_first(search[:label_ids]).to_a
+        listed.for_sprint(sprints.map(&:id)).open.searched(**search).in_order.ids_first(search[:label_ids]).to_a
       end
 
       def public_board_slugs(task_ids)
@@ -131,7 +129,7 @@ module Tasks
         by_task.filter_map { |id, project_id| [id, [slugs[project_id]]] if slugs.key?(project_id) }.to_h
       end
 
-      def recurring = with_details.combine(:sprint).where(id: task_series.pluck(:task_id)).in_order.to_a
+      def recurring = listed.combine(:sprint).where(id: task_series.pluck(:task_id)).in_order.to_a
 
       private
 
@@ -139,6 +137,8 @@ module Tasks
         search = { **search, label_ids: task_label_queries.ids_labelled(search[:text]) }
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
       end
+
+      def listed(found = tasks) = found.select(*found.schema.qualified.reject { it.name == :note }).detailed
 
       def on_project(found, project_id) = recent(found.searched(project_ids: [project_id]))
 

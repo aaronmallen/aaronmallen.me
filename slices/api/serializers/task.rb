@@ -42,7 +42,6 @@ module API
           id: Helpers::Schema::INTEGER,
           label: LABEL,
           title: Helpers::Schema::STRING,
-          note: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
           list: Helpers::Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
           stage: { type: "string", enum: Blog::Types::TaskStage.values, description: "an open task's board column" },
@@ -76,7 +75,6 @@ module API
 
       stamps :completed_at, :created_at, :updated_at
       tag_names
-      untrusted :note
 
       def contributors(task) = task.credits
 

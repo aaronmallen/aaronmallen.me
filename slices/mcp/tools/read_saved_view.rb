@@ -12,10 +12,10 @@ module MCP
                   "read_activity row carries, null where its kind holds none. " \
                   "Reading a Today, Next, Someday or External tasks view claims today's sprint, starting it when " \
                   "today has none yet and carrying in what the day before left open, as read_current_sprint and " \
-                  "the admin's task list do. A task's note, a synced task's title, a comment's name, its excerpt " \
-                  "when its task syncs from an issue, the name of a task or session row when its task syncs " \
-                  "from an issue, a webmention's name and excerpt, and a pull request's name may come from " \
-                  "someone else and come marked untrusted. #{Untrusted::WARNING}"
+                  "the admin's task list do. A task row leaves out its note. A synced task's title, a comment's " \
+                  "name, its excerpt when its task syncs from an issue, the name of a task or session row when " \
+                  "its task syncs from an issue, a webmention's name and excerpt, and a pull request's name may " \
+                  "come from someone else and come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end

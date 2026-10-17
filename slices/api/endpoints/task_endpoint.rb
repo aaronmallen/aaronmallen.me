@@ -8,6 +8,7 @@ module API
 
       REPLY = Helpers::Schema.widen(
         Serializers::Task::SCHEMA,
+        note: Helpers::Schema::STRING,
         comments: Helpers::Schema.list(Serializers::TaskComment.reference),
         record_links: Serializers::Link::GROUPS,
       ).freeze
@@ -47,7 +48,9 @@ module API
         comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id),
                               owner: settings.owner_name)
 
-        Success(serialized(Serializers::Task, task).merge(comments:, record_links: links_for(task.id), **extra))
+        note = Helpers::Untrusted.call(task.note)
+
+        Success(serialized(Serializers::Task, task).merge(note:, comments:, record_links: links_for(task.id), **extra))
       end
     end
   end

@@ -446,8 +446,8 @@ RSpec.describe "MCP untrusted text", type: :request do
       end
     end
 
-    it "marks the note of each task list_tasks lists" do
-      expect(mcp_answer("list_tasks").fetch("tasks").map { it.fetch("note") }).to eq([marked("Send the draft")])
+    it "sends no note on each task list_tasks lists" do
+      expect(mcp_answer("list_tasks").fetch("tasks")).to contain_exactly(hash_excluding("note"))
     end
   end
 
@@ -528,7 +528,7 @@ RSpec.describe "MCP untrusted text", type: :request do
       expect(inputs.keys).to match_array(self.class.task_tools)
     end
 
-    def synced_task?(value) = value.key?("note") && !value["source"].nil?
+    def synced_task?(value) = value.key?("recur") && !value["source"].nil?
 
     def synced_titles(value)
       case value
@@ -538,9 +538,31 @@ RSpec.describe "MCP untrusted text", type: :request do
       end
     end
 
+    def self.row_tools
+      %w[
+        cancel_tasks complete_tasks list_tasks move_tasks read_current_sprint read_saved_view read_tag tag_tasks
+        untag_tasks
+      ]
+    end
+
     def self.task_answering_tools = task_tools - %w[add_task_comment capture_task edit_task_comment]
 
-    task_tools.each do |name|
+    def linked_titles(value, id)
+      case value
+        when Hash then (value.key?("label") && value["id"] == id ? [value["title"]] : []) + linked_titles(value.values,
+                                                                                                          id)
+        when Array then value.flat_map { linked_titles(it, id) }
+        else []
+      end
+    end
+
+    row_tools.each do |name|
+      it "sends no note on the task rows #{name} answers with" do
+        expect(task_rows(mcp_answer(name, **input(name))).map { it.key?("note") }).to include(false).and(all(be(false)))
+      end
+    end
+
+    (task_tools - row_tools).each do |name|
       it "leaves no note or comment body plain in what #{name} answers with", :aggregate_failures do
         answered = mcp_answer(name, **input(name))
 
@@ -557,11 +579,10 @@ RSpec.describe "MCP untrusted text", type: :request do
       end
     end
 
-    def linked_titles(value, id)
+    def task_rows(value)
       case value
-        when Hash then (value.key?("label") && value["id"] == id ? [value["title"]] : []) + linked_titles(value.values,
-                                                                                                          id)
-        when Array then value.flat_map { linked_titles(it, id) }
+        when Hash then (value.key?("recur") ? [value] : []) + task_rows(value.values)
+        when Array then value.flat_map { task_rows(it) }
         else []
       end
     end
@@ -723,10 +744,10 @@ RSpec.describe "MCP untrusted text", type: :request do
       mcp_answer("read_saved_view", id: create(:saved_view, screen:, filters:).id).fetch("records")
     end
 
-    it "marks the note of each task row" do
+    it "sends no note on each task row" do
       create(:task, note: "Send the draft")
 
-      expect(records("tasks", filter: "next").map { it.fetch("note") }).to eq([marked("Send the draft")])
+      expect(records("tasks", filter: "next")).to contain_exactly(hash_excluding("note"))
     end
 
     it "marks the name of a comment row and the title of its synced task" do
