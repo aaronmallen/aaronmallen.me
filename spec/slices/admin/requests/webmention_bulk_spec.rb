@@ -189,7 +189,7 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       before do
         replace_component(
           "social.operations.act_on_webmentions",
-          ->(_params) { Dry::Monads::Result::Failure.new([:record, mention.id, :locked]) },
+          ->(_params) { Failure([:record, mention.id, :locked]) },
         )
         act("approved", [mention])
       end

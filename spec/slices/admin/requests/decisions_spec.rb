@@ -215,7 +215,7 @@ RSpec.describe "Admin decisions", type: :request do
           capture = Tasks::Slice["operations.capture_task"]
           lambda do |params|
             capture.call(params)
-            Dry::Monads::Failure([:invalid, { title: ["is too long"] }])
+            Failure([:invalid, { title: ["is too long"] }])
           end
         end
 

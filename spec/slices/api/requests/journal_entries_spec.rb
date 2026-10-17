@@ -232,7 +232,7 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Record::Operations::SaveJournalEntry, call: Dry::Monads::Failure(:unexpected))
+      failing = instance_double(Record::Operations::SaveJournalEntry, call: Failure(:unexpected))
       replace_component("record.operations.save_journal_entry", failing)
 
       expect([create_entry(body: "Lost"), status])

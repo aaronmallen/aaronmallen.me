@@ -877,7 +877,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       end
 
       it "answers with a server error when the delete fails", :aggregate_failures do
-        replace_component("record.operations.delete_journal_entry", ->(_id) { Dry::Monads::Failure(:unexpected) })
+        replace_component("record.operations.delete_journal_entry", ->(_id) { Failure(:unexpected) })
         delete_entry
 
         expect([last_response.status, repo.count]).to eq([500, 1])

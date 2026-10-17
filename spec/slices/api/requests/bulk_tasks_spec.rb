@@ -248,7 +248,7 @@ RSpec.describe "API bulk task actions", type: :request do
 
   it "answers a failure it did not expect with a 500 that names the task" do
     task = create(:task)
-    failing = instance_double(Tasks::Operations::ActOnTasks, call: Dry::Monads::Failure[:record, task.id, :unexpected])
+    failing = instance_double(Tasks::Operations::ActOnTasks, call: Failure([:record, task.id, :unexpected]))
     replace_component("tasks.operations.act_on_tasks", failing)
 
     expect([act("complete", [task.id]), status])

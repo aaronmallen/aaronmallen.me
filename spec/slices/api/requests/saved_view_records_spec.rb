@@ -317,7 +317,7 @@ RSpec.describe "API saved view records", type: :request do
   end
 
   it "answers a failure to open today's sprint with a 500" do
-    failing = instance_double(Tasks::Operations::CurrentSprint, call: Dry::Monads::Failure(:not_found))
+    failing = instance_double(Tasks::Operations::CurrentSprint, call: Failure(:not_found))
     replace_component("tasks.operations.current_sprint", failing)
 
     expect([records, status]).to eq([{ "error" => "failed", "message" => "could not open today's sprint" }, 500])

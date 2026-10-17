@@ -118,7 +118,7 @@ RSpec.describe "API review note", type: :request do
     end
 
     it "answers 500 when the save fails some other way" do
-      failing = instance_double(Record::Operations::SaveReviewNote, call: Dry::Monads::Failure(:locked))
+      failing = instance_double(Record::Operations::SaveReviewNote, call: Failure(:locked))
       replace_component("record.operations.save_review_note", failing)
 
       expect([save(day: "2026-09-16", body: "good week"), status])

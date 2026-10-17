@@ -83,7 +83,7 @@ RSpec.describe "API revising a post's edit note", type: :request do
     end
 
     it "answers 500 when the revision fails some other way" do
-      failing = instance_double(Posts::Operations::ReviseEditNote, call: Dry::Monads::Failure(:locked))
+      failing = instance_double(Posts::Operations::ReviseEditNote, call: Failure(:locked))
       replace_component("posts.operations.revise_edit_note", failing)
 
       expect([revise(published.id, edit.id, note: "Mine"), status])

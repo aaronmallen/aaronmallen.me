@@ -126,7 +126,7 @@ RSpec.describe "API bulk post actions", type: :request do
 
   it "answers a failure it did not expect with a 500 that names the post" do
     id = create(:post, :draft).id
-    failing = instance_double(Posts::Operations::ActOnPosts, call: Dry::Monads::Failure[:record, id, :unexpected])
+    failing = instance_double(Posts::Operations::ActOnPosts, call: Failure([:record, id, :unexpected]))
     replace_component("posts.operations.act_on_posts", failing)
 
     expect([act("delete", [id]), status])

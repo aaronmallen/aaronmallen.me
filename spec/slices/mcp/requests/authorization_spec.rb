@@ -942,7 +942,7 @@ RSpec.describe "OAuth authorization", type: :request do
     before do
       sign_in_to_admin
       get authorize_path
-      failing = instance_double(MCP::Operations::Authorize, call: Dry::Monads::Failure(:gone_wrong))
+      failing = instance_double(MCP::Operations::Authorize, call: Failure(:gone_wrong))
       replace_component("operations.authorize", failing)
       post "/oauth/authorize", authorization_fields.merge("decision" => "approve")
     end

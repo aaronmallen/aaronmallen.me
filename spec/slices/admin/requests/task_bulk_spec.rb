@@ -323,7 +323,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       before do
         replace_component(
           "tasks.operations.act_on_tasks",
-          ->(_params) { Dry::Monads::Result::Failure.new([:record, task.id, :locked]) },
+          ->(_params) { Failure([:record, task.id, :locked]) },
         )
         act("complete", [task])
       end

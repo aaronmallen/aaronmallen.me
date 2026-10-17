@@ -68,7 +68,7 @@ RSpec.describe "API publishing a post", type: :request do
     end
 
     it "answers 500 when the publish fails some other way" do
-      failing = instance_double(Posts::Operations::PublishDraft, call: Dry::Monads::Failure(:not_due))
+      failing = instance_double(Posts::Operations::PublishDraft, call: Failure(:not_due))
       replace_component("posts.operations.publish_draft", failing)
 
       expect([publish(create(:post, :draft).id), status])

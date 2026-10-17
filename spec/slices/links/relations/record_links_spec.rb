@@ -127,7 +127,7 @@ RSpec.describe Links::Relations::RecordLinks do
       result = Links::Slice["operations.link_records"].call("task", task.id,
                                                             { other_kind: "project", other_id: 999_999 })
 
-      expect(result).to eq(Dry::Monads::Failure([:invalid, { other_id: ["missing"] }]))
+      expect(result).to eq(Failure([:invalid, { other_id: ["missing"] }]))
     end
 
     it "moves the task to the next project it links" do
@@ -140,7 +140,7 @@ RSpec.describe Links::Relations::RecordLinks do
     it "clears the project on unlink, and refuses a project the task is not in", :aggregate_failures do
       link("task", task.id, "project", project.id)
 
-      expect(unlink(create(:project).id)).to eq(Dry::Monads::Failure(:not_found))
+      expect(unlink(create(:project).id)).to eq(Failure(:not_found))
       expect(unlink(project.id)).to be_success
       expect(project_id).to be_nil
     end

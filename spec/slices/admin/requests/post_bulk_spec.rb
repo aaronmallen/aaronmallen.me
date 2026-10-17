@@ -173,7 +173,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       before do
         replace_component(
           "posts.operations.act_on_posts",
-          ->(_params) { Dry::Monads::Result::Failure.new([:record, draft.id, :locked]) },
+          ->(_params) { Failure([:record, draft.id, :locked]) },
         )
         act("delete", [draft])
       end

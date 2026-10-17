@@ -27,7 +27,7 @@ RSpec.describe Tasks::Repos::TaskSourceMutations do
     it "turns away a second sync of the same provider" do
       hold("linear")
 
-      expect(repo.with_sync_lock("linear") { :ran }).to eq(Dry::Monads::Failure(:lock_busy))
+      expect(repo.with_sync_lock("linear") { :ran }).to eq(Failure(:lock_busy))
     end
   end
 end

@@ -143,7 +143,7 @@ RSpec.describe "Admin sign-in log", type: :request do
 
   describe "a sign-in failing for a reason the callback doesn't know" do
     it "records an unexpected failure" do
-      replace_component("operations.sign_in", instance_double(Admin::Operations::SignIn, call: Dry::Monads::Failure(:odd)))
+      replace_component("operations.sign_in", instance_double(Admin::Operations::SignIn, call: Failure(:odd)))
       sign_in
 
       expect(sign_ins.select_map(:outcome)).to eq(%w[unexpected])

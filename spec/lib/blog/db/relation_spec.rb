@@ -102,7 +102,7 @@ RSpec.describe Blog::DB::Relation do
     it "fails with lock_busy when another session holds the lock" do
       free_elsewhere?(hashtext("relation spec"))
 
-      expect(states.with_advisory_lock("relation spec") { :ran }).to eq(Dry::Monads::Failure(:lock_busy))
+      expect(states.with_advisory_lock("relation spec") { :ran }).to eq(Failure(:lock_busy))
     end
 
     it "hands back busy when given one" do

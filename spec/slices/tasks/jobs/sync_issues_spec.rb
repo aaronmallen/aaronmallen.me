@@ -790,7 +790,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   describe "an issue closed on GitHub when its task cannot settle" do
     before do
-      replace_component("operations.cancel_task", ->(*, **) { Dry::Monads::Failure(:invalid) })
+      replace_component("operations.cancel_task", ->(*, **) { Failure(:invalid) })
       stub_known(issue(state: "CLOSED", stateReason: "NOT_PLANNED"))
     end
 
