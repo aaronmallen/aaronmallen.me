@@ -394,10 +394,10 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "a batch" do
     def article = @article ||= create(:post, :published)
 
-    def batch(*messages)
+    def batch(*messages, opening: "")
       sent = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
 
-      post "/mcp", JSON.generate(messages), sent
+      post "/mcp", "#{opening}#{JSON.generate(messages)}", sent
     end
 
     def seo_call(id, og_title)
@@ -419,6 +419,12 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "refuses a batch of one" do
       batch(seo_call(1, "First"))
+
+      expect(document.dig("error", "code")).to eq(-32_600)
+    end
+
+    it "refuses a batch that opens with blank space" do
+      batch(seo_call(1, "First"), opening: " \r\n\t")
 
       expect(document.dig("error", "code")).to eq(-32_600)
     end

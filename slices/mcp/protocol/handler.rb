@@ -34,6 +34,7 @@ module MCP
         "tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
+      BATCH_OPENING = /\A[ \t\r\n]*\[/
       DAY_PAGED = [Tools::ListCommits, Tools::ListJournalEntries, Tools::ListPullRequests, Tools::ReadActivity].freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
       TITLE = "%s's site"
@@ -54,7 +55,7 @@ module MCP
       private
 
       def batch?(payload)
-        JSON.parse(payload).is_a?(Array)
+        payload.match?(BATCH_OPENING) && JSON.parse(payload).is_a?(Array)
       rescue JSON::ParserError
         false
       end
