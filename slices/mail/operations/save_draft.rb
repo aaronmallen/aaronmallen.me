@@ -4,10 +4,7 @@ module Mail
   module Operations
     class SaveDraft < Blog::Operation
       HEADERS = %w[to cc bcc subject].freeze
-      DRAFTS = "#{SyncGmail::GMAIL}/drafts".freeze
       LISTED = 500
-      MESSAGES = "#{SyncGmail::GMAIL}/messages".freeze
-      THREADS = "#{SyncGmail::GMAIL}/threads".freeze
 
       include Deps[
         google: "google.client",
@@ -19,7 +16,7 @@ module Mail
 
       def call(params)
         fields = send_mail.form(params)
-        account = step sender(fields[:from])
+        account = step send_mail.sender(fields[:from])
         draft = step saved(account, fields)
 
         store(account, draft.fetch("message"))
@@ -32,21 +29,27 @@ module Mail
         address = thread&.draft && gmail_queries.address(thread.mail_account_id)
         return unless address
 
-        listed = google.get(DRAFTS, account: address, maxResults: LISTED).fetch("drafts", [])
-        id = listed.find { it.dig("message", "threadId") == thread.gmail_id }&.fetch("id")
-        id && opened(id, google.get("#{DRAFTS}/#{id}", account: address, format: "full").fetch("message"), thread)
+        mailbox = Mailbox.new(google, address)
+        id = draft_id(mailbox, thread.gmail_id)
+        id && opened(id, mailbox.get("drafts/#{id}", format: "full").fetch("message"), thread)
       rescue Google::Error
         nil
       end
 
       private
 
-      def create(account, message) = google.post(DRAFTS, { message: }, account: account.address)
+      def create(account, message) = mailbox(account).post("drafts", { message: })
+
+      def draft_id(mailbox, gmail_id)
+        listed = mailbox.get("drafts", maxResults: LISTED).fetch("drafts", [])
+        listed.find { it.dig("message", "threadId") == gmail_id }&.fetch("id")
+      end
 
       def kept(account, gmail_id)
-        thread = google.get("#{THREADS}/#{gmail_id}", account: account.address, format: "minimal")
-        thread.fetch("messages", []).map { it.fetch("id") }
+        mailbox(account).thread(gmail_id, format: "minimal").fetch("messages", []).map { it.fetch("id") }
       end
+
+      def mailbox(account) = Mailbox.new(google, account.address)
 
       def opened(id, message, thread)
         headers = message.dig("payload", "headers").to_h { [it["name"].downcase, it["value"]] }
@@ -69,24 +72,18 @@ module Mail
         Success(id ? update(account, id, message) : create(account, message))
       end
 
-      def sender(id)
-        account = send_mail.senders.find { it.id == Blog::Types::IdParam[id] }
-
-        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
-      end
-
       def store(account, message)
         gmail_id = message.fetch("threadId")
         id = gmail_mutations.thread_id(account.id, gmail_id)
         return send_mail.mirror(account, gmail_id) unless id
 
         kept = kept(account, gmail_id)
-        full = google.get("#{MESSAGES}/#{message.fetch('id')}", account: account.address, format: "full")
+        full = mailbox(account).get("messages/#{message.fetch('id')}", format: "full")
         gmail_mutations.store_draft(id, parsed(gmail_id, full), kept)
       end
 
       def update(account, id, message)
-        google.put("#{DRAFTS}/#{id}", { id:, message: }, account: account.address)
+        mailbox(account).put("drafts/#{id}", { id:, message: })
       rescue Google::NotFound
         create(account, message)
       end

@@ -37,8 +37,13 @@ module Mail
       end
 
       def mirror(account, gmail_id)
-        json = google.get("#{SyncGmail::GMAIL}/threads/#{gmail_id}", account: account.address, format: "full")
-        gmail_mutations.store_thread(account.id, parse_gmail_thread.call(json))
+        gmail_mutations.store_thread(account.id, parse_gmail_thread.call(mailbox(account).thread(gmail_id)))
+      end
+
+      def sender(id)
+        account = senders.find { it.id == Blog::Types::IdParam[id] }
+
+        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
       end
 
       def senders(accounts = thread_queries.accounts)
@@ -67,12 +72,13 @@ module Mail
         end
       end
 
+      def mailbox(account) = Mailbox.new(google, account.address)
+
       def message_id(account, thread)
         last = thread.mail_messages.rfind(&:gmail_id)
         return unless last
 
-        url = "#{SyncGmail::GMAIL}/messages/#{last.gmail_id}"
-        found = google.get(url, account: account.address, format: "metadata", metadataHeaders: MESSAGE_ID)
+        found = mailbox(account).get("messages/#{last.gmail_id}", format: "metadata", metadataHeaders: MESSAGE_ID)
         found.dig("payload", "headers")&.find { it["name"].casecmp?(MESSAGE_ID) }&.fetch("value")
       end
 
@@ -87,9 +93,9 @@ module Mail
 
       def post(account, message, thread_id, draft)
         body = { raw: message.raw, threadId: thread_id }.compact
-        return google.post("#{SyncGmail::GMAIL}/messages/send", body, account: account.address) unless draft
+        return mailbox(account).post("messages/send", body) unless draft
 
-        google.post("#{SyncGmail::GMAIL}/drafts/send", { id: draft, message: body }, account: account.address)
+        mailbox(account).post("drafts/send", { id: draft, message: body })
       rescue Google::NotFound
         raise unless draft
 
@@ -100,12 +106,6 @@ module Mail
         return Success(nil) unless id
 
         found(thread_queries.by_id(id))
-      end
-
-      def sender(id)
-        account = senders.find { it.id == id }
-
-        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
       end
 
       def settle(account, thread, gmail_id, archive:)

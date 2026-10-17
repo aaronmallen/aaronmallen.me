@@ -16,23 +16,23 @@ module Mail
         message = attachment.mail_message
         address = step found(gmail_queries.address(message.mail_thread.mail_account_id))
 
-        step fetched(attachment, address, "#{SyncGmail::GMAIL}/messages/#{message.gmail_id}")
+        step fetched(attachment, Mailbox.new(google, address), "messages/#{message.gmail_id}")
       end
 
       private
 
-      def body(part, address, url)
+      def body(part, mailbox, path)
         data = part.dig("body", "data")
-        data ||= google.get("#{url}/attachments/#{part.dig('body', 'attachmentId')}", account: address).fetch("data")
+        data ||= mailbox.get("#{path}/attachments/#{part.dig('body', 'attachmentId')}").fetch("data")
 
         Base64.urlsafe_decode64(data)
       end
 
-      def fetched(attachment, address, url)
-        payload = google.get(url, account: address, format: "full").fetch("payload")
+      def fetched(attachment, mailbox, path)
+        payload = mailbox.get(path, format: "full").fetch("payload")
         part = parts(payload).find { it["partId"] == attachment.part_id }
 
-        part ? Success([attachment, body(part, address, url)]) : Failure(:not_found)
+        part ? Success([attachment, body(part, mailbox, path)]) : Failure(:not_found)
       rescue Google::NotFound
         Failure(:not_found)
       rescue Google::Error => e

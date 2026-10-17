@@ -5,7 +5,6 @@ module Mail
     class ChangeThread < Blog::Operation
       ACT = Blog::Types::MessageBulkAction
       STATUS = Blog::Types::MessageStatus
-      THREADS = "#{SyncGmail::GMAIL}/threads".freeze
       UNSPAM = { addLabelIds: %w[INBOX], removeLabelIds: %w[SPAM] }.freeze
       LABELS = {
         ACT["archive"] => { removeLabelIds: %w[INBOX] },
@@ -87,7 +86,7 @@ module Mail
       end
 
       def post(address, thread, verb, body = {})
-        google.post("#{THREADS}/#{thread.gmail_id}/#{verb}", body, account: address)
+        Mailbox.new(google, address).post("threads/#{thread.gmail_id}/#{verb}", body)
       end
 
       def status(thread, act)

@@ -21,7 +21,7 @@ module Mail
 
       def erased(thread)
         address = thread.gmail_id && gmail_queries.address(thread.mail_account_id)
-        google.delete("#{ChangeThread::THREADS}/#{thread.gmail_id}", account: address) if address
+        Mailbox.new(google, address).delete("threads/#{thread.gmail_id}") if address
         Success(thread)
       rescue Google::NotFound
         Success(thread)

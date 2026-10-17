@@ -6,19 +6,12 @@ module Mail
   module Operations
     class SyncGmail < Blog::Operation
       BACKFILL_STALLED_AFTER = 60 * 60
-      GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
       LABELS_ADDED = %w[messagesAdded labelsAdded].freeze
       PAGE_SIZE = 25
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
       SETTINGS_EVERY = 3600
       USER_LABEL = "user"
       USER_LABEL_PREFIX = "Label_"
-
-      Mailbox = Data.define(:google, :address) do
-        def get(path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
-
-        def pages(path, rows:, **) = google.pages("#{GMAIL}/#{path}", rows:, account: address, **)
-      end
 
       include Deps[
         "settings",
@@ -95,7 +88,7 @@ module Mail
       end
 
       def store(mailbox, account_id, gmail_id)
-        thread = parse_gmail_thread.call(mailbox.get("threads/#{gmail_id}", format: "full"))
+        thread = parse_gmail_thread.call(mailbox.thread(gmail_id))
         gmail_mutations.store_thread(account_id, thread)
       rescue Google::NotFound
         gmail_mutations.delete_thread(account_id, gmail_id)

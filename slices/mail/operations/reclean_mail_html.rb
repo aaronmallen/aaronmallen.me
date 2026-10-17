@@ -13,7 +13,7 @@ module Mail
       private
 
       def reclean(client, id, address, gmail_id)
-        thread = SyncGmail::Mailbox.new(client, address).get("threads/#{gmail_id}", format: "full")
+        thread = Mailbox.new(client, address).thread(gmail_id)
         gmail_recleans.reclean(id, parse_gmail_thread.call(thread).messages)
       rescue Google::NotFound
         false
