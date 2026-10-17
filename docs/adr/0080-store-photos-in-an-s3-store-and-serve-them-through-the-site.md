@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [config, media, public]
 issue: "#132"
-amended: ["#137", "#396", "#394", "#468", "#1310", "#1656"]
+amended: ["#137", "#396", "#394", "#468", "#1310", "#1656", "#1634"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 
@@ -41,7 +41,9 @@ We store photos in any S3-compatible store named in settings and serve them thro
 - The `public` slice answers `GET /media/<key>`, since a feature slice answers no route ([ADR 0001][0001]). It
   fetches the photo from the store over the LAN and streams it back with a one-year `immutable` cache header.
   Cloudflare then serves repeat requests from its own cache. #468 added `s-maxage=86400`, so Cloudflare keeps a
-  photo for a day and a photo taken down drops off the edge ([ADR 0109][0109]).
+  photo for a day and a photo taken down drops off the edge ([ADR 0109][0109]). Since #1634 the action asks the
+  store for the photo's type and length first, then streams the bytes in chunks, so the Pi never holds a whole
+  photo in memory.
 - Since #394 a visitor gets only a photo a published post claims ([ADR 0082][0082]). Since #1656 a visitor also gets
   a photo that a task on a published board claims, or a comment on one, since those tasks have public pages
   ([ADR 0160][0160]). Any other photo answers a visitor with the same empty 404 as a missing key. Since #1310 the

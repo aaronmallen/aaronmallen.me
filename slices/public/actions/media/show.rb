@@ -14,6 +14,12 @@ module Public
 
         config.formats.clear
 
+        def call(env)
+          response = super
+          body = response.exposures[:stream]
+          body && !response.head? ? [response.status, response.headers, body] : response
+        end
+
         def handle(request, response)
           published = published(request.params[:key])
           key = stored_key(request, published)
@@ -23,8 +29,8 @@ module Public
           validators(response, key, published)
           return not_modified(response) if fresh?(request, key)
 
-          photo = fetch(key)
-          photo ? serve(response, photo) : miss(response)
+          head = fetch(key)
+          head ? serve(response, key, head) : miss(response)
         end
 
         private
@@ -32,7 +38,7 @@ module Public
         def etag(key) = %("#{key}")
 
         def fetch(key)
-          store.get(key)
+          store.head(key)
         rescue ObjectStore::Client::Error
           nil
         end
@@ -59,9 +65,10 @@ module Public
 
         def published(key) = photo_key?(key) ? photo_queries.published(key) : nil
 
-        def serve(response, photo)
-          response.content_type = photo.content_type
-          response.body = photo.body
+        def serve(response, key, head)
+          response.content_type = head.content_type
+          response.headers["Content-Length"] = head.content_length.to_s
+          response[:stream] = ObjectStore::Body.new(client: store, key:)
         end
 
         def stored_key(request, published)

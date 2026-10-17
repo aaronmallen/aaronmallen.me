@@ -5,10 +5,6 @@ require "zip_kit"
 
 module Shares
   class Server
-    Body = Data.define(:client, :key, :range) do
-      def each(&) = client.stream(key, range: range && "bytes=#{range.begin}-#{range.end}", &)
-    end
-
     CODE_PATH = %r{\A/(?<code>[^/.]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
     FILE_POLICY = "sandbox; default-src 'none'; style-src 'unsafe-inline'"
     PAGE_HEADERS = {
@@ -107,7 +103,7 @@ module Shares
 
       range = ranges.first if ranges&.one?
       note(request, range, &)
-      body = request.head? ? [] : Body.new(client, share.key, range)
+      body = request.head? ? [] : ObjectStore::Body.new(client, share.key, range)
       range ? [206, partial(share, range), body] : [200, share_headers(share), body]
     end
 

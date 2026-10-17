@@ -6,6 +6,7 @@ module ObjectStore
   class Client
     class Error < StandardError; end
 
+    Head = Data.define(:content_length, :content_type)
     Stored = Data.define(:body, :content_type)
 
     def initialize(bucket:, connection:)
@@ -22,13 +23,20 @@ module ObjectStore
       nil
     end
 
-    def exists?(key) = configured? && !request { connection.head_object(bucket:, key:) }.nil?
+    def exists?(key) = !head(key).nil?
 
     def get(key)
       return unless configured?
 
       response = request { connection.get_object(bucket:, key:) }
       response && Stored.new(body: response.body.read, content_type: response.content_type)
+    end
+
+    def head(key)
+      return unless configured?
+
+      response = request { connection.head_object(bucket:, key:) }
+      response && Head.new(content_length: response.content_length, content_type: response.content_type)
     end
 
     def inspect = "#<#{self.class.name} configured=#{configured?}>"

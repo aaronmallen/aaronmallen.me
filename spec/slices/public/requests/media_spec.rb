@@ -6,6 +6,8 @@ RSpec.describe "Media", type: :request do
   let(:photo) { create(:photo, key:) }
   let(:url) { media_store_url(key) }
 
+  def asked_store = a_request(:any, /store\.example/)
+
   def board_task(*traits, **project) = create(:task, project_id: create(:project, *traits, **project).id)
 
   def cache_control = last_response.headers["Cache-Control"]
@@ -16,7 +18,11 @@ RSpec.describe "Media", type: :request do
 
   def claim_for_post(*traits) = claim("post", create(:post, *traits).id)
 
-  def stub_store = stub_request(:get, url).to_return(body: "photo", headers: { "Content-Type" => "image/jpeg" })
+  def stub_store(at = url, body = "photo")
+    headers = { "Content-Type" => "image/jpeg", "Content-Length" => body.bytesize.to_s }
+    stub_request(:head, at).to_return(headers:)
+    stub_request(:get, at).to_return(body:, headers:)
+  end
 
   describe "a photo a published post shows" do
     before do
@@ -31,6 +37,29 @@ RSpec.describe "Media", type: :request do
       expect(last_response).to be_ok
       expect(last_response.body).to eq("photo")
       expect(last_response.content_type).to eq("image/jpeg")
+    end
+
+    it "sends the length the store gives" do
+      get path
+
+      expect(last_response.headers["Content-Length"]).to eq("5")
+    end
+
+    it "streams the bytes from the store" do
+      client = Public::Slice["media_store.client"]
+      allow(client).to receive(:stream).and_call_original
+      get path
+
+      expect(client).to have_received(:stream).with(key, range: nil)
+    end
+
+    it "answers a HEAD with its headers and never reads the bytes", :aggregate_failures do
+      head path
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to be_empty
+      expect(last_response.content_type).to eq("image/jpeg")
+      expect(a_request(:get, url)).not_to have_been_made
     end
 
     it "lets a browser keep it for a year and Cloudflare for a day" do
@@ -69,7 +98,7 @@ RSpec.describe "Media", type: :request do
 
       expect(last_response.status).to eq(304)
       expect(last_response.body).to be_empty
-      expect(stub_store).not_to have_been_requested
+      expect(asked_store).not_to have_been_made
     end
 
     it "keeps the tag and cache header on a 304", :aggregate_failures do
@@ -123,11 +152,9 @@ RSpec.describe "Media", type: :request do
   end
 
   describe "a photo no published post shows" do
-    let(:store) { stub_store }
-
     before do
       connect_media_store
-      store
+      stub_store
     end
 
     {
@@ -156,7 +183,7 @@ RSpec.describe "Media", type: :request do
 
           expect(last_response.status).to eq(404)
           expect(last_response.body).to be_empty
-          expect(store).not_to have_been_requested
+          expect(asked_store).not_to have_been_made
         end
 
         it "answers a visitor the way it answers a missing key", :aggregate_failures do
@@ -188,7 +215,7 @@ RSpec.describe "Media", type: :request do
 
           expect(last_response.status).to eq(304)
           expect(cache_control).to eq("private, max-age=3600")
-          expect(store).not_to have_been_requested
+          expect(asked_store).not_to have_been_made
         end
 
         it "answers a visitor who sends the tag with a 404", :aggregate_failures do
@@ -212,14 +239,10 @@ RSpec.describe "Media", type: :request do
 
   describe "a smaller width of a photo" do
     let(:photo) { create(:photo, key:, widths: [640, 1280]) }
-    let(:store) do
-      stub_request(:get, media_store_url("640/#{key}")).to_return(body: "small",
-                                                                  headers: { "Content-Type" => "image/jpeg" })
-    end
 
     before do
       connect_media_store
-      store
+      stub_store(media_store_url("640/#{key}"), "small")
     end
 
     it "serves a stored width of a published photo like the photo", :aggregate_failures do
@@ -243,7 +266,7 @@ RSpec.describe "Media", type: :request do
       get "/media/640/#{key}", {}, "HTTP_IF_NONE_MATCH" => %("640/#{key}")
 
       expect(last_response.status).to eq(304)
-      expect(store).not_to have_been_requested
+      expect(asked_store).not_to have_been_made
     end
 
     it "sends a width when the browser holds the full photo" do
@@ -268,7 +291,7 @@ RSpec.describe "Media", type: :request do
       get "/media/640/#{key}"
 
       expect(last_response.status).to eq(404)
-      expect(store).not_to have_been_requested
+      expect(asked_store).not_to have_been_made
     end
   end
 
@@ -276,7 +299,7 @@ RSpec.describe "Media", type: :request do
     before do
       connect_media_store
       missing = "<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message></Error>"
-      stub_request(:get, url).to_return(status: 404, body: missing)
+      stub_request(:any, url).to_return(status: 404, body: missing)
       get path
     end
 
@@ -303,12 +326,12 @@ RSpec.describe "Media", type: :request do
 
     %W[a1b2c3.jpg #{'A1B2C3D4' * 4}.jpg #{'a1b2c3d4' * 4}.svg #{'a1b2c3d4' * 4}.jpg.png ..%2Fsecret.jpg].each do |bad|
       it "answers #{bad} with an empty 404 and never asks the store", :aggregate_failures do
-        store = stub_request(:any, /store\.example/)
+        stub_request(:any, /store\.example/)
         get "/media/#{bad}"
 
         expect(last_response.status).to eq(404)
         expect(last_response.body).to be_empty
-        expect(store).not_to have_been_requested
+        expect(asked_store).not_to have_been_made
       end
     end
 
@@ -329,7 +352,7 @@ RSpec.describe "Media", type: :request do
   describe "a store that cannot be reached" do
     before do
       connect_media_store
-      stub_request(:get, url).to_timeout
+      stub_request(:any, url).to_timeout
       claim_for_post(:published)
     end
 
