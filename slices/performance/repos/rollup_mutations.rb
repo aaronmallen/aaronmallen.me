@@ -26,12 +26,10 @@ module Performance
 
       private
 
-      def percentile(fraction, value) = Sequel.function(:percentile_cont, fraction).within_group(value)
-
       def roll(target, source, day, keys:, value: :duration, **extra)
         from, to = Blog::TimeZone.day_bounds(day, day)
-        figures = { day: Sequel.cast(day, Date), count: COUNT, p50: percentile(0.5, value),
-                    p95: percentile(0.95, value), **extra }
+        figures = { day: Sequel.cast(day, Date), count: COUNT, p50: Blog::DB::Relation.percentile(0.5, value),
+                    p95: Blog::DB::Relation.percentile(0.95, value), **extra }
         rows = source.dataset.unordered.where(occurred_at: from...to).exclude(value => nil).group(*keys)
 
         target.dataset.insert([*keys, *figures.keys], rows.select(*keys, *figures.map { |name, sql| sql.as(name) }))

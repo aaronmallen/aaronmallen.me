@@ -43,8 +43,8 @@ module Performance
 
       def daily(rolled, source, range, keys:, value: :duration, extra: QUERIES, by_day: false)
         figures = [
-          *keys, *(DAY.as(:day) if by_day), COUNT.as(:count), percentile(0.5, value).as(:p50),
-          percentile(0.95, value).as(:p95), *extra.map { Sequel.function(:sum, it).as(it) },
+          *keys, *(DAY.as(:day) if by_day), COUNT.as(:count), Blog::DB::Relation.percentile(0.5, value).as(:p50),
+          Blog::DB::Relation.percentile(0.95, value).as(:p95), *extra.map { Sequel.function(:sum, it).as(it) },
         ]
 
         rolled.unordered.where(day: range).select(*keys, *(:day if by_day), :count, :p50, :p95, *extra)
@@ -57,8 +57,6 @@ module Performance
 
         combined(days, %i[route], []).to_a.to_h { [it.fetch(:route), rounded(it.except(:route))] }
       end
-
-      def percentile(fraction, value) = Sequel.function(:percentile_cont, fraction).within_group(value)
 
       def ranked(rolled, source, range, top, keys:)
         combined(daily(rolled, source, range, keys:), keys, QUERIES).limit(top).to_a.map { rounded(it) }

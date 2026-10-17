@@ -16,6 +16,8 @@ module Blog
 
       def self.lock_key(name) = Sequel.function(:hashtext, name)
 
+      def self.percentile(fraction, value) = Sequel.function(:percentile_cont, fraction).within_group(value)
+
       def self.site_day(*columns)
         moment = columns.one? ? columns.first : Sequel.function(:coalesce, *columns)
 

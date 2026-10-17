@@ -38,7 +38,7 @@ module Tags
         return self if text.empty?
         return none if unmatchable?(text)
 
-        where(Sequel.like(:name, "%#{dataset.escape_like(text)}%"))
+        where(Sequel.like(:name, like_pattern(text)))
       end
 
       def on_mail = where(id: mail_tags)
