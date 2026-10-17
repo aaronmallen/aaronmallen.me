@@ -30,14 +30,14 @@ module API
         **MAIL_ENDPOINTS.to_h { [it, MAIL] },
       }.freeze
 
-      include Deps[build_document: "operations.build_document"]
+      include Deps[build_document: "operations.build_document"] # rubocop:disable Blog/UnusedDeps
 
       def self.route(operation) = ->(env) { new(operation:).call(env) }
 
-      def initialize(operation:, **)
-        @operation = operation
+      def initialize(operation:, build_document:, **)
         @endpoint = Slice["endpoints.#{operation}"]
-        super(**)
+        @descriptor = build_document.descriptor(operation)
+        super(build_document:, **)
       end
 
       def handle(request, response)
@@ -53,7 +53,7 @@ module API
 
       private
 
-      attr_reader :endpoint, :operation
+      attr_reader :descriptor, :endpoint
 
       def body(request, response)
         parsed = request.env.fetch(ACTION_PARSED_BODY, Blog::Constants::EMPTY_HASH)
@@ -62,8 +62,6 @@ module API
         response.format = :json
         halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
       end
-
-      def descriptor = build_document.descriptor(operation)
 
       def input(request, response)
         route = request.env.fetch(ROUTER_PARAMS, Blog::Constants::EMPTY_HASH)
