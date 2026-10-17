@@ -14,7 +14,11 @@ module Shares
         step any(uploads)
         step available
 
-        transaction { step add_share_group_files.call(create, uploads) }
+        group = nil
+        transaction { group = step add_share_group_files.call(create, uploads) }
+      rescue StandardError
+        client.discard(group.share_group_files.map(&:key)) if group
+        raise
       end
 
       private

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "securerandom"
-
 module Shares
   module Operations
     class AddShareGroupFiles < Blog::Operation
@@ -17,8 +15,9 @@ module Shares
         step any(uploads)
         step available
         files = uploads.map { step validate(Hash(it)) }
+        stored = step store(files)
 
-        transaction { save(group.id, files) }
+        save(group.id, stored)
       end
 
       private
@@ -26,14 +25,6 @@ module Shares
       def any(uploads) = uploads.empty? ? Failure([:blank]) : Success(uploads)
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
-
-      def discard(keys)
-        keys.each do |key|
-          client.delete(key)
-        rescue ObjectStore::Client::Error
-          next
-        end
-      end
 
       def form(upload)
         type = Blog::Types::TrimmedText[upload[:type]]
@@ -44,24 +35,32 @@ module Shares
         }
       end
 
-      def save(id, files)
-        stored = []
-        files.each do |fields|
-          key = ObjectStore::Key.generate
-          group_mutations.add_file(
-            id, key:, filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
-          )
-          step store(key, fields, stored)
-        end
-        group_queries.find(id)
-      end
-
-      def store(key, fields, stored)
+      def put(fields)
+        key = ObjectStore::Key.generate
         fields[:file].rewind
         client.put(key, fields[:file], content_type: fields[:content_type])
-        Success(stored << key)
+      end
+
+      def save(id, stored)
+        transaction do
+          stored.each do |key, fields|
+            group_mutations.add_file(
+              id, key:, filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
+            )
+          end
+          group_queries.find(id)
+        end
+      rescue StandardError
+        client.discard(stored.keys)
+        raise
+      end
+
+      def store(files)
+        stored = {}
+        files.each { stored[put(it)] = it }
+        Success(stored)
       rescue ObjectStore::Client::Error
-        discard(stored)
+        client.discard(stored.keys)
         Failure([:unavailable])
       end
 

@@ -23,6 +23,14 @@ module ObjectStore
       nil
     end
 
+    def discard(keys)
+      keys.each do |key|
+        delete(key)
+      rescue Error
+        next
+      end
+    end
+
     def exists?(key) = !head(key).nil?
 
     def get(key)

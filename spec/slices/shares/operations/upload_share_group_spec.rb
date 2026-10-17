@@ -96,6 +96,15 @@ RSpec.describe Shares::Operations::UploadShareGroup do
       expect(result.failure).to eq([:unavailable])
       expect([groups, files, Shares::Slice["relations.short_codes"].to_a, stored]).to all(be_empty)
     end
+
+    it "deletes every stored file when an insert fails", :aggregate_failures do
+      keep_deletes
+      allow(ObjectStore::Key).to receive(:generate).and_return("a" * 32, "not-a-key")
+
+      expect { upload(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain")) }
+        .to raise_error(ROM::SQL::CheckConstraintError)
+      expect([groups, files, stored]).to all(be_empty)
+    end
   end
 
   it "refuses an upload with no store" do

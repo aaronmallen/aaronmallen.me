@@ -3,6 +3,13 @@
 RSpec.describe Shares::Operations::UploadShare do
   let(:stored) { {} }
 
+  def keep_deletes
+    stub_request(:delete, %r{\A#{share_store_url}/}).to_return do |request|
+      stored.delete(File.basename(request.uri.path))
+      { status: 204 }
+    end
+  end
+
   def keep_puts
     stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
       stored[File.basename(request.uri.path)] = { body: request.body.b, content_type: request.headers["Content-Type"] }
@@ -72,6 +79,14 @@ RSpec.describe Shares::Operations::UploadShare do
       expect(upload_share.failure).to eq([:unavailable])
       expect(shares).to be_empty
       expect(Shares::Slice["relations.short_codes"].count).to eq(0)
+    end
+
+    it "deletes the stored file when the insert fails", :aggregate_failures do
+      keep_deletes
+      allow(ObjectStore::Key).to receive(:generate).and_return("not-a-key")
+
+      expect { upload_share }.to raise_error(ROM::SQL::CheckConstraintError)
+      expect([shares, stored]).to all(be_empty)
     end
   end
 

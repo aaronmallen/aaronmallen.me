@@ -16,18 +16,19 @@ module Shares
       def call(upload)
         step available
         fields = step validate(Hash(upload))
+        key = step store(fields)
 
-        transaction { save(fields) }
+        save(key, fields)
       end
 
       private
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def create(fields)
+      def create(key, fields)
         Helpers::Code.retrying(share_mutations) do
           share_mutations.create(
-            code: short_code_queries.free_code, key: ObjectStore::Key.generate,
+            code: short_code_queries.free_code, key:,
             filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
           )
         end
@@ -39,16 +40,17 @@ module Shares
         { file: upload[:tempfile], filename: upload[:filename], content_type: type.empty? ? UNKNOWN_TYPE : type }
       end
 
-      def save(fields)
-        share = share_queries.find(create(fields))
-        step store(share, fields)
-        share
+      def save(key, fields)
+        transaction { share_queries.find(create(key, fields)) }
+      rescue StandardError
+        client.discard([key])
+        raise
       end
 
-      def store(share, fields)
+      def store(fields)
+        key = ObjectStore::Key.generate
         fields[:file].rewind
-        client.put(share.key, fields[:file], content_type: share.content_type)
-        Success(share)
+        Success(client.put(key, fields[:file], content_type: fields[:content_type]))
       rescue ObjectStore::Client::Error
         Failure([:unavailable])
       end
