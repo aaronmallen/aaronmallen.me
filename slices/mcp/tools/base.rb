@@ -22,7 +22,7 @@ module MCP
           input_schema(API::Endpoints.const_get(name.split("::").last, false)::SCHEMA)
           scope(scope)
           define_singleton_method(:call) do |server_context:, **input|
-            hand_over(endpoint_key, input, server_context) { reply(it, server_context) }
+            hand_over(endpoint_key, input, server_context)
           end
         end
 
@@ -32,13 +32,9 @@ module MCP
 
         def answer(payload) = Tool::Response.new([{ type: TEXT, text: JSON.generate(payload) }])
 
-        def answered(payload) = payload
-
         def hand_over(endpoint, input, server_context)
           case handed(endpoint, input, server_context)
-            in Success(payload)
-              settled = synced(payload, server_context)
-              block_given? ? yield(settled) : answer(settled)
+            in Success(payload) then reply(synced(payload, server_context), server_context)
             in Failure(refusal) then refuse(refusal.message)
           end
         end
@@ -51,7 +47,7 @@ module MCP
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
-        def reply(payload, _server_context) = answer(answered(payload))
+        def reply(payload, _server_context) = answer(payload)
 
         def synced(payload, server_context)
           Untrusted.synced(payload) { server_context.fetch(:task_source_queries).synced_task_ids(it) }
