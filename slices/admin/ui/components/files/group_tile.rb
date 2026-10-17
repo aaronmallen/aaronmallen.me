@@ -35,7 +35,7 @@ module Admin
 
           def files = @group.share_group_files
 
-          def image = files.find { Tile::IMAGE.match?(it.content_type) }
+          def image = files.find { Shares::ContentType.image?(it.content_type) }
 
           def link = Helpers::ShareLink.for(@group.code)
 

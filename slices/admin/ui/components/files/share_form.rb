@@ -53,11 +53,11 @@ module Admin
             field(:alt_text, t(".alt_text"), t(".alt_text_hint"), placeholder: t(".alt_text_placeholder"))
           end
 
-          def image? = Tile::IMAGE.match?(@share.content_type)
+          def image? = Shares::ContentType.image?(@share.content_type)
 
           def link = Helpers::ShareLink.for(@share.code)
 
-          def markdown = ("!#{Helpers::ShareLink.markdown(@share.alt_text, link)}" if image?)
+          def markdown = (Helpers::ShareLink.image_markdown(@share.alt_text, link) if image?)
 
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }

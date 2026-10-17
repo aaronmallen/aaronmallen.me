@@ -48,7 +48,7 @@ module Admin
             end
           end
 
-          def image? = Tile::IMAGE.match?(@file.content_type)
+          def image? = Shares::ContentType.image?(@file.content_type)
 
           def link = Helpers::ShareLink.for(@group.code, @file.id)
 

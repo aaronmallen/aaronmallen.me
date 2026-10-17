@@ -13,7 +13,6 @@ module Admin
             %r{\Atext/|json|javascript} => "fa-regular fa-file-code",
           }.freeze
           FILE_ICON = "fa-regular fa-file"
-          IMAGE = %r{\Aimage/}
 
           prop :share, Blog::Types::Instance(ROM::Struct)
 
@@ -46,7 +45,7 @@ module Admin
 
           def icon = ICONS.find { |type, _| type.match?(@share.content_type) }&.last || FILE_ICON
 
-          def image? = IMAGE.match?(@share.content_type)
+          def image? = Shares::ContentType.image?(@share.content_type)
 
           def link = Helpers::ShareLink.for(@share.code)
 

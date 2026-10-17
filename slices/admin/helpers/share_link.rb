@@ -16,6 +16,8 @@ module Admin
 
         def host = new.host
 
+        def image_markdown(alt, link) = "!#{markdown(alt, link)}"
+
         def markdown(text, link) = "[#{text.to_s.gsub(MARKDOWN_SPECIAL) { "\\#{it}" }}](#{link})"
 
         def preview(code) = new.preview(code)

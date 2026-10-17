@@ -3,7 +3,6 @@
 
 module Shares
   class GroupPage < Phlex::HTML
-    IMAGE = %r{\Aimage/}
     DOWNLOAD = "Download all"
     TITLE = "Shared files"
     STYLE = <<~CSS
@@ -158,6 +157,6 @@ module Shares
       end
     end
 
-    def split = @split ||= @group.share_group_files.partition { IMAGE.match?(it.content_type) }
+    def split = @split ||= @group.share_group_files.partition { ContentType.image?(it.content_type) }
   end
 end

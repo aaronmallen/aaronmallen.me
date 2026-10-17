@@ -26,7 +26,7 @@ module Shares
         end.to_h
       end
 
-      def editable(file) = GroupPage::IMAGE.match?(file.content_type) ? %i[alt_text filename] : %i[filename]
+      def editable(file) = ContentType.image?(file.content_type) ? %i[alt_text filename] : %i[filename]
 
       def file_fields(group, sent)
         results = checked_files(group, sent)

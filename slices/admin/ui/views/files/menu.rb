@@ -40,12 +40,14 @@ module Admin
                                     confirm:)
           end
 
+          def image? = Shares::ContentType.image?(@share.content_type)
+
           def link = Helpers::ShareLink.for(@share.code)
 
           def markdown
-            return "!#{Helpers::ShareLink.markdown(@share.alt_text, link)}" if Tile::IMAGE.match?(@share.content_type)
+            return Helpers::ShareLink.markdown(@share.filename, link) unless image?
 
-            Helpers::ShareLink.markdown(@share.filename, link)
+            Helpers::ShareLink.image_markdown(@share.alt_text, link)
           end
 
           def opens(menu)
