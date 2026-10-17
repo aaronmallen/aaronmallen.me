@@ -79,7 +79,7 @@ module Admin
       def next_on(series, today)
         task = series.task
 
-        task.closed? ? next_cadence_date.call(series.to_h, today) : task.sprint&.sprint_date
+        task.closed? ? next_cadence_date.call(series.to_h, task.recurs_after(today)) : task.sprint&.sprint_date
       end
 
       def plan(tab, tasks, planned, page, pool)

@@ -41,14 +41,9 @@ module Tasks
         task = task_queries.detailed(id)
         return unless task.closed?
 
-        copy = clone(task, next_cadence_date.call(series.to_h, since(task, at)), at)
+        copy = clone(task, next_cadence_date.call(series.to_h, task.recurs_after(Blog::TimeZone.today(at))), at)
         task_series_mutations.advance(series.id, copy.id, at)
         task_queries.by_id(copy.id)
-      end
-
-      def since(task, at)
-        today = Blog::TimeZone.today(at)
-        task.ahead?(today) ? task.sprint.sprint_date : today
       end
     end
   end

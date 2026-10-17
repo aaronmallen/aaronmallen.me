@@ -65,7 +65,8 @@ module API
         },
         required: ["cadence"],
         description: [
-          "repeats the task: when it closes, done or canceled, a copy appears on the next cadence day after today;",
+          "repeats the task: when it closes, done or canceled, a copy appears on the next cadence day after today,",
+          "or after the closed copy's sprint day when that day is still ahead;",
           "a field the cadence does not use is dropped; an imported task cannot recur",
         ].join(" "),
       }.freeze

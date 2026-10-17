@@ -59,6 +59,15 @@ RSpec.describe "Admin recurring tasks", :frozen_clock, type: :request do
     expect(rows.first).to have_text("next #{long(today + 2)}")
   end
 
+  it "counts a paused series' next date from a closed copy's day still ahead" do
+    ahead = create(:task, title: "Water the plants", list: nil, sprint_id: create(:sprint, sprint_date: today + 3).id)
+    series = cadence(ahead, cadence: "days", every: 2)
+    switch(series)
+    complete(ahead)
+
+    expect(rows.first).to have_text("next #{long(today + 5)}")
+  end
+
   {
     { cadence: "days", every: 1 } => "Every day",
     { cadence: "weeks", every: 1, weekday: 4 } => "Every Thursday",

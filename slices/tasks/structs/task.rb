@@ -33,6 +33,8 @@ module Tasks
 
       def place = list || Blog::Types::TaskFilter["today"]
 
+      def recurs_after(today) = ahead?(today) ? sprint.sprint_date : today
+
       def tracked_seconds(now = Time.now)
         running_session ? worked_seconds + (now - running_session.started_at).floor : worked_seconds
       end
