@@ -141,7 +141,7 @@ RSpec.describe "Analytics beacon", type: :feature do
         const sent = [];
         const sendBeacon = navigator.sendBeacon.bind(navigator);
         navigator.sendBeacon = (url, body) => {
-          body.text().then((text) => sent.push(JSON.parse(text).scroll_depth));
+          body.text().then((text) => sent.push(JSON.parse(text)));
           return sendBeacon(url, body);
         };
         const frame = () => new Promise((settled) => requestAnimationFrame(() => requestAnimationFrame(settled)));
@@ -151,7 +151,9 @@ RSpec.describe "Analytics beacon", type: :feature do
             scrollTo(0, height() * share);
             await frame();
           }
-          done(sent);
+          dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true }));
+          await frame();
+          done(sent.map((visit) => Object.keys(visit).includes("scroll_depth") ? [visit.kind, visit.scroll_depth] : [visit.kind]));
         })();
       JS
     end
@@ -178,11 +180,18 @@ RSpec.describe "Analytics beacon", type: :feature do
       expect(wait_for { depth == 100 }).to be(true)
     end
 
-    it "sends each depth once it is reached and never a shallower one later" do
+    it "sends only the deepest depth reached, with the read" do
       visit "/writing/long"
       recorded("/writing/long")
 
-      expect(scroll_through(0.6, 1, 0, 0.6)).to eq([50, 100])
+      expect(scroll_through(0.6, 1, 0, 0.6)).to eq([["read", 100]])
+    end
+
+    it "sends no depth with the read of a long page left unscrolled" do
+      visit "/writing/long"
+      recorded("/writing/long")
+
+      expect(scroll_through).to eq([["read"]])
     end
   end
 

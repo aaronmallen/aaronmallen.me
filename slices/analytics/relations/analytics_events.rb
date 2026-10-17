@@ -115,9 +115,9 @@ module Analytics
         end.group(:path)
       end
 
-      def record_read_seconds(read_seconds) = raise_newest(:read_seconds, read_seconds)
+      def record_read(read_seconds, scroll_depth = nil) = raise_newest(read_seconds:, scroll_depth:)
 
-      def record_scroll_depth(scroll_depth) = raise_newest(:scroll_depth, scroll_depth)
+      def record_scroll_depth(scroll_depth) = raise_newest(scroll_depth:)
 
       def since(time) = where { occurred_at >= time }
 
@@ -148,11 +148,11 @@ module Analytics
 
       def bounced = unordered.dataset.select(:visitor_hash).group(:visitor_hash).having(SINGLE_VIEW)
 
-      def raise_newest(column, value)
+      def raise_newest(**values)
         newest = newest_first.limit(1).dataset.select(:id)
-        raised = Sequel.function(:greatest, column, value)
+        raised = values.compact.to_h { |column, value| [column, Sequel.function(:greatest, column, value)] }
 
-        unordered.where(id: newest).stamped(:update, result: :many).call(column => raised).size
+        unordered.where(id: newest).stamped(:update, result: :many).call(raised).size
       end
     end
   end

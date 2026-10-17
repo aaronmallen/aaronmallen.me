@@ -57,10 +57,11 @@ module Analytics
       end
 
       def read(visit, visitor_hashes)
-        matched = event_mutations.record_read_seconds(
+        matched = event_mutations.record_read(
           visitor_hashes:,
           view_token: visit[:view_token],
           read_seconds: [visit[:read_seconds], MAX_READ_SECONDS].min,
+          **visit.slice(:scroll_depth),
         )
 
         matched.zero? ? Failure(:unknown_visit) : Success(matched)

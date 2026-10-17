@@ -360,6 +360,26 @@ RSpec.describe "Visits", type: :request do
       expect(stored.first.read_seconds).to eq(1_200)
     end
 
+    it "stores the depth the read carries" do
+      beacon({ kind: "read", path: "/writing/hello", read_seconds: 42, scroll_depth: 75, view_token: token("first") })
+
+      expect(stored.first).to have_attributes(read_seconds: 42, scroll_depth: 75)
+    end
+
+    it "keeps the deeper depth when a later read carries a shallower one" do
+      beacon({ kind: "read", path: "/writing/hello", read_seconds: 42, scroll_depth: 75, view_token: token("first") })
+      beacon({ kind: "read", path: "/writing/hello", read_seconds: 60, scroll_depth: 25, view_token: token("first") })
+
+      expect(stored.first).to have_attributes(read_seconds: 60, scroll_depth: 75)
+    end
+
+    it "turns away a read with a depth the server does not take", :aggregate_failures do
+      beacon({ kind: "read", path: "/writing/hello", read_seconds: 42, scroll_depth: 30, view_token: token("first") })
+
+      expect(last_response.status).to eq(400)
+      expect(stored.first).to have_attributes(read_seconds: 0, scroll_depth: 0)
+    end
+
     describe "of one of two views of the page" do
       before { view(name: "second") }
 

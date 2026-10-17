@@ -17,8 +17,8 @@ module Analytics
         analytics_clicks.claim(event_id:, limit:, link_host:, link_path:)
       end
 
-      def record_read_seconds(visitor_hashes:, view_token:, read_seconds:)
-        analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_read_seconds(read_seconds)
+      def record_read(visitor_hashes:, view_token:, read_seconds:, scroll_depth: nil)
+        analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_read(read_seconds, scroll_depth)
       end
 
       def record_scroll_depth(visitor_hashes:, view_token:, scroll_depth:)

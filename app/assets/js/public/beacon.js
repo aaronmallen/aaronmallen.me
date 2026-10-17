@@ -98,7 +98,12 @@ export function setupBeacon() {
     read += Math.ceil((Date.now() - opened) / 1000);
     const timing = timed ? undefined : timingOf(paint);
     timed ||= timing !== undefined;
-    send({ kind: "read", read_seconds: Math.min(read, Number(readCap)), ...(timing && { timing }) });
+    send({
+      kind: "read",
+      read_seconds: Math.min(read, Number(readCap)),
+      ...(deepest && { scroll_depth: deepest }),
+      ...(timing && { timing }),
+    });
   };
 
   const readAgain = () => {
@@ -108,10 +113,7 @@ export function setupBeacon() {
   };
 
   const scrolled = () => {
-    const depth = depthReached(depths);
-    if (depth <= deepest) return;
-    deepest = depth;
-    send({ kind: "scroll", scroll_depth: depth });
+    deepest = Math.max(deepest, depthReached(depths));
   };
 
   const clicked = (event) => {
