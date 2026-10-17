@@ -13,6 +13,7 @@ module API
 
       include Deps[
         post_queries: "posts.repos.post_queries",
+        project_queries: "projects.repos.project_queries",
         save_tag: "tags.operations.save_tag",
         tag_queries: "tags.repos.tag_queries",
       ]
@@ -29,7 +30,10 @@ module API
 
       def public_in(fields)
         name = tag_queries.find_in(fields[:scope], fields[:id])&.name if fields[:scope] == PUBLIC
-        "a blog post with this tag" if name && post_queries.shown?(post_queries.by_tag(name).map(&:id))
+        return if name.nil?
+        return "a blog post with this tag" if post_queries.shown?(post_queries.by_tag(name).map(&:id))
+
+        "a public project with this tag" if project_queries.public_by_tag(name).any?
       end
     end
   end

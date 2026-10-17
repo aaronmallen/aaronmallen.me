@@ -8,11 +8,29 @@ RSpec.describe "Changes that show in public", type: :request do
     task
   end
 
+  def project_tag(project) = Projects::Slice["repos.project_queries"].by_id(project.id).tags.first
+
+  def recurring(task) = Tasks::Slice["operations.set_task_cadence"].call(task.id, { cadence: "days", every: 2 }).value!
+
   def response_to(verb, path, body = {}, scopes: %w[read write])
     call_api(verb, path, body, token: api_token(scopes)).then { last_response }
   end
 
+  def rule_into(project)
+    fields = { pattern: "aaronmallen/*", tags: "", projects: [project.id] }
+    Tasks::Slice["operations.save_task_rule"].call(fields).value!
+  end
+
+  def scheduled_social_post
+    Social::Slice["repos.social_post_mutations"]
+      .create_with_parts(parts: ["teh one"], posted_at: Time.now + 86_400, status: "scheduled", targets: %w[mastodon])
+  end
+
   def suggest(post) = Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, [typo])
+
+  def suggest_social(social_post)
+    Suggestions::Slice["repos.suggestion_mutations"].replace_for_social_post(social_post.id, [typo.merge(part: 1)])
+  end
 
   def tag_on(post) = Posts::Slice["repos.post_queries"].by_id(post.id).tags.first
 
@@ -163,6 +181,62 @@ RSpec.describe "Changes that show in public", type: :request do
       expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }).status).to eq(200)
     end
 
+    it "cannot capture a task numbered on a published board" do
+      create(:project, name: "Keyed", key: "PUB", board_published: true)
+
+      expect(response_to(:post, "/tasks", { title: "Loud", project: "PUB" })).to be_refused
+    end
+
+    it "still captures a task numbered in a private project" do
+      create(:project, :private, name: "Keyed", key: "HUSH", board_published: true)
+
+      expect(response_to(:post, "/tasks", { title: "Quiet", project: "HUSH" }).status).to eq(201)
+    end
+
+    it "cannot point a task rule at a published board" do
+      rule = rule_into(create(:project, :private))
+
+      expect(response_to(:patch, "/task_rules/#{rule.id}", { projects: [board.id] })).to be_refused
+    end
+
+    it "cannot change a task rule that already files into a published board" do
+      expect(response_to(:patch, "/task_rules/#{rule_into(board).id}", { pattern: "aaronmallen/blog" })).to be_refused
+    end
+
+    it "still moves a task rule off a published board into a private project" do
+      body = { projects: [create(:project, :private).id] }
+
+      expect(response_to(:patch, "/task_rules/#{rule_into(board).id}", body).status).to eq(200)
+    end
+
+    it "cannot resume a series whose task sits on a published board" do
+      expect(response_to(:post, "/task_series/#{recurring(on_board).id}/resume")).to be_refused
+    end
+
+    it "still resumes a series whose task sits on no published board" do
+      expect(response_to(:post, "/task_series/#{recurring(create(:task)).id}/resume").status).to eq(200)
+    end
+
+    it "cannot rename a tag a public project carries", :aggregate_failures do
+      tag = project_tag(create(:project, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" })).to be_refused
+      expect(Tags::Slice["repos.tag_queries"].find_in("public", tag.id).name).to eq("ruby")
+    end
+
+    it "still renames a tag only a private project carries" do
+      tag = project_tag(create(:project, :private, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }).status).to eq(200)
+    end
+
+    it "cannot accept edits to a scheduled social post", :aggregate_failures do
+      social_post = scheduled_social_post
+
+      expect(response_to(:post, "/suggestions/#{suggest_social(social_post).id}/accept")).to be_refused
+      expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.first.body).to eq("teh one")
+    end
+
     it "still changes a task on no published board" do
       expect(response_to(:patch, "/tasks/#{create(:task).id}", { title: "changed" }).status).to eq(200)
     end
@@ -300,6 +374,38 @@ RSpec.describe "Changes that show in public", type: :request do
     it "changes a task on a published board" do
       expect(response_to(:patch, "/tasks/#{on_board.id}", { title: "changed" }, scopes: %w[write publish]).status)
         .to eq(200)
+    end
+
+    it "captures a task numbered on a published board" do
+      create(:project, name: "Keyed", key: "PUB", board_published: true)
+
+      expect(response_to(:post, "/tasks", { title: "Loud", project: "PUB" }, scopes: %w[write publish]).status)
+        .to eq(201)
+    end
+
+    it "points a task rule at a published board" do
+      rule = rule_into(create(:project, :private))
+
+      expect(response_to(:patch, "/task_rules/#{rule.id}", { projects: [board.id] }, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
+    it "resumes a series whose task sits on a published board" do
+      expect(response_to(:post, "/task_series/#{recurring(on_board).id}/resume", {}, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
+    it "renames a tag a public project carries" do
+      tag = project_tag(create(:project, tags: %w[ruby]))
+
+      expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
+    it "accepts edits to a scheduled social post" do
+      id = suggest_social(scheduled_social_post).id
+
+      expect(response_to(:post, "/suggestions/#{id}/accept", {}, scopes: %w[write publish]).status).to eq(200)
     end
   end
 

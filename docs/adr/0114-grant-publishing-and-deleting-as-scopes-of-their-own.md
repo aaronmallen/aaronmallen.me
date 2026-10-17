@@ -29,11 +29,12 @@ on the consent page. The owner wants to grant edits without either power.
   can call back", since an undo comes too late once a page has gone out and sits in the edge cache. It guards
   `publish_post` and `send_social_post`, and every call that uploads a share or a share group, adds a work entry,
   approves webmentions in bulk, changes the webmention settings or rewrites the edit note on a published post. It
-  also guards each change whose target is public at the time: a project that is public after the change, a published
-  or scheduled post and its tags and social card, an approved webmention, and a task on a published board
-  ([ADR 0160][0160]), which takes in linking a task to such a project. #1441 added scheduled posts, since their
-  text goes out with them, and an issue sync that can reach a published board: one a task rule files into, one that
-  tracks a repo, or one that holds a synced task.
+  also guards each change whose target is public at the time: a project that is public after the change and its
+  tags, a published or scheduled post and its tags and social card, a scheduled social post, an approved webmention,
+  and a task on a published board ([ADR 0160][0160]), which takes in linking a task to such a project. #1441 added
+  scheduled posts, since their text goes out with them, and an issue sync that can reach a published board: one a
+  task rule files into, one that tracks a repo, or one that holds a synced task. #1597 added scheduled social posts
+  for the same reason.
 - **`delete`** guards every tool that removes a record for good: each `delete_*` tool and `remove_tag`.
 - **`write`** keeps every other change, those a later call can undo among them: drop, archive, untag, unlink and
   cancel. A change to a draft, a private project or a task on no published board stays here, as do task tags and

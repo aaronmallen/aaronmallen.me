@@ -18,12 +18,13 @@ module API
       REPLY = Serializers::TaskRule.reference
 
       include Deps[
+        project_queries: "projects.repos.project_queries",
         save_task_rule: "tasks.operations.save_task_rule",
         task_rule_queries: "tasks.repos.task_rule_queries",
       ]
 
       def handle(id:, **fields)
-        rule = task_rule_queries.all.find { it.id == id }
+        rule = rule(id)
         return missing("task rule", id) if rule.nil?
 
         saved(id, save_task_rule.call(form(rule, fields), id:))
@@ -37,6 +38,13 @@ module API
 
         { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags:, projects: }
       end
+
+      def public_in(fields)
+        projects = fields.fetch(:projects) { rule(fields[:id])&.projects&.map(&:id) }
+        "a published board" if project_queries.public_boards(Array(projects).first(1)).any?
+      end
+
+      def rule(id) = task_rule_queries.all.find { it.id == id }
 
       def saved(id, result)
         case result

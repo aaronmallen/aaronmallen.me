@@ -24,7 +24,7 @@ module API
         required: ["title"],
       }.freeze
 
-      include Deps[capture_task: "tasks.operations.capture_task"]
+      include Deps[capture_task: "tasks.operations.capture_task", project_queries: "projects.repos.project_queries"]
 
       def handle(title:, list: NEXT, note: nil, project: nil, sprint_on: nil, tags: nil, recur: nil)
         fields = { title:, note:, project:, tags: Helpers::Wording.tag_list(tags), recur: Tasks.recur(recur) }
@@ -36,6 +36,13 @@ module API
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
           else failed(Helpers::Wording::UNSAVED)
         end
+      end
+
+      private
+
+      def public_in(fields)
+        id = fields[:project] && project_queries.live_id_by_key(fields[:project])
+        PUBLIC_TASK if id && project_queries.public_boards([id]).any?
       end
     end
   end

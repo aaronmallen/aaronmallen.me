@@ -5,6 +5,7 @@ module API
     class AcceptSuggestionEdits < Endpoint
       EMPTY_PART = "the edits would leave part %s of the social post under suggestion %s empty; nothing changed"
       PUBLISHED = "the blog post under suggestion %s is published; its edits can no longer apply"
+      SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
       SCHEMA = {
         additionalProperties: false,
@@ -27,6 +28,7 @@ module API
       include Deps[
         accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
         post_queries: "posts.repos.post_queries",
+        social_post_queries: "social.repos.social_post_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
@@ -46,8 +48,11 @@ module API
       def ids(edits) = edits.map(&:id)
 
       def public_in(fields)
-        post_id = suggestion_queries.by_id(fields[:suggestion_id])&.post_id
-        "this blog post" if post_id && post_queries.shown?(post_id)
+        suggestion = suggestion_queries.by_id(fields[:suggestion_id])
+        return if suggestion.nil?
+        return "this blog post" if suggestion.post_id && post_queries.shown?(suggestion.post_id)
+
+        "this social post" if social_post_queries.by_id(suggestion.social_post_id)&.status == SCHEDULED
       end
 
       def refused(id, failure)
