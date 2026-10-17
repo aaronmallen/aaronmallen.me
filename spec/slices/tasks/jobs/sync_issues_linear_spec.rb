@@ -791,6 +791,15 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(status(task)).to eq("canceled")
     end
+
+    it "leaves its task alone when no connection holds its workspace", :aggregate_failures do
+      task = tracked
+      stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues(workspace: "elsewhere"))
+      sync
+
+      expect(status(task)).to eq("open")
+      expect(sources.pluck(:remote_state)).to eq(%w[open])
+    end
   end
 
   describe "tracked issues in two workspaces" do
@@ -800,7 +809,8 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       task = create(:task, list: "external")
       create(:task_source, provider: "linear", remote_id: "L_two", url: "https://linear.app/other/issue/xyz-2", task:)
       stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues(issue), key: LinearGraphQL::KEY)
-      stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues(linear_issue("L_two", key: "XYZ-2", state: "completed")),
+      stub_linear(LinearGraphQL::ISSUES_QUERY,
+                  linear_issues(linear_issue("L_two", key: "XYZ-2", state: "completed"), workspace: "other"),
                   key: "lin_api_two")
     end
 

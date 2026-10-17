@@ -52,9 +52,10 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def stub_rest(path, response) = stub_request(:get, "#{api}/repos/#{path}").to_return(response)
 
-  def stub_vanished(response)
+  def stub_vanished(response, repo: github_json(full_name: "aaronmallen/aaronmallen.me"))
     stub_github(GitHubGraphQL::ISSUES_QUERY, github_missing_issue)
     stub_rest("aaronmallen/aaronmallen.me/issues/7", response)
+    stub_rest("aaronmallen/aaronmallen.me", repo)
   end
 
   def sync = described_class.new.perform("github")
@@ -944,6 +945,27 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(github_request(GitHubGraphQL::ISSUES_QUERY)).to have_been_made.once
       expect(a_request(:get, "#{api}/repos/aaronmallen/aaronmallen.me/issues/7")).to have_been_made.once
+    end
+  end
+
+  describe "an issue in a repo the token no longer sees" do
+    before { stub_vanished({ status: 404 }, repo: { status: 404 }) }
+
+    it "leaves its task and source alone", :aggregate_failures do
+      task = tracked
+      sync
+
+      expect(repo.by_id(task.id).status).to eq("open")
+      expect(sources.pluck(:remote_state)).to eq(%w[open])
+    end
+
+    it "asks after the repo once for all its issues" do
+      tracked
+      create(:task_source, provider: "github", remote_id: "I_eight", url: url.sub(/7\z/, "8"))
+      stub_rest("aaronmallen/aaronmallen.me/issues/8", { status: 404 })
+      sync
+
+      expect(a_request(:get, "#{api}/repos/aaronmallen/aaronmallen.me")).to have_been_made.once
     end
   end
 

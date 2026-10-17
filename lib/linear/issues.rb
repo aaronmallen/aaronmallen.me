@@ -40,6 +40,7 @@ module Linear
       BY_ID = <<~GRAPHQL.freeze
         query($ids: [ID!]!) {
           viewer { id }
+          organization { urlKey }
           issues(first: #{PAGE_SIZE}, includeArchived: true, filter: {id: {in: $ids}}) {
             nodes { #{FIELDS} }
           }
@@ -76,11 +77,12 @@ module Linear
     def issues(urls)
       return unless configured?
 
+      workspaces = []
       found = transports.each_with_object({}) do |transport, seen|
-        (urls.keys - seen.keys).each_slice(ID_BATCH_SIZE) { seen.merge!(issue_batch(transport, it)) }
+        (urls.keys - seen.keys).each_slice(ID_BATCH_SIZE) { seen.merge!(issue_batch(transport, it, workspaces)) }
       end
 
-      urls.map { |id, url| found.fetch(id) { { id:, remote_state: DELETED, url: } } }
+      urls.filter_map { |id, url| found.fetch(id) { gone(id, url, workspaces) } }
     end
 
     private
@@ -105,6 +107,10 @@ module Linear
       { comments: page&.fetch("nodes").to_a.compact.map { comment(it) }, comments_cut_short: more?(page) }
     end
 
+    def gone(id, url, workspaces)
+      { id:, remote_state: DELETED, url: } if workspaces.include?(url.to_s[::Issues::LINEAR_URL, :workspace])
+    end
+
     def issue(node, viewer)
       key = node.fetch("identifier")
       url = node.fetch("url")
@@ -116,9 +122,10 @@ module Linear
       }
     end
 
-    def issue_batch(transport, ids)
+    def issue_batch(transport, ids, workspaces)
       data = transport.query(Queries::BY_ID, ids:)
       viewer = data&.dig("viewer", "id") || raise(Error, "Linear sent no viewer id")
+      workspaces << data.dig("organization", "urlKey")
 
       data.dig("issues", "nodes").to_a.to_h { [it.fetch("id"), issue(it, viewer)] }
     end

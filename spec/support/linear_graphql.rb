@@ -47,7 +47,9 @@ module LinearGraphQL
       url: "https://linear.app/aaronmallen/issue/#{key.downcase}/sync-my-issues" }.merge(fields)
   end
 
-  def linear_issues(*nodes, viewer: VIEWER_ID) = linear_json(data: { issues: { nodes: }, viewer: { id: viewer } })
+  def linear_issues(*nodes, viewer: VIEWER_ID, workspace: "aaronmallen")
+    linear_json(data: { issues: { nodes: }, organization: { urlKey: workspace }, viewer: { id: viewer } })
+  end
 
   def linear_json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
 

@@ -67,7 +67,9 @@ module GitHub
     def issues(urls)
       return unless configured?
 
-      urls.keys.each_slice(ID_BATCH_SIZE).flat_map { issue_batch(it, urls) }
+      repos = Hash.new { |known, repo| known[repo] = !transport.get("/repos/#{repo}").nil? }
+
+      urls.keys.each_slice(ID_BATCH_SIZE).flat_map { issue_batch(it, urls, repos) }
     end
 
     private
@@ -101,12 +103,12 @@ module GitHub
       }
     end
 
-    def issue_batch(ids, urls)
+    def issue_batch(ids, urls, repos)
       data = transport.query(Queries::BY_ID, ids:)
       viewer = data&.dig("viewer", "id") || raise(Error, "GitHub sent no viewer id")
 
-      ids.zip(data.fetch("nodes")).map do |id, node|
-        node&.key?("id") ? issue(node, viewer) : vanished(id, urls.fetch(id))
+      ids.zip(data.fetch("nodes")).filter_map do |id, node|
+        node&.key?("id") ? issue(node, viewer) : vanished(id, urls.fetch(id), repos)
       end
     end
 
@@ -135,8 +137,9 @@ module GitHub
       node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer } ? OPEN : UNASSIGNED
     end
 
-    def vanished(id, url)
+    def vanished(id, url, repos)
       found_at = moved_to(url)
+      return if found_at.nil? && !url.to_s[::Issues::GITHUB_URL, :repo]&.then { repos[it] }
       return { id:, remote_state: DELETED, url: } if found_at.nil? || found_at == url
 
       { id:, moved_to: found_at, remote_state: MOVED, url: }

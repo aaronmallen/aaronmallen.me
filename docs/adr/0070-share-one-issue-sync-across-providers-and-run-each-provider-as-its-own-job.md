@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, lib, record, tasks]
 issue: "#43"
-amended: ["#631"]
+amended: ["#631", "#1658"]
 tags: [tasks, imports, sync, github, linear, providers, jobs, locks, sync-states, enums]
 ---
 
@@ -50,6 +50,12 @@ Linear's client maps each issue to a `remote_state` this way:
 Since #631, a task that a synced link holds stays open when either provider takes it off the operator: `SyncIssues`
 reads its `unassigned` as `open`, and cancels it on the first run after its last synced link goes
 ([ADR 0117][0117]).
+
+Since #1658, a missing issue reads as `deleted` only when the place that held it still answers. Linear's check names
+each connection's workspace, and an issue whose workspace no connection holds is left out of the answer. GitHub asks
+REST for the repo of each issue it cannot find, once a check, and leaves the issue out when the repo answers 404. A
+left out issue keeps its task and its `remote_state`, so a removed connection or a token that lost a repo cancels
+nothing, and the next run asks again.
 
 Linear archives closed issues on its own, so an archive says nothing the state type has not said already. Linear
 keeps an issue's id when it moves teams, so a move keeps the same row and task, and only the key and URL change.
