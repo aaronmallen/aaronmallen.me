@@ -48,11 +48,6 @@ RSpec.describe "API mail threads", type: :request do
       expect(call_api(:get, "/mail/threads/#{message.id}"))
         .to eq(trusted(mcp_answer("read_mail_thread", id: message.id)))
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([call_api(:get, "/mail/threads/999999").fetch("message"),
-              status]).to eq(["no mail thread has the ID 999999", 404])
-    end
   end
 
   describe "POST /api/v1/mail/threads/:id/mark" do

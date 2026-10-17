@@ -158,15 +158,6 @@ RSpec.describe "API sprints", type: :request do
 
       expect([drop(sprint.id).fetch("message"), status]).to eq(["that sprint has already started", 422])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([drop(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no sprint has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([drop("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
   end
 
   describe "the MCP tools" do

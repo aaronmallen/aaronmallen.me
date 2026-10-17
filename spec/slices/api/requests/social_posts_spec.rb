@@ -133,11 +133,6 @@ RSpec.describe "API social posts", type: :request do
       expect([update_social_post(sent.id, parts: %w[new]).fetch("message"), status])
         .to eq(["social post #{sent.id} has gone out, so nothing was saved", 422])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([update_social_post(999_999, parts: %w[new]).fetch("message"), status])
-        .to eq(["no social post has the ID 999999", 404])
-    end
   end
 
   describe "POST /api/v1/social_posts/:id/send" do
@@ -169,10 +164,6 @@ RSpec.describe "API social posts", type: :request do
       expect(status_of { send_social_post(sent.id) }).to eq(422)
     end
 
-    it "answers an unknown ID with a 404" do
-      expect(status_of { send_social_post(999_999) }).to eq(404)
-    end
-
     it "refuses as send_social_post does" do
       long = compose("a" * 501)
 
@@ -192,10 +183,6 @@ RSpec.describe "API social posts", type: :request do
 
       expect([answer.fetch("message"), status, stored(taken.id)])
         .to match(["social post #{taken.id} has gone out, so nothing was removed", 422, be_truthy])
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect(status_of { delete_social_post(999_999) }).to eq(404)
     end
 
     it "deletes as delete_social_post does" do

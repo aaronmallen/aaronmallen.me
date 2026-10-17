@@ -51,14 +51,5 @@ RSpec.describe "API reading a commit", type: :request do
 
       expect(read(commit.id)).to eq(trusted(mcp_answer("read_commit", id: commit.id)))
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no commit has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
   end
 end

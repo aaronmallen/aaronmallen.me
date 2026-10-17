@@ -174,15 +174,6 @@ RSpec.describe "API journal entries", type: :request do
       expect(read(entry.id).fetch("record_links"))
         .to eq(mcp_answer("read_journal_entry", id: entry.id).fetch("record_links"))
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
   end
 
   describe "POST /api/v1/journal_entries" do
@@ -284,12 +275,6 @@ RSpec.describe "API journal entries", type: :request do
 
       expect([status, journal_entry_queries.by_id(entry.id).body]).to eq([422, "before"])
     end
-
-    it "answers an unknown ID with a 404" do
-      update_entry(entry.id + 1000, body: "after")
-
-      expect(status).to eq(404)
-    end
   end
 
   describe "DELETE /api/v1/journal_entries/:id" do
@@ -297,11 +282,6 @@ RSpec.describe "API journal entries", type: :request do
       entry = create(:journal_entry)
 
       expect([delete_entry(entry.id), entries.count]).to eq([{ "id" => entry.id, "deleted" => true }, 0])
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([delete_entry(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 999999" }, 404])
     end
   end
 

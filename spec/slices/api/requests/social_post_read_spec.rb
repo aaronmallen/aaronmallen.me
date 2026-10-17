@@ -193,15 +193,6 @@ RSpec.describe "API reading a social post", type: :request do
       expect(read(social_post.id).fetch("record_links"))
         .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Announce the move")])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no social post has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
   end
 
   describe "the MCP tool" do

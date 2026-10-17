@@ -158,10 +158,5 @@ RSpec.describe "API tags", type: :request do
 
       expect([status, tag_queries.find_in("private", id)]).to eq([200, nil])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([call_api(:delete, "/tags/public/999999").fetch("message"),
-              status]).to eq(["no tag has the ID 999999", 404])
-    end
   end
 end

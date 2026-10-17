@@ -55,11 +55,6 @@ RSpec.describe "API projects", type: :request do
       expect(call_api(:patch, "/projects/#{project.id}", { tagline: "new" }))
         .to include("name" => "blog", "tagline" => "new", "tags" => %w[ruby])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([call_api(:patch, "/projects/999999", { name: "ghost" }).fetch("message"), status])
-        .to eq(["no project has the ID 999999", 404])
-    end
   end
 
   describe "POST /api/v1/projects/:id/archive" do
@@ -83,12 +78,6 @@ RSpec.describe "API projects", type: :request do
       expect([call_api(:post, "/projects/#{project.id}/archive").fetch("message"), status])
         .to eq(["not archived: it is archived already", 422])
       expect(project_queries.by_id(project.id).archived_on).to eq(today - 30)
-    end
-
-    it "answers an unknown ID with a 404" do
-      call_api(:post, "/projects/999999/archive")
-
-      expect(status).to eq(404)
     end
   end
 

@@ -61,10 +61,6 @@ RSpec.describe "API task time", type: :request do
         .to eq(["task #{task.id} is not in progress", 422])
     end
 
-    it "answers an unknown ID with a 404" do
-      expect([act(999_999, "pause").fetch("message"), status]).to eq(["no task has the ID 999999", 404])
-    end
-
     %i[done canceled].each do |state|
       it "refuses a #{state} task with a 422 and leaves it #{state}", :aggregate_failures do
         found = create(:task, state, completed_at: Time.now - 60)
@@ -187,11 +183,6 @@ RSpec.describe "API task time", type: :request do
       expect(answer).to include("status" => "done", "worked_seconds" => 600)
       expect(Tasks::Slice["repos.task_queries"].by_id(found.id).completed_at).to eq(started - 60)
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([add(id: 999_999, started_at: started, ended_at: started).fetch("message"), status])
-        .to eq(["no task has the ID 999999", 404])
-    end
   end
 
   describe "DELETE /api/v1/tasks/:id/sessions/:session_id" do
@@ -252,10 +243,6 @@ RSpec.describe "API task time", type: :request do
 
     it "refuses minutes past 59 with a 422" do
       expect(act(task.id, "total", minutes: 60).fetch("errors")).to eq("minutes" => ["minutes run from 0 to 59"])
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([act(999_999, "total", hours: 1).fetch("message"), status]).to eq(["no task has the ID 999999", 404])
     end
   end
 

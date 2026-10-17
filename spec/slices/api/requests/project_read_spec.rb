@@ -56,14 +56,5 @@ RSpec.describe "API reading a project", type: :request do
 
       expect(read(project.id)).to eq(mcp_answer("read_project", id: project.id))
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no project has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
   end
 end

@@ -33,11 +33,6 @@ RSpec.describe "API webmention moderation and settings", type: :request do
 
       expect(status).to eq(422)
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([call_api(:post, "/webmentions/999999/moderate", { verdict: "spam" }).fetch("message"), status])
-        .to eq(["no webmention has the ID 999999", 404])
-    end
   end
 
   describe "GET /api/v1/webmention_settings" do

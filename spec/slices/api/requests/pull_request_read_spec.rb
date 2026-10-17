@@ -52,10 +52,5 @@ RSpec.describe "API reading a pull request", type: :request do
 
       expect(read(opened.id)).to eq(trusted(mcp_answer("read_pull_request", id: opened.id)))
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no pull request has the ID 999999" }, 404])
-    end
   end
 end

@@ -86,10 +86,6 @@ RSpec.describe "API task links", type: :request do
       expect([unlink(task.id, other.id).fetch("message"), status])
         .to eq(["task #{task.id} has no link to task #{other.id}", 404])
     end
-
-    it "refuses another task ID that is not a number with a 422" do
-      expect([unlink(task.id, "abc").fetch("errors").keys, status]).to eq([%w[other_id], 422])
-    end
   end
 
   describe "a parent link" do

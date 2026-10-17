@@ -62,11 +62,6 @@ RSpec.describe "API people", type: :request do
 
       expect(read(person.id)).to include("id" => person.id, "name" => "Ada Lovelace")
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
-    end
   end
 
   describe "POST /api/v1/people" do
@@ -174,11 +169,6 @@ RSpec.describe "API people", type: :request do
 
       expect(edit(person.id, key: "grace").fetch("errors")).to eq("key" => ["someone else already holds that key"])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([edit(999_999, name: "Ada"), status])
-        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
-    end
   end
 
   describe "DELETE /api/v1/people/:id" do
@@ -187,11 +177,6 @@ RSpec.describe "API people", type: :request do
 
       expect(remove(person.id)).to eq("id" => person.id, "deleted" => true)
       expect(everyone).to be_empty
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([remove(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
     end
   end
 

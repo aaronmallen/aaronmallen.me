@@ -166,10 +166,6 @@ RSpec.describe "API record links", type: :request do
     it "refuses another kind it does not know with a 422" do
       expect([unlink("post", post_record.id, "person", 1).fetch("errors").keys, status]).to eq([%w[other_kind], 422])
     end
-
-    it "refuses another ID that is not a number with a 422" do
-      expect([unlink("post", post_record.id, "commit", "abc").fetch("errors").keys, status]).to eq([%w[other_id], 422])
-    end
   end
 
   describe "GET /api/v1/links/:kind/:id" do

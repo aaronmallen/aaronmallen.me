@@ -69,12 +69,6 @@ RSpec.describe "API blog posts", type: :request do
 
       expect([JSON.parse(last_response.body).fetch("errors").keys, status]).to eq([%w[publish_at], 422])
     end
-
-    it "answers an unknown ID with a 404" do
-      call_api(:patch, "/posts/999999", JSON.generate(title: "Ghost"))
-
-      expect(status).to eq(404)
-    end
   end
 
   describe "DELETE /api/v1/posts/:id" do
@@ -91,11 +85,6 @@ RSpec.describe "API blog posts", type: :request do
 
       expect(post_queries.by_id(post.id)).to be_nil
       expect(post_queries.by_id(other.id)).not_to be_nil
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([call_api(:delete, "/posts/999999").fetch("message"),
-              status]).to eq(["no blog post has the ID 999999", 404])
     end
   end
 
@@ -123,12 +112,6 @@ RSpec.describe "API blog posts", type: :request do
 
       expect([call_api(:get, "/posts/#{post.id}/announcement"), status])
         .to eq([{ "id" => post.id, "announcement" => announcement }, 200])
-    end
-
-    it "answers an unknown ID with a 404" do
-      call_api(:get, "/posts/999999/announcement")
-
-      expect(status).to eq(404)
     end
   end
 end

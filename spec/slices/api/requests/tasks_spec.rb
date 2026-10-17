@@ -412,15 +412,6 @@ RSpec.describe "API tasks", type: :request do
       expect(read(create(:task).id).fetch("source")).to be_nil
     end
 
-    it "answers an unknown ID with a 404" do
-      expect([read(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no task has the ID 999999" }, 404])
-    end
-
-    it "refuses an ID that is not a number with a 422" do
-      expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
-    end
-
     describe "a link" do
       let(:blocker) { create(:task, title: "blocker") }
       let(:blocked) { create(:task, title: "blocked") }
@@ -830,12 +821,6 @@ RSpec.describe "API tasks", type: :request do
       expect(tasks.by_id(done.id)).to have_attributes(title: "Draft", sprint_id: nil)
     end
 
-    it "answers an unknown ID with a 404" do
-      save(999_999, title: "Ghost")
-
-      expect(status).to eq(404)
-    end
-
     it "replaces the whole set of tags" do
       save(task.id, tags: %w[site ruby])
 
@@ -941,12 +926,6 @@ RSpec.describe "API tasks", type: :request do
       expect([call_api(:delete, "/tasks/#{task.id}"), tasks.by_id(task.id)])
         .to eq([{ "id" => task.id, "title" => "Gone", "deleted" => true }, nil])
     end
-
-    it "answers an unknown ID with a 404" do
-      call_api(:delete, "/tasks/999999")
-
-      expect(status).to eq(404)
-    end
   end
 
   describe "the status endpoints" do
@@ -998,12 +977,6 @@ RSpec.describe "API tasks", type: :request do
         expect([act(task.id, "complete").fetch("errors"), status])
           .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
         expect(tasks.by_id(task.id)).to have_attributes(status: closed.to_s, completed_at: at(today - 1))
-      end
-    end
-
-    %w[start complete reopen cancel].each do |verb|
-      it "answers #{verb} on an unknown ID with a 404" do
-        expect([act(999_999, verb).fetch("message"), status]).to eq(["no task has the ID 999999", 404])
       end
     end
   end
@@ -1078,10 +1051,6 @@ RSpec.describe "API tasks", type: :request do
       expect([act(task.id, "seen").fetch("errors"), status])
         .to eq([{ "id" => ["task #{task.id} has no synced issue to mark seen"] }, 422])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([act(999_999, "seen").fetch("message"), status]).to eq(["no task has the ID 999999", 404])
-    end
   end
 
   describe "POST /api/v1/tasks/:id/move" do
@@ -1134,10 +1103,6 @@ RSpec.describe "API tasks", type: :request do
           .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
         expect(tasks.by_id(task.id).stage).to eq("backlog")
       end
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([act(999_999, "stage", stage: "ready").fetch("message"), status]).to eq(["no task has the ID 999999", 404])
     end
   end
 

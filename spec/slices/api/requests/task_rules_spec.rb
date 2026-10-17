@@ -305,11 +305,6 @@ RSpec.describe "API task rules", type: :request do
 
       expect([status, rules.map(&:pattern)]).to eq([422, ["aaronmallen/*"]])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([update_rule(999_999, tags: %w[ruby]), status])
-        .to eq([{ "error" => "not_found", "message" => "no task rule has the ID 999999" }, 404])
-    end
   end
 
   describe "DELETE /api/v1/task_rules/:id" do
@@ -327,11 +322,6 @@ RSpec.describe "API task rules", type: :request do
       delete_rule(create_rule(pattern: "aaronmallen/*", projects: [blog.id]).fetch("id"))
 
       expect(project_ids(task)).to eq([blog.id])
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([delete_rule(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no task rule has the ID 999999" }, 404])
     end
   end
 

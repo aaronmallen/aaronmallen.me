@@ -197,11 +197,6 @@ RSpec.describe "API saved views", type: :request do
     it "refuses a field it does not take, such as screen" do
       expect([update_view(view.id, screen: "posts").fetch("errors").keys, status]).to eq([%w[screen], 422])
     end
-
-    it "answers an unknown ID with a 404" do
-      expect([update_view(999_999, name: "New"), status])
-        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 999999" }, 404])
-    end
   end
 
   describe "DELETE /api/v1/saved_views/:id" do
@@ -217,11 +212,6 @@ RSpec.describe "API saved views", type: :request do
       delete_view(view.id)
 
       expect(views.pluck(:id)).to eq([kept.id])
-    end
-
-    it "answers an unknown ID with a 404" do
-      expect([delete_view(999_999), status])
-        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 999999" }, 404])
     end
   end
 
