@@ -11,8 +11,7 @@ module Admin
 
           def view_template
             Form(action: path(:admin_create_task), class: "quick-add") do
-              input(type: "hidden", name: "filter", value: @filter)
-              input(type: "hidden", name: "task[sprint_on]", value: @sprint_on.iso8601) if @sprint_on
+              HiddenFields(values: { filter: @filter, "task[sprint_on]": @sprint_on&.iso8601 })
               Icon(:add)
               input(
                 type: "text", name: "task[title]", required: true, autocomplete: "off", placeholder: @placeholder,

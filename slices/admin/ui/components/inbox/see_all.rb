@@ -9,16 +9,16 @@ module Admin
 
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
 
+          def self.ids(rows)
+            rows.group_by { FIELDS.fetch(it.kind) }.transform_values { |group| group.map { it.record.id } }
+          end
+
           def view_template
             ButtonForm(
               action: path(:admin_inbox_see_all), label: t(".label"), icon: "fa-solid fa-check-double",
-              confirm: t(".confirm"), hidden: ids,
+              confirm: t(".confirm"), hidden: self.class.ids(@rows),
             )
           end
-
-          private
-
-          def ids = @rows.group_by { FIELDS.fetch(it.kind) }.transform_values { |rows| rows.map { it.record.id } }
         end
       end
     end

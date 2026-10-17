@@ -528,10 +528,10 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
           .to eq([false, false, false, false, true])
       end
 
-      it "marks the start the palette runs on an open task" do
+      it "marks the start the palette runs on an open task, and keeps the morph" do
         read
 
-        expect(page).to have_css("form[data-task-act='start'][action='/admin/tasks/#{task.id}/start']")
+        expect(page).to have_css("form[data-task-act='start'][data-morph][action='/admin/tasks/#{task.id}/start']")
       end
 
       it "marks the complete the palette runs on a task in progress, and no start", :aggregate_failures do

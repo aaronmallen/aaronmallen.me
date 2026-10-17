@@ -40,7 +40,7 @@ module Admin
               ReasonForm(
                 decision: @decision, form: Blog::Constants::EMPTY_HASH, name:, route: :"admin_#{name}_decision",
                 variant:, morph: true,
-              ) { input(type: "hidden", name: "return_to", value: @return_to) if @return_to }
+              ) { HiddenFields(values: { return_to: @return_to }) }
             end
           end
 

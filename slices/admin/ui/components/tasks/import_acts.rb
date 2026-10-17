@@ -7,9 +7,7 @@ module Admin
         class ImportActs < Component
           def view_template
             Button(href: path(:admin_task_rules), small: true, icon: "fa-solid fa-tag") { t(".rules") }
-            Form(action: path(:admin_sync_issues)) do
-              Button(type: "submit", small: true, icon: "fa-solid fa-rotate") { t(".sync") }
-            end
+            ButtonForm(action: path(:admin_sync_issues), label: t(".sync"), icon: "fa-solid fa-rotate")
           end
         end
       end

@@ -61,13 +61,10 @@ module Admin
           def menu = path(:admin_social_post_menu, id: @social_post.id, filter: @filter)
 
           def remove_form
-            Form(action: path(:admin_delete_social_post, id: @social_post.id)) do
-              input(type: "hidden", name: "filter", value: @filter)
-              Button(
-                type: "submit", variant: :warn, small: true, label: t(".remove"),
-                icon: :trash, data: { social_remove_item: "" },
-              )
-            end
+            DeleteForm(
+              action: path(:admin_delete_social_post, id: @social_post.id), label: t(".remove"), icon_only: true,
+              hidden: { filter: @filter }, button: { data: { social_remove_item: "" } },
+            )
           end
         end
       end

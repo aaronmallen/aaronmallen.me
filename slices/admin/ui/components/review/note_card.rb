@@ -50,10 +50,7 @@ module Admin
             end
           end
 
-          def hidden_fields
-            input(type: "hidden", name: "period", value: @period) if @period == MONTH
-            input(type: "hidden", name: "day", value: @to.iso8601)
-          end
+          def hidden_fields = HiddenFields(values: { period: (@period if @period == MONTH), day: @to.iso8601 })
 
           def private_note
             span(class: "journal-words") do

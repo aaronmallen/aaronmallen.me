@@ -18,7 +18,7 @@ module Admin
 
           def view_template
             Form(action: @action, class: "journal-edit", data: { journal_edit_form: "", journal_source: @source }) do
-              @place.each { |name, value| input(type: "hidden", name:, value:) }
+              HiddenFields(values: @place)
               EntryFields(body: @body, tags: @tags, errors: @errors, scope: @scope, height: HEIGHT, label: t(".body"))
               div(class: "journal-edit-foot") do
                 Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }

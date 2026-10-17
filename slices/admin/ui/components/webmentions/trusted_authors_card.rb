@@ -19,10 +19,10 @@ module Admin
           private
 
           def remove_form(url)
-            Form(action: path(:admin_remove_trusted_author), data: { confirm: t(".confirm", author: url) }) do
-              input(type: "hidden", name: "author_url", value: url)
-              Button(variant: :warn, small: true, type: "submit") { t(".remove") }
-            end
+            ButtonForm(
+              action: path(:admin_remove_trusted_author), label: t(".remove"), variant: :warn,
+              confirm: t(".confirm", author: url), hidden: { author_url: url },
+            )
           end
 
           def row(author) = ListItem(title: author.author_url) { remove_form(author.author_url) }

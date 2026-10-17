@@ -35,16 +35,14 @@ module Admin
           private
 
           def cancel
-            data = { confirm: t(".confirm_cancel", task: @task.title) }
-
-            change(:admin_cancel_task, :ban, t(".cancel"), data:)
+            change(:admin_cancel_task, :ban, t(".cancel"), confirm: t(".confirm_cancel", task: @task.title))
           end
 
-          def change(route, icon, label, variant: nil, data: Blog::Constants::EMPTY_HASH, key: nil)
-            Form(action: path(route, id: @task.id), data: { morph: true, **data }) do
-              origin_fields
-              Button(type: "submit", variant:, small: true, label:, **keyed(key), icon:)
-            end
+          def change(route, icon, label, confirm: nil, data: Blog::Constants::EMPTY_HASH, key: nil)
+            ButtonForm(
+              action: path(route, id: @task.id), label:, icon:, icon_only: true, morph: true, confirm:, data:,
+              hidden: { filter: @filter, origin: @origin }, button: keyed(key),
+            )
           end
 
           def complete = CompleteForm(task: @task, filter: @filter, origin: @origin, compact: @row, keyed: @row)
@@ -57,24 +55,15 @@ module Admin
 
           def move(place, icon, key:)
             list = t(Helpers::TaskLists.title(place))
-            label = t(".move", list:)
-            data = { morph: true, **move_confirm(list) }
+            confirm = t(".confirm_move", task: @task.title, list:) if running?
 
-            Form(action: path(:admin_move_task, id: @task.id, filter: place), data:) do
-              origin_field
-              Button(type: "submit", small: true, label:, **keyed(key), icon:)
-            end
-          end
-
-          def move_confirm(list)
-            running? ? { confirm: t(".confirm_move", task: @task.title, list:) } : Blog::Constants::EMPTY_HASH
+            ButtonForm(
+              action: path(:admin_move_task, id: @task.id, filter: place), label: t(".move", list:), icon:,
+              icon_only: true, morph: true, confirm:, hidden: { origin: @origin }, button: keyed(key),
+            )
           end
 
           def moves = MOVES.fetch(@ahead ? AHEAD : @task.place).each { |place, side, key| move(place, side, key:) }
-
-          def origin_field = input(type: "hidden", name: "origin", value: @origin)
-
-          def origin_fields = HiddenFields(values: { filter: @filter, origin: @origin })
 
           def progress
             complete if @row || running?

@@ -44,12 +44,10 @@ module Admin
           def unlink_form
             label = t(".remove", key: other.label)
 
-            Form(action: path(:admin_unlink_task, id: @task.id, other_id: other.id)) do
-              HiddenFields(values: { filter: @tab, origin: @origin })
-              Button(
-                type: "submit", variant: :gh, small: true, label:, icon: :close,
-              )
-            end
+            ButtonForm(
+              action: path(:admin_unlink_task, id: @task.id, other_id: other.id), label:, variant: :gh, icon: :close,
+              icon_only: true, hidden: { filter: @tab, origin: @origin },
+            )
           end
         end
       end

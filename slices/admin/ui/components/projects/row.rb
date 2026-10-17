@@ -40,10 +40,10 @@ module Admin
           def board_path = path(:admin_project, id: @project.id)
 
           def change(route, label_key, icon, variant)
-            Form(action: path(route, id: @project.id)) do
-              input(type: "hidden", name: "filter", value: @filter)
-              Button(type: "submit", variant:, small: true, label: t(label_key), icon:)
-            end
+            ButtonForm(
+              action: path(route, id: @project.id), label: t(label_key), variant:, icon:, icon_only: true,
+              hidden: { filter: @filter },
+            )
           end
 
           def edit_path = path(:admin_edit_project, id: @project.id)

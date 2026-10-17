@@ -13,8 +13,7 @@ module Admin
 
           def view_template
             AutoForm(action: path(:admin_tasks), role: "search", class: "tasks-filters") do
-              input(type: "hidden", name: "filter", value: @tab)
-              @range.each { |name, day| input(type: "hidden", name:, value: day.iso8601) }
+              HiddenFields(values: { filter: @tab, **@range.transform_values(&:iso8601) })
               SearchField(
                 id: SEARCH_ID, label: t(".search"), name: "q", value: @query, placeholder: t(".search_placeholder"),
               )

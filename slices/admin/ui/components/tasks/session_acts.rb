@@ -23,15 +23,10 @@ module Admin
           private
 
           def delete_form
-            label = t(".delete")
-            data = { morph: true, confirm: t(".confirm_delete") }
-
-            Form(action: route(:admin_delete_task_session), data:) do
-              return_fields
-              Button(
-                type: "submit", variant: :gh, small: true, label:, icon: :trash,
-              )
-            end
+            ButtonForm(
+              action: route(:admin_delete_task_session), label: t(".delete"), variant: :gh, icon: :trash,
+              icon_only: true, morph: true, confirm: t(".confirm_delete"), hidden:,
+            )
           end
 
           def edit_form
@@ -52,6 +47,8 @@ module Admin
 
           def fields = @entry.running? ? FIELDS.slice(:started_at) : FIELDS
 
+          def hidden = { filter: @tab, origin: @origin }
+
           def mine? = @timing[:id] == @entry.source_id
 
           def moment_field(field, label)
@@ -60,9 +57,7 @@ module Admin
             end
           end
 
-          def return_fields
-            HiddenFields(values: { filter: @tab, origin: @origin })
-          end
+          def return_fields = HiddenFields(values: hidden)
 
           def route(name) = path(name, id: @task.id, session_id: @entry.source_id)
 

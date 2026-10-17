@@ -18,8 +18,7 @@ module Admin
           def view_template
             Dialog(id: ID, title:, class: "modal journal-modal", static: true, data:) do
               Form(**form_attributes) do
-                input(type: "hidden", name: "modal", value: Blog::Constants::CHECKED)
-                input(type: "hidden", name: "return_to", value: @return_to) if @return_to
+                HiddenFields(values: { modal: Blog::Constants::CHECKED, return_to: @return_to })
                 body_field
                 foot
                 FieldError(field: :tags, errors: @errors, scope: SCOPE)

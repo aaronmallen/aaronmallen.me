@@ -82,15 +82,10 @@ module Admin
         def comment_route(name, comment) = path(@routes[name], id: @record_id, comment_id: comment.source_id)
 
         def delete_form(comment)
-          label = t(".delete")
-          data = { morph: true, confirm: t(".confirm_delete") }
-
-          Form(action: comment_route(:delete, comment), data:) do
-            @fields&.call
-            Button(
-              type: "submit", variant: :gh, small: true, label:, icon: :trash,
-            )
-          end
+          ButtonForm(
+            action: comment_route(:delete, comment), label: t(".delete"), variant: :gh, icon: :trash, icon_only: true,
+            morph: true, confirm: t(".confirm_delete"),
+          ) { @fields&.call }
         end
 
         def edit_form(comment)

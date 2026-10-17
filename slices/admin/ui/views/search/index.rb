@@ -72,7 +72,7 @@ module Admin
           def search_form
             AutoForm(action: path(:admin_search), role: "search", class: "search-box") do
               SearchField(id: QUERY_ID, label: t(".query"), name: "q", value: @query, placeholder: t(".placeholder"))
-              input(type: "hidden", name: "kind", value: @kind) if @kind
+              HiddenFields(values: { kind: @kind })
             end
           end
 

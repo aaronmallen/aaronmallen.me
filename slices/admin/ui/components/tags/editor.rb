@@ -34,9 +34,7 @@ module Admin
 
           def color_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field") do
-              scope_field
-              page_field
-              query_field
+              return_fields
               input(type: "hidden", name: "tag[name]", value: @tag.name)
               span(class: "f") { t(".color") }
               Swatches(name: "tag[color]", scope:, selected: @tag.color, submit: true)
@@ -84,26 +82,18 @@ module Admin
 
           def name = editing? ? @editing[:name] : @tag.name
 
-          def page_field = @page > 1 && input(type: "hidden", name: "page", value: @page)
-
-          def query_field = !@query.empty? && input(type: "hidden", name: "q", value: @query)
-
           def remove
             DeleteForm(
               action: path(:admin_delete_tag, id: @tag.id), label: t(".remove"),
               confirm: t(".confirm_remove", tag: @tag.name, count: held, uses: losers),
             ) do
-              scope_field
-              page_field
-              query_field
+              return_fields
             end
           end
 
           def rename_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field", id: rename_id) do
-              scope_field
-              page_field
-              query_field
+              return_fields
               label(class: "f", for: FieldError.id_for(:name, scope)) { t(".rename") }
               Input(**FieldError.control_attributes(:name, errors, scope), name: "tag[name]", value: name)
               description_field
@@ -112,6 +102,10 @@ module Admin
 
           def rename_id = "tag-#{@tag.id}-form"
 
+          def return_fields
+            HiddenFields(values: { scope: @tag.scope, page: (@page if @page > 1), q: (@query unless @query.empty?) })
+          end
+
           def save
             Button(variant: :pri, type: "submit", small: true, form: rename_id, icon: :save) do
               t(".save")
@@ -119,8 +113,6 @@ module Admin
           end
 
           def scope = "tag-#{@tag.id}"
-
-          def scope_field = input(type: "hidden", name: "scope", value: @tag.scope)
         end
       end
     end

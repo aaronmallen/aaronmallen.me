@@ -16,7 +16,7 @@ module Admin
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template
-          Form(action: @action, **@attributes, data: { morph: (true if @morph), confirm: @confirm }) do
+          Form(action: @action, **@attributes, data:) do
             HiddenFields(values: @hidden)
             yield if block_given?
             Button(type: "submit", variant: @variant, small: true, icon: @icon, label: name, **@button) { @label }
@@ -24,6 +24,10 @@ module Admin
         end
 
         private
+
+        def data
+          { **@attributes.fetch(:data, Blog::Constants::EMPTY_HASH), morph: (true if @morph), confirm: @confirm }
+        end
 
         def name = (@label if @icon_only)
       end

@@ -12,21 +12,19 @@ module Admin
 
         def dead_job(job)
           text = t(".died", at: Stamped::MARK, error: job.error)
-          discard = { confirm: t(".confirm_discard", job: job.name) }
+          discard = t(".confirm_discard", job: job.name)
 
           data = { menu: path(:admin_dead_job_menu, jid: job.jid) }
 
           ListItem(title: job.name, href: nil, sub: nil, icon: "fa-solid fa-skull", hover: true, data:) do |item|
             item.sub { Stamped(text:, at: job.died_at) }
             job_form(:admin_retry_dead_job, job, t(".retry"), "fa-solid fa-rotate-right")
-            job_form(:admin_discard_dead_job, job, t(".discard"), :trash, data: discard)
+            job_form(:admin_discard_dead_job, job, t(".discard"), :trash, confirm: discard)
           end
         end
 
-        def job_form(route, job, label, icon, data: nil)
-          Form(action: path(route, jid: job.jid), data:) do
-            Button(type: "submit", small: true, label:, icon:)
-          end
+        def job_form(route, job, label, icon, confirm: nil)
+          ButtonForm(action: path(route, jid: job.jid), label:, icon:, icon_only: true, confirm:)
         end
       end
     end
