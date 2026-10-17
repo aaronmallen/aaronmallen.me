@@ -35,7 +35,8 @@ Each slice that tags declares its own `Relations::Tags` over the `tags` table: `
 Each is `schema :tags, infer: true` and includes `Blog::DB::Tags` (`lib/blog/db/tags.rb`), which holds what the
 relation does: `by_names`, `claim`, `next_color` and the rest. Each join relation includes `Blog::DB::Taggings`
 (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins into ROM relation plugins that a
-relation opts into with `use` (ADR 0126).
+relation opts into with `use` (ADR 0126). Since #1693 `Taggings::TABLES` names each join table's owner key, so a join
+relation says only `use :taggings`, and an owner relation gets `tagged` from `use :tagged, through:`.
 
 A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` does. Since #1200 the decisions, posts,
 projects and journal entry repos name their join relation with `tagged_by`, which `Blog::DB::Repo` turns into one shared
@@ -65,6 +66,7 @@ One schema block has seven copies (#957), kept in step only by the mixin. A scop
 A new tagged kind needs a tags relation and a join relation in its own slice, a `tagged_by` line in its mutations repo,
 and a `JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its
 join table holds a `tag_scope` column pinned to that scope (ADR 0074). Since #992 that scope goes in `Taggings::SCOPES`.
+Since #1693 the owner key, scope and kind go in one `Taggings::TABLES` row, which `SCOPES` and `JOINS` read.
 
 A tag that `claim` writes runs none of `Tags::Contracts::TagContract`. Its name passes only the tagged record's
 contract, through `Blog::Types::TagList` and the `tag_slugs` rule, and the `tag_name` domain in Postgres.

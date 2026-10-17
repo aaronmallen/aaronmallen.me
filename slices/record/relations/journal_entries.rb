@@ -3,6 +3,8 @@
 module Record
   module Relations
     class JournalEntries < Blog::DB::Relation
+      use :tagged, through: :journal_entry_tags
+
       OPENING = 160
       OPENING_BLANKS = " \t\r\n"
       COUNT = Sequel.function(:count).*.as(:entries)
@@ -33,12 +35,6 @@ module Record
 
       def opening
         select(:id, :entry_date).select_append { string.left(string.ltrim(body, OPENING_BLANKS), OPENING).as(:body) }
-      end
-
-      def tagged(names)
-        return none if unmatchable?(names)
-
-        where(id: journal_entry_tags.holding_every(names).dataset)
       end
 
       def totals(from, to)

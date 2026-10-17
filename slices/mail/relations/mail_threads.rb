@@ -108,7 +108,7 @@ module Mail
       def holding(name)
         held = mail_thread_labels.join(:mail_label).where(Sequel[:mail_labels][:name] => name).dataset.unordered
 
-        Sequel.|({ id: held.select(:mail_thread_id) }, { id: mail_thread_tags.holding_every([name]).dataset })
+        Sequel.|({ id: held.select(:mail_thread_id) }, { id: mail_thread_tags.holding_every([name]) })
       end
 
       def inbox_folder = inboxed.where(PRIMARY)

@@ -3,6 +3,8 @@
 module Tasks
   module Relations
     class Tasks < Blog::DB::Relation
+      use :tagged, through: :task_tags
+
       COMPLETED_ON = site_day(:completed_at)
       CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       CREATED_ON = site_day(:created_at)
@@ -135,12 +137,6 @@ module Tasks
       end
 
       def sourced = where(id: task_sources.task_ids)
-
-      def tagged(names)
-        return none if unmatchable?(names)
-
-        where(id: task_tags.holding_every(names).dataset)
-      end
 
       def titled(text) = containing(text, :title)
 

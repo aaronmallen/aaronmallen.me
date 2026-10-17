@@ -3,7 +3,7 @@
 module Posts
   module Relations
     class PostTags < Blog::DB::Relation
-      use :taggings, owner_key: :post_id
+      use :taggings
 
       schema :post_tags, infer: true do
         associations do

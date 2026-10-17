@@ -3,7 +3,7 @@
 module Projects
   module Relations
     class ProjectTags < Blog::DB::Relation
-      use :taggings, owner_key: :project_id
+      use :taggings
 
       schema :project_tags, infer: true do
         associations do

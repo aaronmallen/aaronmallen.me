@@ -17,7 +17,6 @@ module Activity
       DECISION = Blog::Types::ActivityKind["decision"]
       DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
       JOURNAL = Blog::Types::ActivityKind["journal"]
-      MATCHED = Sequel.function(:count, Sequel[:tags][:name]).distinct
       MONTH_FORMAT = "YYYY-MM"
       OWNER_SEPARATOR = "/"
       POST = Blog::Types::ActivityKind["post"]
@@ -26,14 +25,15 @@ module Activity
       SESSION = Blog::Types::ActivityKind["session"]
       TASK = Blog::Types::ActivityKind["task"]
       TAGGED = {
-        JOURNAL => %i[source_id journal_entry_tags journal_entry_id],
-        TASK => %i[source_id task_tags task_id],
-        COMMENT => %i[task_id task_tags task_id],
-        SESSION => %i[task_id task_tags task_id],
-        DECISION => %i[decision_id decision_tags decision_id],
-        DECISION_COMMENT => %i[decision_id decision_tags decision_id],
+        JOURNAL => %i[source_id journal_entry_tags],
+        TASK => %i[source_id task_tags],
+        COMMENT => %i[task_id task_tags],
+        SESSION => %i[task_id task_tags],
+        DECISION => %i[decision_id decision_tags],
+        DECISION_COMMENT => %i[decision_id decision_tags],
       }.freeze
-      LISTED = { **TAGGED, POST => %i[source_id post_tags post_id] }.freeze
+      LISTED = { **TAGGED, POST => %i[source_id post_tags] }.freeze
+      TAGGINGS = Blog::DB::Plugins::Taggings
       TAG_NAME = Sequel.cast(Sequel[:tags][:name], :text)
       TARGET_SEPARATOR = " "
 
@@ -84,13 +84,11 @@ module Activity
       def tagged(names)
         return none if unmatchable?(names)
 
-        folded = names.map { it.to_s.downcase }.uniq
-
-        where(Sequel.|(*TAGGED.map { |type, (owner, table, key)| owners_tagged(type, owner, table, key, folded) }))
+        where(Sequel.|(*TAGGED.map { |type, (owner, table)| Sequel[type:] & Sequel[owner => holding(table, names)] }))
       end
 
       def with_tags
-        lists = LISTED.to_h { |type, (owner, table, key)| [Sequel[type:], tag_names(owner, table, key)] }
+        lists = LISTED.to_h { |type, (owner, table)| [Sequel[type:], tag_names(owner, table)] }
 
         select_append(ROM::SQL::Attribute[ROM::Types::Any].meta(sql_expr: Sequel.case(lists, nil)).as(:tags))
       end
@@ -98,6 +96,8 @@ module Activity
       def with_types(types) = where(type: types)
 
       private
+
+      def holding(table, names) = TAGGINGS.holding_every(dataset.db, table, names)
 
       def named_repo(name)
         folded = name.to_s.downcase
@@ -108,21 +108,10 @@ module Activity
 
       def owned_name = Sequel.function(:split_part, Sequel[:repo], OWNER_SEPARATOR, 2)
 
-      def owners_tagged(type, owner, table, key, names)
-        Sequel[type:] & Sequel[owner => tag_owners(table, key, names)]
-      end
-
-      def tag_names(owner, table, key)
-        taggings = dataset.db[table].join(:tags, id: :tag_id).where(Sequel[table][key] => Sequel[:activities][owner])
+      def tag_names(owner, table)
+        taggings = dataset.db[table].join(:tags, id: :tag_id).where(TAGGINGS.owner(table) => Sequel[:activities][owner])
 
         taggings.select(Sequel.function(:array_agg, TAG_NAME).order(TAG_NAME))
-      end
-
-      def tag_owners(table, key, names)
-        owner = Sequel[table][key]
-        taggings = dataset.db[table].join(:tags, id: :tag_id)
-
-        taggings.where(Sequel[:tags][:name] => names).group(owner).having(MATCHED => names.length).select(owner)
       end
     end
   end

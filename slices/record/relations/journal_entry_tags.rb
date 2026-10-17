@@ -3,7 +3,7 @@
 module Record
   module Relations
     class JournalEntryTags < Blog::DB::Relation
-      use :taggings, owner_key: :journal_entry_id
+      use :taggings
 
       schema :journal_entry_tags, infer: true do
         associations do

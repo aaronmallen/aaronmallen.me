@@ -3,7 +3,7 @@
 module Tasks
   module Relations
     class TaskTags < Blog::DB::Relation
-      use :taggings, owner_key: :task_id
+      use :taggings
 
       schema :task_tags, infer: true do
         associations do

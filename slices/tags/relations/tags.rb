@@ -5,15 +5,7 @@ module Tags
     class Tags < Blog::DB::Relation
       use :tags
 
-      JOINS = {
-        posts: :post_tags,
-        projects: :project_tags,
-        journal_entries: :journal_entry_tags,
-        tasks: :task_tags,
-        decisions: :decision_tags,
-        task_rules: :task_rule_tags,
-        messages: :mail_thread_tags,
-      }.freeze
+      JOINS = Blog::DB::Plugins::Taggings::TABLES.to_h { |join, table| [table.fetch(:kind), join] }.freeze
       SUMMARY = Blog::Types::TagKind.values.map(&:to_sym).freeze
       SCOPES = Blog::DB::Plugins::Taggings::SCOPES
 

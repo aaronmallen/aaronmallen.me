@@ -3,7 +3,7 @@
 module Decisions
   module Relations
     class DecisionTags < Blog::DB::Relation
-      use :taggings, owner_key: :decision_id
+      use :taggings
 
       schema :decision_tags, infer: true do
         associations do
