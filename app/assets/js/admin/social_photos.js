@@ -2,7 +2,6 @@ import { uploadPhoto } from "./photo_upload.js";
 
 const MAX = 4;
 const PENDING = "socialPhotoPending";
-const TOKEN = "_csrf_token";
 
 export function setupPhotos(form, render) {
   const parts = form.querySelector("[data-social-parts]");
@@ -20,9 +19,8 @@ export function setupPhotos(form, render) {
     render();
 
     try {
-      const token = new FormData(form).get(TOKEN) ?? "";
       const { socialUpload, socialUploadFailed } = settings(part);
-      const { key, url } = await uploadPhoto(socialUpload, file, token, socialUploadFailed);
+      const { key, url } = await uploadPhoto(socialUpload, file, form, socialUploadFailed);
       photo.querySelector("[data-social-photo-key]").value = key;
       image.src = url;
       hold(photo, false);

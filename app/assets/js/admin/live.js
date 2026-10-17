@@ -6,13 +6,12 @@ import { parse } from "./in_place.js";
 
 const CATCH_UP = "*";
 const LONGEST_WAIT = 30000;
-const MORPHED = "admin:morphed";
 const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
 const TYPED = "input, textarea, select, [contenteditable]";
 const WAIT = 1000;
-const HOLD = `dialog:modal:not([data-dialog-live]), ${ASKING}, ${MENU}`;
 
+export const MORPHED = "admin:morphed";
 export const MORPHED_PARTS = PARTS.join(", ");
 
 const edits = trackEdits();
@@ -55,6 +54,10 @@ export function morphPage(next) {
       });
   }
 
+  morphed();
+}
+
+export function morphed() {
   document.dispatchEvent(new Event(MORPHED));
 }
 
@@ -66,7 +69,7 @@ export function setupLive() {
   let next = null;
 
   const morph = () => {
-    if (!next || leaving || document.querySelector(HOLD)) return;
+    if (!next || leaving || held()) return;
 
     const page = next;
     next = null;
@@ -105,6 +108,10 @@ export function setupLive() {
 
 function drawnAt(page) {
   return Number(page.querySelector("[data-live-at]")?.dataset.liveAt) || 0;
+}
+
+function held() {
+  return document.querySelector(`dialog:modal:not([data-dialog-live]), ${ASKING}, ${MENU}`) !== null;
 }
 
 function keepsEdits(node) {

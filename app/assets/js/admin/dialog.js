@@ -3,7 +3,7 @@ import { fresh } from "./fresh.js";
 const ACCEPT = "accept";
 const INVALID = "[aria-invalid='true']";
 
-export const FIELD = "input:not([type=hidden]), textarea, select";
+export const FOCUSABLE = "input:not([type=hidden]), textarea, select";
 
 const ready = new WeakSet();
 
@@ -27,7 +27,7 @@ export function ask(dialog, { opener, focus, accept, refocus = "always" }) {
 }
 
 export function focusField(root) {
-  (root.querySelector(INVALID) ?? root.querySelector("[autofocus]") ?? root.querySelector(FIELD))?.focus();
+  (root.querySelector(INVALID) ?? root.querySelector("[autofocus]") ?? root.querySelector(FOCUSABLE))?.focus();
 }
 
 export function openDialog(id) {

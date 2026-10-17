@@ -14,7 +14,7 @@ import { setupFileDrops } from "./file_drop.js";
 import { setupJournals } from "./journal.js";
 import { bootKeys, setupKeys } from "./keys.js";
 import { setupLinkForms } from "./link_form.js";
-import { setupLive } from "./live.js";
+import { MORPHED, setupLive } from "./live.js";
 import { bootMailDrag } from "./mail_drag.js";
 import { setupMailEditors } from "./mail_editor.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
@@ -104,4 +104,4 @@ function run(steps) {
 
 run(STEPS);
 run(BOOT);
-document.addEventListener("admin:morphed", () => run(STEPS));
+document.addEventListener(MORPHED, () => run(STEPS));

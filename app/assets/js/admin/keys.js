@@ -118,6 +118,10 @@ function highlight(row) {
   row.scrollIntoView({ block: "nearest" });
 }
 
+export function typing(event) {
+  return event.ctrlKey || event.metaKey || event.altKey || event.isComposing || Boolean(event.target.closest?.(FIELD));
+}
+
 function quiet(target) {
   return Boolean(target.closest?.(FIELD)) || document.querySelector("dialog:modal") !== null;
 }

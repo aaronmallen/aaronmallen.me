@@ -1,9 +1,10 @@
 import { setupCadences } from "./cadence.js";
 import { setupCommentAdds } from "./comment_add.js";
 import { setupConfirms } from "./confirm.js";
-import { FIELD, focusField, showDialog } from "./dialog.js";
+import { focusField, showDialog } from "./dialog.js";
 import { fresh } from "./fresh.js";
 import { parse, plain, setupPost, setupVisit } from "./in_place.js";
+import { typing } from "./keys.js";
 import { leavePage } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
@@ -59,10 +60,6 @@ function findUrl(form, button) {
 
 function here() {
   return window.location.pathname + window.location.search;
-}
-
-function typing(event) {
-  return event.ctrlKey || event.metaKey || event.altKey || event.isComposing || event.target.closest(FIELD);
 }
 
 function setupPanel(panel) {

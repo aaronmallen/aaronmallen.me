@@ -1,5 +1,6 @@
 const COUNT = "{count}";
-const STEPS = { ArrowDown: 1, ArrowUp: -1 };
+
+export const ARROWS = { ArrowDown: 1, ArrowUp: -1 };
 
 export function countText(element, key, count) {
   const template = element.dataset[`${key}${count === 1 ? "One" : "Other"}`];
@@ -28,9 +29,9 @@ export function setupListbox({ list, owner, choice, options, shown = options, ch
   };
 
   const step = (event) => {
-    if (!(event.key in STEPS)) return false;
+    if (!(event.key in ARROWS)) return false;
 
-    move(STEPS[event.key]);
+    move(ARROWS[event.key]);
     return true;
   };
 

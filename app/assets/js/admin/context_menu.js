@@ -1,6 +1,8 @@
 import { clear, picks } from "./bulk.js";
 import { focusField, openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
+import { ARROWS } from "./listbox.js";
+import { morphed } from "./live.js";
 import { setupMenuSuggest } from "./menu_suggest.js";
 import { copy } from "./record_key.js";
 import { showToast } from "./toast.js";
@@ -12,11 +14,9 @@ const CONTROL = "a, input, textarea, select";
 const EDGE = 8;
 const ITEM = "[data-context-item]";
 const LIST = "[role=menu]";
-const MORPHED = "admin:morphed";
 const OPEN = "[data-key-open]";
 const PICK = "input[name='ids[]'][form]";
 const ROW = "[data-menu], [data-key-row]";
-const STEPS = { ArrowDown: 1, ArrowUp: -1 };
 const SUB = "[aria-haspopup=menu]";
 
 let shown = null;
@@ -216,9 +216,9 @@ function press(event) {
   const item = event.target.closest(ITEM);
   const typing = event.target.matches("input");
 
-  if (event.key in STEPS || event.key === "Tab") {
+  if (event.key in ARROWS || event.key === "Tab") {
     event.preventDefault();
-    return step(list, item, STEPS[event.key] ?? (event.shiftKey ? -1 : 1));
+    return step(list, item, ARROWS[event.key] ?? (event.shiftKey ? -1 : 1));
   }
   if (event.key === "Escape") {
     event.preventDefault();
@@ -293,7 +293,7 @@ function summon(item) {
   if (carried) {
     for (const old of document.querySelectorAll(`dialog[id="${id}"]`)) old.remove();
     document.querySelector("main").append(carried);
-    document.dispatchEvent(new Event(MORPHED));
+    morphed();
   }
   if (reveal(document.getElementById(id))) return;
   if (!openDialog(id)) window.location.assign(item.href);

@@ -1,19 +1,14 @@
 import { setupFetch } from "./fetching.js";
-import { uploadPhoto } from "./photo_upload.js";
+import { fresh } from "./fresh.js";
+import { formToken, uploadPhoto } from "./photo_upload.js";
 
 const BRACKET = 2;
 const EDITOR = "[data-markdown-editor]";
-const TOKEN = "_csrf_token";
 
 const ready = new WeakSet();
 
 export function setupMarkdownEditors(root = document) {
-  for (const editor of root.querySelectorAll(EDITOR)) {
-    if (ready.has(editor)) continue;
-
-    ready.add(editor);
-    setupMarkdownEditor(editor);
-  }
+  for (const editor of fresh(ready, root.querySelectorAll(EDITOR))) setupMarkdownEditor(editor);
 }
 
 function setupMarkdownEditor(editor) {
@@ -28,7 +23,7 @@ function setupMarkdownEditor(editor) {
   const payload = () => {
     if (whole) return new URLSearchParams(new FormData(body.form ?? undefined));
 
-    return new URLSearchParams({ [TOKEN]: tokenFor(body), markdown: body.value });
+    return new URLSearchParams({ _csrf_token: formToken(body.form), markdown: body.value });
   };
 
   const refresh = setupFetch({
@@ -95,8 +90,7 @@ function setupUploads(editor, body) {
     }
   };
 
-  const upload = async (file) =>
-    (await uploadPhoto(endpoint, file, tokenFor(body), editor.dataset.editorUploadFailed)).url;
+  const upload = async (file) => (await uploadPhoto(endpoint, file, body.form, editor.dataset.editorUploadFailed)).url;
 
   const settle = (text, replacement) => {
     const at = body.value.indexOf(text);
@@ -161,10 +155,6 @@ function setupUploads(editor, body) {
 
 function changed(body) {
   body.dispatchEvent(new Event("input", { bubbles: true }));
-}
-
-function tokenFor(body) {
-  return new FormData(body.form ?? undefined).get(TOKEN) ?? "";
 }
 
 function insertAtCursor(textarea, snippet) {

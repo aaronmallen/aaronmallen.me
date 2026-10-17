@@ -1,10 +1,10 @@
 import { armGrips, setupCalendarDrag } from "./calendar_drag.js";
 import { fresh } from "./fresh.js";
 import { plain, setupVisit } from "./in_place.js";
+import { morphed } from "./live.js";
 
 const CALENDAR = "[data-calendar]";
 const DAY = "a[data-calendar-day]";
-const MORPHED = "admin:morphed";
 const PANEL = "[data-calendar-panel]";
 
 const ready = new WeakSet();
@@ -35,7 +35,7 @@ function setupCalendar(calendar) {
     event.preventDefault();
     visit(link.href, PANEL, (panel) => {
       calendar.querySelector(PANEL).replaceWith(panel);
-      document.dispatchEvent(new Event(MORPHED));
+      morphed();
       pick(calendar, link);
       history.replaceState(history.state, "", link.href);
       panel.focus();

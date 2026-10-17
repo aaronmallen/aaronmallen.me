@@ -1,6 +1,11 @@
 const PHOTO = "photo";
+const TOKEN = "_csrf_token";
 
-export async function uploadPhoto(endpoint, file, token, failed) {
+export function formToken(form) {
+  return new FormData(form ?? undefined).get(TOKEN) ?? "";
+}
+
+export async function uploadPhoto(endpoint, file, form, failed) {
   const data = new FormData();
   data.append(PHOTO, file);
 
@@ -9,7 +14,7 @@ export async function uploadPhoto(endpoint, file, token, failed) {
     response = await fetch(endpoint, {
       method: "POST",
       body: data,
-      headers: { Accept: "application/json", "X-CSRF-Token": token },
+      headers: { Accept: "application/json", "X-CSRF-Token": formToken(form) },
       redirect: "manual",
     });
   } catch {

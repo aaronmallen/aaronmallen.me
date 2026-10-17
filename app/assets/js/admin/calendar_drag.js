@@ -1,5 +1,5 @@
 import { parse } from "./in_place.js";
-import { whilePosting } from "./live.js";
+import { morphed, whilePosting } from "./live.js";
 import { dragOnto } from "./pointer.js";
 import { showPageToast, showToast } from "./toast.js";
 
@@ -8,7 +8,6 @@ const DRAGGING = "cal-dragging";
 const GRIP = "[data-calendar-grip]";
 const ITEM = "[data-calendar-item]";
 const MONTH = ".cal-month";
-const MORPHED = "admin:morphed";
 const PANEL = "[data-calendar-panel]";
 const REFUSED = "cal-refused";
 const TARGET = "cal-target";
@@ -76,7 +75,7 @@ async function move(calendar, grip, day) {
 
   calendar.querySelector(MONTH).replaceWith(month);
   calendar.querySelector(PANEL).replaceWith(panel);
-  document.dispatchEvent(new Event(MORPHED));
+  morphed();
 
   const stayed = panel.querySelector(`[data-calendar-item="${item}"]`) !== null;
   showPageToast(page, { failed: stayed });

@@ -3,6 +3,7 @@ import { json, setupFetch } from "./fetching.js";
 import { fresh } from "./fresh.js";
 import { bind } from "./keys.js";
 import { countText, setupListbox } from "./listbox.js";
+import { MORPHED } from "./live.js";
 
 const ACCEPT = { Accept: "application/json" };
 const DELAY = 150;
@@ -195,7 +196,7 @@ function setupDialog(dialog) {
   query.addEventListener("keydown", (event) => steer(event, { run, select, shown, step }));
 
   dialog.addEventListener("close", finder.stop);
-  document.addEventListener("admin:morphed", () => filled.clear());
+  document.addEventListener(MORPHED, () => filled.clear());
 
   rebuild();
   return open;

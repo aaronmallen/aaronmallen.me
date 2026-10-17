@@ -1,12 +1,12 @@
 import { fresh } from "./fresh.js";
 import { bind, FIELD } from "./keys.js";
+import { ARROWS } from "./listbox.js";
 import { whilePosting } from "./live.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
 const DRAGGING = "task-dragging";
 const GRIP = "[data-task-grip]";
-const KEYS = { ArrowDown: 1, ArrowUp: -1 };
 const ROW = "[data-task-order]";
 
 const ready = new WeakSet();
@@ -48,7 +48,7 @@ function drag(event, grip) {
 }
 
 function nudge(event) {
-  const step = KEYS[event.key];
+  const step = ARROWS[event.key];
   const row = event.target.closest?.(ROW);
   if (event.target.closest?.(FIELD) || !row?.querySelector(`${GRIP}:not([hidden])`)) return;
 
@@ -70,7 +70,7 @@ function keepFocus(work) {
 }
 
 function nudges(event) {
-  return event.key in KEYS && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
+  return event.key in ARROWS && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
 }
 
 function peers(row) {
