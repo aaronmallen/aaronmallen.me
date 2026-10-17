@@ -42,6 +42,12 @@ RSpec.describe "Admin photo claims", type: :request do
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end
 
+    it "claims a photo by a sized URL" do
+      save(body: "![A photo](/media/1280/#{photo.key})")
+
+      expect(claims_of("post")).to eq([[article.id, photo.id]])
+    end
+
     it "claims the photo in its Open Graph image field" do
       save(body: "text only", og_image_url: Hanami.app.settings.site_url("/media/#{photo.key}"))
 
