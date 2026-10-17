@@ -1,6 +1,6 @@
 import { whilePosting } from "./live.js";
 import { postAndMorph } from "./morph_form.js";
-import { floatGhost, followPointer, holdPage, moveGhost, releasePage, waitForDrag } from "./pointer.js";
+import { dragOnto, waitForDrag } from "./pointer.js";
 
 const BULK = "#mail-bulk";
 const DRAGGING = "mail-dragging";
@@ -26,39 +26,33 @@ function drag(row, press, at) {
   const ids = dragged(form, row);
   const rows = ids.map((id) => document.getElementById(`thread-${id}`)).filter(Boolean);
   const targets = document.querySelectorAll(DROP);
-  let ghost = null;
-  let over = null;
 
-  const move = (moved) => {
-    moveGhost(ghost, moved);
-    over?.classList.remove(OVER);
-    over = dropAt(moved);
-    over?.classList.add(OVER);
-  };
+  dragOnto(press, {
+    element: row,
+    dragging: DRAGGING,
+    ghost: "mail-ghost",
+    label: ids.length === 1 ? row.dataset.mailDrag : many(ids.length),
+    at,
+    target: DROP,
+    over: OVER,
+    start: () => {
+      for (const target of targets) target.classList.add(TARGET);
+      for (const each of rows) each.classList.add(DRAGGING);
 
-  const end = async (done, cancelled) => {
-    releasePage();
-    ghost.remove();
-    for (const target of targets) target.classList.remove(TARGET, OVER);
-    for (const each of rows) each.classList.remove(DRAGGING);
-
-    const target = cancelled ? null : dropAt(done);
-    if (!target) return;
-
-    busy = true;
-    try {
-      await whilePosting(send(form, ids, target));
-    } finally {
-      busy = false;
-    }
-  };
-
-  if (!followPointer(press, { element: row, dragging: DRAGGING, move, end })) return;
-
-  holdPage();
-  for (const target of targets) target.classList.add(TARGET);
-  for (const each of rows) each.classList.add(DRAGGING);
-  ghost = floatGhost("mail-ghost", ids.length === 1 ? row.dataset.mailDrag : many(ids.length), at);
+      return () => {
+        for (const target of targets) target.classList.remove(TARGET);
+        for (const each of rows) each.classList.remove(DRAGGING);
+      };
+    },
+    drop: async (target) => {
+      busy = true;
+      try {
+        await whilePosting(send(form, ids, target));
+      } finally {
+        busy = false;
+      }
+    },
+  });
 }
 
 function dragged(form, row) {
@@ -70,10 +64,6 @@ function dragged(form, row) {
 
 function droppable() {
   return [...document.querySelectorAll(DROP)].some((target) => target.checkVisibility());
-}
-
-function dropAt(event) {
-  return document.elementFromPoint(event.clientX, event.clientY)?.closest(DROP) ?? null;
 }
 
 function many(count) {

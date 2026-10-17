@@ -1,6 +1,6 @@
 import { parse } from "./in_place.js";
 import { whilePosting } from "./live.js";
-import { floatGhost, followPointer, holdPage, moveGhost, releasePage } from "./pointer.js";
+import { dragOnto } from "./pointer.js";
 import { showPageToast, showToast } from "./toast.js";
 
 const DAY = "a[data-calendar-day]";
@@ -39,38 +39,21 @@ export function setupCalendarDrag(calendar) {
 function drag(calendar, grip, press, drop) {
   const row = grip.closest(ITEM);
   const from = grip.closest(PANEL).dataset.calendarPanel;
-  let ghost = null;
-  let over = null;
 
-  const move = (moved) => {
-    moveGhost(ghost, moved);
-    over?.classList.remove(TARGET, REFUSED);
-    over = dayAt(calendar, moved, from);
-    over?.classList.add(refused(over) ? REFUSED : TARGET);
-  };
+  dragOnto(press, {
+    element: row,
+    dragging: DRAGGING,
+    ghost: "cal-ghost",
+    label: row.querySelector(TITLE)?.textContent ?? "",
+    target: DAY,
+    accepts: (day) => calendar.contains(day) && day.dataset.calendarDay !== from,
+    over: (day) => (refused(day) ? REFUSED : TARGET),
+    drop: (day) => {
+      if (refused(day)) return showToast(grip.dataset.calendarPast, { failed: true });
 
-  const end = (done, cancelled) => {
-    releasePage();
-    ghost.remove();
-    over?.classList.remove(TARGET, REFUSED);
-
-    const day = cancelled ? null : dayAt(calendar, done, from);
-    if (!day) return;
-    if (refused(day)) return showToast(grip.dataset.calendarPast, { failed: true });
-
-    drop(day.dataset.calendarDay);
-  };
-
-  if (!followPointer(press, { element: row, dragging: DRAGGING, move, end })) return;
-
-  holdPage();
-  ghost = floatGhost("cal-ghost", row.querySelector(TITLE)?.textContent ?? "", press);
-}
-
-function dayAt(calendar, event, from) {
-  const day = document.elementFromPoint(event.clientX, event.clientY)?.closest(DAY);
-
-  return day && calendar.contains(day) && day.dataset.calendarDay !== from ? day : null;
+      drop(day.dataset.calendarDay);
+    },
+  });
 }
 
 async function move(calendar, grip, day) {

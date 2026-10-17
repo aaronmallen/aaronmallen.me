@@ -59,7 +59,44 @@ export function waitForDrag(press, start) {
   for (const type of ENDS) document.addEventListener(type, stop);
 }
 
-export function floatGhost(className, text, at) {
+export function dragOnto(press, { element, dragging, ghost, label, at = press, target, accepts, over, start, drop }) {
+  const mark = typeof over === "function" ? over : () => over;
+  let floating = null;
+  let hovered = null;
+  let marked = null;
+  let undo = null;
+
+  const find = (event) => {
+    const found = document.elementFromPoint(event.clientX, event.clientY)?.closest(target);
+    return found && (!accepts || accepts(found)) ? found : null;
+  };
+
+  const move = (event) => {
+    moveGhost(floating, event);
+    hovered?.classList.remove(marked);
+    hovered = find(event);
+    marked = hovered && mark(hovered);
+    hovered?.classList.add(marked);
+  };
+
+  const end = (event, cancelled) => {
+    releasePage();
+    floating.remove();
+    hovered?.classList.remove(marked);
+    undo?.();
+
+    const found = cancelled ? null : find(event);
+    if (found) drop(found);
+  };
+
+  if (!followPointer(press, { element, dragging, move, end })) return;
+
+  holdPage();
+  undo = start?.();
+  floating = floatGhost(ghost, label, at);
+}
+
+function floatGhost(className, text, at) {
   const ghost = document.createElement("div");
 
   ghost.className = className;
@@ -72,16 +109,16 @@ export function floatGhost(className, text, at) {
   return ghost;
 }
 
-export function moveGhost(ghost, event) {
+function moveGhost(ghost, event) {
   ghost.style.translate = `${event.clientX + GHOST_OFFSET}px ${event.clientY + GHOST_OFFSET}px`;
 }
 
-export function holdPage() {
+function holdPage() {
   document.addEventListener("touchmove", still, { passive: false });
   document.addEventListener("contextmenu", menu, true);
 }
 
-export function releasePage() {
+function releasePage() {
   document.removeEventListener("touchmove", still);
   document.removeEventListener("contextmenu", menu, true);
   swallowClick();

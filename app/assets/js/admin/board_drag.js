@@ -1,4 +1,4 @@
-import { floatGhost, followPointer, holdPage, moveGhost, releasePage, waitForDrag } from "./pointer.js";
+import { dragOnto, waitForDrag } from "./pointer.js";
 
 const CARD = "[data-board-card]";
 const COLUMN = "[data-board-column]";
@@ -17,35 +17,18 @@ export function bootBoardDrag() {
 
 function drag(card, press, at) {
   const from = card.closest(COLUMN);
-  let ghost = null;
-  let over = null;
 
-  const move = (moved) => {
-    moveGhost(ghost, moved);
-    over?.classList.remove(OVER);
-    over = columnAt(moved, from);
-    over?.classList.add(OVER);
-  };
-
-  const end = (done, cancelled) => {
-    releasePage();
-    ghost.remove();
-    over?.classList.remove(OVER);
-
-    const column = cancelled ? null : columnAt(done, from);
-    if (column) submitTo(card, column.dataset.boardColumn);
-  };
-
-  if (!followPointer(press, { element: card, dragging: DRAGGING, move, end })) return;
-
-  holdPage();
-  ghost = floatGhost("kc-ghost", card.querySelector(TITLE)?.textContent ?? "", at);
-}
-
-function columnAt(event, from) {
-  const column = document.elementFromPoint(event.clientX, event.clientY)?.closest(COLUMN);
-
-  return column && column !== from ? column : null;
+  dragOnto(press, {
+    element: card,
+    dragging: DRAGGING,
+    ghost: "kc-ghost",
+    label: card.querySelector(TITLE)?.textContent ?? "",
+    at,
+    target: COLUMN,
+    accepts: (column) => column !== from,
+    over: OVER,
+    drop: (column) => submitTo(card, column.dataset.boardColumn),
+  });
 }
 
 function submitTo(card, column) {
