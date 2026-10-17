@@ -124,4 +124,45 @@ RSpec.describe "Admin social post photos", type: :request do
       expect(page).to have_css("[data-social-photo-count]", text: "Photos 2/4")
     end
   end
+
+  describe "the queue" do
+    def kept(index, part: 1, alt: nil) = { part:, key: photos[index].key, alt: }
+
+    def queue_photos = page.all(".sq-photo").map { [it[:src], it[:alt]] }
+
+    def save(status, photos: nil, at: Time.now + 3600)
+      Social::Slice["repos.social_post_mutations"]
+        .create_with_parts(parts: %w[one two], photos:, targets: %w[mastodon], status:, posted_at: at)
+    end
+
+    def src(index) = Media::Helpers::MediaPath.for(photos[index].key)
+
+    {
+      "queued" => %w[scheduled queued],
+      "draft" => %w[draft drafts],
+      "posted" => %w[posted posted],
+    }.each do |name, (status, filter)|
+      it "shows a #{name} post's photos under each part in order with their alt text" do
+        save(status, photos: [kept(2, part: 2, alt: "A bird"), kept(1, alt: "A dog"), kept(0, alt: "A cat")])
+        get("/admin/social", filter:)
+
+        expect(queue_photos).to eq([[src(1), "A dog"], [src(0), "A cat"], [src(2), "A bird"]])
+      end
+    end
+
+    it "puts each photo under its own part" do
+      save("scheduled", photos: [kept(0, part: 2, alt: "A cat")])
+      get "/admin/social"
+
+      expect(page).to have_css(".sq-part + .sq-part + .sq-photos .sq-photo[alt='A cat']")
+    end
+
+    it "shows no photos for a post without any", :aggregate_failures do
+      save("scheduled")
+      get "/admin/social"
+
+      expect(page).to have_css(".sq-part", count: 2)
+      expect(page).to have_no_css(".sq-photos")
+    end
+  end
 end

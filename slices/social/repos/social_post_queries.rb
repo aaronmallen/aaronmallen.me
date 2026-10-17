@@ -97,14 +97,14 @@ module Social
       def page_of(listed, page)
         ids = page.fill(listed.paged(page).pluck(:id))
 
-        ids.with(rows: listed.where(id: ids.rows).combine(:parts, :deliveries).to_a)
+        ids.with(rows: listed.where(id: ids.rows).combine(:deliveries, parts: :photos).to_a)
       end
 
       def photo_values(photo, numbers)
         { part: numbers.fetch(photo.social_post_part_id), key: photo.photo_key, alt: photo.alt_text.to_s }
       end
 
-      def with_children = social_posts.combine(:parts, :deliveries)
+      def with_children = social_posts.combine(:deliveries, parts: :photos)
     end
   end
 end

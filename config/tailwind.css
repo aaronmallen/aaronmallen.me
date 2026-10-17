@@ -8075,6 +8075,14 @@
   text-wrap: pretty;
 }
 
+@utility sq-photos {
+  @apply flex flex-wrap gap-2;
+}
+
+@utility sq-photo {
+  @apply size-12 rounded-sm border border-line object-cover;
+}
+
 @utility sq-fail {
   @apply field-error;
 }

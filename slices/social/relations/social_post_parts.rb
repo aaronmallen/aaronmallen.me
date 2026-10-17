@@ -5,7 +5,11 @@ module Social
     class SocialPostParts < Blog::DB::Relation
       KEY = %i[social_post_id position].freeze
 
-      schema :social_post_parts, infer: true
+      schema :social_post_parts, infer: true do
+        associations do
+          has_many :social_post_photos, as: :photos, view: :in_order
+        end
+      end
 
       def for_social_post(social_post_id) = where(social_post_id:)
 

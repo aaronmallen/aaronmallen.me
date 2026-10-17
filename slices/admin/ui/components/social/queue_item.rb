@@ -16,7 +16,7 @@ module Admin
           def view_template
             article(class: "sq-item", data: { social_item: @social_post.id, key_row: true, menu: }) do
               div(class: "sq-body") do
-                div(class: "sq-text") { @social_post.parts.each { |part| p(class: "sq-part") { part.body } } }
+                div(class: "sq-text") { @social_post.parts.each { part(it) } }
                 failures
                 QueueMeta(social_post: @social_post, accounts: @accounts, now: @now, suggestions: @suggestions)
               end
@@ -59,6 +59,17 @@ module Admin
           end
 
           def menu = path(:admin_social_post_menu, id: @social_post.id, filter: @filter)
+
+          def part(part)
+            p(class: "sq-part") { part.body }
+            return if part.photos.empty?
+
+            div(class: "sq-photos") do
+              part.photos.each do |photo|
+                img(class: "sq-photo", src: ::Media::Helpers::MediaPath.for(photo.photo_key), alt: photo.alt_text.to_s)
+              end
+            end
+          end
 
           def remove_form
             DeleteForm(
