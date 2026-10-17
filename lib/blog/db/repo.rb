@@ -39,7 +39,9 @@ module Blog
 
       def after_commit(&) = connection.after_commit(savepoint: true, &)
 
-      def linkable(relation, **) = public_send(relation).find_linkable(**)
+      def linkable(relation, ids:) = public_send(relation).find_linkable(ids)
+
+      def linkable_matching(relation, text, limit) = public_send(relation).matching(text).limit(limit).linkable
 
       def transaction(**, &) = super(savepoint: true, **, &)
 

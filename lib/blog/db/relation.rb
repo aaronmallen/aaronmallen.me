@@ -54,9 +54,7 @@ module Blog
 
       def excluded(columns) = columns.to_h { [it, Sequel[:excluded][it]] }
 
-      def find_linkable(ids: nil, text: nil, limit: nil)
-        (text ? matching(text) : where(id: ids)).limit(limit).linkable
-      end
+      def find_linkable(ids) = where(id: ids).linkable.map { Structs::Linkable.new(**it) }
 
       def latest_first(arrived, snoozed = self[:snoozed_until].qualified)
         order(Sequel.function(:greatest, self[arrived].qualified, snoozed).desc, self[:id].qualified.desc)
@@ -67,7 +65,7 @@ module Blog
       def linkables(title:, day:)
         columns = [:id, Sequel.as(title, :title), Sequel.as(day, :day)]
 
-        dataset.select(*columns).order(*LINKABLE_ORDER).map { Structs::Linkable.new(**it) }
+        dataset.select(*columns).order(*LINKABLE_ORDER)
       end
 
       def lock_senders_until_commit(senders)

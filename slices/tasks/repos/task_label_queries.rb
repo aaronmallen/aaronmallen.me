@@ -19,12 +19,11 @@ module Tasks
 
       def labels(ids) = tasks.where(id: ids).labelled.to_a.to_h { [it.id, it.label] }
 
-      def linkable(relation, text: nil, limit: nil, **)
-        found = super
-        return found unless text
+      def linkable_matching(_relation, text, limit)
+        ids = ids_labelled(text)
+        found = tasks.matching(text, ids).limit(limit).linkable
 
-        rows = (labelled_as(tasks, text).limit(limit).linkable + found).uniq(&:id)
-        limit ? rows.first(limit) : rows
+        ids.empty? ? found : found.order_prepend(Sequel.case({ { id: ids } => 0 }, 1))
       end
 
       def terms(projects: [], **search)

@@ -42,7 +42,9 @@ module Links
         query = Blog::Types::TrimmedText[text]
         return Blog::Constants::EMPTY_HASH if query.empty?
 
-        Blog::Types::RecordKind.values.to_h { [it, linked(it, rows(it, text: query, limit:))] }.reject { _2.empty? }
+        found = picked(query, limit).group_by { it.delete(:kind) }
+
+        Blog::Types::RecordKind.values.filter_map { [it, linked(it, found[it])] if found.key?(it) }.to_h
       end
 
       def for_record(kind, id)
@@ -75,17 +77,29 @@ module Links
 
       private
 
+      def branch(kind, text, limit)
+        found = public_send(kind).linkable_matching(RELATIONS.fetch(kind), text, limit)
+        place = Sequel.function(:row_number).over(order: found.opts[:order])
+
+        found.from_self.select_append(Sequel.as(kind, :kind), place.as(:place))
+      end
+
       def linked(kind, rows)
         rows.map do |row|
-          title = Blog::Helpers::Truncation.fit(row.title, limit: TITLE_LIMIT)
+          row => { id:, title:, day: }
+          url = Blog::Helpers::RecordKinds.path(routes, kind, id:, day:)
 
-          Structs::Link.new(kind:, id: row.id, title:, day: row.day, url: url(kind, row))
+          Structs::Link.new(kind:, id:, title: Blog::Helpers::Truncation.fit(title, limit: TITLE_LIMIT), day:, url:)
         end
       end
 
-      def rows(kind, **) = public_send(kind).linkable(RELATIONS.fetch(kind), **)
+      def picked(text, limit)
+        branches = Blog::Types::RecordKind.values.map { branch(it, text, limit) }
 
-      def url(kind, row) = Blog::Helpers::RecordKinds.path(routes, kind, id: row.id, day: row.day)
+        branches.reduce { |all, more| all.union(more, all: true) }.order(:place).to_a
+      end
+
+      def rows(kind, **) = public_send(kind).linkable(RELATIONS.fetch(kind), **)
     end
   end
 end

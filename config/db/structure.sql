@@ -6181,6 +6181,20 @@ CREATE INDEX commits_created_at_index ON public.commits USING btree (created_at)
 
 
 --
+-- Name: commits_message_trigram_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX commits_message_trigram_index ON public.commits USING gin (message public.gin_trgm_ops);
+
+
+--
+-- Name: commits_repo_trigram_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX commits_repo_trigram_index ON public.commits USING gin (repo public.gin_trgm_ops);
+
+
+--
 -- Name: commits_search_vector_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8827,4 +8841,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002183_let_task_positions_go_below_one.rb'),
 ('20261016002186_index_commits_created_at.rb'),
 ('20261016002204_create_held_title_fetches_and_backfills.rb'),
-('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb');
+('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb'),
+('20261016002252_index_commit_text_by_trigram.rb');

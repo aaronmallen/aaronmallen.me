@@ -246,6 +246,10 @@ RSpec.describe "Admin record links", type: :request do
       expect(picks).to eq((1..5).map { "Zeppelin #{it}" })
     end
 
+    it "searches every kind in one query" do
+      expect(counting(/ILIKE '%zeppelin%'/) { show(record_q: "zeppelin") }.size).to eq(1)
+    end
+
     it "reads the text as plain, not as a pattern" do
       create(:task, title: "Half done")
       show(record_q: "%")
