@@ -27,7 +27,8 @@ module Admin
         post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, noting: Blog::Constants::EMPTY_HASH, view: nil,
         now: Time.now, review: false, links: false
       )
-        values = params ? values_from_params(params) : values_from_post(post)
+        form = params ? form_from_params(params) : form_from_post(post)
+        values = form.slice(*FIELDS)
         preview = build_post_preview.call(values:, now:)
 
         {
@@ -40,10 +41,10 @@ module Admin
           now:,
           preview:,
           suggestions: suggestions(post, review),
-          syndication: syndication(values, post, params),
+          syndication: syndication(values, form),
           tags: tag_queries.all_in(PUBLIC),
           view:,
-          webmentions: webmentions(post, params),
+          webmentions: webmentions(post, form),
         }
       end
 
@@ -57,6 +58,34 @@ module Admin
         return Blog::Constants::EMPTY_ARRAY unless post&.status == PUBLISHED
 
         post_queries.edits_newest_first(post.id)
+      end
+
+      def form_from_params(params)
+        FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }.merge(
+          syndication_body: Blog::Types::Text[params[:syndication_body]],
+          syndication_enabled: Blog::Types::Checkbox[params[:syndication_enabled]],
+          syndication_targets: Array(params[:syndication_targets]).map(&:to_s),
+          webmentions_enabled: Blog::Types::Checkbox[params[:webmentions_enabled]],
+        )
+      end
+
+      def form_from_post(post)
+        unless post
+          return FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] }.merge(
+            syndication_body: Blog::Constants::EMPTY_STRING,
+            syndication_enabled: true,
+            syndication_targets: nil,
+            webmentions_enabled: webmention_queries.settings.enable_on_new_posts,
+          )
+        end
+
+        post.form.slice(*FIELDS).merge(
+          edit_note: Blog::Constants::EMPTY_STRING,
+          syndication_body: announcement.call(post),
+          syndication_enabled: post.syndication_enabled,
+          syndication_targets: post.syndication_targets&.to_a,
+          webmentions_enabled: post.webmentions_enabled,
+        )
       end
 
       def links_in(post)
@@ -77,60 +106,22 @@ module Admin
         }
       end
 
-      def syndication(values, post, params)
-        body = syndication_body(post, params)
+      def syndication(values, form)
+        body = form[:syndication_body]
         preview = preview_announcement.call(values)
 
         {
           body:,
           counts: count_network_lengths.call([body.strip.empty? ? preview : body]).first,
-          enabled: syndication_enabled(post, params),
+          enabled: form[:syndication_enabled],
           handles: resolve_mentions.handles(person_queries.all),
-          networks: list_networks.call(selected: syndication_targets(post, params)),
+          networks: list_networks.call(selected: form[:syndication_targets]),
           preview:,
         }
       end
 
-      def syndication_body(post, params)
-        return Blog::Types::Text[params[:syndication_body]] if params
-        return announcement.call(post) if post
-
-        Blog::Constants::EMPTY_STRING
-      end
-
-      def syndication_enabled(post, params)
-        return Blog::Types::Checkbox[params[:syndication_enabled]] if params
-        return post.syndication_enabled if post
-
-        true
-      end
-
-      def syndication_targets(post, params)
-        return Array(params[:syndication_targets]).map(&:to_s) if params
-
-        post&.syndication_targets&.to_a
-      end
-
-      def values_from_params(params) = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }
-
-      def values_from_post(post)
-        return FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] } unless post
-
-        post.form.slice(*FIELDS).merge(edit_note: Blog::Constants::EMPTY_STRING)
-      end
-
-      def webmentions(post, params)
-        {
-          enabled: webmentions_enabled(post, params),
-          received: post ? webmention_queries.received_count(post.id) : 0,
-        }
-      end
-
-      def webmentions_enabled(post, params)
-        return Blog::Types::Checkbox[params[:webmentions_enabled]] if params
-        return post.webmentions_enabled if post
-
-        webmention_queries.settings.enable_on_new_posts
+      def webmentions(post, form)
+        { enabled: form[:webmentions_enabled], received: post ? webmention_queries.received_count(post.id) : 0 }
       end
     end
   end
