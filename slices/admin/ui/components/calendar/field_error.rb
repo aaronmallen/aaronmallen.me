@@ -6,8 +6,6 @@ module Admin
       module Calendar
         class FieldError < Blog::UI::FieldError
           SCOPE = "cal-event"
-          CONTROL = { "control" => ".control" }.freeze
-          OVERRIDES = { place: CONTROL, title: CONTROL }.freeze
         end
       end
     end

@@ -1196,7 +1196,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "refuses a note with a control character" do
         save_published(body: "two", edit_note: "a\u0007b")
 
-        expect(field_error).to eq(note_error("control"))
+        expect(field_error).to eq(i18n.t("ui.field_error.control"))
       end
 
       it "keeps the note as typed after a failed save" do

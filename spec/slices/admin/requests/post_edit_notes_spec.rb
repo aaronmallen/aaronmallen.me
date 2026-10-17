@@ -187,7 +187,7 @@ RSpec.describe "Admin post edit notes", type: :request do
       edit = create(:post_edit, post: article, note: "Before")
       revise(edit, "a\u0007b")
 
-      expect(page.find("#post-edit-#{edit.id}-note-error").text).to eq(message("edit_note.control"))
+      expect(page.find("#post-edit-#{edit.id}-note-error").text).to eq(i18n.t("ui.field_error.control"))
     end
 
     it "answers 404 for another post's note", :aggregate_failures do

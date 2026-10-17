@@ -3,6 +3,7 @@
 module Blog
   module UI
     class FieldError < Component
+      CODES = "ui.field_error."
       INVALID = "ui.field_error.invalid"
       OVERRIDES = Blog::Constants::EMPTY_HASH
 
@@ -36,9 +37,10 @@ module Blog
 
       def error_id = "#{self.class.id_for(@field, @scope)}-error"
 
-      def message(code) = t(convention_key(code), default: nil) || t(override_key(code))
-
-      def override_key(code) = self.class::OVERRIDES.dig(@field, code) || INVALID
+      def message(code)
+        keys = [convention_key(code), self.class::OVERRIDES.dig(@field, code), "#{CODES}#{code}"].compact
+        keys.lazy.filter_map { t(it, default: nil) }.first || t(INVALID)
+      end
     end
   end
 end

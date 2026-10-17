@@ -6,7 +6,7 @@ module Admin
       module Posts
         class FieldError < Blog::UI::FieldError
           SCOPE = "post"
-          OVERRIDES = { note: { "control" => ".edit_note.control", "long" => ".edit_note.long" } }.freeze
+          OVERRIDES = { note: { "long" => ".edit_note.long" } }.freeze
         end
       end
     end

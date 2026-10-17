@@ -6,7 +6,7 @@ created: 2026-10-10
 area: [lib, admin, api, public, mcp]
 supersedes: ["0027"]
 issue: "#1002"
-amended: ["#1435"]
+amended: ["#1435", "#1559"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -31,15 +31,19 @@ A contract still fails with a short String code, never with copy. `config/errors
 operations hand out codes as ADR 0027 lists them, and `Blog::Operation#validated` hands them up as
 `Failure([:invalid, errors])`.
 
-`Blog::UI::FieldError` words a code in three steps, in `lib/blog/ui/field_error.rb`:
+`Blog::UI::FieldError` words a code in four steps, in `lib/blog/ui/field_error.rb`:
 
 1. The key `.<field>.<code>`, under the subclass's own scope in its slice's locale file.
 2. The subclass's `OVERRIDES` table, for a code whose copy lives under another key.
-3. `ui.field_error.invalid`, "Check this field.", in `config/i18n/shared/en.yml`.
+3. The key `ui.field_error.<code>` in `config/i18n/shared/en.yml`, for a code every form words alike (#1559).
+4. `ui.field_error.invalid`, "Check this field.", in `config/i18n/shared/en.yml`.
 
-Two admin subclasses keep overrides. Decisions word `control` on every text field with one shared `.control`, and
-`option_id`'s `format` as `.option_id.missing`. Posts word a note's `control` and `long` with the edit note's copy.
-Services needs none, since #1002 moved its keys under their fields.
+Two admin subclasses keep overrides. Decisions word `option_id`'s `format` as `.option_id.missing`. Posts word a
+note's `long` with the edit note's copy. Services needs none, since #1002 moved its keys under their fields.
+
+`ui.field_error.control` reads "Take out the control characters." It replaced 29 copies of that line in the admin
+locale file and the `.control` overrides calendar and decisions kept for it (#1559). A field that words `control` its
+own way, such as the contact form's "hidden character" copy, keeps its own key, since step 1 comes first.
 
 MCP tools and API endpoints still word codes through `API::Helpers::Wording`, and the MCP OAuth operations still
 answer with the protocol's own codes, as ADR 0027 says.
@@ -49,8 +53,11 @@ answer with the protocol's own codes, as ADR 0027 says.
 **Keep a row for every code (ADR 0027).** It lost because the rows repeated the locale file, and a missed row
 failed quietly.
 
-**Move every exception into the locale file.** Decisions would write the `control` copy five times, and posts the
-edit note's copy twice. A short table costs less than copy that drifts apart.
+**Keep a copy of a shared code's copy under every field.** It lost because 29 fields held the same `control` line,
+and each new field needed one more.
+
+**Move every exception into the locale file.** Posts would write the edit note's copy twice, and decisions the
+missing option's. A short table costs less than copy that drifts apart.
 
 ## Consequences
 
@@ -62,8 +69,9 @@ weight, so delete a key when its code goes.
 
 A missing key still shows "Check this field." at run time, but `spec/lib/blog/ui/field_error_codes_spec.rb` fails
 first (#1390). It reads the codes each contract can return, from its schema, `config/errors.yml` and the `failure`
-calls in its rules and macros, and wants a key for each field the form shows. `mise run lint` fails on a locale key
-no code reads; `.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
+calls in its rules and macros, and wants a key for each field the form shows, or a `ui.field_error.<code>` key for
+the code. `mise run lint` fails on a locale key no code reads; `.config/i18n/allowed.yml` lists the keys built at run
+time, field error keys among them.
 
 `Public::UI::Components::ContactFieldError` words its codes the same way. It also hands the browser the copy for
 `blank` and `format` before any code arrives, and finds those by the same `.<field>.<code>` key, so a field with no

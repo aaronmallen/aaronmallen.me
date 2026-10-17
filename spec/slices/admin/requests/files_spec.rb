@@ -392,7 +392,9 @@ RSpec.describe "Admin files", type: :request do
 
       def error(reason) = i18n.t(reason, scope: "ui.components.files.field_error.code")
 
-      def name_error(reason) = i18n.t(reason, scope: "ui.components.files.field_error.filename")
+      def name_error(reason)
+        i18n.t(reason, scope: "ui.components.files.field_error.filename", default: :"ui.field_error.#{reason}")
+      end
 
       def save(**fields)
         post("/admin/files/#{file.id}", { share: fields }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })

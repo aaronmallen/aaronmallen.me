@@ -62,4 +62,5 @@ en:
       wordmark:
         label: "%{owner}, home"
     field_error:
+      control: "Take out the control characters."
       invalid: "Check this field."

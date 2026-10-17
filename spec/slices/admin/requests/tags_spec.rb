@@ -363,7 +363,7 @@ RSpec.describe "Admin tags", type: :request do
       it "says why it refused a name with a control character" do
         add("ru\u0007by")
 
-        expect(page).to have_css(".field-error", text: message("control"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.control"))
       end
 
       ["c++", "-ruby", "ruby-", "a/b", "open source"].each do |name|

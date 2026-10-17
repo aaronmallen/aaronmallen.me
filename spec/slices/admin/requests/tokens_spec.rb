@@ -125,6 +125,13 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(page).to have_field("token[name]", with: "a" * 101)
     end
 
+    it "refuses a name with a control character in the name field's own words", :aggregate_failures do
+      mint("Term\u0007inal")
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".field-error", exact_text: error("control"))
+    end
+
     it "stores nothing when it refuses" do
       mint("")
 

@@ -681,7 +681,6 @@ en:
           untitled: "(no title)"
           until: "until %{date}"
         field_error:
-          control: "Take out the control characters."
           date:
             blank: "Pick a day."
             format: "Pick a real day."
@@ -805,7 +804,6 @@ en:
         field_error:
           body:
             blank: "Write the comment first."
-          control: "Take out the control characters."
           note:
             blank: "Say what changed and why. A closed decision needs a note."
             long: "Keep the note to 500 characters or fewer."
@@ -880,18 +878,13 @@ en:
           label: "Ticked files"
           pick_group: "Add to group…"
         field_error:
-          alt_text:
-            control: "Take out the control characters."
           code:
             blank: "Give it a code."
             format: "Use lowercase letters, numbers and single hyphens."
             taken: "Another file or short link already uses that code."
           filename:
             blank: "Give it a name."
-            control: "Take out the control characters."
             format: "Take out the slashes, and use a name other than . or .."
-          name:
-            control: "Take out the control characters."
         group_file:
           alt_text: "Alt text"
           alt_text_hint: "The group's page uses it for the image."
@@ -1101,7 +1094,6 @@ en:
         field_error:
           body:
             blank: "Write something first."
-            control: "Take out the control characters."
           entry_date:
             format: "Enter a date."
             future: "Pick today or an earlier day."
@@ -1146,8 +1138,6 @@ en:
           destination:
             blank: "Paste a link to shorten."
             format: "That doesn't look like a web link. It has to start with http:// or https://."
-          title:
-            control: "Take out the control characters."
         link_form:
           clicks:
             one: "%{clicks} click"
@@ -1239,7 +1229,6 @@ en:
             gmail: "Gmail would not send it. Try again."
           subject:
             blank: "Add a subject."
-            control: "Take out the control characters."
             long: "Keep the subject to 200 characters."
           to:
             blank: "Add someone to send to."
@@ -1539,7 +1528,6 @@ en:
             format: "A Mastodon handle looks like @ada@ruby.social."
           name:
             blank: "Give them a name first."
-            control: "Take out the control characters."
         finder:
           failed: "That search did not go through. Try again."
           label: "Search %{network}"
@@ -1650,22 +1638,15 @@ en:
           save_draft: "Save draft"
           schedule: "Schedule"
         field_error:
-          body:
-            control: "Take out the control characters."
           canonical_url:
-            control: "Take out the control characters."
             format: "Enter a link that starts with http:// or https://."
           edit_note:
             blank: "Say what changed and why. A published post needs a note when its body changes."
-            control: "Take out the control characters."
             long: "Keep the note to 500 characters or fewer."
           note:
             blank: "Say what changed and why. A note can't be blank."
           og_image_url:
-            control: "Take out the control characters."
             format: "Enter a link that starts with http:// or https://."
-          og_title:
-            control: "Take out the control characters."
           publish_at:
             format: "Enter a date and time."
             skipped: "That time doesn't exist in Chicago: the clocks skip it."
@@ -1675,18 +1656,14 @@ en:
             locked: "A published post keeps its slug."
             reserved: "That slug is taken by a site page."
             taken: "Another post has this slug."
-          summary:
-            control: "Take out the control characters."
           syndication_body:
             announcement_too_long: "The title and link that go out are over the limit for a network you picked."
-            control: "Take out the control characters."
             too_long: "The cross-post is over the limit for a network you picked."
             unknown_mention: "A mention names nobody in the directory."
           tags:
             format: "Use lowercase letters, numbers and single dashes in each tag."
           title:
             blank: "Add a title."
-            control: "Take out the control characters."
         broken_short_links:
           all: "all short links"
           change: "Change destination: %{link}"
@@ -1815,9 +1792,7 @@ en:
             taken: "Another project already has this key."
           name:
             blank: "Add a name."
-            control: "Take out the control characters."
           og_image_url:
-            control: "Take out the control characters."
             format: "Enter a link that starts with http:// or https://."
           repo:
             format: "Name the repository as owner/repo, as octocat/hello-world."
@@ -1826,12 +1801,9 @@ en:
             after_archived: "The start month falls after the day this project was archived."
             format: "Use the year and the month, as 2024-06."
             future: "Pick this month or one before it."
-          tagline:
-            control: "Take out the control characters."
           tags:
             format: "Use lowercase letters, numbers and single dashes in each tag."
           url:
-            control: "Take out the control characters."
             format: "Enter a link that starts with http:// or https://."
           visibility:
             blank: "Pick who can see it."
@@ -2230,7 +2202,6 @@ en:
         field_error:
           parts:
             blank: "Write something first."
-            control: "Take out the control characters."
             too_long: "A part is over the limit for a network you picked."
             unknown_mention: "A mention names nobody in the directory."
           photos:
@@ -2407,7 +2378,6 @@ en:
             format: "Pick one of the six colours."
           name:
             blank: "Give the tag a name first."
-            control: "Take out the control characters."
             format: "A tag is lowercase words joined by hyphens."
             taken: "Another tag already holds that name."
         editor:
@@ -2580,7 +2550,6 @@ en:
         field_error:
           body:
             blank: "Write the comment first."
-            control: "Take out the control characters."
           cadence:
             blank: "Pick how often it repeats."
             format: "Pick how often it repeats from the list."
@@ -2610,8 +2579,6 @@ en:
             format: "Give whole minutes, up to 59."
           month:
             format: "Pick a month."
-          note:
-            control: "Take out the control characters."
           other_id:
             format: "Pick a task from the list."
             missing: "That task is gone. Find another."
@@ -2631,7 +2598,6 @@ en:
             format: "Tags are lowercase words, separated by commas."
           title:
             blank: "Write the task down first."
-            control: "Take out the control characters."
           week:
             format: "Pick a week of the month."
           weekday:
@@ -2996,17 +2962,13 @@ en:
           to_placeholder: "2021"
           title: "A new role"
         field_error:
-          blurb:
-            control: "Take out the control characters."
           from_year:
             blank: "Add the year this started."
             format: "Use a four digit year, as 2018."
           org:
             blank: "Name the organization."
-            control: "Take out the control characters."
           role:
             blank: "Name the role."
-            control: "Take out the control characters."
           to_year:
             before_from: "The end year falls before the start year."
             format: "Use a four digit year, as 2021."

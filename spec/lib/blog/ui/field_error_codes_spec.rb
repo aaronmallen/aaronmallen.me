@@ -45,8 +45,10 @@ RSpec.describe Blog::UI::FieldError do
     view = error.allocate
     i18n = error.slice["i18n"]
     ContractCodes.call(Object.const_get(contract)).except(*unshown).flat_map do |field, codes|
-      keys = codes.map { error::OVERRIDES.dig(field, it) || ".#{field}.#{it}" }
-      keys.reject { i18n.exists?(view.send(:_resolve_i18n_key, it)) }
+      codes.filter_map do |code|
+        keys = [error::OVERRIDES.dig(field, code) || ".#{field}.#{code}", "#{Blog::UI::FieldError::CODES}#{code}"]
+        ".#{field}.#{code}" if keys.none? { i18n.exists?(view.send(:_resolve_i18n_key, it)) }
+      end
     end
   end
 
