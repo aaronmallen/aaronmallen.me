@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "API commits, pull requests and syncs", type: :request do
-  include Spec::DB::FactoryHelper.new(:record)
-
   def march = { from: "2026-03-01", to: "2026-03-31" }
 
   def status = last_response.status

@@ -6,11 +6,9 @@ RSpec.describe "Admin security", type: :request do
 
   def card(title) = page.find(".card", text: title)
 
-  def client(name) = mcp_create(:oauth_client, client_name: name).tap { mcp_create(:oauth_token, oauth_client: it) }
+  def client(name) = create(:oauth_client, client_name: name).tap { create(:oauth_token, oauth_client: it) }
 
   def credential(name) = page.find(".security-cred", text: name)
-
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def sight(**row)
     database[:sightings].insert(

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "OAuth authorization", type: :request do
-  let(:client) { mcp_create(:oauth_client, client_name: "Claude") }
+  let(:client) { create(:oauth_client, client_name: "Claude") }
   let(:i18n) { MCP::Slice["i18n"] }
   let(:verifier) { Blog::Types::NewSecret[] }
 
@@ -37,8 +37,6 @@ RSpec.describe "OAuth authorization", type: :request do
   def copy(key, **) = i18n.t(key, scope: "ui.views.authorizations.new", **)
 
   def document = JSON.parse(last_response.body)
-
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def page = Capybara.string(last_response.body)
 
@@ -299,7 +297,7 @@ RSpec.describe "OAuth authorization", type: :request do
   end
 
   describe "when the client has never held a token" do
-    let(:client) { mcp_create(:oauth_client, client_name: "Claude", created_at: Time.new(2026, 9, 3, 15, 4, 0, "UTC")) }
+    let(:client) { create(:oauth_client, client_name: "Claude", created_at: Time.new(2026, 9, 3, 15, 4, 0, "UTC")) }
 
     before do
       sign_in_to_admin
@@ -317,7 +315,7 @@ RSpec.describe "OAuth authorization", type: :request do
 
   describe "when the client holds a token" do
     before do
-      mcp_create(:oauth_token, oauth_client_id: client.id)
+      create(:oauth_token, oauth_client_id: client.id)
       sign_in_to_admin
       authorize
     end
@@ -328,7 +326,7 @@ RSpec.describe "OAuth authorization", type: :request do
   end
 
   describe "when the client used a token it no longer holds" do
-    let(:client) { mcp_create(:oauth_client, client_name: "Claude", last_used_at: Time.now - 86_400) }
+    let(:client) { create(:oauth_client, client_name: "Claude", last_used_at: Time.now - 86_400) }
 
     before do
       sign_in_to_admin
@@ -343,7 +341,7 @@ RSpec.describe "OAuth authorization", type: :request do
   describe "when the client registered no name" do
     before do
       sign_in_to_admin
-      authorize(client_id: mcp_create(:oauth_client, client_name: nil).client_id)
+      authorize(client_id: create(:oauth_client, client_name: nil).client_id)
     end
 
     it "still leads with the redirect URI host" do
@@ -356,7 +354,7 @@ RSpec.describe "OAuth authorization", type: :request do
   end
 
   describe "when the client registered a redirect URI that does not parse" do
-    let(:client) { mcp_create(:oauth_client, client_name: nil, redirect_uris: ["not a uri"]) }
+    let(:client) { create(:oauth_client, client_name: nil, redirect_uris: ["not a uri"]) }
 
     before do
       sign_in_to_admin
@@ -767,7 +765,7 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "rejects the request when the client registered more than one and sends none" do
-      two = mcp_create(:oauth_client, redirect_uris: %w[https://claude.ai/one https://claude.ai/two])
+      two = create(:oauth_client, redirect_uris: %w[https://claude.ai/one https://claude.ai/two])
       authorize(client_id: two.client_id, redirect_uri: nil)
 
       expect(last_response.status).to eq(400)
@@ -957,7 +955,7 @@ RSpec.describe "OAuth authorization", type: :request do
   end
 
   describe "a redirect URI that carries a query" do
-    let(:client) { mcp_create(:oauth_client, redirect_uris: ["https://claude.ai/callback?next=1&state=theirs"]) }
+    let(:client) { create(:oauth_client, redirect_uris: ["https://claude.ai/callback?next=1&state=theirs"]) }
 
     before do
       sign_in_to_admin

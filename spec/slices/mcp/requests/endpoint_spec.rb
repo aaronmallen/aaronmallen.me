@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP endpoint", type: :request do
-  let(:client) { mcp_create(:oauth_client) }
+  let(:client) { create(:oauth_client) }
   let(:verifier) { Blog::Types::NewSecret[] }
 
   def access_token = issued.fetch("access_token")
@@ -43,8 +43,6 @@ RSpec.describe "MCP endpoint", type: :request do
   def fetch_prompt(name, **arguments) = rpc("prompts/get", { name:, arguments: })
 
   def issued = @issued ||= connect
-
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def message = result.fetch("content").first.fetch("text")
 

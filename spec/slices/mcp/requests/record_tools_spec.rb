@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP record tools", type: :request do
-  include Spec::DB::FactoryHelper.new(:record)
-
   def access_token
     @access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client),
+      create(:oauth_client),
       verifier: Blog::Types::NewSecret[],
       scope: "read write publish delete",
     ).fetch("access_token")

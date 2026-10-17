@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin MCP clients", type: :feature do
-  include Spec::DB::FactoryHelper.new(:mcp)
-
   let(:row) { find(".li", text: "Claude") }
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)

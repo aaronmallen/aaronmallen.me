@@ -34,8 +34,6 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
   def line_value(label) = line(label).find(".today-line-value").text
 
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
-
   def schedule_social(*parts, at: Time.now + 60, targets: %w[mastodon])
     Social::Slice["repos.social_post_mutations"].create_with_parts(targets:, status: "scheduled", posted_at: at, parts:)
   end
@@ -191,8 +189,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
     describe "MCP clients" do
       it "counts the connected clients and opens them", :aggregate_failures do
-        mcp_create(:oauth_client).tap { mcp_create(:oauth_token, oauth_client: it) }
-        mcp_create(:oauth_client)
+        create(:oauth_client).tap { create(:oauth_token, oauth_client: it) }
+        create(:oauth_client)
         get "/admin"
 
         expect(line_value("MCP clients")).to eq("1 connected")

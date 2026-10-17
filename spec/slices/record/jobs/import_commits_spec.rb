@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Record::Jobs::ImportCommits do
-  include Spec::DB::FactoryHelper.new(:record)
-
   def commit_mutations = Record::Slice["repos.commit_mutations"]
   def commit_queries = Record::Slice["repos.commit_queries"]
   let(:repo) { "aaronmallen/aaronmallen.me" }

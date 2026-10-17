@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP authorization", type: :feature do
-  include Spec::DB::FactoryHelper.new(:mcp)
-
   let(:client) { create(:oauth_client, client_name: "Claude", redirect_uris: [redirect_uri]) }
   let(:redirect_uri) { "http://localhost:#{page.server.port}/callback" }
 

@@ -105,7 +105,7 @@ RSpec.describe "CSRF protection", type: :request do
   end
 
   describe "an MCP approval without a token" do
-    let(:client) { Spec::DB::Factories[:mcp].create(:oauth_client) }
+    let(:client) { create(:oauth_client) }
 
     def approval
       {
@@ -132,7 +132,7 @@ RSpec.describe "CSRF protection", type: :request do
 
   describe "an MCP approval with a token that is not a string" do
     let(:agent) { Hanami.app["honeybadger.agent"] }
-    let(:client) { Spec::DB::Factories[:mcp].create(:oauth_client) }
+    let(:client) { create(:oauth_client) }
     let(:page) { Capybara.string(last_response.body) }
 
     def approval

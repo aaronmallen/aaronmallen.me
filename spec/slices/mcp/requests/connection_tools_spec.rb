@@ -10,7 +10,7 @@ RSpec.describe "MCP connection tools", type: :request do
     post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/call", params: { name:, arguments: {} }), headers
   end
 
-  def calling_client = @calling_client ||= mcp_create(:oauth_client, client_name: "Claude")
+  def calling_client = @calling_client ||= create(:oauth_client, client_name: "Claude")
 
   def connect(client, scope:) = mcp_connect(client, verifier: Blog::Types::NewSecret[], scope:)
 
@@ -19,8 +19,6 @@ RSpec.describe "MCP connection tools", type: :request do
   def document = JSON.parse(last_response.body)
 
   def marked(text) = { "untrusted" => true, "text" => text }
-
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def message = document.dig("result", "content").first.fetch("text")
 
@@ -65,7 +63,7 @@ RSpec.describe "MCP connection tools", type: :request do
   describe "list_clients" do
     def clients = content.fetch("clients")
 
-    def connected(scope: "read", **) = mcp_create(:oauth_client, **).tap { connect(it, scope:) }
+    def connected(scope: "read", **) = create(:oauth_client, **).tap { connect(it, scope:) }
 
     def entry(client, name, scopes)
       {
@@ -99,7 +97,7 @@ RSpec.describe "MCP connection tools", type: :request do
 
     it "leaves out a revoked client and one holding no live token" do
       MCP::Slice["operations.revoke_client"].call(connected.id)
-      mcp_create(:oauth_client)
+      create(:oauth_client)
       call_tool("list_clients")
 
       expect(clients.map { it.fetch("id") }).to eq([calling_client.id])

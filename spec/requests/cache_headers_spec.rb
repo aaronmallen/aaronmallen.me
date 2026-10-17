@@ -244,7 +244,7 @@ RSpec.describe "Cache headers", type: :request do
   end
 
   describe "the MCP approval page" do
-    let(:client) { Spec::DB::Factories[:mcp].create(:oauth_client) }
+    let(:client) { create(:oauth_client) }
     let(:verifier) { Blog::Types::NewSecret[] }
 
     before do

@@ -95,7 +95,7 @@ RSpec.describe "API authentication", type: :request do
 
     it "refuses an MCP access token" do
       access_token = mcp_connect(
-        Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: "read write",
+        create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: "read write",
       ).fetch("access_token")
       read_token("Bearer #{access_token}")
 

@@ -120,9 +120,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     let(:token) { Blog::Types::NewSecret[] }
 
     before do
-      factories = Spec::DB::Factories[:mcp]
-      factories.create(
-        :oauth_token, oauth_client: factories.create(:oauth_client, client_name: "Claude"),
+      create(
+        :oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"),
                       token_digest: Blog::Types::SecretDigest[token], resource: Hanami.app.settings.site_url("/mcp"),
       )
       [agent, firefox].each { call_mcp(it) }

@@ -4,7 +4,7 @@ RSpec.describe "MCP health days", type: :request do
   let(:monday) { Date.new(2026, 9, 7) }
 
   def access_token(scope)
-    client = Spec::DB::Factories[:mcp].create(:oauth_client)
+    client = create(:oauth_client)
     mcp_connect(client, verifier: Blog::Types::NewSecret[], scope:).fetch("access_token")
   end
 

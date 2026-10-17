@@ -3,7 +3,7 @@
 RSpec.describe "MCP social tools", type: :request do
   def access_token
     @access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client),
+      create(:oauth_client),
       verifier: Blog::Types::NewSecret[],
       scope: "read write publish delete",
     ).fetch("access_token")

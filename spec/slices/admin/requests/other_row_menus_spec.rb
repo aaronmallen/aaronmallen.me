@@ -232,8 +232,8 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
     describe "a client" do
       let(:client) do
-        Spec::DB::Factories[:mcp].create(:oauth_client, client_name: "Desk").tap do |client|
-          Spec::DB::Factories[:mcp].create(:oauth_token, oauth_client: client)
+        create(:oauth_client, client_name: "Desk").tap do |client|
+          create(:oauth_token, oauth_client: client)
         end
       end
 

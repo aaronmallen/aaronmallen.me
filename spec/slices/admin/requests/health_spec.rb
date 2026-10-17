@@ -105,7 +105,7 @@ RSpec.describe "Admin health", :frozen_clock, type: :request do
       let(:usual) { { minutes_asleep: 420, hrv: 50, resting_heart_rate: 55 } }
 
       def health_token
-        client = Spec::DB::Factories[:mcp].create(:oauth_client)
+        client = create(:oauth_client)
         mcp_connect(client, verifier: Blog::Types::NewSecret[], scope: "health").fetch("access_token")
       end
 

@@ -9,7 +9,7 @@ RSpec.describe "API MCP clients", type: :request do
     )
   end
 
-  def connected(scope: "read", **) = Spec::DB::Factories[:mcp].create(:oauth_client, **).tap { connect(it, scope:) }
+  def connected(scope: "read", **) = create(:oauth_client, **).tap { connect(it, scope:) }
 
   def list
     get "/api/v1/clients", nil, { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
@@ -33,7 +33,7 @@ RSpec.describe "API MCP clients", type: :request do
 
   it "leaves out a revoked client and one holding no live token" do
     MCP::Slice["operations.revoke_client"].call(connected.id)
-    Spec::DB::Factories[:mcp].create(:oauth_client)
+    create(:oauth_client)
 
     expect(list).to be_empty
   end

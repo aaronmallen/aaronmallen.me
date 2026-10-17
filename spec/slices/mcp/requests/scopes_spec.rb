@@ -59,7 +59,7 @@ RSpec.describe "MCP tool scopes", type: :request do
 
   def access_token
     @access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: scopes.join(" "),
+      create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: scopes.join(" "),
     ).fetch("access_token")
   end
 

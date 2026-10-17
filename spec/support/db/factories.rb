@@ -76,9 +76,7 @@ module Spec
           (@defining || self[]).define(...)
         end
 
-        def for_factory(name, slice_name = nil)
-          return self[slice_name] if slice_name
-
+        def for_factory(name)
           registry.each_value.find { it.registry.key?(name) } || self[]
         end
 
@@ -169,21 +167,14 @@ module Spec
       def self.repo_for(name) = repo(name, REPOS.fetch(name).last)
     end
 
-    class FactoryHelper < Module
-      attr_reader :slice_name
+    module FactoryHelper
+      def build(name, *traits, **attrs) = Factories.for_factory(name).build(name, *traits, **attrs.except(:tags))
 
-      def initialize(slice_name = nil)
-        super()
-        @slice_name = slice_name
-
-        define_method(:factory) { |name| Factories.for_factory(name, slice_name) }
-        define_method(:build) { |name, *traits, **attrs| factory(name).build(name, *traits, **attrs.except(:tags)) }
-        define_method(:create) { |name, *traits, **attrs| factory(name).create(name, *traits, **attrs) }
-      end
+      def create(...) = Factories.create(...)
     end
   end
 end
 
 RSpec.configure do |config|
-  config.include Spec::DB::FactoryHelper.new
+  config.include Spec::DB::FactoryHelper
 end

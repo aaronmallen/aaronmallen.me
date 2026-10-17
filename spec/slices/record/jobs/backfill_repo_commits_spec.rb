@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Record::Jobs::BackfillRepoCommits do
-  include Spec::DB::FactoryHelper.new(:record)
-
   let(:clock) { Time.utc(2026, 8, 20, 12) }
   let(:edge) { Time.utc(2026, 8, 18, 15) }
   let(:repo) { "aaronmallen/aaronmallen.me" }
@@ -546,9 +544,9 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
   end
 
   describe "a commit that closes an issue a task came from" do
-    let(:task) { tasks_create(:task) }
+    let(:task) { create(:task) }
 
-    before { tasks_create(:task_source, task_id: task.id, url: "https://github.com/#{repo}/issues/42") }
+    before { create(:task_source, task_id: task.id, url: "https://github.com/#{repo}/issues/42") }
 
     def claude = "Co-Authored-By: Claude Opus 5.5 <noreply@example.com>"
 
@@ -559,8 +557,6 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       walk
       Tasks::Jobs::CreditAgents.drain
     end
-
-    def tasks_create(name, **) = Spec::DB::Factories[:tasks].create(name, **)
 
     it "adds the agent and model the trailer names to the task" do
       import("app: credit the agent\n\n#{claude}\n\nCloses #42")

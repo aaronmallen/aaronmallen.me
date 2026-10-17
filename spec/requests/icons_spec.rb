@@ -4,7 +4,7 @@ RSpec.describe "Icons", type: :request do
   def asset(source) = Hanami.app["assets"][source].url
 
   def authorize_path
-    client = Spec::DB::Factories[:mcp].create(:oauth_client)
+    client = create(:oauth_client)
     params = {
       client_id: client.client_id,
       code_challenge: MCP::Slice["operations.derive_code_challenge"].call(Blog::Types::NewSecret[]),

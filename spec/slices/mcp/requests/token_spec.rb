@@ -3,7 +3,7 @@
 require "timeout"
 
 RSpec.describe "OAuth token", type: :request do
-  let(:client) { mcp_create(:oauth_client) }
+  let(:client) { create(:oauth_client) }
   let(:code) { authorization_code }
   let(:verifier) { Blog::Types::NewSecret[] }
 
@@ -49,8 +49,6 @@ RSpec.describe "OAuth token", type: :request do
     exchange(**)
     last_response
   end
-
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def redirect_uri = client.redirect_uris.first
 
@@ -223,7 +221,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "refuses another client" do
-      exchange(client_id: mcp_create(:oauth_client).client_id)
+      exchange(client_id: create(:oauth_client).client_id)
 
       expect(document["error"]).to eq("invalid_client")
     end
@@ -374,7 +372,7 @@ RSpec.describe "OAuth token", type: :request do
 
     it "refuses another client" do
       exchange
-      refresh(document.fetch("refresh_token"), client_id: mcp_create(:oauth_client).client_id)
+      refresh(document.fetch("refresh_token"), client_id: create(:oauth_client).client_id)
 
       expect(document["error"]).to eq("invalid_client")
     end

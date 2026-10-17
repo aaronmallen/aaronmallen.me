@@ -10,8 +10,6 @@ RSpec.describe "Admin MCP clients", type: :request do
     Capybara.string(last_response.body).all(".li-title").map(&:text)
   end
 
-  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
-
   def names = page.all(".li-title").map(&:text)
 
   def revoke(id) = post("/admin/clients/#{id}/revoke", _csrf_token: admin_csrf_token)
@@ -44,7 +42,7 @@ RSpec.describe "Admin MCP clients", type: :request do
     before { sign_in_to_admin }
 
     def connect(*, **)
-      mcp_create(:oauth_client, *, **).tap { mcp_create(:oauth_token, oauth_client: it) }
+      create(:oauth_client, *, **).tap { create(:oauth_token, oauth_client: it) }
     end
 
     it "says so when nothing has connected" do
@@ -63,44 +61,44 @@ RSpec.describe "Admin MCP clients", type: :request do
 
     it "counts only the clients it lists" do
       connect(client_name: "Claude")
-      mcp_create(:oauth_client, client_name: "Stranger")
+      create(:oauth_client, client_name: "Stranger")
       get "/admin/clients"
 
       expect(page).to have_css(".card-side", exact_text: "1 connected client")
     end
 
     it "leaves out a registration that never got a token" do
-      mcp_create(:oauth_client, client_name: "Stranger")
+      create(:oauth_client, client_name: "Stranger")
       get "/admin/clients"
 
       expect(names).to be_empty
     end
 
     it "leaves out a client whose tokens have all expired" do
-      mcp_create(:oauth_token, :expired, oauth_client: mcp_create(:oauth_client, client_name: "Lapsed"))
+      create(:oauth_token, :expired, oauth_client: create(:oauth_client, client_name: "Lapsed"))
       get "/admin/clients"
 
       expect(names).to be_empty
     end
 
     it "leaves out a client whose tokens have all been revoked" do
-      mcp_create(:oauth_token, :revoked, oauth_client: mcp_create(:oauth_client, client_name: "Signed out"))
+      create(:oauth_token, :revoked, oauth_client: create(:oauth_client, client_name: "Signed out"))
       get "/admin/clients"
 
       expect(names).to be_empty
     end
 
     it "keeps a client whose access token lapsed while its refresh token lives" do
-      client = mcp_create(:oauth_client, client_name: "Claude")
-      mcp_create(:oauth_token, :expired, oauth_client: client)
-      mcp_create(:oauth_token, :refresh, oauth_client: client)
+      client = create(:oauth_client, client_name: "Claude")
+      create(:oauth_token, :expired, oauth_client: client)
+      create(:oauth_token, :refresh, oauth_client: client)
       get "/admin/clients"
 
       expect(names).to eq(%w[Claude])
     end
 
     it "lists a client once however many tokens it holds" do
-      connect(client_name: "Claude").then { mcp_create(:oauth_token, :refresh, oauth_client: it) }
+      connect(client_name: "Claude").then { create(:oauth_token, :refresh, oauth_client: it) }
       get "/admin/clients"
 
       expect(names).to eq(%w[Claude])
@@ -176,7 +174,7 @@ RSpec.describe "Admin MCP clients", type: :request do
   end
 
   describe "revoking" do
-    let(:client) { mcp_create(:oauth_client, client_name: "Claude") }
+    let(:client) { create(:oauth_client, client_name: "Claude") }
 
     before { sign_in_to_admin }
 
@@ -205,7 +203,7 @@ RSpec.describe "Admin MCP clients", type: :request do
     end
 
     it "leaves another client's tokens alone" do
-      other = mcp_create(:oauth_client, client_name: "Other")
+      other = create(:oauth_client, client_name: "Other")
       stock_token(other, type: "access")
       revoke(client.id)
 

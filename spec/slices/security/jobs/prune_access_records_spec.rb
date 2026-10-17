@@ -5,7 +5,7 @@ RSpec.describe Security::Jobs::PruneAccessRecords, type: :request do
   let(:day) { 24 * 60 * 60 }
   let(:keep_for) { 90 * day }
 
-  def client = Spec::DB::Factories[:mcp].create(:oauth_client)
+  def client = create(:oauth_client)
 
   def prune = described_class.new.perform
 
