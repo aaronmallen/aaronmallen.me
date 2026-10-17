@@ -16,26 +16,18 @@ module MCP
       include Deps[
         "operations.match_resource",
         "repos.oauth_client_mutations",
-        "repos.oauth_client_queries",
         "repos.oauth_token_queries",
       ]
 
       def call(authorization, issuer:)
         value = step read(authorization)
         token = step find(value)
-        step check_client(token)
         step check_resource(token, issuer)
         touch(token)
         token
       end
 
       private
-
-      def check_client(token)
-        return Success(token) if oauth_client_queries.connected_by_id(token.oauth_client_id)
-
-        refuse(UNKNOWN_CLIENT)
-      end
 
       def check_resource(token, issuer)
         return refuse(NO_RESOURCE) if token.resource.nil?
@@ -62,6 +54,8 @@ module MCP
 
       def touch(token)
         at = Time.now
+        return if token.client_last_used_at && token.client_last_used_at > at - TOUCH_EVERY
+
         oauth_client_mutations.touch_last_used(token.oauth_client_id, at:, unless_since: at - TOUCH_EVERY)
       end
     end

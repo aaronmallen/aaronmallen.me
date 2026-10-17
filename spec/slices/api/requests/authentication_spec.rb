@@ -149,6 +149,13 @@ RSpec.describe "API authentication", type: :request do
       expect(stored.one[:last_used_at]).to eq(used)
     end
 
+    it "sends no token update within five minutes" do
+      token = minted("Laptop")
+      stored.where(id: token[:token].id).update(last_used_at: Time.now - (4 * 60))
+
+      expect(counting { read_token("Bearer #{token[:value]}") }.grep(/UPDATE "api_tokens"/)).to be_empty
+    end
+
     it "answers with the last use it kept" do
       token = minted("Laptop")
       stored.where(id: token[:token].id).update(last_used_at: Time.now.floor - 60)

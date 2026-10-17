@@ -31,6 +31,8 @@ module API
 
       def touch(token)
         at = Time.now
+        return if token.last_used_at && token.last_used_at > at - TOUCH_EVERY
+
         api_token_mutations.touch_last_used(token.id, at:, unless_since: at - TOUCH_EVERY)
       end
     end

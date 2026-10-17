@@ -574,7 +574,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def statements_to_read
       issued
-      counting { read_activity }.size
+      counting { read_activity }.grep_v(/UPDATE "oauth_clients"/).size
     end
 
     def suggest_on(post_id, on: today)
@@ -2484,6 +2484,19 @@ RSpec.describe "MCP endpoint", type: :request do
     rpc("tools/list")
 
     expect(clients.one[:last_used_at]).to eq(called)
+  end
+
+  it "sends no client update when the client called within five minutes" do
+    issued
+    clients.by_pk(client.id).update(last_used_at: Time.now - (4 * 60))
+
+    expect(counting { rpc("tools/list") }.grep(/UPDATE "oauth_clients"/)).to be_empty
+  end
+
+  it "reads the token and its client in one query" do
+    issued
+
+    expect(counting { rpc("tools/list") }.grep(/FROM "oauth_(tokens|clients)"/).size).to eq(1)
   end
 
   it "leaves updated_at alone when it notes a call" do

@@ -440,6 +440,7 @@ RSpec.describe "API review", type: :request do
 
     it "runs the same statements as the whole period" do
       api_token
+      read(day: "2026-09-14")
       whole = counting { read(day: "2026-09-14") }.size
 
       expect(counting { read(day: "2026-09-14", focus: wednesday.iso8601) }).to have(whole).items

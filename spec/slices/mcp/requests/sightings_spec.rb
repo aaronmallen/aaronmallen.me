@@ -65,7 +65,7 @@ RSpec.describe "MCP client sightings", type: :request do
     expect(sightings.count).to eq(0)
   end
 
-  describe "a client deleted after it authenticates" do
+  describe "a client deleted after it authenticates", :commits do
     before do
       authenticate = MCP::Slice["operations.authenticate"]
       allow(authenticate).to(receive(:call).and_wrap_original do |read, *args, **options|

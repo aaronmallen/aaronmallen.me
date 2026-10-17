@@ -109,7 +109,7 @@ RSpec.describe "API token sightings", type: :request do
     expect(sightings.count).to eq(0)
   end
 
-  describe "a token deleted after it authenticates" do
+  describe "a token deleted after it authenticates", :commits do
     before do
       authenticate = API::Slice["operations.authenticate"]
       allow(authenticate).to(receive(:call).and_wrap_original do |read, *args|
