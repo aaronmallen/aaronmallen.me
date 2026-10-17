@@ -22,6 +22,18 @@
   }
 }
 
+@custom-variant phone {
+  @media (width < 43.75rem) {
+    @slot;
+  }
+}
+
+@custom-variant wide {
+  @media (width >= 53.75rem) {
+    @slot;
+  }
+}
+
 @theme {
   --color-ground: light-dark(#faf4f2, #222222);
   --color-ground-sunk: light-dark(#ede7e5, #191919);
@@ -443,7 +455,7 @@
 @utility g {
   @apply grid grid-cols-1 items-start gap-grid;
 
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
 
     &.even {
@@ -457,7 +469,7 @@
 }
 
 @utility stick {
-  @media (width >= 900px) {
+  @media (width >= 56.25rem) {
     @apply sticky top-stick;
   }
 }
@@ -519,7 +531,7 @@
   background-color: color-mix(in oklab, var(--color-ground) 88%, transparent);
   backdrop-filter: blur(10px);
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex-wrap;
   }
 }
@@ -528,7 +540,7 @@
   @apply flex gap-0.5 overflow-x-auto rounded-full border border-line bg-ground-sunk p-1;
   scrollbar-width: none;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply order-3 w-full;
   }
 }
@@ -541,7 +553,7 @@
     @apply bg-ink text-ground;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap flex-1 items-center justify-center;
   }
 }
@@ -559,7 +571,7 @@
     box-shadow: 0 0 0 1px var(--color-ink-muted);
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply h-tap min-w-tap;
   }
 }
@@ -580,7 +592,7 @@
     @apply flex;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply top-[4.25rem];
   }
 }
@@ -601,7 +613,7 @@
     @apply text-ink;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -1039,7 +1051,7 @@
   @apply accent-focus;
   @apply disabled:cursor-not-allowed disabled:opacity-45;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap justify-center;
   }
 }
@@ -1288,7 +1300,7 @@
   & li {
     @apply m-0 flex flex-col gap-2 pt-1.5 pb-5.5;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply pt-1 pb-4.5;
     }
   }
@@ -1298,7 +1310,7 @@
     @apply no-underline hover:text-accent-text focus-ring;
     text-wrap: balance;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply block py-0.5;
     }
   }
@@ -1335,7 +1347,7 @@
     }
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply size-tap justify-center p-0;
 
     & span,
@@ -1373,7 +1385,7 @@
     }
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply gap-2 pl-4;
 
     & > i {
@@ -1386,7 +1398,7 @@
   @apply inline-flex min-h-12 flex-none cursor-pointer items-center gap-[9px] rounded-full border-0 bg-accent px-5.5 font-mono text-[13.5px] text-accent-on;
   @apply hover:brightness-108 pub-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply px-4;
   }
 }
@@ -1394,7 +1406,7 @@
 @utility sq-h {
   @apply mt-2.5 mb-0 ml-5.5 font-mono text-[12.5px] leading-normal text-ink-muted;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply ml-1;
   }
 }
@@ -1433,7 +1445,7 @@
     @apply text-ink-muted;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply w-full;
 
     & a {
@@ -1780,7 +1792,7 @@
   background-color: color-mix(in oklab, var(--color-ground) 88%, transparent);
   backdrop-filter: blur(10px);
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     @apply flex-wrap content-center gap-y-2;
   }
 }
@@ -1801,7 +1813,7 @@
   --cy4: var(--color-mk-blue-text);
   --cy5: var(--color-mk-violet-text);
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -1819,7 +1831,7 @@
   @apply flex gap-0.5 overflow-x-auto rounded-full border border-line bg-ground-sunk p-1;
   scrollbar-width: none;
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     @apply order-3 w-full;
   }
 }
@@ -1832,7 +1844,7 @@
     @apply bg-ink text-ground;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -1845,7 +1857,7 @@
   @apply ml-auto inline-flex w-search min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-full border;
   @apply border-line px-3 py-2 font-mono text-badge leading-none whitespace-nowrap text-ink-muted hover:text-ink admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap justify-center;
   }
 }
@@ -1853,7 +1865,7 @@
 @utility top-bar-search-label {
   @apply min-w-0 truncate;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply hidden;
   }
 }
@@ -1861,7 +1873,7 @@
 @utility top-bar-search-key {
   @apply ml-auto kbd;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply hidden;
   }
 }
@@ -1871,7 +1883,7 @@
   @apply font-display text-nav font-extrabold text-ink admin-focus;
   box-shadow: 0 0 0 1px var(--color-line);
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply size-tap;
   }
 }
@@ -1893,7 +1905,7 @@
   @apply flex w-full cursor-pointer items-center gap-2.5 rounded-icon border-0 bg-transparent px-2.5 py-2 text-left;
   @apply font-mono text-tab tracking-normal text-ink no-underline hover:bg-wash hover:text-ink admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -1942,7 +1954,7 @@
     @apply border-line bg-ground-sunk text-ink;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -1990,7 +2002,7 @@
     @apply border-ink-muted bg-ground-sunk;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap justify-center;
   }
 }
@@ -2004,18 +2016,24 @@
     @apply opacity-100;
   }
 
-  @media (hover: none), (width < 43.75rem) {
+  @media (hover: none) {
     @apply opacity-100;
   }
 
-  @media (hover: hover) and (width >= 43.75rem) {
-    :where(.task, .li) > & {
-      @apply absolute top-2.5 right-0 z-20 rounded-card border border-line bg-ground-sunk p-0.5;
-      box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
-    }
+  @variant phone {
+    @apply opacity-100;
+  }
 
-    :where(.task, .li) > &:not(:has(*)) {
-      @apply hidden;
+  @media (hover: hover) {
+    @variant not-phone {
+      :where(.task, .li) > & {
+        @apply absolute top-2.5 right-0 z-20 rounded-card border border-line bg-ground-sunk p-0.5;
+        box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+      }
+
+      :where(.task, .li) > &:not(:has(*)) {
+        @apply hidden;
+      }
     }
   }
 
@@ -2031,7 +2049,7 @@
       }
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply size-auto min-h-tap min-w-tap;
     }
   }
@@ -2040,7 +2058,7 @@
 @utility g-main {
   @apply grid grid-cols-1 items-start gap-stack;
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     grid-template-columns: minmax(0, 2.2fr) minmax(320px, 1fr);
 
     &.even {
@@ -2097,7 +2115,7 @@
   :where(.page-head-actions) > & {
     @apply basis-full;
 
-    @media (width >= 43.75rem) {
+    @variant not-phone {
       @apply justify-end;
     }
   }
@@ -2119,7 +2137,7 @@
     @apply border-ink-muted bg-ground-sunk text-ink;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 }
@@ -2148,7 +2166,7 @@
     @apply right-auto left-0;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply fixed inset-x-4 top-auto w-auto;
   }
 }
@@ -2217,7 +2235,7 @@
   @apply grid gap-4;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -2265,7 +2283,7 @@
   & > .day-head {
     @apply flex-col-reverse items-start gap-0.5;
 
-    @media (width >= 53.75rem) {
+    @variant wide {
       @apply self-start bg-transparent pt-1;
     }
   }
@@ -2282,7 +2300,7 @@
     @apply font-mono text-meta font-normal text-ink-muted;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     grid-template-columns: 170px minmax(0, 1fr);
   }
 }
@@ -2319,7 +2337,7 @@
   }
 
   & a {
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply tap-target;
     }
   }
@@ -2424,7 +2442,7 @@
 }
 
 @utility journal-compose {
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -2529,7 +2547,7 @@
 @utility cal-weekdays {
   @apply grid grid-cols-7 gap-1 meta-badge;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply hidden;
   }
 }
@@ -2541,7 +2559,7 @@
 @utility cal-days {
   @apply grid grid-cols-7 gap-1;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex flex-col;
   }
 }
@@ -2552,7 +2570,7 @@
   &.cal-out {
     @apply border-dashed bg-transparent;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply hidden;
     }
   }
@@ -2570,7 +2588,7 @@
   @apply flex h-full flex-col gap-[3px] p-1.5 text-inherit no-underline admin-focus;
   min-height: clamp(84px, 9vw, 132px);
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap flex-row items-center gap-3 px-3 py-2;
   }
 }
@@ -2578,7 +2596,7 @@
 @utility cal-date {
   @apply flex shrink-0 gap-1.5 meta-badge;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply w-16;
   }
 
@@ -2588,7 +2606,7 @@
 }
 
 @utility cal-day-name {
-  @media (width >= 43.75rem) {
+  @variant not-phone {
     @apply hidden;
   }
 }
@@ -2596,7 +2614,7 @@
 @utility cal-marks {
   @apply flex min-w-0 flex-col gap-[3px] font-mono text-badge;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex-row flex-wrap gap-x-3;
   }
 }
@@ -2768,11 +2786,11 @@
 @utility cal-panel {
   @apply focus-ring;
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar;
   }
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     @apply -order-1;
   }
 }
@@ -2826,7 +2844,7 @@
   @apply grid items-center gap-[3px];
   grid-template-columns: auto repeat(var(--days), minmax(0, 1fr));
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply overflow-x-auto;
     grid-template-columns: auto repeat(var(--days), minmax(var(--spacing-tap), 1fr));
     scrollbar-width: none;
@@ -2848,7 +2866,7 @@
     @apply text-mk-green-text;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap content-end;
   }
 }
@@ -2879,7 +2897,7 @@
     box-shadow: inset 0 0 0 1px var(--color-line);
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -2913,7 +2931,7 @@
     @apply underline;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -2946,7 +2964,7 @@
   @apply max-w-full truncate py-0.5 text-[.92rem] leading-[1.35] text-ink-muted no-underline hover:text-ink;
   @apply admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap content-center;
   }
 }
@@ -3014,7 +3032,7 @@
 }
 
 @utility review-notes {
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -3096,7 +3114,7 @@
     @apply bg-mk-pink-text;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply contents;
 
     & i {
@@ -3155,7 +3173,7 @@
   @apply mt-3 inline-flex items-center font-mono text-meta text-accent-text no-underline hover:underline;
   @apply admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -3206,7 +3224,7 @@
     @apply accent-outline;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 }
@@ -3222,7 +3240,7 @@
 @utility time-meter {
   @apply block h-1.5 overflow-hidden rounded-full bg-line text-mk-green;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply hidden;
   }
 }
@@ -3237,7 +3255,7 @@
   & a.li-title {
     @apply inline-flex min-h-6 items-center;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -3252,7 +3270,7 @@
     @apply h-8 min-w-8 justify-center rounded-[8px] border-transparent px-2 py-0 text-ink-muted;
     @apply hover:border-line hover:text-ink;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply size-auto min-h-tap min-w-tap;
     }
   }
@@ -3329,7 +3347,7 @@
   @apply font-display text-post-title font-extrabold text-ink;
   @apply placeholder:text-ink-muted focus:border-mk-blue focus:outline-1 focus:outline-mk-blue;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 
@@ -3346,7 +3364,7 @@
   @apply w-full rounded-input border border-dashed border-line bg-transparent px-2.5 py-1.5;
   @apply text-li text-ink placeholder:text-ink-muted focus:border-mk-blue focus:outline-1 focus:outline-mk-blue;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -3355,7 +3373,7 @@
   @apply grid items-start gap-4;
   grid-template-columns: minmax(0, 1fr) var(--container-rail);
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -3383,7 +3401,7 @@
 @utility edit-pane-head {
   @apply flex items-center justify-between gap-2.5 border-b border-line px-3.5 py-2.5;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex-wrap;
   }
 }
@@ -3397,7 +3415,7 @@
   @apply tracking-normal text-ink-muted hover:border-line hover:text-ink transition-colors duration-150 ease-in-out;
   @apply accent-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply tap-target;
   }
 }
@@ -3533,7 +3551,7 @@
 @utility li {
   @apply relative flex flex-wrap items-center justify-between gap-4 border-t border-line py-3 first:border-t-0 first:pt-0;
 
-  @media (width >= 43.75rem) {
+  @variant not-phone {
     @apply flex-nowrap;
   }
 
@@ -3564,7 +3582,7 @@
   &:is(a) {
     @apply hover:text-accent-text focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply flex min-h-tap items-center;
     }
   }
@@ -3593,7 +3611,7 @@
 @utility li-side {
   @apply flex shrink-0 items-center gap-2 meta;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply shrink flex-wrap;
   }
 }
@@ -3621,7 +3639,7 @@
     @apply w-44;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply basis-full;
 
     & .inp {
@@ -3648,7 +3666,7 @@
   & .record-key {
     @apply px-1.5 py-px;
 
-    @media (width >= 43.75rem) {
+    @variant not-phone {
       @apply min-w-0;
     }
   }
@@ -3658,22 +3676,26 @@
   @apply relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2;
   @apply border-t border-line py-4 first:border-t-0 first:pt-0;
 
-  @media (hover: hover) and (width >= 43.75rem) {
-    @apply grid-cols-[auto_minmax(0,1fr)];
+  @media (hover: hover) {
+    @variant not-phone {
+      @apply grid-cols-[auto_minmax(0,1fr)];
+    }
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-[auto_minmax(0,1fr)] gap-x-3;
   }
 
   &:has(> .task-pick) {
     @apply grid-cols-[auto_auto_minmax(0,1fr)_auto];
 
-    @media (hover: hover) and (width >= 43.75rem) {
-      @apply grid-cols-[auto_auto_minmax(0,1fr)];
+    @media (hover: hover) {
+      @variant not-phone {
+        @apply grid-cols-[auto_auto_minmax(0,1fr)];
+      }
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply grid-cols-[auto_auto_minmax(0,1fr)];
     }
   }
@@ -3702,7 +3724,7 @@
 @utility task-title {
   @apply min-w-0 font-display text-task font-semibold text-pretty text-ink no-underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -3734,7 +3756,7 @@
 @utility task-source {
   @apply inline-flex items-center gap-1 min-w-0 font-mono text-badge wrap-anywhere text-ink-muted no-underline hover:text-accent-text hover:underline focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -3744,7 +3766,7 @@
 }
 
 @utility task-acts {
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply col-start-2 flex-wrap gap-2;
 
     :where(.task:has(> .task-pick)) > & {
@@ -3787,13 +3809,13 @@
   & a.task-link-title {
     @apply no-underline hover:text-accent-text hover:underline focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply block min-h-tap basis-full content-center;
     }
   }
 
   &:has(> a.task-link-title) {
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply flex-wrap;
     }
   }
@@ -3819,7 +3841,7 @@
   @apply flex min-w-0 cursor-pointer items-center gap-2 border-t border-line px-2.5 py-2 text-left first:border-t-0;
   @apply hover:bg-wash focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 
@@ -3833,7 +3855,7 @@
   @apply text-center font-mono text-badge leading-[1.3] whitespace-nowrap text-ink-muted;
   @apply hover:border-ink-muted hover:text-ink admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap;
   }
 }
@@ -3862,7 +3884,7 @@
   & > a.record-link-title {
     @apply no-underline hover:text-accent-text hover:underline focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap content-center;
     }
   }
@@ -3900,7 +3922,7 @@
   @apply flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-icon border-0 bg-transparent px-2.5 py-2;
   @apply text-left hover:bg-wash admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 
@@ -3930,7 +3952,7 @@
 @utility timeline-event {
   @apply grid min-w-0 grid-cols-[110px_minmax(0,1fr)] gap-2.5 border-b border-line py-[7px] text-li text-ink;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-1 gap-1;
   }
 }
@@ -4155,7 +4177,7 @@
 @utility decision-row-title {
   @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -4179,7 +4201,7 @@
     @apply bg-transparent;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -4220,7 +4242,7 @@
       @apply hidden;
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -4245,7 +4267,7 @@
 @utility decision-event {
   @apply grid grid-cols-[110px_minmax(0,1fr)] gap-2.5 border-b border-line py-[7px] last:border-b-0;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-1 gap-1;
   }
 }
@@ -4273,7 +4295,7 @@
 @utility inbox-row {
   @apply grid grid-cols-1 items-start gap-x-4 gap-y-3 border-b border-line py-4 first:pt-0 last:border-b-0 last:pb-0;
 
-  @media (width >= 43.75rem) {
+  @variant not-phone {
     @apply grid-cols-[minmax(0,1fr)_auto] gap-y-1;
   }
 }
@@ -4310,7 +4332,7 @@
   &:is(a) {
     @apply hover:text-accent-text focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply flex min-h-tap items-center;
     }
   }
@@ -4323,7 +4345,7 @@
 @utility inbox-row-acts {
   @apply flex flex-wrap items-center gap-2;
 
-  @media (width >= 43.75rem) {
+  @variant not-phone {
     @apply justify-end;
   }
 }
@@ -4339,7 +4361,7 @@
       @apply hidden;
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -4364,13 +4386,13 @@
 @utility mail-panes {
   @apply grid grid-cols-1 items-start gap-stack;
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.6fr);
   }
 }
 
 @utility mail-list {
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar;
   }
 
@@ -4401,7 +4423,7 @@
 }
 
 @utility mail-pane {
-  @media (width < 53.75rem) {
+  @variant not-wide {
     &:not(:has(.mail-reader)) {
       @apply hidden;
     }
@@ -4761,7 +4783,7 @@
 }
 
 @utility mail-reply-as {
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap min-w-tap items-center;
   }
 }
@@ -4802,7 +4824,7 @@
   & > label {
     @apply w-14 shrink-0 meta-badge;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply inline-flex min-h-tap items-center;
     }
   }
@@ -4830,7 +4852,7 @@
   & > button {
     @apply cursor-pointer text-ink-muted underline underline-offset-2 hover:text-ink focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap min-w-tap;
     }
   }
@@ -4856,7 +4878,7 @@
     @apply border-line bg-wash text-ink;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     & > button {
       @apply min-h-tap min-w-tap;
     }
@@ -4915,7 +4937,7 @@
 @utility mail-sig-off {
   @apply grid size-7 cursor-pointer place-items-center rounded-lg text-ink-muted hover:text-ink;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply size-tap;
   }
 
@@ -4927,7 +4949,7 @@
 @utility mail-sig-on {
   @apply cursor-pointer meta-badge underline underline-offset-2 hover:text-ink;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 
@@ -4972,7 +4994,7 @@
 @utility wm-author {
   @apply text-ink no-underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 }
@@ -4994,7 +5016,7 @@
   @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent-text focus-ring;
   @apply after:absolute after:inset-0;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -5024,7 +5046,7 @@
 @utility project-card-name {
   @apply font-mono text-[1.15rem] font-medium text-ink no-underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -5056,7 +5078,7 @@
   & > a {
     @apply hover:text-accent-text focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -5171,7 +5193,7 @@
 @utility kc-title {
   @apply font-display font-semibold text-pretty text-ink no-underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -5183,7 +5205,7 @@
     @apply bg-transparent;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -5197,7 +5219,7 @@
     @apply col-span-full mb-[calc(var(--spacing-head)-var(--spacing-stack))];
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     & > form > .project-side {
       @apply row-span-2;
     }
@@ -5229,7 +5251,7 @@
     @apply border-ink-muted;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -5278,7 +5300,7 @@
   & a {
     @apply text-inherit no-underline admin-focus after:absolute after:inset-0;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply block truncate leading-(--spacing-tap);
     }
   }
@@ -5337,7 +5359,7 @@
   @apply relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-1;
   }
 
@@ -5356,7 +5378,7 @@
   & a {
     @apply text-inherit no-underline admin-focus after:absolute after:inset-0;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply block min-h-tap;
     }
   }
@@ -5386,7 +5408,7 @@
     @apply text-accent-text;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply justify-start;
   }
 }
@@ -5403,7 +5425,7 @@
     @apply text-accent-text;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -5490,7 +5512,7 @@
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-1;
   }
 }
@@ -5665,7 +5687,7 @@
 @utility today-side {
   @apply stack;
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -5673,7 +5695,7 @@
 @utility today-link {
   @apply font-mono text-badge text-mk-green-text no-underline hover:underline admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 }
@@ -5705,7 +5727,7 @@
       @apply hidden;
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -5737,7 +5759,7 @@
   @apply flex w-full items-baseline justify-between gap-3 border-b border-line py-3 last:border-b-0;
   @apply font-display font-medium text-ink no-underline hover:text-accent-text admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap items-center;
   }
 }
@@ -5797,16 +5819,18 @@
     & .task {
       @apply grid-cols-[auto_minmax(0,1fr)_auto];
 
-      @media (width < 43.75rem) {
+      @variant phone {
         @apply grid-cols-[auto_minmax(0,1fr)];
       }
 
-      @media (hover: hover) and (width >= 43.75rem) {
-        @apply grid-cols-[auto_minmax(0,1fr)];
+      @media (hover: hover) {
+        @variant not-phone {
+          @apply grid-cols-[auto_minmax(0,1fr)];
+        }
       }
     }
 
-    @media (width < 43.75rem) {
+    @variant phone {
       & .task-acts {
         @apply col-start-2;
       }
@@ -5821,7 +5845,7 @@
     @apply mt-0 mb-4;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -5846,7 +5870,7 @@
     @apply hidden;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     & > input {
       @apply min-h-tap;
     }
@@ -5904,7 +5928,7 @@
   & > .day-head {
     @apply static flex-col-reverse items-start gap-0.5 bg-transparent py-0;
 
-    @media (width >= 53.75rem) {
+    @variant wide {
       @apply stick-bar self-start;
     }
   }
@@ -5921,7 +5945,7 @@
     @apply font-mono text-meta font-normal text-ink-muted;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     grid-template-columns: 200px minmax(0, 1fr);
   }
 }
@@ -5966,13 +5990,13 @@
   & summary {
     @apply cursor-pointer;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
 
   & a {
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply tap-target;
     }
   }
@@ -5984,7 +6008,7 @@
   & input[type="checkbox"] {
     @apply relative mr-1 inline-block size-check appearance-none align-middle;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply size-tap;
     }
 
@@ -6031,7 +6055,7 @@
   & a {
     @apply text-ink-muted underline hover:text-accent-text focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply inline-flex min-h-tap items-center;
     }
   }
@@ -6092,7 +6116,7 @@
 @utility task-form-pair {
   @apply grid gap-3;
 
-  @media (width >= 43.75rem) {
+  @variant not-phone {
     @apply grid-cols-2;
   }
 }
@@ -6180,7 +6204,7 @@
 @utility swatch {
   @apply size-5 cursor-pointer rounded border border-line p-0;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply size-tap;
   }
 
@@ -6223,7 +6247,7 @@
   &:is(a) {
     @apply hover:underline focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply tap-target;
     }
   }
@@ -6264,7 +6288,7 @@
     @apply flex-1;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex-wrap;
 
     & .inp {
@@ -6286,7 +6310,7 @@
 @utility tag-name {
   @apply col-start-1 row-start-1 min-w-0 font-mono text-li font-semibold text-ink-muted;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 
@@ -6353,7 +6377,7 @@
     @apply col-span-full;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply grid-cols-1;
   }
 }
@@ -6370,7 +6394,7 @@
 @utility series-title {
   @apply text-li font-semibold break-words text-ink hover:underline;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 }
@@ -6406,7 +6430,7 @@
   @apply min-w-0 cursor-pointer font-mono text-li font-semibold text-ink-muted;
   @apply hover:underline;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap items-center;
   }
 }
@@ -6451,7 +6475,7 @@
   @apply inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-ink-muted;
   @apply hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap;
   }
 }
@@ -6480,7 +6504,7 @@
     @apply bg-wash;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -6545,7 +6569,7 @@
 @utility settings-side {
   @apply bg-transparent;
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 
@@ -6565,7 +6589,7 @@
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply inline-flex min-h-tap items-center;
   }
 }
@@ -7128,7 +7152,7 @@
     @apply text-accent-text underline underline-offset-3;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply flex min-h-tap max-w-[58vw] items-center overflow-hidden;
 
     & .perf-path {
@@ -7270,7 +7294,7 @@
     @apply accent-outline;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -7306,7 +7330,7 @@
     @apply font-mono text-meta font-normal text-ink-muted;
   }
 
-  @media (width >= 53.75rem) {
+  @variant wide {
     grid-template-columns: 200px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
 
@@ -7358,7 +7382,7 @@
     @apply border-ink-muted bg-ground-sunk;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -7402,7 +7426,7 @@
     mask: var(--glyph-calendar) center / contain no-repeat;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -7449,7 +7473,7 @@
 @utility choice {
   @apply inline-flex cursor-pointer items-center gap-2 font-mono text-input text-ink;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -7461,7 +7485,7 @@
     @apply fixed bottom-5 left-1/2 z-60 mb-0 max-w-[calc(100%-2*var(--spacing-admin-gutter))] -translate-x-1/2;
     @apply rounded-panel border border-line bg-ground-sunk py-2.5 pr-3 pl-[18px] text-input shadow-menu;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply inset-x-admin-gutter max-w-none translate-x-0;
     }
   }
@@ -7490,7 +7514,7 @@
 @utility bulk-pick {
   @apply inline-flex cursor-pointer items-center justify-center;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap;
   }
 }
@@ -7522,7 +7546,7 @@
     @apply cursor-default opacity-50 hover:text-ink-muted;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply tap-target px-2.5;
   }
 }
@@ -7556,7 +7580,7 @@
     @apply bg-wash;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap content-center;
   }
 }
@@ -7600,7 +7624,7 @@
     }
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap;
   }
 }
@@ -7742,7 +7766,7 @@
 @utility compose-photo-tools {
   @apply flex items-center justify-end gap-1;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     & .bt {
       @apply min-h-tap min-w-tap justify-center;
     }
@@ -7756,7 +7780,7 @@
     @apply w-full border-0 px-0 py-0;
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     & .bt {
       @apply min-h-tap;
     }
@@ -7891,7 +7915,7 @@
   @apply inline-flex size-5.5 flex-none cursor-pointer items-center justify-center rounded-full text-ink-muted;
   @apply hover:text-ink admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap min-w-tap;
   }
 }
@@ -7909,7 +7933,7 @@
   @apply cursor-pointer font-mono text-meta tracking-normal normal-case text-ink-muted;
   @apply hover:text-ink admin-focus;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply tap-target;
   }
 }
@@ -7977,7 +8001,7 @@
     accent-color: var(--net);
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-tap;
   }
 }
@@ -7996,7 +8020,7 @@
   & a {
     @apply hover:text-ink;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply inline-flex min-h-tap items-center;
     }
   }
@@ -8058,7 +8082,7 @@
   &:is(a) {
     @apply no-underline hover:underline focus-ring;
 
-    @media (width < 43.75rem) {
+    @variant phone {
       @apply min-h-tap;
     }
   }
@@ -8093,7 +8117,7 @@
 }
 
 @utility social-side {
-  @media (width >= 53.75rem) {
+  @variant wide {
     @apply stick-bar self-start;
   }
 }
@@ -8179,7 +8203,7 @@
   @apply fixed z-80 flex max-h-[calc(100vh-1rem)] w-max max-w-80 min-w-56 flex-col overflow-auto p-1.5 outline-none;
   @apply menu-surface;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply max-w-[calc(100vw-1rem)];
   }
 
@@ -8200,7 +8224,7 @@
   @apply flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-[7px] text-left font-mono text-input;
   @apply text-ink no-underline outline-none;
 
-  @media (width < 43.75rem) {
+  @variant phone {
     @apply min-h-11;
   }
 
@@ -8270,11 +8294,11 @@
     :root { --spacing-gutter: 1rem; }
   }
 
-  @media (width < 53.75rem) {
+  @variant not-wide {
     :root { --spacing-top-bar: 7.25rem; }
   }
 
-  @media (width < 43.75rem) {
+  @variant phone {
     :root { --spacing-top-bar: 8.25rem; }
   }
 

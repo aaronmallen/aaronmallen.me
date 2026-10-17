@@ -59,8 +59,10 @@ slice, so the site cannot do what the design does and cap every `p` at a measure
 instead, and a rule meant for one side has to hang off a class that side owns, as the admin's phone type steps hang off
 `.adm`.
 
-Most phone rules live inside the utility they change, each in its own `@media (width < 43.75rem)` block, and the
-rest sit in the base layer. Finding all of them takes a search for the breakpoint.
+Most phone rules live inside the utility they change, each in its own `@variant phone` block, and the rest sit in
+the base layer. `config/tailwind.css` defines `phone` (below `43.75rem`) and `wide` (from `53.75rem`) beside `light` and
+`dark`, so moving a breakpoint takes one edit, and a search for `phone` or `wide` finds every rule that uses it. Rules
+for the wider side use `not-phone` or `not-wide`.
 
 Nothing checks a class name. Tailwind emits a utility only when it finds the name in the source, and a misspelt
 class matches nothing and renders unstyled with every request spec passing. Only a browser spec that reads the
