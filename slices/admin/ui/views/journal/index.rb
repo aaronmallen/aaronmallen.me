@@ -54,6 +54,7 @@ module Admin
               Day(date:, entries:, today: @today, editing: @editing, linked: @linked, place:)
             end
             Pager(page: @days, route: :admin_journal, params: search.empty? ? {} : { q: search })
+            template(data: { journal_edit_template: EditForm::TEMPLATE }) { EditForm(place:) }
           end
 
           def entry_date = @values[:entry_date] || @today

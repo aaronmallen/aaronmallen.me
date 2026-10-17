@@ -21,11 +21,9 @@ module Admin
         {
           days:,
           linked: record_link_queries.counts(KIND, days.rows.flat_map(&:last).map(&:id)),
-          entries: journal_entry_queries.count,
           saved_views: list_saved_views.call(SCREEN, filters),
-          streak: journal_entry_queries.streak(now:),
           today: Blog::TimeZone.today(now),
-          words: journal_entry_queries.word_count,
+          **journal_entry_queries.summary(now:),
         }
       end
 

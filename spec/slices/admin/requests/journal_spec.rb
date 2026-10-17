@@ -13,6 +13,10 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
   def day_dates = page.all(".day-date").map { it["datetime"] }
 
+  def edit_template
+    Capybara.string(last_response.body[%r{<template data-journal-edit-template[^>]*>(.*?)</template>}m, 1].to_s)
+  end
+
   def entries = repo.between(from: today - 30, to: today)
 
   def entry = entries.first
@@ -286,11 +290,24 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(page.find(".journal-entry-body").native.inner_html).not_to include("alert")
       end
 
-      it "gives the edit form the markdown source" do
+      it "gives the entry its markdown source" do
         create(:journal_entry, body: "a **bold** day")
         get "/admin/journal"
 
-        expect(page).to have_css("[data-journal-edit-form][data-journal-source='a **bold** day']", visible: :all)
+        expect(page).to have_css(".journal-entry[data-journal-source='a **bold** day']")
+      end
+
+      it "renders the body stored with the entry" do
+        create(:journal_entry, body: "markdown", body_html: "<p>stored</p>")
+        get "/admin/journal"
+
+        expect(bodies).to eq(["stored"])
+      end
+
+      it "reads the entry count, words and streak in one query" do
+        create(:journal_entry, body: "one two")
+
+        expect(counting(/FROM "journal_entries"/) { get "/admin/journal" }.grep(/\b(count|sum)\(/i).size).to eq(1)
       end
 
       it "counts the streak over the last 30 days, today included" do
@@ -548,6 +565,12 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(entry.entry_time.strftime("%H:%M:%S")).to eq(Blog::TimeZone.local(now).strftime("%H:%M:%S"))
       end
 
+      it "renders the body to HTML" do
+        save(body: "a *walk*", entry_date: today.iso8601)
+
+        expect(repo.today.first.body_html).to eq(Markdown.to_html("a *walk*"))
+      end
+
       it "returns to the journal with the toast", :aggregate_failures do
         save(body: "walked", entry_date: today.iso8601)
         follow_redirect!
@@ -739,34 +762,64 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(form).to have_field("_csrf_token", type: "hidden")
       end
 
-      it "hides an edit form holding the entry's text", :aggregate_failures do
-        form = page.find("form[action='/admin/journal/#{entry.id}'][method='post'][hidden]", visible: :hidden)
-
-        expect(form).to have_field("Entry text", type: "textarea", with: "walked", visible: :hidden)
-        expect(form).to have_field("_csrf_token", type: "hidden")
+      it "draws no edit form for an entry nobody is editing" do
+        expect(page).to have_no_css("form[action='/admin/journal/#{entry.id}']", visible: :all)
       end
 
-      it "draws the edit form's text in the Markdown editor at its own height" do
-        form = page.find("form[action='/admin/journal/#{entry.id}'][method='post']", visible: :hidden)
+      it "gives the entry where its edit form posts and the ids it uses", :aggregate_failures do
+        item = page.find(".journal-entry")
 
-        expect(form).to have_css(
-          "[data-markdown-editor][style='--edit-height: 200px'] textarea[name='entry[body]']", visible: :hidden,
-        )
+        expect(item["data-journal-scope"]).to eq("journal-edit-#{entry.id}")
+        expect(item["data-journal-update"]).to eq("/admin/journal/#{entry.id}")
       end
 
-      it "holds the entry's tags in the edit form, joined by commas" do
+      it "draws one edit form for the script to fill" do
+        expect(page.all("template[data-journal-edit-template='journal-edit-template']", visible: :all).size).to eq(1)
+      end
+
+      describe "the edit form" do
+        def form = edit_template.find("form[method='post'][data-journal-edit-form]")
+
+        it "posts with the CSRF token" do
+          expect(form).to have_field("_csrf_token", type: "hidden")
+        end
+
+        it "draws the text in the Markdown editor at its own height" do
+          editor = "[data-markdown-editor][style='--edit-height: 200px']"
+
+          expect(form).to have_css("#{editor} textarea#journal-edit-template-body[name='entry[body]']")
+        end
+
+        it "gives Save and Cancel", :aggregate_failures do
+          expect(form).to have_button("Save", type: "submit", disabled: true)
+          expect(form).to have_button("Cancel", type: "button")
+        end
+      end
+    end
+
+    describe "a tagged entry" do
+      before do
         create(:journal_entry, body: "read", tags: %w[ruby health])
         get "/admin/journal"
-        form = page.find("form[action='/admin/journal/#{entry.id}']", visible: :hidden)
-
-        expect(form).to have_field("Tags", with: "health, ruby", visible: :hidden)
       end
 
-      it "gives the edit form Save and Cancel", :aggregate_failures do
-        form = page.find("form[action='/admin/journal/#{entry.id}']", visible: :hidden)
+      it "gives the entry its tags, joined by commas" do
+        expect(page.find(".journal-entry")["data-journal-tags"]).to eq("health, ruby")
+      end
 
-        expect(form).to have_button("Save", type: "submit", visible: :hidden)
-        expect(form).to have_button("Cancel", type: "button", visible: :hidden)
+      describe "opened to edit" do
+        def form = page.find("form[action='/admin/journal/#{entry.id}'][data-journal-source='read']")
+
+        before { get "/admin/journal?edit=#{entry.id}" }
+
+        it "draws its edit form holding its text and tags", :aggregate_failures do
+          expect(form).to have_field("Entry text", type: "textarea", with: "read")
+          expect(form).to have_field("Tags", with: "health, ruby")
+        end
+
+        it "draws no other edit form" do
+          expect(page.all("form[data-journal-edit-form]", visible: :all).size).to eq(1)
+        end
       end
     end
 
@@ -783,6 +836,12 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
         expect(saved).to have_attributes(body: "after", entry_date: today - 3)
         expect(saved.entry_time.strftime("%H:%M")).to eq("21:05")
+      end
+
+      it "renders the new body to HTML" do
+        edit(body: "a **bold** day")
+
+        expect(repo.by_id(entry.id).body_html).to eq(Markdown.to_html("a **bold** day"))
       end
 
       it "changes the tags, folded to one case" do
@@ -862,6 +921,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
       it "sends the page and the search with the edit form", :aggregate_failures do
         get "/admin/journal", to:, q: "walk"
+        form = edit_template
 
         expect(form).to have_css("input[type='hidden'][name='to'][value='#{to}']", visible: :all)
         expect(form).to have_css("input[type='hidden'][name='q'][value='walk']", visible: :all)
@@ -870,7 +930,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       it "sends neither on the plain newest page" do
         get "/admin/journal"
 
-        expect(page).to have_no_css(".journal-edit input[name='to'], .journal-edit input[name='q']", visible: :all)
+        expect(edit_template).to have_no_css(".journal-edit input[name='to'], .journal-edit input[name='q']")
       end
 
       it "reopens a refused edit on its page with the error", :aggregate_failures do

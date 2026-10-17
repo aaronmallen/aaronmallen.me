@@ -5,7 +5,6 @@ module Admin
     module Components
       module Journal
         class Entry < Component
-          BODY_HEIGHT = "200px"
           TAG_SEPARATOR = ", "
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
@@ -17,13 +16,12 @@ module Admin
           def self.links_id(id) = "journal-links-#{id}"
 
           def view_template
-            article(class: "journal-entry", data: { journal_item: "", menu: }) do
+            article(class: "journal-entry", data:) do
               head
-              MarkdownBody(
-                source: @entry.body, renderer: "posts", class: "journal-entry-body", hidden: editing?,
-                data: { journal_text: "" },
-              )
-              edit_form
+              div(class: "post-body journal-entry-body", hidden: editing?, data: { journal_text: "" }) do
+                raw(safe(@entry.body_html.strip))
+              end
+              edit_form if editing?
               linked if records
             end
           end
@@ -38,7 +36,12 @@ module Admin
             end
           end
 
-          def body = editing? ? @editing[:body] : @entry.body
+          def data
+            {
+              journal_item: "", menu:, journal_source: @entry.body, journal_tags: saved_tags, journal_scope: scope,
+              journal_update: update_path,
+            }
+          end
 
           def delete_form
             DeleteForm(
@@ -47,29 +50,14 @@ module Admin
             )
           end
 
-          def edit_attributes
-            {
-              action: path(:admin_update_journal_entry, id: @entry.id),
-              class: "journal-edit",
-              hidden: !editing?,
-              data: { journal_edit_form: "", journal_source: @entry.body },
-            }
-          end
-
           def edit_form
-            Form(**edit_attributes) do
-              @place.each { |name, value| input(type: "hidden", name:, value:) }
-              EntryFields(body:, tags:, errors:, scope:, height: BODY_HEIGHT, label: t(".body"))
-              div(class: "journal-edit-foot") do
-                Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }
-                SaveButton(body:) { t(".save") }
-              end
-            end
+            EditForm(
+              action: update_path, body: @editing[:body], tags: @editing[:tags], errors: @editing[:errors], scope:,
+              source: @entry.body, place: @place,
+            )
           end
 
           def editing? = !@editing.nil?
-
-          def errors = editing? ? @editing[:errors] : Blog::Constants::EMPTY_HASH
 
           def head
             header(class: "journal-entry-head") do
@@ -114,9 +102,11 @@ module Admin
 
           def records = @editing&.fetch(:records, nil)
 
+          def saved_tags = @entry.tags.map(&:name).join(TAG_SEPARATOR)
+
           def scope = "journal-edit-#{@entry.id}"
 
-          def tags = editing? ? @editing[:tags] : @entry.tags.map(&:name).join(TAG_SEPARATOR)
+          def update_path = path(:admin_update_journal_entry, id: @entry.id)
         end
       end
     end

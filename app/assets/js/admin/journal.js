@@ -1,4 +1,6 @@
 import { fresh } from "./fresh.js";
+import { setupMarkdownEditors } from "./markdown_editor.js";
+import { setupTagFields } from "./tag_field.js";
 
 const WORDS = /\S+/g;
 const BLANK = /^\s*$/;
@@ -17,10 +19,38 @@ export function setupJournals() {
 }
 
 function setupEntry(entry) {
+  let form = entry.querySelector("[data-journal-edit-form]");
+  let open = form && setupEditForm(entry, form);
+
+  entry.querySelector("[data-journal-edit]").addEventListener("click", () => {
+    if (!form?.isConnected) {
+      form = drawEditForm(entry);
+      open = setupEditForm(entry, form);
+    }
+    open();
+  });
+}
+
+function drawEditForm(entry) {
+  const template = document.querySelector("[data-journal-edit-template]");
+  const holder = document.createElement("template");
+  holder.innerHTML = template.innerHTML.replaceAll(template.dataset.journalEditTemplate, entry.dataset.journalScope);
+
+  const form = holder.content.querySelector("form");
+  form.action = entry.dataset.journalUpdate;
+  form.dataset.journalSource = entry.dataset.journalSource;
+  form.querySelector("[data-journal-body]").value = entry.dataset.journalSource;
+  form.querySelector("[data-tag-field-value]").value = entry.dataset.journalTags;
+  entry.querySelector("[data-journal-text]").after(form);
+  setupMarkdownEditors(form);
+  setupTagFields(form);
+  return form;
+}
+
+function setupEditForm(entry, form) {
   const text = entry.querySelector("[data-journal-text]");
   const actions = entry.querySelector("[data-journal-actions]");
   const edit = entry.querySelector("[data-journal-edit]");
-  const form = entry.querySelector("[data-journal-edit-form]");
   const body = form.querySelector("[data-journal-body]");
   const save = form.querySelector("[data-journal-save]");
   const links = entry.querySelector("[data-journal-links]");
@@ -36,11 +66,6 @@ function setupEntry(entry) {
     if (links) links.hidden = !editing;
   };
 
-  edit.addEventListener("click", () => {
-    setEditing(true);
-    body.focus();
-  });
-
   form.querySelector("[data-journal-cancel]").addEventListener("click", () => {
     body.value = form.dataset.journalSource;
     body.removeAttribute("aria-invalid");
@@ -53,6 +78,12 @@ function setupEntry(entry) {
   });
 
   body.addEventListener("input", renderSave);
+  renderSave();
+
+  return () => {
+    setEditing(true);
+    body.focus();
+  };
 }
 
 function showWrite(form) {

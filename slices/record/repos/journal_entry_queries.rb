@@ -33,15 +33,14 @@ module Record
 
       def page_by_tag(tag, page) = page.fill(journal_entries.tagged([tag]).newest_first.opening.paged(page).to_a)
 
-      def streak(now: Time.now)
+      def summary(now: Time.now)
         today = Blog::TimeZone.today(now)
+        totals = journal_entries.totals(today - (STREAK_DAYS - 1), today)
 
-        { days: STREAK_DAYS, written: journal_entries.between(today - (STREAK_DAYS - 1), today).days_written }
+        { entries: totals[:entries], words: totals[:words], streak: { days: STREAK_DAYS, written: totals[:written] } }
       end
 
       def today(now: Time.now) = with_tags.on(Blog::TimeZone.today(now)).newest_first.to_a
-
-      def word_count = journal_entries.word_total
 
       private
 

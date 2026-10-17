@@ -5,6 +5,8 @@ RSpec.describe "Admin private tag fields", type: :request do
 
   def choices = get("/admin/tags/private/choices", {}, { "HTTP_ACCEPT" => "application/json" })
 
+  def edit_template = last_response.body[%r{<template.*?</template>}m].to_s
+
   def names(selector)
     page.all(selector, visible: :all).map { JSON.parse(picker(it)["data-tag-field"]).map { |tag| tag["name"] } }
   end
@@ -57,11 +59,13 @@ RSpec.describe "Admin private tag fields", type: :request do
       expect(sources("input[name='task[tags]']").uniq).to eq(["/admin/tags/private/choices"])
     end
 
-    it "points the journal box, the write dialog and an entry's edit form at the private tags" do
+    it "points the journal box, the write dialog and the edit form template at the private tags" do
       create(:journal_entry, body: "one")
       get "/admin/journal"
 
-      expect(sources("input[name='entry[tags]']")).to eq(["/admin/tags/private/choices"] * 3)
+      expect([sources("input[name='entry[tags]']"), edit_template]).to match(
+        [["/admin/tags/private/choices"] * 2, include('data-tag-field-src="/admin/tags/private/choices"')],
+      )
     end
 
     it "points the decision editors at the private tags" do

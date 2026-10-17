@@ -53,10 +53,7 @@ module API
         window.merge(stats:, entries: serialized(Serializers::JournalEntry, rows))
       end
 
-      def stats
-        { entries: journal_entry_queries.count, words: journal_entry_queries.word_count,
-          streak: journal_entry_queries.streak }
-      end
+      def stats = journal_entry_queries.summary
     end
   end
 end

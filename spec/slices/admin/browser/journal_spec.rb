@@ -195,12 +195,50 @@ RSpec.describe "Admin journal", type: :feature do
       expect(repo.by_id(entry.id).body).to eq("before")
     end
 
+    it "draws one edit form, for this entry" do
+      expect(page.all("form[data-journal-edit-form]", visible: :all).size).to eq(1)
+    end
+
+    it "labels the textarea with its own id" do
+      expect(item).to have_css("textarea#journal-edit-#{entry.id}-body")
+    end
+
+    it "keeps an edit in progress through a live update", :aggregate_failures do
+      item.fill_in "Entry text", with: "half typed"
+      create(:journal_entry, body: "written elsewhere")
+      page.assert_selector(".journal-entry-body", text: "written elsewhere")
+
+      expect(item).to have_field("Entry text", with: "half typed")
+    end
+
     it "holds the saved text when editing again after Cancel" do
       item.fill_in "Entry text", with: "changed my mind"
       item.click_button "Cancel"
       item.click_button "Edit"
 
       expect(item).to have_field("Entry text", with: "before")
+    end
+  end
+
+  describe "editing a tagged entry" do
+    let(:item) { find(".journal-entry").tap(&:hover) }
+
+    before do
+      create(:journal_entry, body: "tagged", tags: %w[ruby health])
+      visit "/admin/journal"
+      item.click_button "Edit"
+    end
+
+    it "holds the entry's tags" do
+      expect(item).to have_css(".tag-pick-chip", count: 2)
+    end
+
+    it "saves the tags with the new text" do
+      item.fill_in "Entry text", with: "retagged"
+      item.click_button "Save"
+      page.assert_selector(".toast", text: "Entry updated")
+
+      expect(Record::Slice["repos.journal_entry_queries"].today.first.tags.map(&:name)).to eq(%w[health ruby])
     end
   end
 
@@ -276,6 +314,7 @@ RSpec.describe "Admin journal", type: :feature do
     before do
       create(:journal_entry, body: "before")
       visit "/admin/journal"
+      item.click_button "Edit"
       execute_script(<<~JS)
         const form = document.querySelector("[data-journal-edit-form]");
         form.querySelector("textarea").value = " ";

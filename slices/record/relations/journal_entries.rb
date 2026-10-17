@@ -5,7 +5,8 @@ module Record
     class JournalEntries < Blog::DB::Relation
       OPENING = 160
       OPENING_BLANKS = " \t\r\n"
-      WORDS = Sequel.function(:regexp_count, :body, "\\S+")
+      COUNT = Sequel.function(:count).*.as(:entries)
+      WORDS = Sequel.function(:coalesce, Sequel.function(:sum, :word_count), 0).as(:words)
 
       schema :journal_entries, infer: true do
         associations do
@@ -17,8 +18,6 @@ module Record
       def between(from, to) = where(entry_date: from..to)
 
       def days = unordered.distinct.select(:entry_date)
-
-      def days_written = unordered.distinct.select(:entry_date).count
 
       def later_than(day) = where { entry_date > day }
 
@@ -42,7 +41,11 @@ module Record
         where(id: journal_entry_tags.holding_every(names).dataset)
       end
 
-      def word_total = unordered.sum(WORDS).to_i
+      def totals(from, to)
+        written = Sequel.function(:count, :entry_date).distinct.filter(entry_date: from..to).as(:written)
+
+        unordered.dataset.select(COUNT, WORDS, written).first
+      end
     end
   end
 end

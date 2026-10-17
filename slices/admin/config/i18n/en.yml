@@ -1083,15 +1083,16 @@ en:
           wake: "Wake now"
           wakes: "wakes %{at}"
       journal:
-        entry:
+        edit_form:
           body: "Entry text"
           cancel: "Cancel"
+          save: "Save"
+        entry:
           confirm_delete: "Delete this entry? You can't undo this."
           delete: "Delete"
           edit: "Edit"
           linked: "%{count} linked"
           links: "Links"
-          save: "Save"
         entry_fields:
           tags: "Tags"
           tags_placeholder: "ruby, health"

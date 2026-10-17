@@ -1010,7 +1010,9 @@ CREATE TABLE public.journal_entries (
     body public.non_blank_text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE((body)::text, ''::text)), 'B'::"char")) STORED
+    search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE((body)::text, ''::text)), 'B'::"char")) STORED,
+    body_html text NOT NULL,
+    word_count integer GENERATED ALWAYS AS (regexp_count((body)::text, '\S+'::text)) STORED NOT NULL
 );
 
 
@@ -8842,4 +8844,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002186_index_commits_created_at.rb'),
 ('20261016002204_create_held_title_fetches_and_backfills.rb'),
 ('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb'),
-('20261016002252_index_commit_text_by_trigram.rb');
+('20261016002252_index_commit_text_by_trigram.rb'),
+('20261016002255_store_journal_html_and_word_counts.rb');

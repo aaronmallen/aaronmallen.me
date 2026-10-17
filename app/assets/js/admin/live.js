@@ -51,7 +51,7 @@ export function morphPage(next) {
     if (now && drawn)
       Idiomorph.morph(now, drawn, {
         ignoreActiveValue: typing,
-        callbacks: { beforeNodeMorphed: untouched, beforeAttributeUpdated: keepsOpen },
+        callbacks: { beforeNodeMorphed: untouched, beforeNodeRemoved: keepsEdits, beforeAttributeUpdated: keepsOpen },
       });
   }
 
@@ -105,6 +105,10 @@ export function setupLive() {
 
 function drawnAt(page) {
   return Number(page.querySelector("[data-live-at]")?.dataset.liveAt) || 0;
+}
+
+function keepsEdits(node) {
+  return !(node instanceof HTMLFormElement) || untouched(node);
 }
 
 function keepsOpen(name, node, change) {
