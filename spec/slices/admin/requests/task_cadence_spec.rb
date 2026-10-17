@@ -90,6 +90,12 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
       expect(page.all("#new-cadence option").map(&:value)).to eq(["", *Blog::Types::TaskCadence.values])
     end
 
+    it "bounds the number fields and lists the weeks as the cadence contract does", :aggregate_failures do
+      expect(%w[every day].map { page.find("#new-#{it}", visible: :all).then { |field| [field[:min], field[:max]] } })
+        .to eq([%w[1 365], %w[1 31]])
+      expect(page.all("#new-week option", visible: :all).map(&:value)).to eq(%w[1 2 3 4 -1])
+    end
+
     it "hides and disables every field a kind needs until one is picked", :aggregate_failures do
       expect(page.all("main [data-cadence-for]:not([hidden])", visible: :all)).to be_empty
       expect(enabled("main")).to eq(%w[cadence])

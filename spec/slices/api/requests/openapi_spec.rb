@@ -27,6 +27,15 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(document).to eq(OpenAPI.document)
   end
 
+  it "bounds each repeat field as the cadence contract does" do
+    body = document.dig("paths", "/tasks", "post", "requestBody", "content", "application/json", "schema")
+    recur = body.dig("properties", "recur", "properties")
+    bounds = recur.slice("every", "weekday", "day", "month").transform_values { it.values_at("minimum", "maximum") }
+
+    expect([bounds, recur.dig("week", "enum")])
+      .to eq([{ "every" => [1, 365], "weekday" => [0, 6], "day" => [1, 31], "month" => [1, 12] }, [-1, 1, 2, 3, 4]])
+  end
+
   it "refuses every operation it describes when the request has no token" do
     unguarded = operations.reject do |verb, path|
       call_api(verb.to_sym, path.gsub(/\{\w+\}/, "0"), nil, token: nil)

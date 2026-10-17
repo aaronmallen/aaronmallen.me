@@ -5,10 +5,11 @@ module Admin
     module Components
       module Tasks
         class CadenceFields < Component
+          CONTRACT = ::Tasks::Contracts::TaskCadenceContract
           KINDS = Blog::Types::TaskCadence.values.freeze
           MONTHS = Date::MONTHNAMES.drop(1).each.with_index(1).to_h { |name, number| [number.to_s, name] }.freeze
           WEEKDAYS = Date::DAYNAMES.each.with_index.to_h { |name, number| [number.to_s, name] }.freeze
-          WEEKS = %w[1 2 3 4 -1].freeze
+          WEEKS = CONTRACT::WEEKS.map(&:to_s).freeze
 
           prop :scope, Blog::Types::String
           prop :today, Blog::Types::Date
@@ -29,9 +30,13 @@ module Admin
 
           private
 
+          def bounds(range) = { min: range.min, max: range.max }
+
           def day_field
             part(:day, %w[month_day yearly]) do |control|
-              Input(**control, type: "number", name: name(:day), min: 1, max: 31, value: value(:day, @today.day))
+              Input(
+                **control, type: "number", name: name(:day), **bounds(CONTRACT::DAYS), value: value(:day, @today.day),
+              )
             end
           end
 
@@ -39,7 +44,7 @@ module Admin
             label = -> { %w[days weeks].each { unit(it) } }
 
             part(:every, %w[days weeks], label:) do |control|
-              Input(**control, type: "number", name: name(:every), min: 1, max: 365, value: value(:every, 1))
+              Input(**control, type: "number", name: name(:every), **bounds(CONTRACT::EVERY), value: value(:every, 1))
             end
           end
 

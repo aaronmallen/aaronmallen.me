@@ -7,6 +7,7 @@ module API
       TASK = Helpers::Schema::TASK
       BULK = Helpers::Schema.bulk("tasks", TASK)
       BY_ID = Helpers::Schema.by_id(TASK)
+      CADENCE = ::Tasks::Contracts::TaskCadenceContract
       CLOSED = "task %s is already done or canceled"
       CREDITS = "the whole set of who did the work: the owner, or an agent with the model it ran on; " \
                 "an empty list clears it, which lists the owner again"
@@ -37,20 +38,26 @@ module API
               "such as the first Monday; yearly: a date each year",
             ].join(" "),
           },
-          every: { type: "integer", minimum: 1, maximum: 365, description: "days or weeks apart, for days and weeks" },
+          every: {
+            type: "integer", minimum: CADENCE::EVERY.min, maximum: CADENCE::EVERY.max,
+            description: "days or weeks apart, for days and weeks",
+          },
           weekday: {
-            type: "integer", minimum: 0, maximum: 6,
+            type: "integer", minimum: CADENCE::WEEKDAYS.min, maximum: CADENCE::WEEKDAYS.max,
             description: "0 for Sunday to 6 for Saturday, for weeks and month_weekday",
           },
           week: {
-            type: "integer", enum: [-1, 1, 2, 3, 4],
+            type: "integer", enum: CADENCE::WEEKS.sort,
             description: "1 to 4 for the first to fourth, or -1 for the last, for month_weekday",
           },
           day: {
-            type: "integer", minimum: 1, maximum: 31,
+            type: "integer", minimum: CADENCE::DAYS.min, maximum: CADENCE::DAYS.max,
             description: "the day of the month, for month_day and yearly",
           },
-          month: { type: "integer", minimum: 1, maximum: 12, description: "1 for January to 12, for yearly" },
+          month: {
+            type: "integer", minimum: CADENCE::MONTHS.min, maximum: CADENCE::MONTHS.max,
+            description: "1 for January to 12, for yearly",
+          },
           starts_on: {
             type: "string",
             description: "for weeks, the day as YYYY-MM-DD that weeks count from; today when you leave it out",

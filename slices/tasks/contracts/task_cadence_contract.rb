@@ -11,15 +11,20 @@ module Tasks
         Blog::Types::TaskCadence["month_weekday"] => %i[week weekday],
         Blog::Types::TaskCadence["yearly"] => %i[month day],
       }.freeze
+      DAYS = (1..31)
+      EVERY = (1..365)
       LEAP_YEAR = 2024
+      MONTHS = (1..12)
+      WEEKDAYS = (0..6)
+      WEEKS = [1, 2, 3, 4, -1].freeze
 
       params do
         required(:cadence).filled(Blog::Types::TaskCadence)
-        optional(:every).maybe(:integer, included_in?: 1..365)
-        optional(:weekday).maybe(:integer, included_in?: 0..6)
-        optional(:week).maybe(:integer, included_in?: [-1, 1, 2, 3, 4])
-        optional(:day).maybe(:integer, included_in?: 1..31)
-        optional(:month).maybe(:integer, included_in?: 1..12)
+        optional(:every).maybe(:integer, included_in?: EVERY)
+        optional(:weekday).maybe(:integer, included_in?: WEEKDAYS)
+        optional(:week).maybe(:integer, included_in?: WEEKS)
+        optional(:day).maybe(:integer, included_in?: DAYS)
+        optional(:month).maybe(:integer, included_in?: MONTHS)
         optional(:starts_on).maybe(:date)
       end
 
