@@ -22,7 +22,7 @@ module Tasks
       end
 
       def rising(positions)
-        positions.each_with_object([]) { |position, out| out << [position, out.last.to_i + 1].max }
+        positions.each_with_object([]) { |position, out| out << [position, out.last&.succ].compact.max }
       end
     end
   end

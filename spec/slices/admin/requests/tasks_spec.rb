@@ -2299,6 +2299,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(next_titles).to eq(%w[tied second third fourth first])
       end
 
+      it "keeps a task led below position one where it is" do
+        led = create(:task, title: "led", position: -2)
+        place("third", "led")
+
+        expect([repo.by_id(led.id).position, next_titles]).to eq([-2, %w[led third first second fourth]])
+      end
+
       it "keeps a task in its own list" do
         place("first", "third")
 

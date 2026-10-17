@@ -282,6 +282,26 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
     end
 
+    describe "moving several ticked cards into an open column" do
+      let!(:waiting) { linked(stage: "ready", title: "Waiting") }
+      let!(:elsewhere) { create(:task, :someday, title: "Elsewhere") }
+
+      def positions = Tasks::Slice["relations.tasks"].where(id: [waiting.id, elsewhere.id]).order(:id).pluck(:position)
+
+      before do
+        bulk([linked(title: "Plan it"), linked(:in_progress, :in_sprint, title: "Ship it")].map(&:id), "ready")
+        get "/admin/projects/#{project.id}"
+      end
+
+      it "puts the last ticked card first and every moved card ahead of the column" do
+        expect(titles("ready")).to eq(["Ship it", "Plan it", "Waiting"])
+      end
+
+      it "leaves every other task where it was" do
+        expect(positions).to eq([waiting.position, elsewhere.position])
+      end
+    end
+
     describe "moving ticked cards with one that is gone" do
       let(:task) { linked }
       let(:missing) { create(:task).id.tap { Tasks::Slice["repos.task_mutations"].delete(it) } }

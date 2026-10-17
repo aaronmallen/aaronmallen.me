@@ -33,10 +33,7 @@ module Tasks
       def lead(id)
         transaction do
           tasks.lock_until_commit
-          first = tasks.unordered.min(:position)
-          ahead = tasks.exclude(id:).where(Sequel[:position] <= tasks.unordered.by_pk(id).select(:position).dataset)
-          ahead.dataset.update(position: Sequel[:position] + 1)
-          update(id, position: first)
+          update(id, position: tasks.unordered.min(:position) - 1)
         end
       end
 

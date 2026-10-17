@@ -1217,7 +1217,6 @@ CREATE TABLE public.tasks (
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
     CONSTRAINT tasks_number_check CHECK ((number > 0)),
-    CONSTRAINT tasks_position_check CHECK (("position" > 0)),
     CONSTRAINT tasks_worked_seconds_check CHECK ((worked_seconds >= 0))
 );
 
@@ -8726,4 +8725,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002072_claim_decision_photos.rb'),
 ('20261016002074_add_description_to_tags.rb'),
 ('20261016002086_keep_manual_work_session_days_positive.rb'),
-('20261016002092_add_task_rules_for_project_repos.rb');
+('20261016002092_add_task_rules_for_project_repos.rb'),
+('20261016002183_let_task_positions_go_below_one.rb');
