@@ -6,12 +6,14 @@ RSpec.describe "The worker during maintenance", type: :app do
   let(:notices) { [] }
   let(:runs) { [] }
 
-  let(:job) do
-    ran = runs
-    stub_const("Spec::MaintainedJob", Class.new(Blog::Job) { define_method(:perform) { ran << :ran } })
-  end
+  let(:job) { job_class("Spec::MaintainedJob", Blog::Job) }
 
   def agent = Hanami.app["honeybadger.agent"]
+
+  def job_class(name, base)
+    ran = runs
+    stub_const(name, Class.new(base) { define_method(:perform) { ran << :ran } })
+  end
 
   def run
     job.perform_async
@@ -33,16 +35,30 @@ RSpec.describe "The worker during maintenance", type: :app do
   context "when the flag file exists" do
     before { FileUtils.touch(flag) }
 
-    it "skips the job's work" do
-      run
+    it "puts a one-off job off for later", :aggregate_failures do
+      job.perform_async
+      job.perform_one
 
       expect(runs).to be_empty
+      expect(job.jobs).to contain_exactly(include("at" => be > Time.now.to_f))
     end
 
-    it "clears the job from the queue" do
-      run
+    it "runs a put off job once the file is gone" do
+      job.perform_async
+      job.perform_one
+      FileUtils.rm(flag)
+      job.drain
 
-      expect(job.jobs).to be_empty
+      expect(runs).to eq([:ran])
+    end
+
+    it "skips a scheduled job and clears it from the queue", :aggregate_failures do
+      scheduled = job_class("Spec::MaintainedScheduledJob", Blog::ScheduledJob)
+      scheduled.perform_async
+      scheduled.drain
+
+      expect(runs).to be_empty
+      expect(scheduled.jobs).to be_empty
     end
 
     it "sends Honeybadger nothing" do

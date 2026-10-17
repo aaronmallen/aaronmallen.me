@@ -5,6 +5,7 @@ status: active
 created: 2026-10-16
 area: [app, config, lib]
 issue: "#1584"
+amended: ["#1642"]
 tags: [maintenance, flag-file, settings, deploy, pi, nas, sidekiq, honeybadger, postgres, redis, rustfs]
 ---
 
@@ -30,7 +31,8 @@ Three readers check the file each time they need the answer, never caching it, s
 at once:
 
 - The web check, ahead of every request, the share host included, answers 503 before anything touches the NAS.
-- The Sidekiq worker skips jobs while the file exists.
+- The Sidekiq worker skips scheduled jobs while the file exists, since each runs again on its next tick. It puts
+  every other job, retries included, off by five minutes, so a one-off job waits out the window and nothing is lost.
 - The Honeybadger provider ([ADR 0010][0010]) sends no reports while the file exists.
 
 A script on the Pi, in `~/.local/bin/` beside `aaronmallen-deploy` and outside the repo, creates and removes the
@@ -47,6 +49,8 @@ the web. The worker and Honeybadger would not know, so jobs would still fail and
 ## Consequences
 
 The mode needs no store but the Pi's own disk, and turning it on or off takes a file and no deploy.
+
+A one-off job queued during a long window goes back on the queue every five minutes until the file is gone.
 
 Each request and each job reads the disk once more. A missing file costs a failed `stat`, which is cheap, but every
 request pays it.

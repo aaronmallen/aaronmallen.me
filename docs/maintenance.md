@@ -2,7 +2,7 @@
 
 Maintenance mode takes the site down on purpose while I update Postgres, Redis or RustFS on the NAS
 ([ADR 0181][0181]). A file on the Pi holds the mode: while it exists, every request gets a 503 and the maintenance
-page, or a JSON 503 for the API and MCP. The worker skips jobs and Honeybadger sends no reports. The site reads the
+page, or a JSON 503 for the API and MCP. The worker holds jobs back and Honeybadger sends no reports. The site reads the
 file on each request and each job, so creating or removing it takes effect at once, with no restart.
 
 The `maintenance.flag_path` setting names the file, through `MAINTENANCE_FLAG_PATH`. A script on the Pi creates and
@@ -64,8 +64,8 @@ hand.
 4. On the Pi, run `aaronmallen-maintenance off`.
 5. Check that the site loads.
 
-The worker drops each job it picks up while maintenance is on. Scheduled jobs run again on their next tick, but
-nothing replays the rest.
+The worker skips each scheduled job it picks up while maintenance is on, since it runs again on its next tick. It puts
+every other job off by five minutes, again and again, until maintenance is off.
 
 ## Don't release during maintenance
 
