@@ -4722,7 +4722,7 @@
 }
 
 @utility mail-rich {
-  @apply break-words;
+  @apply break-words overflow-clip contain-paint;
 
   & p {
     @apply mb-[.6em];
@@ -4903,6 +4903,7 @@
 }
 
 @utility mail-editor-surface {
+  @apply mail-rich;
   @apply relative max-h-[52vh] min-h-44 overflow-auto px-5 py-4 font-serif text-[1.1rem] leading-[1.6] text-ink;
   @apply focus:outline-none;
 
@@ -4913,8 +4914,6 @@
   &.empty::before {
     @apply pointer-events-none absolute text-ink-muted content-[attr(data-placeholder)];
   }
-
-  @apply mail-rich;
 }
 
 @utility mail-sig {

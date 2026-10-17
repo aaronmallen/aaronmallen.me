@@ -5,7 +5,7 @@ status: active
 created: 2026-10-12
 area: [admin, lib, mail]
 issue: "#1157"
-amended: ["#1392", "#1499"]
+amended: ["#1392", "#1499", "#1602"]
 tags: [mail, gmail, html, sanitize, images, privacy, csp, reader]
 ---
 
@@ -39,6 +39,11 @@ again. Any change to what mail may carry goes in that class.
 class on mail markup could lay it over the admin as the `position` property once could, and an `id` could clash
 with one the admin scripts look up. Cleaning drops both, as `Markdown::Note` does. Queue
 `Mail::Jobs::RecleanMailHtml` once after this ships, so stored mail loses them too.
+
+**Mail paints only inside its own box.** `.mail-rich` sets `contain: paint` and `overflow: clip`, so a negative
+margin or any other trick cannot paint mail over the admin chrome. Cleaning also drops `transform`, `translate`,
+`rotate` and `scale`, which move a block without moving its box. Queue `Mail::Jobs::RecleanMailHtml` once after this
+ships, so stored mail loses them too.
 
 **Clean stored mail again whenever the Sanitize config or gem changes.** Gmail mail keeps no raw HTML, so
 `Mail::Jobs::RecleanMailHtml` fetches each stored Gmail thread again, a page at a time, and rewrites each message's

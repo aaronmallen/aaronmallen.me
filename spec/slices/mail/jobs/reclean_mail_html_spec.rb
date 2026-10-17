@@ -43,6 +43,15 @@ RSpec.describe Mail::Jobs::RecleanMailHtml do
     expect(html_bodies).to eq(["<p>One</p>", "<p>Two</p>"])
   end
 
+  it "strips a transform from stored HTML" do
+    messages.dataset.update(html_body: %(<p style="transform: translateY(-90vh)">One</p>))
+    stub_gmail(threads: { "t1" => [html("t1", %(<p style="transform: translateY(-90vh)">One</p>))],
+                          "t2" => [html("t2", "<p>Two</p>")] })
+    reclean
+
+    expect(html_bodies).to eq(["<p>One</p>", "<p>Two</p>"])
+  end
+
   it "leaves a thread Gmail no longer has as it is, and counts it", :aggregate_failures do
     stub_gmail(threads: { "t2" => [html("t2", "<p>Two</p>")] })
     stub_request(:get, %r{/threads/t1\?}).to_return(status: 404)

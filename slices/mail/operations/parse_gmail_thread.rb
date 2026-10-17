@@ -13,6 +13,7 @@ module Mail
       FLAGS = { starred: "STARRED", sent: "SENT", important: "IMPORTANT" }.freeze
       FROM = /\A\s*"?(?<name>[^"<]*?)"?\s*<(?<address>[^>]*)>\s*\z/
       HTML = "text/html"
+      MOVES = %w[-webkit-transform rotate scale transform translate].freeze
       NBSP = " "
       NO_SUBJECT = "(no subject)"
       NUL = "\0"
@@ -23,7 +24,7 @@ module Mail
           RELAXED,
           elements: RELAXED[:elements] - %w[style],
           attributes: { all: RELAXED[:attributes][:all] - %w[class id] },
-          css: { properties: RELAXED[:css][:properties] - %w[position z-index] },
+          css: { properties: RELAXED[:css][:properties] - %w[position z-index] - MOVES },
         ),
       )
 

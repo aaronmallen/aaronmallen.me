@@ -299,6 +299,13 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(message.html_body).to eq(%(<div style="  top: 0; color: red"><img src="https://example.com/a.png">Hi</div>))
     end
 
+    it "drops the moves that could carry a stored HTML body out of its box" do
+      style = "transform: translateY(-90vh); translate: 0 -50vh; rotate: 1deg; scale: 2; color: red"
+      sync_message(parts: [gmail_part("text/html", %(<div style="#{style}">Hi</div>))])
+
+      expect(message.html_body).to eq(%(<div style="    color: red">Hi</div>))
+    end
+
     it "drops the class and id of a stored HTML body" do
       html = %(<div class="fixed inset-0 z-50" id="main"><p class="x">Hi</p></div>)
       sync_message(parts: [gmail_part("text/html", html)])
