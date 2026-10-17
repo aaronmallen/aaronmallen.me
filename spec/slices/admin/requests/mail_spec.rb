@@ -849,6 +849,8 @@ RSpec.describe "Admin mail", type: :request do
     describe "Make a task" do
       let(:thread) { create(:message, subject: "Re: Fwd: Lunch on Friday") }
 
+      def label_of(thread) = Tasks::Slice["repos.task_label_queries"].labels([task_of(thread)]).values.first
+
       def links = Links::Slice["repos.record_link_queries"]
 
       def make(**fields)
@@ -896,11 +898,11 @@ RSpec.describe "Admin mail", type: :request do
         expect(repo.by_id(thread.id).archived).to be(true)
       end
 
-      it "says so with the task's number" do
+      it "names the task by its label as the board does" do
         make(list: "next", archive: "1")
         follow_redirect!
 
-        expect(toast).to eq("Made task ##{task_of(thread)}")
+        expect(toast).to eq("Made task #{label_of(thread)}")
       end
 
       it "refuses a second task for the same thread", :aggregate_failures do
@@ -971,7 +973,7 @@ RSpec.describe "Admin mail", type: :request do
           make_on(thread)
           follow_redirect!
 
-          expect(toast).to eq("Made task ##{task_of(thread)} · Gmail refused to archive the thread")
+          expect(toast).to eq("Made task #{label_of(thread)} · Gmail refused to archive the thread")
           expect(repo.by_id(thread.id).archived).to be(false)
         end
       end
