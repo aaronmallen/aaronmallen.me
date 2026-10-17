@@ -264,7 +264,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     it "refuses a bad name with an error toast", :aggregate_failures do
       menu.find(".ctx-input").send_keys("no good", :enter)
 
-      expect(page).to have_css(".toast-failed", text: translate("tasks_page.toasts.bulk.invalid.tag_format"))
+      expect(page).to have_css(".toast-failed", text: translate("bulk_refusals.tag_format"))
       expect(repo.by_id(task.id).tags).to be_empty
     end
   end

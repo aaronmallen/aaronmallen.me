@@ -7,6 +7,7 @@ module Admin
         class FieldError < Blog::UI::FieldError
           CONTRACTS = [::Tags::Contracts::TagContract].freeze
           SCOPE = "tag"
+          OVERRIDES = { name: { "format" => "ui.field_error.tags.format" } }.freeze
         end
       end
     end

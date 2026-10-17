@@ -278,7 +278,7 @@ RSpec.describe "Admin task rules", type: :request do
       it "says why it refused a tag that is not a slug" do
         add("aaronmallen/*", "c++")
 
-        expect(page).to have_css("#rule-tags-error", text: message(:tags, "format"))
+        expect(page).to have_css("#rule-tags-error", text: i18n.t("ui.field_error.tags.format"))
       end
 
       it "keeps what was typed after a refusal", :aggregate_failures do

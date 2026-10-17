@@ -64,3 +64,8 @@ en:
     field_error:
       control: "Take out the control characters."
       invalid: "Check this field."
+      skipped: "That time does not exist here: the clocks skip it."
+      tags:
+        format: "A tag is lowercase words joined by hyphens."
+      url:
+        format: "Enter a link that starts with http:// or https://."

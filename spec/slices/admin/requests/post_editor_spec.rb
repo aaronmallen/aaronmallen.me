@@ -999,7 +999,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "refuses a card image that is not a link" do
         save(title: "Hello", body: "one two", og_image_url: "card.png")
 
-        expect(field_error).to eq(i18n.t("ui.components.posts.field_error.og_image_url.format"))
+        expect(field_error).to eq(i18n.t("ui.field_error.url.format"))
       end
 
       it "keeps the publish time on a draft" do
@@ -1295,13 +1295,13 @@ RSpec.describe "Admin post editor", type: :request do
       it "rejects a tag with a slash" do
         save(title: "Hello", tags: "ruby, a/b")
 
-        expect(field_error).to eq(message("tags.format"))
+        expect(field_error).to eq(i18n.t("ui.field_error.tags.format"))
       end
 
       it "rejects a Chicago time the clocks skip and saves nothing" do
         save(intent: "publish", title: "Hello", publish_at: "2027-03-14T02:30")
 
-        expect([field_error, post_queries.all]).to eq([message("publish_at.skipped"), []])
+        expect([field_error, post_queries.all]).to eq([i18n.t("ui.field_error.skipped"), []])
       end
 
       it "rejects a publish time it can't read" do

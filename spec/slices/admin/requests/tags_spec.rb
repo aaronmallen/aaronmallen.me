@@ -397,7 +397,7 @@ RSpec.describe "Admin tags", type: :request do
       it "says why it refused a name that is not a slug" do
         add("Machine Learning")
 
-        expect(page).to have_css(".field-error", text: message("format"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.tags.format"))
       end
 
       it "says why it refused a name with a control character" do
@@ -410,7 +410,7 @@ RSpec.describe "Admin tags", type: :request do
         it "refuses #{name.inspect}, which is not a slug", :aggregate_failures do
           add(name)
 
-          expect(page).to have_css(".field-error", text: message("format"))
+          expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.tags.format"))
           expect(every_tag).to be_empty
         end
       end

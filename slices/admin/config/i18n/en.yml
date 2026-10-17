@@ -30,6 +30,10 @@ en:
     views:
       one: "%{count} view"
       other: "%{count} views"
+  bulk_refusals:
+    format: "Nothing changed · pick an action from the bar"
+    tag_blank: "Type a tag first"
+    tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
   calendar_page:
     toasts:
       calendars: "Calendars saved"
@@ -160,11 +164,8 @@ en:
           other: "Moved %{count} threads to Inbox"
         invalid:
           blank: "Tick a thread first"
-          format: "Nothing changed · pick an action from the bar"
           long: "Tick %{max} threads or fewer"
           past: "Nothing changed · a snooze ends after now"
-          tag_blank: "Type a tag first"
-          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         label:
           zero: "#%{label} is on another account · nothing labeled"
           one: "Labeled %{count} thread #%{label}"
@@ -249,10 +250,7 @@ en:
           other: "Nothing changed · %{post} would not change"
         invalid:
           blank: "Tick a post first"
-          format: "Nothing changed · pick an action from the bar"
           long: "Tick %{max} posts or fewer"
-          tag_blank: "Type a tag first"
-          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         tagged:
           one: "Tagged %{count} post %{tag}"
           other: "Tagged %{count} posts %{tag}"
@@ -408,10 +406,7 @@ en:
           other: "Nothing changed · %{task} would not change"
         invalid:
           blank: "Tick a task first"
-          format: "Nothing changed · pick an action from the bar"
           long: "Tick %{max} tasks or fewer"
-          tag_blank: "Type a tag first"
-          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
           to_blank: "Pick a list first"
         moved:
           one: "Moved %{count} task to %{list}"
@@ -818,8 +813,6 @@ en:
             blank: "Say what needs a choice."
           reason:
             blank: "Say why."
-          tags:
-            format: "Tags are lowercase words, separated by commas."
           title:
             blank: "Give it a title."
         option_form:
@@ -1103,8 +1096,6 @@ en:
           entry_date:
             format: "Enter a date."
             future: "Pick today or an earlier day."
-          tags:
-            format: "Use lowercase letters, numbers and single dashes in each tag."
         new_entry:
           body: "Entry"
           entry_date: "Entry date"
@@ -1222,12 +1213,8 @@ en:
             strikeThrough: "Strikethrough"
             underline: "Underline"
         field_error:
-          bcc:
-            format: "Use email addresses split by commas."
           body:
             blank: "Write something first."
-          cc:
-            format: "Use email addresses split by commas."
           from:
             blank: "Pick an account to send from."
             format: "Pick an account that may send."
@@ -1644,18 +1631,13 @@ en:
           save_draft: "Save draft"
           schedule: "Schedule"
         field_error:
-          canonical_url:
-            format: "Enter a link that starts with http:// or https://."
           edit_note:
             blank: "Say what changed and why. A published post needs a note when its body changes."
             long: "Keep the note to %{max} characters or fewer."
           note:
             blank: "Say what changed and why. A note can't be blank."
-          og_image_url:
-            format: "Enter a link that starts with http:// or https://."
           publish_at:
             format: "Enter a date and time."
-            skipped: "That time doesn't exist in Chicago: the clocks skip it."
           slug:
             blank: "Add a slug with a letter or number in it."
             format: "Use lowercase letters, numbers and single dashes."
@@ -1666,8 +1648,6 @@ en:
             announcement_too_long: "The title and link that go out are over the limit for a network you picked."
             too_long: "The cross-post is over the limit for a network you picked."
             unknown_mention: "A mention names nobody in the directory."
-          tags:
-            format: "Use lowercase letters, numbers and single dashes in each tag."
           title:
             blank: "Add a title."
         broken_short_links:
@@ -1800,8 +1780,6 @@ en:
             blank: "Add a name."
             slugless: "Use a letter or a digit, so the board gets a link."
             taken: "Another project's name makes the same link."
-          og_image_url:
-            format: "Enter a link that starts with http:// or https://."
           repo:
             format: "Name the repository as owner/repo, as octocat/hello-world."
             taken: "Another project already tracks this repository."
@@ -1809,10 +1787,6 @@ en:
             after_archived: "The start month falls after the day this project was archived."
             format: "Use the year and the month, as 2024-06."
             future: "Pick this month or one before it."
-          tags:
-            format: "Use lowercase letters, numbers and single dashes in each tag."
-          url:
-            format: "Enter a link that starts with http:// or https://."
           visibility:
             blank: "Pick who can see it."
             format: "Pick who can see it from the list."
@@ -2221,7 +2195,6 @@ en:
             silent_part: "Write something in each part that holds photos."
           schedule_at:
             format: "Enter a date and time."
-            skipped: "That time doesn't exist in Chicago: the clocks skip it."
           targets:
             blank: "Pick a network."
             format: "Pick a network from the list."
@@ -2386,7 +2359,6 @@ en:
             format: "Pick one of the six colours."
           name:
             blank: "Give the tag a name first."
-            format: "A tag is lowercase words joined by hyphens."
             taken: "Another tag already holds that name."
         editor:
           cancel: "Cancel"
@@ -2442,7 +2414,6 @@ en:
             format: "Pick a provider from the list."
           tags:
             blank: "Name a tag or a project first."
-            format: "A tag is lowercase words joined by hyphens."
         fields:
           pattern: "Repo or team"
           pattern_placeholder: "aaronmallen/*"
@@ -2572,7 +2543,6 @@ en:
             future: "A session cannot end later than now."
             order: "End it after it starts."
             running: "Pause or complete the task before you delete its running session."
-            skipped: "That time does not exist here. The clocks skip it."
           every:
             blank: "Say how far apart."
             format: "Give a whole number from 1 to 365."
@@ -2601,9 +2571,6 @@ en:
             blank: "Give the time it started."
             format: "Give the start as a date and time."
             future: "A session cannot start later than now."
-            skipped: "That time does not exist here. The clocks skip it."
-          tags:
-            format: "Tags are lowercase words, separated by commas."
           title:
             blank: "Write the task down first."
           week:
@@ -3883,7 +3850,6 @@ en:
           other: "Ignored %{count} webmentions"
         invalid:
           blank: "Tick a webmention first"
-          format: "Nothing changed · pick an action from the bar"
           long: "Tick %{max} webmentions or fewer"
         spam:
           one: "Marked %{count} webmention as spam"

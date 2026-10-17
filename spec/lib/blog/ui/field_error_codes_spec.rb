@@ -12,7 +12,9 @@ RSpec.describe Blog::UI::FieldError do
     i18n = error.slice["i18n"]
     codes.except(*error::UNSHOWN).flat_map do |field, field_codes|
       field_codes.filter_map do |code|
-        keys = [error::OVERRIDES.dig(field, code) || ".#{field}.#{code}", "#{Blog::UI::FieldError::CODES}#{code}"]
+        shared = Blog::UI::FieldError::CODES
+        keys = [error::OVERRIDES.dig(field, code) || ".#{field}.#{code}", "#{shared}#{field}.#{code}",
+                "#{shared}#{code}"]
         ".#{field}.#{code}" if keys.none? { i18n.exists?(view.send(:_resolve_i18n_key, it)) }
       end
     end

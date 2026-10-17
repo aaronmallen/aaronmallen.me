@@ -34,7 +34,7 @@ module Admin
 
           def held = @posts.flat_map { it.tags.map(&:name) }.uniq.sort
 
-          def invalid = t("posts_page.toasts.bulk.invalid.tag_format")
+          def invalid = t("bulk_refusals.tag_format")
 
           def picked = { **@fields, "ids[]": @posts.map(&:id) }
         end

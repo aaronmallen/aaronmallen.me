@@ -455,7 +455,7 @@ RSpec.describe "Admin decisions", type: :request do
         update(title: "Pick a queue", problem: "Jobs pile up", tags: "two words!")
 
         expect(last_response.status).to eq(422)
-        expect(page.find_by_id("decision-tags-error").text).to eq(t("ui.components.decisions.field_error.tags.format"))
+        expect(page.find_by_id("decision-tags-error").text).to eq(t("ui.field_error.tags.format"))
         expect(page).to have_field("decision[tags]", with: "two words!")
       end
     end

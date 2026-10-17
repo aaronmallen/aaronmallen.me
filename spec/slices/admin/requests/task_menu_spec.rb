@@ -180,7 +180,7 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
         act("/admin/tasks/bulk", act: "tag", ids: [task.id], tag: "no good")
         follow_redirect!
 
-        expect(toast).to eq(translate("tasks_page.toasts.bulk.invalid.tag_format"))
+        expect(toast).to eq(translate("bulk_refusals.tag_format"))
       end
 
       it "lands a seen issue back on the page the menu opened on" do

@@ -4,6 +4,7 @@
 module Admin
   class BulkAction < Action
     LONG = "long"
+    REFUSALS = "bulk_refusals."
 
     def handle(request, response)
       case act(request.params.to_h)
@@ -33,7 +34,10 @@ module Admin
     def refusal(_errors) = Blog::Contract::FORMAT
 
     def refuse(response, errors)
-      toast(response, "#{self.class::INVALID}.#{refused(errors)}", max: Blog::Contract::MAX_IDS)
+      code = refused(errors)
+      key = "#{self.class::INVALID}.#{code}"
+
+      toast(response, i18n.exists?(key) ? key : "#{REFUSALS}#{code}", max: Blog::Contract::MAX_IDS)
     end
 
     def refused(errors)

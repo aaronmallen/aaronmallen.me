@@ -59,7 +59,7 @@ module Admin
 
           def tags(menu)
             names = @post.tags.map(&:name)
-            invalid = t("posts_page.toasts.bulk.invalid.tag_format")
+            invalid = t("bulk_refusals.tag_format")
 
             menu.tags(t(".tags"), names:, tags: @tags, new_tag: t(".new_tag"), invalid:) do |name, on|
               tag = name ? { tag: name } : Blog::Constants::EMPTY_HASH

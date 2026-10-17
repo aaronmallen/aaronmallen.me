@@ -646,7 +646,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       it "rejects a tag it can't use and keeps what was typed", :aggregate_failures do
         save(body: "walked", entry_date: today.iso8601, tags: "a/b")
 
-        expect(page).to have_css("#journal-tags-error", exact_text: message("tags.format"))
+        expect(page).to have_css("#journal-tags-error", exact_text: i18n.t("ui.field_error.tags.format"))
         expect(page).to have_field("Tags", with: "a/b")
         expect(repo.count).to eq(0)
       end
@@ -935,7 +935,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
       it "reopens a refused edit on its page with the error", :aggregate_failures do
         edit(body: "old run", tags: "a/b")
-        message = i18n.t("tags.format", scope: "ui.components.journal.field_error")
+        message = i18n.t("ui.field_error.tags.format")
 
         expect([last_response.status, day_dates]).to eq([422, [to]])
         expect(page).to have_css("form[action='/admin/journal/#{old.id}']:not([hidden])")

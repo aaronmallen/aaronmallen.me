@@ -235,6 +235,12 @@ RSpec.describe "Admin mail sending", type: :request do
       expect(page).to have_text(error("to.format"))
     end
 
+    it "words a bad copy address as it words a bad recipient" do
+      compose(cc: "nobody")
+
+      expect(page).to have_css("#mail-compose-cc-error", text: error("to.format"), visible: :all)
+    end
+
     it "says when Gmail refuses it" do
       stub_request(:post, "#{gmail}/messages/send").to_return(status: 500)
       compose

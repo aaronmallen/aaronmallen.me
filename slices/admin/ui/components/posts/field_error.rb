@@ -10,7 +10,7 @@ module Admin
           LIMITS = { edit_note: NOTE, note: NOTE }.freeze
           SCOPE = "post"
           UNSHOWN = %i[syndication_targets].freeze
-          OVERRIDES = { note: { "long" => ".edit_note.long" } }.freeze
+          OVERRIDES = { canonical_url: URL, note: { "long" => ".edit_note.long" }, og_image_url: URL }.freeze
         end
       end
     end

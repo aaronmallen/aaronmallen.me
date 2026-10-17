@@ -8,6 +8,7 @@ module Blog
       LIMITS = Blog::Constants::EMPTY_HASH
       OVERRIDES = Blog::Constants::EMPTY_HASH
       UNSHOWN = Blog::Constants::EMPTY_ARRAY
+      URL = { "format" => "ui.field_error.url.format" }.freeze
 
       prop :field, Blog::Types::Symbol
       prop :errors, Blog::Types::Hash
@@ -40,10 +41,12 @@ module Blog
       def error_id = "#{self.class.id_for(@field, @scope)}-error"
 
       def message(code)
-        keys = [convention_key(code), self.class::OVERRIDES.dig(@field, code), "#{CODES}#{code}"].compact
+        keys = [convention_key(code), self.class::OVERRIDES.dig(@field, code), *shared_keys(code)].compact
         limits = self.class::LIMITS.fetch(@field, Blog::Constants::EMPTY_HASH)
         keys.lazy.filter_map { t(it, default: nil, **limits) }.first || t(INVALID)
       end
+
+      def shared_keys(code) = ["#{CODES}#{@field}.#{code}", "#{CODES}#{code}"]
     end
   end
 end

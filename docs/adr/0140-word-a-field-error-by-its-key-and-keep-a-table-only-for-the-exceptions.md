@@ -6,7 +6,7 @@ created: 2026-10-10
 area: [lib, admin, api, public, mcp]
 supersedes: ["0027"]
 issue: "#1002"
-amended: ["#1435", "#1559"]
+amended: ["#1435", "#1559", "#1670"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -31,15 +31,18 @@ A contract still fails with a short String code, never with copy. `config/errors
 operations hand out codes as ADR 0027 lists them, and `Blog::Operation#validated` hands them up as
 `Failure([:invalid, errors])`.
 
-`Blog::UI::FieldError` words a code in four steps, in `lib/blog/ui/field_error.rb`:
+`Blog::UI::FieldError` words a code in five steps, in `lib/blog/ui/field_error.rb`:
 
 1. The key `.<field>.<code>`, under the subclass's own scope in its slice's locale file.
 2. The subclass's `OVERRIDES` table, for a code whose copy lives under another key.
-3. The key `ui.field_error.<code>` in `config/i18n/shared/en.yml`, for a code every form words alike (#1559).
-4. `ui.field_error.invalid`, "Check this field.", in `config/i18n/shared/en.yml`.
+3. The key `ui.field_error.<field>.<code>` in `config/i18n/shared/en.yml`, for a field every form words alike (#1670).
+4. The key `ui.field_error.<code>` in `config/i18n/shared/en.yml`, for a code every form words alike (#1559).
+5. `ui.field_error.invalid`, "Check this field.", in `config/i18n/shared/en.yml`.
 
-Two admin subclasses keep overrides. Decisions word `option_id`'s `format` as `.option_id.missing`. Posts word a
-note's `long` with the edit note's copy. Services needs none, since #1002 moved its keys under their fields.
+Decisions word `option_id`'s `format` as `.option_id.missing`. Posts word a note's `long` with the edit note's copy.
+A link field other than `url` points `format` at `ui.field_error.url.format` through `FieldError::URL`, the tag
+form's `name` points at `ui.field_error.tags.format`, and mail words `cc` and `bcc` as `.to.format` (#1670).
+Services needs none, since #1002 moved its keys under their fields.
 
 `ui.field_error.control` reads "Take out the control characters." It replaced 29 copies of that line in the admin
 locale file and the `.control` overrides calendar and decisions kept for it (#1559). A field that words `control` its
@@ -69,14 +72,17 @@ weight, so delete a key when its code goes.
 
 A missing key still shows "Check this field." at run time, but `spec/lib/blog/ui/field_error_codes_spec.rb` fails
 first (#1390). It reads the codes each contract can return, from its schema, `config/errors.yml` and the `failure`
-calls in its rules and macros, and wants a key for each field the form shows, or a `ui.field_error.<code>` key for
-the code. `mise run lint` fails on a locale key no code reads; `.config/i18n/allowed.yml` lists the keys built at run
-time, field error keys among them.
+calls in its rules and macros, and wants a key for each field the form shows, or a shared
+`ui.field_error.<field>.<code>` or `ui.field_error.<code>` key. `mise run lint` fails on a locale key no code reads;
+`.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
 
 `Public::UI::Components::ContactFieldError` words its codes the same way. It also hands the browser the copy for
 `blank` and `format` before any code arrives, and finds those by the same `.<field>.<code>` key, so a field with no
 such key hands the browser nothing for that code (#1435).
 
 A field shows only its first code, as before.
+
+`Admin::BulkAction` words a refused bulk action the same way: the page's own `<page>.toasts.bulk.invalid.<code>`
+first, then `bulk_refusals.<code>` in the admin locale file (#1670).
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

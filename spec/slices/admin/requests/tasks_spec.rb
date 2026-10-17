@@ -940,7 +940,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "says what went wrong", :aggregate_failures do
         expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.title.blank"))
-        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.tags.format"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.tags.format"))
       end
 
       it "keeps what was typed", :aggregate_failures do
@@ -1896,7 +1896,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page.find("#task-#{task.id}-title-error"))
           .to have_text(i18n.t("ui.components.tasks.field_error.title.blank"))
         expect(page.find("#task-#{task.id}-tags-error"))
-          .to have_text(i18n.t("ui.components.tasks.field_error.tags.format"))
+          .to have_text(i18n.t("ui.field_error.tags.format"))
       end
 
       it "keeps what was typed", :aggregate_failures do

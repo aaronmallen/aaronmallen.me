@@ -40,7 +40,7 @@ module Admin
 
           def held = @tasks.flat_map { it.tags.map(&:name) }.uniq.sort
 
-          def invalid = t("tasks_page.toasts.bulk.invalid.tag_format")
+          def invalid = t("bulk_refusals.tag_format")
 
           def moves(menu)
             menu.sub(t(".move"), icon: "fa-solid fa-arrow-right-arrow-left") do

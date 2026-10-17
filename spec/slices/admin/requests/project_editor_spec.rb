@@ -328,7 +328,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(og_image_url: "card.png")
 
         expect(last_response.status).to eq(422)
-        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.og_image_url.format"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.url.format"))
       end
 
       it "sends the editor to the saved project" do
@@ -598,7 +598,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(repo: "", url: "gest.aaronmallen.dev")
 
         expect(last_response.status).to eq(422)
-        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.url.format"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.url.format"))
       end
 
       ["javascript:alert(1)", "mailto:hello@example.com", "/projects/gest"].each do |url|
@@ -606,7 +606,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
           save(repo: "aaronmallen/gest", url:)
 
           expect(last_response.status).to eq(422)
-          expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.url.format"))
+          expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.url.format"))
         end
       end
 
@@ -777,7 +777,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(project, tags: "a/b")
 
         expect(last_response.status).to eq(422)
-        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.tags.format"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.field_error.tags.format"))
       end
 
       it "takes the visibility" do
