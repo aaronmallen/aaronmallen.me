@@ -24,6 +24,7 @@ module Admin
           prop :editing, Blog::Types::Hash.optional
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :search, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
+          prop :to, Blog::Types::Date.optional, default: nil
           prop :values, Blog::Types::Hash, default: BLANK_ENTRY
           prop :writing, Blog::Types::Bool, default: false
           prop :written, Blog::Types::Hash.optional, default: nil
@@ -50,7 +51,7 @@ module Admin
             return Empty { t(search.empty? ? ".empty" : ".no_match") } if @days.rows.empty?
 
             @days.rows.each do |(date, entries)|
-              Day(date:, entries:, today: @today, editing: @editing, linked: @linked)
+              Day(date:, entries:, today: @today, editing: @editing, linked: @linked, place:)
             end
             Pager(page: @days, route: :admin_journal, params: search.empty? ? {} : { q: search })
           end
@@ -63,6 +64,8 @@ module Admin
               word_count: Blog::Helpers::Figures.words(body), autofocus: @writing,
             )
           end
+
+          def place = { to: @to&.iso8601, q: (search unless search.empty?) }.compact
 
           def search = @search.strip
 

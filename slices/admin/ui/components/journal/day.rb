@@ -10,13 +10,15 @@ module Admin
           prop :today, Blog::Types::Date
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linked, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :place, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
             section(class: "journal-day", id: Blog::Helpers::RecordKinds.day_anchor(@date)) do
               DayHead(date: @date, today: @today)
               div do
                 @entries.each do |entry|
-                  Entry(entry:, date: @date, editing: editing_for(entry), linked: @linked.fetch(entry.id, 0))
+                  Entry(entry:, date: @date, editing: editing_for(entry), linked: @linked.fetch(entry.id, 0),
+                        place: @place)
                 end
               end
             end

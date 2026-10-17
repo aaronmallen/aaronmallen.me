@@ -842,6 +842,66 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       end
     end
 
+    describe "editing an entry on an older page" do
+      before do
+        lower_page_size(:admin, to: 2)
+        create(:journal_entry, entry_date: today, body: "newest walk")
+        2.times { create(:journal_entry, entry_date: today - 1, body: "middle walk") }
+        create(:journal_entry, entry_date: today - 3, body: "old walk")
+      end
+
+      def edit(**fields)
+        post "/admin/journal/#{old.id}", _csrf_token: admin_csrf_token, entry: fields, to:, q: "walk"
+      end
+
+      def form = page.find("form[action='/admin/journal/#{old.id}']", visible: :all)
+
+      def old = repo.between(from: today - 3, to: today - 3).first
+
+      def to = (today - 3).iso8601
+
+      it "sends the page and the search with the edit form", :aggregate_failures do
+        get "/admin/journal", to:, q: "walk"
+
+        expect(form).to have_css("input[type='hidden'][name='to'][value='#{to}']", visible: :all)
+        expect(form).to have_css("input[type='hidden'][name='q'][value='walk']", visible: :all)
+      end
+
+      it "sends neither on the plain newest page" do
+        get "/admin/journal"
+
+        expect(page).to have_no_css(".journal-edit input[name='to'], .journal-edit input[name='q']", visible: :all)
+      end
+
+      it "reopens a refused edit on its page with the error", :aggregate_failures do
+        edit(body: "old run", tags: "a/b")
+        message = i18n.t("tags.format", scope: "ui.components.journal.field_error")
+
+        expect([last_response.status, day_dates]).to eq([422, [to]])
+        expect(page).to have_css("form[action='/admin/journal/#{old.id}']:not([hidden])")
+        expect(page).to have_css("#journal-edit-#{old.id}-tags-error", exact_text: message)
+      end
+
+      it "keeps what was typed in a refused edit", :aggregate_failures do
+        edit(body: "old run", tags: "a/b")
+
+        expect(form).to have_field("entry[body]", with: "old run", visible: :all)
+        expect(form).to have_field("entry[tags]", with: "a/b", visible: :all)
+      end
+
+      it "keeps the search in the reopened page" do
+        edit(body: "  ")
+
+        expect(page).to have_field("journal-search", with: "walk")
+      end
+
+      it "returns to the page and the search after a save" do
+        edit(body: "old run walk")
+
+        expect(last_response.location).to end_with("/admin/journal?to=#{to}&q=walk")
+      end
+    end
+
     describe "deleting an entry" do
       before { create(:journal_entry, body: "one two") }
 

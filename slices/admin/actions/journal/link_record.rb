@@ -24,7 +24,7 @@ module Admin
           editing = open_journal_entry.call(journal[:days], id, records: records_query(request, errors))
           halt 404 unless editing
 
-          response.render(index_view, **journal, editing:)
+          response.render(index_view, **journal, editing:, to:)
         end
       end
     end

@@ -12,6 +12,7 @@ module Admin
           prop :date, Blog::Types::Date
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linked, Blog::Types::Integer, default: 0
+          prop :place, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def self.links_id(id) = "journal-links-#{id}"
 
@@ -57,6 +58,7 @@ module Admin
 
           def edit_form
             Form(**edit_attributes) do
+              @place.each { |name, value| input(type: "hidden", name:, value:) }
               EntryFields(body:, tags:, errors:, scope:, height: BODY_HEIGHT, label: t(".body"))
               div(class: "journal-edit-foot") do
                 Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }

@@ -17,15 +17,19 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:entry]]
+          to = Blog::Types::DateParam[request.params[:to]]
+          search = Blog::Types::TrimmedText[request.params[:q]]
 
           result = update_journal_entry.call(id, params)
 
-          settle(response, result, UPDATED, routes.path(:admin_journal)) do |errors|
-            invalid(response, id, params, errors)
+          settle(response, result, UPDATED, back(to, search)) do |errors|
+            invalid(request, response, editing(id, params, errors), to:, search:)
           end
         end
 
         private
+
+        def back(to, search) = routes.path(:admin_journal, **{ to:, q: (search unless search.empty?) }.compact)
 
         def editing(id, params, errors)
           {
@@ -34,9 +38,10 @@ module Admin
           }
         end
 
-        def invalid(response, id, params, errors)
+        def invalid(request, response, editing, to:, search:)
           response.status = 422
-          response.render(index_view, **summarize_journal.call, editing: editing(id, params, errors))
+          journal = summarize_journal.call(search:, to:, filters: request.params)
+          response.render(index_view, **journal, editing:, search:, to:)
         end
       end
     end
