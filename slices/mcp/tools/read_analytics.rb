@@ -105,36 +105,6 @@ module MCP
                   "refused, and the daily counts still come back. With a path, hours, since and read_spread " \
                   "count that page alone. #{DEFINITIONS}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      VISITOR_TEXT = {
-        paths: %i[path title],
-        referrers: %i[host],
-        clicks: %i[link_host link_path],
-        internal_referrers: %i[path],
-        entry_pages: %i[path],
-        exit_pages: %i[path],
-      }.freeze
-
-      class << self
-        private
-
-        def answered(payload)
-          answer = marked_rows(super)
-          answer.key?(:since) ? answer.merge(since: marked_rows(answer.fetch(:since))) : answer
-        end
-
-        def marked(key, fields)
-          fields.to_h { |field, text| [field, text.nil? && key == :referrers ? text : Untrusted.call(text)] }
-        end
-
-        def marked_rows(payload)
-          VISITOR_TEXT.reduce(payload) do |answer, (key, fields)|
-            next answer unless answer.key?(key)
-
-            answer.merge(key => answer.fetch(key).map { |row| row.merge(marked(key, row.slice(*fields))) })
-          end
-        end
-      end
     end
   end
 end

@@ -125,6 +125,15 @@ module API
         },
       ).freeze
 
+      VISITOR_TEXT = {
+        paths: %i[path title],
+        referrers: %i[host],
+        clicks: %i[link_host link_path],
+        internal_referrers: %i[path],
+        entry_pages: %i[path],
+        exit_pages: %i[path],
+      }.freeze
+
       include Deps[
         analytics_event_queries: "analytics.repos.analytics_event_queries",
         post_queries: "posts.repos.post_queries",
@@ -137,12 +146,29 @@ module API
         return invalid(since: [SINCE_REFUSAL]) if since && at.nil?
 
         case range(from, to)
-          in Success(days) then Success(reader(days, at, path).call)
+          in Success(days) then Success(marked(reader(days, at, path).call))
           in Failure(message) then bad_window(message)
         end
       end
 
       private
+
+      def marked(answer)
+        rows = marked_rows(answer)
+        rows.key?(:since) ? rows.merge(since: marked_rows(rows.fetch(:since))) : rows
+      end
+
+      def marked_fields(key, fields)
+        fields.transform_values { it.nil? && key == :referrers ? it : Helpers::Untrusted.call(it) }
+      end
+
+      def marked_rows(answer)
+        VISITOR_TEXT.reduce(answer) do |found, (key, fields)|
+          next found unless found.key?(key)
+
+          found.merge(key => found.fetch(key).map { |row| row.merge(marked_fields(key, row.slice(*fields))) })
+        end
+      end
 
       def range(from, to) = Helpers::DayWindow.days(from, to, capped: true).fmap { |first, last| first..last }
 

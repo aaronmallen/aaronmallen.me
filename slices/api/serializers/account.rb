@@ -12,6 +12,7 @@ module API
       ).freeze
 
       schema_attributes
+      untrusted :name
     end
   end
 end

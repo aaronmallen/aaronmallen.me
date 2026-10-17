@@ -9,14 +9,6 @@ module MCP
                   "that rate limits, is refused. The name, which the account's owner wrote, comes marked " \
                   "untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(found)
-          found.merge(accounts: found.fetch(:accounts).map { it.merge("name" => Untrusted.call(it.fetch("name"))) })
-        end
-      end
     end
   end
 end
