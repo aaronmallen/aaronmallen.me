@@ -4,6 +4,8 @@ module Shares
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/shares"), namespace: Shares)
 
+    config.shared_app_component_keys += %w[page_fetcher.link_title share_store.client]
+
     export %w[
       operations.add_share_group_files operations.add_shares_to_group operations.check_short_links
       operations.create_short_link operations.delete_share operations.delete_share_group operations.delete_short_link
