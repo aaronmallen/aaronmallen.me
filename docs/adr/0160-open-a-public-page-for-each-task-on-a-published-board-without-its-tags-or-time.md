@@ -5,7 +5,7 @@ status: active
 created: 2026-10-14
 area: [public]
 issue: "#1182"
-amended: ["#1315"]
+amended: ["#1315", "#1656"]
 tags: [projects, tasks, kanban, board, public, privacy, visibility, notes, comments, links, sources, tags]
 ---
 
@@ -32,7 +32,8 @@ lacks ([ADR 0166][0166]).
 
 **The page shows everything but tags and time.** It shows the number, title, status, column, done or canceled
 date, notes cleaned as ADR 0072 cleans them, comments, related tasks named by how each relates, and a link to the
-source issue. It never shows tags, since every task tag is private, or time and work hours.
+source issue. Since #1656 the site serves visitors the photos the notes and comments show ([ADR 0080][0080]). It
+never shows tags, since every task tag is private, or time and work hours.
 
 **A related task shows only when it sits on a published board of a public project.** The page leaves out every
 other link, so a private task's title never reaches the page through a relation.
@@ -47,8 +48,9 @@ other link, so a private task's title never reaches the page through a relation.
 
 ## Consequences
 
-Publishing a board now publishes each task's notes and comments as well as its title. Synced notes and comments
-show as GitHub or Linear holds them, so text written for a private issue reaches the public site.
+Publishing a board now publishes each task's notes, comments and the photos in them as well as its title. Synced
+notes and comments show as GitHub or Linear holds them, so text written for a private issue reaches the public site.
+Cloudflare keeps a photo for a day ([ADR 0109][0109]), so one from a board taken down stays at the edge that long.
 
 A source issue in a private repository shows as a link a visitor cannot open.
 
@@ -60,7 +62,9 @@ or a project that goes private, stays readable that long.
 [0072]: 0072-render-raw-html-in-task-notes-through-the-sanitize-gem.md
 [0074]: 0074-split-tags-into-a-public-and-a-private-scope.md
 [0075]: 0075-keep-local-and-synced-task-comments-in-one-table-keyed-by-remote-id.md
+[0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
+[0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md

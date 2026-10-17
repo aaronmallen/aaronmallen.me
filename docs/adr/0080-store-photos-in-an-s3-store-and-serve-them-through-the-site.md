@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [config, media, public]
 issue: "#132"
-amended: ["#137", "#396", "#394", "#468", "#1310"]
+amended: ["#137", "#396", "#394", "#468", "#1310", "#1656"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 
@@ -42,10 +42,11 @@ We store photos in any S3-compatible store named in settings and serve them thro
   fetches the photo from the store over the LAN and streams it back with a one-year `immutable` cache header.
   Cloudflare then serves repeat requests from its own cache. #468 added `s-maxage=86400`, so Cloudflare keeps a
   photo for a day and a photo taken down drops off the edge ([ADR 0109][0109]).
-- Since #394 a visitor gets only a photo a published post claims ([ADR 0082][0082]). Any other photo answers a
-  visitor with the same empty 404 as a missing key. Since #1310 the signed in owner gets it with
-  `private, max-age=3600`, so only the owner's browser keeps a photo from a journal entry, a task or a draft, and
-  for an hour at most.
+- Since #394 a visitor gets only a photo a published post claims ([ADR 0082][0082]). Since #1656 a visitor also gets
+  a photo that a task on a published board claims, or a comment on one, since those tasks have public pages
+  ([ADR 0160][0160]). Any other photo answers a visitor with the same empty 404 as a missing key. Since #1310 the
+  signed in owner gets it with `private, max-age=3600`, so only the owner's browser keeps a photo from a journal
+  entry, a task off a published board or a draft, and for an hour at most.
 - Since #1310 every photo, and every stored width of it, sends its key as a strong `ETag`. A request whose
   `If-None-Match` names that tag gets an empty 304 without a read from the store.
 - A photo the store does not have, or a store that does not answer, gives an empty 404.
@@ -86,4 +87,5 @@ so the client has to send them only when the request needs them.
 [0082]: 0082-tie-a-photo-to-the-records-whose-markdown-points-to-it.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
 [0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
+[0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

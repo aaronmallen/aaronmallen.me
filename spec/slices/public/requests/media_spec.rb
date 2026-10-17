@@ -6,6 +6,8 @@ RSpec.describe "Media", type: :request do
   let(:photo) { create(:photo, key:) }
   let(:url) { media_store_url(key) }
 
+  def board_task(*traits, **project) = create(:task, project_id: create(:project, *traits, **project).id)
+
   def cache_control = last_response.headers["Cache-Control"]
 
   def claim(owner, owner_id)
@@ -98,6 +100,28 @@ RSpec.describe "Media", type: :request do
     end
   end
 
+  {
+    "a task on a published board" => -> { claim("task", board_task(board_published: true).id) },
+    "a comment on a task on a published board" => lambda {
+      claim("task_comment", create(:task_comment, task_id: board_task(board_published: true).id).id)
+    },
+  }.each do |owner, setup|
+    describe "a photo #{owner} shows" do
+      before do
+        connect_media_store
+        stub_store
+        instance_exec(&setup)
+      end
+
+      it "comes back to a visitor with the published cache header", :aggregate_failures do
+        get path
+
+        expect(last_response).to be_ok
+        expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
+      end
+    end
+  end
+
   describe "a photo no published post shows" do
     let(:store) { stub_store }
 
@@ -112,6 +136,14 @@ RSpec.describe "Media", type: :request do
       "a scheduled post claims" => -> { claim_for_post(:scheduled) },
       "a journal entry claims" => -> { claim("journal_entry", create(:journal_entry).id) },
       "a task claims" => -> { claim("task", 1) },
+      "a task on an unpublished board claims" => -> { claim("task", board_task.id) },
+      "a task on a private project's board claims" => lambda {
+        claim("task", board_task(:private, board_published: true).id)
+      },
+      "a task on no project claims" => -> { claim("task", create(:task).id) },
+      "a comment on a task off a published board claims" => lambda {
+        claim("task_comment", create(:task_comment, task_id: board_task.id).id)
+      },
     }.each do |owner, setup|
       describe "when #{owner}" do
         before do
