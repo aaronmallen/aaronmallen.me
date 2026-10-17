@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require "dry/operation"
+require "rom/sql"
 
 module Blog
   class Operation < Dry::Operation
+    CONSTRAINT_ERRORS = [
+      ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError, ROM::SQL::UniqueConstraintError,
+    ].freeze
+
     module Savepoint
       def transaction(**, &) = super(savepoint: true, **, &)
     end
@@ -18,6 +23,16 @@ module Blog
 
     def affected(count) = count.positive? ? Success(count) : Failure(:not_found)
 
+    def constrained(repo, map)
+      yield
+    rescue *CONSTRAINT_ERRORS => e
+      case map[repo.violated_constraint(e)]
+        in [field, code] then invalid(field, code)
+        in Symbol => code then Failure(code)
+        else raise
+      end
+    end
+
     def contract_keys = contract.schema.key_map.map(&:id)
 
     def each_record(ids)
@@ -27,6 +42,8 @@ module Blog
     def every_field(params) = contract_keys.to_h { [it, params[it]] }
 
     def found(value) = value ? Success(value) : Failure(:not_found)
+
+    def invalid(field, code) = Failure([:invalid, { field => [code] }])
 
     def moved_to_day(time, day, now)
       at = TimeZone.on_day(time, day)

@@ -105,7 +105,7 @@ module Mail
       def sender(id)
         account = senders.find { it.id == id }
 
-        account ? Success(account) : Failure([:invalid, { from: [Blog::Contract::FORMAT] }])
+        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
       end
 
       def settle(account, thread, gmail_id, archive:)

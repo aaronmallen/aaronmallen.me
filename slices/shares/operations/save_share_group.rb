@@ -38,7 +38,7 @@ module Shares
       def group_form(params) = params.slice(:name).merge(code: params[:code])
 
       def save(group, fields, files)
-        Helpers::Code.taken(group_mutations) do
+        constrained(group_mutations, Helpers::Code::CONSTRAINTS) do
           transaction { write(group, fields, files) }
           Success(group_queries.find(group.id))
         end

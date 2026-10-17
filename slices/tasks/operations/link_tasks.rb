@@ -33,12 +33,7 @@ module Tasks
       def persist(id, kind:, other_id:)
         from, to, type = kind == BLOCKED_BY ? [other_id, id, BLOCKS] : [id, other_id, kind]
 
-        Success(transaction { task_mutations.link(from, to, type) })
-      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError => e
-        field, code = CONSTRAINTS[task_mutations.violated_constraint(e)]
-        raise unless field
-
-        Failure([:invalid, { field => [code] }])
+        constrained(task_mutations, CONSTRAINTS) { Success(transaction { task_mutations.link(from, to, type) }) }
       end
     end
   end

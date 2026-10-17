@@ -35,19 +35,16 @@ module Links
       end
 
       def persist(side, other)
-        Success(transaction { record_link_mutations.link(side, other) })
-      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError => e
-        field, code = CONSTRAINTS[record_link_mutations.violated_constraint(e)]
-        raise unless field
-
-        Failure([:invalid, { field => [code] }])
+        constrained(record_link_mutations, CONSTRAINTS) do
+          Success(transaction { record_link_mutations.link(side, other) })
+        end
       end
 
       def place(*sides)
         task_id, project_id = record_link_mutations.sorted(*sides).map(&:last)
 
         set_task_project.call(task_id, project_id).or do |code|
-          Failure([:invalid, { other_id: [code == :taken ? "taken" : "missing"] }])
+          invalid(:other_id, code == :taken ? "taken" : "missing")
         end
       end
     end

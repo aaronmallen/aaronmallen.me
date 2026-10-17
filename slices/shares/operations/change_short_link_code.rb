@@ -18,7 +18,7 @@ module Shares
       private
 
       def change(link, code)
-        Helpers::Code.taken(short_link_mutations) do
+        constrained(short_link_mutations, Helpers::Code::CONSTRAINTS) do
           transaction { short_link_mutations.change_code(link.short_code_id, code) }
           Success(short_link_queries.find(link.id))
         end

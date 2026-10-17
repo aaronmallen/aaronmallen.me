@@ -9,7 +9,7 @@ module Decisions
 
       private
 
-      def written(note) = note.empty? ? Failure([:invalid, { note: [Blog::Contract::BLANK] }]) : Success(note)
+      def written(note) = note.empty? ? invalid(:note, Blog::Contract::BLANK) : Success(note)
     end
   end
 end

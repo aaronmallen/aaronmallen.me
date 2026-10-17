@@ -30,11 +30,9 @@ module Decisions
       end
 
       def remove(decision_id, id)
-        Success(transaction { release(decision_id, id) })
-      rescue ROM::SQL::ForeignKeyConstraintError => e
-        raise unless decision_option_mutations.violated_constraint(e) == CHOSEN
-
-        Failure([:invalid, { id: ["chosen"] }])
+        constrained(decision_option_mutations, CHOSEN => [:id, "chosen"]) do
+          Success(transaction { release(decision_id, id) })
+        end
       end
     end
   end

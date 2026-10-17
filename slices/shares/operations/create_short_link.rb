@@ -20,7 +20,7 @@ module Shares
       def create(fields)
         attempts = fields[:code] ? 1 : Helpers::Code::ATTEMPTS
 
-        Helpers::Code.taken(short_link_mutations) do
+        constrained(short_link_mutations, Helpers::Code::CONSTRAINTS) do
           Helpers::Code.retrying(short_link_mutations, attempts) { insert(fields) }
         end
       end

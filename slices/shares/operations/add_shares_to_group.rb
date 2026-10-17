@@ -20,7 +20,7 @@ module Shares
       private
 
       def picked(ids)
-        return Failure([:invalid, { ids: [Blog::Contract::BLANK] }]) if ids.empty?
+        return invalid(:ids, Blog::Contract::BLANK) if ids.empty?
 
         shares = ids.uniq.map { share_queries.find(it) }
         shares.all? ? Success(shares) : Failure(:not_found)

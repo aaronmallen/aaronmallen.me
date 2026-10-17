@@ -62,12 +62,7 @@ module Projects
       end
 
       def persist(id, attributes)
-        transaction { save(step(find(id)), attributes) }
-      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
-        field, code = CONSTRAINTS[project_mutations.violated_constraint(e)]
-        raise unless field
-
-        Failure([:invalid, { field => [code] }])
+        constrained(project_mutations, CONSTRAINTS) { transaction { save(step(find(id)), attributes) } }
       end
 
       def queue_refresh(id)

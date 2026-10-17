@@ -30,11 +30,9 @@ module Tags
       def form(params) = { color: params[:color], name: params[:name], **params.slice(:description) }
 
       def persist(id, scope, fields)
-        Success(transaction { id ? tag_mutations.update(id, **changes(fields)) : store(scope, fields) })
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless tag_mutations.violated_constraint(e) == NAME_KEY
-
-        Failure([:invalid, { name: [TAKEN] }])
+        constrained(tag_mutations, NAME_KEY => [:name, TAKEN]) do
+          Success(transaction { id ? tag_mutations.update(id, **changes(fields)) : store(scope, fields) })
+        end
       end
 
       def store(scope, fields) = tag_mutations.create(scope:, color: tag_queries.next_color(scope:), **fields.compact)

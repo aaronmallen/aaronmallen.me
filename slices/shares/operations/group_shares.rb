@@ -24,7 +24,7 @@ module Shares
         Helpers::Code.retrying(group_mutations) { group_mutations.create(code: short_code_queries.free_code) }
       end
 
-      def enough(ids) = ids.size < FEWEST ? Failure([:invalid, { ids: [TOO_FEW] }]) : Success(ids)
+      def enough(ids) = ids.size < FEWEST ? invalid(:ids, TOO_FEW) : Success(ids)
     end
   end
 end

@@ -38,17 +38,10 @@ RSpec.describe Shares::Helpers::Code do
     expect(tries.call).to eq(described_class::ATTEMPTS)
   end
 
-  it "turns a code collision into the taken failure" do
-    repo, insert = collide(described_class::KEY)
-
-    expect(described_class.taken(repo, &insert).failure).to eq([:invalid, { code: ["taken"] }])
-  end
-
   it "raises a collision on any other constraint", :aggregate_failures do
     repo, insert, tries = collide("shares_key_key")
 
     expect { described_class.retrying(repo, &insert) }.to raise_error(ROM::SQL::UniqueConstraintError)
     expect(tries.call).to eq(1)
-    expect { described_class.taken(repo, &insert) }.to raise_error(ROM::SQL::UniqueConstraintError)
   end
 end

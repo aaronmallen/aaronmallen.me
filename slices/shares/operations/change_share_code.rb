@@ -18,7 +18,7 @@ module Shares
       private
 
       def change(share, code)
-        Helpers::Code.taken(share_mutations) do
+        constrained(share_mutations, Helpers::Code::CONSTRAINTS) do
           transaction { share_mutations.change_code(share.short_code_id, code) }
           Success(share_queries.find(share.id))
         end

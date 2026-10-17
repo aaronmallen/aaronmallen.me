@@ -19,7 +19,10 @@ module Posts
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
       NOTE = :edit_note
       PUBLISH = Blog::Types::PostIntent["publish"]
-      SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
+      SLUG_CONSTRAINTS = {
+        "posts_published_slug_locked" => [:slug, "locked"],
+        "posts_slug_key" => [:slug, "taken"],
+      }.freeze
 
       def call(params, id: nil, intent: DRAFT, now: Time.now)
         attributes = step validate(params, announcing: announcing?(id, intent))
@@ -69,8 +72,6 @@ module Posts
         given.merge(slug: Helpers::PostSlug.derive(slug: given[:slug], title: given[:title]))
       end
 
-      def invalid(field, code) = Failure([:invalid, { field => [code] }])
-
       def kept(post, attributes)
         saved = post&.published_at
         given = attributes[:published_at]
@@ -82,15 +83,12 @@ module Posts
       def lines(text) = text.encode(universal_newline: true)
 
       def persist(id, attributes, intent, now)
-        transaction do
-          post = step find(id)
-          save(post, kept(post, attributes), intent, now)
+        constrained(post_mutations, SLUG_CONSTRAINTS) do
+          transaction do
+            post = step find(id)
+            save(post, kept(post, attributes), intent, now)
+          end
         end
-      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
-        code = SLUG_CONSTRAINTS[post_mutations.violated_constraint(e)]
-        raise unless code
-
-        invalid(:slug, code)
       end
 
       def publish_now(post, attributes, now)

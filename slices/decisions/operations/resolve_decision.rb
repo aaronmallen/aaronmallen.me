@@ -29,16 +29,14 @@ module Decisions
       end
 
       def persist(id, option_id:, reason:)
-        transaction do
-          step find(id)
-          decision_mutations.update(id, status: STATUS, resolved_option_id: option_id)
-          step close_decision_task.call(id)
-          Success(record_decision_event.call(id, EVENT, option_id:, reason:))
+        constrained(decision_mutations, CHOICE => [:option_id, "missing"]) do
+          transaction do
+            step find(id)
+            decision_mutations.update(id, status: STATUS, resolved_option_id: option_id)
+            step close_decision_task.call(id)
+            Success(record_decision_event.call(id, EVENT, option_id:, reason:))
+          end
         end
-      rescue ROM::SQL::ForeignKeyConstraintError => e
-        raise unless decision_mutations.violated_constraint(e) == CHOICE
-
-        Failure([:invalid, { option_id: ["missing"] }])
       end
     end
   end

@@ -72,7 +72,7 @@ module Mail
       def sender(id)
         account = send_mail.senders.find { it.id == Blog::Types::IdParam[id] }
 
-        account ? Success(account) : Failure([:invalid, { from: [Blog::Contract::FORMAT] }])
+        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
       end
 
       def store(account, message)

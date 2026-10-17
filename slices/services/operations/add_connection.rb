@@ -17,11 +17,9 @@ module Services
       private
 
       def add(**columns)
-        Success(transaction { connection_mutations.add(**columns) })
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless connection_mutations.violated_constraint(e) == ACCOUNT_INDEX
-
-        Failure(:taken)
+        constrained(connection_mutations, ACCOUNT_INDEX => :taken) do
+          Success(transaction { connection_mutations.add(**columns) })
+        end
       end
 
       def known(provider) = found(definition_queries.all.find { it.id == provider.to_s && it.connectable? })

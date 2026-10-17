@@ -49,12 +49,9 @@ module Tasks
       end
 
       def persist(id, fields, now)
-        Success(transaction { task_rule_queries.by_id(id ? edit(id, fields) : create(fields, now)) })
-      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::ForeignKeyConstraintError => e
-        field, code = CONSTRAINTS[task_rule_mutations.violated_constraint(e)]
-        raise unless field
-
-        Failure([:invalid, { field => [code] }])
+        constrained(task_rule_mutations, CONSTRAINTS) do
+          Success(transaction { task_rule_queries.by_id(id ? edit(id, fields) : create(fields, now)) })
+        end
       end
 
       def projects(fields) = fields[:projects] || Blog::Constants::EMPTY_ARRAY

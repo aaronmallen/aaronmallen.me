@@ -41,16 +41,14 @@ module Social
       end
 
       def persist(person, fields)
-        Success(transaction do
-          person ? person_mutations.update(person.id, **fields) : person_mutations.create(**fields)
-        end)
-      rescue ROM::SQL::UniqueConstraintError => e
-        raise unless person_mutations.violated_constraint(e) == KEY_INDEX
-
-        Failure([:invalid, { key: [TAKEN] }])
+        constrained(person_mutations, KEY_INDEX => [:key, TAKEN]) do
+          Success(transaction do
+            person ? person_mutations.update(person.id, **fields) : person_mutations.create(**fields)
+          end)
+        end
       end
 
-      def refused(code) = Failure([:invalid, { bluesky_handle: [code] }])
+      def refused(code) = invalid(:bluesky_handle, code)
 
       def resolve(person, handle)
         return Success(nil) unless handle
