@@ -13,7 +13,7 @@ module Activity
       ROWS = Sequel[:attention]
       SNOOZES = Sequel[:attention_snoozes]
       SNOOZED_ROW = Sequel[SNOOZES[:kind].cast(:text) => ROWS[:kind]] &
-                    Sequel.lit("? IS NOT DISTINCT FROM ?", SNOOZES[:record_id], ROWS[:record_id])
+                    Sequel.~(Sequel.is_distinct_from(SNOOZES[:record_id], ROWS[:record_id]))
 
       schema :attention, infer: true
 

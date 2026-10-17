@@ -16,7 +16,7 @@ module Record
 
         conflict_target %i[repo number]
         update_statement(RESTATED.to_h { [it, Sequel[:excluded][it]] })
-        update_where(Sequel.lit("? IS DISTINCT FROM ?", *CHANGED))
+        update_where(Sequel.is_distinct_from(*CHANGED))
       end
     end
   end

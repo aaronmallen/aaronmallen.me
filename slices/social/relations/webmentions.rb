@@ -44,10 +44,7 @@ module Social
       private
 
       def changed(fields)
-        stored = Sequel.function(:row, *fields.map { Sequel[:webmentions][it] })
-        sent = Sequel.function(:row, *fields.map { Sequel[:excluded][it] })
-
-        Sequel.lit("? IS DISTINCT FROM ?", stored, sent)
+        Sequel.is_distinct_from(*%i[webmentions excluded].map { |table| fields.map { Sequel[table][it] } })
       end
 
       def rechecked(fields)

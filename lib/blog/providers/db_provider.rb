@@ -25,7 +25,7 @@ module Blog
             gateway.connection_options(max_connections: max_connections(settings))
 
             gateway.adapter :sql do |sql|
-              sql.extension :date_arithmetic, VALIDATED_CONNECTIONS
+              sql.extension :date_arithmetic, :is_distinct_from, VALIDATED_CONNECTIONS
             end
           end
         end
