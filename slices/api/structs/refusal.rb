@@ -11,6 +11,8 @@ module API
 
       def self.unavailable(message) = new(error: :unavailable, message:, errors: {})
 
+      def self.undeleted(noun) = new(error: :undeleted, message: format(Endpoint::UNDELETED, noun), errors: {})
+
       def self.unmailed = new(error: :unmailed, message: format(Action::MISSING_SCOPE, Endpoint::MAIL), errors: {})
 
       def self.unpublished(message) = new(error: :unpublished, message:, errors: {})

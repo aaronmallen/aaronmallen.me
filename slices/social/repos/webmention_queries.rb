@@ -63,6 +63,10 @@ module Social
 
       def trusted_author?(author_url) = trusted_authors.by_pk(normalize_author_url.call(author_url)).exist?
 
+      def trusted_author_among?(ids)
+        webmentions.where(id: ids, author_url: trusted_authors.select(:author_url).dataset).exist?
+      end
+
       def unseen(limit) = unseen_pending.latest_first(:received_at).limit(limit).to_a
 
       def unseen_count = unseen_pending.count

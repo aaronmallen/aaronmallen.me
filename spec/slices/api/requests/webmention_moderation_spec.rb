@@ -35,6 +35,67 @@ RSpec.describe "API webmention moderation and settings", type: :request do
     end
   end
 
+  describe "a spam verdict on a trusted author" do
+    let(:mention) { create(:webmention, author_url: "https://ada.example/") }
+    let(:stranger) { create(:webmention, author_url: "https://grace.example/") }
+
+    def refusal = "this change removes a trusted author for good, so it needs the delete scope"
+
+    def spam(path, body, scopes) = call_api(:post, path, body, token: api_token(scopes))
+
+    before { Social::Slice["repos.webmention_mutations"].trust(mention.author_url, approve_pending: false) }
+
+    {
+      "one at a time" => ->(mention) { ["/webmentions/#{mention.id}/moderate", { verdict: "spam" }] },
+      "in bulk" => ->(mention) { ["/webmentions/bulk/spam", { ids: [mention.id] }] },
+    }.each do |way, request|
+      it "is refused #{way} without delete, naming delete", :aggregate_failures do
+        spam(*request.call(mention), %w[read write])
+
+        expect([status, last_response.headers["WWW-Authenticate"], JSON.parse(last_response.body)["error_description"]])
+          .to eq([403, %(Bearer error="insufficient_scope", scope="delete"), refusal])
+        expect([webmention_queries.trusted_author?(mention.author_url), webmention_queries.by_id(mention.id).status])
+          .to eq([true, "pending"])
+      end
+
+      it "runs #{way} with delete" do
+        spam(*request.call(mention), %w[read write delete])
+
+        expect([status, webmention_queries.trusted_author?(mention.author_url)]).to eq([200, false])
+      end
+
+      it "runs #{way} on an author who is not trusted with write alone" do
+        spam(*request.call(stranger), %w[read write])
+
+        expect([status, webmention_queries.by_id(stranger.id).status]).to eq([200, "spam"])
+      end
+    end
+
+    it "refuses a bulk spam without delete when any one author is trusted" do
+      spam("/webmentions/bulk/spam", { ids: [stranger.id, mention.id] }, %w[read write])
+
+      expect([status, webmention_queries.by_id(stranger.id).status]).to eq([403, "pending"])
+    end
+
+    it "still ignores a trusted author's webmention with write alone" do
+      spam("/webmentions/#{mention.id}/moderate", { verdict: "ignored" }, %w[read write])
+
+      expect(status).to eq(200)
+    end
+
+    describe "over MCP without delete" do
+      def mcp_scopes = %w[read write]
+
+      it "refuses moderate_webmention, naming delete" do
+        expect(mcp_text("moderate_webmention", id: mention.id, verdict: "spam")).to eq(refusal)
+      end
+
+      it "refuses mark_webmentions_spam, naming delete" do
+        expect(mcp_text("mark_webmentions_spam", ids: [mention.id])).to eq(refusal)
+      end
+    end
+  end
+
   describe "GET /api/v1/webmention_settings" do
     let(:settings) do
       {

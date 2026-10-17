@@ -5,6 +5,7 @@ module API
     class ModerateWebmention < Endpoint
       APPROVED = Blog::Types::WebmentionStatus["approved"]
       IGNORED = Blog::Types::WebmentionStatus["ignored"]
+      SCOPED = true
       SPAM = Blog::Types::WebmentionStatus["spam"]
 
       SCHEMA = {
@@ -30,9 +31,14 @@ module API
         { id: Helpers::Schema::INTEGER, status: { type: "string", enum: Blog::Types::WebmentionStatus.values } },
       ).freeze
 
-      include Deps[moderate_webmention: "social.operations.moderate_webmention"]
+      include Deps[
+        moderate_webmention: "social.operations.moderate_webmention",
+        webmention_queries: "social.repos.webmention_queries",
+      ]
 
-      def handle(id:, verdict:, reason: nil)
+      def handle(id:, verdict:, scopes:, reason: nil)
+        return Failure(Structs::Refusal.undeleted("a trusted author")) if verdict == SPAM && distrusts?(id, scopes)
+
         case moderate_webmention.call(id, verdict, reason:)
           in Success(mention) then Success(id: mention.id, status: mention.status)
           in Failure(:not_found) then missing("webmention", id)
@@ -41,6 +47,8 @@ module API
       end
 
       private
+
+      def distrusts?(id, scopes) = !scopes.include?(DELETE) && webmention_queries.trusted_author_among?(id)
 
       def public_in(fields) = ("an approved webmention" if fields[:verdict] == APPROVED)
     end

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
-amended: ["#941", "#1335", "#1441"]
+amended: ["#941", "#1335", "#1441", "#1599"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 
@@ -35,7 +35,10 @@ on the consent page. The owner wants to grant edits without either power.
   scheduled posts, since their text goes out with them, and an issue sync that can reach a published board: one a
   task rule files into, one that tracks a repo, or one that holds a synced task. #1597 added scheduled social posts
   for the same reason.
-- **`delete`** guards every tool that removes a record for good: each `delete_*` tool and `remove_tag`.
+- **`delete`** guards every tool that removes a record for good: each `delete_*` tool, `remove_tag` and
+  `remove_trusted_author`. It also guards a spam verdict, one at a time or in bulk, when the author of any webmention
+  it names sits on the trusted list, since the verdict takes them off it. #1599 added the trusted list, which #1441
+  had left on `write`. A spam verdict on an author nobody trusts stays on `write`.
 - **`write`** keeps every other change, those a later call can undo among them: drop, archive, untag, unlink and
   cancel. A change to a draft, a private project or a task on no published board stays here, as do task tags and
   time, which no public page shows.
@@ -45,9 +48,10 @@ line, not on `write`. The server instructions in `MCP::Protocol::Handler` name t
 sending and deleting. ADR 0061's rule still applies: each scope has a name in `OAuthScope`, a consent line and
 the tools that name it, and `MCP::Protocol::ScopedServer` withholds them from a token that lacks it.
 
-A tool that needs `publish` only for some targets keeps `write` as its scope, and `API::Endpoint` refuses a public
-target to a caller without `publish`. Over the API that refusal is the same 403 `insufficient_scope` a missing scope
-gets, naming `publish`.
+A tool that needs `publish` or `delete` only for some targets keeps `write` as its scope. `API::Endpoint` refuses a
+public target to a caller without `publish`, and the webmention endpoints refuse a spam verdict on a trusted author
+to one without `delete`. Over the API that refusal is the same 403 `insufficient_scope` a missing scope gets, naming
+the scope it lacks.
 
 ## Alternatives
 

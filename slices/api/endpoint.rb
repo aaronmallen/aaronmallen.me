@@ -7,6 +7,7 @@ require "json_schemer"
 
 module API
   class Endpoint
+    DELETE = Blog::Types::OAuthScope["delete"]
     FINDS = false
     HEALTH = Blog::Types::OAuthScope["health"]
     MAIL = Blog::Types::OAuthScope["mail"]
@@ -18,6 +19,7 @@ module API
     SCOPED = false
     SHOWS_TASKS = false
     UNAVAILABLE = false
+    UNDELETED = "this change removes %s for good, so it needs the delete scope"
     UNPUBLISHED = "%s shows in public, so this change needs the publish scope"
     WORKOUT = Blog::Types::ActivityKind["workout"]
     GUARDED = { HEALTH => [WORKOUT], MAIL => [MAIL_ROW, Blog::Types::RecordKind["mail_thread"]] }.freeze
