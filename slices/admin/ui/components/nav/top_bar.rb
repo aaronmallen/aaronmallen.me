@@ -9,14 +9,15 @@ module Admin
           SEARCH_KEY = "/"
           SHORTCUT = "⌘K"
 
-          prop :navigation, Blog::Types::Instance(Structs::Navigation).optional
-          prop :session, Blog::Types.Interface(:csrf_token, :signed_in?)
+          prop :navigation, Blog::Types::Instance(Structs::Navigation)
 
           def view_template
             header(class: "top-bar") do
               a(class: "top-bar-skip", href: "#main") { t(".skip_link") }
               Wordmark()
-              @navigation ? signed_in : SettingsMenu(session: @session)
+              pills
+              search
+              AvatarMenu(settings: @navigation.settings)
             end
           end
 
@@ -48,12 +49,6 @@ module Admin
               span(class: "top-bar-search-label", aria: { hidden: "true" }) { t(".search_hint") }
               span(class: "top-bar-search-key", aria: { hidden: "true" }) { SHORTCUT }
             end
-          end
-
-          def signed_in
-            pills
-            search
-            AvatarMenu(settings: @navigation.settings)
           end
 
           def waiting_dot

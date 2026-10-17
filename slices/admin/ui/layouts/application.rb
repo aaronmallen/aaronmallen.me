@@ -52,7 +52,7 @@ module Admin
 
         def render_body(&)
           session = Auth::Session.for(request)
-          navigation ? TopBar(navigation:, session:) : MainNav(session:)
+          navigation ? TopBar(navigation:) : MainNav(session:)
           main(id: "main", class: "adm-main", data: main_data, &)
           Toast(message: toast_message) if toast_message
           navigation ? render_signed_in_tail(navigation) : Footer()

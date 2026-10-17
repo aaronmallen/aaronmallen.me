@@ -40,7 +40,7 @@ module Admin
           def action_group
             return if @actions.empty?
 
-            row_group(ACTIONS_GROUP, t(".actions")) do
+            PaletteGroup(id: ACTIONS_GROUP, heading: t(".actions")) do
               @actions.each { action_row(it) }
             end
           end
@@ -69,7 +69,7 @@ module Admin
 
           def category_groups
             @sections.group_by(&:group).each do |group, sections|
-              row_group("command-palette-group-#{group}", t(sections.first.group_key)) do
+              PaletteGroup(id: "command-palette-group-#{group}", heading: t(sections.first.group_key)) do
                 sections.each { section_row(it) }
               end
             end
@@ -112,14 +112,10 @@ module Admin
             end
           end
 
-          def row_group(id, heading, data: Blog::Constants::EMPTY_HASH, &)
-            PaletteGroup(id:, heading:, data:, &)
-          end
-
           def search_group
             search = path(:admin_search)
 
-            row_group(SEE_ALL_GROUP, t(".search")) do
+            PaletteGroup(id: SEE_ALL_GROUP, heading: t(".search")) do
               PaletteRow(
                 id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all", query: QUERY), href: search,
                 all: search, query: true,

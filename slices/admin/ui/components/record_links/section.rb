@@ -52,7 +52,7 @@ module Admin
             label = t(".remove", title: link.title)
 
             Form(action: path(:"admin_unlink_#{@kind}_record", id: @id, other_kind: link.kind, other_id: link.id)) do
-              HiddenFields(values: @fields.compact)
+              HiddenFields(values: @fields)
               Button(
                 type: "submit", variant: :gh, small: true, label:, icon: :close,
               )

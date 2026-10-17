@@ -28,7 +28,7 @@ module Admin
 
           def find_form
             Form(method: "get", action: @find_path, class: "record-picker-find") do
-              HiddenFields(values: @fields.compact)
+              HiddenFields(values: @fields)
               Input(
                 **FieldError.control_attributes(:other_id, @errors, @scope),
                 type: "search", name: "record_q", value: @query, placeholder: t(".placeholder"),
@@ -40,7 +40,7 @@ module Admin
           def pick(kind, link)
             Form(action: @link_path) do
               picked = { **@fields, record_q: @query, "record[other_kind]": kind, "record[other_id]": link.id }
-              HiddenFields(values: picked.compact)
+              HiddenFields(values: picked)
               button(type: "submit", class: "record-picker-target") do
                 Icon(:add)
                 span(class: "record-link-title") { link.title }

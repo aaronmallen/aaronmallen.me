@@ -48,14 +48,7 @@ module Admin
 
           def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
 
-          def state
-            if @pull_request.merged_at then t(".states.merged")
-            elsif @pull_request.closed_at then t(".states.closed")
-            elsif @pull_request.ready_at then t(".states.open")
-            else
-              t(".states.draft")
-            end
-          end
+          def state = t([".states", @pull_request.state].join("."))
 
           def stats
             Stat(key: t(".state"), value: state)

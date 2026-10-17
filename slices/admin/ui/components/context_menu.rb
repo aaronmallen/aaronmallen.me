@@ -89,7 +89,7 @@ module Admin
         private
 
         def hidden(fields)
-          HiddenFields(values: { return_to: @return_to, **fields }.compact)
+          HiddenFields(values: { return_to: @return_to, **fields })
         end
 
         def inner(label, icon:, hint: nil, key: nil)
