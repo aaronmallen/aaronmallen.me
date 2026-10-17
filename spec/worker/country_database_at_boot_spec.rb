@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe "The worker fetching the country database at boot", type: :app do
-  let(:sidekiq) { Sidekiq::Config.new(lifecycle_events: { startup: [] }).tap { it.logger = Logger.new(File::NULL) } }
+  let(:sidekiq) do
+    Sidekiq::Config.new(lifecycle_events: { startup: [], exit: [] }).tap { it.logger = Logger.new(File::NULL) }
+  end
 
   def boot
     allow(Hanami).to receive(:boot)

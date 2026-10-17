@@ -24,4 +24,8 @@ if puma_cluster_mode
   before_fork do
     Sequel::DATABASES.each(&:disconnect)
   end
+
+  before_worker_shutdown do
+    Hanami.shutdown
+  end
 end

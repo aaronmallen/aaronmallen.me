@@ -18,4 +18,5 @@ Sidekiq.configure_server do |config|
   end
 
   config.on(:startup) { Analytics::Slice["operations.queue_country_database"].call }
+  config.on(:exit) { Hanami.shutdown }
 end

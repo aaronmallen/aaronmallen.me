@@ -5,6 +5,7 @@ status: active
 created: 2026-10-14
 area: [config]
 issue: "#1314"
+amended: ["#1577"]
 tags: [puma, cluster, preload, fork, yjit, malloc, sidekiq, postgres, connections, raspberry-pi, systemd]
 ---
 
@@ -34,6 +35,11 @@ falls back to 2 in production and to 0 elsewhere.
 Before each fork the master calls `Sequel::DATABASES.each(&:disconnect)` in place of `Hanami.shutdown`. The master
 then holds no Postgres connection, each worker opens its own pool the first time it asks, and every provider stays
 started, so each worker starts its own live hub on its first stream as [ADR 0118][0118] says.
+
+`Hanami.shutdown` runs where each process ends instead. Puma calls it from `before_worker_shutdown` in each worker,
+and Sidekiq from its `exit` event, so every provider's `stop` runs: the live hub joins its LISTEN thread and closes
+its streams, and the MaxMind readers close. Sidekiq fires `shutdown` while its last jobs still run and `exit` once
+they finish, so `exit` keeps the readers open for those jobs.
 
 `config/puma.rb` and `config/sidekiq.rb` call `RubyVM::YJIT.enable` in production, when the Ruby was built with
 YJIT.
