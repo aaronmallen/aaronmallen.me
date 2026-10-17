@@ -34,7 +34,9 @@ module Posts
       def due_at(time) = with_status(SCHEDULED).where { published_at <= time }
 
       def last_changed_at
-        unordered.max(Sequel.function(:greatest, self[:published_at].qualified, self[:updated_at].qualified))
+        changed = Sequel.function(:greatest, self[:published_at].qualified, self[:updated_at].qualified)
+
+        unordered.dataset.select(Sequel.function(:max, changed))
       end
 
       def lean = select(*ROW).combine(:tags)

@@ -65,13 +65,7 @@ module Posts
 
       def held_follow_ups = held_post_follow_ups.oldest_first.to_a
 
-      def last_changed_published_at(tag = nil) = (tag ? posts.published.tagged(tag) : posts.published).last_changed_at
-
-      def last_deleted_at = post_deletions.last_deleted_at
-
       def last_link_check_run = link_check_runs.order(Sequel.desc(:started_at)).limit(1).one
-
-      def last_untagged_at = post_tag_removals.last_removed_at
 
       def link_check_tally
         post_ids = failing_checks.pluck(:post_id)
@@ -92,8 +86,6 @@ module Posts
       def published_bodies = posts.select(*LINKS).published.to_a
 
       def published_body(id) = posts.select(*LINKS).published.by_pk(id).one
-
-      def published_by_ids(ids) = with_tags.published.with_ids(ids).newest_first.to_a
 
       def published_by_slug(slug) = with_tags.published.with_slug(slug).one
 

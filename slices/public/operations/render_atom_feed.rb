@@ -13,7 +13,10 @@ module Public
       REF = "feed"
 
       include Deps[
-        "i18n", "routes", "settings", post_queries: "posts.repos.post_queries", tag_ref: "analytics.operations.tag_ref",
+        "i18n", "routes", "settings",
+        feed_queries: "posts.repos.feed_queries",
+        post_queries: "posts.repos.post_queries",
+        tag_ref: "analytics.operations.tag_ref",
       ]
 
       def call(version, title:, html:, feed:, params: {})
@@ -22,9 +25,7 @@ module Public
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
           feed_head(xml, version, title:, html:, params:)
           feed_links(xml, version.posts, html:, feed:, params:)
-          ids = version.posts.rows.map(&:id)
-          edits = post_queries.edits_for_posts(ids)
-          post_queries.published_by_ids(ids).each { entry(xml, it, version.changed_at(it), edits) }
+          feed_entries(xml, version)
         end
       end
 
@@ -49,15 +50,15 @@ module Public
         end
       end
 
-      def entry(xml, post, changed_at, edits)
+      def entry(xml, row, post, changed_at, edits)
         url = routes.url(:post, slug: post.slug).to_s
 
         xml.entry do
           xml.id(url)
           xml.title(post.title)
           entry_link(xml, url)
-          entry_dates(xml, post, changed_at)
-          post.tags.each { xml.category(term: it.name) }
+          entry_dates(xml, row.published_at, changed_at)
+          row.tags.each { xml.category(term: it.name) }
           entry_body(xml, post, edits)
         end
       end
@@ -68,12 +69,20 @@ module Public
         xml.content(post.body_html + notes(edits.fetch(post.id, NO_EDITS)), type: "html")
       end
 
-      def entry_dates(xml, post, changed_at)
-        xml.published(timestamp(post.published_at))
+      def entry_dates(xml, published_at, changed_at)
+        xml.published(timestamp(published_at))
         xml.updated(timestamp(changed_at))
       end
 
       def entry_link(xml, url) = xml.link(rel: "alternate", type: HTML_TYPE, href: tag_ref.call(url, REF))
+
+      def feed_entries(xml, version)
+        rows = version.posts.rows
+        ids = rows.map(&:id)
+        edits = post_queries.edits_for_posts(ids)
+        posts = feed_queries.entries(ids)
+        rows.each { |row| posts[row.id]&.then { entry(xml, row, it, version.changed_at(row), edits) } }
+      end
 
       def feed_head(xml, version, title:, html:, params:)
         xml.id(url(html, params))

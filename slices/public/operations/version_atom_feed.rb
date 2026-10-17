@@ -25,17 +25,11 @@ module Public
       end
 
       include Deps[
-        post_queries: "posts.repos.post_queries",
+        feed_queries: "posts.repos.feed_queries",
       ]
 
       def call(posts, tag: nil)
-        Version.new(
-          posts:,
-          edited_at: post_queries.edited_at(posts.rows.map(&:id)),
-          deleted_at: post_queries.last_deleted_at,
-          untagged_at: post_queries.last_untagged_at,
-          feed_changed_at: post_queries.last_changed_published_at(tag),
-        )
+        Version.new(posts:, **feed_queries.stamps(posts.rows.map(&:id), tag))
       end
     end
   end

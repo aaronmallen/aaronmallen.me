@@ -21,7 +21,7 @@ module Public
 
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
-    import keys: %w[repos.post_queries], from: :posts
+    import keys: %w[repos.feed_queries repos.post_queries], from: :posts
 
     import keys: %w[operations.claim_search_attempt repos.public_search_queries], from: :search
 

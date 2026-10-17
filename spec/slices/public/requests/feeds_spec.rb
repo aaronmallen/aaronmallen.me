@@ -532,6 +532,20 @@ RSpec.describe "Feeds", type: :request do
           expect(fetched.grep(body_columns)).not_to be_empty
         end
 
+        it "reads the feed's stamps in one statement", :aggregate_failures do
+          stamps = counting { poll(path, etag: validators[:etag]) }.grep(/post_deletions|post_tag_removals|post_edits/)
+
+          expect(last_response.status).to eq(304)
+          expect(stamps).to have(1).item
+        end
+
+        it "loads each entry once with only the rendered body", :aggregate_failures do
+          fetched = counting { get path }
+
+          expect(fetched.grep(/"posts"\."body_html"/)).to have(1).item
+          expect(fetched.grep(/"posts"\."(syndication_)?body"/)).to be_empty
+        end
+
         it "answers 200 with the new entry once another post is published", :aggregate_failures do
           sent = validators
           publish("newest", 0, tags: %w[ruby])
