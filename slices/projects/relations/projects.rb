@@ -31,8 +31,10 @@ module Projects
       def newest_archived_first = order(Sequel.desc(:archived_on, nulls: :last), self[:id].desc)
 
       def slugged(slugs)
-        dataset.unordered.select_map(%i[id name]).filter_map { |id, name| id if slugs.include?(slug(name)) }
+        dataset.order(:id).select_map(%i[id name]).filter_map { |id, name| id if slugs.include?(slug(name)) }
       end
+
+      def slugs = dataset.unordered.select_map(:name).filter_map { slug(it) }.to_set
 
       def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
 

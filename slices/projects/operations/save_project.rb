@@ -19,7 +19,7 @@ module Projects
       }.freeze
 
       def call(params, id: nil, now: Time.now)
-        attributes = step validate(params, now)
+        attributes = step validate(params, id, now)
         step persist(id, attributes)
       end
 
@@ -86,7 +86,10 @@ module Projects
 
       def save(project, attributes) = Success(create_or_update(project, attributes).tap { refresh(it, project) })
 
-      def validate(params, now) = validated(contract.call(form(params), today: Blog::TimeZone.today(now)))
+      def validate(params, id, now)
+        context = { slugs: project_queries.slugs_besides(id), stored_name: project_queries.name_of(id) }
+        validated(contract.call(form(params), **context, today: Blog::TimeZone.today(now)))
+      end
     end
   end
 end

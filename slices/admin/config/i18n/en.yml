@@ -1797,6 +1797,8 @@ en:
             taken: "Another project already has this key."
           name:
             blank: "Add a name."
+            slugless: "Use a letter or a digit, so the board gets a link."
+            taken: "Another project's name makes the same link."
           og_image_url:
             format: "Enter a link that starts with http:// or https://."
           repo:

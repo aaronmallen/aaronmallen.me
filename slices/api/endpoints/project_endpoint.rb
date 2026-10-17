@@ -18,7 +18,11 @@ module API
           Blog::Contract::FORMAT => "use 2 to 6 letters and digits that start with a letter, as POD",
           "taken" => "another project already has this key",
         },
-        name: { Blog::Contract::BLANK => "add a name" },
+        name: {
+          Blog::Contract::BLANK => "add a name",
+          "slugless" => "use a letter or a digit, so the board gets a link",
+          "taken" => "another project's name makes the same link",
+        },
         og_image_url: { Blog::Contract::FORMAT => LINK },
         repo: {
           Blog::Contract::FORMAT => "name the repository as owner/repo, as octocat/hello-world",

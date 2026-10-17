@@ -385,6 +385,21 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(last_response.status).to eq(422)
         expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.repo.taken"))
       end
+
+      it "refuses a name with no letter or digit for its link", :aggregate_failures do
+        save(name: "日本語 !")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.name.slugless"))
+      end
+
+      it "refuses a name whose link another project's name makes, archived too", :aggregate_failures do
+        create(:project, :archived, name: "Site Tools")
+        save(name: "site-tools")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.name.taken"))
+      end
     end
 
     describe "the key" do
@@ -675,6 +690,27 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         save(project, name: "sai")
 
         expect(repo.by_id(project.id).name).to eq("sai")
+      end
+
+      it "keeps a name that makes the project's own link" do
+        save(project, name: "Old")
+
+        expect(repo.by_id(project.id).name).to eq("Old")
+      end
+
+      it "saves a project whose unchanged name shares its link with one saved before the check", :aggregate_failures do
+        create(:project, name: "Old")
+        save(project, name: "old", tagline: "Kept")
+
+        expect(last_response).to be_redirect
+        expect(repo.by_id(project.id).tagline).to eq("Kept")
+      end
+
+      it "refuses a rename to a name whose link another project's name makes" do
+        create(:project, name: "Site Tools")
+        save(project, name: "site-tools")
+
+        expect(last_response.status).to eq(422)
       end
 
       it "says the project was saved" do

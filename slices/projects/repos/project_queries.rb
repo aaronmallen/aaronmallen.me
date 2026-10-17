@@ -23,6 +23,8 @@ module Projects
 
       def live_id_by_key(key) = projects.live.where(key:).pluck(:id).first
 
+      def name_of(id) = (projects.where(id:).pluck(:name).first if id)
+
       def page_by_tag(tag, page) = page.fill(projects.tagged(tag).in_order.paged(page).to_a)
 
       def public_archived = with_tags.in_public.archived.by_stars.to_a
@@ -51,6 +53,8 @@ module Projects
       end
 
       def sitemap_boards = projects.in_public.with_board.in_order.to_a
+
+      def slugs_besides(id) = projects.exclude(id:).slugs
 
       def tracked = with_tags.tracked.in_order.to_a
 

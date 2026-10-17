@@ -31,6 +31,14 @@ RSpec.describe "Project board", type: :request do
       expect(page).to have_css("header.hd > .kicker + h1.board-name", exact_text: "Doing It")
     end
 
+    it "opens the oldest board when names saved before the check share its slug" do
+      project
+      create(:project, name: "doing-it", tagline: "Newer", board_published: true)
+      get "/projects/doing-it"
+
+      expect(page).to have_css("h1.board-name", exact_text: "Doing It")
+    end
+
     it "lets caches keep it for five minutes" do
       project
       get "/projects/doing-it"

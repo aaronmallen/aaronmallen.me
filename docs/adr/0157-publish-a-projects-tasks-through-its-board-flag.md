@@ -5,7 +5,7 @@ status: active
 created: 2026-10-12
 area: [db, admin, api, mcp, projects, public]
 issue: "#1163"
-amended: ["#1182", "#1315"]
+amended: ["#1182", "#1315", "#1657"]
 tags: [projects, tasks, kanban, board, public, privacy, visibility, tags]
 ---
 
@@ -24,6 +24,12 @@ public or private and an archive date, kept apart by [ADR 0119][0119]. Tasks car
 
 **A flag on the project publishes its tasks.** Projects gain a "Publish Kanban" flag, saved from the project editor
 and carried by `save_project`, `read_project` and `list_projects`. It stands beside visibility and the archive date.
+
+**Each project's name makes its own slug.** The board URL takes the slug of the name, and no column stores it.
+Since #1657 saving a project refuses a name that makes no slug, such as one with no ASCII letter or digit, or one
+whose slug another project's name already makes, archived projects included. It checks only a new project or a
+changed name, so a project saved before #1657 that keeps its name still saves. Such names may share a slug; their
+URL then opens the oldest published board among them.
 
 **A project shows its board when it is public and the flag is on.** Archived public projects keep their board. A
 private project, or one without the flag, reads "That board isn't public." at its board URL.

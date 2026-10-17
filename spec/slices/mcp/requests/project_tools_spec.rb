@@ -190,6 +190,13 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(message).to eq("key: another project already has this key")
     end
 
+    it "refuses a name whose link another project's name makes" do
+      create(:project, name: "Site Tools")
+      call_tool("save_project", name: "site tools!", visibility: "public")
+
+      expect(message).to eq("name: another project's name makes the same link")
+    end
+
     it "refuses a visibility it does not know" do
       call_tool("save_project", name: "fresh", visibility: "secret")
 

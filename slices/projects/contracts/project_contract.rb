@@ -5,6 +5,9 @@ module Projects
     class ProjectContract < Blog::Contract
       FUTURE = "future"
       MONTH = "%Y-%m"
+      SLUG = Blog::Types::Normalized::Slug
+      SLUGLESS = "slugless"
+      TAKEN = "taken"
       STARTED_ON = Blog::Types::Date.optional.constructor do |value|
         text = Blog::Types::TrimmedText[value]
         next nil if text.empty?
@@ -26,6 +29,16 @@ module Projects
       end
 
       rule(:name).validate(:without_controls, :visible)
+
+      rule(:name) do |context:|
+        next if rule_error?(:name) || value == context.fetch(:stored_name)
+
+        slug = SLUG.call(value) { nil }
+        next key.failure(SLUGLESS) unless slug
+
+        key.failure(TAKEN) if context.fetch(:slugs).include?(slug)
+      end
+
       rule(:tagline).validate(:without_controls)
       rule(:url).validate(:without_controls)
       rule(:og_image_url).validate(:without_controls)
