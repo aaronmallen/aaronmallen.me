@@ -5,7 +5,7 @@ status: active
 created: 2026-10-16
 area: [app, config, lib]
 issue: "#1584"
-amended: ["#1642"]
+amended: ["#1642", "#1728"]
 tags: [maintenance, flag-file, settings, deploy, pi, nas, sidekiq, honeybadger, postgres, redis, rustfs]
 ---
 
@@ -36,7 +36,8 @@ at once:
 - The Honeybadger provider ([ADR 0010][0010]) sends no reports while the file exists.
 
 A script on the Pi, in `~/.local/bin/` beside `aaronmallen-deploy` and outside the repo, creates and removes the
-file. The app only reads it.
+file. #1728 made the admin a writer too: it creates the file from Settings, and `Blog::Maintenance` removes it for a
+browser holding the signed owner cookie, as [ADR 0184][0184] says. The script still works.
 
 ## Alternatives
 
@@ -63,4 +64,5 @@ Pi by hand.
 
 [0010]: 0010-configure-honeybadger-from-settings-in-a-provider-not-from-honeybadger-yml.md
 [0020]: 0020-keep-locks-throttles-and-claims-in-postgres-not-redis.md
+[0184]: 0184-turn-maintenance-mode-off-from-a-signed-owner-cookie-and-keep-the-admin-blocked.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
