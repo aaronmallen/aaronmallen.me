@@ -10,7 +10,7 @@ module Admin
         include Deps[queue_issue_sync: "tasks.operations.queue_issue_sync"]
 
         def handle(_request, response)
-          toast(response, "#{TOASTS}.#{enqueue}")
+          toast(response, enqueue)
           response.redirect_to(routes.path(:admin_tasks, filter: EXTERNAL))
         end
 
@@ -18,8 +18,9 @@ module Admin
 
         def enqueue
           case queue_issue_sync.call
-            in Failure(:not_configured) then :not_configured
-            in Success then :queued
+            in Failure(:not_configured) then "#{TOASTS}.not_configured"
+            in Failure(:queue_unavailable) then QUEUE_UNAVAILABLE
+            in Success then "#{TOASTS}.queued"
           end
         end
       end

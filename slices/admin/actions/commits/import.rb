@@ -9,7 +9,7 @@ module Admin
         include Deps[queue_commit_import: "record.operations.queue_commit_import"]
 
         def handle(_request, response)
-          toast(response, "#{TOASTS}.#{enqueue}")
+          toast(response, enqueue)
           response.redirect_to(routes.path(:admin_root))
         end
 
@@ -17,8 +17,9 @@ module Admin
 
         def enqueue
           case queue_commit_import.call
-            in Failure(:not_configured) then :not_configured
-            in Success(_) then :queued
+            in Failure(:not_configured) then "#{TOASTS}.not_configured"
+            in Failure(:queue_unavailable) then QUEUE_UNAVAILABLE
+            in Success(_) then "#{TOASTS}.queued"
           end
         end
       end

@@ -15,6 +15,7 @@ module API
           in Success(_) then Success(status: QUEUED)
           in Failure(:not_configured)
             Failure(Structs::Refusal.unavailable("GitHub isn't connected, so no import can run"))
+          in Failure(:queue_unavailable) then Failure(Structs::Refusal.queue_unavailable)
         end
       end
     end

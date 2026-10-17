@@ -36,6 +36,12 @@ module Blog
       Failure(:invalid)
     end
 
+    def queued
+      Success(yield)
+    rescue RedisClient::Error
+      Failure(:queue_unavailable)
+    end
+
     def snoozed(record, now) = record&.snoozed_until&.>(now) ? Success(record) : Failure(:not_snoozed)
 
     def upcoming_day(date, now)

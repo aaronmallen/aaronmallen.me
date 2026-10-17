@@ -290,6 +290,7 @@ en:
       role_added: "Role added to /projects"
       role_removed: "Role removed from /projects"
       saved: "Project saved"
+  queue_unavailable: "Not queued · the job queue is down, so try again soon"
   record_links:
     toasts:
       linked: "Record linked"

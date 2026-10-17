@@ -2,8 +2,8 @@
 
 module Posts
   module Operations
-    class QueueLinkCheckRun
-      def call = Jobs::CheckPostLinks.perform_async
+    class QueueLinkCheckRun < Blog::Operation
+      def call = step(queued { Jobs::CheckPostLinks.perform_async })
     end
   end
 end

@@ -12,7 +12,7 @@ module Admin
           id = record_id(request)
           url = Blog::Types::OptionalText[request.params[:url]]
 
-          toast(response, "#{TOASTS}.#{queue(id, url)}")
+          toast(response, queue(id, url))
           response.redirect_to(back_here(request) || routes.path(:admin_edit_post, id:, links: Blog::Constants::CHECKED))
         end
 
@@ -20,8 +20,9 @@ module Admin
 
         def queue(id, url)
           case queue_link_check.call(id, url)
-            in Success then url ? :one : :all
-            in Failure(:not_found) then :not_published
+            in Success then "#{TOASTS}.#{url ? :one : :all}"
+            in Failure(:not_found) then "#{TOASTS}.not_published"
+            in Failure(:queue_unavailable) then QUEUE_UNAVAILABLE
           end
         end
       end

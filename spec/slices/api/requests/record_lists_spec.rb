@@ -50,6 +50,13 @@ RSpec.describe "API commits, pull requests and syncs", type: :request do
       expect([call_api(:post, "/commits/import", "{}").fetch("message"), status])
         .to eq(["GitHub isn't connected, so no import can run", 503])
     end
+
+    it "answers with a 503 when the queue is down" do
+      connect_github_token
+      allow(Record::Jobs::ImportCommits).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+
+      expect([call_api(:post, "/commits/import", "{}").fetch("error"), status]).to eq(["unavailable", 503])
+    end
   end
 
   describe "GET /api/v1/pull_requests" do

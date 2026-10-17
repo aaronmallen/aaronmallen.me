@@ -9,6 +9,8 @@ module API
 
       def self.not_found(message) = new(error: :not_found, message:, errors: {})
 
+      def self.queue_unavailable = unavailable("the job queue is down, so nothing was queued; try again soon")
+
       def self.unavailable(message) = new(error: :unavailable, message:, errors: {})
 
       def self.undeleted(noun) = new(error: :undeleted, message: format(Endpoint::UNDELETED, noun), errors: {})

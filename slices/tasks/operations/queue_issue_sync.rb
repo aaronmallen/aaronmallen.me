@@ -7,7 +7,7 @@ module Tasks
 
       def call
         sources = step configured
-        sources.each { Jobs::SyncIssues.perform_async(it) }
+        step(queued { sources.each { Jobs::SyncIssues.perform_async(it) } })
       end
 
       private

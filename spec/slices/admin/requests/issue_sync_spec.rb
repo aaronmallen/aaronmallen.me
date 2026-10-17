@@ -53,6 +53,14 @@ RSpec.describe "Admin issue sync", type: :request do
       expect(toast).to eq(i18n.t("tasks_page.toasts.issue_sync.queued"))
     end
 
+    it "says so when the queue is down" do
+      allow(Tasks::Jobs::SyncIssues).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+      sync
+      follow_redirect!
+
+      expect(toast).to eq(i18n.t("queue_unavailable"))
+    end
+
     it "asks GitHub for nothing inside the request" do
       sync
 

@@ -3,6 +3,8 @@
 
 module Admin
   class Action < Blog::Action
+    QUEUE_UNAVAILABLE = "queue_unavailable"
+
     include CSRFToken
     include Deps[
       "operations.build_navigation", "settings",
@@ -75,9 +77,8 @@ module Admin
 
     def settle(response, result, key, path)
       case result
-        in Success(_)
-          toast(response, key)
-          response.redirect_to(path)
+        in Success(_) then toast_back(response, key, path)
+        in Failure(:queue_unavailable) then toast_back(response, QUEUE_UNAVAILABLE, path)
         in Failure[:invalid, errors] if block_given? then yield errors
         in Failure(:not_found) then halt 404
         else halt 500
@@ -92,6 +93,11 @@ module Admin
 
     def toast(response, key, **)
       response.flash[UI::Components::Toast::FLASH_KEY] = i18n.t!(key, **)
+    end
+
+    def toast_back(response, key, path)
+      toast(response, key)
+      response.redirect_to(path)
     end
   end
 end

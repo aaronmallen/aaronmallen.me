@@ -62,6 +62,13 @@ RSpec.describe "API issue sync", type: :request do
         expect(queued).to eq([0, 0])
       end
     end
+
+    it "answers 503 when the queue is down" do
+      connect_github_token
+      allow(Tasks::Jobs::SyncIssues).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+
+      expect([sync.fetch("error"), status]).to eq(["unavailable", 503])
+    end
   end
 
   it "lists 503 in the OpenAPI document" do

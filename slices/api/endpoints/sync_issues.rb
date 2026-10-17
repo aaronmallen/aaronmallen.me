@@ -18,6 +18,7 @@ module API
         case queue_issue_sync.call
           in Success[*sources] then Success(queued: sources)
           in Failure(:not_configured) then Failure(Structs::Refusal.unavailable(UNCONFIGURED))
+          in Failure(:queue_unavailable) then Failure(Structs::Refusal.queue_unavailable)
         end
       end
 

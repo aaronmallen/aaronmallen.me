@@ -31,6 +31,8 @@ RSpec.describe "Admin broken links", type: :request do
     create(:post, status, title:, body: ["intro", *urls.map { "See [note #{it}](#{it})." }].join("\n\n"))
   end
 
+  def queue_down = Admin::Slice["i18n"].t("queue_unavailable")
+
   def runs = Posts::Slice["relations.link_check_runs"]
 
   def short_checks = Shares::Slice["relations.short_link_checks"]
@@ -38,6 +40,11 @@ RSpec.describe "Admin broken links", type: :request do
   def short_link(destination) = Shares::Slice["operations.create_short_link"].call(destination:).value!
 
   def slow = "https://cy.example/slow"
+
+  def toast_after_redirect
+    follow_redirect!
+    page.find("[data-toast] .toast", visible: :all).text(:all)
+  end
 
   before { sign_in_to_admin }
 
@@ -247,6 +254,21 @@ RSpec.describe "Admin broken links", type: :request do
       expect(page.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Checking that link")
     end
 
+    it "says so when the queue is down for a post link" do
+      allow(Posts::Jobs::CheckPostLinksAgain).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+      post "/admin/posts/#{post_with(dead).id}/links/check", _csrf_token: admin_csrf_token, url: dead, return_to: back
+
+      expect(toast_after_redirect).to eq(queue_down)
+    end
+
+    it "says so when the queue is down for a short link" do
+      link = short_link(slow)
+      allow(Shares::Jobs::CheckShortLinkAgain).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+      post "/admin/links/#{link.id}/check", _csrf_token: admin_csrf_token, return_to: back
+
+      expect(toast_after_redirect).to eq(queue_down)
+    end
+
     it "finds no short link that is gone" do
       post "/admin/links/0/check", _csrf_token: admin_csrf_token
 
@@ -317,6 +339,13 @@ RSpec.describe "Admin broken links", type: :request do
 
       expect(Posts::Jobs::CheckPostLinks.jobs.size).to eq(1)
       expect(last_response.location).to end_with(back)
+    end
+
+    it "says so when the queue is down" do
+      allow(Posts::Jobs::CheckPostLinks).to receive(:perform_async).and_raise(RedisClient::CannotConnectError)
+      post "/admin/posts/links/check", _csrf_token: admin_csrf_token, return_to: back
+
+      expect(toast_after_redirect).to eq(queue_down)
     end
 
     it "records the new run once the job runs", :aggregate_failures do

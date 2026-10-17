@@ -7,7 +7,7 @@ module Shares
 
       def call(id)
         step found(short_link_queries.find(id))
-        Jobs::CheckShortLinkAgain.perform_async(id)
+        step(queued { Jobs::CheckShortLinkAgain.perform_async(id) })
       end
     end
   end

@@ -7,7 +7,7 @@ module Record
 
       def call
         step configured
-        Jobs::ImportCommits.perform_async
+        step(queued { Jobs::ImportCommits.perform_async })
       end
 
       private
