@@ -15,6 +15,8 @@ module Mail
 
       Mailbox = Data.define(:google, :address) do
         def get(path, **) = google.get("#{GMAIL}/#{path}", account: address, **)
+
+        def pages(path, rows:, **) = google.pages("#{GMAIL}/#{path}", rows:, account: address, **)
       end
 
       include Deps[
@@ -59,14 +61,9 @@ module Mail
         start(mailbox, account)
       end
 
-      def changes(mailbox, start, page_token = nil)
-        page = mailbox.get("history", startHistoryId: start, **token(page_token))
-        records = page.fetch("history", [])
-        following = page["nextPageToken"]
-        return [records, page.fetch("historyId")] unless following
-
-        more, last = changes(mailbox, start, following)
-        [records + more, last]
+      def changes(mailbox, start)
+        found = mailbox.pages("history", rows: "history", startHistoryId: start)
+        [found.fetch("history"), found.fetch("historyId")]
       end
 
       def mailbox(address, client = google.loaded) = Mailbox.new(client, address)

@@ -4,6 +4,8 @@ require "oauth2"
 
 module Google
   class Client
+    include Paging
+
     CHALLENGE_METHOD = "S256"
     FORBIDDEN = 403
     FULL_SCOPES = {
@@ -74,13 +76,11 @@ module Google
 
     def loaded = self.class.new(oauth:, connections:, tokens: @tokens.remembering)
 
-    def patch(url, body, account:) = request(account, :patch, url, body: body.to_json, headers: JSON_HEADERS.dup)
+    def patch(url, body, account:) = request(account, :patch, url, **json(body))
 
-    def post(url, body, account:, narrow: nil)
-      request(account, :post, url, narrow:, body: body.to_json, headers: JSON_HEADERS.dup)
-    end
+    def post(url, body, account:, narrow: nil) = request(account, :post, url, narrow:, **json(body))
 
-    def put(url, body, account:) = request(account, :put, url, body: body.to_json, headers: JSON_HEADERS.dup)
+    def put(url, body, account:) = request(account, :put, url, **json(body))
 
     def revoke(credentials)
       oauth.request(:post, REVOKE_URL, body: { token: credentials[:refresh_token] || credentials[:access_token] })
@@ -118,6 +118,8 @@ module Google
     rescue Faraday::Error => e
       raise Error, e.message
     end
+
+    def json(body) = { body: body.to_json, headers: JSON_HEADERS.dup }
 
     def named(token)
       email = Hash.try_convert(token.get(USERINFO_URL).parsed).to_h.fetch("email")

@@ -62,11 +62,10 @@ module Health
               .transform_values { night(it) }
       end
 
-      def points(account, type, filter, **params)
-        page = google.get("#{DATA_TYPES}/#{type}/dataPoints", account:, narrow: SCOPE, filter:, **params)
-        rows = page.fetch("dataPoints", [])
-        token = page["nextPageToken"].to_s
-        token.empty? ? rows : rows + points(account, type, filter, **params, page_token: token)
+      def points(account, type, filter)
+        url = "#{DATA_TYPES}/#{type}/dataPoints"
+        found = google.pages(url, rows: "dataPoints", account:, narrow: SCOPE, token_param: :page_token, filter:)
+        found.fetch("dataPoints")
       end
 
       def resting_heart_rates(account, first, last)

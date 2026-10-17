@@ -35,7 +35,7 @@ module Calendar
       end
 
       def calendars(account, from, to)
-        listed = pages(account, "#{API}/users/me/calendarList").fetch("items", [])
+        listed = google.pages("#{API}/users/me/calendarList", rows: "items", account:).fetch("items")
         tokens = calendar_queries.sync_tokens(account, from)
 
         listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, tokens[it["id"]], from, to) }
@@ -55,8 +55,10 @@ module Calendar
 
       def events(account, id, token, from, to)
         url = "#{API}/calendars/#{ERB::Util.url_encode(id)}/events"
-        found = pages(account, url, singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to))
-        cancelled, kept = found.fetch("items", []).partition { it["status"] == CANCELLED }
+        found = google.pages(
+          url, rows: "items", account:, singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to),
+        )
+        cancelled, kept = found.fetch("items").partition { it["status"] == CANCELLED }
 
         {
           events: kept.map { event(it) }, cancelled: cancelled.map { it.fetch("id") }, full: token.nil?,
@@ -73,15 +75,6 @@ module Calendar
       end
 
       def last_day(time) = Blog::TimeZone.today(time - 1)
-
-      def pages(account, url, **params)
-        page = google.get(url, account:, **params)
-        token = page["nextPageToken"].to_s
-        return page if token.empty?
-
-        rest = pages(account, url, **params, pageToken: token)
-        rest.merge("items" => page.fetch("items", []) + rest.fetch("items", []))
-      end
 
       def since(token, from, to)
         return { syncToken: token } if token
