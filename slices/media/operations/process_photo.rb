@@ -14,14 +14,13 @@ module Media
       PAGE_HEIGHT = "page-height"
       QUALITY = 85
       SHRINK = 0.8
-      TALL = 10_000_000
       WIDTHS = [640, 1280, 1920].freeze
 
       Processed = Data.define(:body, :width, :height, :variants)
 
       def call(bytes, type)
-        image = thumbnail(bytes, LONG_EDGE, type)
-        variants = resize(bytes, type, image.width)
+        image = thumbnail(bytes, LONG_EDGE, type).copy_memory
+        variants = resize(image, type)
 
         Processed.new(body: save(image, type), width: image.width, height: frame_height(image), variants:)
       rescue Vips::Error
@@ -51,8 +50,8 @@ module Media
         nil
       end
 
-      def variants(bytes, type, width)
-        resize(bytes, type, width)
+      def variants(bytes, type)
+        resize(Vips::Image.new_from_buffer(bytes, load_options(type)).copy_memory, type)
       rescue Vips::Error
         nil
       end
@@ -65,8 +64,8 @@ module Media
 
       def load_options(type) = ANIMATED.include?(type) ? ALL_PAGES : FIRST_PAGE
 
-      def resize(bytes, type, width)
-        WIDTHS.select { it < width }.to_h { [it, save(thumbnail(bytes, it, type, TALL), type)] }
+      def resize(image, type)
+        WIDTHS.select { it < image.width }.to_h { [it, save(shrink(image, it), type)] }
       end
 
       def save(image, type)
@@ -74,8 +73,24 @@ module Media
         image.write_to_buffer(".#{type}", strip: true, **options)
       end
 
-      def thumbnail(bytes, width, type, height = width)
-        Vips::Image.thumbnail_buffer(bytes, width, height:, size: :down, option_string: load_options(type))
+      def scale(image, hscale, vscale)
+        return image.resize(hscale, vscale:) unless image.has_alpha?
+
+        image.premultiply.resize(hscale, vscale:).unpremultiply.cast(image.format)
+      end
+
+      def shrink(image, width)
+        page = frame_height(image)
+        pages = image.height / page
+        height = [(page * width.fdiv(image.width)).round, 1].max
+        small = scale(image, width.fdiv(image.width), (height * pages).fdiv(image.height))
+        return small if small.get_typeof(PAGE_HEIGHT).zero?
+
+        small.mutate { it.set_type!(GObject::GINT_TYPE, PAGE_HEIGHT, height) }
+      end
+
+      def thumbnail(bytes, width, type)
+        Vips::Image.thumbnail_buffer(bytes, width, height: width, size: :down, option_string: load_options(type))
       end
     end
   end

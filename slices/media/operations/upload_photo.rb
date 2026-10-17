@@ -24,21 +24,14 @@ module Media
         bytes = photo.read
         step measure(bytes, type)
         processed = step process(bytes, type)
+        stored = step store(processed, type)
 
-        transaction { save(processed, type) }
+        save(processed, stored)
       end
 
       private
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
-
-      def discard(keys)
-        keys.each do |key|
-          client.delete(key)
-        rescue ObjectStore::Client::Error
-          next
-        end
-      end
 
       def key_for(type) = "#{ObjectStore::Key.generate}.#{type}"
 
@@ -49,31 +42,37 @@ module Media
         pixels > ProcessPhoto::MAX_PIXELS ? Failure([:oversized]) : Success(pixels)
       end
 
+      def objects(key, processed)
+        { key => processed.body, **processed.variants.transform_keys { "#{it}/#{key}" } }
+      end
+
       def process(bytes, type)
         processed = processor.call(bytes, type)
 
         processed ? Success(processed) : Failure([:unreadable])
       end
 
-      def save(processed, type)
-        record = photo_mutations.create(
-          key: key_for(type), width: processed.width, height: processed.height, byte_size: processed.body.bytesize,
-          widths: processed.variants.keys,
-        )
-        objects = { record.key => processed.body, **processed.variants.transform_keys { record.variant_key(it) } }
-        step store(objects, type)
-        record
+      def save(processed, stored)
+        transaction do
+          photo_mutations.create(
+            key: stored.first, width: processed.width, height: processed.height, byte_size: processed.body.bytesize,
+            widths: processed.variants.keys,
+          )
+        end
+      rescue StandardError
+        client.discard(stored)
+        raise
       end
 
-      def store(objects, type)
+      def store(processed, type)
         stored = []
-        objects.each do |key, body|
+        objects(key_for(type), processed).each do |key, body|
           client.put(key, body, content_type: Blog::Types::PhotoType.mapping.fetch(type))
           stored << key
         end
         Success(stored)
       rescue ObjectStore::Client::Error
-        discard(stored)
+        client.discard(stored)
         Failure([:unavailable])
       end
 

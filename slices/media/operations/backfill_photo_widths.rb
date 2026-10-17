@@ -16,7 +16,7 @@ module Media
 
       def backfill(photo)
         stored = client.get(photo.key)
-        variants = stored && processor.variants(stored.body, photo.type, photo.width)
+        variants = stored && processor.variants(stored.body, photo.type)
         return false unless variants
 
         variants.each { |width, body| client.put(photo.variant_key(width), body, content_type: stored.content_type) }

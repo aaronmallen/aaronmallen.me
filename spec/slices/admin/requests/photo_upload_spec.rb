@@ -135,6 +135,37 @@ RSpec.describe "Admin photo upload", type: :request do
       end
     end
 
+    describe "a wide PNG with a clear half" do
+      before do
+        half = Vips::Image.black(750, 750, bands: 4)
+        upload(file_of(half.invert.join(half, :horizontal).cast(:uchar).write_to_buffer(".png"), "clear.png"))
+      end
+
+      it "keeps the colour of its edge in each smaller width" do
+        key = stored.keys.find { !it.include?("/") }
+        edge = Vips::Image.new_from_buffer(stored.fetch("640/#{key}")[:body], "").getpoint(320, 160)
+
+        expect(edge.first(3)).to all(eq(255))
+      end
+    end
+
+    describe "a wide animated GIF" do
+      before do
+        frames = [0, 128, 255].map { Vips::Image.black(1500, 750) + it }
+        strip = Vips::Image.arrayjoin(frames, across: 1).mutate { it.set_type!(GObject::GINT_TYPE, "page-height", 750) }
+        upload(file_of(strip.cast(:uchar).write_to_buffer(".gif"), "wide.gif"))
+      end
+
+      it "keeps every frame in each smaller width", :aggregate_failures do
+        key = stored.keys.find { !it.include?("/") }
+        frames = Vips::Image.new_from_buffer(stored.fetch("640/#{key}")[:body], "", n: -1)
+
+        expect(frames.get("n-pages")).to eq(3)
+        expect(frames.get("page-height")).to eq(320)
+        expect(frames.width).to eq(640)
+      end
+    end
+
     { "gif" => "image/gif", "webp" => "image/webp" }.each do |extension, type|
       describe "an animated #{extension.upcase}" do
         before { upload(fixture("animated.#{extension}")) }
