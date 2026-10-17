@@ -223,6 +223,12 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
       it "counts each reader who read it through once a day" do
         expect(stat("Read-throughs")).to have_css(".stat-value", exact_text: "2")
       end
+
+      it "builds today's summary once for the whole page" do
+        statements = counting { get "/admin/posts/#{post.id}/analytics", range: "7" }
+
+        expect(statements.size).to be <= 50
+      end
     end
 
     describe "with reads either side of the read-through line" do
