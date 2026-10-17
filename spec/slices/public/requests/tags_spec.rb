@@ -216,6 +216,13 @@ RSpec.describe "Tags", type: :request do
       expect(page).to have_css(".hd h1 + .ld em", text: "ruby")
     end
 
+    it "turns an h1 in it into an h2", :aggregate_failures do
+      described("# About ruby")
+
+      expect(page).to have_css("h1", count: 1)
+      expect(page).to have_css(".ld h2", exact_text: "About ruby")
+    end
+
     it "puts it as plain text in the meta tags" do
       described("notes on *ruby*\n\nand **hanami**")
 

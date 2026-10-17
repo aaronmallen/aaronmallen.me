@@ -9,12 +9,18 @@ module Markdown
     BOX = "input[type='checkbox']"
     CHECKBOX = "checkbox"
     DROPPED_ATTRIBUTES = %w[class id style tabindex].freeze
+    H1 = "h1"
+    H2 = "h2"
     IMG = "img"
     INPUT = "input"
     OPTIONS = { extension: { header_ids: nil, tagfilter: false }, render: { hardbreaks: false, unsafe: true } }.freeze
     ITEM_TEXT = "node()[not(self::ul or self::ol)]"
     PLUGINS = { syntax_highlighter: nil }.freeze
     RELAXED = Sanitize::Config::RELAXED
+
+    DEMOTE_H1 = lambda do |env|
+      env[:node].name = H2 if env[:node_name] == H1
+    end
 
     TASK_BOX = lambda do |env|
       node = env[:node]
@@ -27,7 +33,7 @@ module Markdown
       Sanitize::Config.merge(
         RELAXED,
         elements: RELAXED[:elements] - %w[style] + %w[details],
-        transformers: [TASK_BOX],
+        transformers: [DEMOTE_H1, TASK_BOX],
       ).tap do |config|
         config[:attributes] = config[:attributes].except("style").merge(
           all: RELAXED[:attributes][:all] - DROPPED_ATTRIBUTES,

@@ -79,6 +79,21 @@ RSpec.describe "Project task page", type: :request do
       expect(last_response.body).not_to match(/<script>alert|javascript:alert|onclick/)
     end
 
+    it "turns an h1 in the notes into an h2", :aggregate_failures do
+      visit_task(link(create(:task, note: "# Note heading"), project))
+
+      expect(page).to have_css("h1", count: 1)
+      expect(page).to have_css(".task-section .post-body h2", exact_text: "Note heading")
+    end
+
+    it "turns an h1 in a comment into an h2", :aggregate_failures do
+      create(:task_comment, task: task = link(create(:task), project), body: "<h1>Comment heading</h1>")
+      visit_task(task)
+
+      expect(page).to have_css("h1", count: 1)
+      expect(page).to have_css(".task-comment .post-body h2", exact_text: "Comment heading")
+    end
+
     it "shows the comments oldest first" do
       task = link(create(:task), project)
       create(:task_comment, task:, body: "first", created_at: Time.now - 60)
