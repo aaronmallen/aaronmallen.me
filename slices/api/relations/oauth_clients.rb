@@ -5,11 +5,15 @@ module API
     class OAuthClients < Blog::DB::Relation
       schema :oauth_clients, infer: true
 
-      def holding_live_token(at: Time.now)
-        live = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
+      def holding_live_token(oauth_tokens, at: Time.now) = holding_token(oauth_tokens.live(at:))
 
-        where(id: live.select(:oauth_client_id))
+      def holding_scope(oauth_tokens, scope, at: Time.now)
+        holding_token(oauth_tokens.live(at:).where(Sequel.expr(scope => Sequel.pg_array_op(:scopes).any)))
       end
+
+      private
+
+      def holding_token(tokens) = where(id: tokens.select(:oauth_client_id).dataset)
     end
   end
 end

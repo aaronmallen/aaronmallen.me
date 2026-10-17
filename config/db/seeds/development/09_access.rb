@@ -10,7 +10,7 @@ if api["repos.api_token_queries"].live.empty?
   Seeds.unwrap(api["operations.revoke_token"].call(retired[:token].id))
 end
 
-if MCP::Slice["repos.oauth_client_queries"].connected.empty?
+if api["repos.client_queries"].connected.empty?
   client = Seeds.unwrap(
     MCP::Slice["operations.register_client"].call(
       { "redirect_uris" => ["http://127.0.0.1:33418/callback"], "client_name" => "Example Desktop" },

@@ -15,12 +15,12 @@ module Admin
         "operations.summarize_sprint",
         attention_queries: "activity.repos.attention_queries",
         client: "github.client",
+        client_queries: "api.repos.client_queries",
         commit_queries: "record.repos.commit_queries",
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
         health_queries: "health.repos.health_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
-        oauth_client_queries: "mcp.repos.oauth_client_queries",
         post_queries: "posts.repos.post_queries",
         short_link_queries: "shares.repos.short_link_queries",
         social_post_queries: "social.repos.social_post_queries",
@@ -83,7 +83,7 @@ module Admin
       end
 
       def counts(now)
-        { clients: oauth_client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.today(now)) }
+        { clients: client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.today(now)) }
       end
 
       def failures

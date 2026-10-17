@@ -7,8 +7,8 @@ module Admin
         SCOPE = Blog::Types::OAuthScope["health"]
 
         include Deps[
-          api_token_queries: "api.repos.api_token_queries", health_queries: "health.repos.health_queries",
-          oauth_client_queries: "mcp.repos.oauth_client_queries",
+          api_token_queries: "api.repos.api_token_queries", client_queries: "api.repos.client_queries",
+          health_queries: "health.repos.health_queries",
         ]
 
         def handle(request, response)
@@ -20,7 +20,7 @@ module Admin
           response.render(
             view,
             report: health_queries.report(from:, to: today), day: day(params[:day], from..today), span:, today:,
-            clients: oauth_client_queries.holding(SCOPE), tokens:,
+            clients: client_queries.holding(SCOPE), tokens:,
           )
         end
 

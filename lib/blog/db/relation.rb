@@ -58,6 +58,8 @@ module Blog
 
       def find_linkable(ids) = where(id: ids).linkable.map { Structs::Linkable.new(**it) }
 
+      def last_used_before(time) = where(Sequel.|({ last_used_at: nil }, Sequel[:last_used_at] < time))
+
       def latest_first(arrived, snoozed = self[:snoozed_until].qualified)
         order(Sequel.function(:greatest, self[arrived].qualified, snoozed).desc, self[:id].qualified.desc)
       end

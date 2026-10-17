@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module MCP
+module API
   module Structs
     class OAuthClient < Blog::DB::Struct
       def display_name

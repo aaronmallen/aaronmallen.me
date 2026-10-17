@@ -19,19 +19,11 @@ module MCP
         where(Sequel.|(Sequel.~(last_used_at: nil), { id: dataset.db[:oauth_tokens].select(:oauth_client_id) }))
       end
 
-      def holding_live_token(at: Time.now) = where(id: live_tokens(at).select(:oauth_client_id))
-
-      def holding_scope(scope, at: Time.now)
-        where(id: live_tokens(at).where(Sequel.expr(scope => Sequel.pg_array_op(:scopes).any)).select(:oauth_client_id))
-      end
-
       def idle(since:, at: Time.now)
         exclude(id: live_tokens(at).select(:oauth_client_id))
           .exclude(id: live_codes(at).select(:oauth_client_id))
           .where { coalesce(last_used_at, created_at) < since }
       end
-
-      def last_used_before(time) = where(Sequel.|({ last_used_at: nil }, Sequel[:last_used_at] < time))
 
       def registered_since(time) = where { created_at >= time }
 
