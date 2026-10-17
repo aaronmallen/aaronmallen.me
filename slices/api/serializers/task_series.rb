@@ -26,7 +26,7 @@ module API
 
       def day(series) = series.day
 
-      def starts_on(series) = series.starts_on&.iso8601
+      def starts_on(series) = Helpers::DayWindow.day(series.starts_on)
     end
   end
 end

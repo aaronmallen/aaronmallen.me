@@ -51,8 +51,7 @@ module API
         found = webmention_queries.received_in(from: first, to: last, page:, status:, post_id:)
 
         {
-          from: first&.iso8601,
-          to: last&.iso8601,
+          **Helpers::DayWindow.range(first, last),
           time_zone: Blog::TimeZone::NAME,
           counts: webmention_queries.count_received_in(from: first, to: last, post_id:),
           webmentions: serialized(Serializers::Webmention, found.rows),

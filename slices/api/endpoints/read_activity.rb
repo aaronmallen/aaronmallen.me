@@ -82,13 +82,7 @@ module API
         end
         rows = page.fetch(:rows)
 
-        {
-          from: first.iso8601,
-          to: last.iso8601,
-          count: rows.length,
-          **page.except(:rows),
-          activity: serialized(Serializers::Activity, rows, views: activity_queries.views(rows)),
-        }
+        page.except(:rows).merge(activity: serialized(Serializers::Activity, rows, views: activity_queries.views(rows)))
       end
     end
   end

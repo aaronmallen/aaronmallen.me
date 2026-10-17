@@ -47,10 +47,7 @@ module API
         page = Helpers::DayWindow.page(first, last, settings, day: :entry_date.to_proc) do |from, to, limit|
           journal_entry_queries.between(from:, to:, limit:, tag:)
         end
-        rows = page.fetch(:rows)
-        window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
-
-        window.merge(stats:, entries: serialized(Serializers::JournalEntry, rows))
+        page.except(:rows).merge(stats:, entries: serialized(Serializers::JournalEntry, page.fetch(:rows)))
       end
 
       def stats = journal_entry_queries.summary

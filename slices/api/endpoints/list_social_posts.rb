@@ -47,8 +47,7 @@ module API
         found = social_post_queries.dated_between(from: first, to: last, page: page_of(number), queue:)
 
         {
-          from: first&.iso8601,
-          to: last&.iso8601,
+          **Helpers::DayWindow.range(first, last),
           counts: social_post_queries.count_dated_between(from: first, to: last),
           social_posts: found.rows.map { answered(it) },
           **Helpers::Paging.fields(found),

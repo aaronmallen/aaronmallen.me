@@ -42,10 +42,7 @@ module API
         page = Helpers::DayWindow.page(first, last, settings, day: :commit_date.to_proc) do |from, to, limit|
           commit_queries.between(from:, to:, repos:, limit:)
         end
-        rows = page.fetch(:rows)
-        window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
-
-        window.merge(commits: serialized(Serializers::Commit, rows))
+        page.except(:rows).merge(commits: serialized(Serializers::Commit, page.fetch(:rows)))
       end
     end
   end

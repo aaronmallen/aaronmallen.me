@@ -32,7 +32,7 @@ module API
 
     def clock(time) = time.strftime(TIME_FORMAT)
 
-    def day(date) = date&.iso8601
+    def day(date) = Helpers::DayWindow.day(date)
 
     def stamp(time) = time&.utc&.iso8601
 

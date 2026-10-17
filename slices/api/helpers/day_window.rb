@@ -31,6 +31,8 @@ module API
 
       module_function
 
+      def day(date) = date&.iso8601
+
       def days(from, to, capped: false)
         first = Blog::TimeZone.parse_day(from)
         last = Blog::TimeZone.parse_day(to)
@@ -56,10 +58,12 @@ module API
 
       def page(first, last, settings, day:, &)
         found = Blog::Structs::DayCursor.page(first, last, size: size(settings), day:, &)
-        return { rows: found.rows, partial: false } unless found.partial?
+        window = { **range(first, last), count: found.rows.length, rows: found.rows, partial: found.partial? }
 
-        { rows: found.rows, partial: true, continue_to: found.continue_to.iso8601 }
+        found.partial? ? window.merge(continue_to: found.continue_to.iso8601) : window
       end
+
+      def range(first, last) = { from: day(first), to: day(last) }
 
       def size(settings) = settings.page_size[:mcp]
     end

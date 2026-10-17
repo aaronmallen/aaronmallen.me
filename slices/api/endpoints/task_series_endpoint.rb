@@ -22,13 +22,12 @@ module API
 
       private
 
-      def day(date) = date&.iso8601
-
       def row(series)
         task = series.task
+        sprint_on = Helpers::DayWindow.day(task.sprint&.sprint_date)
 
         serialized(Serializers::TaskSeries, series).merge(
-          task: { id: task.id, title: task.title, status: task.status, sprint_on: day(task.sprint&.sprint_date) },
+          task: { id: task.id, title: task.title, status: task.status, sprint_on: },
         )
       end
 

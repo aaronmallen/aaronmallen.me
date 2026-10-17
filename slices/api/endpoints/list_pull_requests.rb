@@ -36,10 +36,7 @@ module API
         page = Helpers::DayWindow.page(first, last, settings, day: DAY) do |from, to, limit|
           pull_request_queries.between(from:, to:, limit:)
         end
-        rows = page.fetch(:rows)
-        window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
-
-        window.merge(pull_requests: serialized(Serializers::PullRequest, rows))
+        page.except(:rows).merge(pull_requests: serialized(Serializers::PullRequest, page.fetch(:rows)))
       end
     end
   end

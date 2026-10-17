@@ -42,8 +42,7 @@ module API
         found = message_queries.received_between(from: first, to: last, page:, status:)
 
         {
-          from: first&.iso8601,
-          to: last&.iso8601,
+          **Helpers::DayWindow.range(first, last),
           counts: message_queries.count_received_between(from: first, to: last),
           mail_threads: found.rows.map { serialized(Serializers::MailThread, it) },
           **Helpers::Paging.fields(found),
