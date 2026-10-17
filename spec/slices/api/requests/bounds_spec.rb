@@ -38,9 +38,8 @@ RSpec.describe "API page and ID bounds", type: :request do
   end
 
   def tool_inputs
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
-    JSON.parse(last_response.body).dig("result", "tools").map { it.fetch("inputSchema") }
+    mcp_rpc("tools/list")
+    mcp_result.fetch("tools").map { it.fetch("inputSchema") }
   end
 
   describe "paged endpoints" do

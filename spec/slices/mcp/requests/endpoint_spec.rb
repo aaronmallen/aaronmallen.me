@@ -4,8 +4,6 @@ RSpec.describe "MCP endpoint", type: :request do
   let(:client) { create(:oauth_client) }
   let(:verifier) { Blog::Types::NewSecret[] }
 
-  def access_token = issued.fetch("access_token")
-
   def authorization_params
     {
       client_id: client.client_id,
@@ -19,8 +17,6 @@ RSpec.describe "MCP endpoint", type: :request do
     }
   end
 
-  def call_tool(name, **arguments) = rpc("tools/call", { name:, arguments: })
-
   def challenge = last_response.headers["WWW-Authenticate"]
 
   def clients = MCP::Slice["db.rom"].relations[:oauth_clients]
@@ -33,22 +29,20 @@ RSpec.describe "MCP endpoint", type: :request do
     sign_in_to_admin
     approve_authorization("/oauth/authorize?#{Rack::Utils.build_query(authorization_params)}")
     post "/oauth/token", token_params(Rack::Utils.parse_query(URI(last_response.location).query).fetch("code"))
-    document
+    mcp_reply
   end
 
-  def content = JSON.parse(result.fetch("content").first.fetch("text"))
-
-  def fetch_prompt(name, **arguments) = rpc("prompts/get", { name:, arguments: })
+  def fetch_prompt(name, **arguments) = mcp_rpc("prompts/get", { name:, arguments: })
 
   def issued = @issued ||= connect
 
-  def message = result.fetch("content").first.fetch("text")
+  def mcp_access_token = issued.fetch("access_token")
 
   def metadata_url = "https://aaronmallen.me/.well-known/oauth-protected-resource/mcp"
 
-  def offered = result.fetch("tools").map { it.fetch("name") }
+  def offered = mcp_result.fetch("tools").map { it.fetch("name") }
 
-  def prompt = result.fetch("messages").first
+  def prompt = mcp_result.fetch("messages").first
 
   def prompt_text = prompt.fetch("content").fetch("text")
 
@@ -113,18 +107,9 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def refresh_token = issued.fetch("refresh_token")
 
-  def refusal = document.dig("error", "data")
+  def refusal = mcp_reply.dig("error", "data")
 
   def resource = "https://aaronmallen.me/mcp"
-
-  def result = document.fetch("result")
-
-  def rpc(method, params = nil, id: 1, authorization: "Bearer #{access_token}", headers: {})
-    sent = { "CONTENT_TYPE" => "application/json" }.merge(headers)
-    sent["HTTP_AUTHORIZATION"] = authorization if authorization
-
-    post "/mcp", JSON.generate({ jsonrpc: "2.0", id:, method:, params: }.compact), sent
-  end
 
   def scopes = "read suggest write publish delete"
 
@@ -150,7 +135,7 @@ RSpec.describe "MCP endpoint", type: :request do
   def tokens = MCP::Slice["db.rom"].relations[:oauth_tokens]
 
   describe "a request with no token" do
-    before { rpc("tools/list", authorization: nil) }
+    before { mcp_rpc("tools/list", authorization: nil) }
 
     it "refuses it" do
       expect(last_response.status).to eq(401)
@@ -169,18 +154,18 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "says what it wanted" do
-      expect(document["error_description"]).to eq("this endpoint takes a bearer access token")
+      expect(mcp_reply["error_description"]).to eq("this endpoint takes a bearer access token")
     end
 
     it "serves the metadata it points at" do
       get URI(challenge[/resource_metadata="([^"]+)"/, 1]).path
 
-      expect(document["resource"]).to eq(resource)
+      expect(mcp_reply["resource"]).to eq(resource)
     end
   end
 
   describe "a request whose Host somebody else picked" do
-    before { rpc("tools/list", authorization: nil, headers: { "HTTP_X_FORWARDED_HOST" => "evil.example" }) }
+    before { mcp_rpc("tools/list", authorization: nil, headers: { "HTTP_X_FORWARDED_HOST" => "evil.example" }) }
 
     it "points at the configured resource metadata all the same" do
       expect(challenge).to include(%(resource_metadata="#{metadata_url}"))
@@ -193,71 +178,71 @@ RSpec.describe "MCP endpoint", type: :request do
 
   describe "a token it refuses" do
     it "refuses a token it never issued" do
-      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
+      mcp_rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "names the token as the problem" do
-      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
+      mcp_rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
-      expect(document["error"]).to eq("invalid_token")
+      expect(mcp_reply["error"]).to eq("invalid_token")
     end
 
     it "points at the resource metadata all the same" do
-      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
+      mcp_rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
       expect(challenge).to include(%(resource_metadata="#{metadata_url}"))
     end
 
     it "refuses a scheme it does not take" do
-      rpc("tools/list", authorization: "Basic #{access_token}")
+      mcp_rpc("tools/list", authorization: "Basic #{mcp_access_token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses a refresh token" do
-      rpc("tools/list", authorization: "Bearer #{refresh_token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{refresh_token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses an access token that expired" do
-      token = access_token
+      token = mcp_access_token
       tokens.of_type("access").update(expires_at: Time.now - 1)
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses an access token that was revoked" do
-      token = access_token
+      token = mcp_access_token
       tokens.of_type("access").update(revoked_at: Time.now)
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses a token issued for another resource" do
-      token = access_token
+      token = mcp_access_token
       tokens.of_type("access").update(resource: "https://elsewhere.example/mcp")
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses a token bound to no resource" do
-      token = access_token
+      token = mcp_access_token
       tokens.of_type("access").update(resource: nil)
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "refuses a token the operator revoked from the admin" do
-      token = access_token
+      token = mcp_access_token
       post "/admin/clients/#{clients.one[:id]}/revoke", _csrf_token: admin_csrf_token
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
@@ -266,20 +251,20 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "a refresh" do
     def rotate(token)
       post "/oauth/token", { client_id: client.client_id, grant_type: "refresh_token", refresh_token: token, resource: }
-      document
+      mcp_reply
     end
 
     it "refuses the access token issued with the refresh token it spent" do
-      token = access_token
+      token = mcp_access_token
       rotate(refresh_token)
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "answers the access token it hands out" do
       token = rotate(refresh_token).fetch("access_token")
-      rpc("tools/list", authorization: "Bearer #{token}")
+      mcp_rpc("tools/list", authorization: "Bearer #{token}")
 
       expect(last_response.status).to eq(200)
     end
@@ -288,7 +273,7 @@ RSpec.describe "MCP endpoint", type: :request do
       spent = refresh_token
       other = connect.fetch("access_token")
       rotate(spent)
-      rpc("tools/list", authorization: "Bearer #{other}")
+      mcp_rpc("tools/list", authorization: "Bearer #{other}")
 
       expect(last_response.status).to eq(200)
     end
@@ -298,13 +283,13 @@ RSpec.describe "MCP endpoint", type: :request do
     def resource = nil
 
     it "still answers it, since the code it was issued names this server" do
-      rpc("tools/list")
+      mcp_rpc("tools/list")
 
       expect(last_response.status).to eq(200)
     end
 
     it "binds the token it issued to this server" do
-      access_token
+      mcp_access_token
 
       expect(tokens.of_type("access").one[:resource]).to eq("https://aaronmallen.me/mcp")
     end
@@ -312,66 +297,66 @@ RSpec.describe "MCP endpoint", type: :request do
 
   describe "the transport" do
     it "answers initialize" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.dig("serverInfo", "name")).to eq("aaronmallen.me")
+      expect(mcp_result.dig("serverInfo", "name")).to eq("aaronmallen.me")
     end
 
     it "reports the version the app read at boot" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.dig("serverInfo", "version")).to eq(Blog::Version::CURRENT)
+      expect(mcp_result.dig("serverInfo", "version")).to eq(Blog::Version::CURRENT)
     end
 
     it "tells the client it reads every record and makes every admin write" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.fetch("instructions"))
+      expect(mcp_result.fetch("instructions"))
         .to include("Read everything").and(include("Make any change the admin makes"))
     end
 
     it "tells the client which permission grants publishing, sending and deleting" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.fetch("instructions"))
+      expect(mcp_result.fetch("instructions"))
         .to include("publish grants publishing posts and sending social posts, and every change that shows in public")
         .and(include("Delete grants every tool that removes a record for good"))
     end
 
     it "names a kind in the instructions for every read tool" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(read_kinds.values.reject { result.fetch("instructions").include?(it) }).to be_empty
+      expect(read_kinds.values.reject { mcp_result.fetch("instructions").include?(it) }).to be_empty
     end
 
     it "tells the client suggestions settle through the tools" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.fetch("instructions"))
+      expect(mcp_result.fetch("instructions"))
         .to include("accept_suggestion_edits").and(include("reject_suggestion_edits"))
     end
 
     it "titles the server after the whole site" do
-      rpc("initialize",
-          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+      mcp_rpc("initialize",
+              { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(result.dig("serverInfo", "title")).to eq("#{Hanami.app['settings'].owner[:name]}'s site")
+      expect(mcp_result.dig("serverInfo", "title")).to eq("#{Hanami.app['settings'].owner[:name]}'s site")
     end
 
     it "takes a notification without answering" do
-      rpc("notifications/initialized", id: nil)
+      mcp_rpc("notifications/initialized", id: nil)
 
       expect(last_response.status).to eq(202)
     end
 
     it "answers JSON" do
-      rpc("tools/list")
+      mcp_rpc("tools/list")
 
       expect(last_response.headers["Content-Type"]).to eq("application/json")
     end
@@ -383,9 +368,9 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "calls a body that opens like a batch but is not JSON a parse error" do
-      post "/mcp", "[not json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}"
+      post "/mcp", "[not json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}"
 
-      expect(document.dig("error", "code")).to eq(-32_700)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_700)
     end
   end
 
@@ -393,7 +378,7 @@ RSpec.describe "MCP endpoint", type: :request do
     def article = @article ||= create(:post, :published)
 
     def batch(*messages, opening: "")
-      sent = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
+      sent = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
 
       post "/mcp", "#{opening}#{JSON.generate(messages)}", sent
     end
@@ -406,7 +391,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "refuses a batch of tool calls as an invalid request" do
       batch(seo_call(1, "First"), seo_call(2, "Second"))
 
-      expect(document.dig("error", "code")).to eq(-32_600)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_600)
     end
 
     it "runs none of the tools in it" do
@@ -418,27 +403,27 @@ RSpec.describe "MCP endpoint", type: :request do
     it "refuses a batch of one" do
       batch(seo_call(1, "First"))
 
-      expect(document.dig("error", "code")).to eq(-32_600)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_600)
     end
 
     it "refuses a batch that opens with blank space" do
       batch(seo_call(1, "First"), opening: " \r\n\t")
 
-      expect(document.dig("error", "code")).to eq(-32_600)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_600)
     end
 
     it "refuses an empty batch" do
       batch
 
-      expect(document.dig("error", "code")).to eq(-32_600)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_600)
     end
   end
 
   describe "the tools it offers" do
-    before { rpc("tools/list") }
+    before { mcp_rpc("tools/list") }
 
     it "names a read tool in search for every kind it finds" do
-      description = result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
+      description = mcp_result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
       readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
 
       expect(readers.values - [*read_kinds.keys, "read_mail_thread"]).to be_empty
@@ -453,63 +438,63 @@ RSpec.describe "MCP endpoint", type: :request do
     def typo = { original: "teh", replacement: "the", reason: "typo" }
 
     it "offers the reading tools and nothing else" do
-      rpc("tools/list")
+      mcp_rpc("tools/list")
 
       expect(offered).to eq(read_kinds.keys.sort)
     end
 
     it "still reads a post" do
-      call_tool("read_post", id: article.id)
+      mcp_call("read_post", id: article.id)
 
-      expect(content.fetch("id")).to eq(article.id)
+      expect(mcp_content.fetch("id")).to eq(article.id)
     end
 
     it "still lists decisions" do
       decision = create(:decision)
-      call_tool("list_decisions")
+      mcp_call("list_decisions")
 
-      expect(content.fetch("decisions").map { it.fetch("id") }).to eq([decision.id])
+      expect(mcp_content.fetch("decisions").map { it.fetch("id") }).to eq([decision.id])
     end
 
     it "still reads a decision" do
       decision = create(:decision)
-      call_tool("read_decision", id: decision.id)
+      mcp_call("read_decision", id: decision.id)
 
-      expect(content.fetch("id")).to eq(decision.id)
+      expect(mcp_content.fetch("id")).to eq(decision.id)
     end
 
     it "refuses the social card write" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
 
     it "answers the refusal as an MCP error rather than a 500" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
 
       expect(last_response.status).to eq(200)
     end
 
     it "leaves the post as it stands" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
 
       expect(Posts::Slice["repos.post_queries"].by_id(article.id).og_title).to be_nil
     end
 
     it "reads the activity feed" do
-      call_tool("read_activity", from: "2026-01-01", to: "2026-12-31")
+      mcp_call("read_activity", from: "2026-01-01", to: "2026-12-31")
 
-      expect(content).to include("from" => "2026-01-01", "to" => "2026-12-31")
+      expect(mcp_content).to include("from" => "2026-01-01", "to" => "2026-12-31")
     end
 
     it "reads the activity summary" do
-      call_tool("summarize_activity", from: "2026-01-01", to: "2026-12-31")
+      mcp_call("summarize_activity", from: "2026-01-01", to: "2026-12-31")
 
-      expect(content).to include("from" => "2026-01-01", "to" => "2026-12-31")
+      expect(mcp_content).to include("from" => "2026-01-01", "to" => "2026-12-31")
     end
 
     it "stores no suggestion" do
-      call_tool("suggest_edits", target: "post", id: article.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: article.id, edits: [typo])
 
       expect(suggestion_queries.for_post(article.id)).to be_nil
     end
@@ -521,14 +506,14 @@ RSpec.describe "MCP endpoint", type: :request do
     def typo = { original: "teh", replacement: "the", reason: "typo" }
 
     it "offers the suggesting tool" do
-      rpc("tools/list")
+      mcp_rpc("tools/list")
 
       expect(offered).to eq([*read_kinds.keys, "suggest_edits"].sort)
     end
 
     it "stores a suggestion" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_queries.for_post(post.id).edits).to have(1).item
     end
@@ -543,15 +528,13 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:decision_comment, decision_id: decision.id, created_at: at(11))
     end
 
-    def entries = content.fetch("activity")
+    def entries = mcp_content.fetch("activity")
 
     def finish_with_comment
       create(:task_comment, task_id: create(:task, :done, completed_at: at(16)).id, created_at: at(10))
     end
 
     def kinds = entries.map { it.fetch("kind") }
-
-    def marked(text) = { "untrusted" => true, "text" => text }
 
     def month_ago = today - 30
 
@@ -569,7 +552,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     def read_activity(from: month_ago, to: today, **arguments)
-      call_tool("read_activity", from: from.to_s, to: to.to_s, **arguments)
+      mcp_call("read_activity", from: from.to_s, to: to.to_s, **arguments)
     end
 
     def scopes = "read health"
@@ -609,7 +592,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "names the window it read" do
       read_activity
 
-      expect(content).to include("from" => month_ago.iso8601, "to" => today.iso8601)
+      expect(mcp_content).to include("from" => month_ago.iso8601, "to" => today.iso8601)
     end
 
     it "gives every row its kind, date, time and name" do
@@ -633,12 +616,12 @@ RSpec.describe "MCP endpoint", type: :request do
     it "opens the record a row names with its kind's read tool" do
       create(:commit, commit_date: today, sha: "b" * 40)
       read_activity
-      call_tool("read_commit", id: entries.first.fetch("source_id"))
+      mcp_call("read_commit", id: entries.first.fetch("source_id"))
 
-      expect(content).to include("sha" => "b" * 40)
+      expect(mcp_content).to include("sha" => "b" * 40)
     end
 
-    it "sends a commit's whole message, not its subject" do
+    it "sends a commit's whole mcp_message, not its subject" do
       create(:commit, commit_date: today, message: "posts: add the view\n\nThe body says why it changed")
       read_activity
 
@@ -789,7 +772,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
       def row(pull, kind, time)
         include("kind" => "pull_request_#{kind}", "time" => time, "source_id" => pull.id,
-                "name" => { "untrusted" => true, "text" => "Add feeds" },
+                "name" => marked("Add feeds"),
                 "repo" => "aaronmallen/blog", "link" => pull.url)
       end
 
@@ -939,7 +922,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "refuses a kind the feed does not hold" do
       read_activity(kinds: %w[meeting])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "sends the newest row first" do
@@ -1079,39 +1062,39 @@ RSpec.describe "MCP endpoint", type: :request do
       2.times { create(:commit, commit_date: today) }
       read_activity
 
-      expect(content.fetch("count")).to eq(2)
+      expect(mcp_content.fetch("count")).to eq(2)
     end
 
     it "calls an answer inside the cap whole" do
       create(:commit, commit_date: today)
       read_activity
 
-      expect(content.fetch("partial")).to be(false)
+      expect(mcp_content.fetch("partial")).to be(false)
     end
 
     it "gives no day to carry on from when it sent the whole window" do
       create(:commit, commit_date: today)
       read_activity
 
-      expect(content).not_to have_key("continue_to")
+      expect(mcp_content).not_to have_key("continue_to")
     end
 
     it "refuses a day it cannot read" do
-      call_tool("read_activity", from: "last tuesday", to: today.iso8601)
+      mcp_call("read_activity", from: "last tuesday", to: today.iso8601)
 
-      expect(message).to eq("give from and to as days, such as 2026-01-01")
+      expect(mcp_message).to eq("give from and to as days, such as 2026-01-01")
     end
 
     it "refuses a from that comes after its to" do
-      call_tool("read_activity", from: today.iso8601, to: (today - 7).iso8601)
+      mcp_call("read_activity", from: today.iso8601, to: (today - 7).iso8601)
 
-      expect(message).to eq("from comes after to")
+      expect(mcp_message).to eq("from comes after to")
     end
 
     it "refuses a call naming no window" do
-      call_tool("read_activity")
+      mcp_call("read_activity")
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     describe "a window holding more than one answer" do
@@ -1125,7 +1108,7 @@ RSpec.describe "MCP endpoint", type: :request do
         three_days
         read_activity
 
-        expect(content.fetch("partial")).to be(true)
+        expect(mcp_content.fetch("partial")).to be(true)
       end
 
       it "sends the newest rows in the window" do
@@ -1139,13 +1122,13 @@ RSpec.describe "MCP endpoint", type: :request do
         three_days
         read_activity
 
-        expect(content.fetch("continue_to")).to eq((today - 3).iso8601)
+        expect(mcp_content.fetch("continue_to")).to eq((today - 3).iso8601)
       end
 
       it "carries on from that day with nothing repeated" do
         three_days
         read_activity
-        read_activity(to: Date.iso8601(content.fetch("continue_to")))
+        read_activity(to: Date.iso8601(mcp_content.fetch("continue_to")))
 
         expect(names).to eq([marked("commit 3")])
       end
@@ -1153,9 +1136,9 @@ RSpec.describe "MCP endpoint", type: :request do
       it "finishes the window on the next ask" do
         three_days
         read_activity
-        read_activity(to: Date.iso8601(content.fetch("continue_to")))
+        read_activity(to: Date.iso8601(mcp_content.fetch("continue_to")))
 
-        expect(content.fetch("partial")).to be(false)
+        expect(mcp_content.fetch("partial")).to be(false)
       end
 
       it "rounds a day out rather than splitting it" do
@@ -1169,27 +1152,27 @@ RSpec.describe "MCP endpoint", type: :request do
         3.times { create(:commit, commit_date: today - 1) }
         read_activity
 
-        expect(content.fetch("partial")).to be(false)
+        expect(mcp_content.fetch("partial")).to be(false)
       end
     end
 
     describe "the summary over the same range" do
       def busy_months = months.transform_values { |counts| counts.select { |_, count| count.positive? }.keys }
 
-      def counted = content.fetch("kinds")
+      def counted = mcp_content.fetch("kinds")
 
       def january = Date.new(2026, 1, 1)
 
       def march = Date.new(2026, 3, 31)
 
-      def months = content.fetch("months")
+      def months = mcp_content.fetch("months")
 
       def none = Blog::Types::ActivityKind.values.to_h { [it, 0] }
 
-      def repos = content.fetch("repos")
+      def repos = mcp_content.fetch("repos")
 
       def summarize(from: month_ago, to: today)
-        call_tool("summarize_activity", from: from.to_s, to: to.to_s)
+        mcp_call("summarize_activity", from: from.to_s, to: to.to_s)
       end
 
       def winter = summarize(from: january, to: march)
@@ -1197,7 +1180,7 @@ RSpec.describe "MCP endpoint", type: :request do
       it "names the range it counted" do
         summarize
 
-        expect(content).to include("from" => month_ago.iso8601, "to" => today.iso8601)
+        expect(mcp_content).to include("from" => month_ago.iso8601, "to" => today.iso8601)
       end
 
       it "counts each kind in the range" do
@@ -1310,43 +1293,43 @@ RSpec.describe "MCP endpoint", type: :request do
         create(:journal_entry, entry_date: today, body: "wrote the tool")
         summarize(from: today - 365)
 
-        expect(message).not_to include("posts: add the view", "wrote the tool")
+        expect(mcp_message).not_to include("posts: add the view", "wrote the tool")
       end
 
       it "refuses a day it cannot read" do
-        call_tool("summarize_activity", from: "last tuesday", to: today.iso8601)
+        mcp_call("summarize_activity", from: "last tuesday", to: today.iso8601)
 
-        expect(message).to eq("give from and to as days, such as 2026-01-01")
+        expect(mcp_message).to eq("give from and to as days, such as 2026-01-01")
       end
 
       it "refuses a from that comes after its to" do
         summarize(from: today, to: today - 7)
 
-        expect(message).to eq("from comes after to")
+        expect(mcp_message).to eq("from comes after to")
       end
 
       it "refuses a range longer than 366 days" do
         summarize(from: today - 366)
 
-        expect(message).to eq("give a range of 366 days or fewer")
+        expect(mcp_message).to eq("give a range of 366 days or fewer")
       end
 
       it "counts a range of 366 days" do
         summarize(from: today - 365)
 
-        expect(content).to include("from" => (today - 365).iso8601)
+        expect(mcp_content).to include("from" => (today - 365).iso8601)
       end
 
       it "refuses a call naming no range" do
-        call_tool("summarize_activity")
+        mcp_call("summarize_activity")
 
-        expect(result.fetch("isError")).to be(true)
+        expect(mcp_result.fetch("isError")).to be(true)
       end
 
       it "refuses a kinds argument, since it counts every kind" do
-        call_tool("summarize_activity", from: month_ago.to_s, to: today.to_s, kinds: %w[webmention])
+        mcp_call("summarize_activity", from: month_ago.to_s, to: today.to_s, kinds: %w[webmention])
 
-        expect(result.fetch("isError")).to be(true)
+        expect(mcp_result.fetch("isError")).to be(true)
       end
     end
   end
@@ -1355,7 +1338,7 @@ RSpec.describe "MCP endpoint", type: :request do
     def article = @article ||= create(:post, :published)
 
     def backfilled
-      token = access_token
+      token = mcp_access_token
       tokens.of_type("access").update(scopes: Sequel::DEFAULT)
       token
     end
@@ -1367,21 +1350,21 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "still reads" do
-      rpc("tools/list", authorization: "Bearer #{backfilled}")
+      mcp_rpc("tools/list", authorization: "Bearer #{backfilled}")
 
       expect(offered).to eq(read_kinds.keys.sort)
     end
 
     it "cannot write until it is granted again" do
-      rpc("tools/call", { name: "write_post_seo", arguments: { id: article.id, og_title: "On the card" } },
-          authorization: "Bearer #{backfilled}")
+      mcp_rpc("tools/call", { name: "write_post_seo", arguments: { id: article.id, og_title: "On the card" } },
+              authorization: "Bearer #{backfilled}")
 
       expect(refusal).to include("Connect the app again")
     end
 
     it "leaves the post as it stands" do
-      rpc("tools/call", { name: "write_post_seo", arguments: { id: article.id, og_title: "On the card" } },
-          authorization: "Bearer #{backfilled}")
+      mcp_rpc("tools/call", { name: "write_post_seo", arguments: { id: article.id, og_title: "On the card" } },
+              authorization: "Bearer #{backfilled}")
 
       expect(Posts::Slice["repos.post_queries"].by_id(article.id).og_title).to be_nil
     end
@@ -1390,9 +1373,10 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "list_posts" do
     it "lists blog posts in every status" do
       %i[draft scheduled published].each { |status| create(:post, status, title: status.to_s) }
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("posts").map { it.fetch("status") }).to contain_exactly("draft", "scheduled", "published")
+      expect(mcp_content.fetch("posts").map { it.fetch("status") })
+        .to contain_exactly("draft", "scheduled", "published")
     end
 
     def listed_draft(post)
@@ -1405,38 +1389,38 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "gives each blog post its ID, slug, tags, title, status, times, words and readership" do
       post = create(:post, :draft, title: "A draft", body: "")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("posts").first).to eq(listed_draft(post))
+      expect(mcp_content.fetch("posts").first).to eq(listed_draft(post))
     end
 
     it "gives each blog post its tags" do
       post = create(:post, :draft)
       Posts::Slice["repos.post_mutations"].replace_tags(post.id, %w[ruby web])
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("posts").first.fetch("tags")).to eq(%w[ruby web])
+      expect(mcp_content.fetch("posts").first.fetch("tags")).to eq(%w[ruby web])
     end
 
     it "says which blog posts are drafts" do
       %i[draft scheduled published].each { |status| create(:post, status, title: status.to_s) }
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("posts").to_h { [it.fetch("title"), it.fetch("draft")] })
+      expect(mcp_content.fetch("posts").to_h { [it.fetch("title"), it.fetch("draft")] })
         .to eq("draft" => true, "scheduled" => false, "published" => false)
     end
 
     it "gives a published post the time it went out" do
       post = create(:post, :published)
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("posts").first.fetch("published_at")).to eq(post.published_at.utc.iso8601)
+      expect(mcp_content.fetch("posts").first.fetch("published_at")).to eq(post.published_at.utc.iso8601)
     end
 
     describe "over a range of days" do
       def day(offset) = Blog::TimeZone.today + offset
 
-      def listed = content.fetch("posts").map { it.fetch("title") }
+      def listed = mcp_content.fetch("posts").map { it.fetch("title") }
 
       def on(offset, title, status: :published, hour: 12)
         at = Blog::TimeZone.local_time(day(offset).year, day(offset).month, day(offset).day, hour)
@@ -1447,7 +1431,7 @@ RSpec.describe "MCP endpoint", type: :request do
         on(-10, "before")
         on(-5, "inside")
         on(-1, "after")
-        call_tool("list_posts", from: day(-6).iso8601, to: day(-4).iso8601)
+        mcp_call("list_posts", from: day(-6).iso8601, to: day(-4).iso8601)
 
         expect(listed).to eq(%w[inside])
       end
@@ -1455,14 +1439,14 @@ RSpec.describe "MCP endpoint", type: :request do
       it "counts both days whole, in Chicago time" do
         on(-6, "first thing", hour: 0)
         on(-4, "last thing", hour: 23)
-        call_tool("list_posts", from: day(-6).iso8601, to: day(-4).iso8601)
+        mcp_call("list_posts", from: day(-6).iso8601, to: day(-4).iso8601)
 
         expect(listed).to eq(["last thing", "first thing"])
       end
 
       it "keeps a scheduled post whose time is still to come" do
         on(3, "queued", status: :scheduled)
-        call_tool("list_posts", from: day(1).iso8601)
+        mcp_call("list_posts", from: day(1).iso8601)
 
         expect(listed).to eq(%w[queued])
       end
@@ -1470,7 +1454,7 @@ RSpec.describe "MCP endpoint", type: :request do
       it "reads a from alone as every day from then on" do
         on(-10, "old")
         on(-2, "new")
-        call_tool("list_posts", from: day(-3).iso8601)
+        mcp_call("list_posts", from: day(-3).iso8601)
 
         expect(listed).to eq(%w[new])
       end
@@ -1478,100 +1462,100 @@ RSpec.describe "MCP endpoint", type: :request do
       it "reads a to alone as every day up to then" do
         on(-10, "old")
         on(-2, "new")
-        call_tool("list_posts", to: day(-3).iso8601)
+        mcp_call("list_posts", to: day(-3).iso8601)
 
         expect(listed).to eq(%w[old])
       end
 
       it "drops a draft with no publish time" do
         create(:post, :draft, title: "undated")
-        call_tool("list_posts", from: day(-30).iso8601)
+        mcp_call("list_posts", from: day(-30).iso8601)
 
         expect(listed).to be_empty
       end
 
       it "keeps a draft whose publish time falls inside the days" do
         on(-2, "dated draft", status: :draft)
-        call_tool("list_posts", from: day(-3).iso8601)
+        mcp_call("list_posts", from: day(-3).iso8601)
 
-        expect(content.fetch("posts")).to contain_exactly(include("title" => "dated draft", "draft" => true))
+        expect(mcp_content.fetch("posts")).to contain_exactly(include("title" => "dated draft", "draft" => true))
       end
 
       it "leaves the social posts alone" do
         compose("draft", "a draft")
-        call_tool("list_posts", from: day(1).iso8601)
+        mcp_call("list_posts", from: day(1).iso8601)
 
-        expect(content.fetch("social_posts")).to have(1).item
+        expect(mcp_content.fetch("social_posts")).to have(1).item
       end
 
       it "refuses a day it cannot read" do
-        call_tool("list_posts", from: "last tuesday")
+        mcp_call("list_posts", from: "last tuesday")
 
-        expect(message).to eq("give from and to as days, such as 2026-01-01")
+        expect(mcp_message).to eq("give from and to as days, such as 2026-01-01")
       end
 
       it "refuses a from that comes after its to" do
-        call_tool("list_posts", from: day(0).iso8601, to: day(-7).iso8601)
+        mcp_call("list_posts", from: day(0).iso8601, to: day(-7).iso8601)
 
-        expect(message).to eq("from comes after to")
+        expect(mcp_message).to eq("from comes after to")
       end
     end
 
     it "lists social posts that are drafts or scheduled" do
       compose("draft", "a draft")
       compose("scheduled", "queued up", posted_at: Time.now + 3600)
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").map { it.fetch("status") }).to contain_exactly("draft", "scheduled")
+      expect(mcp_content.fetch("social_posts").map { it.fetch("status") }).to contain_exactly("draft", "scheduled")
     end
 
     it "leaves out social posts already sent" do
       compose("posted", "gone out", posted_at: Time.now - 3600)
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts")).to be_empty
+      expect(mcp_content.fetch("social_posts")).to be_empty
     end
 
     it "previews the first part of a social post" do
       compose("draft", "first part", "second part")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("first part")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("first part")
     end
 
     it "previews a social post with no parts as empty" do
       compose("draft")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("")
     end
 
     it "cuts a long preview short" do
       compose("draft", "a" * 200)
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 120}…")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 120}…")
     end
 
     it "reads a preview as one line" do
       compose("draft", "  Hello\n\n  wide   world  ")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("Hello wide world")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("Hello wide world")
     end
 
     it "drops the trailing space before the mark" do
       compose("draft", "#{'a' * 119} bbb")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 119}…")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 119}…")
     end
 
     it "keeps a family emoji whole where it cuts a preview" do
       compose("draft", "#{'a' * 119}👩‍👩‍👧‍👦 x")
-      call_tool("list_posts")
+      mcp_call("list_posts")
 
-      expect(content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 119}👩‍👩‍👧‍👦…")
+      expect(mcp_content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 119}👩‍👩‍👧‍👦…")
     end
   end
 
@@ -1580,14 +1564,14 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "stores the edits as pending" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_queries.for_post(post.id).edits.map(&:status)).to eq(["pending"])
     end
 
     it "stores what each edit says" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_queries.for_post(post.id).edits.first)
         .to have_attributes(original: "teh", replacement: "the", reason: "typo")
@@ -1595,213 +1579,213 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "says how many edits it stored" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(content).to include("edits" => 1, "status" => "pending", "target" => "post")
+      expect(mcp_content).to include("edits" => 1, "status" => "pending", "target" => "post")
     end
 
     it "leaves the post body alone" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(Posts::Slice["repos.post_queries"].by_id(post.id).body).to eq("teh cat sat")
     end
 
     it "replaces the edits still waiting from an earlier call" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
       later = [{ **typo, original: "sat", replacement: "slept" }]
-      call_tool("suggest_edits", target: "post", id: post.id, edits: later)
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: later)
 
       expect(suggestion_queries.for_post(post.id).edits.map(&:original)).to eq(["sat"])
     end
 
     it "leaves an edit already answered alone" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
       answered = suggestion_mutations.accept(suggestion_queries.for_post(post.id).edits.map(&:id)).first
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(Suggestions::Slice["relations.suggestion_edits"].by_pk(answered.id).one[:status]).to eq("accepted")
     end
 
     it "pays no mind to a part on a blog post edit" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, part: 4 }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, part: 4 }])
 
       expect(suggestion_queries.for_post(post.id).edits.map(&:part)).to eq([nil])
     end
 
     it "stores edits for an unsent social post" do
       social_post = compose("draft", "teh first", "teh second")
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, part: 2 }])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, part: 2 }])
 
       expect(suggestion_queries.for_social_post(social_post.id).edits.map(&:part)).to eq([2])
     end
 
     it "takes the first part when an edit names none" do
       social_post = compose("draft", "teh first", "teh second")
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
 
       expect(suggestion_queries.for_social_post(social_post.id).edits.map(&:part)).to eq([1])
     end
 
     it "leaves the social post parts alone" do
       social_post = compose("draft", "teh first")
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
 
       expect(social_post_queries.by_id(social_post.id).parts.map(&:body)).to eq(["teh first"])
     end
 
     it "calls an unknown blog post an error" do
-      call_tool("suggest_edits", target: "post", id: 999_999, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: 999_999, edits: [typo])
 
-      expect(message).to eq("no blog post has the ID 999999")
+      expect(mcp_message).to eq("no blog post has the ID 999999")
     end
 
     it "refuses a published blog post" do
       post = create(:post, :published, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(message).to eq("blog post #{post.id} is published; suggest edits only on a draft or scheduled post")
+      expect(mcp_message).to eq("blog post #{post.id} is published; suggest edits only on a draft or scheduled post")
     end
 
     it "marks a published blog post an error" do
       post = create(:post, :published, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "stores nothing for a published blog post" do
       post = create(:post, :published, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "stores edits for a scheduled blog post" do
       post = create(:post, :scheduled, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_queries.for_post(post.id).edits.map(&:status)).to eq(["pending"])
     end
 
     it "calls an unknown social post an error" do
-      call_tool("suggest_edits", target: "social_post", id: 999_999, edits: [typo])
+      mcp_call("suggest_edits", target: "social_post", id: 999_999, edits: [typo])
 
-      expect(message).to eq("no unsent social post has the ID 999999")
+      expect(mcp_message).to eq("no unsent social post has the ID 999999")
     end
 
     it "does not touch a social post already sent" do
       social_post = compose("posted", "gone out", posted_at: Time.now - 3600)
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "calls an empty edit list an error" do
       post = create(:post, :draft)
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [])
 
-      expect(message).to eq("give at least one edit")
+      expect(mcp_message).to eq("give at least one edit")
     end
 
     it "calls a part the social post has not got an error" do
       social_post = compose("draft", "teh first")
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, part: 3 }])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, part: 3 }])
 
-      expect(message).to eq("social post #{social_post.id} has no part 3")
+      expect(mcp_message).to eq("social post #{social_post.id} has no part 3")
     end
 
     it "refuses a target it does not know" do
       post = create(:post, :draft)
-      call_tool("suggest_edits", target: "journal_entry", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "journal_entry", id: post.id, edits: [typo])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "refuses an edit carrying a property it does not know" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, note: "by the way" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, note: "by the way" }])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "stores nothing from an edit carrying a property it does not know" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, note: "by the way" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, note: "by the way" }])
 
       expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "refuses an edit with no reason" do
       post = create(:post, :draft)
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ original: "teh", replacement: "the" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ original: "teh", replacement: "the" }])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "names the field when an original holds nothing but space" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
 
-      expect(message).to eq("edit 1: original needs a character that is not a space")
+      expect(mcp_message).to eq("edit 1: original needs a character that is not a space")
     end
 
     it "names the field when a reason holds nothing but space" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: " " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: " " }])
 
-      expect(message).to eq("edit 1: reason needs a character that is not a space")
+      expect(mcp_message).to eq("edit 1: reason needs a character that is not a space")
     end
 
     it "names the field when an original holds nothing but Unicode spaces" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "\u2003\u3000" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "\u2003\u3000" }])
 
-      expect(message).to eq("edit 1: original needs a character that is not a space")
+      expect(mcp_message).to eq("edit 1: original needs a character that is not a space")
     end
 
     it "names the field when a reason holds nothing but Unicode spaces" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: "\u2003\u3000" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: "\u2003\u3000" }])
 
-      expect(message).to eq("edit 1: reason needs a character that is not a space")
+      expect(mcp_message).to eq("edit 1: reason needs a character that is not a space")
     end
 
     it "answers a blank original as a tool error, not an internal one" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: " " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: " " }])
 
-      expect(document).not_to have_key("error")
+      expect(mcp_reply).not_to have_key("error")
     end
 
     it "marks a blank original an error" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: " " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: " " }])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "counts the edits when it names the one it turned away" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo, { **typo, reason: "\t" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo, { **typo, reason: "\t" }])
 
-      expect(message).to eq("edit 2: reason needs a character that is not a space")
+      expect(mcp_message).to eq("edit 2: reason needs a character that is not a space")
     end
 
     it "stores nothing when it turns a blank original away" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
 
       expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "keeps the edits an earlier call stored when a later one is blank" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "  " }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [typo])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "  " }])
 
       expect(suggestion_queries.for_post(post.id).edits.map(&:original)).to eq(["teh"])
     end
@@ -1809,14 +1793,14 @@ RSpec.describe "MCP endpoint", type: :request do
     %i[original reason replacement].each do |field|
       it "names the #{field} when it holds a NUL" do
         post = create(:post, :draft, body: "teh cat sat")
-        call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, field => "t\u0000he" }])
+        mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, field => "t\u0000he" }])
 
-        expect(message).to eq("edit 1: #{field} holds a control character")
+        expect(mcp_message).to eq("edit 1: #{field} holds a control character")
       end
 
       it "stores nothing when the #{field} holds a NUL" do
         post = create(:post, :draft, body: "teh cat sat")
-        call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, field => "t\u0000he" }])
+        mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, field => "t\u0000he" }])
 
         expect(suggestion_queries.for_post(post.id)).to be_nil
       end
@@ -1824,52 +1808,52 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "answers a NUL as a tool error, not an internal one" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, replacement: "t\u0000he" }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, replacement: "t\u0000he" }])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "names the field when a social post edit holds nothing but space" do
       social_post = compose("draft", "teh first")
-      call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, reason: "  " }])
+      mcp_call("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, reason: "  " }])
 
-      expect(message).to eq("edit 1: reason needs a character that is not a space")
+      expect(mcp_message).to eq("edit 1: reason needs a character that is not a space")
     end
 
     it "refuses more edits than one call may carry" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "says the ceiling it holds the edits to" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
 
-      expect(message).to include("50")
+      expect(mcp_message).to include("50")
     end
 
     it "refuses a reason longer than the ceiling" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: "a" * 201 }])
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: "a" * 201 }])
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "stores nothing when it turns away more edits than one call may carry" do
       post = create(:post, :draft, body: "teh cat sat")
-      call_tool("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
+      mcp_call("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
 
       expect(suggestion_queries.for_post(post.id)).to be_nil
     end
   end
 
   describe "the prompts it offers" do
-    before { rpc("prompts/list") }
+    before { mcp_rpc("prompts/list") }
 
     it "offers proofreading and a report, and nothing else" do
-      expect(result.fetch("prompts").map { it.fetch("name") }).to eq(%w[proofread report])
+      expect(mcp_result.fetch("prompts").map { it.fetch("name") }).to eq(%w[proofread report])
     end
   end
 
@@ -1877,7 +1861,7 @@ RSpec.describe "MCP endpoint", type: :request do
     before { fetch_prompt("proofread", target: "post", id: "12") }
 
     it "names the post it proofreads" do
-      expect(result.fetch("description")).to eq("Proofread blog post 12")
+      expect(mcp_result.fetch("description")).to eq("Proofread blog post 12")
     end
 
     it "speaks as the user" do
@@ -1928,31 +1912,31 @@ RSpec.describe "MCP endpoint", type: :request do
     it "names the social post it proofreads" do
       fetch_prompt("proofread", target: "social_post", id: "12")
 
-      expect(result.fetch("description")).to eq("Proofread social post 12")
+      expect(mcp_result.fetch("description")).to eq("Proofread social post 12")
     end
 
     it "refuses a target it does not know" do
       fetch_prompt("proofread", target: "journal_entry", id: "12")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
 
     it "says which targets it takes" do
       fetch_prompt("proofread", target: "journal_entry", id: "12")
 
-      expect(document.dig("error", "message")).to include("target takes post or social_post")
+      expect(mcp_reply.dig("error", "message")).to include("target takes post or social_post")
     end
 
     it "refuses an ID that is not a number" do
       fetch_prompt("proofread", target: "post", id: "twelve")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
 
     it "refuses a call with no ID" do
       fetch_prompt("proofread", target: "post")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
   end
 
@@ -1973,7 +1957,7 @@ RSpec.describe "MCP endpoint", type: :request do
     before { fetch_prompt("report", from: "2026-01-01", to: "2026-03-31") }
 
     it "names the range it reports on" do
-      expect(result.fetch("description")).to eq("Report on 2026-01-01 to 2026-03-31")
+      expect(mcp_result.fetch("description")).to eq("Report on 2026-01-01 to 2026-03-31")
     end
 
     it "speaks as the user" do
@@ -2009,14 +1993,14 @@ RSpec.describe "MCP endpoint", type: :request do
     it "asks for only the tasks canceled in the range" do
       drop("dropped", Time.utc(2026, 1, 5), Time.utc(2026, 2, 10))
       drop("dropped later", Time.utc(2026, 2, 10), Time.utc(2026, 4, 5))
-      call_tool("list_tasks", **canceled_call)
+      mcp_call("list_tasks", **canceled_call)
 
-      expect(content.fetch("tasks").map { it.fetch("title") }).to eq(["dropped"])
+      expect(mcp_content.fetch("tasks").map { it.fetch("title") }).to eq(["dropped"])
     end
 
     it "names only tools the server offers" do
       named = named_tools
-      rpc("tools/list")
+      mcp_rpc("tools/list")
 
       expect(offered).to include(*named)
     end
@@ -2028,32 +2012,32 @@ RSpec.describe "MCP endpoint", type: :request do
     it "refuses a day it cannot read" do
       fetch_prompt("report", from: "January", to: "2026-03-31")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
 
     it "refuses a start after the end" do
       fetch_prompt("report", from: "2026-04-01", to: "2026-03-31")
 
-      expect(document.dig("error", "data")).to include("from comes after to")
+      expect(mcp_reply.dig("error", "data")).to include("from comes after to")
     end
 
     it "refuses a range longer than 366 days", :aggregate_failures do
       fetch_prompt("report", from: "2024-01-01", to: "2025-01-01")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
-      expect(document.dig("error", "data")).to include("give a range of 366 days or fewer")
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "data")).to include("give a range of 366 days or fewer")
     end
 
     it "reports on a range of 366 days" do
       fetch_prompt("report", from: "2024-01-01", to: "2024-12-31")
 
-      expect(result.fetch("description")).to eq("Report on 2024-01-01 to 2024-12-31")
+      expect(mcp_result.fetch("description")).to eq("Report on 2024-01-01 to 2024-12-31")
     end
 
     it "refuses a call with no end" do
       fetch_prompt("report", from: "2026-01-01")
 
-      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(mcp_reply.dig("error", "code")).to eq(-32_602)
     end
   end
 
@@ -2078,12 +2062,12 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "stores a photo of 2 MB and answers its reference", :aggregate_failures do
-      call_tool("upload_photo", data: Base64.strict_encode64(photo), filename: "photo.jpg")
+      answer = mcp_answer("upload_photo", data: Base64.strict_encode64(photo), filename: "photo.jpg")
       row = Media::Slice["relations.photos"].one
 
       expect(photo.bytesize).to be > 2 * 1024 * 1024
       expect(stored.keys).to contain_exactly(end_with(".jpg"))
-      expect(content).to eq("url" => Hanami.app.settings.site_url("/media/#{row[:key]}"), "width" => 20, "height" => 40)
+      expect(answer).to eq("url" => Hanami.app.settings.site_url("/media/#{row[:key]}"), "width" => 20, "height" => 40)
     end
   end
 
@@ -2093,99 +2077,99 @@ RSpec.describe "MCP endpoint", type: :request do
     def seo(id) = Posts::Slice["repos.post_queries"].by_id(id)
 
     it "sets every social card field it takes" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card", og_image_url: "https://e.example/c.png")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card", og_image_url: "https://e.example/c.png")
 
       expect(seo(article.id))
         .to have_attributes(og_title: "On the card", og_image_url: "https://e.example/c.png")
     end
 
     it "offers no canonical URL to set" do
-      rpc("tools/list")
-      tool = result.fetch("tools").find { it.fetch("name") == "write_post_seo" }
+      mcp_rpc("tools/list")
+      tool = mcp_result.fetch("tools").find { it.fetch("name") == "write_post_seo" }
 
       expect(tool.dig("inputSchema", "properties").keys).to contain_exactly("id", "og_image_url", "og_title")
     end
 
     it "leaves the canonical URL alone when a client sends one anyway" do
-      call_tool("write_post_seo", id: article.id, canonical_url: "https://elsewhere.example/hello")
+      mcp_call("write_post_seo", id: article.id, canonical_url: "https://elsewhere.example/hello")
 
       expect(seo(article.id).canonical_url).to be_nil
     end
 
     it "names the canonical URL back when a client sends one" do
-      call_tool("write_post_seo", id: article.id, canonical_url: "https://elsewhere.example/hello")
+      mcp_call("write_post_seo", id: article.id, canonical_url: "https://elsewhere.example/hello")
 
-      expect(message).to include("canonical_url")
+      expect(mcp_message).to include("canonical_url")
     end
 
     it "answers with what the post now carries" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
 
-      expect(content).to eq("id" => article.id, "canonical_url" => nil, "og_image_url" => nil,
-                            "og_title" => "On the card")
+      expect(mcp_content).to eq("id" => article.id, "canonical_url" => nil, "og_image_url" => nil,
+                                "og_title" => "On the card")
     end
 
     it "keeps the fields the call leaves out" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
-      call_tool("write_post_seo", id: article.id, og_image_url: "https://example.com/card.png")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_image_url: "https://example.com/card.png")
 
       expect(seo(article.id).og_title).to eq("On the card")
     end
 
     it "clears a field an empty string names" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
-      call_tool("write_post_seo", id: article.id, og_title: "")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "")
 
       expect(seo(article.id).og_title).to be_nil
     end
 
     it "changes nothing else about the post" do
       before_write = seo(article.id).to_h
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card")
 
       expect(seo(article.id).to_h.except(:og_title, :updated_at)).to eq(before_write.except(:og_title, :updated_at))
     end
 
     it "refuses an image that is not a URL" do
-      call_tool("write_post_seo", id: article.id, og_image_url: "card.png")
+      mcp_call("write_post_seo", id: article.id, og_image_url: "card.png")
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
 
     it "names the field it could not read" do
-      call_tool("write_post_seo", id: article.id, og_image_url: "card.png")
+      mcp_call("write_post_seo", id: article.id, og_image_url: "card.png")
 
-      expect(message).to include("og_image_url")
+      expect(mcp_message).to include("og_image_url")
     end
 
     it "names a card title holding a NUL" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the\u0000card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the\u0000card")
 
-      expect(message).to eq("og_title holds a control character")
+      expect(mcp_message).to eq("og_title holds a control character")
     end
 
     it "leaves the post alone when the card title holds a NUL" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the\u0000card")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the\u0000card")
 
       expect(seo(article.id).og_title).to be_nil
     end
 
     it "leaves the post alone when it refuses" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card", og_image_url: "card.png")
+      mcp_call("write_post_seo", id: article.id, og_title: "On the card", og_image_url: "card.png")
 
       expect(seo(article.id).og_title).to be_nil
     end
 
     it "calls an unknown ID an error" do
-      call_tool("write_post_seo", id: 999_999, og_title: "On the card")
+      mcp_call("write_post_seo", id: 999_999, og_title: "On the card")
 
-      expect(message).to eq("no blog post has the ID 999999")
+      expect(mcp_message).to eq("no blog post has the ID 999999")
     end
 
     it "refuses a call with no ID" do
-      call_tool("write_post_seo", og_title: "On the card")
+      mcp_call("write_post_seo", og_title: "On the card")
 
-      expect(result.fetch("isError")).to be(true)
+      expect(mcp_result.fetch("isError")).to be(true)
     end
   end
 
@@ -2206,7 +2190,7 @@ RSpec.describe "MCP endpoint", type: :request do
       allow(agent).to receive(:notify).and_call_original
       record = ->(build, *args) { build.call(*args).tap { notices << it } }
       allow(Honeybadger::Notice).to receive(:new).and_wrap_original(&record)
-      call_tool("write_post_seo", id: 1, og_title:)
+      mcp_call("write_post_seo", id: 1, og_title:)
     end
 
     it "tells Honeybadger what the tool raised" do
@@ -2222,7 +2206,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "sends Honeybadger no token" do
-      expect(reported).not_to include(access_token)
+      expect(reported).not_to include(mcp_access_token)
     end
 
     it "sends Honeybadger none of the request body" do
@@ -2257,7 +2241,7 @@ RSpec.describe "MCP endpoint", type: :request do
     before { allow(agent).to receive(:notify).and_call_original }
 
     it "sends Honeybadger nothing for a tool the token's scopes withhold" do
-      call_tool("write_post_seo", id: 1, og_title: "On the card")
+      mcp_call("write_post_seo", id: 1, og_title: "On the card")
 
       expect(agent).not_to have_received(:notify)
     end
@@ -2269,7 +2253,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "sends Honeybadger nothing for a tool it does not have" do
-      call_tool("rename_site", id: 1)
+      mcp_call("rename_site", id: 1)
 
       expect(agent).not_to have_received(:notify)
     end
@@ -2451,22 +2435,22 @@ RSpec.describe "MCP endpoint", type: :request do
 
     MCP::Protocol::Handler::TOOLS.map(&:name_value).each do |name|
       it "refuses #{name} rather than raising on it" do
-        call_tool(name, **enough_for(name), stray: "x")
+        mcp_call(name, **enough_for(name), stray: "x")
 
-        expect(message).to include("stray")
+        expect(mcp_message).to include("stray")
       end
     end
   end
 
   it "changes nothing when it reads" do
     post = create(:post, :draft)
-    call_tool("read_post", id: post.id)
+    mcp_call("read_post", id: post.id)
 
     expect(Posts::Slice["repos.post_queries"].by_id(post.id).to_h).to eq(post.to_h)
   end
 
   it "notes when the client last called" do
-    rpc("tools/list")
+    mcp_rpc("tools/list")
 
     expect(clients.one[:last_used_at]).to be_within(60).of(Time.now)
   end
@@ -2474,7 +2458,7 @@ RSpec.describe "MCP endpoint", type: :request do
   it "notes a call when the client last called more than five minutes ago" do
     issued
     clients.by_pk(client.id).update(last_used_at: Time.now - (6 * 60))
-    rpc("tools/list")
+    mcp_rpc("tools/list")
 
     expect(clients.one[:last_used_at]).to be_within(60).of(Time.now)
   end
@@ -2483,7 +2467,7 @@ RSpec.describe "MCP endpoint", type: :request do
     issued
     called = Time.now.floor - (4 * 60)
     clients.by_pk(client.id).update(last_used_at: called)
-    rpc("tools/list")
+    mcp_rpc("tools/list")
 
     expect(clients.one[:last_used_at]).to eq(called)
   end
@@ -2492,20 +2476,20 @@ RSpec.describe "MCP endpoint", type: :request do
     issued
     clients.by_pk(client.id).update(last_used_at: Time.now - (4 * 60))
 
-    expect(counting { rpc("tools/list") }.grep(/UPDATE "oauth_clients"/)).to be_empty
+    expect(counting { mcp_rpc("tools/list") }.grep(/UPDATE "oauth_clients"/)).to be_empty
   end
 
   it "reads the token and its client in one query" do
     issued
 
-    expect(counting { rpc("tools/list") }.grep(/FROM "oauth_(tokens|clients)"/).size).to eq(1)
+    expect(counting { mcp_rpc("tools/list") }.grep(/FROM "oauth_(tokens|clients)"/).size).to eq(1)
   end
 
   it "leaves updated_at alone when it notes a call" do
     issued
     updated = Time.now.floor - (24 * 60 * 60)
     clients.by_pk(client.id).update(updated_at: updated)
-    rpc("tools/list")
+    mcp_rpc("tools/list")
 
     expect(clients.one[:updated_at]).to eq(updated)
   end

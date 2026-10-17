@@ -57,28 +57,17 @@ RSpec.describe "MCP tool scopes", type: :request do
     }
   end
 
-  def access_token
-    @access_token ||= mcp_connect(
-      create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: scopes.join(" "),
-    ).fetch("access_token")
-  end
-
   def guarded = self.class.guarded
 
   def listed = tools.map { it.fetch("name") }
 
-  def rpc(method, params = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
-    post "/mcp", JSON.generate({ jsonrpc: "2.0", id: 1, method:, params: }.compact), headers
-  end
-
   def tools
-    rpc("tools/list")
-    document.dig("result", "tools")
+    mcp_rpc("tools/list")
+    mcp_result.fetch("tools")
   end
 
   describe "a token holding every scope" do
-    def scopes = guarded.keys
+    def mcp_scopes = guarded.keys
 
     it "guards each tool with the scope this spec expects" do
       expect(listed).to match_array(guarded.values.flatten)
@@ -87,7 +76,7 @@ RSpec.describe "MCP tool scopes", type: :request do
 
   guarded.each do |scope, names|
     describe "a token holding every scope but #{scope}" do
-      define_method(:scopes) { guarded.keys - [scope] }
+      define_method(:mcp_scopes) { guarded.keys - [scope] }
 
       it "lists none of the tools #{scope} guards" do
         expect(listed).not_to include(*names)
@@ -98,9 +87,9 @@ RSpec.describe "MCP tool scopes", type: :request do
       end
 
       it "refuses a call to a tool #{scope} guards, naming the #{scope} permission" do
-        rpc("tools/call", { name: names.first, arguments: {} })
+        mcp_rpc("tools/call", { name: names.first, arguments: {} })
 
-        expect(document.dig("error", "data")).to eq(
+        expect(mcp_reply.dig("error", "data")).to eq(
           "#{names.first} needs the #{scope} permission, and this connection was never granted it. " \
           "Connect the app again to grant it",
         )

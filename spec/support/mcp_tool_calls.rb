@@ -3,15 +3,35 @@
 module MCPToolCalls
   SCOPES = "read suggest write publish delete mail"
 
+  def marked(text) = { "untrusted" => true, "text" => text }
+
   def mcp_answer(name, **) = JSON.parse(mcp_text(name, **))
 
   def mcp_call(name, **arguments)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/call", params: { name:, arguments: }), headers
-    JSON.parse(last_response.body).fetch("result")
+    mcp_rpc("tools/call", { name:, arguments: })
+    mcp_reply["result"]
   end
 
-  def mcp_text(name, **) = mcp_call(name, **).fetch("content").first.fetch("text")
+  def mcp_content = JSON.parse(mcp_message)
+
+  def mcp_message = mcp_result.fetch("content").first.fetch("text")
+
+  def mcp_refused? = mcp_result.fetch("isError", false)
+
+  def mcp_reply = JSON.parse(last_response.body)
+
+  def mcp_result = mcp_reply.fetch("result")
+
+  def mcp_rpc(method, params = nil, id: 1, authorization: "Bearer #{mcp_access_token}", headers: {})
+    sent = { "CONTENT_TYPE" => "application/json", **headers }
+    sent["HTTP_AUTHORIZATION"] = authorization if authorization
+    post "/mcp", JSON.generate({ jsonrpc: "2.0", id:, method:, params: }.compact), sent
+  end
+
+  def mcp_text(name, **)
+    mcp_call(name, **)
+    mcp_message
+  end
 
   def trusted(value)
     case value
@@ -33,11 +53,13 @@ module MCPToolCalls
 
   def mcp_access_token
     @mcp_access_token ||= MCP::Slice["operations.issue_tokens"].call(
-      oauth_client_id: create(:oauth_client).id,
+      oauth_client_id: mcp_client.id,
       resource: MCP::Slice["operations.describe_protected_resource"].call(Hanami.app.settings.site_url.chomp("/"))[:resource],
       scopes: mcp_scopes,
     ).fetch(:access_token)
   end
+
+  def mcp_client = @mcp_client ||= create(:oauth_client)
 
   def mcp_scopes = SCOPES.split
 end

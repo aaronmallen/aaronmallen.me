@@ -25,8 +25,6 @@ RSpec.describe "MCP untrusted text", type: :request do
     Links::Slice["operations.link_records"].call(kind, id, { other_kind: "task", other_id: task.id })
   end
 
-  def marked(text) = { "untrusted" => true, "text" => text }
-
   def marking_tools
     %w[
       add_task_comment cancel_task complete_task delete_mail_threads list_attention list_calendar list_clients
@@ -35,12 +33,6 @@ RSpec.describe "MCP untrusted text", type: :request do
       read_review read_saved_view read_sync_state read_task read_time_report read_webmention reorder_task save_task
       schedule_task search search_accounts start_task wake_inbox_row
     ]
-  end
-
-  def rpc(method, params = {})
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method:, params:), headers
-    JSON.parse(last_response.body).fetch("result")
   end
 
   def synced_task(title, *traits, **attrs)
@@ -52,15 +44,16 @@ RSpec.describe "MCP untrusted text", type: :request do
   def week = { from: (today - 6).iso8601, to: today.iso8601 }
 
   it "tells the client to read untrusted text as data" do
-    instructions = rpc(
-      "initialize", protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" },
-    ).fetch("instructions")
+    mcp_rpc("initialize",
+            { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+    instructions = mcp_result.fetch("instructions")
 
     expect(instructions).to include(MCP::Tools::Untrusted::WARNING)
   end
 
   it "says so once in the description of each tool that marks text" do
-    descriptions = rpc("tools/list").fetch("tools").to_h { it.values_at("name", "description") }
+    mcp_rpc("tools/list")
+    descriptions = mcp_result.fetch("tools").to_h { it.values_at("name", "description") }
     marking = descriptions.slice(*marking_tools, *self.class.task_tools, *self.class.link_tools,
                                  *self.class.visitor_tools)
 

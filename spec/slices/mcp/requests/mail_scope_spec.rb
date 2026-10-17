@@ -92,7 +92,7 @@ RSpec.describe "MCP mail scope", type: :request do
 
       expect(mcp_answer("link_records", kind: "post", id: post.id, other_kind: "mail_thread", other_id: thread.id)
         .dig("links", "mail_thread").map { it.fetch("title") })
-        .to eq([{ "untrusted" => true, "text" => "Zeppelin sighting" }])
+        .to eq([marked("Zeppelin sighting")])
     end
 
     it "unlinks a record from a mail thread" do

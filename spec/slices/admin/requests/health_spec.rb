@@ -104,20 +104,14 @@ RSpec.describe "Admin health", :frozen_clock, type: :request do
       end
       let(:usual) { { minutes_asleep: 420, hrv: 50, resting_heart_rate: 55 } }
 
-      def health_token
-        client = create(:oauth_client)
-        mcp_connect(client, verifier: Blog::Types::NewSecret[], scope: "health").fetch("access_token")
-      end
-
       def hint(key) = Admin::Slice["i18n"].t(key, scope: "ui")
+
+      def mcp_scopes = %w[health]
 
       def readings(back) = usual.to_h { |field, value| [field, edges.fetch(field).fetch(back, value)] }
 
       def tool_patterns
-        params = { name: "read_health_days", arguments: { from: (today - 29).iso8601, to: today.iso8601 } }
-        headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{health_token}" }
-        post "/mcp", JSON.generate({ jsonrpc: "2.0", id: 1, method: "tools/call", params: }), headers
-        JSON.parse(JSON.parse(last_response.body).dig("result", "content", 0, "text")).fetch("patterns")
+        mcp_answer("read_health_days", from: (today - 29).iso8601, to: today.iso8601).fetch("patterns")
       end
 
       before do

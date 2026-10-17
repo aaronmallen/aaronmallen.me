@@ -1,31 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP social tools", type: :request do
-  def access_token
-    @access_token ||= mcp_connect(
-      create(:oauth_client),
-      verifier: Blog::Types::NewSecret[],
-      scope: "read write publish delete",
-    ).fetch("access_token")
-  end
-
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
-
-  def call_tool(name, **arguments)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
-    params = { name:, arguments: }
-    post "/mcp", JSON.generate({ jsonrpc: "2.0", id: 1, method: "tools/call", params: }), headers
-  end
-
-  def content = JSON.parse(message)
 
   def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
 
-  def message = result.fetch("content").first.fetch("text")
-
-  def refused? = result.fetch("isError", false)
-
-  def result = JSON.parse(last_response.body).fetch("result")
+  def mcp_scopes = %w[read write publish delete]
 
   def social_post_mutations = Social::Slice["repos.social_post_mutations"]
   def social_post_queries = Social::Slice["repos.social_post_queries"]
@@ -43,15 +23,15 @@ RSpec.describe "MCP social tools", type: :request do
     def delivered(network, **)
       social_post = create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 5)))
       create(:social_post_delivery, network, social_post_id: social_post.id, **)
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
     end
 
     def delivery(network) = listed.first.fetch("deliveries").find { it.fetch("network") == network }
 
-    def listed = content.fetch("social_posts")
+    def listed = mcp_content.fetch("social_posts")
 
     def listed_ids(**)
-      call_tool("list_social_posts", **)
+      mcp_call("list_social_posts", **)
       listed.map { it.fetch("id") }
     end
 
@@ -61,7 +41,7 @@ RSpec.describe "MCP social tools", type: :request do
       sent = create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 2)))
       queued = create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 20)))
       draft = create(:social_post, :draft, created_at: at(Date.new(2026, 3, 10)))
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed.map { it.fetch("id") }).to eq([queued.id, draft.id, sent.id])
     end
@@ -69,7 +49,7 @@ RSpec.describe "MCP social tools", type: :request do
     it "leaves out posts outside the range" do
       create(:social_post, :posted, posted_at: at(Date.new(2026, 4, 1)))
       create(:social_post, :draft, created_at: at(Date.new(2026, 2, 28)))
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed).to be_empty
     end
@@ -77,7 +57,7 @@ RSpec.describe "MCP social tools", type: :request do
     it "counts both days at the ends as inside the range" do
       first = create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 1), 0))
       last = create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 31), 23))
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed.map { it.fetch("id") }).to contain_exactly(first.id, last.id)
     end
@@ -86,7 +66,7 @@ RSpec.describe "MCP social tools", type: :request do
       social_post = social_post_mutations.create_with_parts(
         parts: %w[one two], status: "posted", posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon],
       )
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed.first).to include("id" => social_post.id, "status" => "posted", "parts" => %w[one two])
     end
@@ -101,14 +81,14 @@ RSpec.describe "MCP social tools", type: :request do
     it "gives a delivery that gave up as failed, with its error" do
       delivered(:bluesky, failed: true, error: "rate limited")
 
-      error = { "untrusted" => true, "text" => "rate limited" }
+      error = marked("rate limited")
 
       expect(delivery("bluesky")).to include("state" => "failed", "error" => error)
     end
 
     it "gives each part's length and limit on each network it targets" do
       draft = create(:social_post, :draft, targets: %w[bluesky], created_at: at(Date.new(2026, 3, 5)))
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
       count = stored(draft.id).parts.first.body.length
 
       expect(listed.first.fetch("lengths")).to eq([{ "bluesky" => { "count" => count, "limit" => 300 } }])
@@ -116,7 +96,7 @@ RSpec.describe "MCP social tools", type: :request do
 
     it "calls a network with no delivery yet waiting" do
       create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon])
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed.first.fetch("deliveries")).to match([include("network" => "mastodon", "state" => "waiting")])
     end
@@ -124,7 +104,7 @@ RSpec.describe "MCP social tools", type: :request do
     it "calls a delivery with an error but no give up retrying" do
       social_post = create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon])
       create(:social_post_delivery, :mastodon, social_post_id: social_post.id, error: "rate limited")
-      call_tool("list_social_posts", **range)
+      mcp_call("list_social_posts", **range)
 
       expect(listed.first.fetch("deliveries").first.fetch("state")).to eq("retrying")
     end
@@ -148,9 +128,10 @@ RSpec.describe "MCP social tools", type: :request do
     it "lists every social post, newest first, when given no range" do
       older = create(:social_post, :posted, posted_at: at(Date.new(2020, 3, 2)))
       newer = create(:social_post, :scheduled, posted_at: at(Date.new(2030, 3, 2)))
-      call_tool("list_social_posts")
+      mcp_call("list_social_posts")
 
-      expect([listed.map { it.fetch("id") }, content.values_at("from", "to")]).to eq([[newer.id, older.id], [nil, nil]])
+      expect([listed.map { it.fetch("id") }, mcp_content.values_at("from", "to")])
+        .to eq([[newer.id, older.id], [nil, nil]])
     end
 
     it "pages through every post in one queue when given no range" do
@@ -179,125 +160,125 @@ RSpec.describe "MCP social tools", type: :request do
       2.upto(3) { create(:social_post, :posted, posted_at: at(Date.new(2026, 3, it))) }
       create(:social_post, :draft, created_at: at(Date.new(2026, 3, 10)))
       create(:social_post, :scheduled, posted_at: at(Date.new(2026, 4, 2)))
-      call_tool("list_social_posts", **range, queue: "drafts")
+      mcp_call("list_social_posts", **range, queue: "drafts")
 
-      expect(content.fetch("counts")).to eq("queued" => 0, "posted" => 2, "drafts" => 1)
+      expect(mcp_content.fetch("counts")).to eq("queued" => 0, "posted" => 2, "drafts" => 1)
     end
 
     it "counts every social post when given no range" do
       create(:social_post, :posted, posted_at: at(Date.new(2020, 3, 2)))
       create(:social_post, :scheduled, posted_at: at(Date.new(2030, 3, 2)))
-      call_tool("list_social_posts")
+      mcp_call("list_social_posts")
 
-      expect(content.fetch("counts")).to eq("queued" => 1, "posted" => 1, "drafts" => 0)
+      expect(mcp_content.fetch("counts")).to eq("queued" => 1, "posted" => 1, "drafts" => 0)
     end
 
     it "refuses a queue the admin does not have" do
-      call_tool("list_social_posts", queue: "archived")
+      mcp_call("list_social_posts", queue: "archived")
 
-      expect(message).to include("/queue")
+      expect(mcp_message).to include("/queue")
     end
 
     it "refuses a day it cannot read" do
-      call_tool("list_social_posts", from: "March", to: "2026-03-31")
+      mcp_call("list_social_posts", from: "March", to: "2026-03-31")
 
-      expect(message).to eq("give from and to as days, such as 2026-01-01")
+      expect(mcp_message).to eq("give from and to as days, such as 2026-01-01")
     end
 
     it "refuses a range that runs backwards" do
-      call_tool("list_social_posts", from: "2026-03-31", to: "2026-03-01")
+      mcp_call("list_social_posts", from: "2026-03-31", to: "2026-03-01")
 
-      expect(message).to eq("from comes after to")
+      expect(mcp_message).to eq("from comes after to")
     end
   end
 
   describe "create_social_post" do
     it "saves a draft" do
-      call_tool("create_social_post", parts: %w[hello there], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: %w[hello there], targets: %w[mastodon])
 
-      expect(stored(content.fetch("id"))).to have_attributes(status: "draft", targets: %w[mastodon])
+      expect(stored(mcp_content.fetch("id"))).to have_attributes(status: "draft", targets: %w[mastodon])
     end
 
     it "keeps the parts in order" do
-      call_tool("create_social_post", parts: %w[hello there], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: %w[hello there], targets: %w[mastodon])
 
-      expect(stored(content.fetch("id")).parts.map(&:body)).to eq(%w[hello there])
+      expect(stored(mcp_content.fetch("id")).parts.map(&:body)).to eq(%w[hello there])
     end
 
     it "answers with the post it saved" do
-      call_tool("create_social_post", parts: %w[hello], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: %w[hello], targets: %w[mastodon])
 
-      expect(content).to include("status" => "draft", "parts" => %w[hello], "posted_at" => nil)
+      expect(mcp_content).to include("status" => "draft", "parts" => %w[hello], "posted_at" => nil)
     end
 
     it "gives each part's length and limit on each network it targets" do
-      call_tool("create_social_post", parts: ["a" * 400, "hi"], targets: %w[mastodon bluesky])
+      mcp_call("create_social_post", parts: ["a" * 400, "hi"], targets: %w[mastodon bluesky])
 
       long = { "mastodon" => { "count" => 400, "limit" => 500 }, "bluesky" => { "count" => 400, "limit" => 300 } }
       short = { "mastodon" => { "count" => 2, "limit" => 500 }, "bluesky" => { "count" => 2, "limit" => 300 } }
 
-      expect(content.fetch("lengths")).to eq([long, short])
+      expect(mcp_content.fetch("lengths")).to eq([long, short])
     end
 
     it "refuses a post with no text, as the admin does" do
-      call_tool("create_social_post", parts: ["  "], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["  "], targets: %w[mastodon])
 
-      expect(message).to eq("parts is empty")
+      expect(mcp_message).to eq("parts is empty")
     end
 
     it "refuses a part made only of Unicode spaces" do
-      call_tool("create_social_post", parts: ["\u2003"], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["\u2003"], targets: %w[mastodon])
 
-      expect(message).to eq("parts is empty")
+      expect(mcp_message).to eq("parts is empty")
     end
 
     it "refuses a later part made only of Unicode spaces" do
-      call_tool("create_social_post", parts: ["Hello", "\u2003\u3000"], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["Hello", "\u2003\u3000"], targets: %w[mastodon])
 
-      expect(message).to eq("parts is empty")
+      expect(mcp_message).to eq("parts is empty")
     end
 
     it "keeps a part with Unicode spaces around real words as typed" do
-      call_tool("create_social_post", parts: ["\u2003Pick a queue\u00a0"], targets: %w[mastodon])
-      call_tool("read_social_post", id: content.fetch("id"))
+      mcp_call("create_social_post", parts: ["\u2003Pick a queue\u00a0"], targets: %w[mastodon])
+      mcp_call("read_social_post", id: mcp_content.fetch("id"))
 
-      expect(content.fetch("parts")).to eq(["\u2003Pick a queue\u00a0"])
+      expect(mcp_content.fetch("parts")).to eq(["\u2003Pick a queue\u00a0"])
     end
 
     it "refuses a post with no network" do
-      call_tool("create_social_post", parts: %w[hello], targets: [])
+      mcp_call("create_social_post", parts: %w[hello], targets: [])
 
-      expect(message).to eq("targets is empty")
+      expect(mcp_message).to eq("targets is empty")
     end
 
     it "refuses a network with no credentials" do
       connect_social_networks(bluesky: {})
-      call_tool("create_social_post", parts: %w[hello], targets: %w[bluesky])
+      mcp_call("create_social_post", parts: %w[hello], targets: %w[bluesky])
 
-      expect(message).to eq("targets names a network that has no credentials")
+      expect(mcp_message).to eq("targets names a network that has no credentials")
     end
 
     it "refuses a part holding a control character" do
-      call_tool("create_social_post", parts: ["hel\u0000lo"], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["hel\u0000lo"], targets: %w[mastodon])
 
-      expect(message).to eq("parts holds a control character")
+      expect(mcp_message).to eq("parts holds a control character")
     end
 
     it "refuses a mention of nobody in the directory, as the admin does" do
-      call_tool("create_social_post", parts: ["hi @{nobody}"], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["hi @{nobody}"], targets: %w[mastodon])
 
-      expect(message).to eq("parts mentions someone who is not in the directory")
+      expect(mcp_message).to eq("parts mentions someone who is not in the directory")
     end
 
     it "saves a mention of someone in the directory" do
       create(:person, key: "ada-lovelace")
-      call_tool("create_social_post", parts: ["hi @{ada-lovelace}"], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["hi @{ada-lovelace}"], targets: %w[mastodon])
 
-      expect(stored(content.fetch("id")).parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+      expect(stored(mcp_content.fetch("id")).parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
     end
 
     it "saves nothing when it refuses" do
-      call_tool("create_social_post", parts: ["  "], targets: %w[mastodon])
+      mcp_call("create_social_post", parts: ["  "], targets: %w[mastodon])
 
       expect(social_post_queries.drafts).to be_empty
     end
@@ -309,19 +290,19 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "replaces the parts" do
-      call_tool("update_social_post", id: draft.id, parts: %w[new words])
+      mcp_call("update_social_post", id: draft.id, parts: %w[new words])
 
       expect(stored(draft.id).parts.map(&:body)).to eq(%w[new words])
     end
 
     it "keeps the networks it was not given" do
-      call_tool("update_social_post", id: draft.id, parts: %w[new])
+      mcp_call("update_social_post", id: draft.id, parts: %w[new])
 
       expect(stored(draft.id).targets).to eq(%w[mastodon])
     end
 
     it "keeps the parts it was not given" do
-      call_tool("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
+      mcp_call("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
 
       expect(stored(draft.id)).to have_attributes(targets: %w[mastodon bluesky], parts: [have_attributes(body: "old")])
     end
@@ -329,41 +310,41 @@ RSpec.describe "MCP social tools", type: :request do
     it "sends to every account on a network it adds to a post that picked accounts" do
       other = connect_another_mastodon
       social_post_mutations.update(draft.id, connection_ids: [other.id])
-      call_tool("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
+      mcp_call("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
 
       expect(targeted(draft.id)).to eq([other.id, social_account("bluesky").id])
     end
 
     it "gives the lengths of the parts it saved" do
-      call_tool("update_social_post", id: draft.id, parts: %w[new])
+      mcp_call("update_social_post", id: draft.id, parts: %w[new])
 
-      expect(content.fetch("lengths")).to eq([{ "mastodon" => { "count" => 3, "limit" => 500 } }])
+      expect(mcp_content.fetch("lengths")).to eq([{ "mastodon" => { "count" => 3, "limit" => 500 } }])
     end
 
     it "leaves a queued post a draft, as saving a draft in the admin does" do
       queued = create(:social_post, :scheduled)
-      call_tool("update_social_post", id: queued.id, parts: %w[new])
+      mcp_call("update_social_post", id: queued.id, parts: %w[new])
 
       expect(stored(queued.id)).to have_attributes(status: "draft", posted_at: nil)
     end
 
     it "refuses a post that has gone out" do
       sent = create(:social_post, :posted)
-      call_tool("update_social_post", id: sent.id, parts: %w[new])
+      mcp_call("update_social_post", id: sent.id, parts: %w[new])
 
-      expect(message).to eq("social post #{sent.id} has gone out, so nothing was saved")
+      expect(mcp_message).to eq("social post #{sent.id} has gone out, so nothing was saved")
     end
 
     it "refuses an unknown ID" do
-      call_tool("update_social_post", id: 999_999, parts: %w[new])
+      mcp_call("update_social_post", id: 999_999, parts: %w[new])
 
-      expect(message).to eq("no social post has the ID 999999")
+      expect(mcp_message).to eq("no social post has the ID 999999")
     end
 
     it "refuses empty text and keeps what was there" do
-      call_tool("update_social_post", id: draft.id, parts: [""])
+      mcp_call("update_social_post", id: draft.id, parts: [""])
 
-      expect([message, stored(draft.id).parts.map(&:body)]).to eq(["parts is empty", %w[old]])
+      expect([mcp_message, stored(draft.id).parts.map(&:body)]).to eq(["parts is empty", %w[old]])
     end
   end
 
@@ -376,44 +357,44 @@ RSpec.describe "MCP social tools", type: :request do
 
     def send_both(*parts)
       long = social_post_mutations.create_with_parts(parts:, status: "draft", targets: %w[mastodon bluesky])
-      call_tool("send_social_post", id: long.id)
+      mcp_call("send_social_post", id: long.id)
     end
 
     it "queues the post to go out now" do
-      call_tool("send_social_post", id: draft.id)
+      mcp_call("send_social_post", id: draft.id)
 
       expect(stored(draft.id)).to have_attributes(status: "scheduled", posted_at: be_within(60).of(Time.now))
     end
 
     it "queues the post for the time it was given" do
-      call_tool("send_social_post", id: draft.id, schedule_at: "2030-01-02T09:30")
+      mcp_call("send_social_post", id: draft.id, schedule_at: "2030-01-02T09:30")
 
       expect(stored(draft.id).posted_at).to eq(Blog::TimeZone.local_time(2030, 1, 2, 9, 30))
     end
 
     it "answers with the queued post" do
-      call_tool("send_social_post", id: draft.id)
+      mcp_call("send_social_post", id: draft.id)
 
-      expect(content).to include("id" => draft.id, "status" => "scheduled")
+      expect(mcp_content).to include("id" => draft.id, "status" => "scheduled")
     end
 
     it "refuses a part over a network's limit, as the admin does" do
       long = social_post_mutations.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
-      call_tool("send_social_post", id: long.id)
+      mcp_call("send_social_post", id: long.id)
 
-      expect(message).to eq(over("part 1 runs 501 of 500 on mastodon"))
+      expect(mcp_message).to eq(over("part 1 runs 501 of 500 on mastodon"))
     end
 
     it "names only the network a part runs over when it fits the other" do
       send_both("hi", "a" * 400)
 
-      expect(message).to eq(over("part 2 runs 400 of 300 on bluesky"))
+      expect(mcp_message).to eq(over("part 2 runs 400 of 300 on bluesky"))
     end
 
     it "says a part has too many bytes when it fits the count but not the bytes" do
       send_both("\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}" * 121)
 
-      expect(message).to eq(over("part 1 has too many bytes for bluesky"))
+      expect(mcp_message).to eq(over("part 1 has too many bytes for bluesky"))
     end
 
     it "names each part and network over its limit" do
@@ -422,39 +403,39 @@ RSpec.describe "MCP social tools", type: :request do
       runs = ["part 1 runs 501 of 500 on mastodon", "part 1 runs 501 of 300 on bluesky",
               "part 2 runs 301 of 300 on bluesky"]
 
-      expect(message).to eq(over(runs.join(", ")))
+      expect(mcp_message).to eq(over(runs.join(", ")))
     end
 
     it "leaves an over limit post a draft" do
       long = social_post_mutations.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
-      call_tool("send_social_post", id: long.id)
+      mcp_call("send_social_post", id: long.id)
 
       expect(stored(long.id).status).to eq("draft")
     end
 
     it "refuses a time it cannot read" do
-      call_tool("send_social_post", id: draft.id, schedule_at: "tomorrow")
+      mcp_call("send_social_post", id: draft.id, schedule_at: "tomorrow")
 
-      expect(message).to eq("schedule_at needs a date and time, as 2026-10-01T09:30")
+      expect(mcp_message).to eq("schedule_at needs a date and time, as 2026-10-01T09:30")
     end
 
     it "refuses a time the clocks skip" do
-      call_tool("send_social_post", id: draft.id, schedule_at: "2030-03-10T02:30")
+      mcp_call("send_social_post", id: draft.id, schedule_at: "2030-03-10T02:30")
 
-      expect(message).to eq("schedule_at falls in the hour the clocks skip in America/Chicago")
+      expect(mcp_message).to eq("schedule_at falls in the hour the clocks skip in America/Chicago")
     end
 
     it "refuses a post that has gone out" do
       sent = create(:social_post, :posted)
-      call_tool("send_social_post", id: sent.id)
+      mcp_call("send_social_post", id: sent.id)
 
-      expect(message).to eq("social post #{sent.id} has gone out, so nothing was saved")
+      expect(mcp_message).to eq("social post #{sent.id} has gone out, so nothing was saved")
     end
 
     it "refuses an unknown ID" do
-      call_tool("send_social_post", id: 999_999)
+      mcp_call("send_social_post", id: 999_999)
 
-      expect(message).to eq("no social post has the ID 999999")
+      expect(mcp_message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -467,34 +448,34 @@ RSpec.describe "MCP social tools", type: :request do
 
     it "deletes a post that has not gone out" do
       draft = create(:social_post, :draft)
-      call_tool("delete_social_post", id: draft.id)
+      mcp_call("delete_social_post", id: draft.id)
 
       expect(stored(draft.id)).to be_nil
     end
 
     it "answers with the ID it deleted" do
       draft = create(:social_post, :draft)
-      call_tool("delete_social_post", id: draft.id)
+      mcp_call("delete_social_post", id: draft.id)
 
-      expect(content).to eq("id" => draft.id, "deleted" => true)
+      expect(mcp_content).to eq("id" => draft.id, "deleted" => true)
     end
 
     it "keeps a post a network has taken" do
-      call_tool("delete_social_post", id: taken.id)
+      mcp_call("delete_social_post", id: taken.id)
 
       expect(stored(taken.id)).not_to be_nil
     end
 
     it "says why it kept a post a network has taken" do
-      call_tool("delete_social_post", id: taken.id)
+      mcp_call("delete_social_post", id: taken.id)
 
-      expect(message).to eq("social post #{taken.id} has gone out, so nothing was removed")
+      expect(mcp_message).to eq("social post #{taken.id} has gone out, so nothing was removed")
     end
 
     it "refuses an unknown ID" do
-      call_tool("delete_social_post", id: 999_999)
+      mcp_call("delete_social_post", id: 999_999)
 
-      expect(message).to eq("no social post has the ID 999999")
+      expect(mcp_message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -502,34 +483,34 @@ RSpec.describe "MCP social tools", type: :request do
     def mention = @mention ||= create(:webmention)
 
     it "stores the reason given with spam", :aggregate_failures do
-      call_tool("moderate_webmention", id: mention.id, verdict: "spam", reason: "link farm")
+      mcp_call("moderate_webmention", id: mention.id, verdict: "spam", reason: "link farm")
 
-      expect(content).to eq("id" => mention.id, "status" => "spam")
+      expect(mcp_content).to eq("id" => mention.id, "status" => "spam")
       expect(filed("spam", :spam_reason)).to eq(["link farm"])
     end
 
     it "trusts the author of a webmention it approves" do
-      call_tool("moderate_webmention", id: mention.id, verdict: "approved")
+      mcp_call("moderate_webmention", id: mention.id, verdict: "approved")
 
       expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
     end
 
     it "trusts the author of a webmention approve_webmentions approves" do
-      call_tool("approve_webmentions", ids: [mention.id])
+      mcp_call("approve_webmentions", ids: [mention.id])
 
       expect(webmention_queries.trusted_author?(mention.author_url)).to be(true)
     end
 
     it "refuses a verdict it does not know" do
-      call_tool("moderate_webmention", id: mention.id, verdict: "pending")
+      mcp_call("moderate_webmention", id: mention.id, verdict: "pending")
 
       expect(filed("pending", :id)).to eq([mention.id])
     end
 
     it "refuses an unknown ID" do
-      call_tool("moderate_webmention", id: 999_999, verdict: "spam")
+      mcp_call("moderate_webmention", id: 999_999, verdict: "spam")
 
-      expect(message).to eq("no webmention has the ID 999999")
+      expect(mcp_message).to eq("no webmention has the ID 999999")
     end
   end
 
@@ -543,54 +524,54 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "reads every setting" do
-      call_tool("read_webmention_settings")
+      mcp_call("read_webmention_settings")
 
-      expect(content).to eq(settings)
+      expect(mcp_content).to eq(settings)
     end
   end
 
   describe "update_webmention_settings" do
     it "changes the settings it was given" do
-      call_tool("update_webmention_settings", receive: false)
+      mcp_call("update_webmention_settings", receive: false)
 
       expect(webmention_queries.settings.receive).to be(false)
     end
 
     it "keeps the settings it was not given" do
-      call_tool("update_webmention_settings", receive: false)
+      mcp_call("update_webmention_settings", receive: false)
 
       expect(webmention_queries.settings.send_on_publish).to be(true)
     end
 
     it "answers with every setting" do
-      call_tool("update_webmention_settings", accept_bridgy: false)
+      mcp_call("update_webmention_settings", accept_bridgy: false)
 
-      expect(content).to include("accept_bridgy" => false, "receive" => true)
+      expect(mcp_content).to include("accept_bridgy" => false, "receive" => true)
     end
 
     it "saves the like and repost toggles" do
-      call_tool("update_webmention_settings", auto_approve_likes: false, auto_approve_reposts: false)
+      mcp_call("update_webmention_settings", auto_approve_likes: false, auto_approve_reposts: false)
 
       expect(webmention_queries.settings).to have_attributes(auto_approve_likes: false, auto_approve_reposts: false)
     end
 
     it "saves the hosts it was given, cleaned up and in order" do
-      call_tool("update_webmention_settings", single_author_hosts: ["grace.example", "https://Ada.Example/", "a b"])
+      mcp_call("update_webmention_settings", single_author_hosts: ["grace.example", "https://Ada.Example/", "a b"])
 
-      expect(content).to include("single_author_hosts" => %w[ada.example grace.example])
+      expect(mcp_content).to include("single_author_hosts" => %w[ada.example grace.example])
     end
 
     it "says it saved nothing when the hosts match the stored ones" do
       webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
-      call_tool("update_webmention_settings", single_author_hosts: ["ada.example"])
+      mcp_call("update_webmention_settings", single_author_hosts: ["ada.example"])
 
-      expect(refused?).to be(true)
+      expect(mcp_refused?).to be(true)
     end
 
     it "says it saved nothing when nothing changed, as the admin does" do
-      call_tool("update_webmention_settings", receive: true)
+      mcp_call("update_webmention_settings", receive: true)
 
-      expect([refused?, message]).to eq([true, "nothing saved, since no setting changed"])
+      expect([mcp_refused?, mcp_message]).to eq([true, "nothing saved, since no setting changed"])
     end
   end
 
@@ -600,37 +581,37 @@ RSpec.describe "MCP social tools", type: :request do
     before { webmention_mutations.trust(ada, approve_pending: false) }
 
     it "lists each author with the URL marked untrusted" do
-      call_tool("list_trusted_authors")
+      mcp_call("list_trusted_authors")
 
-      expect(content.fetch("trusted_authors").first.fetch("author_url")).to eq({ "untrusted" => true, "text" => ada })
+      expect(mcp_content.fetch("trusted_authors").first.fetch("author_url")).to eq(marked(ada))
     end
 
     it "lists the newest author first" do
       Social::Slice["relations.trusted_authors"].by_pk(ada).update(created_at: Time.now - 60)
       webmention_mutations.trust("https://grace.example/", approve_pending: false)
-      call_tool("list_trusted_authors")
+      mcp_call("list_trusted_authors")
 
-      expect(content.fetch("trusted_authors").map { it.dig("author_url", "text") })
+      expect(mcp_content.fetch("trusted_authors").map { it.dig("author_url", "text") })
         .to eq(["https://grace.example/", ada])
     end
 
     it "removes an author" do
-      call_tool("remove_trusted_author", author_url: ada)
+      mcp_call("remove_trusted_author", author_url: ada)
 
       expect(webmention_queries.trusted_author?(ada)).to be(false)
     end
 
     it "keeps the author's approved webmentions approved" do
       mention = create(:webmention, :approved, author_url: ada)
-      call_tool("remove_trusted_author", author_url: ada)
+      mcp_call("remove_trusted_author", author_url: ada)
 
       expect(filed("approved", :id)).to eq([mention.id])
     end
 
     it "refuses an author not on the list" do
-      call_tool("remove_trusted_author", author_url: "https://grace.example/")
+      mcp_call("remove_trusted_author", author_url: "https://grace.example/")
 
-      expect(message).to eq("no trusted author has the URL https://grace.example/")
+      expect(mcp_message).to eq("no trusted author has the URL https://grace.example/")
     end
   end
 end

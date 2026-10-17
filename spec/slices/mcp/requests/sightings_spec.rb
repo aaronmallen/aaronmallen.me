@@ -16,10 +16,8 @@ RSpec.describe "MCP client sightings", type: :request do
   end
 
   def call_mcp(address: "81.2.69.160", user_agent: agent, token: value)
-    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), {
-      "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}",
-      "HTTP_CF_CONNECTING_IP" => address, "HTTP_USER_AGENT" => user_agent,
-    }
+    mcp_rpc("tools/list", authorization: "Bearer #{token}",
+                          headers: { "HTTP_CF_CONNECTING_IP" => address, "HTTP_USER_AGENT" => user_agent })
   end
 
   def recorded

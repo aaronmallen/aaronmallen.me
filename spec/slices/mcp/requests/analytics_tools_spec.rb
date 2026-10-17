@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
-  def marked(text) = { "untrusted" => true, "text" => text }
-
   def roll_up(day, views:, visitors:)
     create(:analytics_rollup, day:, views:, visitors:, read_seconds: views * 10)
   end
@@ -241,9 +239,8 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
 
   describe "read_analytics read-throughs" do
     def described
-      headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-      post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
-      tools = JSON.parse(last_response.body).dig("result", "tools")
+      mcp_rpc("tools/list")
+      tools = mcp_result.fetch("tools")
       tools.find { it.fetch("name") == "read_analytics" }.fetch("description")
     end
 

@@ -3,29 +3,7 @@
 RSpec.describe "MCP tag tools", type: :request do
   let(:tag_queries) { Tags::Slice["repos.tag_queries"] }
 
-  def access_token
-    @access_token ||= mcp_connect(
-      create(:oauth_client),
-      verifier: Blog::Types::NewSecret[],
-      scope: "read write publish delete",
-    ).fetch("access_token")
-  end
-
-  def call_tool(name, **arguments) = rpc("tools/call", name:, arguments:)
-
-  def content = JSON.parse(message)
-
-  def error? = result.fetch("isError", false)
-
-  def message = result.fetch("content").first.fetch("text")
-
-  def result = JSON.parse(last_response.body).fetch("result")
-
-  def rpc(method, **params)
-    body = JSON.generate({ jsonrpc: "2.0", id: 1, method:, params: })
-
-    post "/mcp", body, { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
-  end
+  def mcp_scopes = %w[read write publish delete]
 
   {
     "list_tags" => {},
@@ -33,16 +11,16 @@ RSpec.describe "MCP tag tools", type: :request do
     "remove_tag" => { id: 1 },
   }.each do |name, arguments|
     it "refuses #{name} without a scope, naming the field", :aggregate_failures do
-      call_tool(name, **arguments)
+      mcp_call(name, **arguments)
 
-      expect(error?).to be(true)
-      expect(message).to include("scope")
+      expect(mcp_refused?).to be(true)
+      expect(mcp_message).to include("scope")
     end
   end
 
   def scoped_tag_tools
-    rpc("tools/list")
-    tools = JSON.parse(last_response.body).dig("result", "tools")
+    mcp_rpc("tools/list")
+    tools = mcp_result.fetch("tools")
 
     tools.select do |tool|
       tool.fetch("name").end_with?("_tag", "_tags") && tool.dig("inputSchema", "properties", "scope")
@@ -64,17 +42,17 @@ RSpec.describe "MCP tag tools", type: :request do
       create(:project, tags: %w[ruby cli])
       create(:tag, name: "unused", description: "kept for *later*")
       create(:task, tags: %w[chores ruby])
-      call_tool("list_tags", scope: "public")
+      mcp_call("list_tags", scope: "public")
     end
 
-    def named(name) = content.fetch("tags").find { it.fetch("name") == name }
+    def named(name) = mcp_content.fetch("tags").find { it.fetch("name") == name }
 
     it "lists the public tags by name" do
-      expect(content.fetch("tags").map { it.fetch("name") }).to eq(%w[cli ruby unused])
+      expect(mcp_content.fetch("tags").map { it.fetch("name") }).to eq(%w[cli ruby unused])
     end
 
     it "gives each tag its scope" do
-      expect(content.fetch("tags").map { it.fetch("scope") }.uniq).to eq(%w[public])
+      expect(mcp_content.fetch("tags").map { it.fetch("scope") }.uniq).to eq(%w[public])
     end
 
     it "counts the records that carry each tag, by kind" do
@@ -90,18 +68,18 @@ RSpec.describe "MCP tag tools", type: :request do
     end
 
     it "counts every tag in the scope" do
-      expect(content.fetch("count")).to eq(3)
+      expect(mcp_content.fetch("count")).to eq(3)
     end
 
     describe "with a query" do
-      before { call_tool("list_tags", scope: "public", query: " RU ") }
+      before { mcp_call("list_tags", scope: "public", query: " RU ") }
 
       it "lists only the tags whose name holds it" do
-        expect(content.fetch("tags").map { it.fetch("name") }).to eq(%w[ruby])
+        expect(mcp_content.fetch("tags").map { it.fetch("name") }).to eq(%w[ruby])
       end
 
       it "counts the tags that match" do
-        expect(content.fetch("count")).to eq(1)
+        expect(mcp_content.fetch("count")).to eq(1)
       end
 
       it "keeps each match's record count" do
@@ -110,21 +88,21 @@ RSpec.describe "MCP tag tools", type: :request do
     end
 
     it "lists nothing for a query no tag name holds", :aggregate_failures do
-      call_tool("list_tags", scope: "public", query: "go")
+      mcp_call("list_tags", scope: "public", query: "go")
 
-      expect(content.fetch("tags")).to be_empty
-      expect(content.fetch("count")).to eq(0)
+      expect(mcp_content.fetch("tags")).to be_empty
+      expect(mcp_content.fetch("count")).to eq(0)
     end
 
     describe "in the private scope" do
-      before { call_tool("list_tags", scope: "private") }
+      before { mcp_call("list_tags", scope: "private") }
 
       it "lists the private tags by name" do
-        expect(content.fetch("tags").map { it.fetch("name") }).to eq(%w[chores ruby])
+        expect(mcp_content.fetch("tags").map { it.fetch("name") }).to eq(%w[chores ruby])
       end
 
       it "gives each tag its scope" do
-        expect(content.fetch("tags").map { it.fetch("scope") }.uniq).to eq(%w[private])
+        expect(mcp_content.fetch("tags").map { it.fetch("scope") }.uniq).to eq(%w[private])
       end
 
       it "counts a private tag by its private kinds" do
@@ -135,69 +113,69 @@ RSpec.describe "MCP tag tools", type: :request do
 
   describe "save_tag" do
     it "adds a public tag", :aggregate_failures do
-      call_tool("save_tag", scope: "public", name: "Elixir", color: "mk-blue")
+      mcp_call("save_tag", scope: "public", name: "Elixir", color: "mk-blue")
 
-      expect(content).to include("name" => "elixir", "color" => "mk-blue")
+      expect(mcp_content).to include("name" => "elixir", "color" => "mk-blue")
       expect(tag_queries.all_in("public").map(&:name)).to eq(%w[elixir])
     end
 
     it "adds a private tag" do
-      call_tool("save_tag", scope: "private", name: "chores")
+      mcp_call("save_tag", scope: "private", name: "chores")
 
       expect(tag_queries.all_in("private").map(&:name)).to eq(%w[chores])
     end
 
     it "takes a name the other scope holds" do
       create(:tag, name: "ruby")
-      call_tool("save_tag", scope: "private", name: "ruby")
+      mcp_call("save_tag", scope: "private", name: "ruby")
 
       expect(tag_queries.all_in("private").map(&:name)).to eq(%w[ruby])
     end
 
     it "recolours a tag and keeps its name" do
       tag = create(:tag, name: "ruby", color: "mk-pink")
-      call_tool("save_tag", scope: "public", id: tag.id, color: "mk-green")
+      mcp_call("save_tag", scope: "public", id: tag.id, color: "mk-green")
 
       expect(tag_queries.find_in("public", tag.id)).to have_attributes(name: "ruby", color: "mk-green")
     end
 
     it "renames a tag and keeps its colour" do
       tag = create(:tag, name: "ruby", color: "mk-pink")
-      call_tool("save_tag", scope: "public", id: tag.id, name: "crystal")
+      mcp_call("save_tag", scope: "public", id: tag.id, name: "crystal")
 
       expect(tag_queries.find_in("public", tag.id)).to have_attributes(name: "crystal", color: "mk-pink")
     end
 
     it "adds a tag with a description and returns it" do
-      call_tool("save_tag", scope: "public", name: "ruby", description: "  all about *ruby*  ")
+      mcp_call("save_tag", scope: "public", name: "ruby", description: "  all about *ruby*  ")
 
-      expect(content.fetch("description")).to eq("all about *ruby*")
+      expect(mcp_content.fetch("description")).to eq("all about *ruby*")
     end
 
     it "describes a tag and returns the description", :aggregate_failures do
       tag = create(:tag, name: "ruby")
-      call_tool("save_tag", scope: "public", id: tag.id, description: "all about ruby")
+      mcp_call("save_tag", scope: "public", id: tag.id, description: "all about ruby")
 
-      expect(content).to include("name" => "ruby", "description" => "all about ruby")
+      expect(mcp_content).to include("name" => "ruby", "description" => "all about ruby")
       expect(tag_queries.find_in("public", tag.id).description).to eq("all about ruby")
     end
 
     it "keeps the description when a change leaves it out" do
       tag = create(:tag, name: "ruby", description: "all about ruby")
-      call_tool("save_tag", scope: "public", id: tag.id, name: "crystal", color: "mk-green")
+      mcp_call("save_tag", scope: "public", id: tag.id, name: "crystal", color: "mk-green")
 
       expect(tag_queries.find_in("public", tag.id).description).to eq("all about ruby")
     end
 
     it "clears the description when given an empty one" do
       tag = create(:tag, name: "ruby", description: "all about ruby")
-      call_tool("save_tag", scope: "public", id: tag.id, description: "")
+      mcp_call("save_tag", scope: "public", id: tag.id, description: "")
 
       expect(tag_queries.find_in("public", tag.id).description).to be_nil
     end
 
     it "says in its description that it sets a description" do
-      rpc("tools/list")
+      mcp_rpc("tools/list")
       tool = JSON.parse(last_response.body).dig("result", "tools").find { it.fetch("name") == "save_tag" }
 
       expect(tool.fetch("description")).to include("describe", "description is markdown")
@@ -205,7 +183,7 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "recolours a private tag" do
       tag = create(:tag, :private, name: "chores", color: "mk-pink")
-      call_tool("save_tag", scope: "private", id: tag.id, color: "mk-green")
+      mcp_call("save_tag", scope: "private", id: tag.id, color: "mk-green")
 
       expect(tag_queries.find_in("private", tag.id)).to have_attributes(name: "chores", color: "mk-green")
     end
@@ -213,86 +191,86 @@ RSpec.describe "MCP tag tools", type: :request do
     it "loads only the tag it changes" do
       tag = create(:tag, name: "ruby")
       create(:tag, name: "elixir")
-      reads = counting { call_tool("save_tag", scope: "public", id: tag.id, color: "mk-green") }.grep(/FROM "tags"/)
+      reads = counting { mcp_call("save_tag", scope: "public", id: tag.id, color: "mk-green") }.grep(/FROM "tags"/)
 
       expect(reads).to have_at_least(1).item.and all(include(%("tags"."id" = #{tag.id})))
     end
 
     it "refuses a tag from the other scope as not found", :aggregate_failures do
       tag = create(:tag, :private, name: "chores", color: "mk-pink")
-      call_tool("save_tag", scope: "public", id: tag.id, name: "errands")
+      mcp_call("save_tag", scope: "public", id: tag.id, name: "errands")
 
-      expect(message).to eq("no tag has the ID #{tag.id}")
+      expect(mcp_message).to eq("no tag has the ID #{tag.id}")
       expect(tag_queries.find_in("private", tag.id)).to have_attributes(name: "chores")
     end
 
     it "refuses a name another tag holds, with the reason the admin gives", :aggregate_failures do
       create(:tag, name: "ruby")
-      call_tool("save_tag", scope: "public", name: "ruby")
+      mcp_call("save_tag", scope: "public", name: "ruby")
 
-      expect(error?).to be(true)
-      expect(message).to eq("name: another tag already holds that name")
+      expect(mcp_refused?).to be(true)
+      expect(mcp_message).to eq("name: another tag already holds that name")
     end
 
     it "refuses a name that is not lowercase words joined by hyphens" do
-      call_tool("save_tag", scope: "public", name: "two words")
+      mcp_call("save_tag", scope: "public", name: "two words")
 
-      expect(message).to eq("name: a tag is lowercase words joined by hyphens")
+      expect(mcp_message).to eq("name: a tag is lowercase words joined by hyphens")
     end
 
     it "refuses a name holding a control character in words" do
-      call_tool("save_tag", scope: "public", name: "ru\u0007by")
+      mcp_call("save_tag", scope: "public", name: "ru\u0007by")
 
-      expect(message).to eq("name: holds a control character")
+      expect(mcp_message).to eq("name: holds a control character")
     end
 
     it "names one rule as one" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
       id = tag_queries.all_in("private").first.id
-      call_tool("remove_tag", scope: "private", id:)
+      mcp_call("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")
+      expect(mcp_message).to eq("tag #{id} is the only tag on the task rule rails/*")
     end
 
     it "refuses an ID no tag has" do
-      call_tool("save_tag", scope: "public", id: 999_999, name: "ghost")
+      mcp_call("save_tag", scope: "public", id: 999_999, name: "ghost")
 
-      expect(message).to eq("no tag has the ID 999999")
+      expect(mcp_message).to eq("no tag has the ID 999999")
     end
 
     it "refuses a scope that is neither public nor private" do
-      call_tool("save_tag", scope: "secret", name: "ghost")
+      mcp_call("save_tag", scope: "secret", name: "ghost")
 
-      expect(error?).to be(true)
+      expect(mcp_refused?).to be(true)
     end
   end
 
   describe "remove_tag" do
     it "removes a tag nothing carries" do
       tag = create(:tag)
-      call_tool("remove_tag", scope: "public", id: tag.id)
+      mcp_call("remove_tag", scope: "public", id: tag.id)
 
       expect(tag_queries.all_in("public")).to be_empty
     end
 
     it "removes a private tag nothing carries" do
       tag = create(:tag, :private)
-      call_tool("remove_tag", scope: "private", id: tag.id)
+      mcp_call("remove_tag", scope: "private", id: tag.id)
 
       expect(tag_queries.all_in("private")).to be_empty
     end
 
     it "refuses a tag from the other scope as not found", :aggregate_failures do
       tag = create(:tag, :private)
-      call_tool("remove_tag", scope: "public", id: tag.id)
+      mcp_call("remove_tag", scope: "public", id: tag.id)
 
-      expect(message).to eq("no tag has the ID #{tag.id}")
+      expect(mcp_message).to eq("no tag has the ID #{tag.id}")
       expect(tag_queries.find_in("private", tag.id)).not_to be_nil
     end
 
     it "removes a tag records carry" do
       create(:post, tags: %w[ruby rails])
-      call_tool("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
+      mcp_call("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
 
       expect(tag_queries.all_in("public").map(&:name)).to eq(%w[rails])
     end
@@ -300,7 +278,7 @@ RSpec.describe "MCP tag tools", type: :request do
     it "takes the tag off every record that carried it", :aggregate_failures do
       post = create(:post, tags: %w[ruby rails])
       project = create(:project, tags: %w[ruby])
-      call_tool("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
+      mcp_call("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
 
       expect(Posts::Slice["repos.post_queries"].by_id(post.id).tags.map(&:name)).to eq(%w[rails])
       expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
@@ -308,7 +286,7 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "removes a private tag a task carries" do
       create(:task, tags: %w[chores])
-      call_tool("remove_tag", scope: "private", id: tag_queries.all_in("private").first.id)
+      mcp_call("remove_tag", scope: "private", id: tag_queries.all_in("private").first.id)
 
       expect(tag_queries.all_in("private")).to be_empty
     end
@@ -316,32 +294,32 @@ RSpec.describe "MCP tag tools", type: :request do
     it "refuses the only tag on a task rule, naming the rules", :aggregate_failures do
       %w[rails/* aaronmallen/*].each { Tasks::Slice["operations.save_task_rule"].call({ pattern: it, tags: "ruby" }) }
       id = tag_queries.all_in("private").first.id
-      call_tool("remove_tag", scope: "private", id:)
+      mcp_call("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task rules aaronmallen/*, rails/*")
+      expect(mcp_message).to eq("tag #{id} is the only tag on the task rules aaronmallen/*, rails/*")
       expect(tag_queries.find_in("private", id)).not_to be_nil
     end
 
     it "names one rule as one" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
       id = tag_queries.all_in("private").first.id
-      call_tool("remove_tag", scope: "private", id:)
+      mcp_call("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")
+      expect(mcp_message).to eq("tag #{id} is the only tag on the task rule rails/*")
     end
 
     it "refuses an ID no tag has" do
-      call_tool("remove_tag", scope: "public", id: 999_999)
+      mcp_call("remove_tag", scope: "public", id: 999_999)
 
-      expect(message).to eq("no tag has the ID 999999")
+      expect(mcp_message).to eq("no tag has the ID 999999")
     end
   end
 
   describe "read_tag" do
     def statuses(kind)
-      call_tool("read_tag", name: "ruby")
+      mcp_call("read_tag", name: "ruby")
 
-      content.fetch(kind).map { it.values_at(kind == "projects" ? "name" : "title", "status") }
+      mcp_content.fetch(kind).map { it.values_at(kind == "projects" ? "name" : "title", "status") }
     end
 
     it "groups everything with the name by kind, each with its status" do
@@ -357,7 +335,7 @@ RSpec.describe "MCP tag tools", type: :request do
       create(:task, :done, title: "Shipped ruby", tags: %w[ruby])
       create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
 
-      expect([statuses("tasks"), content.fetch("journal_entries").map { it.fetch("body") }])
+      expect([statuses("tasks"), mcp_content.fetch("journal_entries").map { it.fetch("body") }])
         .to eq([[["Shipped ruby", "done"]], ["Wrote some ruby"]])
     end
 
@@ -365,16 +343,16 @@ RSpec.describe "MCP tag tools", type: :request do
       create(:tag, name: "ruby", description: "the language")
       create(:tag, :private, name: "ruby")
       create(:task, title: "Bump ruby", tags: %w[ruby])
-      call_tool("read_tag", name: "ruby")
+      mcp_call("read_tag", name: "ruby")
 
-      expect(content.fetch("descriptions")).to eq("public" => "the language", "private" => nil)
+      expect(mcp_content.fetch("descriptions")).to eq("public" => "the language", "private" => nil)
     end
 
     it "refuses a name no tag holds", :aggregate_failures do
-      call_tool("read_tag", name: "nothing")
+      mcp_call("read_tag", name: "nothing")
 
-      expect(error?).to be(true)
-      expect(message).to eq("no tag has the name nothing")
+      expect(mcp_refused?).to be(true)
+      expect(mcp_message).to eq("no tag has the name nothing")
     end
   end
 end

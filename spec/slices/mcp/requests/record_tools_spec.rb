@@ -1,33 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP record tools", type: :request do
-  def access_token
-    @access_token ||= mcp_connect(
-      create(:oauth_client),
-      verifier: Blog::Types::NewSecret[],
-      scope: "read write publish delete",
-    ).fetch("access_token")
-  end
-
-  def call_tool(name, **arguments) = rpc("tools/call", { name:, arguments: })
-
-  def content = JSON.parse(message)
-
   def entries = Record::Slice["relations.journal_entries"]
 
-  def error? = document.dig("result", "isError")
-
   def journal_page
+    sign_in_to_admin
     get "/admin/journal"
     last_response.body
   end
 
-  def message = document.dig("result", "content").first.fetch("text")
-
-  def rpc(method, params = nil)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
-    post "/mcp", JSON.generate({ jsonrpc: "2.0", id: 1, method:, params: }.compact), headers
-  end
+  def mcp_scopes = %w[read write publish delete]
 
   def today = Blog::TimeZone.today
 
@@ -35,12 +17,12 @@ RSpec.describe "MCP record tools", type: :request do
     def fields_of(commit)
       {
         "id" => commit.id, "sha" => commit.sha, "repo" => "aaronmallen/blog", "branch" => "main",
-        "message" => { "untrusted" => true, "text" => "fix the feed\n\nthe body runs on" },
+        "message" => marked("fix the feed\n\nthe body runs on"),
         "date" => "2026-03-02", "time" => "14:05", "additions" => 12, "deletions" => 3,
       }
     end
 
-    def shas = content.fetch("commits").map { it.fetch("sha") }
+    def shas = mcp_content.fetch("commits").map { it.fetch("sha") }
 
     def whole_commit
       create(
@@ -52,16 +34,16 @@ RSpec.describe "MCP record tools", type: :request do
 
     it "answers each commit whole" do
       commit = whole_commit
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content.fetch("commits")).to eq([fields_of(commit)])
+      expect(mcp_content.fetch("commits")).to eq([fields_of(commit)])
     end
 
     it "keeps to the window, newest first" do
       older = create(:commit, commit_date: Date.new(2026, 3, 1))
       newer = create(:commit, commit_date: Date.new(2026, 3, 31))
       create(:commit, commit_date: Date.new(2026, 4, 1))
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31")
 
       expect(shas).to eq([newer.sha, older.sha])
     end
@@ -70,31 +52,31 @@ RSpec.describe "MCP record tools", type: :request do
       blog = create(:commit, repo: "aaronmallen/blog", commit_date: Date.new(2026, 3, 2))
       site = create(:commit, repo: "aaronmallen/site", commit_date: Date.new(2026, 3, 3))
       create(:commit, repo: "aaronmallen/other", commit_date: Date.new(2026, 3, 4))
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31", repos: ["blog", "aaronmallen/site"])
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31", repos: ["blog", "aaronmallen/site"])
 
       expect(shas).to eq([site.sha, blog.sha])
     end
 
     it "says whether it answered the whole window" do
       create(:commit, commit_date: Date.new(2026, 3, 2))
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content).to include("count" => 1, "partial" => false)
+      expect(mcp_content).to include("count" => 1, "partial" => false)
     end
 
     it "stops at the row cap and says where to go on" do
       lower_page_size(:mcp, to: 2)
       [1, 2, 2, 3].each { create(:commit, commit_date: Date.new(2026, 3, it)) }
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
+      expect(mcp_content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
     end
 
     it "names the MCP page size in each day-paged tool's description" do
       lower_page_size(:mcp, to: 7)
-      rpc("tools/list")
+      mcp_rpc("tools/list")
       paged = %w[list_commits list_journal_entries list_pull_requests read_activity]
-      described = document.dig("result", "tools").select { paged.include?(it.fetch("name")) }
+      described = mcp_reply.dig("result", "tools").select { paged.include?(it.fetch("name")) }
 
       expect(described.map { it.fetch("description") }).to all(include("One answer carries about 7 rows"))
     end
@@ -102,21 +84,21 @@ RSpec.describe "MCP record tools", type: :request do
     it "rounds a full window out to the end of its last day" do
       lower_page_size(:mcp, to: 2)
       3.times { create(:commit, commit_date: Date.new(2026, 3, 2)) }
-      call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_commits", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content).to include("count" => 3, "partial" => false)
+      expect(mcp_content).to include("count" => 3, "partial" => false)
     end
 
     it "refuses a day it cannot read" do
-      call_tool("list_commits", from: "March", to: "2026-03-31")
+      mcp_call("list_commits", from: "March", to: "2026-03-31")
 
-      expect(message).to eq("give from and to as days, such as 2026-01-01")
+      expect(mcp_message).to eq("give from and to as days, such as 2026-01-01")
     end
 
     it "refuses a window that runs backwards" do
-      call_tool("list_commits", from: "2026-03-31", to: "2026-03-01")
+      mcp_call("list_commits", from: "2026-03-31", to: "2026-03-01")
 
-      expect(message).to eq("from comes after to")
+      expect(mcp_message).to eq("from comes after to")
     end
   end
 
@@ -129,7 +111,7 @@ RSpec.describe "MCP record tools", type: :request do
       }
     end
 
-    def numbers = content.fetch("pull_requests").map { it.fetch("number") }
+    def numbers = mcp_content.fetch("pull_requests").map { it.fetch("number") }
 
     def on(day) = Blog::TimeZone.local_time(2026, 3, day, 12)
 
@@ -142,16 +124,16 @@ RSpec.describe "MCP record tools", type: :request do
 
     it "answers each pull request whole" do
       merged = whole_pull_request
-      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 
-      expect(trusted(content.fetch("pull_requests"))).to eq([fields_of(merged)])
+      expect(trusted(mcp_content.fetch("pull_requests"))).to eq([fields_of(merged)])
     end
 
     it "keeps to the window, newest first, by the day each one last moved" do
       create(:pull_request, number: 1, ready_at: on(1))
       create(:pull_request, number: 2, ready_at: Blog::TimeZone.local_time(2026, 2, 20), closed_at: on(31))
       create(:pull_request, number: 3, ready_at: on(5), merged_at: Blog::TimeZone.local_time(2026, 4, 1))
-      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 
       expect(numbers).to eq([2, 1])
     end
@@ -160,30 +142,30 @@ RSpec.describe "MCP record tools", type: :request do
       create(:pull_request, number: 1, ready_at: nil, opened_at: on(2))
       create(:pull_request, number: 2, ready_at: on(1))
       create(:pull_request, number: 3, ready_at: nil, opened_at: Blog::TimeZone.local_time(2026, 2, 20))
-      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 
       expect(numbers).to eq([1, 2])
     end
 
     it "answers a draft as a draft" do
       create(:pull_request, ready_at: nil)
-      call_tool("list_pull_requests", from: today.iso8601, to: today.iso8601)
+      mcp_call("list_pull_requests", from: today.iso8601, to: today.iso8601)
 
-      expect(content.fetch("pull_requests").map { it.fetch("state") }).to eq(%w[draft])
+      expect(mcp_content.fetch("pull_requests").map { it.fetch("state") }).to eq(%w[draft])
     end
 
     it "stops at the row cap and says where to go on" do
       lower_page_size(:mcp, to: 2)
       [1, 2, 2, 3].each { create(:pull_request, ready_at: on(it)) }
-      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+      mcp_call("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
+      expect(mcp_content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
     end
 
     it "refuses a window that runs backwards" do
-      call_tool("list_pull_requests", from: "2026-03-31", to: "2026-03-01")
+      mcp_call("list_pull_requests", from: "2026-03-31", to: "2026-03-01")
 
-      expect(message).to eq("from comes after to")
+      expect(mcp_message).to eq("from comes after to")
     end
   end
 
@@ -197,36 +179,36 @@ RSpec.describe "MCP record tools", type: :request do
 
     it "answers an open pull request with its times" do
       opened = create(:pull_request, repo: "aaronmallen/blog", number: 12, ready_at: Time.utc(2026, 3, 2, 14, 5))
-      call_tool("read_pull_request", id: opened.id)
+      mcp_call("read_pull_request", id: opened.id)
 
-      expect(content).to include(opened_fields)
+      expect(mcp_content).to include(opened_fields)
     end
 
     it "answers a pull request closed unmerged as closed" do
       closed = create(:pull_request, closed_at: Time.now)
-      call_tool("read_pull_request", id: closed.id)
+      mcp_call("read_pull_request", id: closed.id)
 
-      expect(content.fetch("state")).to eq("closed")
+      expect(mcp_content.fetch("state")).to eq("closed")
     end
 
     it "refuses an unknown ID" do
-      call_tool("read_pull_request", id: 999_999)
+      mcp_call("read_pull_request", id: 999_999)
 
-      expect([error?, message]).to eq([true, "no pull request has the ID 999999"])
+      expect([mcp_refused?, mcp_message]).to eq([true, "no pull request has the ID 999999"])
     end
   end
 
   describe "create_journal_entry" do
     it "shows the entry in the admin" do
-      call_tool("create_journal_entry", body: "Wrote about abc")
+      mcp_call("create_journal_entry", body: "Wrote about abc")
 
       expect(journal_page).to include("Wrote about abc")
     end
 
     it "refuses a day after today as an error and saves nothing", :aggregate_failures do
-      call_tool("create_journal_entry", body: "Not yet", entry_date: (today + 1).iso8601)
+      mcp_call("create_journal_entry", body: "Not yet", entry_date: (today + 1).iso8601)
 
-      expect([error?, message, entries.count])
+      expect([mcp_refused?, mcp_message, entries.count])
         .to eq([true, "entry_date falls after today; pick today or an earlier day", 0])
     end
   end
@@ -234,7 +216,7 @@ RSpec.describe "MCP record tools", type: :request do
   describe "update_journal_entry" do
     it "shows the change in the admin" do
       entry = create(:journal_entry, body: "before")
-      call_tool("update_journal_entry", id: entry.id, body: "after the edit")
+      mcp_call("update_journal_entry", id: entry.id, body: "after the edit")
 
       expect(journal_page).to include("after the edit")
     end
@@ -243,7 +225,7 @@ RSpec.describe "MCP record tools", type: :request do
   describe "delete_journal_entry" do
     it "drops the entry from the admin" do
       entry = create(:journal_entry, body: "gone soon")
-      call_tool("delete_journal_entry", id: entry.id)
+      mcp_call("delete_journal_entry", id: entry.id)
 
       expect(journal_page).not_to include("gone soon")
     end
@@ -259,22 +241,22 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "answers nothing synced and nothing failing on a fresh site" do
-      call_tool("read_sync_state")
+      mcp_call("read_sync_state")
 
-      expect(content).to eq("commits_last_synced_at" => nil, "failures" => [])
+      expect(mcp_content).to eq("commits_last_synced_at" => nil, "failures" => [])
     end
 
     it "answers when commits last synced" do
       commit_mutations.record_synced_through("aaronmallen/blog", at: Time.utc(2026, 3, 2, 9))
-      call_tool("read_sync_state")
+      mcp_call("read_sync_state")
 
-      expect(Time.iso8601(content.fetch("commits_last_synced_at"))).to be_within(60).of(Time.now)
+      expect(Time.iso8601(mcp_content.fetch("commits_last_synced_at"))).to be_within(60).of(Time.now)
     end
 
     def failing_twice
       {
         "sync" => "commits", "repo" => nil, "reason" => "github_failed", "count" => 2,
-        "message" => { "untrusted" => true, "text" => "503" },
+        "message" => marked("503"),
         "failing_since" => "2026-03-01T08:00:00Z", "last_failed_at" => "2026-03-02T08:00:00Z",
       }
     end
@@ -284,9 +266,9 @@ RSpec.describe "MCP record tools", type: :request do
     it "answers each failing sync with when it began failing" do
       fail_commits(1, "502")
       fail_commits(2, "503")
-      call_tool("read_sync_state")
+      mcp_call("read_sync_state")
 
-      expect(content.fetch("failures")).to eq([failing_twice])
+      expect(mcp_content.fetch("failures")).to eq([failing_twice])
     end
   end
 
@@ -295,16 +277,16 @@ RSpec.describe "MCP record tools", type: :request do
 
     it "queues the import the admin queues", :aggregate_failures do
       connect_github_token
-      call_tool("import_commits")
+      mcp_call("import_commits")
 
-      expect([content, enqueued.size]).to eq([{ "status" => "queued" }, 1])
+      expect([mcp_content, enqueued.size]).to eq([{ "status" => "queued" }, 1])
     end
 
     it "refuses when GitHub isn't connected", :aggregate_failures do
       disconnect_github
-      call_tool("import_commits")
+      mcp_call("import_commits")
 
-      expect([message, enqueued]).to eq(["GitHub isn't connected, so no import can run", []])
+      expect([mcp_message, enqueued]).to eq(["GitHub isn't connected, so no import can run", []])
     end
   end
 end

@@ -7,8 +7,6 @@ RSpec.describe "MCP mail tools", type: :request do
 
   def today = Blog::TimeZone.today
 
-  def untrusted(text) = { "untrusted" => true, "text" => text }
-
   def week = { from: (today - 6).iso8601, to: today.iso8601 }
 
   describe "list_mail_threads" do
@@ -35,7 +33,7 @@ RSpec.describe "MCP mail tools", type: :request do
 
     it "says what the admin list shows" do
       message = create(:message, :read, subject: "Hello", reply_to: "someone@example.com", received_at: at(today, 0, 5))
-      shown = { "subject" => untrusted("Hello"), "reply_to" => untrusted("someone@example.com"), "status" => "read" }
+      shown = { "subject" => marked("Hello"), "reply_to" => marked("someone@example.com"), "status" => "read" }
       stamps = { "received_at" => at(today, 0, 5).utc.iso8601, "snoozed_until" => nil }
 
       expect(listed.first).to eq("id" => message.id, "account" => "Contact form", **shown, "tags" => [], **stamps)
@@ -119,8 +117,8 @@ RSpec.describe "MCP mail tools", type: :request do
       thread = create(:message, subject: "Hi", body: "I liked the post", reply_to: "a@example.com")
 
       expect(mcp_answer("read_mail_thread", id: thread.id)).to include(
-        "id" => thread.id, "account" => "Contact form", "subject" => untrusted("Hi"), "status" => "unread",
-        "messages" => [include("body" => untrusted("I liked the post"), "reply_to" => untrusted("a@example.com"))],
+        "id" => thread.id, "account" => "Contact form", "subject" => marked("Hi"), "status" => "unread",
+        "messages" => [include("body" => marked("I liked the post"), "reply_to" => marked("a@example.com"))],
       )
     end
 
