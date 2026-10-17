@@ -10,9 +10,18 @@ module Blog
       LINKABLE_ORDER = [Sequel.desc(:day), Sequel.desc(:id)].freeze
       LOCK_BUSY = Dry::Monads::Failure(:lock_busy)
       NUL = "\0"
+      ONE_DAY = Sequel.cast("1 day", :interval)
       STAMPS = { create: %i[created_at updated_at], update: %i[updated_at] }.freeze
 
       schema_inferrer SchemaInferrer.new.freeze
+
+      def self.day_end(day) = Sequel.function(:timezone, TimeZone::NAME, day + ONE_DAY)
+
+      def self.day_series(first, last)
+        Sequel.function(:generate_series, Sequel.cast(first, :timestamp), Sequel.cast(last, :timestamp), ONE_DAY)
+      end
+
+      def self.day_start(day) = Sequel.function(:timezone, TimeZone::NAME, Sequel.cast(day, :timestamp))
 
       def self.lock_key(name) = Sequel.function(:hashtext, name)
 

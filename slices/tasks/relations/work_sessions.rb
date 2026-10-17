@@ -6,7 +6,6 @@ module Tasks
       CLOSED_TASK = { Sequel[:tasks][:id] => Sequel[:closed][:task_id] }.freeze
       DAY = Sequel[:days][:day]
       ENDED = Sequel.function(:coalesce, :ended_at, Sequel::CURRENT_TIMESTAMP)
-      ONE_DAY = Sequel.cast("1 day", :interval)
       SPAN_ORDER = { partition: :key, order: %i[started_at ended_at] }.freeze
       ROWS_BEFORE = { type: :rows, start: :preceding, end: [1, :preceding] }.freeze
       LATEST = Sequel.function(:max, :ended_at).over(**SPAN_ORDER, frame: ROWS_BEFORE)
@@ -16,7 +15,6 @@ module Tasks
         :key, Sequel.function(:min, :started_at).as(:started_at), Sequel.function(:max, :ended_at).as(:ended_at),
       ].freeze
       SESSION = Sequel.function(:floor, Sequel.extract(:epoch, Sequel[:ended_at] - Sequel[:started_at]))
-      ZONE = Blog::TimeZone::NAME
       WORKED = Sequel[:tasks][:worked_seconds] + Sequel[:closed][:seconds]
 
       schema :work_sessions, infer: true do
@@ -77,18 +75,18 @@ module Tasks
       end
 
       def day_columns
-        ends = Sequel.function(:least, ENDED, local(DAY + ONE_DAY))
-        span = ends - Sequel.function(:greatest, :started_at, local(DAY))
+        ends = Sequel.function(:least, ENDED, self.class.day_end(DAY))
+        span = ends - Sequel.function(:greatest, :started_at, self.class.day_start(DAY))
         seconds = Sequel.function(:sum, Sequel.function(:floor, Sequel.extract(:epoch, span))).cast(Integer)
 
         [DAY.cast(Date).as(:worked_on), seconds.as(:seconds)]
       end
 
       def days(first, last)
-        from = Sequel.function(:greatest, self.class.site_day(:started_at), first).cast(:timestamp)
-        to = Sequel.function(:least, self.class.site_day(ENDED), last).cast(:timestamp)
+        from = Sequel.function(:greatest, self.class.site_day(:started_at), first)
+        to = Sequel.function(:least, self.class.site_day(ENDED), last)
 
-        Sequel.function(:generate_series, from, to, ONE_DAY)
+        self.class.day_series(from, to)
       end
 
       def db = dataset.db
@@ -106,8 +104,6 @@ module Tasks
 
         db.from(marked.as(:marked)).select(:key, :started_at, :ended_at, ISLAND)
       end
-
-      def local(day) = Sequel.function(:timezone, ZONE, day)
 
       def merged_by_day(first, last, pairs)
         merged = db.from(islands(spans(first, last, pairs)).as(:islands)).group(:key, :island).select(*MERGED)

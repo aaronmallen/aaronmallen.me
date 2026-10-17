@@ -7,14 +7,13 @@ module Health
       COUNT = Sequel.function(:count).*
       DAY = Sequel[:days][:day]
       ENDED = Sequel.function(:coalesce, :ended_at, Sequel::CURRENT_TIMESTAMP)
-      ONE_DAY = Sequel.cast("1 day", :interval)
       ZONE = Blog::TimeZone::NAME
       ACTIVE = %i[first_active_at last_active_at].map { Sequel[:active][it] }.freeze
       LATE = COUNT.filter(Sequel[:commit_time] >= Sequel.cast("22:00", :time)).as(:late_commits)
       COMMITS = [Sequel[:commit_date].as(:day), COUNT.as(:commits), LATE].freeze
       COMMIT_AT = Sequel.function(:timezone, ZONE, Sequel[:commit_date] + Sequel[:commit_time])
-      DAY_END = Sequel.function(:timezone, ZONE, DAY + ONE_DAY)
-      DAY_START = Sequel.function(:timezone, ZONE, DAY.cast(:timestamp))
+      DAY_END = day_end(DAY)
+      DAY_START = day_start(DAY)
       DONE = { status: Blog::Types::TaskStatus["done"] }.freeze
       FIGURES = {
         worked: %i[focus_minutes], commits: %i[commits late_commits], done: %i[tasks_done],
@@ -70,7 +69,7 @@ module Health
       def dated(table, column, range) = db[table].where(column => range).group(column)
 
       def days(range)
-        series = Sequel.function(:generate_series, *range.minmax.map { Sequel.cast(it, :timestamp) }, ONE_DAY)
+        series = self.class.day_series(*range.minmax)
 
         db.from(series.as(:series, [:at])).select(Sequel[:at].cast(Date).as(:day)).from_self(alias: :days)
       end
