@@ -11,11 +11,9 @@ module Admin
           prop :today, Blog::Types::Date
           prop :origin, Blog::Types::TaskOrigin.optional, default: nil
 
-          include Deps[project_queries: "projects.repos.project_queries"]
-
           def view_template
             Dialog(id: ID, title: t(".title"), class: "modal", static: true) do
-              TaskForm(scope: SCOPE, today: @today, returns:, projects: project_queries.live_by_name) { close }
+              TaskForm(scope: SCOPE, today: @today, returns:) { close }
             end
           end
 

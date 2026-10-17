@@ -26,6 +26,7 @@ import { setupPersonForms } from "./person_form.js";
 import { setupPools } from "./pools.js";
 import { setupPostEditors } from "./post_editor.js";
 import { setupPostSyndication } from "./post_syndication.js";
+import { setupProjectChoices } from "./project_choices.js";
 import { setupProjectEditors } from "./project_editor.js";
 import { setupProjectPicks } from "./project_pick.js";
 import { setupRecordKeys } from "./record_key.js";
@@ -65,6 +66,7 @@ const STEPS = [
   setupPools,
   setupPostEditors,
   setupPostSyndication,
+  setupProjectChoices,
   setupProjectEditors,
   setupProjectPicks,
   setupRecordKeys,

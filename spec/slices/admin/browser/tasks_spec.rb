@@ -151,6 +151,32 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "a project in the dialog" do
+    before do
+      create(:project, name: "Podcast", key: "POD")
+      visit "/admin/tasks?filter=next"
+      click_link("Create Task")
+    end
+
+    it "offers the live projects once the dialog opens" do
+      expect(modal).to have_select("task[project]", options: ["No project", "Podcast"])
+    end
+
+    describe "picking one" do
+      before do
+        within(modal) do
+          fill_in("task[title]", with: "Book a guest")
+          select("Podcast", from: "task[project]")
+          click_button("Create task")
+        end
+      end
+
+      it "files the task under it" do
+        expect(find(".task", text: "Book a guest")).to have_css(".record-key", text: /\APOD-/)
+      end
+    end
+  end
+
   describe "the key" do
     let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { task.label }

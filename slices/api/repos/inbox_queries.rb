@@ -3,6 +3,7 @@
 module API
   module Repos
     class InboxQueries < Blog::DB::Repo
+      COUNT = Sequel.function(:count).*
       LIMIT = 100
 
       include Deps[
@@ -16,11 +17,13 @@ module API
       def unseen(mail: true) = unseen_rows(mail).sort_by { [it.at, it.kind, it.record.id] }.last(LIMIT).reverse
 
       def unseen_counts
-        {
-          messages: message_queries.unread_count,
-          webmentions: webmention_queries.unseen_count,
-          tasks: task_source_queries.unseen_task_count,
+        unseen = {
+          messages: message_queries.unread_threads,
+          webmentions: webmention_queries.unseen_pending,
+          tasks: task_source_queries.unseen,
         }
+
+        connection.select(*unseen.map { |kind, found| found.dataset.unordered.select(COUNT).as(kind) }).first
       end
 
       private

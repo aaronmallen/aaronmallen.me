@@ -124,7 +124,7 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
       create(:message)
       statements = counting { get "/admin" }
 
-      expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+      expect(statements.grep(/\ASELECT \(SELECT count\(\*\) FROM "mail_threads"/)).to have(1).item
     end
 
     it "leaves the row out with nothing waiting" do

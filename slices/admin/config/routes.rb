@@ -193,6 +193,7 @@ module Admin
     post "/posts/:id/suggestions/reject", to: "posts.reject_suggestions", as: :reject_post_suggestions, id: ID
     get "/projects", to: "projects.index", as: :projects
     post "/projects", to: "projects.create", as: :create_project
+    get "/projects/choices", to: "projects.choices", as: :project_choices
     get "/projects/new", to: "projects.new", as: :new_project
     get "/projects/:id", to: "projects.show", as: :project, id: ID
     get "/projects/:id/edit", to: "projects.edit", as: :edit_project, id: ID

@@ -21,7 +21,7 @@ module Tasks
         task_sources.where(provider:).where(Sequel.function(:lower, :url) => urls.map(&:downcase)).pluck(:task_id)
       end
 
-      def unseen_task_count = unseen.count
+      def unseen = tasks.open.where(id: task_sources.unseen.awake.task_ids)
 
       def unseen_tasks(limit)
         unseen.latest_first(:created_at, snoozed_until).limit(limit).combine(:source, :tags).to_a
@@ -30,8 +30,6 @@ module Tasks
       private
 
       def snoozed_until = task_sources.where(task_id: tasks[:id].qualified).dataset.unordered.select(:snoozed_until)
-
-      def unseen = tasks.open.where(id: task_sources.unseen.awake.task_ids)
     end
   end
 end

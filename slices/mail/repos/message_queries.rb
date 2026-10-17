@@ -68,7 +68,9 @@ module Mail
 
       def unread(limit: nil) = waiting.awake.with_preview.with_account.latest_first(:received_at).limit(limit).to_a
 
-      def unread_count = waiting.awake.count
+      def unread_count = unread_threads.count
+
+      def unread_threads = waiting.awake
 
       private
 

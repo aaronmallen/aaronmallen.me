@@ -317,7 +317,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "counts the inbox once for the nav and the tint" do
         statements = counting { get "/admin/tasks", filter: "next" }
 
-        expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+        expect(statements.grep(/\ASELECT \(SELECT count\(\*\) FROM "mail_threads"/)).to have(1).item
       end
 
       it "leaves the external count plain once every issue is seen" do
@@ -721,11 +721,18 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_select("task[project]", selected: "Podcast")
       end
 
-      it "offers the live projects in the dialog" do
+      it "points the dialog at the live projects in place of drawing them", :aggregate_failures do
         get "/admin"
+        select = page.find("dialog#task-create select[name='task[project]']", visible: :all)
 
-        expect(page.find("dialog#task-create", visible: :all))
-          .to have_select("task[project]", options: ["No project", "Podcast"], visible: :all)
+        expect(select["data-project-choices"]).to eq("/admin/projects/choices")
+        expect(select.all("option", visible: :all).map(&:text)).to eq(["No project"])
+      end
+
+      it "keeps the new task page's projects in its markup" do
+        get "/admin/tasks/new"
+
+        expect(page.find("select[name='task[project]']")["data-project-choices"]).to be_nil
       end
     end
 

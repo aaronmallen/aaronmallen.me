@@ -105,7 +105,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "loads no task to draw a page that lists none" do
-      reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/).grep_v(/\ASELECT count\(\*\)/)
+      reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/).grep_v(/\ASELECT (\(SELECT )?count\(\*\)/)
 
       expect(reads).to be_empty
     end
@@ -168,6 +168,22 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "loads the site styles and scripts", :aggregate_failures do
       expect(page).to have_css("link[rel='stylesheet'][href*='app']", visible: :all)
       expect(page).to have_css("script[src*='app']", visible: :all)
+    end
+  end
+
+  describe "the reads behind it" do
+    def statements(pattern) = counting { get "/admin/tokens" }.grep(pattern)
+
+    before { sign_in_to_admin }
+
+    it "counts the inbox in one statement" do
+      expect(statements(/FROM "(mail_threads|webmentions|task_sources)"/)).to contain_exactly(
+        a_string_including('FROM "mail_threads"', 'FROM "webmentions"', 'FROM "task_sources"'),
+      )
+    end
+
+    it "leaves the projects to the task dialog" do
+      expect(statements(/FROM "projects"/)).to be_empty
     end
   end
 

@@ -69,7 +69,7 @@ module Social
 
       def unseen(limit) = unseen_pending.latest_first(:received_at).limit(limit).to_a
 
-      def unseen_count = unseen_pending.count
+      def unseen_pending = webmentions.with_status(PENDING).unseen.awake
 
       private
 
@@ -87,8 +87,6 @@ module Social
       end
 
       def stored_settings = webmention_settings.by_pk(SETTINGS_ID).one
-
-      def unseen_pending = webmentions.with_status(PENDING).unseen.awake
     end
   end
 end

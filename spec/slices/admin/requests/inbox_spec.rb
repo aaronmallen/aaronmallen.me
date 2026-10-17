@@ -76,7 +76,7 @@ RSpec.describe "Admin inbox", type: :request do
       create(:message)
       statements = counting { get "/admin/inbox" }
 
-      expect(statements.grep(/count\(\*\) AS "count" FROM "\w+" WHERE .*"snoozed_until" IS NULL/)).to have(3).items
+      expect(statements.grep(/\ASELECT \(SELECT count\(\*\) FROM "mail_threads"/)).to have(1).item
     end
 
     it "lists only the newest rows past its limit and still counts them all", :aggregate_failures do
