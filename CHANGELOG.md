@@ -5,6 +5,14 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.22] - 2026-10-17
+
+### Fixed
+
+- A Linear issue with more than ten sub-issues or relations synced none of its relations, so sub-issues not assigned to
+  you never came in. Its relations now load in full, up to 250 of each.
+- A live refresh that started before a Today pool switch could land after it and put the old pool back.
+
 ## [26.10.21] - 2026-10-17
 
 ### Added
@@ -1340,7 +1348,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...HEAD
+[26.10.22]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...26.10.22
 [26.10.21]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...26.10.21
 [26.10.20]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...26.10.20
 [26.10.19]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.18...26.10.19
