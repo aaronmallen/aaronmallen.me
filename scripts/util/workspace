@@ -3,18 +3,19 @@
 
 set -e
 
+if [ "$#" -gt 0 ]; then
+  case "$1" in
+  "" | *[!0-9]*)
+    echo "id must be a number" >&2
+    exit 1
+    ;;
+  esac
+fi
+
 root="${WORKTREES_DIR:-$(dirname "$(jj git root)")/.claude/worktrees}"
 
 if [ "$#" -eq 0 ]; then
   echo "$root"
-  exit
+else
+  echo "${root}/ws$1"
 fi
-
-case "$1" in
-"" | *[!0-9]*)
-  echo "id must be a number" >&2
-  exit 1
-  ;;
-esac
-
-echo "${root}/ws$1"

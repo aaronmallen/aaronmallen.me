@@ -231,6 +231,7 @@ RSpec.describe "Admin row context menu", type: :feature do
       end
 
       it "picks by keyboard alone", :aggregate_failures do
+        expect(menu).to have_css(".ctx-suggest [role=menuitem]", count: 2)
         press(:down, :down, :up, :enter)
 
         expect(page).to have_css(".toast", text: "Tagged 1 task home")

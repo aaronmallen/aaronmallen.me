@@ -2,7 +2,7 @@
 
 RSpec.describe "Maintenance mode", type: :request do
   let(:app) { Rack::Builder.parse_file(Hanami.app.root.join(".config/config.ru").to_s) }
-  let(:flag) { Hanami.app.root.join("tmp/maintenance-#{SecureRandom.hex}").to_s }
+  let(:flag) { File.join(Dir.tmpdir, "maintenance-#{SecureRandom.hex}") }
   let(:hooks) { [] }
 
   before do

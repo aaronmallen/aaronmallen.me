@@ -2,7 +2,7 @@
 
 RSpec.describe "The worker during maintenance", type: :app do
   let(:error) { RuntimeError.new("boom") }
-  let(:flag) { Hanami.app.root.join("tmp/maintenance-#{SecureRandom.hex}").to_s }
+  let(:flag) { File.join(Dir.tmpdir, "maintenance-#{SecureRandom.hex}") }
   let(:notices) { [] }
   let(:runs) { [] }
 
