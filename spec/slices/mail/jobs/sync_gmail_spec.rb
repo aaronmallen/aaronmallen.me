@@ -39,6 +39,14 @@ RSpec.describe Mail::Jobs::SyncGmail do
 
   def run_an_hour_later = hour_passes.then { run }
 
+  def stub_endless_history
+    stub_request(:get, %r{/history\?}).to_return do |request|
+      page = request.uri.query[/pageToken=(\d+)/, 1].to_i + 1
+      history = [{ id: (150 + page).to_s, messages: [{ threadId: "t1" }] }]
+      google_health_json({ history:, nextPageToken: page.to_s, historyId: "900" })
+    end
+  end
+
   def sync_message(**)
     stub_gmail(history: %w[t1], threads: { "t1" => [gmail_message("m1", **)] })
     run
@@ -349,6 +357,15 @@ RSpec.describe Mail::Jobs::SyncGmail do
       run
 
       expect(rows("mail_threads").pluck(:gmail_id)).to contain_exactly("t1", "t2")
+    end
+
+    it "follows only the history it read when the page cap cuts a catch up short" do
+      follow("150")
+      stub_gmail(threads: { "t1" => [gmail_message("m1")] })
+      stub_endless_history
+      run
+
+      expect([account.history_id, thread&.gmail_id]).to eq([(150 + Google::Paging::MAX_PAGES).to_s, "t1"])
     end
 
     it "starts over when Gmail no longer holds the history it left off at", :aggregate_failures do

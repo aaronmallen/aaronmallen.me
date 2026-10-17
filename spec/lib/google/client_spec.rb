@@ -27,6 +27,19 @@ RSpec.describe Google::Client do
     expect(pages.fetch("items").size).to eq(Google::Paging::MAX_PAGES)
   end
 
+  it "keeps the token it stopped at when the cap cuts the walk short" do
+    stub_request(:get, /\A#{url}/o).to_return { google_health_json({ items: [1], nextPageToken: "#{it.uri.query}+" }) }
+
+    expect(pages["nextPageToken"]).not_to be_nil
+  end
+
+  it "leaves no token when it read every page" do
+    stub_page(nil, [1], "two")
+    stub_page("two", [2], nil)
+
+    expect(pages).not_to have_key("nextPageToken")
+  end
+
   it "stops when Google sends the same token again" do
     stub_page(nil, [1], "loop")
     stub_page("loop", [2], "loop")

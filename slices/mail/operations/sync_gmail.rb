@@ -65,7 +65,7 @@ module Mail
 
       def changes(mailbox, start)
         found = mailbox.pages("history", rows: "history", startHistoryId: start)
-        [found.fetch("history"), found.fetch("historyId")]
+        [found["history"], found["nextPageToken"] ? found["history"].dig(-1, "id") || start : found["historyId"]]
       end
 
       def mailbox(address, client = google.loaded) = Mailbox.new(client, address)
