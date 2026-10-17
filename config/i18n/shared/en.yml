@@ -23,6 +23,8 @@ en:
       medium: "%b %-d, %Y, %H:%M"
       short: "%b %-d · %H:%M"
   ui:
+    board:
+      load_more: "Load more · %{count} left"
     components:
       main_nav:
         label: "Main"

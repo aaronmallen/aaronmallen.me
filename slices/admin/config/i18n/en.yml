@@ -3478,7 +3478,6 @@ en:
           edit: "Edit Project"
           empty: "No tasks"
           hint: "Drag a card, or use its arrows or menu, to move it. Select moves several. In progress starts the task in today's sprint; done and canceled close it."
-          load_more: "Load more · %{count} left"
           no_tagline: "No description yet."
           private: "board is private"
           published: "board published"

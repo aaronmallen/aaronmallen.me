@@ -8,8 +8,7 @@ module Public
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
-          prop :sizes, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
-          prop :step, Blog::Types::Integer
+          prop :board, Blog::Types::Instance(Blog::BoardSizes)
 
           def view_template
             back_link
@@ -78,8 +77,6 @@ module Public
             end
           end
 
-          def grown = @sizes.reject { |_, size| size == @step }
-
           def link(href, text, icon)
             a(href:, rel: "noopener") { IconLabel(icon:) { text } }
           end
@@ -103,11 +100,12 @@ module Public
           end
 
           def more(key, shown)
-            left = @counts.fetch(key) - shown
+            left = @board.left(@counts.fetch(key), shown)
             return unless left.positive?
 
-            sizes = grown.merge(key => @sizes.fetch(key) + @step).transform_keys(&:to_sym)
-            a(class: "board-more", href: path(:project, slug: @project.slug, **sizes)) { t(".load_more", count: left) }
+            a(class: "board-more", href: path(:project, slug: @project.slug, **@board.more(key))) do
+              t("ui.board.load_more", count: left)
+            end
           end
 
           def stats

@@ -18,8 +18,7 @@ module Admin
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
-          prop :sizes, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
-          prop :step, Blog::Types::Integer
+          prop :board, Blog::Types::Instance(Blog::BoardSizes)
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -87,8 +86,6 @@ module Admin
             end
           end
 
-          def grown = @sizes.reject { |_, size| size == @step }
-
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
@@ -99,19 +96,19 @@ module Admin
             end
           end
 
-          def here = path(:admin_project, id: @project.id, **grown.transform_keys(&:to_sym))
+          def here = path(:admin_project, id: @project.id, **@board.grown)
 
           def link(href, text, icon)
             a(href:, target: "_blank", rel: "noopener") { IconLabel(icon:) { text } }
           end
 
           def more(name, shown)
-            left = @counts.fetch(name) - shown
+            left = @board.left(@counts.fetch(name), shown)
             return unless left.positive?
 
             AutoForm(action: path(:admin_project, id: @project.id)) do
-              HiddenFields(values: grown.merge(name => @sizes.fetch(name) + @step))
-              Button(type: "submit", variant: :gh, small: true) { t(".load_more", count: left) }
+              HiddenFields(values: @board.more(name))
+              Button(type: "submit", variant: :gh, small: true) { t("ui.board.load_more", count: left) }
             end
           end
 
