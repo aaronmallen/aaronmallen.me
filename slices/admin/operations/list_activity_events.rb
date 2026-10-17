@@ -26,16 +26,7 @@ module Admin
         Blog::Types::SocialPostStatus["posted"] => "activity_page.statuses.posted",
       }.freeze
       WEBMENTION = Blog::Types::ActivityKind["webmention"]
-      LINE_BUILDERS = {
-        COMMIT => :commit_line,
-        DECISION => :decision_line,
-        DECISION_COMMENT => :decision_comment_line,
-        SESSION => :session_line,
-        SOCIAL => :social_line,
-        TASK => :task_line,
-        WEBMENTION => :webmention_line,
-        Blog::Types::ActivityKind["workout"] => :workout_line,
-      }.freeze
+      WORKOUT = Blog::Types::ActivityKind["workout"]
 
       include Deps[
         "i18n",
@@ -44,22 +35,14 @@ module Admin
 
       def call(from:, to:, day:, size:, **filters)
         counts = activity_queries.counts_by_day(from:, to:, **filters)
-        shown = counts.select { |date, _| date <= day }
-        boundary = boundary(shown, size)
-        rows = activity_queries.between(from: boundary || from, to: day, **filters)
+        pages = Helpers::DayPages.call(counts, day:, to:, size:)
+        rows = activity_queries.between(from: pages[:start] || from, to: day, **filters)
         views = activity_queries.views(rows)
 
-        {
-          events: rows.map { event(it, views) },
-          older: older(shown, boundary),
-          newer: newer(counts, to:, day:, size:),
-          days: counts.size,
-        }
+        { events: rows.map { event(it, views) }, older: pages[:older], newer: pages[:newer], days: counts.size }
       end
 
       private
-
-      def boundary(shown, size) = (page_ends(shown, size).first if shown.values.sum > size)
 
       def commit_line(row)
         i18n.t!(
@@ -103,34 +86,6 @@ module Admin
         targets.to_a.map { i18n.t!(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
       end
 
-      def newer(counts, to:, day:, size:)
-        return if day >= to
-
-        later = counts.select { |date, _| date >= day }
-        starts = page_starts(later, to:, day:, size:)
-        return starts.last if starts.last == to || later.keys.min <= starts.last || counts.keys.min < day
-
-        starts[-2]
-      end
-
-      def older(shown, boundary) = (boundary.prev_day if boundary && shown.keys.min < boundary)
-
-      def page_ends(counts, size)
-        seen = 0
-
-        counts.each_with_object([]) do |(date, count), ends|
-          seen += count
-          next if seen < size
-
-          ends << date
-          seen = 0
-        end
-      end
-
-      def page_starts(counts, to:, day:, size:)
-        [to, *page_ends(counts, size).map(&:prev_day)].select { it > day }
-      end
-
       def post_line(row, views)
         i18n.t!(
           "activity_page.sub_lines.post",
@@ -151,10 +106,13 @@ module Admin
       def status(value) = i18n.t!(STATUSES.fetch(value))
 
       def sub_line(row, views)
-        return post_line(row, views) if row.type == POST
-
-        builder = LINE_BUILDERS[row.type]
-        builder ? send(builder, row) : i18n.t!(LINES.fetch(row.type), task: row.excerpt, repo: row.repo)
+        case row.type
+          when POST then post_line(row, views)
+          when DECISION_COMMENT then decision_comment_line(row)
+          when SESSION then session_line(row)
+          when *LINES.keys then i18n.t!(LINES.fetch(row.type), task: row.excerpt, repo: row.repo)
+          else worded_line(row)
+        end
       end
 
       def task_line(row)
@@ -169,6 +127,17 @@ module Admin
         return i18n.t!("activity_page.sub_lines.webmention", link: row.link) unless row.excerpt
 
         i18n.t!("activity_page.sub_lines.webmention_excerpt", link: row.link, excerpt: row.excerpt)
+      end
+
+      def worded_line(row)
+        case row.type
+          when COMMIT then commit_line(row)
+          when DECISION then decision_line(row)
+          when SOCIAL then social_line(row)
+          when TASK then task_line(row)
+          when WEBMENTION then webmention_line(row)
+          when WORKOUT then workout_line(row)
+        end
       end
 
       def workout_line(row) = [hours(row.worked_seconds), row.excerpt].compact.join(DOT)
