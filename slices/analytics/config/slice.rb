@@ -6,8 +6,6 @@ module Analytics
 
     config.shared_app_component_keys += %w[http]
 
-    import keys: %w[operations.record_sync_outcome], from: :record
-
     export %w[
       operations.check_visit operations.classify_device operations.find_place operations.hash_visitor
       operations.queue_country_database operations.record_feed_fetch operations.record_visit operations.tag_ref

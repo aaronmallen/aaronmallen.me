@@ -6,17 +6,10 @@ module Health
       REREAD_DAYS = 2
       SYNC = Blog::Types::SyncName["health"]
 
-      include Deps[
-        record_sync_outcome: "record.operations.record_sync_outcome",
-        sync_health: "operations.sync_health",
-        sync_state_queries: "record.repos.sync_state_queries",
-      ]
+      include Record::SyncBookkeeping
+      include Deps["operations.sync_health", sync_state_queries: "record.repos.sync_state_queries"]
 
-      def perform
-        today = Blog::TimeZone.today
-
-        record_crash(SYNC) { record_sync_outcome.call(SYNC, sync_health.call(first_day(today), today)) }
-      end
+      def perform = record_sync(SYNC) { Blog::TimeZone.today.then { sync_health.call(first_day(it), it) } }
 
       private
 

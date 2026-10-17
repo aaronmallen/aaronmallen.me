@@ -6,8 +6,6 @@ module Tasks
 
     import keys: %w[repos.project_queries], from: :projects
 
-    import keys: %w[operations.record_sync_outcome], from: :record
-
     export %w[
       operations.act_on_tasks operations.add_repo_rule operations.add_work_session
       operations.add_task_comment operations.cancel_task operations.capture_task

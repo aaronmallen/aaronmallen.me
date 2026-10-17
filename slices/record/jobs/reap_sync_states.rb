@@ -3,10 +3,8 @@
 module Record
   module Jobs
     class ReapSyncStates < Blog::ScheduledJob
-      include Deps[
-        reap_sync_states: "operations.reap_sync_states",
-        record_sync_outcome: "operations.record_sync_outcome",
-      ]
+      include SyncBookkeeping
+      include Deps["operations.reap_sync_states"]
 
       def perform = reap_sync_states.call.tap { record(it) }
 

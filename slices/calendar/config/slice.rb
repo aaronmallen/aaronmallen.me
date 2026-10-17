@@ -8,7 +8,7 @@ module Calendar
 
     import keys: %w[repos.post_queries], from: :posts
 
-    import keys: %w[operations.record_sync_outcome repos.journal_entry_queries], from: :record
+    import keys: %w[repos.journal_entry_queries], from: :record
 
     import keys: %w[repos.social_post_queries], from: :social
 

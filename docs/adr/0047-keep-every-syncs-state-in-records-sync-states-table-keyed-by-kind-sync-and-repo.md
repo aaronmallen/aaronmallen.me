@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, analytics, db, projects, record]
 issue: AA-688
-amended: [AA-821, AA-823, "#941"]
+amended: [AA-821, AA-823, "#941", "#1565"]
 tags: [sync-states, sync, failures, today, schema, postgres, slices, exports]
 ---
 
@@ -60,8 +60,8 @@ columns and reads the sync and the repository from their own columns. #941 corre
 `CommitRepo` and `SyncStateRepo`.
 
 Another slice writes its health only through record's exports. A new sync takes an enum value, matched in
-`Blog::Types::SyncName`, an import of `record.operations.record_sync_outcome` in the slice that runs it (#941 corrected
-this from one `record_*_sync_outcome` export per sync), and, if it fails per repository, an entry in
+`Blog::Types::SyncName`, `Record::SyncBookkeeping` in the job that runs it (#1565 moved this from an import of
+`record.operations.record_sync_outcome` in each slice), and, if it fails per repository, an entry in
 `Record::Operations::ReapSyncStates::SYNCS` so the reaper drops rows for repositories that are gone.
 
 ## Alternatives

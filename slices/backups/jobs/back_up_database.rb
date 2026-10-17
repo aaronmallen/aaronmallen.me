@@ -8,10 +8,8 @@ module Backups
       NOT_CONFIGURED = "Backups are not configured, so no dump ran"
       SYNC = Blog::Types::SyncName["backups"]
 
-      include Deps[
-        back_up_database: "operations.back_up_database",
-        record_sync_outcome: "record.operations.record_sync_outcome",
-      ]
+      include Record::SyncBookkeeping
+      include Deps["operations.back_up_database"]
 
       def perform
         case back_up_database.call

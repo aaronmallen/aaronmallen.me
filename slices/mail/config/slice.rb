@@ -4,8 +4,6 @@ module Mail
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/mail"), namespace: Mail)
 
-    import keys: %w[operations.record_sync_outcome], from: :record
-
     export %w[
       operations.act_on_messages operations.change_thread operations.create_message operations.delete_message
       operations.download_attachment operations.mark_message operations.save_draft

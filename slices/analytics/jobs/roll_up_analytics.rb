@@ -5,11 +5,11 @@ module Analytics
     class RollUpAnalytics < Blog::ScheduledJob
       SYNC = Blog::Types::SyncName["analytics_rollup"]
 
+      include Record::SyncBookkeeping
       include Deps[
-        prune_analytics_events: "operations.prune_analytics_events",
-        record_sync_outcome: "record.operations.record_sync_outcome",
-        roll_up_analytics: "operations.roll_up_analytics",
-        save_reader_counts: "operations.save_reader_counts",
+        "operations.prune_analytics_events",
+        "operations.roll_up_analytics",
+        "operations.save_reader_counts",
       ]
 
       def perform

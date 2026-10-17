@@ -5,10 +5,10 @@ module Tasks
     class SyncIssues < Blog::ScheduledJob
       SYNCS = { "github" => Blog::Types::SyncName["issues"], "linear" => Blog::Types::SyncName["linear_issues"] }.freeze
 
+      include Record::SyncBookkeeping
       include Deps[
         github: "github.client",
         linear: "linear.client",
-        record_sync_outcome: "record.operations.record_sync_outcome",
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
       ]
@@ -18,11 +18,9 @@ module Tasks
         client = { "github" => github, "linear" => linear }.fetch(provider)
         return unless client.configured?
 
-        result = record_crash(SYNCS.fetch(provider)) do
+        record_sync(SYNCS.fetch(provider)) do
           task_source_mutations.with_sync_lock(provider) { sync_issues.call(provider:, client:) }
         end
-
-        record_outcome(SYNCS.fetch(provider), result)
       end
     end
   end
