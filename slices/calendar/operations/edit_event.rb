@@ -22,11 +22,20 @@ module Calendar
 
       def change(calendar, event, fields, series)
         target, date = series ? [series, shifted(calendar, event, fields)] : [event.google_id, fields[:date]]
-        span = span(event)
-
-        body = Helpers::GoogleEvent.body(fields, date:, span:)
+        body = Helpers::GoogleEvent.body(fields, date:, span: new_span(event, fields))
 
         google.patch(Helpers::GoogleEvent.url(calendar, target), body, account: calendar.account)
+      end
+
+      def clock(time) = Blog::TimeZone.local(time).strftime("%H:%M")
+
+      def crossed(starts, ends) = ends <= starts ? 1 : 0
+
+      def new_span(event, fields)
+        return span(event) if event.all_day? && fields[:all_day]
+
+        days = event.all_day? ? 0 : [span(event) - crossed(clock(event.starts_at), clock(event.ends_at)), 0].max
+        fields[:all_day] ? days : days + crossed(fields[:starts], fields[:ends])
       end
 
       def shifted(calendar, event, fields)

@@ -192,6 +192,50 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
           .to have_been_made
       end
 
+      it "ends an overnight event moved to daytime on its start day" do
+        shift = spanning("Night shift", day + 1, 22, 1, google_id: "shift")
+        send_form("/admin/calendar/events/#{shift.id}", **fields(starts: "09:00", ends: "10:00"))
+
+        expect(a_request(:patch, "#{events_url}/shift").with(body: hash_including(timed(day, 9, 10))))
+          .to have_been_made
+      end
+
+      it "keeps a multi-day event's days when its clocks stop crossing midnight" do
+        trip = spanning("Trip", day + 2, 22, 1, google_id: "trip")
+        send_form("/admin/calendar/events/#{trip.id}", **fields(starts: "09:00", ends: "10:00"))
+
+        expect(a_request(:patch, "#{events_url}/trip").with(body: hash_including(timed(day, 9, 10, last: day + 1))))
+          .to have_been_made
+      end
+
+      it "keeps a 22:00 to 00:00 event ending at midnight the next day" do
+        late = spanning("Late", day + 1, 22, 0, google_id: "late")
+        send_form("/admin/calendar/events/#{late.id}", **fields(starts: "22:00", ends: "00:00"))
+
+        expect(a_request(:patch, "#{events_url}/late").with(body: hash_including(timed(day, 22, 0, last: day + 1))))
+          .to have_been_made
+      end
+
+      describe "switching an all-day event to timed" do
+        let(:trip) do
+          create(:calendar_event, calendar_id: mine.id, google_id: "trip", starts_on: day, ends_on: day + 1)
+        end
+
+        it "ends it on its start day" do
+          send_form("/admin/calendar/events/#{trip.id}", **fields(starts: "09:00", ends: "17:00"))
+
+          expect(a_request(:patch, "#{events_url}/trip").with(body: hash_including(timed(day, 9, 17))))
+            .to have_been_made
+        end
+
+        it "ends it the next day when its clocks cross midnight" do
+          send_form("/admin/calendar/events/#{trip.id}", **fields(starts: "22:00", ends: "01:00"))
+
+          expect(a_request(:patch, "#{events_url}/trip").with(body: hash_including(timed(day, 22, 1, last: day + 1))))
+            .to have_been_made
+        end
+      end
+
       describe "refused" do
         let(:standup) { event(mine, "Standup", google_id: "abc", recurring_id: "standup") }
 
