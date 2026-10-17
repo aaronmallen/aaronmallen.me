@@ -37,7 +37,7 @@ RSpec.describe "Admin palette search", type: :request do
       end
 
       it "keeps the answer out of every cache" do
-        expect(last_response.headers["Cache-Control"]).to include("no-store")
+        expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
       end
     end
 

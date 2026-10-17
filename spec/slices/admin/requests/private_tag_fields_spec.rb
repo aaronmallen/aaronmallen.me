@@ -37,6 +37,12 @@ RSpec.describe "Admin private tag fields", type: :request do
       )
     end
 
+    it "forbids caching the tag list" do
+      choices
+
+      expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+    end
+
     it "points the task form at the private tags", :aggregate_failures do
       get "/admin/tasks/new"
       field = page.first("main input[name='task[tags]']", visible: :all)

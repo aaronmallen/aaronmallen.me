@@ -16,8 +16,6 @@ module Admin
 
         config.formats.accept :json
 
-        before :forbid_caching
-
         def handle(request, response)
           route = ROUTES.fetch(Blog::Types::TaskActParam[request.params[:act]])
 

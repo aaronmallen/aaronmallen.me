@@ -4,9 +4,7 @@ require_relative "operations"
 
 module API
   class Slice < Hanami::Slice
-    config.no_auto_register_paths += %w[helpers serializers]
-
-    config.actions.csrf_protection = false
+    config.no_auto_register_paths += %w[serializers]
 
     import keys: %w[
       operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries

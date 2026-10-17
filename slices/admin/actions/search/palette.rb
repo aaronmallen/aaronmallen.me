@@ -12,8 +12,6 @@ module Admin
 
         config.formats.accept :json
 
-        before :forbid_caching
-
         def handle(request, response)
           response.format = :json
           response.body = JSON.generate(hits: search_palette.call(request.params[:q]))

@@ -2,8 +2,6 @@
 
 module Calendar
   class Slice < Hanami::Slice
-    config.no_auto_register_paths += %w[helpers]
-
     config.shared_app_component_keys += %w[honeybadger.agent]
 
     import keys: %w[repos.post_queries], from: :posts

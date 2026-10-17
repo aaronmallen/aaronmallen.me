@@ -12,8 +12,6 @@ module Admin
 
         config.formats.accept :json
 
-        before :forbid_caching
-
         def handle(_request, response)
           response.format = :json
           response.body = JSON.generate(rows: list_palette_saved_views.call)

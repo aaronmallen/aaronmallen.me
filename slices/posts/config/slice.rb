@@ -2,8 +2,6 @@
 
 module Posts
   class Slice < Hanami::Slice
-    config.no_auto_register_paths += %w[helpers]
-
     config.shared_app_component_keys += %w[honeybadger.agent]
 
     import keys: %w[repos.analytics_rollup_queries repos.post_reader_queries], from: :analytics

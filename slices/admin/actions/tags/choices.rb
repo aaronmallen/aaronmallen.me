@@ -13,8 +13,6 @@ module Admin
 
         config.formats.accept :json
 
-        before :forbid_caching
-
         def handle(_request, response)
           response.format = :json
           response.body = JSON.generate(tags: UI::Components::TagField.choices(tag_queries.all_in(PRIVATE,

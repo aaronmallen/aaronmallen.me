@@ -10,8 +10,6 @@ module Admin
       assets github.auth google.auth honeybadger.agent linkedin.auth mastodon.auth
     ]
 
-    config.no_auto_register_paths += %w[helpers]
-
     config.actions.default_headers.merge!("Cache-Control" => "private, no-store", "X-Robots-Tag" => ROBOTS)
 
     config.actions.csrf_protection = true
