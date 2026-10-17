@@ -46,7 +46,7 @@ module Admin
           def delete_form
             DeleteForm(
               action: path(:admin_delete_journal_entry, id: @entry.id), label: t(".delete"), icon_only: true,
-              confirm: t(".confirm_delete"),
+              confirm: t(".confirm_delete"), hidden: @place,
             )
           end
 

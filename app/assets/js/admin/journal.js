@@ -68,6 +68,7 @@ function setupEditForm(entry, form) {
 
   form.querySelector("[data-journal-cancel]").addEventListener("click", () => {
     body.value = form.dataset.journalSource;
+    resetTags(form, entry.dataset.journalTags);
     body.removeAttribute("aria-invalid");
     body.removeAttribute("aria-describedby");
     form.querySelector(".field-error")?.remove();
@@ -84,6 +85,15 @@ function setupEditForm(entry, form) {
     setEditing(true);
     body.focus();
   };
+}
+
+function resetTags(form, tags) {
+  const value = form.querySelector("[data-tag-field-value]");
+  if (!value) return;
+
+  value.value = tags;
+  form.querySelector("[data-tag-field-input]").value = "";
+  setupTagFields(form);
 }
 
 function showWrite(form) {

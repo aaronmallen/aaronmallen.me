@@ -960,6 +960,20 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
         expect(last_response.location).to end_with("/admin/journal?to=#{to}&q=walk")
       end
+
+      it "sends the page and the search with the row's delete form", :aggregate_failures do
+        get "/admin/journal", to:, q: "walk"
+        delete = page.find("form[action='/admin/journal/#{old.id}/delete']")
+
+        expect(delete).to have_css("input[type='hidden'][name='to'][value='#{to}']", visible: :all)
+        expect(delete).to have_css("input[type='hidden'][name='q'][value='walk']", visible: :all)
+      end
+
+      it "returns to the page and the search after a delete" do
+        post "/admin/journal/#{old.id}/delete", _csrf_token: admin_csrf_token, to:, q: "walk"
+
+        expect(last_response.location).to end_with("/admin/journal?to=#{to}&q=walk")
+      end
     end
 
     describe "deleting an entry" do

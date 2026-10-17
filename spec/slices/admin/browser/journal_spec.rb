@@ -242,6 +242,32 @@ RSpec.describe "Admin journal", type: :feature do
     end
   end
 
+  describe "cancelling an edit to an entry's tags" do
+    let(:item) { find(".journal-entry").tap(&:hover) }
+
+    before do
+      create(:journal_entry, body: "tagged", tags: %w[ruby])
+      visit "/admin/journal"
+      item.click_button "Edit"
+      item.find(".tag-pick-remove").click
+      item.find("[data-tag-field-input]").send_keys("lake", :enter)
+      item.click_button "Cancel"
+      item.click_button "Edit"
+    end
+
+    it "puts the saved tags back", :aggregate_failures do
+      expect(item.all(".tag-pick-chip").map(&:text)).to eq(["#ruby"])
+      expect(item.find("[data-tag-field-value]", visible: :hidden).value).to eq("ruby")
+    end
+
+    it "saves the saved tags after Cancel" do
+      item.click_button "Save"
+      page.assert_selector(".toast", text: "Entry updated")
+
+      expect(Record::Slice["repos.journal_entry_queries"].today.flat_map { it.tags.map(&:name) }).to eq(%w[ruby])
+    end
+  end
+
   describe "an entry's links" do
     let(:entry) { create(:journal_entry, body: "Packed the rack") }
     let(:item) { find(".journal-entry").tap(&:hover) }
@@ -361,6 +387,22 @@ RSpec.describe "Admin journal", type: :feature do
       expect(page).to have_no_css(".journal-entry-body", text: "drop me")
       expect(page).to have_css(".page-head-sub", text: "1 entry · 2 words")
       expect(page).to have_css(".page-head-sub", text: "wrote on 1 of the last 30 days")
+    end
+  end
+
+  describe "deleting an entry from a searched day" do
+    before do
+      create(:journal_entry, body: "keep walk")
+      create(:journal_entry, entry_date: today - 1, body: "drop walk")
+      create(:journal_entry, entry_date: today - 1, body: "stay walk")
+      visit "/admin/journal?to=#{(today - 1).iso8601}&q=walk"
+      confirm_yes { find(".journal-entry", text: "drop walk").tap(&:hover).click_button "Delete" }
+      page.assert_selector(".toast", text: "Entry deleted")
+    end
+
+    it "comes back to that day and search", :aggregate_failures do
+      expect(page).to have_current_path("/admin/journal?to=#{(today - 1).iso8601}&q=walk")
+      expect(page).to have_field("journal-search", with: "walk")
     end
   end
 
