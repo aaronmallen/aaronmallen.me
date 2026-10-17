@@ -5,9 +5,10 @@ module Blog
     module Bot
       KNOWN = Regexp.union(
         %w[
-          apis-google archiver axios bot crawl curl embedly facebookexternalhit feedfetcher feedly go-http-client
-          httpclient java/ libwww lighthouse mediapartners monitor node-fetch okhttp phantomjs pingdom postman
-          preview python-requests ruby scrape slurp spider validator wget yandex
+          akkoma apis-google archiver axios bot cardyb crawl curl embedly facebookexternalhit feedfetcher feedly
+          go-http-client httpclient java/ libwww lighthouse link-check link-title (mastodon/ mediapartners misskey
+          monitor node-fetch okhttp phantomjs pingdom pleroma postman preview python-requests ruby scrape slurp
+          spider validator webmention wget yandex
         ],
       )
 

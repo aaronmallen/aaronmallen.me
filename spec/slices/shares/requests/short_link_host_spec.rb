@@ -76,6 +76,14 @@ RSpec.describe "A short link on the share host", type: :request do
   {
     "Slack" => "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
     "curl" => "curl/8.4.0",
+    "Mastodon" => "http.rb/5.2.0 (Mastodon/4.3.0; +https://mastodon.example/)",
+    "Pleroma" => "Pleroma 2.7.0; https://pleroma.example",
+    "Akkoma" => "Akkoma 3.13.2; https://akkoma.example",
+    "Misskey" => "Misskey/2024.10.1 (https://misskey.example)",
+    "Bluesky" => "Mozilla/5.0 (compatible; Cardyb/1.1)",
+    "the link check" => "aaronmallen.me link-check (+https://aaronmallen.me)",
+    "the link title fetch" => "aaronmallen.me link-title (+https://aaronmallen.me)",
+    "the webmention fetch" => "aaronmallen.me webmention (+https://aaronmallen.me)",
     "no user agent" => "",
   }.each do |named, agent|
     it "leaves the count and stamp alone for #{named}", :aggregate_failures do
