@@ -23,7 +23,7 @@ module Spec
 
     def delete_by_value(_name, value) = @entries.delete_if { it.value == value }
 
-    def each(&) = @entries.each(&)
+    def each(&) = @entries.sort_by { -it.score }.each(&)
 
     def find_job(jid) = find { it.jid == jid }
 

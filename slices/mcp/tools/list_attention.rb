@@ -11,8 +11,8 @@ module MCP
                   "connection that lapses within a week, titled with its account and with days left, below zero " \
                   "once it has lapsed; and the journal, " \
                   "with days since the last entry. Snoozed rows stay out. " \
-                  "Beside them, dead_jobs lists the background jobs that ran out of retries, newest first, with " \
-                  "the job's name, when it died and its error. " \
+                  "Beside them, dead_jobs lists the newest five background jobs that ran out of retries, newest " \
+                  "first, with the job's name, when it died and its error, and dead_job_count counts them all. " \
                   "A new device row's title names an MCP client as the client named itself, so it comes marked " \
                   "untrusted, and so does the title of a carried or someday task that syncs from an issue " \
                   "tracker. A dead job's error may quote what a remote service answered, so it comes marked " \

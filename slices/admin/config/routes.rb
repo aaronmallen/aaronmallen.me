@@ -24,6 +24,7 @@ module Admin
     get "/", to: "today.show", as: :root
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
+    get "/attention/dead-jobs", to: "today.dead_jobs", as: :dead_jobs
     post "/attention/dead-jobs/:jid/discard", to: "today.discard_dead_job", as: :discard_dead_job, jid: JID
     get "/attention/dead-jobs/:jid/menu", to: "today.dead_job_menu", as: :dead_job_menu, jid: JID
     post "/attention/dead-jobs/:jid/retry", to: "today.retry_dead_job", as: :retry_dead_job, jid: JID

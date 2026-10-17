@@ -13,12 +13,14 @@ module Admin
         prop :broken_links, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
         prop :failed_social_posts, Blog::Types::Array.of(Blog::Types::SocialPostStatus)
         prop :inbox, Blog::Types::Integer
+        prop :more_dead_jobs, Blog::Types::Integer
         prop :webmentions, Blog::Types::Integer
 
         def view_template
           line(".inbox", path(:admin_inbox), ".waiting", @inbox)
           line(".cross_posts", path(:admin_social, filter: failed_queue), ".failed", @failed_social_posts.size)
           line(".webmentions", path(:admin_webmentions, status: PENDING), ".waiting", @webmentions)
+          line(".dead_jobs", path(:admin_dead_jobs), ".more", @more_dead_jobs)
           broken_links
         end
 

@@ -139,10 +139,61 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
     end
   end
 
+  describe "more dead jobs than the card holds" do
+    before { 7.times { kill("Posts::Jobs::Job#{it}", at: Time.now - (it * 60)) } }
+
+    it "shows the newest five and links to the rest", :aggregate_failures do
+      found = card
+      line = found.find("a.today-line", text: "Dead jobs")
+
+      expect(found.all(".li-title").map(&:text)).to eq((0..4).map { "Posts::Jobs::Job#{it}" })
+      expect([line[:href], line.text]).to eq(["/admin/attention/dead-jobs", "Dead jobs2 more →"])
+    end
+
+    it "returns the newest five from list_attention with the count of all", :aggregate_failures do
+      answer = api_read
+
+      expect(answer.fetch("dead_jobs").map { it.fetch("name") }).to eq((0..4).map { "Posts::Jobs::Job#{it}" })
+      expect(answer.fetch("dead_job_count")).to eq(7)
+    end
+  end
+
+  describe "the dead jobs page" do
+    def page(query = "")
+      sign_in_to_admin
+      get "/admin/attention/dead-jobs#{query}"
+      Capybara.string(last_response.body)
+    end
+
+    it "lists every dead job newest first with the count", :aggregate_failures do
+      7.times { kill("Posts::Jobs::Job#{it}", at: Time.now - (it * 60)) }
+      found = page
+
+      expect(found.all(".li-title").map(&:text)).to eq((0..6).map { "Posts::Jobs::Job#{it}" })
+      expect(found.find(".page-head-sub").text).to eq("7 jobs ran out of retries")
+    end
+
+    it "pages past the admin page size" do
+      101.times { kill("Posts::Jobs::Job#{it}", at: Time.now - (it * 60)) }
+
+      expect(page("?page=2").all(".li-title").map(&:text)).to eq(["Posts::Jobs::Job100"])
+    end
+
+    it "says so when no job has died" do
+      expect(page.find(".card")).to have_text(Admin::Slice["i18n"].t("ui.views.today.dead_jobs.empty"))
+    end
+
+    it "answers a page past the end with not found" do
+      page("?page=2")
+
+      expect(last_response.status).to eq(404)
+    end
+  end
+
   it "lists no dead jobs while Redis is down" do
     allow(Sidekiq::DeadSet).to receive(:new).and_raise(RedisClient::CannotConnectError)
 
-    expect(api_read.fetch("dead_jobs")).to eq([])
+    expect(api_read.values_at("dead_jobs", "dead_job_count")).to eq([[], 0])
   end
 
   def titles = card.all(".li-title").map(&:text)

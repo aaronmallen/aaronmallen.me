@@ -13,6 +13,7 @@ module Admin
         prop :broken_links, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
         prop :failed_social_posts, Blog::Types::Array.of(Blog::Types::SocialPostStatus)
         prop :inbox, Blog::Types::Integer
+        prop :more_dead_jobs, Blog::Types::Integer
         prop :webmentions, Blog::Types::Integer
 
         def view_template
@@ -23,7 +24,7 @@ module Admin
             DeadJobs(dead_jobs: @dead_jobs)
             AttentionLines(
               broken_links: @broken_links, failed_social_posts: @failed_social_posts, inbox: @inbox,
-              webmentions: @webmentions,
+              more_dead_jobs: @more_dead_jobs, webmentions: @webmentions,
             )
             @rows.each { row(it) }
           end
@@ -127,7 +128,8 @@ module Admin
         end
 
         def total
-          lines = [@inbox, @failed_social_posts.size, @webmentions, @broken_links.values.sum].count(&:positive?)
+          lines = [@inbox, @failed_social_posts.size, @webmentions, @more_dead_jobs, @broken_links.values.sum]
+                  .count(&:positive?)
 
           @rows.size + @failures.size + @dead_jobs.size + lines
         end

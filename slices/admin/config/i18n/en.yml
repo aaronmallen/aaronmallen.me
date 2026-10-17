@@ -625,11 +625,15 @@ en:
         broken_links: "Broken links"
         broken_split: "%{posts} in posts · %{short} short →"
         cross_posts: "Cross-posts"
+        dead_jobs: "Dead jobs"
         failed:
           one: "%{count} failed →"
           other: "%{count} failed →"
         failing: "%{count} failing →"
         inbox: "Inbox"
+        more:
+          one: "%{count} more →"
+          other: "%{count} more →"
         waiting:
           one: "%{count} waiting →"
           other: "%{count} waiting →"
@@ -3790,6 +3794,12 @@ en:
           copy_error: "Copy error"
           discard: "Discard"
           retry: "Retry"
+        dead_jobs:
+          count:
+            one: "%{count} job ran out of retries"
+            other: "%{count} jobs ran out of retries"
+          empty: "No job has run out of retries."
+          heading: "Dead jobs"
         show:
           heading: "Today"
           headline:

@@ -48,12 +48,14 @@ module Admin
 
       def attention(now, inbox)
         failures = self.failures
+        dead_jobs = attention_queries.dead_jobs
 
         {
           rows: attention_queries.stalled(now:),
           broken_links:,
           failures:,
-          dead_jobs: unshown(attention_queries.dead_jobs, failures),
+          dead_jobs: unshown(dead_jobs, failures),
+          more_dead_jobs: attention_queries.dead_job_count - dead_jobs.size,
           failed_social_posts: social_post_queries.failed_statuses,
           inbox:,
           webmentions: webmention_queries.pending_count,

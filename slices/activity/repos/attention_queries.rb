@@ -3,10 +3,25 @@
 module Activity
   module Repos
     class AttentionQueries < Blog::DB::Repo
+      DEAD_JOB_LIMIT = 5
+
       include Deps["settings", dead_set: "sidekiq.dead_set"]
 
-      def dead_jobs
-        dead_set.call.map { Structs::DeadJob.from(it) }.sort_by { -it.died_at.to_f }
+      def dead_job(jid)
+        found = dead_set.call.find_job(jid)
+        Structs::DeadJob.from(found) if found
+      rescue RedisClient::Error
+        nil
+      end
+
+      def dead_job_count
+        dead_set.call.size
+      rescue RedisClient::Error
+        0
+      end
+
+      def dead_jobs(limit: DEAD_JOB_LIMIT, offset: 0)
+        dead_set.call.lazy.drop(offset).first(limit).map { Structs::DeadJob.from(it) }
       rescue RedisClient::Error
         []
       end
