@@ -7,11 +7,11 @@ module API
         {
           id: Helpers::Schema::INTEGER,
           sha: Helpers::Schema::STRING,
-          repo: { type: "string", description: "the repository, as owner/name" },
+          repo: Helpers::Schema::REPO,
           branch: Helpers::Schema::STRING,
           message: { type: "string", description: "the whole commit message, subject and body" },
           date: Helpers::Schema::DAY,
-          time: { type: "string", description: "the time of day, as HH:MM" },
+          time: Helpers::Schema::CLOCK,
           additions: { type: "integer", description: "lines added" },
           deletions: { type: "integer", description: "lines deleted" },
         },

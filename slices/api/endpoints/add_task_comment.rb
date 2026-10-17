@@ -9,7 +9,7 @@ module API
         additionalProperties: false,
         properties: {
           id: Tasks::TASK.merge(description: "the task to comment on, #{Tasks::TASK[:description]}"),
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
         },
         required: %w[id body],
       }.freeze

@@ -4,6 +4,8 @@ module API
   module Helpers
     module Schema
       BOOLEAN = { type: "boolean" }.freeze
+      CLOCK = { type: "string", description: "the time of day, as HH:MM" }.freeze
+      COMMENT = { type: "string", description: "the comment, in Markdown" }.freeze
       CREDITS = {
         agent: { type: "string", description: "an agent, such as claude-code; only the tasks it worked on" },
         contributor: {
@@ -16,8 +18,11 @@ module API
       DAY = { type: "string", format: "date" }.freeze
       ID = { type: "integer", minimum: 1, maximum: Blog::Constants::INTEGER_MAX }.freeze
       INTEGER = { type: "integer" }.freeze
+      REPO = { type: "string", description: "the repository, as owner/name" }.freeze
       STAMP = { type: "string", format: "date-time" }.freeze
       STRING = { type: "string" }.freeze
+      SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
+      SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
       TAGS = { type: "array", items: STRING }.freeze
       TASK = {
         type: %w[integer string],
@@ -64,6 +69,13 @@ module API
 
       def paged(properties, more: { next_page: INTEGER })
         object(properties.merge(partial: BOOLEAN), optional: more)
+      end
+
+      def suggestion
+        {
+          suggestion_id: nullable(ID).merge(description: SUGGESTION),
+          suggestion_edits: list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
+        }
       end
 
       def task?(schema) = (schema[:items] || schema)[:pattern] == TASK[:pattern]

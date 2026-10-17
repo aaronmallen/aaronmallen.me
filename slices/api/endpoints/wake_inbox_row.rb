@@ -10,8 +10,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          kind: { type: "string", enum: Serializers::InboxRow::KINDS,
-                  description: "the row's kind; message needs the mail scope" },
+          kind: SnoozeInboxRow::SCHEMA.dig(:properties, :kind),
           id: Helpers::Schema::ID.merge(description: "the id of the message, webmention or task"),
         },
         required: %w[kind id],

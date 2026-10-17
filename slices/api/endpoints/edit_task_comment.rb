@@ -10,7 +10,7 @@ module API
         properties: {
           id: Tasks::TASK,
           comment_id: Tasks::ID,
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
         },
         required: %w[id comment_id body],
       }.freeze

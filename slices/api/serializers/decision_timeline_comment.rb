@@ -10,7 +10,7 @@ module API
           kind: { type: "string", enum: KINDS },
           id: { type: "integer", description: "the comment's ID" },
           occurred_at: Helpers::Schema::STAMP,
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
         },
       ).freeze
 

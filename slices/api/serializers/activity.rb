@@ -21,7 +21,7 @@ module API
           kind: { type: "string", enum: Blog::Types::ActivityKind.values },
           source_id: Helpers::Schema::INTEGER,
           date: Helpers::Schema::DAY,
-          time: { type: "string", description: "the time of day, as HH:MM" },
+          time: Helpers::Schema::CLOCK,
           name: Helpers::Schema::STRING,
           link: Helpers::Schema.nullable(Helpers::Schema::STRING),
           repo: Helpers::Schema.nullable(Helpers::Schema::STRING),

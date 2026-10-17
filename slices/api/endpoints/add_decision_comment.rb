@@ -7,7 +7,7 @@ module API
         additionalProperties: false,
         properties: {
           id: Helpers::Schema::ID.merge(description: "the decision to comment on"),
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
         },
         required: %w[id body],
       }.freeze

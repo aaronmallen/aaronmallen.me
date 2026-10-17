@@ -8,7 +8,7 @@ module API
       FAILURE = Helpers::Schema.object(
         {
           sync: { type: "string", enum: Blog::Types::SyncName.values },
-          repo: Helpers::Schema.nullable({ type: "string", description: "the repository, as owner/name" }),
+          repo: Helpers::Schema.nullable(Helpers::Schema::REPO),
           reason: Helpers::Schema::STRING,
           message: Helpers::Schema.nullable(Helpers::Schema::STRING),
           count: { type: "integer", description: "how many times in a row it failed" },

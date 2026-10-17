@@ -8,6 +8,11 @@ module API
       TAG_SEPARATOR = ","
       UNSAVED = "could not save the change"
 
+      SNOOZE_REFUSALS = {
+        invalid: "snoozed_until is not a time",
+        past: "snoozed_until must be in the future",
+      }.freeze
+
       SHARED = {
         Blog::Contract::BLANK => "is empty",
         Blog::Contract::CONTROL => CONTROL,

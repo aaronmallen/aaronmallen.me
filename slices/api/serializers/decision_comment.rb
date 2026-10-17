@@ -6,7 +6,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
           created_at: Helpers::Schema::STAMP,
           updated_at: Helpers::Schema::STAMP,
         },

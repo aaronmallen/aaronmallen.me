@@ -8,7 +8,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
           author: Helpers::Schema.nullable(Helpers::Schema::STRING),
           source: { type: "string", enum: [LOCAL, *Blog::Types::TaskSourceProvider.values] },
           url: Helpers::Schema.nullable(Helpers::Schema::STRING),

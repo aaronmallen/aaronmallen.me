@@ -8,15 +8,12 @@ module API
 
       EDIT_NOTES = "the notes left on each change to the published post, newest first"
       RECEIVED = "the webmentions the post has received"
-      SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
-      SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
       REPLY = Helpers::Schema.widen(
         Serializers::PostDetail::SCHEMA,
         webmentions_received: { type: "integer", description: RECEIVED },
         edit_notes: Helpers::Schema.list(Serializers::PostEdit.reference).merge(description: EDIT_NOTES),
-        suggestion_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(description: SUGGESTION),
-        suggestion_edits: Helpers::Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
+        **Helpers::Schema.suggestion,
         record_links: Serializers::Link::GROUPS,
       ).freeze
 

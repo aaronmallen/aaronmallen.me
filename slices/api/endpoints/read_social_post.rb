@@ -5,13 +5,10 @@ module API
     class ReadSocialPost < SocialPostEndpoint
       KIND = Blog::Types::RecordKind["social_post"]
       SCHEMA = Helpers::Schema.by_id
-      SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
-      SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
       REPLY = Helpers::Schema.widen(
         SocialPostEndpoint::REPLY,
-        suggestion_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(description: SUGGESTION),
-        suggestion_edits: Helpers::Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
+        **Helpers::Schema.suggestion,
         record_links: Serializers::Link::GROUPS,
       ).freeze
 

@@ -45,8 +45,7 @@ module API
           in Success(snoozed) then Success(reply(snoozed))
           in Failure[:record, kind, id, _] then invalid(kind => [Helpers::Wording.missing(NOUNS.fetch(kind), id)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
-          in Failure(:invalid) then invalid(snoozed_until: ["snoozed_until is not a time"])
-          in Failure(:past) then invalid(snoozed_until: ["snoozed_until must be in the future"])
+          in Failure(:invalid | :past => code) then invalid(snoozed_until: [Helpers::Wording::SNOOZE_REFUSALS[code]])
           else failed("could not snooze the rows")
         end
       end

@@ -7,7 +7,7 @@ module API
         {
           id: Helpers::Schema::INTEGER,
           date: Helpers::Schema::DAY,
-          time: { type: "string", description: "the time of day, as HH:MM" },
+          time: Helpers::Schema::CLOCK,
           body: { type: "string", description: "the entry, in Markdown" },
           tags: Helpers::Schema::TAGS,
           created_at: Helpers::Schema::STAMP,

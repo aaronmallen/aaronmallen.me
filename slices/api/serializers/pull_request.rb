@@ -6,7 +6,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
-          repo: { type: "string", description: "the repository, as owner/name" },
+          repo: Helpers::Schema::REPO,
           number: Helpers::Schema::INTEGER,
           title: Helpers::Schema::STRING,
           description: Helpers::Schema::STRING,

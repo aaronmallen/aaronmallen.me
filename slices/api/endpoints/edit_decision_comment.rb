@@ -8,7 +8,7 @@ module API
         properties: {
           id: Decisions::ID,
           comment_id: Decisions::ID,
-          body: { type: "string", description: "the comment, in Markdown" },
+          body: Helpers::Schema::COMMENT,
         },
         required: %w[id comment_id body],
       }.freeze

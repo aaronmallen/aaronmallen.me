@@ -15,7 +15,7 @@ module API
           started_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           archived_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           tags: Helpers::Schema::TAGS,
-          repo: Helpers::Schema.nullable({ type: "string", description: "the repository, as owner/name" }),
+          repo: Helpers::Schema.nullable(Helpers::Schema::REPO),
           url: Helpers::Schema.nullable(Helpers::Schema::STRING),
           og_image_url: Helpers::Schema.nullable(Helpers::Schema::STRING),
           stars: Helpers::Schema::INTEGER,
