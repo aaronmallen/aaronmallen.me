@@ -60,8 +60,7 @@ module MCP
                   "Each referrer's host, each click's link_host and link_path, and each internal referrer's path " \
                   "come from the visitor's browser and come marked untrusted too; a direct visit's host stays null. " \
                   "#{Untrusted::WARNING}. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
-                  "#{API::Helpers::DayWindow::LONGEST} days. " \
+                  "#{API::Helpers::DayWindow::CAPPED_NOTE}. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, its " \
                   "devices, and its top #{TOP} outbound clicks, with no top paths, weekday_hours, change, feed or " \

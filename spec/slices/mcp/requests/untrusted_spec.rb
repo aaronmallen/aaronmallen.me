@@ -59,12 +59,12 @@ RSpec.describe "MCP untrusted text", type: :request do
     expect(instructions).to include(MCP::Tools::Untrusted::WARNING)
   end
 
-  it "says so in the description of each tool that marks text" do
+  it "says so once in the description of each tool that marks text" do
     descriptions = rpc("tools/list").fetch("tools").to_h { it.values_at("name", "description") }
+    marking = descriptions.slice(*marking_tools, *self.class.task_tools, *self.class.link_tools,
+                                 *self.class.visitor_tools)
 
-    expect(descriptions.values_at(*marking_tools, *self.class.task_tools, *self.class.link_tools,
-                                  *self.class.visitor_tools))
-      .to all(include(MCP::Tools::Untrusted::WARNING))
+    expect(marking.transform_values { it.scan(MCP::Tools::Untrusted::WARNING).size }.values.uniq).to eq([1])
   end
 
   it "marks the subject of a mail thread and the subject, body and reply address of each message" do

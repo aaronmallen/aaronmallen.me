@@ -10,7 +10,7 @@ module MCP
                   "A post falls on the day it went out or is set to go out, and a draft on the day it was made. " \
                   "Give queue to keep only the queued, posted or draft posts, as the admin's social screen splits " \
                   "them. counts gives how many posts in the range sit in each queue, whatever queue asks for. " \
-                  "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
+                  "#{API::Helpers::DayWindow::OPEN_NOTE}. " \
                   "Leave both out to list every social post. #{API::Helpers::Paging::USAGE}. " \
                   "#{Untrusted::DELIVERIES}"
       endpoint scope: Blog::Types::OAuthScope["read"]

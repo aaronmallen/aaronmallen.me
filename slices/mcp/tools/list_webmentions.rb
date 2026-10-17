@@ -8,10 +8,9 @@ module MCP
                   "Give post_id to list only the webmentions one post got. counts gives how many webmentions in " \
                   "the range, and for the post when given, sit in each status. Days run on " \
                   "#{Blog::TimeZone::NAME} time, and the answer names it as time_zone; received_at comes in UTC. " \
-                  "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
+                  "#{API::Helpers::DayWindow::OPEN_NOTE}. " \
                   "Leave both out to list every webmention. #{API::Helpers::Paging::USAGE}. " \
-                  "The source, author name, author URL and excerpt, taken from the sender's page, come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "#{Untrusted::WEBMENTIONS}"
       endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end

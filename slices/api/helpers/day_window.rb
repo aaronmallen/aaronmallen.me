@@ -12,10 +12,13 @@ module API
         }.freeze
       end
 
+      LONGEST = 366
       BACKWARDS = "from comes after to"
       BAD_DAY = "give from and to as days, such as 2026-01-01"
+      CAPPED_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
+                    "#{LONGEST} days".freeze
       DAYS = { type: "string", description: "a day, as YYYY-MM-DD" }.freeze
-      LONGEST = 366
+      OPEN_NOTE = "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range"
       PAGING_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                     "One answer carries about %<page_size>s rows, newest first, rounded out to the end of a day. " \
                     "Past that, partial comes back true and continue_to holds the day to send as to " \
