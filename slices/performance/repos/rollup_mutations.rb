@@ -4,7 +4,7 @@ module Performance
   module Repos
     class RollupMutations < Blog::DB::Repo
       COUNT = Sequel.function(:count).*
-      METRICS = %w[ttfb dom_content_loaded load lcp].freeze
+      METRICS = Blog::Types::PerformancePageMetric.values
       QUERIES = {
         query_count: Sequel.function(:sum, :query_count),
         query_time: Sequel.function(:sum, :query_time),

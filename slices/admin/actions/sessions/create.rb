@@ -56,7 +56,7 @@ module Admin
         end
 
         def fail_sign_in(request, response, reason)
-          record(request, STATUSES.key?(reason) ? reason : :unexpected)
+          record(request, Blog::Types::SignInOutcome.valid?(reason.to_s) ? reason : :unexpected)
           end_session(request, response) if reason == ENDS_SESSION
           response.status = STATUSES.fetch(reason, UNEXPECTED)
           response.render(failed_view, reason:, provider: request.params[:provider].to_sym)

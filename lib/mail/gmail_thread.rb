@@ -5,7 +5,6 @@ require "sanitize"
 
 module Mail
   class GmailThread
-    ADDRESS = /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/
     BLANK = /\A[[:space:]]*\z/
     CATEGORY = "CATEGORY_"
     CHARSET = /charset="?([^";\s]+)/i
@@ -118,7 +117,7 @@ module Mail
       match = FROM.match(from)
       address = (match ? match[:address] : from).strip
 
-      { reply_to: (address if ADDRESS.match?(address)), from_name: present(match&.[](:name)) }
+      { reply_to: (address if Blog::Types::EmailAddress.valid?(address)), from_name: present(match&.[](:name)) }
     end
 
     def status(spam)

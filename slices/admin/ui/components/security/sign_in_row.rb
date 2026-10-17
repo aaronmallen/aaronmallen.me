@@ -7,10 +7,9 @@ module Admin
         class SignInRow < Component
           include Located
 
-          OUTCOME_NAMES = %w[denied provider_failed signed_in unexpected wrong_account].freeze
-          OUTCOMES = OUTCOME_NAMES.to_h { [it, ".outcomes.#{it}"] }.freeze
+          OUTCOMES = Blog::Types::SignInOutcome.values.to_h { [it, ".outcomes.#{it}"] }.freeze
           PROVIDERS = Views::Sessions::Failed::NAMES.transform_keys(&:to_s).freeze
-          SIGNED_IN = "signed_in"
+          SIGNED_IN = Blog::Types::SignInOutcome["signed_in"]
 
           prop :sign_in, Blog::Types::Instance(ROM::Struct)
 

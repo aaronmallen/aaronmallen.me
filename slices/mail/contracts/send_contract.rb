@@ -16,7 +16,7 @@ module Mail
       end
 
       ADDRESSES.each do |name|
-        rule(name) { key.failure(FORMAT) unless value.all? { MessageContract::EMAIL.match?(it) } }
+        rule(name) { key.failure(FORMAT) unless value.all? { Blog::Types::EmailAddress.valid?(it) } }
       end
 
       rule(:subject).validate(:without_controls, :visible)

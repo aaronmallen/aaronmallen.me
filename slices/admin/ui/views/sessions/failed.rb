@@ -15,7 +15,7 @@ module Admin
           UNEXPECTED = ".unexpected"
 
           prop :reason, Blog::Types::Symbol
-          prop :provider, Blog::Types::Symbol.enum(*NAMES.keys)
+          prop :provider, Blog::Types::Symbol.enum(*Blog::Types::SignInProvider.values.map(&:to_sym))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(MESSAGES.fetch(@reason, UNEXPECTED), name: NAMES.fetch(@provider)))

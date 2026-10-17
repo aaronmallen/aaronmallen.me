@@ -2,7 +2,6 @@
 
 RSpec.describe "Schema twins", type: :app do
   let(:db) { Hanami.app["db.rom"].gateways[:default].connection }
-  let(:untwinned) { %w[performance_job_outcome performance_page_metric sign_in_outcome sign_in_provider] }
   let(:renamed) do
     {
       "network" => Blog::Types::NetworkName.values,
@@ -26,12 +25,12 @@ RSpec.describe "Schema twins", type: :app do
 
   def twin(name) = renamed.fetch(name) { Blog::Types.const_get(inflector.camelize(name)).values }
 
-  it "names only enums the schema holds in the list without a Ruby twin" do
-    expect(enums.keys).to include(*untwinned, *renamed.keys)
+  it "names only enums the schema holds in the renamed list" do
+    expect(enums.keys).to include(*renamed.keys)
   end
 
   it "keeps every enum's values in its Blog::Types twin" do
-    enums.except(*untwinned).each do |name, values|
+    enums.each do |name, values|
       expect(twin(name)).to match_array(values), "#{name} differs from its Blog::Types twin"
     end
   end

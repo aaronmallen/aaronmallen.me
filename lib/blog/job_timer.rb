@@ -6,8 +6,8 @@ module Blog
   class JobTimer
     include Sidekiq::ServerMiddleware
 
-    FAILED = "failed"
-    SUCCEEDED = "succeeded"
+    FAILED = Types::PerformanceJobOutcome["failed"]
+    SUCCEEDED = Types::PerformanceJobOutcome["succeeded"]
 
     def initialize(record)
       @record = record

@@ -71,6 +71,7 @@ module Blog
     DecisionStatusParam = DecisionStatus.fallback(DecisionStatus.values.first)
     DecisionTimelineKind = Types::String.enum("comment", *DecisionEventKind.values)
     DeviceClass = Types::String.enum("desktop", "mobile", "tablet", "in-app")
+    EmailAddress = Types::String.constrained(format: /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/)
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     GoneTaskSourceState = Types::String.enum("moved", "deleted")
     HealthSpan = Types::Params::Integer.enum(14, 30, 90)
@@ -117,6 +118,8 @@ module Blog
       text = TrimmedText[value]
       text.empty? ? nil : text
     end
+    PerformanceJobOutcome = Types::String.enum("succeeded", "failed")
+    PerformancePageMetric = Types::String.enum("ttfb", "dom_content_loaded", "load", "lcp")
     PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
     BoardSizeParam = PageNumber.optional.fallback(nil)
@@ -175,6 +178,8 @@ module Blog
       "pull_request",
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
+    SignInOutcome = Types::String.enum("signed_in", "denied", "provider_failed", "wrong_account", "unexpected")
+    SignInProvider = Types::String.enum("github", "google")
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)
     ShareFilter = Types::String.enum("all", "images", "other")
     ShareFilterParam = ShareFilter.fallback(ShareFilter.values.first)

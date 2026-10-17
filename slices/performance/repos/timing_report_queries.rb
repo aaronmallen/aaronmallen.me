@@ -6,7 +6,7 @@ module Performance
       COUNT = Sequel.function(:count).*
       DAY = Blog::DB::Relation.site_day(:occurred_at)
       EMPTY_DAY = { count: 0, p50: nil, p95: nil }.freeze
-      METRICS = %i[load lcp ttfb dom_content_loaded].freeze
+      METRICS = Blog::Types::PerformancePageMetric.values.map(&:to_sym).freeze
       QUERIES = %i[query_count query_time].freeze
       TOTAL = Sequel.function(:sum, :count)
 

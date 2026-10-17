@@ -3,7 +3,7 @@
 module Security
   module Operations
     class RecordSignIn
-      SIGNED_IN = :signed_in
+      SIGNED_IN = Blog::Types::SignInOutcome["signed_in"]
 
       include Deps[
         "operations.read_access",
@@ -13,9 +13,10 @@ module Security
 
       def call(request, outcome, provider:)
         access = read_access.call(request)
+        outcome = Blog::Types::SignInOutcome[outcome.to_s]
 
         known_device_mutations.know(**access.slice(*ReadAccess::DEVICE)) if outcome == SIGNED_IN
-        sign_in_mutations.create(outcome: outcome.to_s, provider: provider.to_s, **access)
+        sign_in_mutations.create(outcome:, provider: Blog::Types::SignInProvider[provider.to_s], **access)
       end
     end
   end
