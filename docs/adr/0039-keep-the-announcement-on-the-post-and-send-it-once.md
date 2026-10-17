@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [posts, social, admin, db]
 issue: AA-646
-amended: ["#245", "#524", "#957"]
+amended: ["#245", "#524", "#957", "#1631"]
 tags: [posts, social, syndication, announcement, limits, mastodon, bluesky]
 ---
 
@@ -40,9 +40,12 @@ text, tags its links for each picked network through `social.operations.tag_link
 client `within_limit?` through `social.networks.all`. It runs only when the intent is publish and the switch is on.
 The editor, the counters and the preview measure the same composed text (AA-376).
 
-**A post cross-posts once.** `Posts::Operations::PublishPost` enqueues `Social::Jobs::SyndicatePost` after commit.
-`Social::Operations::QueueSyndication` refuses with `already_queued` when any social post already names the post, so
-a retry of the job sends nothing more.
+**A post cross-posts once.** `Posts::Operations::PublishPost` enqueues `Social::Jobs::SyndicatePost` after commit,
+and so does `Posts::Operations::SavePost` when it saves a published post with the switch on and no social post yet
+(#1505). `Social::Operations::QueueSyndication` refuses with `already_queued` when any social post already names the
+post, so a retry of the job sends nothing more. Publish and save close together and two jobs run at once, so
+`QueueSyndication` takes a Postgres advisory lock on the post's id (`SocialPostMutations#lock_post`) before it checks,
+and holds it until the social post commits. The second job waits, then finds the first one's social post (#1631).
 
 ## Alternatives
 
@@ -61,8 +64,8 @@ sees.
 ## Consequences
 
 The card is one-shot. Once a cross-post exists for a post, editing the card sends nothing. Turning the card on after
-publish sends nothing either, since only `PublishPost` enqueues the job. A second announcement is a social post
-written by hand in the admin.
+publish, before any cross-post exists, sends it on save. A second announcement is a social post written by hand in
+the admin.
 
 A draft can hold text over a limit. The editor refuses it only when the author publishes or schedules.
 

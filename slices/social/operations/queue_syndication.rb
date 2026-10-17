@@ -9,16 +9,21 @@ module Social
         announcement: "posts.operations.compose_announcement",
         networks: "networks.all",
         save_social_post: "operations.save_social_post",
+        social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",
       ]
 
       def call(post, at: Time.now)
         step wanted(post)
-        step unqueued(post)
-        targets = step targets(post)
-        body = step body(post)
 
-        queue(post, body, targets, at)
+        transaction do
+          social_post_mutations.lock_post(post.id)
+          step unqueued(post)
+          targets = step targets(post)
+          body = step body(post)
+
+          queue(post, body, targets, at)
+        end
       end
 
       private

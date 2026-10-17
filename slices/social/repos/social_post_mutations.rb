@@ -32,6 +32,8 @@ module Social
 
       def lock_editable(id) = unposted(id).lock.one
 
+      def lock_post(post_id) = social_posts.lock_until_commit(post_id)
+
       def mark_posted(id, at: Time.now) = social_posts.mark_posted(id, at:)
 
       def mark_sent(social_post, accounts)
