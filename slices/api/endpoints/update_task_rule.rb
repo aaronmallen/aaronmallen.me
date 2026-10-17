@@ -33,7 +33,7 @@ module API
       private
 
       def form(rule, fields)
-        tags = Helpers::Wording.tag_list(fields.fetch(:tags) { rule.tags.map(&:name) })
+        tags = Blog::Types::TagField[fields.fetch(:tags) { rule.tags }]
         projects = fields.fetch(:projects) { rule.projects.map(&:id) }
 
         { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags:, projects: }

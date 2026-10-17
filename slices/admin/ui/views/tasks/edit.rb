@@ -12,7 +12,6 @@ module Admin
             projects record_links sprints task_comments task_contributors task_events task_links task_series task_tags
             work_sessions
           ].freeze
-          TAG_SEPARATOR = ", "
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :timeline, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -77,7 +76,7 @@ module Admin
               note: @task.note.to_s,
               recur: @series.to_h,
               sprint_on: @task.sprint&.sprint_date&.iso8601,
-              tags: @task.tags.map(&:name).join(TAG_SEPARATOR),
+              tags: Blog::Types::TagField[@task.tags],
               title: @task.title,
             }
           end

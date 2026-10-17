@@ -46,7 +46,7 @@ module API
           list: fields[:list],
           note: fields.fetch(:note, task.note),
           sprint_on: fields[:sprint_on],
-          tags: Helpers::Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
+          tags: Blog::Types::TagField[fields.fetch(:tags, task.tags)],
           title: fields.fetch(:title, task.title),
           **fields.slice(:contributors),
           **({ recur: Tasks.recur(fields[:recur]) } if fields.key?(:recur)),

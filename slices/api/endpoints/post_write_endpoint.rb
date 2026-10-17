@@ -5,7 +5,6 @@ module API
   module Endpoints
     class PostWriteEndpoint < Endpoint
       FLAGS = %i[syndication_enabled webmentions_enabled].freeze
-      TAG_SEPARATOR = ", "
       UNCHECKED = "0"
 
       FIELDS = {
@@ -41,7 +40,7 @@ module API
 
       def form(given)
         given.to_h do |field, value|
-          next [field, value.join(TAG_SEPARATOR)] if field == :tags
+          next [field, Blog::Types::TagField[value]] if field == :tags
           next [field, value ? Blog::Constants::CHECKED : UNCHECKED] if FLAGS.include?(field)
 
           [field, value]

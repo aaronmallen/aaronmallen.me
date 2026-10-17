@@ -5,8 +5,6 @@ module Admin
     module Components
       module Journal
         class Entry < Component
-          TAG_SEPARATOR = ", "
-
           prop :entry, Blog::Types::Instance(ROM::Struct)
           prop :date, Blog::Types::Date
           prop :editing, Blog::Types::Hash.optional, default: nil
@@ -102,7 +100,7 @@ module Admin
 
           def records = @editing&.fetch(:records, nil)
 
-          def saved_tags = @entry.tags.map(&:name).join(TAG_SEPARATOR)
+          def saved_tags = Blog::Types::TagField[@entry.tags]
 
           def scope = "journal-edit-#{@entry.id}"
 

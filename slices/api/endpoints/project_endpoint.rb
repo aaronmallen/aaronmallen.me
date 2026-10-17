@@ -72,7 +72,7 @@ module API
 
         given.merge(
           board_published: given[:board_published] ? Blog::Constants::CHECKED : UNCHECKED,
-          tags: Helpers::Wording.tag_list(given[:tags]),
+          tags: Blog::Types::TagField[given[:tags]],
         )
       end
 

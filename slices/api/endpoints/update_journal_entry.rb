@@ -26,7 +26,7 @@ module API
         entry = journal_entry_queries.by_id(id)
         return missing("journal entry", id) if entry.nil?
 
-        params = { body: body || entry.body, tags: Helpers::Wording.tag_list(tags || entry.tags.map(&:name)) }
+        params = { body: body || entry.body, tags: Blog::Types::TagField[tags || entry.tags] }
         saved(id, update_journal_entry.call(id, params))
       end
 

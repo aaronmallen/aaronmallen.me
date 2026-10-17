@@ -7,7 +7,6 @@ module Posts
       DRAFT = Blog::Types::PostStatus["draft"]
       PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
-      TAG_SEPARATOR = ", "
       UNCHECKED = "0"
 
       def canonical_url = written(:canonical_url)
@@ -21,7 +20,7 @@ module Posts
           title:,
           slug:,
           summary: written_summary.to_s,
-          tags: tags.map(&:name).join(TAG_SEPARATOR),
+          tags: Blog::Types::TagField[tags],
           body:,
           publish_at:,
           **CARD.to_h { [it, public_send(it).to_s] },

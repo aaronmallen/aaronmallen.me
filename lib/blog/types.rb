@@ -205,6 +205,9 @@ module Blog
     SyncStateKind = Types::String.enum("commits", "backfill", "failure", "pull_requests")
     Tag = Types::String.constrained(format: SLUG_FORMAT)
     TagColor = Types::String.enum("mk-pink", "mk-green", "mk-blue", "mk-violet", "mk-sand", "mk-orange")
+    TagField = Types::String.constructor do |tags|
+      [*tags].map { it.respond_to?(:name) ? it.name : it.to_s }.join(", ")
+    end
     TagList = Types::Array.of(Types::String).constructor do |tags|
       tags.to_s.split(",").map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end

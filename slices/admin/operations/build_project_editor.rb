@@ -7,7 +7,6 @@ module Admin
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       PUBLIC = Blog::Types::TagScope["public"]
-      TAG_SEPARATOR = ", "
       UNCHECKED = "0"
 
       include Deps[tag_queries: "tags.repos.tag_queries"]
@@ -33,7 +32,7 @@ module Admin
           name: project.name,
           visibility: project.visibility,
           started_on: started_on(project),
-          tags: project.tags.map(&:name).join(TAG_SEPARATOR),
+          tags: Blog::Types::TagField[project.tags],
           **OPTIONAL.to_h { [it, project.public_send(it).to_s] },
         }
       end

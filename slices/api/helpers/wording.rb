@@ -5,7 +5,6 @@ module API
     module Wording
       CONTROL = "holds a control character"
       INVALID = "is not valid"
-      TAG_SEPARATOR = ","
       UNSAVED = "could not save the change"
 
       SNOOZE_REFUSALS = {
@@ -37,8 +36,6 @@ module API
       end
 
       def summary(complaints) = complaints.map { |field, (reason)| "#{field}: #{reason}" }.join("; ")
-
-      def tag_list(tags) = Array(tags).join(TAG_SEPARATOR)
     end
   end
 end

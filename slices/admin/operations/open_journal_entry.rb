@@ -4,7 +4,6 @@ module Admin
   module Operations
     class OpenJournalEntry
       KIND = Blog::Types::RecordKind["journal_entry"]
-      TAG_SEPARATOR = ", "
 
       include Deps[list_record_links: "operations.list_record_links"]
 
@@ -13,7 +12,7 @@ module Admin
         return unless entry
 
         {
-          id:, body: entry.body, tags: entry.tags.map(&:name).join(TAG_SEPARATOR), errors: Blog::Constants::EMPTY_HASH,
+          id:, body: entry.body, tags: Blog::Types::TagField[entry.tags], errors: Blog::Constants::EMPTY_HASH,
           records: list_record_links.call(KIND, id, **records),
         }
       end

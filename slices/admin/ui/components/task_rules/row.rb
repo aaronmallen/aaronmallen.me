@@ -5,8 +5,6 @@ module Admin
     module Components
       module TaskRules
         class Row < Component
-          SEPARATOR = ", "
-
           prop :rule, Blog::Types::Instance(ROM::Struct)
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -94,7 +92,7 @@ module Admin
 
             {
               errors: Blog::Constants::EMPTY_HASH, pattern: @rule.pattern, provider: @rule.provider,
-              tags: @rule.tags.map(&:name).join(SEPARATOR), projects: @rule.projects.map { it.id.to_s },
+              tags: Blog::Types::TagField[@rule.tags], projects: @rule.projects.map { it.id.to_s },
             }
           end
         end
