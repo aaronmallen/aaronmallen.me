@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102", "#1106"]
+amended: ["#873", "#919", "#1102", "#1106", "#1742"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -56,7 +56,8 @@ stops the submit only on No, and with scripts off the form posts without asking.
 
 **Two breakpoints.** The admin folds at 700px and 860px alone. Two-column layouts start at 860px, and the pill nav
 drops onto its own row below it. Between them the pills and the search button shrink with `clamp` rather than at
-another breakpoint. Below 700px every tap target keeps [ADR 0054][0054]'s 44px square.
+another breakpoint. Below 700px every tap target keeps [ADR 0054][0054]'s 44px square. #1742 folded the pill row
+below 860px into a popover switcher and moved Inbox second in the menu, as [ADR 0187][0187] records.
 
 **Keys stay, and three join.** Every key [ADR 0101][0101] binds works as it does today. `⌘K` opens the palette
 beside `/` and `⌘/`, `w` opens a journal entry, and `e` opens a highlighted row on lists where no row key claims
@@ -103,4 +104,5 @@ rebuild lands, the README's table of pills and sub-tabs survives only in the cod
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
 [0118]: 0118-keep-admin-pages-live-through-postgres-notify-a-hijacked-event-stream-and-a-morph.md
 [0148]: 0148-edit-a-task-in-the-task-drawer-and-keep-the-task-modal-for-new-tasks.md
+[0187]: 0187-fold-the-admin-pill-nav-into-a-popover-switcher-below-860px.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

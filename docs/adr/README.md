@@ -184,6 +184,7 @@ one.
 | [0184][0184] | Turn maintenance mode off from a signed owner cookie, and keep the admin blocked | ![Active][active] | 2026-10-17 |
 | [0185][0185] | Keep a failed job's error on its performance_jobs row | ![Active][active] | 2026-10-17 |
 | [0186][0186] | Keep agent memory, artifacts and sessions in an agents slice | ![Active][active] | 2026-10-17 |
+| [0187][0187] | Fold the admin pill nav into a popover switcher below 860px | ![Active][active] | 2026-10-17 |
 | [0188][0188] | Gate agent memory, artifacts and sessions behind an agents scope | ![Active][active] | 2026-10-17 |
 | [0189][0189] | Name an agent by the slugs it reports on each write | ![Active][active] | 2026-10-17 |
 | [0190][0190] | Open and close agent sessions through tools, and close idle ones from a job | ![Active][active] | 2026-10-17 |
@@ -367,6 +368,7 @@ one.
 [0184]: 0184-turn-maintenance-mode-off-from-a-signed-owner-cookie-and-keep-the-admin-blocked.md
 [0185]: 0185-keep-a-failed-jobs-error-on-its-performance-jobs-row.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
+[0187]: 0187-fold-the-admin-pill-nav-into-a-popover-switcher-below-860px.md
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [0189]: 0189-name-an-agent-by-the-slugs-it-reports-on-each-write.md
 [0190]: 0190-open-and-close-agent-sessions-through-tools-and-close-idle-ones-from-a-job.md
