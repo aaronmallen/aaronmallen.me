@@ -6169,13 +6169,6 @@ CREATE INDEX commits_commit_date_commit_time_id_index ON public.commits USING bt
 
 
 --
--- Name: commits_commit_date_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX commits_commit_date_index ON public.commits USING btree (commit_date);
-
-
---
 -- Name: commits_created_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6278,13 +6271,6 @@ CREATE UNIQUE INDEX held_webmentions_post_id_source_url_index ON public.held_web
 --
 
 CREATE INDEX journal_entries_entry_date_entry_time_id_index ON public.journal_entries USING btree (entry_date, entry_time, id);
-
-
---
--- Name: journal_entries_entry_date_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX journal_entries_entry_date_index ON public.journal_entries USING btree (entry_date);
 
 
 --
@@ -6404,13 +6390,6 @@ CREATE INDEX mail_thread_tags_tag_id_index ON public.mail_thread_tags USING btre
 --
 
 CREATE UNIQUE INDEX mail_threads_mail_account_id_gmail_id_index ON public.mail_threads USING btree (mail_account_id, gmail_id);
-
-
---
--- Name: mail_threads_mail_account_id_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX mail_threads_mail_account_id_index ON public.mail_threads USING btree (mail_account_id);
 
 
 --
@@ -8845,4 +8824,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002204_create_held_title_fetches_and_backfills.rb'),
 ('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb'),
 ('20261016002252_index_commit_text_by_trigram.rb'),
-('20261016002255_store_journal_html_and_word_counts.rb');
+('20261016002255_store_journal_html_and_word_counts.rb'),
+('20261016002262_drop_covered_indexes.rb');
