@@ -85,7 +85,7 @@ RSpec.describe "Admin decision timeline", type: :request do
 
       def at(minute)
         result = yield.value!
-        fresh = Sequel.lit("created_at > ?", ten + 43_200)
+        fresh = Sequel[:created_at] > ten + 43_200
         %w[decision_events decision_comments].each do |name|
           Decisions::Slice["relations.#{name}"].where(fresh).update(created_at: ten + (minute * 60))
         end

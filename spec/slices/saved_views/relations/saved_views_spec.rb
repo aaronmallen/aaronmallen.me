@@ -16,9 +16,6 @@ RSpec.describe SavedViews::Relations::SavedViews do
   end
 
   it "keeps the screen's Ruby twin in the enum's order" do
-    db = SavedViews::Slice["db.rom"].gateways[:default].connection
-
-    expect(db.fetch("SELECT unnest(enum_range(NULL::saved_view_screen))::text AS screen").map { it[:screen] })
-      .to eq(Blog::Types::SavedViewScreen.values)
+    expect(enum_labels(SavedViews::Slice, :saved_view_screen)).to eq(Blog::Types::SavedViewScreen.values)
   end
 end

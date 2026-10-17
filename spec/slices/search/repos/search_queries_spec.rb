@@ -51,16 +51,14 @@ RSpec.describe Search::Repos::SearchQueries do
     def plan
       db.transaction do
         db.run("ANALYZE #{tables.join(', ')}")
-        db.run("SET LOCAL enable_seqscan = off")
-        db.run("SET LOCAL enable_indexscan = off")
-        db["EXPLAIN #{sql}"].map(:"QUERY PLAN").join("\n")
+        db.get(Sequel.function(:set_config, "enable_seqscan", "off", true))
+        db.get(Sequel.function(:set_config, "enable_indexscan", "off", true))
+        searched.explain
       end
     end
 
-    def sql
-      relation = Search::Slice["relations.search_documents"]
-
-      relation.hits("x", kinds: Blog::Types::SearchKind.values, page:).sql
+    def searched
+      Search::Slice["relations.search_documents"].hits("x", kinds: Blog::Types::SearchKind.values, page:)
     end
 
     it "reads each table's index" do

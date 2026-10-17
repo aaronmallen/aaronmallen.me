@@ -1354,7 +1354,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def backfilled
       token = access_token
-      tokens.of_type("access").update(scopes: Sequel.lit("DEFAULT"))
+      tokens.of_type("access").update(scopes: Sequel::DEFAULT)
       token
     end
 

@@ -24,10 +24,11 @@ module Spec
 
         def within_timeout(db)
           db.synchronize do
-            db.run("SET lock_timeout = '#{LOCK_TIMEOUT}'")
+            previous = db.get(Sequel.function(:current_setting, "lock_timeout"))
+            lock_timeout(db, LOCK_TIMEOUT)
             yield
           ensure
-            db.run("RESET lock_timeout")
+            lock_timeout(db, previous) if previous
           end
         rescue Sequel::DatabaseLockTimeout
           raise "#{db.opts[:database]} waited #{LOCK_TIMEOUT} on a lock another session holds:\n#{open_sessions(db)}"
@@ -36,6 +37,8 @@ module Spec
         private
 
         def holders = @holders ||= []
+
+        def lock_timeout(db, value) = db.get(Sequel.function(:set_config, "lock_timeout", value, false))
 
         def open_sessions(db)
           db[:pg_stat_activity]

@@ -613,10 +613,10 @@ RSpec.describe "OAuth token", type: :request do
     let(:code_repo) { MCP::Slice["repos.oauth_code_mutations"] }
 
     def blocked?
-      MCP::Slice["db.rom"].gateways[:default].connection.fetch(
-        "SELECT 1 FROM pg_locks WHERE NOT granted AND locktype = 'transactionid' " \
-        "AND transactionid = pg_current_xact_id()::xid",
-      ).any?
+      locks = MCP::Slice["db.rom"].gateways[:default].connection[:pg_locks]
+      waiting = { locktype: "transactionid", transactionid: Sequel.function(:pg_current_xact_id).cast(:xid) }
+
+      !locks.exclude(:granted).where(waiting).empty?
     end
 
     def exchange_fields

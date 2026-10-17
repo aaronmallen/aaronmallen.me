@@ -9,7 +9,7 @@ RSpec.describe Mail::Repos::GmailMutations, "#store_thread" do
   end
 
   def attachment_rows
-    table(:mail_attachments).select(Sequel.lit("ctid::text").as(:ctid), :mail_message_id, :size).to_a
+    table(:mail_attachments).select(Sequel[:ctid].cast(:text).as(:ctid), :mail_message_id, :size).to_a
   end
 
   def message(id, labels: %w[INBOX UNREAD], files: [attachment("2")], **)

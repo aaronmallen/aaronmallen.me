@@ -152,7 +152,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
 
     def rival_update(table, id, **changes)
       rival = Sequel.connect(database.opts.merge(max_connections: 1))
-      rival.run("SET statement_timeout = '1s'")
+      rival.get(Sequel.function(:set_config, "statement_timeout", "1s", false))
       rival[table].where(id:).update(**changes)
       :free
     rescue Sequel::DatabaseError
