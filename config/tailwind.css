@@ -1179,7 +1179,7 @@
 }
 
 @utility cf-n {
-  @apply mb-2 flex items-center gap-2 font-mono text-meta text-ink-muted;
+  @apply mb-2 flex items-center gap-2 meta;
 
   & i {
     @apply text-[0.6875rem];
@@ -2297,7 +2297,7 @@
   }
 
   & .day-date {
-    @apply font-mono text-meta font-normal text-ink-muted;
+    @apply font-normal meta;
   }
 
   @variant wide {
@@ -2807,8 +2807,12 @@
   }
 }
 
-@utility cal-grip {
+@utility grip {
   @apply cursor-grab touch-none border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
+}
+
+@utility cal-grip {
+  @apply grip;
 }
 
 @utility cal-dragging {
@@ -3003,7 +3007,7 @@
 }
 
 @utility review-label {
-  @apply mt-4 mb-1 font-mono text-meta tracking-[.06em] text-ink-muted uppercase;
+  @apply mt-4 mb-1 tracking-[.06em] uppercase meta;
 }
 
 @utility review-slipped {
@@ -3020,7 +3024,7 @@
 }
 
 @utility review-bar-value {
-  @apply font-mono text-meta text-ink-muted;
+  @apply meta;
 }
 
 @utility review-bar-meter {
@@ -3063,7 +3067,7 @@
 }
 
 @utility health-grid-sep {
-  @apply col-span-full mt-2 mb-0.5 border-t border-line pt-3 font-mono text-meta tracking-[.08em] text-ink-muted uppercase;
+  @apply col-span-full mt-2 mb-0.5 border-t border-line pt-3 tracking-[.08em] uppercase meta;
 }
 
 @utility health-grid-row {
@@ -3153,7 +3157,7 @@
 }
 
 @utility health-day-key {
-  @apply mb-1 font-mono text-meta tracking-[.06em] text-ink-muted uppercase;
+  @apply mb-1 tracking-[.06em] uppercase meta;
 }
 
 @utility health-row {
@@ -5227,7 +5231,7 @@
 
 @utility file-drop {
   @apply mb-stack flex flex-wrap items-center justify-center gap-3 rounded-menu border-[1.5px] border-dashed border-line p-[22px];
-  @apply font-mono text-meta text-ink-muted;
+  @apply meta;
 
   & > i {
     @apply text-[18px];
@@ -5346,7 +5350,7 @@
   @apply flex items-center rounded-input border border-line bg-ground pl-2.5 focus-within:border-ink-muted;
 
   & > span {
-    @apply font-mono text-meta whitespace-nowrap text-ink-muted;
+    @apply whitespace-nowrap meta;
   }
 
   & .inp {
@@ -5941,7 +5945,7 @@
   }
 
   & .day-date {
-    @apply font-mono text-meta font-normal text-ink-muted;
+    @apply font-normal meta;
   }
 
   @variant wide {
@@ -6082,7 +6086,7 @@
 }
 
 @utility task-grip {
-  @apply cursor-grab touch-none border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
+  @apply grip;
 }
 
 @utility task-dragging {
@@ -6301,9 +6305,13 @@
   @apply w-44;
 }
 
-@utility tag-row {
+@utility item-row {
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5;
   @apply border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility tag-row {
+  @apply item-row;
 }
 
 @utility tag-name {
@@ -6322,12 +6330,20 @@
   @apply col-start-1 row-start-2 meta;
 }
 
-@utility tag-acts {
+@utility item-acts {
   @apply col-start-2 row-start-1 row-span-2 flex shrink-0 items-center gap-1;
 }
 
-@utility tag-pen {
+@utility tag-acts {
+  @apply item-acts;
+}
+
+@utility item-pen {
   @apply cursor-pointer px-2 py-1;
+}
+
+@utility tag-pen {
+  @apply item-pen;
 }
 
 @utility tag-panel {
@@ -6408,8 +6424,7 @@
 }
 
 @utility rule-row {
-  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5;
-  @apply border-t border-line py-3 first:border-t-0 first:pt-0;
+  @apply item-row;
 }
 
 @utility rule-toggle {
@@ -6427,7 +6442,7 @@
 }
 
 @utility rule-provider {
-  @apply shrink-0 font-mono text-meta text-ink-muted;
+  @apply shrink-0 meta;
 }
 
 @utility rule-pattern {
@@ -6444,7 +6459,7 @@
 }
 
 @utility rule-project {
-  @apply font-mono text-meta text-ink-muted;
+  @apply meta;
 }
 
 @utility rule-projects {
@@ -6546,11 +6561,11 @@
 }
 
 @utility rule-acts {
-  @apply col-start-2 row-start-1 row-span-2 flex shrink-0 items-center gap-1;
+  @apply item-acts;
 }
 
 @utility rule-pen {
-  @apply cursor-pointer px-2 py-1;
+  @apply item-pen;
 }
 
 @utility rule-editor {
@@ -7226,7 +7241,7 @@
 }
 
 @utility meter-count {
-  @apply shrink-0 font-mono text-meta tabular-nums text-ink-muted;
+  @apply shrink-0 tabular-nums meta;
 }
 
 @utility insights {
@@ -7288,7 +7303,7 @@
 
 @utility activity-type {
   @apply inline-flex cursor-pointer items-center gap-2 rounded-full border border-line px-3 py-1.5;
-  @apply font-mono text-meta text-ink-muted transition-colors duration-150 ease-in-out;
+  @apply transition-colors duration-150 ease-in-out meta;
 
   &:has(:checked) {
     @apply border-ink-muted bg-ground-sunk text-ink;
@@ -7331,7 +7346,7 @@
   }
 
   & .day-date {
-    @apply font-mono text-meta font-normal text-ink-muted;
+    @apply font-normal meta;
   }
 
   @variant wide {
@@ -7375,7 +7390,7 @@
 @utility search-kind {
   @apply focus-ring;
   @apply inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5;
-  @apply font-mono text-meta text-ink-muted no-underline transition-colors duration-150 ease-in-out;
+  @apply no-underline transition-colors duration-150 ease-in-out meta;
 
   &:hover,
   &[aria-current] {
@@ -7882,7 +7897,7 @@
 }
 
 @utility compose-chips-empty {
-  @apply font-mono text-meta text-mk-pink-text;
+  @apply field-error;
 }
 
 @utility compose-chip {
@@ -7925,7 +7940,7 @@
 }
 
 @utility compose-chips-more {
-  @apply cursor-pointer rounded-full border border-dashed border-line px-3 py-1 font-mono text-meta text-ink-muted;
+  @apply cursor-pointer rounded-full border border-dashed border-line px-3 py-1 meta;
   @apply hover:border-ink-muted hover:text-ink admin-focus;
 }
 
@@ -7934,7 +7949,7 @@
 }
 
 @utility compose-accounts-link {
-  @apply cursor-pointer font-mono text-meta tracking-normal normal-case text-ink-muted;
+  @apply cursor-pointer tracking-normal normal-case meta;
   @apply hover:text-ink admin-focus;
 
   @variant phone {
@@ -8061,7 +8076,7 @@
 }
 
 @utility sq-fail {
-  @apply font-mono text-meta text-mk-pink-text;
+  @apply field-error;
 }
 
 @utility sq-meta {
