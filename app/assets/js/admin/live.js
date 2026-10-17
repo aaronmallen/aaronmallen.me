@@ -66,6 +66,7 @@ export function setupLive() {
   if (!url) return;
 
   let asked = 0;
+  let askedFor = null;
   let next = null;
 
   const morph = () => {
@@ -80,9 +81,12 @@ export function setupLive() {
     queue: true,
     request: () => {
       asked = wanted;
-      return { url: window.location.href, redirect: "manual" };
+      askedFor = window.location.href;
+      return { url: askedFor, redirect: "manual" };
     },
     done: (html) => {
+      if (askedFor !== window.location.href) return refetch.later();
+
       next = parse(html);
       if (wanted === asked) wanted = 0;
       morph();
