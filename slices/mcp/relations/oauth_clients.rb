@@ -3,8 +3,6 @@
 module MCP
   module Relations
     class OAuthClients < Blog::DB::Relation
-      HOLDS_SCOPE = "? = ANY(scopes)"
-
       schema :oauth_clients, infer: true do
         attribute :visitor_hash, Blog::Types::VisitorHash
       end
@@ -24,7 +22,7 @@ module MCP
       def holding_live_token(at: Time.now) = where(id: live_tokens(at).select(:oauth_client_id))
 
       def holding_scope(scope, at: Time.now)
-        where(id: live_tokens(at).where(Sequel.lit(HOLDS_SCOPE, scope)).select(:oauth_client_id))
+        where(id: live_tokens(at).where(Sequel.expr(scope => Sequel.pg_array_op(:scopes).any)).select(:oauth_client_id))
       end
 
       def idle(since:, at: Time.now)
