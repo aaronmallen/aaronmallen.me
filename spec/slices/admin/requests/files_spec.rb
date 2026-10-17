@@ -317,6 +317,10 @@ RSpec.describe "Admin files", type: :request do
         expect(drawer).to have_css("button[data-record-key='#{link}']", visible: :all)
       end
 
+      it "copies the file as a markdown link by its name" do
+        expect(drawer).to have_css("button[data-record-key='[deck.pdf](#{link})']", visible: :all)
+      end
+
       it "edits the name and the code but no alt text for a file that is no image", :aggregate_failures do
         expect(drawer).to have_field("share[filename]", with: "deck.pdf", visible: :all)
         expect(drawer).to have_field("share[code]", with: file.code, visible: :all)

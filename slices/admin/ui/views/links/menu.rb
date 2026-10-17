@@ -42,7 +42,7 @@ module Admin
                                     confirm:)
           end
 
-          def markdown = Helpers::ShareLink.markdown(@link.title || Row.host(@link.destination), short)
+          def markdown = Helpers::ShareLink.markdown(Helpers::ShareLink.link_name(@link), short)
 
           def opens(menu)
             dialog = ShareDrawer.id_for(LinkForm, @link)

@@ -69,7 +69,7 @@ module Admin
             field(:title, t(".title"), t(".title_hint"), placeholder: host)
           end
 
-          def host = Row.host(@link.destination)
+          def host = Helpers::ShareLink.domain(@link.destination)
 
           def meta
             span { t(".clicks", count: @link.click_count, clicks: Blog::Helpers::Figures.count(@link.click_count)) }
@@ -77,7 +77,7 @@ module Admin
             span { t(".last_clicked", on: date(@link.last_clicked_at, :medium)) } if @link.last_clicked_at
           end
 
-          def name = @link.title || host
+          def name = Helpers::ShareLink.link_name(@link)
 
           def scope = self.class.scope(@link)
 

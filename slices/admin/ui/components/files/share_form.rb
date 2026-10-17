@@ -57,7 +57,7 @@ module Admin
 
           def link = Helpers::ShareLink.for(@share.code)
 
-          def markdown = (Helpers::ShareLink.image_markdown(@share.alt_text, link) if image?)
+          def markdown = Helpers::ShareLink.file_markdown(@share, link)
 
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }

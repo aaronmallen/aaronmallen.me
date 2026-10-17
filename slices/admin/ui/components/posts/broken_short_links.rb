@@ -29,7 +29,7 @@ module Admin
 
           def row(link)
             LinkCheckRow(
-              url: link.destination, text: bare_url(Helpers::ShareLink.for(link.code)), check: link,
+              url: link.destination, text: Helpers::ShareLink.bare_for(link.code), check: link,
               published: true, form: FailingLinks::FORM, action: path(:admin_check_link, id: link.id),
             ) { change_button(link) }
           end

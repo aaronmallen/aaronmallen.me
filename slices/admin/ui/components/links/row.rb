@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "uri"
-
 module Admin
   module UI
     module Components
@@ -9,8 +7,6 @@ module Admin
         class Row < Component
           prop :link, Blog::Types::Instance(ROM::Struct)
           prop :check, Blog::Types::Instance(ROM::Struct).optional, default: nil
-
-          def self.host(destination) = URI.parse(destination).host.to_s.delete_prefix("www.")
 
           def view_template
             div(class: "link-row", data: { menu: path(:admin_link_menu, id: @link.id) }) do
@@ -52,7 +48,7 @@ module Admin
 
           def opener
             a(href: path(:admin_edit_link, id: @link.id), **Dialog.opens(ShareDrawer.id_for(LinkForm, @link))) do
-              @link.title || host
+              Helpers::ShareLink.link_name(@link)
             end
           end
 

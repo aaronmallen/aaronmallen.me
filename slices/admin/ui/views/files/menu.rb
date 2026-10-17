@@ -40,15 +40,9 @@ module Admin
                                     confirm:)
           end
 
-          def image? = Shares::ContentType.image?(@share.content_type)
-
           def link = Helpers::ShareLink.for(@share.code)
 
-          def markdown
-            return Helpers::ShareLink.markdown(@share.filename, link) unless image?
-
-            Helpers::ShareLink.image_markdown(@share.alt_text, link)
-          end
+          def markdown = Helpers::ShareLink.file_markdown(@share, link)
 
           def opens(menu)
             dialog = ShareDrawer.id_for(ShareForm, @share)
