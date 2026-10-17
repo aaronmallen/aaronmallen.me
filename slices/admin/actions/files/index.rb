@@ -25,10 +25,12 @@ module Admin
         private
 
         def list_groups(response, list, page)
-          groups = share_group_queries.listed(**list)
+          first = page.number == 1
+          groups = first ? share_group_queries.listed(**list) : []
+          count = first ? groups.size : share_group_queries.count_listed(**list)
 
-          response[:count] = share_queries.count_listed(**list) + groups.size
-          response[:groups] = page.number == 1 ? groups : []
+          response[:count] = share_queries.count_listed(**list) + count
+          response[:groups] = groups
           response[:group_options] = share_group_queries.options
         end
 

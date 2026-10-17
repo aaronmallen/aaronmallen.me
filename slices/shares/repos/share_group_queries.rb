@@ -13,6 +13,8 @@ module Shares
 
       def count = share_groups.count
 
+      def count_listed(filter:, search: nil) = matched(filter, search).count
+
       def file(id) = share_group_files.by_pk(id).one
 
       def file_by_code(code, id)
@@ -25,11 +27,8 @@ module Shares
       end
 
       def listed(filter:, search: nil)
-        files = share_group_files
-        files = files.images if filter == IMAGES
-        files = files.others if filter == OTHER
-        found = share_groups.with_code.where(Sequel[:share_groups][:id] => owners(files, search))
-        found.newest_first.combine(:share_group_files).node(:share_group_files) { it.order(:id) }.to_a
+        found = matched(filter, search).newest_first
+        found.combine(:share_group_files).node(:share_group_files) { it.order(:id) }.to_a
       end
 
       def options = share_groups.with_code.newest_first.to_a.to_h { [it.id.to_s, it.name || it.code] }
@@ -37,6 +36,13 @@ module Shares
       def page(page) = page.fill(share_groups.with_code.newest_first.paged(page).combine(:share_group_files).to_a)
 
       private
+
+      def matched(filter, search)
+        files = share_group_files
+        files = files.images if filter == IMAGES
+        files = files.others if filter == OTHER
+        share_groups.with_code.where(Sequel[:share_groups][:id] => owners(files, search))
+      end
 
       def owners(files, search)
         files = files.matching(search, Sequel[:short_codes][:code]) if search

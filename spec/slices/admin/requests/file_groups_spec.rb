@@ -90,6 +90,23 @@ RSpec.describe "Admin file groups", type: :request do
 
       expect(page).to have_css(".empty", text: i18n.t("ui.views.files.index.no_match"))
     end
+
+    describe "past the first page" do
+      before { 13.times { upload_share("x", "shot-#{it}.txt") } }
+
+      it "counts the group among the matches but shows no card", :aggregate_failures do
+        get "/admin/files", search: "shot", page: "2"
+
+        expect(page).to have_css(".hint", text: "14 matches")
+        expect(page).to have_no_css(".file-card-name", text: "2 files")
+      end
+
+      it "loads no group files" do
+        statements = counting { get "/admin/files", search: "shot", page: "2" }
+
+        expect(statements.grep(/"share_group_id" IN \(\d/)).to be_empty
+      end
+    end
   end
 
   describe "the drawer" do
