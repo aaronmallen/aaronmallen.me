@@ -7,8 +7,6 @@ module Mail
 
       include Deps[reclean_mail_html: "operations.reclean_mail_html"]
 
-      sidekiq_options retry: 3
-
       def perform(after = 0, gone = 0)
         case reclean_mail_html.call(after)
           in Success(nil, more) then logger.info(format(DONE, gone + more))

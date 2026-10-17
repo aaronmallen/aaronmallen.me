@@ -7,8 +7,6 @@ module Record
 
       include Deps["github.client", backfill_repo_commits: "operations.backfill_repo_commits"]
 
-      sidekiq_options retry: 3
-
       def perform(repo, clock)
         case backfill_repo_commits.call(repo, clock: Time.iso8601(clock))
           in Failure(:rate_limited) then reschedule(repo, clock)

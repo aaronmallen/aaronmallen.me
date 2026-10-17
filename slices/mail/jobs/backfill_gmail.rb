@@ -8,8 +8,6 @@ module Mail
 
       include Deps[gmail_backfills: "repos.gmail_backfills", sync_gmail: "operations.sync_gmail"]
 
-      sidekiq_options retry: 3
-
       def perform(address, page_token = nil)
         gmail_backfills.hold(address, page_token)
         case sync_gmail.backfill(address, page_token)

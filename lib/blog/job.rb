@@ -7,5 +7,7 @@ module Blog
   class Job
     include Dry::Monads[:result]
     include Sidekiq::Job
+
+    sidekiq_options retry: 3
   end
 end

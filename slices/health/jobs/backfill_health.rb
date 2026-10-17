@@ -12,8 +12,6 @@ module Health
 
       include Deps[google: "google.client", sync_health: "operations.sync_health"]
 
-      sidekiq_options retry: 3
-
       def perform(last)
         last = Date.iso8601(last)
         first = last - Operations::SyncHealth::CHUNK_DAYS + 1

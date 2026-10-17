@@ -45,7 +45,8 @@ now, the commit finder starts from the newest stored commit and every failure re
 rollup walks every day since its newest rollup, the health sync reads again from two days before its failure began
 (#1114), and the reapers delete everything past its time.
 
-**A per-item job retries a few times.** `BackfillRepoCommits` takes 3, as `CreditAgents` has since #926, and
+**A per-item job retries a few times.** `Blog::Job` sets `retry: 3`, so a job that names no count takes 3 (#1690).
+`BackfillRepoCommits` takes 3, as `CreditAgents` has since #926, and
 `DeliverSocialPost`, `SendWebmentions`, `VerifyWebmention` and `SyndicatePost` take 5, which three of the specs
 size for a network "only briefly down". The first three each raise for the one `Failure` a retry can fix and
 finish quietly on the rest, and `DeliverSocialPost` marks the delivery failed once its retries run out. The
