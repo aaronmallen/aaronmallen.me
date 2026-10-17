@@ -94,7 +94,7 @@ module API
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
       operations.delete_task_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
       operations.edit_work_session operations.link_tasks operations.mark_task_seen
-      operations.move_task
+      operations.mark_tasks_seen operations.move_task
       operations.pause_task operations.pause_task_series operations.place_task operations.plan_sprint
       operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.resume_task_series
       operations.save_task operations.save_task_rule

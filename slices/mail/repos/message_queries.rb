@@ -64,6 +64,8 @@ module Mail
                     .node(:mail_messages) { it.order(:received_at, :id) }.by_pk(id).one
       end
 
+      def thread_ids(ids) = mail_threads.where(id: ids).pluck(:id)
+
       def unread(limit: nil) = waiting.awake.with_preview.with_account.latest_first(:received_at).limit(limit).to_a
 
       def unread_count = waiting.awake.count

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, contact, mcp, social, tasks]
 issue: "#650"
-amended: ["#911"]
+amended: ["#911", "#1603"]
 tags: [inbox, webmentions, messages, tasks, schema, bulk, transactions, savepoint, api, mcp]
 ---
 
@@ -38,11 +38,13 @@ it to now on any mention that exists, whatever its status. Its exported `repos.w
 the analytics figures keep counting every pending mention.
 
 **One `api` operation clears the inbox.** `API::Operations::ClearInbox` takes three lists of ids, `tasks`,
-`messages` and `webmentions`, and opens one transaction. It calls `tasks.operations.mark_task_seen`,
-`contact.operations.mark_message` with `read`, and the new social operation for each id in turn, all through slice
-exports. The first failure stops the loop, steps out as `Failure[:record, kind, id, reason]` and rolls back every row
-the call had changed. The contract drops repeated ids and refuses a call whose three lists are all empty. It does not
-take the cap of 100 from [ADR 0098][0098]: the inbox has no pages, and the button posts every row it shows.
+`messages` and `webmentions`, and opens one transaction. It marks every listed issue seen in one `task_sources`
+update through `tasks.operations.mark_tasks_seen`, and calls `mail.operations.mark_message` with `read` and the new
+social operation for each id in turn, all through slice exports. Gmail hears of each message before the transaction
+opens, so no Gmail call holds it open (#1603). The first failure stops the loop, steps out as
+`Failure[:record, kind, id, reason]` and rolls back every row the call had changed. The contract drops repeated ids
+and refuses a call whose three lists are all empty. It does not take the cap of 100 from [ADR 0098][0098]: the inbox
+has no pages, and the button posts every row it shows.
 
 **Each door posts ids, never "all".** The admin posts `post "/inbox/seen"` from a form outside the rows that carries
 each row's id, and imports the operation from `api` as it imports `repos.inbox_queries` (#911). The form asks to confirm
@@ -77,6 +79,8 @@ With no cap, a large inbox runs one long transaction that holds its row locks un
 send as many ids as it likes.
 
 A row moderated in another tab after the page loaded still clears, but a row deleted there fails the whole click.
+
+A failure after Gmail heard of a message leaves that thread read in Gmail and unread here.
 
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0094]: 0094-keep-a-seen-at-on-task-sources-and-merge-the-inbox-in-the-api-slice.md

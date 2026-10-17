@@ -9,29 +9,39 @@ module API
       include Deps[
         contract: "contracts.clear_inbox_contract",
         mark_message: "mail.operations.mark_message",
-        mark_task_seen: "tasks.operations.mark_task_seen",
+        mark_tasks_seen: "tasks.operations.mark_tasks_seen",
         mark_webmention_seen: "social.operations.mark_webmention_seen",
+        message_queries: "mail.repos.message_queries",
       ]
 
       def call(params)
         fields = step validate(params)
+        ids = KINDS.to_h { [it, fields.fetch(it, [])] }
+        step found_messages(ids[:messages])
+        each(:messages, ids, local: false)
 
         transaction do
-          KINDS.to_h { |kind| [kind, fields.fetch(kind, []).map { step cleared(kind, it) }] }
+          { tasks: step(tasks(ids[:tasks])), messages: each(:messages, ids, remote: false),
+            webmentions: each(:webmentions, ids) }
         end
       end
 
       private
 
-      def clear(kind, id)
-        case kind
-          when :tasks then mark_task_seen.call(id)
-          when :messages then mark_message.call(id, READ)
-          else mark_webmention_seen.call(id)
-        end
+      def clear(kind, id, **)
+        kind == :messages ? mark_message.call(id, READ, **) : mark_webmention_seen.call(id)
       end
 
-      def cleared(kind, id) = clear(kind, id).alt_map { [:record, kind, id, it] }
+      def cleared(kind, id, **) = clear(kind, id, **).fmap(&:id).alt_map { [:record, kind, id, it] }
+
+      def each(kind, ids, **) = ids.fetch(kind).map { step cleared(kind, it, **) }
+
+      def found_messages(ids)
+        gone = ids - message_queries.thread_ids(ids)
+        gone.empty? ? Success(ids) : Failure[:record, :messages, gone.first, :not_found]
+      end
+
+      def tasks(ids) = mark_tasks_seen.call(ids).alt_map { |(_, id, reason)| [:record, :tasks, id, reason] }
 
       def validate(params) = validated(contract.call(KINDS.to_h { [it, params[it]] }.compact))
     end

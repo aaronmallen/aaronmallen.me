@@ -33,11 +33,13 @@ module Mail
         message_tag_mutations: "repos.message_tag_mutations",
       ]
 
-      def call(id, act, label: nil)
+      def call(id, act, label: nil, local: true, remote: true)
         thread = step found(message_queries.by_id(id))
         return labeled(thread, *label.split(":", 2)) if act == ACT["label"]
 
-        step gmail(thread) { write(it, thread, act) }
+        step gmail(thread) { write(it, thread, act) } if remote
+        return thread unless local
+
         change(thread, act)
         message_queries.by_id(id)
       end

@@ -13,6 +13,20 @@ RSpec.describe "API clear inbox", type: :request do
 
   def everything = { tasks: [task.id], messages: [message.id], webmentions: [webmention.id] }
 
+  def gmail_thread
+    work = create(:mail_account, address: "aaron@work.example")
+    connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+    create(:message, mail_account_id: work.id, gmail_id: "t1")
+  end
+
+  def gmail_transactions
+    db = Mail::Slice["db.rom"].gateways[:default].connection
+    [].tap do |open|
+      stub_request(:post, "#{Spec::GoogleAccounts::GMAIL}/threads/t1/modify")
+        .to_return { open << db.in_transaction? and google_health_json({}) }
+    end
+  end
+
   def marks = [task_unseen?, Mail::Slice["repos.message_queries"].by_id(message.id).status, webmention_marks]
 
   def status = last_response.status
@@ -43,6 +57,39 @@ RSpec.describe "API clear inbox", type: :request do
 
     expect([answer.fetch("errors"), status]).to eq([{ "webmentions" => ["no webmention has the ID #{gone}"] }, 422])
     expect(marks).to eq([true, "unread", [true, "pending"]])
+  end
+
+  it "marks a Gmail thread read with no transaction open", :aggregate_failures, :commits do
+    open = gmail_transactions
+    clear(tasks: [task.id], messages: [gmail_thread.id])
+
+    expect([status, open]).to eq([200, [false]])
+  end
+
+  it "changes nothing when Gmail refuses a thread", :aggregate_failures do
+    thread = gmail_thread
+    stub_request(:post, "#{Spec::GoogleAccounts::GMAIL}/threads/t1/modify").to_return(status: 500)
+
+    errors = clear(tasks: [task.id], messages: [thread.id]).fetch("errors")
+
+    expect(errors).to eq({ "messages" => ["could not clear message #{thread.id}"] })
+    expect(task_unseen?).to be(true)
+  end
+
+  it "marks every issue seen in one update without reloading them", :aggregate_failures do
+    tasks = [task.id, synced.id]
+    queries = counting { clear(tasks:) }
+
+    expect([queries.grep(/UPDATE "task_sources"/).size, queries.grep(/FROM "tasks"/).size]).to eq([1, 0])
+    expect(tasks.map { Tasks::Slice["repos.task_queries"].by_id(it).source.seen_at }).to all(be_a(Time))
+  end
+
+  it "keeps the first seen time of an issue already seen" do
+    at = Time.utc(2026, 1, 2)
+    Tasks::Slice["repos.task_source_mutations"].see([task.id], at)
+    clear(tasks: [task.id])
+
+    expect(Tasks::Slice["repos.task_queries"].by_id(task.id).source.seen_at).to eq(at)
   end
 
   it "refuses a call with no rows" do

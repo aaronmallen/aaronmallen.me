@@ -30,7 +30,7 @@ module API
 
       def cleared(ids)
         case clear_inbox.call(ids)
-          in Success(cleared) then Success(cleared.transform_values { it.map(&:id) })
+          in Success => cleared then cleared
           in Failure[:record, kind, id, reason] then invalid(kind => [refused(NOUNS.fetch(kind), id, reason)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
           else failed(Helpers::Wording::UNSAVED)
