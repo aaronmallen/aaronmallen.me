@@ -8,9 +8,9 @@ module Admin
           prop :carried, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            title = dotted(t(".title"), Blog::Helpers::Figures.count(@carried.size))
+            empty = t(".empty") if @carried.empty?
 
-            Card(title:, empty: (t(".empty") if @carried.empty?), id: "review-carried") do
+            Card(title: t(".title"), count: @carried.size, empty:, id: "review-carried") do
               Capped(items: @carried, more: path(:admin_tasks)) { row(it) }
             end
           end

@@ -10,9 +10,9 @@ module Admin
           prop :decisions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            title = dotted(t(".title"), Blog::Helpers::Figures.count(@decisions.size))
+            empty = t(".empty") if @decisions.empty?
 
-            Card(title:, empty: (t(".empty") if @decisions.empty?), id: "review-decisions") do
+            Card(title: t(".title"), count: @decisions.size, empty:, id: "review-decisions") do
               Capped(items: @decisions, more: path(:admin_decisions)) { row(it) }
             end
           end

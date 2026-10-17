@@ -18,9 +18,7 @@ module Admin
           prop :focused, Blog::Types::Bool, default: false
 
           def view_template
-            title = dotted(t(".title"), Blog::Helpers::Figures.count(tasks.size))
-
-            Card(title:, empty:, id: "review-done") do |card|
+            Card(title: t(".title"), count: tasks.size, empty:, id: "review-done") do |card|
               card.side { SegmentedLinks(label: t(".group"), items: GROUPS.map { |name, text| switch(name, text) }) }
               listed
             end

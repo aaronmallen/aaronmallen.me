@@ -12,14 +12,12 @@ module Admin
           prop :networks, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
-            aside(
-              id: ID, class: "card settings-side person-finder", hidden: true, aria: { labelledby: TITLE_ID },
+            Card(
+              as: :aside, title: t(".title"), title_id: TITLE_ID,
+              id: ID, class: "settings-side person-finder", hidden: true, aria: { labelledby: TITLE_ID },
               data: { person_finder: "", person_finder_failed: t(".failed") },
-            ) do
-              header(class: "card-head") do
-                h2(id: TITLE_ID, class: "card-title") { t(".title") }
-                toggle
-              end
+            ) do |card|
+              card.side { toggle }
               search_form
               div(class: "person-finder-results", aria: { live: "polite" }, data: { person_finder_results: "" })
             end

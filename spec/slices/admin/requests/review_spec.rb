@@ -133,6 +133,12 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         expect(heads).to eq(%w[/admin/posts /admin/social?filter=posted /admin/social?filter=posted])
       end
 
+      it "opens each published row's menu for its kind" do
+        menus = card("published").all(".review-line").map { it["data-menu"] }
+
+        expect(menus).to all(match(%r{\A/admin/(posts|social)/\d+/menu\z})).and(include(%r{/posts/}, %r{/social/}))
+      end
+
       it "sums the journal's entries, words and days written" do
         expect(card("journal").find(".review-stat").text).to eq("2 entries · 5 words · 2 days written")
       end
@@ -556,6 +562,14 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         journal = "/admin/journal?to=2025-09-15#day-2025-09-15"
 
         expect(rows).to eq([["Sep 15, 2025", journal], ["Sep 20, 2024", "/admin/posts/#{published.id}/edit"]])
+      end
+
+      it "opens each row's menu for its kind" do
+        visit_review(day: "2026-09-16")
+
+        menus = card("earlier").all(".review-line").map { it["data-menu"] }
+
+        expect(menus).to match([%r{\A/admin/journal/\d+/menu\z}, "/admin/posts/#{published.id}/menu"])
       end
 
       it "shows the earlier years of the period it pages to" do

@@ -12,7 +12,7 @@ module Admin
           def render? = @earlier.any?
 
           def view_template
-            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(@earlier.size)), id: "review-earlier") do
+            Card(title: t(".title"), count: @earlier.size, id: "review-earlier") do
               Capped(items: @earlier) { line(it) }
             end
           end
@@ -30,7 +30,7 @@ module Admin
           end
 
           def menu(record)
-            path(record.type == POST ? :admin_post_menu : :admin_journal_entry_menu, id: record.source_id)
+            path(Activity::Event::MENUS.fetch(record.type), id: record.source_id)
           end
         end
       end

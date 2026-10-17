@@ -26,9 +26,7 @@ module Admin
             page_head
 
             div(class: "g-main", data: { calendar: "" }) do
-              section(class: "card") do
-                Month(month: @month, today: @today, days: @days, picked: @day.date, tones: @tones)
-              end
+              Card { Month(month: @month, today: @today, days: @days, picked: @day.date, tones: @tones) }
               Panel(day: @day, calendars: @calendars, tasks: @tasks, today: @today, tones: @tones, refused: @refused)
             end
           end

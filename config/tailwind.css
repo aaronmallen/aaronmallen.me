@@ -5840,8 +5840,8 @@
 @utility task-pull {
   @apply bg-transparent;
 
-  & > .card-title {
-    @apply mt-0 mb-4;
+  & .card-title {
+    @apply mt-0;
   }
 
   @variant wide {
@@ -6341,7 +6341,12 @@
 }
 
 @utility tag-editor {
-  @apply hidden scroll-mt-[calc(var(--spacing-top-bar)+1rem)] flex-col gap-3;
+  @apply hidden scroll-mt-[calc(var(--spacing-top-bar)+1rem)] flex-col gap-3
+    rounded-none border-0 bg-transparent p-0;
+
+  & > .card-body {
+    @apply flex flex-col gap-3;
+  }
 
   &:target,
   &.tag-editor-open {

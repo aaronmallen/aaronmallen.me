@@ -81,7 +81,7 @@ module Admin
           def scope_path(scope) = path(:admin_tags, **scope_params(scope))
 
           def side_panel
-            aside(class: "card settings-side tag-panel", id: Editor::PANEL_ID) do
+            Card(as: :aside, class: "settings-side tag-panel", id: Editor::PANEL_ID) do
               div(class: "tag-panel-intro") do
                 p(class: "settings-aside") { t(".aside") }
                 Hint { t(".note") }

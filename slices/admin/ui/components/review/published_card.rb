@@ -13,9 +13,7 @@ module Admin
           prop :days, Blog::Types::Array.of(Blog::Types::Date)
 
           def view_template
-            title = dotted(t(".title"), Blog::Helpers::Figures.count(count))
-
-            Card(title:, empty: (t(".empty") if count.zero?), id: "review-published") do
+            Card(title: t(".title"), count:, empty: (t(".empty") if count.zero?), id: "review-published") do
               Capped(items: groups) { |name, records, href| group(name, records, href) }
             end
           end
@@ -44,7 +42,7 @@ module Admin
           end
 
           def menu(record)
-            path(record.type == POST ? :admin_post_menu : :admin_social_post_menu, id: record.source_id)
+            path(Activity::Event::MENUS.fetch(record.type), id: record.source_id)
           end
         end
       end

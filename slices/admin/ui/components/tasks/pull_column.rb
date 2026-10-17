@@ -15,8 +15,9 @@ module Admin
           )
 
           def view_template
-            aside(class: "card task-pull", aria: { label: t(".title") }, data: { key_list: true }) do
-              h2(class: "card-title") { t(".title") }
+            title = t(".title")
+
+            Card(as: :aside, title:, class: "task-pull", aria: { label: title }, data: { key_list: true }) do
               Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
             end
           end

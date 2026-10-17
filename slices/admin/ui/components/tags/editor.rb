@@ -19,8 +19,11 @@ module Admin
           def self.id_for(tag) = "tag-#{tag.id}-editor"
 
           def view_template
-            div(class: ["tag-editor", ("tag-editor-open" if editing?)], id: self.class.id_for(@tag)) do
-              head
+            Card(
+              as: :div, note: t(SCOPES.fetch(@tag.scope)), note_class: "meta",
+              class: ["tag-editor", ("tag-editor-open" if editing?)], id: self.class.id_for(@tag),
+            ) do |card|
+              card.heading { Tag(tag: @tag) }
               rename_form
               FieldError(field: :name, errors:, scope:)
               color_form
@@ -62,13 +65,6 @@ module Admin
               save
               cancel
               remove
-            end
-          end
-
-          def head
-            header(class: "card-head") do
-              h2(class: "card-title") { Tag(tag: @tag) }
-              div(class: "card-side meta") { t(SCOPES.fetch(@tag.scope)) }
             end
           end
 
