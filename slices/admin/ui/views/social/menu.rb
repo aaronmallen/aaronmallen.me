@@ -41,7 +41,7 @@ module Admin
             fields = { filter: @filter, return_to: nil }
 
             menu.separator
-            menu.post(label, action:, fields:, icon: :trash, warn: true, confirm: t(".confirm_remove"))
+            menu.post(label, action:, fields:, icon: :trash, warn: true, confirm: :remove)
           end
 
           def text = @social_post.parts.map(&:body).join("\n\n")

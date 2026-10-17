@@ -277,7 +277,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "asks for a second click", :aggregate_failures do
-      expect(item(translate("ui.views.tasks.menu.confirm_delete"))).to be_truthy
+      expect(item(translate("ui.components.context_menu.confirm.delete"))).to be_truthy
       expect(repo.by_id(task.id)).not_to be_nil
     end
 
@@ -289,7 +289,7 @@ RSpec.describe "Admin row context menu", type: :feature do
     end
 
     it "deletes on the second click" do
-      item(translate("ui.views.tasks.menu.confirm_delete")).click
+      item(translate("ui.components.context_menu.confirm.delete")).click
 
       expect(page).to have_css(".toast", text: translate("tasks_page.toasts.deleted"))
     end

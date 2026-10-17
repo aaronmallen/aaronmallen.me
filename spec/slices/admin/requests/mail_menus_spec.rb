@@ -160,7 +160,7 @@ RSpec.describe "Admin mail menus", type: :request do
 
       expect(items).not_to include("Reply")
       expect(fields(menu_form("Delete forever"))).to include("act" => "delete")
-      expect(page).to have_css("button[data-confirm-inline='Click again · can’t undo']", text: "Delete forever")
+      expect(page).to have_css("button[data-confirm-inline=\"Click again · can't undo\"]", text: "Delete forever")
     end
 
     it "offers a new label for a contact form thread" do

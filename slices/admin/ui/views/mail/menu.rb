@@ -41,9 +41,9 @@ module Admin
           end
 
           def delete(menu)
-            return act(menu, ACT["trash"], ".delete", warn: true, confirm: t(".confirm")) unless @thread.trashed
+            return act(menu, ACT["trash"], ".delete", warn: true, confirm: :delete) unless @thread.trashed
 
-            act(menu, ACT["delete"], ".delete_forever", warn: true, confirm: t(".confirm_forever"))
+            act(menu, ACT["delete"], ".delete_forever", warn: true, confirm: :forever)
           end
 
           def files(menu)

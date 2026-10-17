@@ -26,9 +26,8 @@ module Admin
           def act(route) = path(route, id: @entry.id)
 
           def delete(menu)
-            confirm = t(".confirm_delete")
-
-            menu.post(t(".delete"), action: act(:admin_delete_journal_entry), icon: :trash, warn: true, confirm:)
+            menu.post(t(".delete"), action: act(:admin_delete_journal_entry), icon: :trash, warn: true,
+                                    confirm: :forever)
           end
 
           def edit_path = path(:admin_journal, to: @entry.entry_date.iso8601, edit: @entry.id)

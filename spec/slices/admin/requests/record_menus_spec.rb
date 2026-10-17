@@ -79,7 +79,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "asks before it deletes" do
-        confirm = translate("ui.views.journal.menu.confirm_delete")
+        confirm = translate("ui.components.context_menu.confirm.forever")
 
         expect(form("/admin/journal/#{entry.id}/delete").find("button")["data-confirm-inline"]).to eq(confirm)
       end

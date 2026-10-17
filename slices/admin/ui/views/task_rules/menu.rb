@@ -17,7 +17,7 @@ module Admin
                                     dialog: Components::TaskRules::Row.toggle_id(id))
               menu.separator
               menu.post(t(".delete"), action: path(:admin_delete_task_rule, id:), icon: :trash,
-                                      warn: true, confirm: t(".confirm_delete"))
+                                      warn: true, confirm: :delete)
             end
           end
         end

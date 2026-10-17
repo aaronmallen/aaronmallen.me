@@ -67,9 +67,7 @@ module Admin
 
           def ends(menu)
             menu.post(t(".cancel"), action: act(:admin_cancel_task), icon: :ban) unless closed?
-            confirm = t(".confirm_delete")
-            menu.post(t(".delete"), action: act(:admin_delete_task), icon: :trash, warn: true,
-                                    confirm:)
+            menu.post(t(".delete"), action: act(:admin_delete_task), icon: :trash, warn: true, confirm: :delete)
           end
 
           def key = @task.label

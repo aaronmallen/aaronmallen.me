@@ -765,6 +765,12 @@ en:
       confirm:
         accept: "Yes"
         decline: "No"
+      context_menu:
+        confirm:
+          delete: "Click again to delete"
+          forever: "Click again · can't undo"
+          remove: "Click again to remove"
+          revoke: "Click again to revoke"
       date_range:
         from: "From"
         to: "To"
@@ -3011,12 +3017,10 @@ en:
           empty: "No client has connected yet."
           heading: "MCP clients"
         menu:
-          confirm_revoke: "Click again to revoke"
           revoke: "Revoke"
           sightings: "Sign-ins"
       comments:
         menu:
-          confirm_delete: "Click again to delete"
           copied_text: "Text copied"
           copy_text: "Copy text"
           delete: "Delete comment"
@@ -3154,7 +3158,6 @@ en:
             one: "%{count} word"
             other: "%{count} words"
         menu:
-          confirm_delete: "Click again · can't undo"
           copied_text: "Entry copied"
           copy_text: "Copy text"
           delete: "Delete entry"
@@ -3214,8 +3217,6 @@ en:
           archive:
             one: "Archive %{count}"
             other: "Archive %{count}"
-          confirm: "Click again to delete"
-          confirm_forever: "Click again · can’t undo"
           delete:
             one: "Delete %{count}"
             other: "Delete %{count}"
@@ -3260,8 +3261,6 @@ en:
             zero: "the contact form"
         menu:
           archive: "Archive"
-          confirm: "Click again to delete"
-          confirm_forever: "Click again · can’t undo"
           copied_address: "Address copied"
           copy_address: "Copy address"
           delete: "Delete"
@@ -3314,7 +3313,6 @@ en:
             other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
           token: "@{%{key}}"
         menu:
-          confirm_remove: "Click again to remove"
           copied_mention: "Mention copied"
           copy_mention: "Copy mention"
           edit: "Edit"
@@ -3389,7 +3387,6 @@ en:
           views: "Page views"
           visitors: "Visitors"
         bulk_menu:
-          confirm_delete: "Click again to delete"
           delete: "Delete"
           label:
             one: "%{count} post picked"
@@ -3424,7 +3421,6 @@ en:
           title: "Posts"
         menu:
           analytics: "Analytics"
-          confirm_delete: "Click again to delete"
           copied_link: "Link copied"
           copy_link: "Copy link"
           delete: "Delete draft"
@@ -3595,7 +3591,6 @@ en:
           no_accounts: "No network is connected"
           queued: "%{count} queued"
         menu:
-          confirm_remove: "Click again to remove"
           copied_text: "Text copied"
           copy_text: "Copy text"
           delete_draft: "Delete draft"
@@ -3668,7 +3663,6 @@ en:
           sub: "Each rule gives the issues it matches private tags as they sync, and a project when they have none."
           title: "Tags and projects by repo or team"
         menu:
-          confirm_delete: "Click again to delete"
           delete: "Delete rule"
           edit: "Edit"
       tasks:
@@ -3676,7 +3670,6 @@ en:
           cancel: "Cancel"
           clear: "Clear selection"
           complete: "Complete"
-          confirm_delete: "Click again to delete"
           delete: "Delete"
           label:
             one: "%{count} task picked"
@@ -3707,7 +3700,6 @@ en:
           cancel: "Cancel task"
           column: "Board column"
           complete: "Complete"
-          confirm_delete: "Click again to delete"
           copied_issue: "Issue link copied"
           copied_title: "Title copied"
           copy: "Copy"
@@ -3729,7 +3721,6 @@ en:
           sub: "Title, notes, list, project, sprint, tags and repeats in one go."
           title: "Create a task"
         session_menu:
-          confirm_delete: "Click again to delete"
           delete: "Delete session"
           edit: "Edit"
           label: "Session · %{at}"
@@ -3803,7 +3794,6 @@ en:
           live: "Live tokens"
           mint: "Mint a token"
         menu:
-          confirm_revoke: "Click again to revoke"
           revoke: "Revoke"
       webmentions:
         bulk_menu:

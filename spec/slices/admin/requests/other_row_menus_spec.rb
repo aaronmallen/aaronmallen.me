@@ -63,7 +63,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       end
 
       it "asks before it deletes" do
-        expect(inline_confirm(delete)).to eq(translate("ui.views.comments.menu.confirm_delete"))
+        expect(inline_confirm(delete)).to eq(translate("ui.components.context_menu.confirm.delete"))
       end
 
       it "lands a delete back on the page it opened on", :aggregate_failures do

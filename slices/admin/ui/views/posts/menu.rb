@@ -39,7 +39,7 @@ module Admin
 
             menu.separator
             menu.post(t(".delete"), action: path(:admin_bulk_posts), fields:, icon: :trash,
-                                    warn: true, confirm: t(".confirm_delete"))
+                                    warn: true, confirm: :delete)
           end
 
           def draft? = @post.status == DRAFT

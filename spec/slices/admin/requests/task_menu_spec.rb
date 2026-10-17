@@ -71,7 +71,9 @@ RSpec.describe "Admin task row menu", :frozen_clock, type: :request do
       end
 
       it "asks before it deletes" do
-        expect(page).to have_css("button[data-confirm-inline='#{translate('ui.views.tasks.menu.confirm_delete')}']")
+        confirm = translate("ui.components.context_menu.confirm.delete")
+
+        expect(page).to have_css("button[data-confirm-inline='#{confirm}']")
       end
 
       it "disables the list the task is on" do

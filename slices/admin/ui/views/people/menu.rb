@@ -17,7 +17,7 @@ module Admin
                                             hint: mention)
               menu.separator
               menu.post(t(".remove"), action: act(:admin_delete_person), icon: :trash, warn: true,
-                                      confirm: t(".confirm_remove"))
+                                      confirm: :remove)
             end
           end
 

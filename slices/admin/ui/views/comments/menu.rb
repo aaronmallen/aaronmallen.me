@@ -33,7 +33,7 @@ module Admin
             action = path(ROUTES.dig(@owner, :delete), id: @owner_id, comment_id: @comment.source_id)
 
             menu.separator
-            menu.post(t(".delete"), action:, icon: :trash, warn: true, confirm: t(".confirm_delete"))
+            menu.post(t(".delete"), action:, icon: :trash, warn: true, confirm: :delete)
           end
 
           def edit(menu)

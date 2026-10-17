@@ -32,10 +32,8 @@ module Admin
           def action = path(:admin_bulk_tasks)
 
           def ends(menu)
-            confirm = t(".confirm_delete")
-
             menu.post(t(".cancel"), **act("cancel"), icon: :ban)
-            menu.post(t(".delete"), **act("delete"), icon: :trash, warn: true, confirm:)
+            menu.post(t(".delete"), **act("delete"), icon: :trash, warn: true, confirm: :delete)
           end
 
           def held = @tasks.flat_map { it.tags.map(&:name) }.uniq.sort

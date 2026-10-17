@@ -64,11 +64,11 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
       before { item("Delete entry").click }
 
       it "asks for a second click" do
-        expect(item(translate("ui.views.journal.menu.confirm_delete"))).to be_truthy
+        expect(item(translate("ui.components.context_menu.confirm.forever"))).to be_truthy
       end
 
       it "deletes in place on the second click", :aggregate_failures do
-        item(translate("ui.views.journal.menu.confirm_delete")).click
+        item(translate("ui.components.context_menu.confirm.forever")).click
 
         expect(page).to have_css(".toast", text: translate("journal_page.toasts.deleted"))
         expect(page).to have_no_css(".journal-entry")

@@ -40,7 +40,7 @@ module Admin
             menu.separator
             files(menu)
             menu.separator
-            act(menu, ACT["trash"], t(".delete", count:), warn: true, confirm: t(".confirm"))
+            act(menu, ACT["trash"], t(".delete", count:), warn: true, confirm: :delete)
           end
 
           def files(menu)
@@ -75,7 +75,7 @@ module Admin
           def trash(menu)
             act(menu, ACT["inbox"], t(".restore", count:), icon: :restore)
             menu.separator
-            act(menu, ACT["delete"], t(".delete_forever", count:), warn: true, confirm: t(".confirm_forever"))
+            act(menu, ACT["delete"], t(".delete_forever", count:), warn: true, confirm: :forever)
           end
         end
       end

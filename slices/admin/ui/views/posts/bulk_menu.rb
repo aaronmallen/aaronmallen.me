@@ -27,9 +27,7 @@ module Admin
 
           def delete(menu)
             fields = { **picked, act: DELETE }
-            confirm = t(".confirm_delete")
-
-            menu.post(t(".delete"), action:, fields:, icon: :trash, warn: true, confirm:)
+            menu.post(t(".delete"), action:, fields:, icon: :trash, warn: true, confirm: :delete)
           end
 
           def held = @posts.flat_map { it.tags.map(&:name) }.uniq.sort

@@ -26,7 +26,7 @@ module Admin
             action = path(:admin_delete_task_session, id: @task_id, session_id: @session.source_id)
 
             menu.separator
-            menu.post(t(".delete"), action:, icon: :trash, warn: true, confirm: t(".confirm_delete"))
+            menu.post(t(".delete"), action:, icon: :trash, warn: true, confirm: :delete)
           end
 
           def edit(menu)

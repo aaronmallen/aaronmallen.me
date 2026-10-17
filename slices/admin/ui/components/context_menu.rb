@@ -50,7 +50,7 @@ module Admin
                  **)
           Form(action:, data: { morph: (true if morph) }) do
             hidden(fields)
-            button(type: "submit", **item(data: confirm ? { confirm_inline: confirm } : {}, **)) do
+            button(type: "submit", **item(data: confirm ? { confirm_inline: worded(confirm) } : {}, **)) do
               inner(label, icon:, hint:)
             end
           end
@@ -109,6 +109,8 @@ module Admin
 
           div(class: "ctx-suggest", hidden: true, data: { menu_suggest: JSON.generate(choices) })
         end
+
+        def worded(confirm) = confirm.is_a?(Symbol) ? t([".confirm", confirm].join(".")) : confirm
       end
     end
   end
