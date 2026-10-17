@@ -28,9 +28,7 @@ module Social
       private
 
       def accepting(post, source, settings)
-        return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
-
-        refusal = refusal(post, settings)
+        refusal = refusal(post, source, settings)
         refusal && !webmention_queries.received?(post.id, source) ? Failure(refusal) : Success(refusal)
       end
 
@@ -69,7 +67,8 @@ module Social
         PageFetcher::Client::OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
       end
 
-      def refusal(post, settings)
+      def refusal(post, source, settings)
+        return :bridgy_off if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
         return :not_receiving unless settings.receive
 
         :webmentions_off unless post.webmentions_enabled

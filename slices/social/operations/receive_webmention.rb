@@ -29,10 +29,7 @@ module Social
       private
 
       def accepted(source_url, post)
-        webmention_settings = webmention_queries.settings
-        return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source_url) && !webmention_settings.accept_bridgy
-
-        refusal = refusal(post, webmention_settings)
+        refusal = refusal(post, source_url, webmention_queries.settings)
         refusal && !webmention_queries.received?(post.id, source_url.to_s) ? Failure(refusal) : Success(post)
       end
 
@@ -57,7 +54,8 @@ module Social
         verify(post.id, source_url.to_s, target_url.to_s)
       end
 
-      def refusal(post, webmention_settings)
+      def refusal(post, source_url, webmention_settings)
+        return :bridgy_off if Webmentions::Source.bridgy?(source_url) && !webmention_settings.accept_bridgy
         return :not_receiving unless webmention_settings.receive
 
         :webmentions_off unless post.webmentions_enabled

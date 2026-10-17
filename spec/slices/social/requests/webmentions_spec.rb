@@ -41,6 +41,14 @@ RSpec.describe "Social webmentions", type: :request do
       expect([last_response.status, queued]).to eq([400, []])
     end
 
+    it "queues a resend for a Bridgy source it stored once Bridgy is off" do
+      create(:webmention, post_id: article.id, source_url: bridgy)
+      webmention_mutations.update_settings(accept_bridgy: false)
+      notify(source: bridgy)
+
+      expect([last_response.status, queued]).to eq([202, [bridgy]])
+    end
+
     it "leaves other senders accepted once Bridgy is off" do
       webmention_mutations.update_settings(accept_bridgy: false)
       notify

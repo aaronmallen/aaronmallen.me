@@ -886,6 +886,29 @@ RSpec.describe Social::Jobs::VerifyWebmention do
         end
       end
     end
+
+    context "with a Bridgy mention stored before Bridgy turned off" do
+      let(:source) { "https://brid.gy/comment/mastodon/1" }
+
+      before do
+        verify_page(entry(body: %(#{link}<p class="e-content">First</p>)))
+        webmention_mutations.update_settings(accept_bridgy: false)
+      end
+
+      [404, 410].each do |status|
+        it "removes the mention once the source answers #{status}" do
+          verify_page("gone", status:)
+
+          expect(stored).to be_nil
+        end
+      end
+
+      it "leaves the mention as it was while the source still links" do
+        verify_page(entry(body: %(#{link}<p class="e-content">Second</p>)))
+
+        expect(stored.excerpt).to eq("First")
+      end
+    end
   end
 
   describe "the settings" do
