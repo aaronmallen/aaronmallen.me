@@ -115,11 +115,11 @@ RSpec.describe "Admin Bluesky connection", type: :request do
       let(:written) { bluesky_writes.first }
 
       before do
-        connect_bluesky
+        connection = connect_bluesky
         stub_bluesky
         part = Data.define(:created_at, :id).new(created_at: Time.now, id: 1)
         key = Social::Structs::PartKey.new(connection_id: 1, part:)
-        bluesky.post("See https://example.com #ruby", idempotency_key: key)
+        bluesky.for(connection).post("See https://example.com #ruby", idempotency_key: key)
       end
 
       it "writes to the account" do
@@ -130,6 +130,14 @@ RSpec.describe "Admin Bluesky connection", type: :request do
         expect(written.dig("record", "facets").map { it.dig("features", 0, "$type") })
           .to eq(%w[app.bsky.richtext.facet#link app.bsky.richtext.facet#tag])
       end
+    end
+
+    it "refuses to post without an account picked" do
+      connect_bluesky
+      part = Data.define(:created_at, :id).new(created_at: Time.now, id: 1)
+      key = Social::Structs::PartKey.new(connection_id: 1, part:)
+
+      expect { bluesky.post("Hello", idempotency_key: key) }.to raise_error(Bluesky::Error, /no account/)
     end
 
     it "stops posting once the account disconnects" do

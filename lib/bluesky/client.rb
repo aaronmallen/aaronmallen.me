@@ -58,10 +58,7 @@ module Bluesky
     def max_bytes = MAX_BYTES
 
     def post(text, idempotency_key:, mentions: [], photos: [], reply_to: nil)
-      sessions = accounts.sessions(reply_to && address(reply_to)[:repo], @credentials)
-
-      sessions.use do |session|
-        accounts.wrote(session.did, sessions)
+      accounts.sessions(@credentials).use do |session|
         uri = write(record(text, mentions, photos, reply_to, session), session, rkey(idempotency_key))
 
         Social::Structs::RemotePost.new(id: uri, url: web_url(session.handle, uri))
