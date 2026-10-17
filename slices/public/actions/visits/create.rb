@@ -8,6 +8,7 @@ module Public
       class Create < Action
         ACCEPTED = 202
         CLICK = Blog::Types::VisitKind["click"]
+        MALFORMED = :malformed
         MAX_BYTES = 8192
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
         REJECTED = 400
@@ -32,17 +33,11 @@ module Public
 
         private
 
-        def checked(visit, route, status)
-          return status if status == ACCEPTED || find_page.call(route)
+        def follow_up(request, visit, route)
+          result = outcome(request, visit)
+          return ACCEPTED if result.failure? && result.failure != MALFORMED && !find_page.call(route)
 
-          uncounted(visit)
-        end
-
-        def countable?(visit, route)
-          return route.params.key?(:slug) if visit["kind"] == CLICK
-          return find_page.call(route) if visit["kind"] == VIEW
-
-          true
+          store(request, visit, route, result)
         end
 
         def outcome(request, visit)
@@ -82,14 +77,16 @@ module Public
           visit = request.env[ACTION_PARSED_BODY]
           route = route_for(visit)
           return REJECTED unless route
-          return uncounted(visit) unless countable?(visit, route)
 
-          status = store(request, visit, route)
-          visit["kind"] == VIEW ? status : checked(visit, route, status)
+          case visit["kind"]
+            in VIEW then find_page.call(route) ? store(request, visit, route) : uncounted(visit)
+            in CLICK unless route.params.key?(:slug) then uncounted(visit)
+            else follow_up(request, visit, route)
+          end
         end
 
-        def store(request, visit, route)
-          case outcome(request, visit)
+        def store(request, visit, route, result = outcome(request, visit))
+          case result
             in Success(counted)
               time(request, visit, route) if counted
               ACCEPTED

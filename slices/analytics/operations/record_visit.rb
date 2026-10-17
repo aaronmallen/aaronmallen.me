@@ -39,8 +39,6 @@ module Analytics
         clicked ? Success(clicked) : Failure(Blog::Throttle::THROTTLED)
       end
 
-      def click?(visit) = visit[:kind] == Contracts::VisitContract::CLICK
-
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }
 
       def origin(visit, address:, user_agent:, base_url:)
@@ -67,8 +65,6 @@ module Analytics
 
         matched.zero? ? Failure(:unknown_visit) : Success(matched)
       end
-
-      def read?(visit) = visit[:kind] == Contracts::VisitContract::READ
 
       def record_reader(path, address:, user_agent:)
         reader_mutations.record(path:, reader_hash: hash_reader.call(address:, user_agent:, path:))
@@ -100,14 +96,12 @@ module Analytics
         matched.zero? ? Failure(:unknown_visit) : Success(matched)
       end
 
-      def scroll?(visit) = visit[:kind] == Contracts::VisitContract::SCROLL
-
       def store(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
-        return read(visit, view_hashes(hashes, address:, user_agent:)) if read?(visit)
-        return scroll(visit, view_hashes(hashes, address:, user_agent:)) if scroll?(visit)
-        return click(visit, view_hashes(hashes, address:, user_agent:)) if click?(visit)
-
-        view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
+        case visit[:kind]
+          in Contracts::VisitContract::VIEW then view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
+          in Contracts::VisitContract::READ | Contracts::VisitContract::SCROLL | Contracts::VisitContract::CLICK => kind
+            send(kind, visit, view_hashes(hashes, address:, user_agent:))
+        end
       end
 
       def throttle = Blog::Throttle.new(settings.analytics)
