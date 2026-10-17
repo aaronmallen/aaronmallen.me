@@ -908,6 +908,13 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       expect(feed.fetch("latest")).to eq(12)
     end
 
+    it "gives yesterday's figures for a range of only today", :aggregate_failures do
+      found = mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601).fetch("feed")
+
+      expect(found.values_at("latest", "readers")).to eq([12, 3])
+      expect(found.fetch("aggregators")).to eq([{ "aggregator" => "inoreader", "subscribers" => 9 }])
+    end
+
     it "leaves the feed out of a page's answer" do
       expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/about"))
         .not_to have_key("feed")

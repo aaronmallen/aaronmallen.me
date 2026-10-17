@@ -7,14 +7,8 @@ module Analytics
         subscribers = subscribers_by_day(from, to)
         readers = readers_by_day(from, to)
         days = (from..to).to_h { [it, subscribers.fetch(it, 0) + readers.fetch(it, 0)] }
-        latest = last_whole_day(to)
 
-        {
-          aggregators: aggregators(feed_subscribers.between(from, to).on(latest)),
-          days: days.map { |day, count| { day:, subscribers: count } },
-          latest: days.fetch(latest, 0),
-          readers: readers.fetch(latest, 0),
-        }
+        { days: days.map { |day, count| { day:, subscribers: count } }, **latest(last_whole_day(to)) }
       end
 
       private
@@ -28,6 +22,13 @@ module Analytics
       end
 
       def last_whole_day(to) = [to, Blog::TimeZone.today.prev_day].min
+
+      def latest(day)
+        found = aggregators(feed_subscribers.on(day))
+        readers = feed_readers.on(day).sum(:readers) || 0
+
+        { aggregators: found, latest: found.sum { it[:subscribers] } + readers, readers: }
+      end
 
       def readers_by_day(from, to) = feed_readers.between(from, to).by_day.to_a.to_h { [it.day, it.readers] }
 
