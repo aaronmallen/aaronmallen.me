@@ -515,7 +515,7 @@ RSpec.describe "Admin webmentions", type: :request do
         }
       end
 
-      Admin::Actions::Webmentions::UpdateSettings::SETTINGS.each do |name|
+      Social::Operations::UpdateWebmentionSettings::TOGGLES.each do |name|
         it "saves #{name} turned off" do
           post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: toggles.merge(name => "0")
 

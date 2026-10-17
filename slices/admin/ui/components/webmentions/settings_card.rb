@@ -5,7 +5,7 @@ module Admin
     module Components
       module Webmentions
         class SettingsCard < Component
-          TOGGLES = {
+          LABELS = {
             receive: ".receive",
             send_on_publish: ".send_on_publish",
             auto_approve_known_authors: ".auto_approve",
@@ -32,7 +32,7 @@ module Admin
           private
 
           def fields
-            TOGGLES.each { |name, label_key| toggle(name, label_key) }
+            ::Social::Operations::UpdateWebmentionSettings::TOGGLES.each { toggle(it) }
             hosts
           end
 
@@ -49,8 +49,10 @@ module Admin
             end
           end
 
-          def toggle(name, label_key)
-            Checkbox(switch: true, label: t(label_key), name: "settings[#{name}]", checked: @settings.public_send(name))
+          def toggle(name)
+            label = t(LABELS.fetch(name))
+
+            Checkbox(switch: true, label:, name: "settings[#{name}]", checked: @settings.public_send(name))
           end
         end
       end

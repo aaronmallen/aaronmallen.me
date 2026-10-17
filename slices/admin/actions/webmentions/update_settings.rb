@@ -4,11 +4,8 @@ module Admin
   module Actions
     module Webmentions
       class UpdateSettings < Action
-        SETTINGS = %i[
-          receive send_on_publish auto_approve_known_authors auto_approve_likes auto_approve_reposts enable_on_new_posts
-          accept_bridgy
-        ].freeze
         TOASTS = "webmentions_page.toasts"
+        TOGGLES = ::Social::Operations::UpdateWebmentionSettings::TOGGLES
 
         include Deps[update_webmention_settings: "social.operations.update_webmention_settings"]
 
@@ -29,7 +26,7 @@ module Admin
 
         def settings(request)
           params = Blog::Types::Fields[request.params[:settings]]
-          toggles = params.slice(*SETTINGS).transform_values { Blog::Types::Checkbox[it] }
+          toggles = params.slice(*TOGGLES).transform_values { Blog::Types::Checkbox[it] }
           return toggles unless params.key?(:single_author_hosts)
 
           toggles.merge(single_author_hosts: Blog::Types::Normalized::Hosts[params[:single_author_hosts]])

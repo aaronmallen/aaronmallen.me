@@ -3,6 +3,11 @@
 module Social
   module Operations
     class UpdateWebmentionSettings < Blog::Operation
+      TOGGLES = %i[
+        receive send_on_publish auto_approve_known_authors auto_approve_likes auto_approve_reposts enable_on_new_posts
+        accept_bridgy
+      ].freeze
+
       include Deps[webmention_mutations: "repos.webmention_mutations", webmention_queries: "repos.webmention_queries"]
 
       def call(**attrs)
