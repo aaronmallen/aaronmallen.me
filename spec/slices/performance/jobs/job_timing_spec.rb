@@ -42,6 +42,12 @@ RSpec.describe "Timing a Sidekiq job", type: :app do
     expect(rows.first).to include(duration: be_positive, query_time: be >= 0)
   end
 
+  it "stores no error when the job finishes" do
+    run
+
+    expect(rows.first).to include(error_class: nil, error_message: nil)
+  end
+
   context "when the job fails" do
     it "lets the error through" do
       expect { run(fail: true) }.to raise_error(ArgumentError)
@@ -51,6 +57,12 @@ RSpec.describe "Timing a Sidekiq job", type: :app do
       run_failing
 
       expect(rows).to contain_exactly(include(job: "Spec::TimedJob", outcome: "failed", query_count: 1))
+    end
+
+    it "stores the error's class and message" do
+      run_failing
+
+      expect(rows.first).to include(error_class: "ArgumentError", error_message: "boom")
     end
   end
 

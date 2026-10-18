@@ -16,11 +16,15 @@ module Blog
 
     def call(job, _payload, _queue)
       timer = Timer.start
-      outcome = FAILED
+      result = { outcome: FAILED }
       yield
-      outcome = SUCCEEDED
+      result = { outcome: SUCCEEDED }
+    rescue Exception => e # rubocop:disable Lint/RescueException
+      result[:error_class] = e.class.name
+      result[:error_message] = e.message
+      raise
     ensure
-      @record.call(job: job.class.name, outcome:, **timer.stop)
+      @record.call(job: job.class.name, **result, **timer.stop)
     end
   end
 end

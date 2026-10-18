@@ -3083,6 +3083,8 @@ CREATE TABLE public.performance_jobs (
     occurred_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    error_class public.non_blank_text,
+    error_message text,
     CONSTRAINT performance_jobs_duration_check CHECK ((duration >= (0)::double precision)),
     CONSTRAINT performance_jobs_query_count_check CHECK ((query_count >= 0)),
     CONSTRAINT performance_jobs_query_time_check CHECK ((query_time >= (0)::double precision))
@@ -8825,4 +8827,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261016002242_keep_the_pull_request_import_edge_in_sync_states.rb'),
 ('20261016002252_index_commit_text_by_trigram.rb'),
 ('20261016002255_store_journal_html_and_word_counts.rb'),
-('20261016002262_drop_covered_indexes.rb');
+('20261016002262_drop_covered_indexes.rb'),
+('20261017190000_add_error_to_performance_jobs.rb');
