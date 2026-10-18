@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin live tables", type: :request do
-  let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
       /admin /admin/activity /admin/agents/artifacts /admin/agents/artifacts/new /admin/agents/memories
@@ -51,7 +50,7 @@ RSpec.describe "Admin live tables", type: :request do
 
   def short_link = Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com" }).value!
 
-  def tables = page.find("main")["data-live-tables"]&.split
+  def tables = Capybara.string(last_response.body).find("main")["data-live-tables"]&.split
 
   before do
     sign_in_to_admin
@@ -97,6 +96,12 @@ RSpec.describe "Admin live tables", type: :request do
 
     expect(tables).to include("service_connections", "sync_states", "webmention_settings", "oauth_clients",
                               "oauth_tokens")
+  end
+
+  it "lists only the tables the settings head reads on the jobs tab" do
+    get "/admin/settings/jobs"
+
+    expect(tables).to match_array(Admin::UI::Layouts::Application::LIVE_TABLES | %w[service_connections task_rules])
   end
 
   it "leaves out the tables a page does not draw" do

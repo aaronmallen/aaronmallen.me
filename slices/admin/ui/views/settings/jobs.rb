@@ -5,6 +5,8 @@ module Admin
     module Views
       module Settings
         class Jobs < View
+          LIVE_TABLES = %w[service_connections task_rules].freeze
+
           prop :cron, Blog::Types::Array.of(Blog::Types::Instance(Data))
           prop :cron_filter, Blog::Types::CronFilter
           prop :health, Blog::Types::Instance(Data)
@@ -15,6 +17,7 @@ module Admin
           prop :job, Blog::Types::Instance(Data).optional, default: nil
 
           def view_template
+            content_for(:live_tables, LIVE_TABLES)
             SettingsHead(tab: :jobs, title: t(".heading"))
             div(class: "jobs") do
               Components::Jobs::Warnings(health: @health)
