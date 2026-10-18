@@ -6824,6 +6824,58 @@
   }
 }
 
+@utility jobs-process {
+  @apply border-t border-line pt-3.5 pb-1 first:border-t-0 first:pt-0;
+}
+
+@utility jobs-process-head {
+  @apply flex flex-wrap items-center gap-x-3 gap-y-2;
+}
+
+@utility jobs-host {
+  @apply m-0 font-mono font-medium wrap-anywhere text-ink;
+
+  & span {
+    @apply text-ink-muted;
+  }
+}
+
+@utility jobs-capacity {
+  @apply ml-auto meta;
+
+  & b {
+    @apply font-display text-lg text-ink;
+  }
+}
+
+@utility jobs-meta {
+  @apply mt-1 mb-0 flex flex-wrap gap-x-3 meta;
+}
+
+@utility jobs-stopping {
+  @apply text-mk-orange-text;
+}
+
+@utility jobs-busy {
+  @apply mt-2 border-l border-line pl-3.5;
+}
+
+@utility jobs-args {
+  @apply mt-1 mb-0 min-w-0 truncate font-mono text-meta text-ink-muted;
+}
+
+@utility jobs-ran {
+  @apply font-mono whitespace-nowrap text-(--tone,var(--color-ink));
+}
+
+@utility jobs-queue-size {
+  @apply font-display text-xl leading-tight font-bold tracking-[-.02em] text-(--tone,var(--color-ink));
+}
+
+@utility jobs-waiting {
+  @apply mt-0 mb-2 font-display text-2xl leading-tight font-bold tracking-[-.02em];
+}
+
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 

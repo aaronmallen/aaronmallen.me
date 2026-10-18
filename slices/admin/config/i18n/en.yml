@@ -1114,6 +1114,36 @@ en:
             stopping: "Stopping"
             working: "Working"
           unknown: "unknown"
+        queue_drawer:
+          earlier: "earlier"
+          enqueued: "enqueued %{at}"
+          later: "later"
+          oldest: "Oldest has waited %{for}. Oldest first."
+          title: "queue · %{name}"
+          waiting:
+            one: "%{formatted} waiting"
+            other: "%{formatted} waiting"
+        queues:
+          empty: "empty"
+          hint: "Latency is how long the oldest waiting job has waited. Open a queue to see what's in it."
+          none: "No queues."
+          title: "Queues"
+          waited: "oldest waited %{for}"
+        running:
+          busy: "%{count} busy"
+          finishing:
+            one: "finishing %{count} job, taking no new work"
+            other: "finishing %{count} jobs, taking no new work"
+          idle: "Idle. Nothing running on this process."
+          none: "No worker processes are running."
+          of: "of %{concurrency}"
+          pid: " · pid %{pid}"
+          queues: "queues %{queues}"
+          quiet: "quiet"
+          started: "started %{at}"
+          stopping: "stopping"
+          title: "Running now"
+          working: "working"
         trend:
           bars: "Processed and failed, last 7 days: %{days}"
           day: "%{day} %{processed} processed, %{failed} failed"

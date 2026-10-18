@@ -50,6 +50,8 @@ module Spec
     def initialize(enqueued: 0, scheduled_size: 0, retry_size: 0, dead_size: 0, queue_summaries: []) = super
   end
 
+  FakeQueue = Data.define(:name, :size, :latency)
+
   module SyncStates
     def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
@@ -72,8 +74,10 @@ RSpec.configure do |config|
   config.before do
     Sidekiq::Job.clear_all
     allow(Sidekiq::ProcessSet).to receive(:new).and_return([])
+    allow(Sidekiq::Queue).to receive(:all).and_return([])
     allow(Sidekiq::Stats).to receive(:new).and_return(Spec::FakeStats.new)
     allow(Sidekiq::Stats::History).to receive(:new).and_return(Spec::FakeHistory.new)
+    allow(Sidekiq::WorkSet).to receive(:new).and_return([])
   end
   config.include Spec::SidekiqConfig
   config.include Spec::SyncStates

@@ -158,4 +158,138 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
 
     expect(health.find("h2")).to have_text("Stopping")
   end
+
+  describe "running now" do
+    def running = page.find(".card", text: admin_t("ui.components.jobs.running.title"))
+
+    def work(identity, run_at, klass, *args)
+      payload = { "class" => klass, "args" => args, "jid" => SecureRandom.hex(12), "queue" => "default" }
+      hash = { "queue" => "default", "run_at" => run_at.to_i, "payload" => payload }
+
+      [identity, SecureRandom.hex(4), Sidekiq::Work.new(identity, "tid", hash)]
+    end
+
+    def worker(identity, quiet: "false")
+      Sidekiq::Process.new(
+        "identity" => identity, "hostname" => "worker-#{identity}", "pid" => 4_120,
+        "started_at" => (Time.now - 3_600).to_f, "queues" => %w[default mailers], "busy" => 1, "concurrency" => 5,
+        "beat" => Time.now.to_f, "quiet" => quiet,
+      )
+    end
+
+    describe "with a busy process and an idle one" do
+      before do
+        processes(worker("a"), worker("b"))
+        allow(Sidekiq::WorkSet).to receive(:new)
+          .and_return([work("a", Time.now - 252, "Posts::Jobs::RenderPost", 42)])
+        visit
+      end
+
+      it "lists each process with its host, pid, busy of concurrency and queues" do
+        expect(running).to have_css(".jobs-host", text: "worker-a · pid 4120")
+          .and have_css(".jobs-capacity", exact_text: "1 of 5")
+          .and have_css(".jobs-meta", text: "queues default, mailers")
+      end
+
+      it "lists each running job with its arguments and how long it has run" do
+        expect(running).to have_css(".li-title", exact_text: "Posts::Jobs::RenderPost")
+          .and have_css(".jobs-args", exact_text: "42")
+          .and have_css(".jobs-ran.jobs-warn", exact_text: "4m")
+      end
+
+      it "says the idle process runs nothing" do
+        expect(running.all(".jobs-process").last).to have_text(admin_t("ui.components.jobs.running.idle"))
+      end
+    end
+
+    it "says a stopping process is finishing its jobs" do
+      processes(worker("a", quiet: "true"))
+      allow(Sidekiq::WorkSet).to receive(:new).and_return([work("a", Time.now - 5, "Posts::Jobs::RenderPost")])
+      visit
+
+      expect(running).to have_css(".jobs-stopping", exact_text: "finishing 1 job, taking no new work")
+    end
+
+    it "says no worker processes are running when there are none" do
+      visit
+
+      expect(running).to have_text(admin_t("ui.components.jobs.running.none"))
+    end
+  end
+
+  describe "queues" do
+    let(:queues) do
+      [
+        Spec::FakeQueue.new(name: "default", size: 250, latency: 700.0),
+        Spec::FakeQueue.new(name: "mailers", size: 0, latency: 0.0),
+      ]
+    end
+
+    def card = page.find("aside.card")
+
+    def drawer = Capybara.string(last_response.body).find("dialog#jobs-queue")
+
+    def queued(name, number, size)
+      first = ((number - 1) * size) + 1
+      last = [number * size, 250].min
+
+      (first..last).map do |position|
+        Sidekiq::JobRecord.new(
+          { "class" => "Shares::Jobs::FetchTitle", "args" => [position], "jid" => "j#{position}",
+            "enqueued_at" => (Time.now - 1_000 + position).to_f },
+          name,
+        )
+      end
+    end
+
+    before do
+      allow(Sidekiq::Queue).to receive(:all).and_return(queues)
+      replace_component("sidekiq.queue_jobs", method(:queued))
+    end
+
+    it "lists each queue with its size and latency", :aggregate_failures do
+      visit
+
+      expect(card).to have_css(".li", count: 2)
+      expect(card.find(".li", text: "default")).to have_css(".jobs-queue-size.jobs-bad", exact_text: "250")
+        .and have_text("oldest waited 11m")
+      expect(card.find(".li", text: "mailers")).to have_text("empty").and have_no_link("mailers")
+    end
+
+    it "opens a queue with jobs in a drawer, oldest first, 100 to a page", :aggregate_failures do
+      visit
+      get card.find_link("default")[:href]
+
+      expect(drawer).to have_css(".jobs-waiting", exact_text: "250 waiting")
+      expect(drawer.all(".jobs-args").map(&:text)).to eq((1..100).map(&:to_s))
+      expect(drawer).to have_link(href: "/admin/settings/jobs?queue=default&page=2")
+    end
+
+    it "pages to later jobs" do
+      get "/admin/settings/jobs?queue=default&page=3"
+
+      expect(drawer.all(".jobs-args").map(&:text)).to eq((201..250).map(&:to_s))
+    end
+
+    it "labels the drawer's page links earlier and later, since the oldest job comes first" do
+      get "/admin/settings/jobs?queue=default&page=2"
+
+      expect(drawer.all(".pager-link").to_h { [it[:rel], [it.text.strip, it[:href]]] }).to eq(
+        "prev" => ["earlier", "/admin/settings/jobs?queue=default"],
+        "next" => ["later", "/admin/settings/jobs?queue=default&page=3"],
+      )
+    end
+
+    it "opens no drawer for an empty queue" do
+      get "/admin/settings/jobs?queue=mailers"
+
+      expect(page).to have_no_css("dialog#jobs-queue")
+    end
+
+    it "opens no drawer for an unknown queue" do
+      get "/admin/settings/jobs?queue=nope"
+
+      expect(page).to have_no_css("dialog#jobs-queue")
+    end
+  end
 end

@@ -4,6 +4,7 @@ Hanami.app.register_provider :sidekiq do
   prepare do
     require "sidekiq"
     require "sidekiq/api"
+    require "sidekiq/paginator"
     require "sidekiq-scheduler"
   end
 
@@ -15,6 +16,13 @@ Hanami.app.register_provider :sidekiq do
 
     register("sidekiq.dead_set") { -> { Sidekiq::DeadSet.new } }
     register("sidekiq.processes") { -> { Sidekiq::ProcessSet.new } }
+    register("sidekiq.queue_jobs") do
+      pager = Object.new.extend(Sidekiq::Paginator)
+
+      lambda do |name, number, size|
+        pager.page("queue:#{name}", number, size, reverse: true).last.map { Sidekiq::JobRecord.new(it, name) }
+      end
+    end
     register("sidekiq.queues") { -> { Sidekiq::Queue.all } }
     register("sidekiq.retry_set") { -> { Sidekiq::RetrySet.new } }
     register("sidekiq.scheduled_set") { -> { Sidekiq::ScheduledSet.new } }

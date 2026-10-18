@@ -5,7 +5,7 @@ status: active
 created: 2026-10-09
 area: [activity, admin, api]
 issue: "#869"
-amended: ["#1731"]
+amended: ["#1731", "#1732"]
 tags: [activity, attention, sidekiq, redis, jobs, dead-set]
 ---
 
@@ -32,7 +32,8 @@ Sidekiq stays the only record of a dead job. Retry and discard act on the dead s
 when it leaves the set.
 
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
-as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled. An `activity`
+as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled.
+`sidekiq.queue_jobs` reads one page of a queue's jobs, oldest first, through `Sidekiq::Paginator`. An `activity`
 query builds the jobs tab on Settings from them, with the time the last job finished, which it reads through the
 `performance` slice. Every read rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
 
