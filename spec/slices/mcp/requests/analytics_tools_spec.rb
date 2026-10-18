@@ -461,7 +461,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     def figures(rows) = rows.map { it.values_at("source", "views", "visitors") }
 
     def read_sources(from: today - 6, to: today, **)
-      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("sources")
+      trusted(mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("sources"))
     end
 
     def roll_up_source(day, source, path: nil, views: 5, visitors: 3)

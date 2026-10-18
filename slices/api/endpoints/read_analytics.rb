@@ -132,6 +132,7 @@ module API
         internal_referrers: %i[path],
         entry_pages: %i[path],
         exit_pages: %i[path],
+        sources: %i[source],
       }.freeze
 
       include Deps[

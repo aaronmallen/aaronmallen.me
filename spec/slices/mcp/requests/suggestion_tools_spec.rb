@@ -40,7 +40,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       suggestion_mutations.reject([edit_id])
       said = { "original" => "teh", "replacement" => "the", "reason" => "typo", "status" => "rejected" }
 
-      expect(listed.first.fetch("edits")).to eq([{ "id" => edit_id, "part" => nil, **said }])
+      expect(trusted(listed.first.fetch("edits"))).to eq([{ "id" => edit_id, "part" => nil, **said }])
     end
 
     it "names a social post as the target" do

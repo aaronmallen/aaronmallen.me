@@ -59,6 +59,8 @@ module MCP
                   "of each entry and exit page come from the visitor's browser and come marked untrusted. " \
                   "Each referrer's host, each click's link_host and link_path, and each internal referrer's path " \
                   "come from the visitor's browser and come marked untrusted too; a direct visit's host stays null. " \
+                  "Each source comes from the link a visitor followed, which anyone can publish, and comes marked " \
+                  "untrusted. " \
                   "#{Untrusted::WARNING}. " \
                   "#{API::Helpers::DayWindow::CAPPED_NOTE}. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \

@@ -25,7 +25,8 @@ RSpec.describe "API suggestions", type: :request do
       suggest(create(:post, :draft, body: "teh cat sat"), edit("teh", "the"))
 
       expect(call_api(:get, "/suggestions",
-                      { from: today, to: today })).to eq(mcp_answer("list_suggestions", from: today, to: today))
+                      { from: today, to: today })).to eq(trusted(mcp_answer("list_suggestions", from: today,
+                                                                                                to: today)))
     end
   end
 
