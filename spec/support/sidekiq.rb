@@ -35,6 +35,21 @@ module Spec
     def size = @entries.size
   end
 
+  class FakeHistory
+    attr_reader :failed, :processed
+
+    def initialize(days = {})
+      today = Time.now.utc.to_date
+      dates = today.downto(today - 6).map(&:to_s)
+      @processed = dates.to_h { [it, days.dig(Date.parse(it), :processed) || 0] }
+      @failed = dates.to_h { [it, days.dig(Date.parse(it), :failed) || 0] }
+    end
+  end
+
+  FakeStats = Data.define(:enqueued, :scheduled_size, :retry_size, :dead_size, :queue_summaries) do
+    def initialize(enqueued: 0, scheduled_size: 0, retry_size: 0, dead_size: 0, queue_summaries: []) = super
+  end
+
   module SyncStates
     def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
@@ -54,7 +69,12 @@ module Spec
 end
 
 RSpec.configure do |config|
-  config.before { Sidekiq::Job.clear_all }
+  config.before do
+    Sidekiq::Job.clear_all
+    allow(Sidekiq::ProcessSet).to receive(:new).and_return([])
+    allow(Sidekiq::Stats).to receive(:new).and_return(Spec::FakeStats.new)
+    allow(Sidekiq::Stats::History).to receive(:new).and_return(Spec::FakeHistory.new)
+  end
   config.include Spec::SidekiqConfig
   config.include Spec::SyncStates
 end

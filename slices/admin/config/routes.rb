@@ -242,6 +242,7 @@ module Admin
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
     redirect_temporary "/settings", to: "/settings/socials"
+    get "/settings/jobs", to: "settings.jobs", as: :settings_jobs
     get "/settings/security", to: "security.show", as: :security
     get "/settings/socials", to: "settings.socials", as: :settings_socials
     get "/settings/tagging", to: "settings.tagging", as: :settings_tagging

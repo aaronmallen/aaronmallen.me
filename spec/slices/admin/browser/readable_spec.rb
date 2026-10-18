@@ -181,6 +181,7 @@ RSpec.describe "Admin screens", type: :feature do
       end,
       "health" => "/admin/health",
       "inbox" => "/admin/inbox",
+      "jobs" => "/admin/settings/jobs",
       "journal" => "/admin/journal",
       "mail" => "/admin/mail",
       "mail open" => "/admin/mail?thread=#{Mail::Slice['repos.message_queries'].unread.first.id}",

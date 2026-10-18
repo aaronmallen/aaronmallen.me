@@ -6625,6 +6625,145 @@
   @apply meta-badge;
 }
 
+@utility jobs {
+  @apply flex min-w-0 flex-col gap-[clamp(16px,1.6vw,28px)];
+}
+
+@utility jobs-banner {
+  @apply mb-0 items-start;
+  border-color: color-mix(in oklab, var(--color-mk-pink) 50%, var(--color-line));
+
+  & > i {
+    @apply mt-1 text-mk-pink-text;
+  }
+
+  & .post-banner-text {
+    @apply basis-70 font-normal leading-relaxed;
+  }
+}
+
+@utility jobs-raw {
+  @apply mt-1 block font-mono text-meta wrap-anywhere text-ink-muted;
+}
+
+@utility jobs-good {
+  --tone: var(--color-mk-green-text);
+}
+
+@utility jobs-calm {
+  --tone: var(--color-mk-sand-text);
+}
+
+@utility jobs-warn {
+  --tone: var(--color-mk-orange-text);
+}
+
+@utility jobs-bad {
+  --tone: var(--color-mk-pink-text);
+}
+
+@utility jobs-status {
+  @apply flex flex-wrap items-center gap-x-3.5 gap-y-2.5;
+}
+
+@utility jobs-dot {
+  @apply size-3 flex-none rounded-full bg-(--tone);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--tone) 22%, transparent);
+}
+
+@utility jobs-status-label {
+  @apply m-0 font-display text-[clamp(1.5rem,2.2vw,2.2rem)] leading-none font-extrabold tracking-[-.03em];
+}
+
+@utility jobs-status-meta {
+  @apply m-0 flex flex-wrap gap-x-3 meta;
+}
+
+@utility jobs-counts {
+  @apply mt-5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,112px),1fr))] gap-px overflow-hidden rounded-panel border border-line bg-line;
+}
+
+@utility jobs-count {
+  @apply flex min-w-0 flex-col gap-1.5 bg-ground px-4 py-3.5;
+
+  & b {
+    @apply font-display text-[clamp(1.45rem,2vw,2rem)] leading-none font-bold tracking-[-.02em] text-(--tone,var(--color-ink));
+  }
+
+  & b small {
+    @apply text-[.55em] font-semibold tracking-normal text-ink-muted;
+  }
+
+  & span {
+    @apply meta;
+  }
+
+  &.jobs-warn span,
+  &.jobs-bad span {
+    @apply text-(--tone);
+  }
+}
+
+@utility jobs-unknown {
+  & .jobs-count b {
+    @apply text-ink-muted;
+  }
+}
+
+@utility jobs-trend {
+  @apply mt-5 grid grid-cols-1 items-end gap-6 sm:grid-cols-[max-content_minmax(0,1fr)];
+}
+
+@utility jobs-today {
+  @apply m-0 meta uppercase;
+}
+
+@utility jobs-big {
+  @apply mt-1.5 mb-0 font-display text-2xl leading-tight font-bold tracking-[-.02em] whitespace-nowrap;
+
+  & span {
+    @apply font-normal tracking-normal meta;
+  }
+}
+
+@utility jobs-big-small {
+  @apply mt-1 text-lg text-ink-muted;
+}
+
+@utility jobs-failed {
+  @apply text-mk-pink-text;
+}
+
+@utility jobs-bars {
+  @apply flex h-21 w-full items-stretch gap-1.5 sm:ml-auto sm:max-w-105;
+}
+
+@utility jobs-bar {
+  @apply relative flex min-w-0 flex-1 flex-col-reverse gap-0.5 pb-5;
+
+  & i {
+    @apply block min-h-0.5 rounded-xs bg-line;
+  }
+
+  & i.jobs-bar-failed {
+    @apply bg-mk-pink-text;
+  }
+
+  & span {
+    @apply absolute inset-x-0 bottom-0 text-center meta;
+  }
+}
+
+@utility jobs-bar-today {
+  & i.jobs-bar-done {
+    @apply bg-ink-muted;
+  }
+
+  & span {
+    @apply text-ink;
+  }
+}
+
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 

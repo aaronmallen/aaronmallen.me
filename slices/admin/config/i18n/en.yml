@@ -1085,6 +1085,42 @@ en:
             other: "%{count} snoozed"
           wake: "Wake now"
           wakes: "wakes %{at}"
+      jobs:
+        health:
+          beat: "heartbeat %{at}"
+          counts:
+            busy: "busy"
+            dead: "dead"
+            enqueued: "enqueued"
+            latency: "latency"
+            retries: "retries"
+            scheduled: "scheduled"
+          of: "of %{concurrency}"
+          processes:
+            one: "%{count} process"
+            other: "%{count} processes"
+          status:
+            down: "Can't read the queue"
+            not_seen: "Not seen"
+            quiet: "Quiet"
+            stopping: "Stopping"
+            working: "Working"
+          unknown: "unknown"
+        trend:
+          bars: "Processed and failed, last 7 days: %{days}"
+          day: "%{day} %{processed} processed, %{failed} failed"
+          failed: "failed"
+          processed: "processed"
+          today: "today"
+        warnings:
+          again: "Check again"
+          last_job: "The last job finished %{ago} ago."
+          no_job: "No finished job on record."
+          no_worker: "No worker seen."
+          redis: "Redis isn't answering. Counts are unknown, not zero."
+          waiting:
+            one: "%{formatted} job is waiting."
+            other: "%{formatted} jobs are waiting."
       journal:
         edit_form:
           body: "Entry text"
@@ -1477,6 +1513,7 @@ en:
           files: "files"
           health: "health"
           inbox: "waiting"
+          jobs: "jobs"
           journal: "journal"
           links: "links"
           mail: "mail"
@@ -2157,6 +2194,7 @@ en:
           activate: "Activate maintenance mode"
           confirm: "Take the site down? Every request gets the maintenance page and jobs hold back."
         tabs:
+          jobs: "jobs"
           label: "Settings tabs"
           security: "security"
           socials: "socials"
@@ -3629,6 +3667,8 @@ en:
           heading: "Sign in"
           sub: "Sign in with an account whose verified email is on the owner list."
       settings:
+        jobs:
+          heading: "Jobs"
         socials:
           heading: "Socials"
           people: "People"

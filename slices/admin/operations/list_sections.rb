@@ -31,6 +31,7 @@ module Admin
         %i[services settings fa-link admin_services].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
         %i[security settings fa-shield-halved admin_security].freeze,
+        %i[jobs settings fa-gears admin_settings_jobs].freeze,
       ].freeze
 
       ALSO = { analytics: { performance: :admin_performance } }.freeze

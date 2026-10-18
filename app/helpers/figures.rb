@@ -3,6 +3,8 @@
 module Blog
   module Helpers
     module Figures
+      DAY = 86_400
+      DAYS = "%dd"
       DELIMITER = ","
       DURATION = "%d:%02d"
       GROUPS = /(\d)(?=(\d{3})+\z)/
@@ -13,6 +15,7 @@ module Blog
       MINUTES = "%dm"
       PERCENT = 100
       PRECISE_BELOW = 10
+      SECONDS = "%ds"
       UNITS = %w[B KB MB GB TB].freeze
       WORD = /\S+/
       ZERO = 0
@@ -24,6 +27,17 @@ module Blog
       def count(number) = number.to_i.to_s.gsub(GROUPS, "\\1#{DELIMITER}")
 
       def duration(seconds) = format(DURATION, seconds / MINUTE, seconds % MINUTE)
+
+      def elapsed(seconds)
+        whole = seconds.round
+
+        case whole
+          when ...MINUTE then format(SECONDS, whole)
+          when ...HOUR then format(MINUTES, whole / MINUTE)
+          when ...DAY then hours(whole)
+          else format(DAYS, whole / DAY)
+        end
+      end
 
       def hours(seconds)
         hours, rest = seconds.divmod(HOUR)

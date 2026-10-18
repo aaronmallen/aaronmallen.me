@@ -10,7 +10,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       /admin/social /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
       /admin/activity /admin/health /admin/time /admin/settings/tagging#tags /admin/settings/socials#people
       /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/tokens /admin/services
-      /admin/clients /admin/settings/security
+      /admin/clients /admin/settings/security /admin/settings/jobs
     ]
   end
 
@@ -54,7 +54,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
         .to eq(%w[/writing /about /projects /contact /admin/settings/tagging#tags /admin/settings/socials#people
                   /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/tokens
-                  /admin/services /admin/clients /admin/settings/security])
+                  /admin/services /admin/clients /admin/settings/security /admin/settings/jobs])
     end
 
     it "offers the keys, the themes and sign out in the avatar menu", :aggregate_failures do
@@ -221,14 +221,14 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "lists the settings tabs as screen-tabs", :aggregate_failures do
       expect(page.all("a.screen-tab").map(&:text))
         .to eq(["tags", "people", "task rules", "webmentions", "API tokens", "connected services", "MCP clients",
-                "security"])
+                "security", "jobs"])
       expect(page).to have_css("a.screen-tab[aria-current='page']", text: "API tokens")
     end
 
     {
       "/admin/settings/tagging" => "Tagging", "/admin/tokens" => "API tokens",
       "/admin/settings/socials" => "Socials", "/admin/services" => "Connected services",
-      "/admin/clients" => "MCP clients", "/admin/settings/security" => "Security",
+      "/admin/clients" => "MCP clients", "/admin/settings/security" => "Security", "/admin/settings/jobs" => "Jobs",
     }.each do |route, title|
       it "heads #{route} as Settings and titles it #{title}", :aggregate_failures do
         get route

@@ -26,6 +26,13 @@ RSpec.describe "Admin security", type: :request do
     )
   end
 
+  def tabs
+    {
+      "socials 0" => "/admin/settings/socials", "tagging 0" => "/admin/settings/tagging",
+      "security" => "/admin/settings/security", "jobs 0" => "/admin/settings/jobs",
+    }.to_a
+  end
+
   def token(name) = API::Slice["operations.mint_token"].call(name:).value![:token]
 
   describe "signed in" do
@@ -35,13 +42,14 @@ RSpec.describe "Admin security", type: :request do
       get "/admin/settings/security"
 
       expect(page).to have_css(".page-head h1", exact_text: "Settings")
+      expect(page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { [it.text, it["href"]] }).to eq(tabs)
       expect(page).to have_css("nav[aria-label='Settings tabs'] a[aria-current='page']", exact_text: "security")
     end
 
     it "lists every Settings tab in order" do
       get "/admin/settings/security"
 
-      expect(settings_tabs).to eq(%w[socials tagging security].map { "/admin/settings/#{it}" })
+      expect(settings_tabs).to eq(%w[socials tagging security jobs].map { "/admin/settings/#{it}" })
     end
 
     it "lands Settings on its first tab" do

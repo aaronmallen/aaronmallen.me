@@ -18,7 +18,7 @@ module Admin
 
     import keys: %w[
       operations.discard_dead_job operations.retry_dead_job operations.snooze_attention repos.activity_queries
-      repos.attention_queries repos.review_queries
+      repos.attention_queries repos.job_queries repos.review_queries
     ], from: :activity
 
     import keys: %w[

@@ -8,6 +8,8 @@ module Performance
       EMPTY_DAY = { count: 0, p50: nil, p95: nil }.freeze
       SLOWEST_LIMIT = 25
 
+      def last_job_at = performance_jobs.dataset.unordered.max(:occurred_at)
+
       def route_days_between(route:, verb:, from:, to:)
         daily(within(performance_requests, from, to).where(route:, verb:), from, to)
       end

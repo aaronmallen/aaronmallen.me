@@ -6,13 +6,18 @@ module Admin
       class SettingsHead < Component
         TABS = {
           socials: :admin_settings_socials, tagging: :admin_settings_tagging, security: :admin_security,
+          jobs: :admin_settings_jobs,
         }.freeze
+        UNKNOWN = "!"
         LABELS = TABS.keys.to_h { [it, ".tabs.#{it}"] }.freeze
 
         prop :tab, Blog::Types::Symbol.enum(*TABS.keys).optional, default: nil
         prop :title, Blog::Types::String
 
-        include Deps[person_queries: "social.repos.person_queries", task_rule_queries: "tasks.repos.task_rule_queries"]
+        include Deps[
+          job_queries: "activity.repos.job_queries", person_queries: "social.repos.person_queries",
+          task_rule_queries: "tasks.repos.task_rule_queries",
+        ]
 
         def view_template
           content_for(:title, @title)
@@ -25,7 +30,9 @@ module Admin
 
         private
 
-        def counts = { socials: person_queries.count, tagging: task_rule_queries.count }
+        def counts
+          { socials: person_queries.count, tagging: task_rule_queries.count, jobs: job_queries.flagged || UNKNOWN }
+        end
 
         def maintenance
           ButtonForm(

@@ -66,7 +66,7 @@ RSpec.describe "Admin command palette", type: :feature do
     it "holds every settings tab under Settings" do
       rows = page.all("[aria-labelledby='command-palette-group-settings'] [data-palette-option]").map { it[:id] }
 
-      expect(rows).to eq(%w[tags people task_rules webmention_settings tokens services clients security]
+      expect(rows).to eq(%w[tags people task_rules webmention_settings tokens services clients security jobs]
         .map { "command-palette-#{it}" })
     end
 
