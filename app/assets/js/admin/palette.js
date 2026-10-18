@@ -47,7 +47,7 @@ function setupDialog(dialog) {
   const records = dialog.querySelector("[data-palette-records]");
   const sources = [...dialog.querySelectorAll("[data-palette-from]")];
   const all = dialog.querySelector("[data-palette-all]");
-  const typed = [...dialog.querySelectorAll("[data-palette-label]")];
+  const queryRows = [...dialog.querySelectorAll("[data-palette-label]")];
   const views = dialog.querySelector("[data-palette-views]");
   const filled = new Set();
   let loading = 0;
@@ -73,7 +73,7 @@ function setupDialog(dialog) {
     const text = query.value.trim().toLowerCase();
 
     if (all) all.dataset.paletteHref = searchUrl(all.dataset.paletteAll, query.value.trim());
-    for (const option of typed) {
+    for (const option of queryRows) {
       option.querySelector(".pal-r-label").textContent = option.dataset.paletteLabel.replace(QUERY, () =>
         query.value.trim(),
       );
@@ -87,7 +87,7 @@ function setupDialog(dialog) {
     status.textContent = countText(
       status,
       "paletteResults",
-      visible.filter((option) => !typed.includes(option)).length,
+      visible.filter((option) => !queryRows.includes(option)).length,
     );
     select(visible[0]);
   };

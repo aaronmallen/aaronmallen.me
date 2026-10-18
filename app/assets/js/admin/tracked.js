@@ -2,7 +2,7 @@ const HOUR = 3600;
 const MINUTE = 60;
 const SECOND = 1000;
 
-export function setupTracked() {
+export function bootTracked() {
   setInterval(tick, SECOND);
 }
 

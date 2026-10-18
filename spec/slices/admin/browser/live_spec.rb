@@ -454,6 +454,30 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     end
   end
 
+  describe "while an inline confirm is open" do
+    let(:entry) { create(:journal_entry, body: "Arrived live") }
+
+    before do
+      create(:journal_entry, body: "Already here")
+      live "/admin/journal"
+      find(".journal-entry").tap(&:hover).click_button "Delete"
+      find("[data-confirm-ask]")
+      at = Admin::Live::Clock.now
+      entry
+      settle_live(at)
+    end
+
+    it "waits to morph" do
+      expect(page).to have_no_text("Arrived live", wait: 1)
+    end
+
+    it "morphs once the confirm closes" do
+      find("[data-confirm-decline]").click
+
+      expect(page).to have_text("Arrived live")
+    end
+  end
+
   describe "in a hidden tab" do
     let(:message) { create(:message) }
 

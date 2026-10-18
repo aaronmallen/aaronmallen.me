@@ -2,7 +2,7 @@ import { clear, picks } from "./bulk.js";
 import { focusField, openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
 import { ARROWS } from "./listbox.js";
-import { morphed } from "./live.js";
+import { morphed, release } from "./live.js";
 import { setupMenuSuggest } from "./menu_suggest.js";
 import { copy } from "./record_key.js";
 import { showToast } from "./toast.js";
@@ -71,7 +71,7 @@ function close(refocus = false) {
 
   menu.remove();
   if (refocus && row.isConnected) home(row);
-  document.dispatchEvent(new Event("close"));
+  release();
 }
 
 function collapse(list, keep = null) {

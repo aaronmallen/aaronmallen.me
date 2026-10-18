@@ -336,7 +336,9 @@ RSpec.describe "Admin row context menu", type: :feature do
       wait_for_stream
       open_menu
       menu
+      at = Admin::Live::Clock.now
       create(:task, title: "Arrived live")
+      settle_live(at)
     end
 
     it "waits until the menu closes", :aggregate_failures do

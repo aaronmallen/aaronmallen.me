@@ -14,7 +14,7 @@ import { setupFileDrops } from "./file_drop.js";
 import { setupJournals } from "./journal.js";
 import { bootKeys, setupKeys } from "./keys.js";
 import { setupLinkForms } from "./link_form.js";
-import { MORPHED, setupLive } from "./live.js";
+import { bootLive, MORPHED } from "./live.js";
 import { bootMailDrag } from "./mail_drag.js";
 import { setupMailEditors } from "./mail_editor.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
@@ -36,10 +36,10 @@ import { setupTagFields } from "./tag_field.js";
 import { bootTaskOrder, setupTaskOrder } from "./task_order.js";
 import { bootTaskPanel, setupTaskPanel } from "./task_panel.js";
 import { setupToasts } from "./toast.js";
-import { setupTracked } from "./tracked.js";
+import { bootTracked } from "./tracked.js";
 import { setupWorkForms } from "./work_form.js";
 
-const STEPS = [
+const SETUPS = [
   setupAccountPickers,
   setupAutosubmit,
   setupBulk,
@@ -81,6 +81,7 @@ const BOOT = [
   bootCommitImports,
   bootContextMenus,
   bootKeys,
+  bootLive,
   bootMailDrag,
   bootMorphForms,
   bootPalette,
@@ -88,8 +89,7 @@ const BOOT = [
   bootPostEditors,
   bootTaskOrder,
   bootTaskPanel,
-  setupLive,
-  setupTracked,
+  bootTracked,
 ];
 
 function run(steps) {
@@ -102,6 +102,6 @@ function run(steps) {
   }
 }
 
-run(STEPS);
+run(SETUPS);
 run(BOOT);
-document.addEventListener(MORPHED, () => run(STEPS));
+document.addEventListener(MORPHED, () => run(SETUPS));

@@ -1,4 +1,5 @@
 import { fresh } from "./fresh.js";
+import { release } from "./live.js";
 
 const FORM = "form[data-confirm], form:has([type='submit'][data-confirm])";
 const TEMPLATE = "template[data-confirm-template]";
@@ -54,7 +55,7 @@ function ask(form, submitter, message) {
       submitter?.focus();
     }
 
-    form.dispatchEvent(new Event("close"));
+    release();
   };
 
   accept.addEventListener("click", () => settle(true));

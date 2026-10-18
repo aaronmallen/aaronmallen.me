@@ -16,6 +16,7 @@ const WAIT = 1000;
 
 export const MORPHED = "admin:morphed";
 export const MORPHED_PARTS = PARTS.join(", ");
+export const UNHELD = "admin:unheld";
 
 const edits = trackEdits();
 let shown = drawnAt(document);
@@ -64,7 +65,11 @@ export function morphed() {
   document.dispatchEvent(new Event(MORPHED));
 }
 
-export function setupLive() {
+export function release() {
+  document.dispatchEvent(new Event(UNHELD));
+}
+
+export function bootLive() {
   const url = document.querySelector("[data-live]")?.dataset.live;
   if (!url) return;
 
@@ -107,20 +112,27 @@ export function setupLive() {
   });
 
   let missed = false;
-  const changed = (at) => {
-    if (at === Infinity) shown = 0;
-    if (leaving || at < shown) return;
-
+  const want = (at) => {
     wanted = Math.max(wanted, at);
     missed = document.hidden;
     if (!missed && !posts) refetch.later();
   };
+  const changed = (at) => {
+    if (!leaving && at >= shown) want(at);
+  };
+  const missedChanges = () => {
+    shown = 0;
+    if (!leaving) want(Infinity);
+  };
 
+  document.addEventListener(UNHELD, morph);
   document.addEventListener("close", morph, true);
   document.addEventListener("visibilitychange", () => {
-    if (missed) changed(wanted);
+    if (!missed) return;
+    if (wanted === Infinity) missedChanges();
+    else changed(wanted);
   });
-  listen(url, changed);
+  listen(url, changed, missedChanges);
 }
 
 function drawnAt(page) {
@@ -162,7 +174,7 @@ function untouched(node) {
   return !controls.some((control) => edits.has(control) || control.checked !== control.defaultChecked);
 }
 
-function listen(url, changed) {
+function listen(url, changed, missedChanges) {
   let heard = 0;
   let opened = false;
   let source = null;
@@ -174,13 +186,17 @@ function listen(url, changed) {
     source = current;
 
     current.addEventListener("open", () => {
-      if (opened) changed(Infinity);
+      if (opened) missedChanges();
       opened = true;
       wait = WAIT;
     });
     current.addEventListener("change", (event) => {
-      if (shows(event.data)) changed(Number(event.lastEventId) || Infinity);
-      heard = Math.max(heard, Number(event.lastEventId) || 0);
+      const at = Number(event.lastEventId) || 0;
+      if (shows(event.data)) {
+        if (at) changed(at);
+        else missedChanges();
+      }
+      heard = Math.max(heard, at);
       document.documentElement.dataset.liveHeard = heard;
     });
     current.addEventListener("error", () => {
