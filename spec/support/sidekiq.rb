@@ -10,10 +10,21 @@ module Spec
   class RedisRefused < RedisClient::CannotConnectError; end
 
   module RefuseRedis
+    def self.check!(example)
+      refused = @refused
+      @refused = nil
+      return if refused.nil? || refused.equal?(example.exception) || example.metadata[:redis_outage]
+
+      raise RedisRefused, "#{example.location} reached Redis and went on past the refusal, so it tests the Redis " \
+                          "outage path: stub the Sidekiq call, or tag the spec redis_outage: true"
+    end
+
+    def self.refuse!(message) = raise(@refused = RedisRefused.new(message))
+
     def connect(_config)
       example = RSpec.current_example&.location || "a spec outside an example"
-      raise RedisRefused, "#{example} opened a Redis connection, which fails in CI: " \
-                          "stub the Sidekiq call or replace the sidekiq.* component"
+      RefuseRedis.refuse!("#{example} opened a Redis connection, which fails in CI: " \
+                          "stub the Sidekiq call or replace the sidekiq.* component")
     end
   end
 
@@ -83,7 +94,15 @@ RSpec.configure do |config|
     allow(Sidekiq::Stats).to receive(:new).and_return(Spec::FakeStats.new)
     allow(Sidekiq::Stats::History).to receive(:new).and_return(Spec::FakeHistory.new)
     allow(Sidekiq::WorkSet).to receive(:new).and_return([])
+    allow(Sidekiq::DeadSet).to receive(:new).and_return(Spec::FakeJobSet.new("dead"))
+    allow(Sidekiq::RetrySet).to receive(:new).and_return(Spec::FakeJobSet.new("retry"))
+    allow(Sidekiq::ScheduledSet).to receive(:new).and_return(Spec::FakeJobSet.new("schedule"))
+    allow(Blog::SidekiqSetPage).to receive(:call).and_return([])
+    allow(Blog::SidekiqQueuePage).to receive(:call).and_return([])
+    replace_component("sidekiq.schedule_states", -> { {} })
+    replace_component("sidekiq.schedule_times", -> { {} })
   end
+  config.after { |example| Spec::RefuseRedis.check!(example) }
   config.include Spec::SidekiqConfig
   config.include Spec::SyncStates
 end
