@@ -8,7 +8,6 @@ module Public
       class Create < Action
         CLICK = Blog::Types::VisitKind["click"]
         MALFORMED = :malformed
-        MAX_BYTES = 8192
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
         TIMING = "timing"
         VIEW = Blog::Types::VisitKind["view"]
@@ -24,7 +23,6 @@ module Public
         config.handle_exception Hanami::Action::BodyParsingError => :reject
 
         before :refuse_cross_site
-        before :refuse_oversized
 
         def handle(request, response) = respond(response, status_for(request))
 
@@ -45,10 +43,6 @@ module Public
             signed_in: signed_in?(request),
             user_agent: request.get_header("HTTP_USER_AGENT"),
           )
-        end
-
-        def refuse_oversized(request, _response)
-          halt :bad_request, Blog::Constants::EMPTY_STRING if request.content_length.to_i > MAX_BYTES
         end
 
         def reject(_request, response, _exception) = respond(response, :bad_request)

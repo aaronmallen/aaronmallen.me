@@ -1199,23 +1199,36 @@ RSpec.describe "Visits", type: :request do
       expect(last_response.status).to eq(400)
     end
 
-    it "rejects a body too big to be a visit" do
+    it "refuses a body too big to be a visit" do
       beacon({ kind: "view", path: "/#{'a' * 9000}" })
 
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(413)
     end
 
-    it "answers nothing to read for a body too big to be a visit" do
+    it "parses none of a body too big to be a visit" do
+      allow(JSON).to receive(:parse).and_call_original
       beacon({ kind: "view", path: "/#{'a' * 9000}" })
 
-      expect(last_response.body).to be_empty
+      expect(JSON).not_to have_received(:parse)
     end
 
-    it "rejects a body whose stated length runs past the cap", :aggregate_failures do
+    it "refuses a body too big to be a visit with no stated length" do
+      beacon({ kind: "view", path: "/#{'a' * 9000}" }, headers: { "CONTENT_LENGTH" => nil })
+
+      expect(last_response.status).to eq(413)
+    end
+
+    it "refuses a body whose stated length runs past the cap", :aggregate_failures do
       beacon({ kind: "view", path: "/writing/hello", title: "Hello" }, headers: { "CONTENT_LENGTH" => "8193" })
 
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(413)
       expect(stored).to be_empty
+    end
+
+    it "takes a body at the cap" do
+      beacon({ kind: "view", path: "/writing/hello", title: "Hello", referrer: "https://example.com/#{'a' * 8103}" })
+
+      expect(last_response.status).to eq(202)
     end
 
     it "rejects an empty body" do

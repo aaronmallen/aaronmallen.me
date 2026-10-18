@@ -84,19 +84,48 @@ RSpec.describe "A request body", type: :request do
     end
   end
 
-  %w[/mcp /api/v1/photos].each do |path|
-    describe "a JSON body to #{path} over 1 MB" do
-      before { post path, rpc(2 * megabyte), json }
+  describe "a JSON body to /mcp over 1 MB" do
+    before { post "/mcp", rpc(2 * megabyte), json }
 
-      it "reaches the action, since it carries photos in base64" do
-        expect(last_response.status).to eq(401)
+    it "reaches the action, since it carries photos in base64" do
+      expect(last_response.status).to eq(401)
+    end
+  end
+
+  describe "a JSON body to /api/v1/photos over 1 MB with a live token" do
+    before { post "/api/v1/photos", rpc(2 * megabyte), json.merge("HTTP_AUTHORIZATION" => "Bearer #{api_token}") }
+
+    it "reaches the action, since it carries photos in base64" do
+      expect(last_response.status).to eq(422)
+    end
+  end
+
+  {
+    "an unknown" => {},
+    "a revoked" => { revoked_at: Time.now },
+    "an expired" => { expires_at: Time.now - 1 },
+  }.each do |kind, spoiled|
+    describe "a JSON body to /api/v1/photos over 1 MB with #{kind} token" do
+      before do
+        value, token = API::Slice["operations.mint_token"].call(name: "Terminal").value!.values_at(:value, :token)
+        API::Slice["db.rom"].relations[:api_tokens].where(id: token.id).update(spoiled) if spoiled.any?
+        value = "nope" if spoiled.empty?
+        headers = json.merge("HTTP_AUTHORIZATION" => "Bearer #{value}", "HTTP_ACCEPT" => "application/json")
+        post "/api/v1/photos", rpc(2 * megabyte), headers
+      end
+
+      it "answers 413 in JSON" do
+        expect(JSON.parse(last_response.body)).to include("status" => 413)
       end
     end
+  end
 
+  %w[/mcp /api/v1/photos].each do |path|
     describe "a JSON body to #{path} over the base64 upload limit" do
       before do
         size = (Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT + 1).to_s
-        post path, rpc(0), json.merge("CONTENT_LENGTH" => size, "HTTP_ACCEPT" => "application/json")
+        headers = json.merge("HTTP_AUTHORIZATION" => "Bearer #{api_token}", "HTTP_ACCEPT" => "application/json")
+        post path, rpc(0), headers.merge("CONTENT_LENGTH" => size)
       end
 
       it "answers 413 in JSON" do

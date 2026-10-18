@@ -53,7 +53,9 @@ module Blog
 
     config.middleware.use RequestTimer, ->(**row) { Performance::Slice["operations.record_timing"].call(:request, **row) }
     config.middleware.use Honeybadger::Rack::ErrorNotifier
-    config.middleware.use ParamsGuard, ->(request) { Admin::Slice["auth.session_reader"].call(request) }
+    config.middleware.use ParamsGuard,
+                          ->(request) { Admin::Slice["auth.session_reader"].call(request) },
+                          ->(token) { API::Slice["repos.api_token_queries"].live_by_token(token) }
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
     config.middleware.use RequestConnection, -> { Hanami.app["db.rom"].gateways[:default].connection }
 

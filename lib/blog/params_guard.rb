@@ -11,21 +11,24 @@ module Blog
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
+    PULSE_LIMIT = 8 * 1024
     SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
     UPLOAD_LIMIT = 25 * 1024 * 1024
     ENCODED_UPLOAD_LIMIT = UPLOAD_LIMIT * 4 / 3
-    UPLOADS = {
+    LIMITS = {
       "/admin/files" => { limit: SHARE_UPLOAD_LIMIT, auth: :session, multipart: true },
       "/admin/mail/draft" => { limit: BODY_LIMIT, auth: :session, multipart: true },
       "/admin/mail/send" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
       "/admin/photos" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
-      "/api/v1/photos" => { limit: ENCODED_UPLOAD_LIMIT, auth: :token, multipart: false },
-      "/mcp" => { limit: ENCODED_UPLOAD_LIMIT, auth: :token, multipart: false },
+      "/api/v1/photos" => { limit: ENCODED_UPLOAD_LIMIT, auth: :api_token, multipart: false },
+      "/mcp" => { limit: ENCODED_UPLOAD_LIMIT, auth: :header, multipart: false },
+      "/pulse" => { limit: PULSE_LIMIT, multipart: false },
     }.freeze
 
-    def initialize(app, session_reader)
+    def initialize(app, session_reader, token_reader)
       @app = app
       @session_reader = session_reader
+      @token_reader = token_reader
       @errors_app = Hanami::Middleware::PublicErrorsApp.new(Hanami.app.root.join(PUBLIC))
     end
 
@@ -39,14 +42,24 @@ module Blog
     private
 
     def authorized?(request, auth)
-      auth == :token ? !request.get_header(AUTHORIZATION).to_s.empty? : signed_in?(request)
+      case auth
+        in :api_token then live_token?(request)
+        in :header then !request.get_header(AUTHORIZATION).to_s.empty?
+        in :session then signed_in?(request)
+        in nil then true
+      end
     end
 
     def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
     def limit(request)
-      rule = upload(request)
+      rule = rule(request)
       rule && authorized?(request, rule[:auth]) ? rule[:limit] : BODY_LIMIT
+    end
+
+    def live_token?(request)
+      match = Blog::Constants::BEARER.match(request.get_header(AUTHORIZATION).to_s)
+      match && @token_reader.call(match[:token])
     end
 
     def oversized?(request)
@@ -79,13 +92,13 @@ module Blog
       end
     end
 
+    def rule(request) = request.post? ? LIMITS[request.path_info] : nil
+
     def signed_in?(request)
       @session_reader.call(::Rack::Request.new(request.env.dup)).signed_in?
     end
 
-    def upload(request) = request.post? ? UPLOADS[request.path_info] : nil
-
-    def upload?(request) = upload(request)&.fetch(:multipart)
+    def upload?(request) = rule(request)&.fetch(:multipart)
 
     def utf8?(value)
       case value

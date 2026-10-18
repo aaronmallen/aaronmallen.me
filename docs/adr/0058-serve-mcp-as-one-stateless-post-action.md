@@ -33,7 +33,10 @@ token holds.
   `Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT` of the body, and hands the raw string to `MCP::Protocol::Handler#call`.
   Since #573 that is the cap `ParamsGuard` sets on `/mcp`, room for a 25 MB photo in base64, so `upload_photo`
   takes the photos `POST /api/v1/photos` takes. It read 1 MiB before, which cut off any photo over about 750 KB.
-  Since #1343 a request with no `Authorization` header gets the 1 MiB `BODY_LIMIT` instead, as on `/api/v1/photos`.
+  Since #1343 a request with no `Authorization` header gets the 1 MiB `BODY_LIMIT` instead. A header alone is enough
+  here, since the action reads the body only after it checks the token. `/api/v1/photos` checks more: Hanami parses
+  an API action's JSON before `require_token` runs, so since #1756 `ParamsGuard` grants that path the larger cap only
+  for a live API token.
 - The handler builds a new `ScopedServer` for that token's scopes and calls `handle_json` with no session. A
   notification answers 202 with no body, and anything else answers `application/json`.
 - The handler refuses a JSON-RPC batch with `-32600` before the server sees it (AA-698).

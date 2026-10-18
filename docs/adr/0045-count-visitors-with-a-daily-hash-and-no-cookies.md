@@ -37,8 +37,9 @@ through `navigator.sendBeacon` to `/pulse`, a neutral path. Each page load mints
 The view carries the path, the title and the referrer's origin. Each time the page hides, the beacon sends a read
 with the whole time the page has been on screen, under the same token (AA-492, AA-552).
 
-**What the site takes.** `Public::Actions::Visits::Create` refuses a body whose length runs past 8 KB and a
-beacon from another site, and turns away a path the public router does not answer (AA-470).
+**What the site takes.** `Blog::ParamsGuard` refuses a body over 8 KB with a 413 before Hanami parses it (#1756).
+`Public::Actions::Visits::Create` refuses a beacon from another site, and turns away a path the public router does not
+answer (AA-470).
 `Analytics::Operations::RecordVisit` skips a hit while the operator is signed in, and from a known bot or a client
 with no user agent. It keeps only the referrer's host, and none when it is our own. A read lands on the newest view
 with its token and today's or yesterday's visitor hash, so a tab left open past midnight still counts (#183). It is
