@@ -36,7 +36,8 @@ token holds.
   Since #1343 a request with no `Authorization` header gets the 1 MiB `BODY_LIMIT` instead. A header alone is enough
   here, since the action reads the body only after it checks the token. `/api/v1/photos` checks more: Hanami parses
   an API action's JSON before `require_token` runs, so since #1756 `ParamsGuard` grants that path the larger cap only
-  for a live API token.
+  for a live API token. Since #1793 `POST /api/v1/shares` and `POST /api/v1/share_groups` get the same cap on the
+  same check, because they too carry files in base64.
 - The handler builds a new `ScopedServer` for that token's scopes and calls `handle_json` with no session. A
   notification answers 202 with no body, and anything else answers `application/json`.
 - The handler refuses a JSON-RPC batch with `-32600` before the server sees it (AA-698).

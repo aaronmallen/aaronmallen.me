@@ -21,6 +21,8 @@ module Blog
       "/admin/mail/send" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
       "/admin/photos" => { limit: UPLOAD_LIMIT, auth: :session, multipart: true },
       "/api/v1/photos" => { limit: ENCODED_UPLOAD_LIMIT, auth: :api_token, multipart: false },
+      "/api/v1/share_groups" => { limit: ENCODED_UPLOAD_LIMIT, auth: :api_token, multipart: false },
+      "/api/v1/shares" => { limit: ENCODED_UPLOAD_LIMIT, auth: :api_token, multipart: false },
       "/mcp" => { limit: ENCODED_UPLOAD_LIMIT, auth: :header, multipart: false },
       "/pulse" => { limit: PULSE_LIMIT, multipart: false },
     }.freeze
