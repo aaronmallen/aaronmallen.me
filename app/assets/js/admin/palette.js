@@ -1,5 +1,5 @@
 import { openDialog, showDialog } from "./dialog.js";
-import { json, setupFetch } from "./fetching.js";
+import { getJSON, json, setupFetch } from "./fetching.js";
 import { fresh } from "./fresh.js";
 import { bind } from "./keys.js";
 import { countText, setupListbox } from "./listbox.js";
@@ -135,7 +135,7 @@ function setupDialog(dialog) {
     filled.add(holder);
     loading += 1;
     list.setAttribute("aria-busy", "true");
-    fetchJSON(url)
+    getJSON(url)
       .then(({ rows }) => {
         place(rows);
         rebuild();
@@ -240,10 +240,6 @@ function applies(option, task) {
   if (needs === NO_TASK) return !task;
 
   return act(task, needs) !== "";
-}
-
-async function fetchJSON(url) {
-  return json(await fetch(url, { headers: ACCEPT, redirect: "manual" }));
 }
 
 function fillField(dialogId, name, value) {

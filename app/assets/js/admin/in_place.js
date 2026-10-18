@@ -9,7 +9,7 @@ export function parse(html) {
   return new DOMParser().parseFromString(html, "text/html");
 }
 
-export function part(html, selector) {
+function part(html, selector) {
   return parse(html).querySelector(selector);
 }
 

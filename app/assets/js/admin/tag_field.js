@@ -1,4 +1,4 @@
-import { json } from "./fetching.js";
+import { getJSON } from "./fetching.js";
 import { fresh } from "./fresh.js";
 import { countText, removeButton, setupListbox, setupToggle } from "./listbox.js";
 
@@ -91,8 +91,7 @@ function loadColors(pick, colors, done) {
   if (!url || loads.has(pick)) return;
 
   loads.set(pick, false);
-  fetch(url, { headers: { Accept: "application/json" }, redirect: "manual" })
-    .then(json)
+  getJSON(url)
     .then(({ tags }) => {
       for (const { name, color } of tags) colors.set(name, color);
       loads.set(pick, true);

@@ -63,7 +63,7 @@ export function removeButton(className, label, remove) {
   return button;
 }
 
-export function noneRow(list, className, text) {
+function noneRow(list, className, text) {
   const row = document.createElement("div");
   row.id = `${list.id}-none`;
   row.className = className;

@@ -1,9 +1,8 @@
 import { fresh } from "./fresh.js";
 
 const ACCEPT = "accept";
+const FOCUSABLE = "input:not([type=hidden]), textarea, select";
 const INVALID = "[aria-invalid='true']";
-
-export const FOCUSABLE = "input:not([type=hidden]), textarea, select";
 
 const ready = new WeakSet();
 

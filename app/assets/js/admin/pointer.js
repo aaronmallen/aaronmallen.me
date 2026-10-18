@@ -1,7 +1,7 @@
 const ENDS = ["pointerup", "pointercancel"];
 
 const GHOST_OFFSET = 14;
-export const HOLD = 300;
+const HOLD = 300;
 const SLOP = 6;
 
 export function followPointer(press, { element, dragging, move, end }) {

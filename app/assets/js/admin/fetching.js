@@ -65,6 +65,10 @@ export function setupFetch({ delay = DELAY, queue = false, marks, request, read 
   return { later, now, stop };
 }
 
+export async function getJSON(url) {
+  return json(await fetch(url, { headers: { Accept: "application/json" }, redirect: "manual" }));
+}
+
 export function json(response) {
   return checked(response).json();
 }
