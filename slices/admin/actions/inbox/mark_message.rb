@@ -6,12 +6,12 @@ module Admin
       class MarkMessage < Action
         TOASTS = "mail_page.toasts"
 
-        include Deps[mark_message: "mail.operations.mark_message"]
+        include Deps[change_thread: "mail.operations.change_thread"]
 
         def handle(request, response)
           status = request.params[:status]
 
-          case mark_message.call(record_id(request), status)
+          case change_thread.call(record_id(request), status)
             in Failure(:gmail_failed)
               toast(response, "#{TOASTS}.gmail_failed")
               response.redirect_to(routes.path(:admin_inbox))

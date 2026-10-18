@@ -28,7 +28,7 @@ module API
 
     import keys: %w[
       operations.act_on_messages
-      operations.mark_message
+      operations.change_thread
       operations.snooze_messages
       operations.wake_message
       repos.message_queries

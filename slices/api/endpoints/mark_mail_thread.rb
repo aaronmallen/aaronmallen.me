@@ -11,10 +11,10 @@ module API
       }.freeze
       REPLY = Helpers::Schema.object({ id: Helpers::Schema::INTEGER, status: STATUS }).freeze
 
-      include Deps[mark_message: "mail.operations.mark_message"]
+      include Deps[change_thread: "mail.operations.change_thread"]
 
       def handle(id:, status:)
-        case mark_message.call(id, status)
+        case change_thread.call(id, status)
           in Success(thread) then Success(id: thread.id, status: thread.status)
           in Failure(:not_found) then missing("mail thread", id)
           in unmatched then unhandled(unmatched, "could not mark the mail thread")

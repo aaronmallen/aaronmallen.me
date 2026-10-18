@@ -7,8 +7,8 @@ module API
       READ = Blog::Types::MessageStatus["read"]
 
       include Deps[
+        change_thread: "mail.operations.change_thread",
         contract: "contracts.clear_inbox_contract",
-        mark_message: "mail.operations.mark_message",
         mark_tasks_seen: "tasks.operations.mark_tasks_seen",
         mark_webmention_seen: "social.operations.mark_webmention_seen",
         message_queries: "mail.repos.message_queries",
@@ -29,7 +29,7 @@ module API
       private
 
       def clear(kind, id, **)
-        kind == :messages ? mark_message.call(id, READ, **) : mark_webmention_seen.call(id)
+        kind == :messages ? change_thread.call(id, READ, **) : mark_webmention_seen.call(id)
       end
 
       def cleared(kind, id, **) = clear(kind, id, **).fmap(&:id).alt_map { [:record, kind, id, it] }

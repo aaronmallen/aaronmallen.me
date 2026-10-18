@@ -6,10 +6,10 @@ module Admin
       class Update < SavedViewAction
         RENAMED = "saved_views_page.toasts.renamed"
 
-        include Deps[rename_saved_view: "saved_views.operations.rename_saved_view"]
+        include Deps[change_saved_view: "saved_views.operations.change_saved_view"]
 
         def handle(request, response)
-          result = rename_saved_view.call(record_id(request), name_params(request))
+          result = change_saved_view.call(record_id(request), name_params(request))
 
           settle(response, result, RENAMED, return_path(request)) do
             invalid(request, response)

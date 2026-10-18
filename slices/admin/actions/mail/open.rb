@@ -9,7 +9,7 @@ module Admin
 
         include Redirect
         include Deps[
-          mark_message: "mail.operations.mark_message",
+          change_thread: "mail.operations.change_thread",
           thread_queries: "mail.repos.thread_queries",
         ]
 
@@ -24,7 +24,7 @@ module Admin
         private
 
         def read(id)
-          case mark_message.call(id, READ)
+          case change_thread.call(id, READ)
             in Success(_) | Failure(:gmail_failed) then nil
           end
         end

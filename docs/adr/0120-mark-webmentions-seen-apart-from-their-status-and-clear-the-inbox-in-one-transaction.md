@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, contact, mcp, social, tasks]
 issue: "#650"
-amended: ["#911", "#1603"]
+amended: ["#911", "#1603", "#1839"]
 tags: [inbox, webmentions, messages, tasks, schema, bulk, transactions, savepoint, api, mcp]
 ---
 
@@ -39,7 +39,7 @@ the analytics figures keep counting every pending mention.
 
 **One `api` operation clears the inbox.** `API::Operations::ClearInbox` takes three lists of ids, `tasks`,
 `messages` and `webmentions`, and opens one transaction. It marks every listed issue seen in one `task_sources`
-update through `tasks.operations.mark_tasks_seen`, and calls `mail.operations.mark_message` with `read` and the new
+update through `tasks.operations.mark_tasks_seen`, and calls `mail.operations.change_thread` with `read` and the new
 social operation for each id in turn, all through slice exports. Gmail hears of each message before the transaction
 opens, so no Gmail call holds it open (#1603). The first failure stops the loop, steps out as
 `Failure[:record, kind, id, reason]` and rolls back every row the call had changed. The contract drops repeated ids

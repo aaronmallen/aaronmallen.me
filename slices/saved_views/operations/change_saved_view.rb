@@ -14,10 +14,12 @@ module SavedViews
         view = step find(id)
         fields = step validate(form(view, params))
 
-        saved_view_mutations.update(view.id, **fields.slice(:name, :filters))
+        saved_view_mutations.update(view.id, **changed(fields, params))
       end
 
       private
+
+      def changed(fields, params) = params.key?(:filters) ? fields.slice(:name, :filters) : fields.slice(:name)
 
       def find(id)
         found(saved_view_queries.by_id(id))
@@ -26,7 +28,7 @@ module SavedViews
       def form(view, params)
         screen = view.screen
 
-        { name: params.fetch(:name, view.name), screen:, filters: kept(screen, params[:filters]) }
+        { name: params.fetch(:name, view.name), screen:, filters: kept(screen, params.fetch(:filters, view.filters)) }
       end
 
       def kept(screen, filters) = filters_contract.call(screen:, filters:).to_h[:filters]
