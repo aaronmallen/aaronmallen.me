@@ -84,8 +84,8 @@ jobs, and there is one to revoke. An API token minted in the admin is not an MCP
 column defaults to all five scopes, and #941 named the MCP tables here to tell the two apart.
 
 **A leaked token reads the journal for any range it asks for.** An access token lasts an hour and a refresh token
-30 days (`slices/mcp/operations/issue_tokens.rb`), and the revoke button on the admin's clients page is the rest of
-the limit.
+30 days (`slices/mcp/operations/issue_tokens.rb`), and the revoke button in the admin's MCP clients section is the rest
+of the limit.
 
 **A year takes many calls.** One answer stops near 100 rows (#941), and a feed of many kinds fills a window sooner, so a
 client counts first with `summarize_activity` and walks the months with `read_activity`, following `continue_to`.

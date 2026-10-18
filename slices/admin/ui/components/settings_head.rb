@@ -5,8 +5,8 @@ module Admin
     module Components
       class SettingsHead < Component
         TABS = {
-          socials: :admin_settings_socials, tagging: :admin_settings_tagging, security: :admin_security,
-          jobs: :admin_settings_jobs,
+          socials: :admin_settings_socials, tagging: :admin_settings_tagging, services: :admin_settings_services,
+          security: :admin_security, jobs: :admin_settings_jobs,
         }.freeze
         UNKNOWN = "!"
         LABELS = TABS.keys.to_h { [it, ".tabs.#{it}"] }.freeze
@@ -15,8 +15,8 @@ module Admin
         prop :title, Blog::Types::String
 
         include Deps[
-          job_queries: "activity.repos.job_queries", person_queries: "social.repos.person_queries",
-          task_rule_queries: "tasks.repos.task_rule_queries",
+          job_queries: "activity.repos.job_queries", list_services: "operations.list_services",
+          person_queries: "social.repos.person_queries", task_rule_queries: "tasks.repos.task_rule_queries",
         ]
 
         def view_template
@@ -31,7 +31,10 @@ module Admin
         private
 
         def counts
-          { socials: person_queries.count, tagging: task_rule_queries.count, jobs: job_queries.flagged || UNKNOWN }
+          {
+            socials: person_queries.count, tagging: task_rule_queries.count, services: list_services.count,
+            jobs: job_queries.flagged || UNKNOWN,
+          }
         end
 
         def maintenance

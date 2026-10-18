@@ -40,7 +40,7 @@ module Admin
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
     post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID
-    get "/clients", to: "clients.index", as: :clients
+    redirect_temporary "/clients", to: "/settings/services#clients"
     get "/clients/:id/menu", to: "clients.menu", as: :client_menu, id: ID
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID
@@ -244,6 +244,7 @@ module Admin
     redirect_temporary "/settings", to: "/settings/socials"
     get "/settings/jobs", to: "settings.jobs", as: :settings_jobs
     get "/settings/security", to: "security.show", as: :security
+    get "/settings/services", to: "settings.services", as: :settings_services
     get "/settings/socials", to: "settings.socials", as: :settings_socials
     get "/settings/tagging", to: "settings.tagging", as: :settings_tagging
     get "/social", to: "social.index", as: :social
@@ -329,7 +330,7 @@ module Admin
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
     get "/tasks/sprints/:id/menu", to: "sprints.menu", as: :sprint_menu, id: ID
     get "/time", to: "time_report.show", as: :time
-    get "/tokens", to: "tokens.index", as: :tokens
+    redirect_temporary "/tokens", to: "/settings/services#tokens"
     post "/tokens", to: "tokens.create", as: :create_token
     get "/tokens/:id/menu", to: "tokens.menu", as: :token_menu, id: ID
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID

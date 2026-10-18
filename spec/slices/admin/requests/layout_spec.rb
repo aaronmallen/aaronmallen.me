@@ -9,8 +9,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       /admin /admin/tasks /admin/calendar /admin/projects /admin/journal /admin/decisions /admin/review /admin/posts
       /admin/social /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
       /admin/activity /admin/health /admin/time /admin/settings/tagging#tags /admin/settings/socials#people
-      /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/tokens /admin/services
-      /admin/clients /admin/settings/security /admin/settings/jobs
+      /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/settings/services#tokens
+      /admin/settings/services#services /admin/settings/services#clients /admin/settings/security /admin/settings/jobs
     ]
   end
 
@@ -72,8 +72,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "links the site and every settings tab from the avatar menu" do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
         .to eq(%w[/writing /about /projects /contact /admin/settings/tagging#tags /admin/settings/socials#people
-                  /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/tokens
-                  /admin/services /admin/clients /admin/settings/security /admin/settings/jobs])
+                  /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
+                  /admin/settings/services#tokens /admin/settings/services#services
+                  /admin/settings/services#clients /admin/settings/security /admin/settings/jobs])
     end
 
     it "offers the keys, the themes and sign out in the avatar menu", :aggregate_failures do
@@ -193,7 +194,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   end
 
   describe "the reads behind it" do
-    def statements(pattern) = counting { get "/admin/tokens" }.grep(pattern)
+    def statements(pattern) = counting { get "/admin/settings/services" }.grep(pattern)
 
     before { sign_in_to_admin }
 
@@ -230,7 +231,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   describe "a settings screen" do
     before do
       sign_in_to_admin
-      get "/admin/tokens"
+      get "/admin/settings/services"
     end
 
     it "marks no pill current" do
@@ -238,16 +239,15 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "lists the settings tabs as screen-tabs", :aggregate_failures do
-      expect(page.all("a.screen-tab").map(&:text))
-        .to eq(["tags", "people", "task rules", "webmentions", "API tokens", "connected services", "MCP clients",
-                "security", "jobs"])
-      expect(page).to have_css("a.screen-tab[aria-current='page']", text: "API tokens")
+      expect(page.all("a.screen-tab").map { it.text.sub(/ \d+\z/, "") })
+        .to eq(["socials", "tagging", "connected services", "security", "jobs"])
+      expect(page).to have_css("a.screen-tab[aria-current='page']", text: "connected services")
     end
 
     {
-      "/admin/settings/tagging" => "Tagging", "/admin/tokens" => "API tokens",
-      "/admin/settings/socials" => "Socials", "/admin/services" => "Connected services",
-      "/admin/clients" => "MCP clients", "/admin/settings/security" => "Security", "/admin/settings/jobs" => "Jobs",
+      "/admin/settings/tagging" => "Tagging", "/admin/settings/socials" => "Socials",
+      "/admin/settings/services" => "Connected services", "/admin/settings/security" => "Security",
+      "/admin/settings/jobs" => "Jobs",
     }.each do |route, title|
       it "heads #{route} as Settings and titles it #{title}", :aggregate_failures do
         get route

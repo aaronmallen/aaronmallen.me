@@ -15,7 +15,7 @@ module Admin
 
           connection = result.value!
           toast(response, connection.by_credentials? ? REVOKE : DISCONNECTED, name: connection.label)
-          response.redirect_to(routes.path(:admin_services))
+          response.redirect_to(Helpers::ServiceTab.services(routes))
         end
       end
     end

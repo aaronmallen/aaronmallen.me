@@ -11,7 +11,7 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Form(action: path(:admin_create_token), class: "token-mint") do
+            Form(action: "#{path(:admin_create_token)}##{Helpers::ServiceTab::TOKENS}", class: "token-mint") do
               Field(label: t(".label"), name: :name, errors: @errors, error: FieldError) do |control|
                 Input(**control, autocomplete: "off", name: "token[name]", placeholder: t(".placeholder"), value: @name)
               end

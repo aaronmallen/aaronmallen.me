@@ -43,7 +43,7 @@ module Admin
           end
 
           def services_link
-            Button(href: path(:admin_services), icon: "fa-solid fa-heart-pulse") { t(".google_health") }
+            Button(href: Helpers::ServiceTab.services(routes), icon: "fa-solid fa-heart-pulse") { t(".google_health") }
           end
 
           def side

@@ -739,6 +739,14 @@ en:
         never_used: "never used"
         revoke: "Revoke"
         sightings: "sightings →"
+      clients:
+        list:
+          connected: "Connected clients"
+          count:
+            one: "%{count} connected client"
+            other: "%{count} connected clients"
+            zero: "Nothing has connected yet"
+          empty: "No client has connected yet."
       commits_card:
         activity: "All of today's commits →"
         commits: "Commits"
@@ -2185,6 +2193,24 @@ en:
             blank: "Type a handle first."
         head:
           close: "Close"
+        list:
+          all_answered: "Everything answered on its last run."
+          connect: "Connect a service"
+          connected: "Connected services"
+          count:
+            one: "%{count} connected"
+            other: "%{count} connected"
+          failing:
+            one: "%{count} failing"
+            other: "%{count} failing"
+          glance: "At a glance"
+          groups:
+            code: "Code and sign-in"
+            infrastructure: "Infrastructure"
+            personal: "Personal"
+            social: "Social"
+          hint: "Services you connect keep their tokens encrypted in the database. The rest take keys from the server environment, if they need any."
+          pick_hint: "Click a service to see what it powers and how often its jobs run."
         picker:
           hint: "The media and backup stores, MaxMind and Honeybadger take their keys from the server environment, so they aren't here."
           title: "Connect a service"
@@ -2202,6 +2228,7 @@ en:
           jobs: "jobs"
           label: "Settings tabs"
           security: "security"
+          services: "connected services"
           socials: "socials"
           tagging: "tagging"
       share_drawer:
@@ -2949,6 +2976,14 @@ en:
           scopes:
             blank: "Pick at least one permission."
             format: "Pick permissions from the list."
+        list:
+          count:
+            one: "%{count} live token"
+            other: "%{count} live tokens"
+            zero: "No live tokens"
+          empty: "No live tokens. Mint one for a client that needs the API."
+          live: "Live tokens"
+          mint: "Mint a token"
         mint:
           expires_hint: "The token stops working when that day starts. Leave it blank and it never expires."
           expires_on: "Expires on"
@@ -3105,14 +3140,6 @@ en:
         show:
           heading: "Calendar"
       clients:
-        index:
-          connected: "Connected clients"
-          count:
-            one: "%{count} connected client"
-            other: "%{count} connected clients"
-            zero: "Nothing has connected yet"
-          empty: "No client has connected yet."
-          heading: "MCP clients"
         menu:
           revoke: "Revoke"
           sightings: "Sign-ins"
@@ -3631,25 +3658,6 @@ en:
           sub: "Every sign-in, failed ones too, and where each token and client has called from."
           token: "API token"
       services:
-        index:
-          all_answered: "Everything answered on its last run."
-          connect: "Connect a service"
-          connected: "Connected services"
-          count:
-            one: "%{count} connected"
-            other: "%{count} connected"
-          failing:
-            one: "%{count} failing"
-            other: "%{count} failing"
-          glance: "At a glance"
-          groups:
-            code: "Code and sign-in"
-            infrastructure: "Infrastructure"
-            personal: "Personal"
-            social: "Social"
-          heading: "Connected services"
-          hint: "Services you connect keep their tokens encrypted in the database. The rest take keys from the server environment, if they need any."
-          pick_hint: "Click a service to see what it powers and how often its jobs run."
         menu:
           another: "Connect another"
           confirm_disconnect: "Click again to disconnect"
@@ -3674,6 +3682,11 @@ en:
       settings:
         jobs:
           heading: "Jobs"
+        services:
+          clients: "MCP clients"
+          heading: "Connected services"
+          services: "Connected"
+          tokens: "API tokens"
         socials:
           heading: "Socials"
           people: "People"
@@ -3850,15 +3863,6 @@ en:
             open: "%{lead}. %{done} of %{total} done."
           plan: "Plan tomorrow"
       tokens:
-        index:
-          count:
-            one: "%{count} live token"
-            other: "%{count} live tokens"
-            zero: "No live tokens"
-          empty: "No live tokens. Mint one for a client that needs the API."
-          heading: "API tokens"
-          live: "Live tokens"
-          mint: "Mint a token"
         menu:
           revoke: "Revoke"
       webmentions:

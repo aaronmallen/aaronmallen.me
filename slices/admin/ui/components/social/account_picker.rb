@@ -63,7 +63,7 @@ module Admin
 
           def foot
             div(class: "compose-accounts-foot") do
-              a(href: path(:admin_services)) { t(".manage") }
+              a(href: Helpers::ServiceTab.services(routes)) { t(".manage") }
               button(type: "button", class: "compose-accounts-link", hidden: true, data: { social_everywhere: "" }) do
                 t(".everywhere")
               end

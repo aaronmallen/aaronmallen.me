@@ -66,7 +66,7 @@ module Admin
         end
 
         def lapsing(row)
-          href = path(:admin_services, selected: row.record_id)
+          href = Helpers::ServiceTab.services(routes, selected: row.record_id)
           sub = row.days.negative? ? t(".lapsed") : t(".lapsing", count: row.days)
 
           ListItem(title: row.title, href:, sub:, icon: "fa-solid fa-hourglass-end", **hovered(row)) do

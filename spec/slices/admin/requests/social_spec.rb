@@ -339,7 +339,7 @@ RSpec.describe "Admin social", type: :request do
 
         link = page.find(".compose-accounts-foot a", text: "Manage accounts", visible: :all)
 
-        expect(link[:href]).to eq("/admin/services")
+        expect(link[:href]).to eq("/admin/settings/services#services")
       end
 
       it "sends to the accounts ticked in the menu with scripts off" do

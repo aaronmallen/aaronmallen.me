@@ -182,7 +182,6 @@ RSpec.describe "Admin screens", type: :feature do
     {
       "activity" => "/admin/activity",
       "analytics" => "/admin/analytics",
-      "clients" => "/admin/clients",
       "commit" => "/admin/commits/#{commit.id}",
       "form expired" => lambda do
         visit "/admin/settings/tagging"
@@ -212,7 +211,7 @@ RSpec.describe "Admin screens", type: :feature do
       "search results" => "/admin/search?q=accountant",
       "search by kind" => "/admin/search?q=quarterly&kind=task",
       "security" => "/admin/settings/security",
-      "services" => "/admin/services",
+      "services" => "/admin/settings/services",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
@@ -230,7 +229,6 @@ RSpec.describe "Admin screens", type: :feature do
       "time" => "/admin/time",
       "time by day" => "/admin/time?by=day",
       "today" => "/admin",
-      "tokens" => "/admin/tokens",
       "webmentions" => "/admin/webmentions",
     }
   end

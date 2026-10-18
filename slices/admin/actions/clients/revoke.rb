@@ -12,7 +12,7 @@ module Admin
           halt :not_found if revoke_client.call(record_id(request)).failure?
 
           toast(response, REVOKED)
-          response.redirect_to(routes.path(:admin_clients))
+          response.redirect_to(Helpers::ServiceTab.clients(routes))
         end
       end
     end

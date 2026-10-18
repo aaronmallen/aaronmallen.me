@@ -17,7 +17,7 @@ module Admin
           connection = connection_queries.by_id(record_id(request)) || halt(:not_found)
 
           report(response, connection)
-          response.redirect_to(routes.path(:admin_services, selected: connection.id))
+          response.redirect_to(Helpers::ServiceTab.services(routes, selected: connection.id))
         end
 
         private

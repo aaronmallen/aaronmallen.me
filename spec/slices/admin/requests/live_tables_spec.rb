@@ -4,13 +4,12 @@ RSpec.describe "Admin live tables", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/activity /admin/analytics /admin/calendar /admin/clients /admin/decisions /admin/decisions/new
+      /admin /admin/activity /admin/analytics /admin/calendar /admin/decisions /admin/decisions/new
       /admin/files /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings
       /admin/people/new /admin/performance /admin/performance/requests /admin/posts /admin/posts/new
       /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/jobs /admin/settings/security
-      /admin/settings/socials
-      /admin/settings/tagging /admin/services /admin/social /admin/tasks /admin/tasks/new /admin/time /admin/tokens
-      /admin/webmentions
+      /admin/settings/services /admin/settings/socials /admin/settings/tagging /admin/social /admin/tasks
+      /admin/tasks/new /admin/time /admin/webmentions
     ]
   end
   let(:records) do
@@ -74,6 +73,13 @@ RSpec.describe "Admin live tables", type: :request do
     get "/admin/settings/socials"
 
     expect(tables).to include("service_connections", "posts", "trusted_authors", "webmention_settings")
+  end
+
+  it "lists the tables of both the services and the MCP clients on the connected services tab" do
+    get "/admin/settings/services"
+
+    expect(tables).to include("service_connections", "sync_states", "webmention_settings", "oauth_clients",
+                              "oauth_tokens")
   end
 
   it "leaves out the tables a page does not draw" do

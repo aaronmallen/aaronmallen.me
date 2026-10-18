@@ -33,7 +33,7 @@ verified.
   `/admin/sign-in/:provider`, which answers 503 when that provider's credentials are not set (ADR 0009).
 - Every provider has one callback for signing in and connecting alike. The `site.auth_callback_path` setting names it,
   from `AUTH_CALLBACK_PATH`, and defaults to `/admin/auth/:provider/callback`. A state the
-  services page started connects an account, and any other state signs in.
+  connected services tab started connects an account, and any other state signs in.
 - GitHub sign-in asks for `user:email` and takes the address `GET /user/emails` marks primary and verified.
 - Google sign-in asks for `openid email`, takes the userinfo email only when `email_verified` is true, and writes no
   `service_connections` row. `Admin::Auth::Google` builds on the same OAuth client as `Google::Client`.

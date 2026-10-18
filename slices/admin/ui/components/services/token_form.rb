@@ -10,11 +10,15 @@ module Admin
           prop :definition, Blog::Types::Instance(::Services::Structs::Definition)
 
           def view_template(&)
-            Form(action: path(:admin_create_service, provider: @definition.id), class: "svc-connect") do
+            Form(action:, class: "svc-connect") do
               yield
               Button(variant: :pri, type: "submit", icon: LINK_ICON) { t(".connect", name: @definition.name) }
             end
           end
+
+          private
+
+          def action = "#{path(:admin_create_service, provider: @definition.id)}##{Helpers::ServiceTab::SERVICES}"
         end
       end
     end

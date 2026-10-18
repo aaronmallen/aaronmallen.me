@@ -48,7 +48,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", type: :feature
   describe "a token" do
     before do
       API::Slice["operations.mint_token"].call(name: "Terminal")
-      visit "/admin/tokens"
+      visit "/admin/settings/services"
       open_menu(find(".li .li-title", text: "Terminal"))
     end
 

@@ -45,7 +45,9 @@ module Admin
             end
           end
 
-          def services(menu) = opener(menu, path(:admin_services, selected: @row.record_id), t(".open_services"))
+          def services(menu)
+            opener(menu, Helpers::ServiceTab.services(routes, selected: @row.record_id), t(".open_services"))
+          end
 
           def snooze(menu)
             fields = { kind: @row.kind, record_id: @row.record_id }.compact

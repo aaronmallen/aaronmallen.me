@@ -78,7 +78,7 @@ RSpec.describe "Lapsing connections on the attention list", :frozen_clock, type:
     held = connect_linkedin(lapses_at: days_ahead(3))
     row = card_row
 
-    expect(row.find(".li-title")[:href]).to eq("/admin/services?selected=#{held.id}")
+    expect(row.find(".li-title")[:href]).to eq("/admin/settings/services?selected=#{held.id}#services")
     expect(row.find(".li-sub").text).to eq("Connection lapses in 3 days")
     expect(row).to have_css("input[value=lapsing]", visible: :all)
   end

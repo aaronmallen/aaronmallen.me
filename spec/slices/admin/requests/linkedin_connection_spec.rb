@@ -37,7 +37,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
     before { set_up_linkedin_client({}) }
 
     it "lists LinkedIn as not set up, names the settings and leaves it out of the picker", :aggregate_failures do
-      get "/admin/services", selected: "linkedin"
+      get "/admin/settings/services", selected: "linkedin"
 
       expect(page.find(".svc-group", text: "Social")).to have_css(".li", text: /LinkedIn.*not set up/)
       expect(page.find(".svc-line", text: "LINKEDIN_CLIENT_ID")).to have_css(".pill", text: "missing")
@@ -64,7 +64,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
     before { set_up_linkedin_client }
 
     it "offers LinkedIn in the picker" do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(pickable).to include("LinkedIn")
     end
@@ -112,7 +112,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
       end
 
       it "shows both profiles on the services page", :aggregate_failures do
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(connections.map(&:account_id)).to contain_exactly("member-ada", "member-grace")
         expect(page.find(".svc-group", text: "Social")).to have_css(".li", text: "Ada Lovelace")
@@ -140,7 +140,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
 
       it "marks it on the services page and offers a reconnect", :aggregate_failures do
         held = connect_linkedin(lapses_at: Time.now + (3 * 86_400))
-        get "/admin/services", selected: held.id
+        get "/admin/settings/services", selected: held.id
 
         expect(row).to have_css(".pill", text: "lapses soon")
         expect(page).to have_text("LinkedIn stops taking the site's token on")
@@ -149,7 +149,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
 
       it "marks it lapsed once the expiry passes", :aggregate_failures do
         held = connect_linkedin(lapses_at: Time.now - 60)
-        get "/admin/services", selected: held.id
+        get "/admin/settings/services", selected: held.id
 
         expect(row).to have_css(".pill", text: "lapsed")
         expect(page).to have_text("LinkedIn no longer takes the site's token")
@@ -158,7 +158,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
       it "marks a connection lapsing late on the last day of the window on both pages", :aggregate_failures do
         last = Blog::TimeZone.today + 7
         connect_linkedin(lapses_at: Blog::TimeZone.local_time(last.year, last.month, last.day, 23, 59))
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(row).to have_css(".pill", text: "lapses soon")
         expect(Activity::Slice["repos.attention_queries"].stalled.map(&:kind)).to include("lapsing")
@@ -167,7 +167,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
       it "leaves a connection more than a week out marked connected" do
         out = Blog::TimeZone.today + 8
         connect_linkedin(lapses_at: Blog::TimeZone.local_time(out.year, out.month, out.day))
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(row).to have_css(".pill", text: "connected")
       end
@@ -193,7 +193,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
       end
 
       it "clears the warning on the services page and the attention list", :aggregate_failures do
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(page.find(".svc-group", text: "Social").find(".li", text: "Ada Lovelace"))
           .to have_css(".pill", text: "connected")

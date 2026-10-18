@@ -26,7 +26,7 @@ someone else registered, and they held the PKCE verifier. Nothing else stood bet
 ## Decision
 
 Anyone may register a client, and the operator approves every connection. The rule lands in `slices/mcp`, and the
-admin's clients page follows it.
+MCP clients section of the admin's Settings follows it.
 
 - `MCP::Operations::RegisterClient` registers a public client with no secret. It sets `grant_types`,
   `response_types` and `token_endpoint_auth_method` itself from `Blog::Types::OAuthGrantType`,
@@ -62,7 +62,7 @@ register a new client.
 The operator clicks Approve on every connect and every reconnect, after a revoke and after a refresh token lapses.
 
 The consent page is the only gate, so the operator has to read it. A client names itself, so the name proves
-nothing. The redirect URI the page shows is where the code goes, and the clients page puts its host beside the
+nothing. The redirect URI the page shows is where the code goes, and the MCP clients section puts its host beside the
 name so the operator can tell two clients called `Claude` apart (AA-693). Since #465 the consent page leads with
 that host, and shows the name only as the name the client gave itself. A client that has never used a token and
 holds no token row gets a notice that it is new, with when it registered, and the `write` grant warns that a post it

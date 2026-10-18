@@ -20,7 +20,7 @@ module Admin
           work = request.params[:work] == Blog::Constants::CHECKED
           change_connection.call(connection.id, work:)
           toast(response, work ? WORK : PERSONAL, account: connection.label)
-          response.redirect_to(routes.path(:admin_services, selected: connection.id))
+          response.redirect_to(Helpers::ServiceTab.services(routes, selected: connection.id))
         end
       end
     end

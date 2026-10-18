@@ -26,7 +26,7 @@ module Admin
           private
 
           def another
-            href = path(:admin_services, connect: definition.id)
+            href = Helpers::ServiceTab.services(routes, connect: definition.id)
             Button(small: true, variant: :gh, icon: ANOTHER_ICON, href:) { t(".another") }
           end
 

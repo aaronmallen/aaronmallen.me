@@ -65,7 +65,8 @@ module Admin
 
         def site_lines
           TodayLine(label: t(".visitors"), href: path(:admin_analytics)) { t(".visitor_count", count: @visitors) }
-          TodayLine(label: t(".clients"), href: path(:admin_clients)) { t(".client_count", count: @clients) }
+          clients = Helpers::ServiceTab.clients(routes)
+          TodayLine(label: t(".clients"), href: clients) { t(".client_count", count: @clients) }
         end
       end
     end

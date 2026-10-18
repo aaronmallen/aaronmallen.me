@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module Services
-        class Index < View
-          include Components::Services
-
+        class List < Component
           LIVE_TABLES = %w[service_connections sync_states webmention_settings].freeze
           WARNING_ICON = "fa-solid fa-triangle-exclamation"
 
@@ -19,8 +17,6 @@ module Admin
           prop :selected, Blog::Types::Instance(Structs::ServiceRow).optional
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list
               Card(class: "settings-side") { side }

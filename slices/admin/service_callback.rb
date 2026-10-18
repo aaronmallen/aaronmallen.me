@@ -22,14 +22,14 @@ module Admin
 
     def connected(response, connection)
       toast(response, "#{TOASTS}.connected", name: self.class::NAME, account: connection.label)
-      response.redirect_to(routes.path(:admin_services, selected: connection.id))
+      response.redirect_to(Helpers::ServiceTab.services(routes, selected: connection.id))
     end
 
     def redirect_uri = auth_callback_url(self.class::PROVIDER)
 
     def refuse(response, reason)
       toast(response, "#{TOASTS}.#{reason}", name: self.class::NAME)
-      response.redirect_to(routes.path(:admin_services))
+      response.redirect_to(Helpers::ServiceTab.services(routes))
     end
   end
 end

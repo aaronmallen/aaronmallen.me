@@ -79,14 +79,14 @@ RSpec.describe "Admin Google connection", type: :request do
     before { set_up_google_client({}) }
 
     it "lists Google as not set up and leaves it out of the picker", :aggregate_failures do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(page.find(".svc-group", text: "Personal")).to have_css(".li", text: /Google.*not set up/)
       expect(pickable).not_to include("Google")
     end
 
     it "names the missing settings on its detail" do
-      get "/admin/services", selected: "google"
+      get "/admin/settings/services", selected: "google"
 
       expect(page.find(".svc-line", text: "GOOGLE_CLIENT_ID")).to have_css(".pill", text: "missing")
     end
@@ -108,14 +108,14 @@ RSpec.describe "Admin Google connection", type: :request do
     before { set_up_google_client }
 
     it "offers Google in the picker" do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(pickable).to include("Google")
     end
 
     describe "picking the scopes to ask for" do
       it "ticks every scope in the dialog and locks the address on", :aggregate_failures do
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(scope_box("Read sleep")).to be_checked.and(have_attributes(disabled?: false))
         expect(scope_box("See your address")).to be_checked.and(be_disabled)
@@ -180,7 +180,7 @@ RSpec.describe "Admin Google connection", type: :request do
 
       it "opens the account as connected", :aggregate_failures do
         expect(toast).to include("Google connected as aaron@example.com")
-        expect(page.find(".settings-side")).to have_css(".pill", text: "connected")
+        expect(page.find("#services .settings-side")).to have_css(".pill", text: "connected")
         expect(scope_line("Read sleep")).to have_css(".pill", text: "granted")
       end
 
@@ -229,7 +229,7 @@ RSpec.describe "Admin Google connection", type: :request do
       end
 
       it "shows each account's own scopes", :aggregate_failures do
-        get "/admin/services", selected: account("work@example.com").id.to_s
+        get "/admin/settings/services", selected: account("work@example.com").id.to_s
 
         expect(scope_line("Read, send, label and delete mail")).to have_css(".pill", text: "granted")
         expect(scope_line("Read sleep")).to have_css(".pill", text: "off")
@@ -239,7 +239,7 @@ RSpec.describe "Admin Google connection", type: :request do
     describe "an account that left a scope off" do
       before do
         connect_account
-        get "/admin/services", selected: connection.id.to_s
+        get "/admin/settings/services", selected: connection.id.to_s
       end
 
       def dialog = "#connect-service-google-#{connection.id}"
@@ -431,7 +431,7 @@ RSpec.describe "Admin Google connection", type: :request do
 
       it "offers to reconnect that account", :aggregate_failures do
         expect { read("me") }.to raise_error(Google::Error)
-        get "/admin/services", selected: connection.id.to_s
+        get "/admin/settings/services", selected: connection.id.to_s
 
         expect(page.find(".li", text: "Google")).to have_css(".pill", text: "needs reconnect")
         expect(page.find(".svc-actions")).to have_css(reconnect_field, visible: :all)
@@ -439,9 +439,9 @@ RSpec.describe "Admin Google connection", type: :request do
 
       it "says a reconnect lets its jobs resume", :aggregate_failures do
         expect { read("me") }.to raise_error(Google::Error)
-        get "/admin/services", selected: connection.id.to_s
+        get "/admin/settings/services", selected: connection.id.to_s
 
-        expect(page.find(".settings-side")).to have_css(".hint", text: revoked_hint)
+        expect(page.find("#services .settings-side")).to have_css(".hint", text: revoked_hint)
       end
 
       it "asks Google nothing more until I reconnect", :aggregate_failures do
@@ -483,7 +483,7 @@ RSpec.describe "Admin Google connection", type: :request do
       end
 
       it "shows a Work account switch on each Google account, off at first" do
-        get "/admin/services", selected: connection.id.to_s
+        get "/admin/settings/services", selected: connection.id.to_s
 
         expect(page.find("form[action='/admin/services/#{connection.id}/work'] input[role=switch]")).not_to be_checked
       end

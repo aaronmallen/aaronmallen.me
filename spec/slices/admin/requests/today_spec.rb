@@ -189,7 +189,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
 
         expect(line_value("MCP clients")).to eq("1 connected")
-        expect(line("MCP clients")[:href]).to eq("/admin/clients")
+        expect(line("MCP clients")[:href]).to eq("/admin/settings/services#clients")
       end
     end
 

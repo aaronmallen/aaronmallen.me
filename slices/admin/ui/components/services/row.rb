@@ -23,9 +23,11 @@ module Admin
 
           private
 
-          def href = @selected ? path(:admin_services) : path(:admin_services, selected: @row.key)
+          def href = Helpers::ServiceTab.services(routes, **picked)
 
           def link = @selected ? { aria: { current: "true" } } : Blog::Constants::EMPTY_HASH
+
+          def picked = @selected ? Blog::Constants::EMPTY_HASH : { selected: @row.key }
 
           def sub
             used_at = @row.connection&.last_used_at

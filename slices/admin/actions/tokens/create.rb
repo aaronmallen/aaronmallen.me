@@ -7,9 +7,9 @@ module Admin
         MINTED = "tokens_page.toasts.minted"
 
         include Deps[
-          index_view: "ui.views.tokens.index",
-          api_token_queries: "api.repos.api_token_queries",
+          "operations.build_services_page",
           mint_token: "api.operations.mint_token",
+          services_view: "ui.views.settings.services",
         ]
 
         def handle(request, response)
@@ -27,17 +27,16 @@ module Admin
         private
 
         def invalid(response, params, errors)
-          unprocessable(
-            response, index_view,
-            errors:, minted: nil, tokens: api_token_queries.live, name: params[:name].to_s,
-            scopes: Array(params[:scopes]), expires_on: params[:expires_on].to_s,
-          )
+          tokens = {
+            errors:, name: params[:name].to_s, scopes: Array(params[:scopes]), expires_on: params[:expires_on].to_s,
+          }
+          unprocessable(response, services_view, **build_services_page.call(tokens:))
         end
 
         def minted(response, value)
-          response.flash[UI::Views::Tokens::Index::MINTED] = value
+          response.flash[UI::Components::Tokens::List::MINTED] = value
           toast(response, MINTED)
-          response.redirect_to(routes.path(:admin_tokens))
+          response.redirect_to(Helpers::ServiceTab.tokens(routes))
         end
 
         def minting(params)

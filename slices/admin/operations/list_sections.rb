@@ -27,9 +27,9 @@ module Admin
         [:people, :settings, :"fa-address-book", :admin_settings_socials, Helpers::Socials::PEOPLE].freeze,
         [:task_rules, :settings, :"fa-wand-magic-sparkles", :admin_settings_tagging, Helpers::TagList::RULES].freeze,
         [:webmention_settings, :settings, :"fa-at", :admin_settings_socials, Helpers::Socials::WEBMENTIONS].freeze,
-        %i[tokens settings fa-key admin_tokens].freeze,
-        %i[services settings fa-link admin_services].freeze,
-        %i[clients settings fa-plug admin_clients].freeze,
+        [:tokens, :settings, :"fa-key", :admin_settings_services, Helpers::ServiceTab::TOKENS].freeze,
+        [:services, :settings, :"fa-link", :admin_settings_services, Helpers::ServiceTab::SERVICES].freeze,
+        [:clients, :settings, :"fa-plug", :admin_settings_services, Helpers::ServiceTab::CLIENTS].freeze,
         %i[security settings fa-shield-halved admin_security].freeze,
         %i[jobs settings fa-gears admin_settings_jobs].freeze,
       ].freeze

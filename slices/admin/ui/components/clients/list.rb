@@ -2,16 +2,14 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module Clients
-        class Index < View
+        class List < Component
           LIVE_TABLES = %w[oauth_clients oauth_tokens].freeze
 
           prop :clients, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading"))
             Card(title: t(".connected"), **list_props, data: { key_list: true }) do
               @clients.each { ClientRow(client: it) }
             end

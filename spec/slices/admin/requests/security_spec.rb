@@ -29,6 +29,7 @@ RSpec.describe "Admin security", type: :request do
   def tabs
     {
       "socials 0" => "/admin/settings/socials", "tagging 0" => "/admin/settings/tagging",
+      "connected services #{Admin::Slice['operations.list_services'].count}" => "/admin/settings/services",
       "security" => "/admin/settings/security", "jobs 0" => "/admin/settings/jobs",
     }.to_a
   end
@@ -49,7 +50,7 @@ RSpec.describe "Admin security", type: :request do
     it "lists every Settings tab in order" do
       get "/admin/settings/security"
 
-      expect(settings_tabs).to eq(%w[socials tagging security jobs].map { "/admin/settings/#{it}" })
+      expect(settings_tabs).to eq(%w[socials tagging services security jobs].map { "/admin/settings/#{it}" })
     end
 
     it "lands Settings on its first tab" do

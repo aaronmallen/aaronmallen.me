@@ -13,13 +13,13 @@ RSpec.describe "Admin API tokens", type: :request do
 
   def minted(name = "Terminal") = API::Slice["operations.mint_token"].call(name:).value!
 
-  def names = page.all(".li-title").map(&:text)
+  def names = page.find_by_id("tokens").all(".li-title").map(&:text)
 
   def revealed = page.first("#minted-token")&.[](:value)
 
   def revoke(id) = post("/admin/tokens/#{id}/revoke", _csrf_token: admin_csrf_token)
 
-  def row = page.first(".li")
+  def row = page.find_by_id("tokens").first(".li")
 
   def stamp(time) = Blog::TimeZone.local(time).strftime("%b %-d, %Y, %H:%M")
 
@@ -35,7 +35,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "returns to the page with a toast", :aggregate_failures do
       mint("Terminal")
 
-      expect(last_response.location).to eq("/admin/tokens")
+      expect(last_response.location).to eq("/admin/settings/services#tokens")
       follow_redirect!
       expect(page).to have_css("[data-toast]", text: "Token minted")
     end
@@ -84,7 +84,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "hides the value on a reload" do
       mint("Terminal")
       follow_redirect!
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page).to have_no_css("#minted-token")
     end
@@ -92,14 +92,14 @@ RSpec.describe "Admin API tokens", type: :request do
     it "keeps the value out of the page on a reload" do
       mint("Terminal")
       value = follow_redirect!.then { revealed }
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(last_response.body).not_to include(value)
     end
 
     it "shows no value before I mint" do
       minted
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page).to have_no_css("#minted-token")
     end
@@ -157,7 +157,7 @@ RSpec.describe "Admin API tokens", type: :request do
     end
 
     it "checks only read on a fresh form" do
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page.all("input[type=checkbox][checked]").map { it[:name] }).to eq(["token[scopes][read]"])
     end
@@ -223,7 +223,7 @@ RSpec.describe "Admin API tokens", type: :request do
 
       it "says to copy the token now because the page can't show it again" do
         value, shown = mint_and_reveal
-        get "/admin/tokens"
+        get "/admin/settings/services"
 
         expect([shown, last_response.body.include?(value)]).to match([include(hint("minted.hint")), false])
       end
@@ -254,7 +254,7 @@ RSpec.describe "Admin API tokens", type: :request do
     before { sign_in_to_admin }
 
     it "says so when no token is live" do
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page).to have_css(".empty")
     end
@@ -263,7 +263,7 @@ RSpec.describe "Admin API tokens", type: :request do
       older = minted("Older")[:token]
       minted("Newer")
       stored.where(id: older.id).update(created_at: Time.now - 60)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(names).to eq(%w[Newer Older])
     end
@@ -271,21 +271,21 @@ RSpec.describe "Admin API tokens", type: :request do
     it "counts the live tokens" do
       minted("Laptop")
       minted("Desktop")
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page).to have_css(".card-side", exact_text: "2 live tokens")
     end
 
     it "leaves out a revoked token" do
       API::Slice["operations.revoke_token"].call(minted("Gone")[:token].id)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(names).to be_empty
     end
 
     it "shows when I minted the token" do
       token = minted[:token]
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("minted #{stamp(token.created_at)}")
     end
@@ -293,28 +293,28 @@ RSpec.describe "Admin API tokens", type: :request do
     it "shows when a client last used the token" do
       used = Time.now - (60 * 60)
       stored.where(id: minted[:token].id).update(last_used_at: used)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("last used #{stamp(used)}")
     end
 
     it "names when I minted the token in local time" do
       token = minted[:token]
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row.find("time")[:datetime]).to eq(Blog::TimeZone.local(token.created_at).iso8601)
     end
 
     it "names each token's scopes" do
       API::Slice["operations.mint_token"].call(name: "Terminal", scopes: %w[read publish])
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("read, publish")
     end
 
     it "says a token with no expiry never expires" do
       minted
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("never expires")
     end
@@ -322,28 +322,28 @@ RSpec.describe "Admin API tokens", type: :request do
     it "shows when a token expires" do
       day = Blog::TimeZone.today + 7
       API::Slice["operations.mint_token"].call(name: "Terminal", expires_on: day)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("expires #{stamp(Blog::TimeZone.day_start(day))}")
     end
 
     it "leaves out an expired token" do
       stored.where(id: minted[:token].id).update(expires_at: Time.now - 1)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(names).to be_empty
     end
 
     it "says a token no client has used has never been used" do
       minted
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(row).to have_text("never used")
     end
 
     it "never shows a token's value" do
       value = minted[:value]
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(last_response.body).not_to include(value)
     end
@@ -356,7 +356,7 @@ RSpec.describe "Admin API tokens", type: :request do
 
     it "asks for confirmation before it posts" do
       token
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(page).to have_css("form[action='/admin/tokens/#{token.id}/revoke'][data-confirm*='Revoke Laptop']")
     end
@@ -369,7 +369,7 @@ RSpec.describe "Admin API tokens", type: :request do
 
     it "takes the token off the page" do
       revoke(token.id)
-      get "/admin/tokens"
+      get "/admin/settings/services"
 
       expect(names).to be_empty
     end
@@ -392,7 +392,7 @@ RSpec.describe "Admin API tokens", type: :request do
     it "says so and returns to the page", :aggregate_failures do
       revoke(token.id)
 
-      expect(last_response.location).to eq("/admin/tokens")
+      expect(last_response.location).to eq("/admin/settings/services#tokens")
       follow_redirect!
       expect(page).to have_css("[data-toast]", text: "Token revoked")
     end
@@ -411,10 +411,17 @@ RSpec.describe "Admin API tokens", type: :request do
     end
   end
 
+  it "sends the old address to its section of the connected services tab" do
+    sign_in_to_admin
+    get "/admin/tokens"
+
+    expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/services#tokens"])
+  end
+
   it "is a section of the command palette" do
     sign_in_to_admin
     get "/admin"
 
-    expect(page).to have_css("[data-palette-href='/admin/tokens']", visible: :all)
+    expect(page).to have_css("[data-palette-href='/admin/settings/services#tokens']", visible: :all)
   end
 end

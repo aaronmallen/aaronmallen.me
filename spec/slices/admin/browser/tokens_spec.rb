@@ -6,7 +6,7 @@ RSpec.describe "Admin API tokens", type: :feature do
   before do
     API::Slice["operations.mint_token"].call(name: "Laptop")
     sign_in_to_admin
-    visit "/admin/tokens"
+    visit "/admin/settings/services"
   end
 
   it "asks with the confirmation text" do

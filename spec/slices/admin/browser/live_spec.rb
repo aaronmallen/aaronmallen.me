@@ -153,8 +153,8 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("#task-rules .rule-pattern", text: "octocat/*")
   end
 
-  it "shows a new connection on the open services page" do
-    live "/admin/services"
+  it "shows a new connection on the open connected services tab" do
+    live "/admin/settings/services"
     Services::Slice["repos.connection_mutations"]
       .add(provider: "linear", account_id: "ws-1", label: "ROOT workspace", credentials: { api_key: "lin_api_secret" })
 

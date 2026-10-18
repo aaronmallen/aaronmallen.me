@@ -6,7 +6,7 @@ RSpec.describe "Admin MCP clients", type: :feature do
   before do
     create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
     sign_in_to_admin
-    visit "/admin/clients"
+    visit "/admin/settings/services"
   end
 
   it "asks with the confirmation text" do

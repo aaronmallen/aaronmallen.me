@@ -14,7 +14,8 @@ module Admin
                 Tile(definition: @definition)
                 plain(@title)
               end
-              Button(small: true, variant: :gh, icon: :close, href: path(:admin_services), label: t(".close"))
+              href = Helpers::ServiceTab.services(routes)
+              Button(small: true, variant: :gh, icon: :close, href:, label: t(".close"))
             end
           end
         end

@@ -55,7 +55,7 @@ module Admin
 
         def refuse(response, reason, name)
           toast(response, "#{TOASTS}.#{reason}", name:)
-          response.redirect_to(routes.path(:admin_services))
+          response.redirect_to(Helpers::ServiceTab.services(routes))
         end
 
         def started(request, definition)

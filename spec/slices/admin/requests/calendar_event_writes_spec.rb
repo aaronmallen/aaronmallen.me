@@ -462,8 +462,8 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         send_form("/admin/calendar/events", calendar: mine.id, **fields)
         expect(toast).to eq("That calendar is read-only")
 
-        get "/admin/services", selected: Services::Slice["repos.connection_queries"].for(:google).first.id.to_s
-        expect(Capybara.string(last_response.body).find(".settings-side"))
+        get "/admin/settings/services", selected: Services::Slice["repos.connection_queries"].for(:google).first.id.to_s
+        expect(Capybara.string(last_response.body).find("#services .settings-side"))
           .to have_css(".hint", text: Admin::Slice["i18n"].t("ui.components.services.detail.work_hint"))
       end
 

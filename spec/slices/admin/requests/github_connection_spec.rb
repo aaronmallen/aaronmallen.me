@@ -23,12 +23,12 @@ RSpec.describe "Admin GitHub connection", type: :request do
   def connections = Services::Slice["repos.connection_queries"].for(:github)
 
   def dialog_hints
-    get "/admin/services"
+    get "/admin/settings/services"
     page.find_by_id("connect-service-github", visible: :all).all(".hint", visible: :all).map { it.text(:all) }
   end
 
   def form_hints
-    get "/admin/services", connect: "github"
+    get "/admin/settings/services", connect: "github"
     page.all(".settings-side .hint").map(&:text)
   end
 
@@ -58,8 +58,9 @@ RSpec.describe "Admin GitHub connection", type: :request do
     shown = dialog_hints
     callback(code: "code", state: start_connect)
 
-    expect([last_response.location, shown]).to match([end_with("/admin/services?selected=#{connections.first.id}"),
-                                                      include(hint("connect_dialog.away"))])
+    expect([last_response.location,
+            shown]).to match([end_with("/admin/settings/services?selected=#{connections.first.id}#services"),
+                              include(hint("connect_dialog.away"))])
   end
 
   describe "when GitHub grants access" do
@@ -90,7 +91,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "opens the connection with its account and scopes granted", :aggregate_failures do
-      expect(last_request.path).to eq("/admin/services")
+      expect(last_request.path).to eq("/admin/settings/services")
       expect(page).to have_css("[data-toast]", text: "GitHub connected as @aaronmallen")
       expect(page).to have_css(".settings-side .svc-account", text: "@aaronmallen")
       expect(page.find(".svc-line", text: "Read repositories and issues")).to have_css(".pill", text: "granted")
@@ -129,13 +130,13 @@ RSpec.describe "Admin GitHub connection", type: :request do
   end
 
   it "offers GitHub in the picker while it is not connected" do
-    get "/admin/services"
+    get "/admin/settings/services"
 
     expect(page).to have_css("#connect-service .svc-pick", text: "GitHub", visible: :all)
   end
 
   it "asks for no server in the picker" do
-    get "/admin/services"
+    get "/admin/settings/services"
 
     expect(page).to have_no_css("form[action='/admin/services/github/connect'] input[name='server']", visible: :all)
   end
@@ -163,7 +164,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
       callback(code: "code", state:)
 
       expect(connections).to be_empty
-      expect(last_response.location).to end_with("/admin/services")
+      expect(last_response.location).to end_with("/admin/settings/services#services")
     end
 
     it "refuses a connect state once I have signed out", :aggregate_failures do
@@ -215,9 +216,9 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "offers a token field beside Sign in with GitHub", :aggregate_failures do
-      get "/admin/services"
+      get "/admin/settings/services"
       dialog = page.find_by_id("connect-service-github", visible: :all)
-      token = "form[action='/admin/services/github'] input[type='password'][name='connection[access_token]']"
+      token = "form[action='/admin/services/github#services'] input[type='password'][name='connection[access_token]']"
 
       expect(dialog).to have_css("form[action='/admin/services/github/connect']", visible: :all)
       expect(dialog).to have_css(token, visible: :all)

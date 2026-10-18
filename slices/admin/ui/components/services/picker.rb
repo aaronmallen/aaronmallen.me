@@ -35,7 +35,8 @@ module Admin
                 line(definition)
               end
             else
-              a(href: path(:admin_services, connect: definition.id), class: "svc-pick") { line(definition) }
+              href = Helpers::ServiceTab.services(routes, connect: definition.id)
+              a(href:, class: "svc-pick") { line(definition) }
             end
           end
         end

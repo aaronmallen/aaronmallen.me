@@ -23,6 +23,7 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.build_pull_request_page" => "builds the admin's pull request page; read_pull_request reads it",
       "admin.operations.build_review_page" => "builds the admin's review screen; read_review reads the same review",
       "admin.operations.build_search_page" => "builds the admin's search screen; the search tool runs the same search",
+      "admin.operations.build_services_page" => "builds the admin's connected services tab; list_api_tokens reads it",
       "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",
       "admin.operations.build_tagging_page" => "builds the admin's tagging tab; list_tags and list_task_rules read it",
       "admin.operations.build_tags_page" => "builds the admin's tags screen; list_tags reads the same tags",

@@ -15,10 +15,15 @@ module Admin
       ]
 
       def call
-        connections = connection_queries.all.group_by(&:provider)
-        connected = definition_queries.all.select { !it.connectable? || connections.key?(it.id) || unready?(it) }
+        connections = grouped
 
-        { pickable: pickable(connections), rows: rows(connected, connections) }
+        { pickable: pickable(connections), rows: rows(connected(connections), connections) }
+      end
+
+      def count
+        connections = grouped
+
+        connected(connections).sum { connections.fetch(it.id, [nil]).size }
       end
 
       private
@@ -33,12 +38,18 @@ module Admin
         :lapsing if Blog::TimeZone.today(lapses_at) <= Blog::TimeZone.today + settings.attention[:lapsing_days]
       end
 
+      def connected(connections)
+        definition_queries.all.select { !it.connectable? || connections.key?(it.id) || unready?(it) }
+      end
+
       def env(definition)
         definition.env.flat_map do |setting, keys|
           values = settings.public_send(setting)
           keys.map { ["#{setting}_#{it}".upcase, !values[it.to_sym].to_s.empty?] }
         end.to_h
       end
+
+      def grouped = connection_queries.all.group_by(&:provider)
 
       def pickable(connections)
         definition_queries.all.select do |definition|

@@ -28,13 +28,13 @@ RSpec.describe "Admin Mastodon connection", type: :request do
   end
 
   it "asks for my server in the picker" do
-    get "/admin/services"
+    get "/admin/settings/services"
 
     expect(page).to have_css("form[action='/admin/services/mastodon/connect'] input[name='server']", visible: :all)
   end
 
   it "continues to my server from the dialog footer, beside a cancel that only closes it", :aggregate_failures do
-    get "/admin/services"
+    get "/admin/settings/services"
     dialog = page.find_by_id("connect-service-mastodon", visible: :all)
 
     expect(dialog).to have_css(".dialog-foot [type='submit'][form='connect-service-mastodon-form']", visible: :all)
@@ -107,7 +107,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
       start_connect
       follow_redirect!
 
-      expect(last_request.path).to eq("/admin/services")
+      expect(last_request.path).to eq("/admin/settings/services")
       expect(page).to have_css("[data-toast]", text: "didn't answer as Mastodon")
     end
   end

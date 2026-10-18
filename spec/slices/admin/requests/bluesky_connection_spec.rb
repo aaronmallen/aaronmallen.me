@@ -16,9 +16,9 @@ RSpec.describe "Admin Bluesky connection", type: :request do
   end
 
   it "offers a handle and app password form", :aggregate_failures do
-    get "/admin/services?connect=bluesky"
+    get "/admin/settings/services?connect=bluesky"
 
-    form = page.find(".settings-side form[action='/admin/services/bluesky']")
+    form = page.find(".settings-side form[action='/admin/services/bluesky#services']")
     expect(form).to have_field("connection[handle]", type: "text")
     expect(form).to have_field("connection[app_password]", type: "password")
   end
@@ -69,10 +69,10 @@ RSpec.describe "Admin Bluesky connection", type: :request do
     let(:connection) { connect_bluesky }
 
     it "offers a test, another account and a disconnect", :aggregate_failures do
-      get "/admin/services?selected=#{connection.id}"
+      get "/admin/settings/services?selected=#{connection.id}"
 
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/test']")
-      expect(page).to have_link("Add another account", href: "/admin/services?connect=bluesky")
+      expect(page).to have_link("Add another account", href: "/admin/settings/services?connect=bluesky#services")
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/disconnect'][data-confirm]")
     end
 

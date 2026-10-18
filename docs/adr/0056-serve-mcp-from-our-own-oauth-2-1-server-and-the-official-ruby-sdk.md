@@ -47,7 +47,7 @@ approve the client before it issues a code. Any other account gets no code and n
 - A token is bound to this server. `MCP::Operations::Authorize` fills in the resource from the protected resource
   metadata when a client sends none, since RFC 8707 leaves it optional there, and `MCP::Operations::Authenticate`
   refuses a token that names no resource or another one (AA-408).
-- The connected clients page in the admin lists each client and revokes it, through the query and the operation
+- The MCP clients section of the admin's Settings lists each client and revokes it, through the query and the operation
   `mcp` exports.
 
 `config/routes.rb` mounts the slice at `/`, not `/mcp`, because discovery has to sit at the root of the issuer, and
@@ -95,7 +95,7 @@ put each fix in Claude's hands before the operator sees it, and fixes in chat br
 `write` now edits a post outright, but a proofreading pass still goes through `suggest`.
 
 **A feature slice for the OAuth tables**, leaving `mcp` the protocol and the tools. It would end the import cycle
-admin and mcp share, since the connected clients page would move with the tables. It loses because the two halves
+admin and mcp share, since the MCP clients section would move with the tables. It loses because the two halves
 are one door. The tokens table holds scopes and the tool classes say what a scope means, so adding a tool would
 change two slices for one thing.
 

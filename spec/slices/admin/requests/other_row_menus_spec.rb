@@ -249,7 +249,8 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "shows its details and disconnects on the second click", :aggregate_failures do
         expect(menu_items).to include("Details", "Disconnect")
-        expect(page).to have_link("Details", href: "/admin/services?selected=#{connection.id}", visible: :all)
+        details = "/admin/settings/services?selected=#{connection.id}#services"
+        expect(page).to have_link("Details", href: details, visible: :all)
         expect(inline_confirm("/admin/services/#{connection.id}/disconnect")).to eq("Click again to disconnect")
       end
 
@@ -335,7 +336,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "carry a menu on a token" do
         id = token.id
-        get "/admin/tokens"
+        get "/admin/settings/services"
 
         expect(menus).to include("/admin/tokens/#{id}/menu")
       end

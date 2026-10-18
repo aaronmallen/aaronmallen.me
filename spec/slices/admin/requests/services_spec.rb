@@ -19,7 +19,11 @@ RSpec.describe "Admin connected services", type: :request do
 
   def group(label) = page.find(".svc-group", text: label)
 
+  def moved(**params) = get("/admin/services", params).then { last_response.location }
+
   def names(label) = group(label).all(".li-title").map(&:text)
+
+  def pick(provider) = "#connect-service a.svc-pick[href='/admin/settings/services?connect=#{provider}#services']"
 
   def pickable = page.all("#connect-service .svc-pick .svc-line-name", visible: :all).map(&:text)
 
@@ -29,7 +33,7 @@ RSpec.describe "Admin connected services", type: :request do
     before { sign_in_to_admin }
 
     it "lets the connect form follow its redirect to an authorize page on any https origin" do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(form_action).to eq("form-action 'self' https:")
     end
@@ -47,22 +51,48 @@ RSpec.describe "Admin connected services", type: :request do
       expect(form_action).to eq("form-action 'self'")
     end
 
+    it "draws the services, the API tokens and the MCP clients on the tab, in that order" do
+      get "/admin/settings/services"
+
+      expect(page.all(".settings-section").map { it[:id] }).to eq(%w[services tokens clients])
+    end
+
+    it "counts the connected services on the tab label" do
+      add_connection("linear", "acct-1", "Workspace")
+      get "/admin/settings/services"
+
+      shown = page.all(".svc-list .li").size
+      expect(page.find("a.screen-tab[aria-current='page']")).to have_text("connected services #{shown}")
+    end
+
+    it "sends the old address to its section of the tab, keeping the pick" do
+      expect([moved, moved(selected: "maxmind"), moved(connect: "linear")])
+        .to eq(%w[/admin/settings/services#services /admin/settings/services?selected=maxmind#services
+                  /admin/settings/services?connect=linear#services])
+    end
+
+    it "opens its section of the tab from the command palette" do
+      get "/admin"
+
+      expect(page).to have_css("[data-palette-href='/admin/settings/services#services']", visible: :all)
+    end
+
     it "heads the tab as Settings and titles it Connected services", :aggregate_failures do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(page).to have_css(".page-head h1", exact_text: "Settings")
       expect(page).to have_title("Connected services | Admin | #{Hanami.app.settings.owner_name}")
     end
 
     it "lists the services that need no sign-in in their groups", :aggregate_failures do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(names("Social")).to eq(%w[Bridgy LinkedIn])
       expect(names("Infrastructure")).to eq(["Backup store", "Honeybadger", "MaxMind", "Media store"])
     end
 
     it "puts every service I can connect in the picker and none in the list", :aggregate_failures do
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(pickable).to eq(%w[GitHub Linear Bluesky Mastodon])
       expect(page).to have_no_css(".svc-group", text: "Available")
@@ -72,7 +102,7 @@ RSpec.describe "Admin connected services", type: :request do
       before do
         add_connection("linear", "ws-1", "ROOT workspace")
         add_connection("linear", "ws-2", "Hanakai workspace")
-        get "/admin/services"
+        get "/admin/settings/services"
       end
 
       it "shows one row per workspace with its name", :aggregate_failures do
@@ -87,14 +117,14 @@ RSpec.describe "Admin connected services", type: :request do
 
     it "dots the account and the last use apart" do
       add_connection("linear", "ws-1", "ROOT workspace", last_used_at: Time.now - 3600)
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(row("ROOT workspace").find(".li-sub").text).to start_with("ROOT workspace · ")
     end
 
     it "skips a connection whose service has no definition" do
       add_connection("myspace", "tom", "Tom")
-      get "/admin/services"
+      get "/admin/settings/services"
 
       expect(page).to have_no_text("Tom")
     end
@@ -110,15 +140,15 @@ RSpec.describe "Admin connected services", type: :request do
       end
 
       it "leaves it out of the picker while the site has no check for it" do
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(pickable).not_to include("Fakebook")
       end
 
       it "offers no form while the site has no check for it" do
-        get "/admin/services?connect=fake"
+        get "/admin/settings/services?connect=fake"
 
-        expect(page).to have_no_css("form[action='/admin/services/fake']")
+        expect(page).to have_no_css("form[action='/admin/services/fake#services']")
       end
 
       it "refuses a connect while the site has no check for it" do
@@ -129,7 +159,7 @@ RSpec.describe "Admin connected services", type: :request do
 
       it "shows in its group once an account connects" do
         add_connection("fake", "1", "ghost")
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(names("Social")).to include("Fakebook")
       end
@@ -137,7 +167,7 @@ RSpec.describe "Admin connected services", type: :request do
 
     describe "status" do
       it "marks an environment service not set up while a key is missing" do
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(row("Honeybadger")).to have_css(".pill", text: "not set up")
       end
@@ -145,17 +175,17 @@ RSpec.describe "Admin connected services", type: :request do
       it "marks an environment service connected once every key is set" do
         settings = Hanami.app["settings"]
         allow(settings).to receive(:honeybadger).and_return(api_key: "hbp_key", project_url: "https://hb.test")
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect(row("Honeybadger")).to have_css(".pill", text: "connected")
       end
 
       it "pauses Bridgy while the webmention toggle is off", :aggregate_failures do
-        get "/admin/services"
+        get "/admin/settings/services"
         expect(row("Bridgy")).to have_css(".pill", text: "connected")
 
         Social::Slice["operations.update_webmention_settings"].call(accept_bridgy: false)
-        get "/admin/services"
+        get "/admin/settings/services"
         expect(row("Bridgy")).to have_css(".pill", text: "paused")
       end
 
@@ -163,7 +193,7 @@ RSpec.describe "Admin connected services", type: :request do
         before do
           add_connection("linear", "ws-1", "ROOT workspace")
           fail_sync("linear_issues")
-          get "/admin/services"
+          get "/admin/settings/services"
         end
 
         it "marks the service failing and counts it", :aggregate_failures do
@@ -176,7 +206,7 @@ RSpec.describe "Admin connected services", type: :request do
         end
 
         it "names the job as the failure banner does" do
-          get "/admin/services?selected=#{connections.first.id}"
+          get "/admin/settings/services?selected=#{connections.first.id}"
 
           expect(page.find(".settings-side .sync-failure").text).to start_with(page.find(".svc-job").text)
         end
@@ -202,23 +232,23 @@ RSpec.describe "Admin connected services", type: :request do
 
       it "says connected services keep their tokens encrypted and the rest read the server environment" do
         connection = add_connection("linear", "ws-1", "ROOT workspace")
-        get "/admin/services"
+        get "/admin/settings/services"
 
         expect([raw(connection).include?("lin_api_secret"), row("Honeybadger").text, hints(".svc-list")])
-          .to match([false, include("not set up"), include(hint("views.services.index.hint"))])
+          .to match([false, include("not set up"), include(hint("components.services.list.hint"))])
       end
 
       it "says a picked service shows what it powers and how often its jobs run" do
-        shown = get("/admin/services").then { hints(".settings-side") }
-        get "/admin/services?selected=maxmind"
+        shown = get("/admin/settings/services").then { hints(".settings-side") }
+        get "/admin/settings/services?selected=maxmind"
 
         expect([page.find(".svc-line", text: "Country database refresh").text, every("refresh_country_database"),
                 shown])
-          .to match([include("weekly"), 7 * 86_400, include(hint("views.services.index.pick_hint"))])
+          .to match([include("weekly"), 7 * 86_400, include(hint("components.services.list.pick_hint"))])
       end
 
       it "says the picker leaves out the services set in the server environment" do
-        get "/admin/services"
+        get "/admin/settings/services"
         env_only = ["Media store", "Backup store", "MaxMind", "Honeybadger"]
 
         expect([pickable & env_only, hints("#connect-service")])
@@ -227,7 +257,7 @@ RSpec.describe "Admin connected services", type: :request do
 
       it "says an environment service's keys live in the server environment", :aggregate_failures do
         allow(Hanami.app["settings"]).to receive(:maxmind).and_return(account_id: "acct-31337", license_key: nil)
-        get "/admin/services?selected=maxmind"
+        get "/admin/settings/services?selected=maxmind"
 
         expect(page.all(".svc-env").map(&:text)).to eq(%w[MAXMIND_ACCOUNT_ID MAXMIND_LICENSE_KEY])
         expect(hints(".settings-side")).to include(hint("components.services.detail.environment"))
@@ -236,17 +266,17 @@ RSpec.describe "Admin connected services", type: :request do
 
     describe "the detail panel" do
       it "opens a picked service and closes it from its row", :aggregate_failures do
-        get "/admin/services?selected=maxmind"
+        get "/admin/settings/services?selected=maxmind"
 
         expect(page).to have_css(".settings-side .card-title", text: "MaxMind")
         expect(page).to have_css(".settings-side li", text: "Countries in Analytics")
         expect(page).to have_css(".settings-side .svc-line", text: "Country database refresh")
-        expect(row("MaxMind")).to have_css("a.li-title[aria-current='true'][href='/admin/services']")
+        expect(row("MaxMind")).to have_css("a.li-title[aria-current='true'][href='/admin/settings/services#services']")
       end
 
       it "shows each environment key as set or missing and never its value", :aggregate_failures do
         allow(Hanami.app["settings"]).to receive(:maxmind).and_return(account_id: "acct-31337", license_key: nil)
-        get "/admin/services?selected=maxmind"
+        get "/admin/settings/services?selected=maxmind"
 
         expect(page.find(".svc-line", text: "MAXMIND_ACCOUNT_ID")).to have_css(".pill", text: "set")
         expect(page.find(".svc-line", text: "MAXMIND_LICENSE_KEY")).to have_css(".pill", text: "missing")
@@ -255,14 +285,14 @@ RSpec.describe "Admin connected services", type: :request do
 
       it "opens a connected account by its id with the scopes it holds", :aggregate_failures do
         connection = add_connection("mastodon", "1", "@aaron", host: "ruby.social", scopes: ["write:statuses"])
-        get "/admin/services?selected=#{connection.id}"
+        get "/admin/settings/services?selected=#{connection.id}"
 
         expect(page.find(".svc-line", text: "Post on your behalf")).to have_css(".pill", text: "granted")
         expect(page.find(".svc-line", text: "Look up accounts")).to have_css(".pill", text: "not granted")
       end
 
       it "sends Bridgy to the webmention toggle" do
-        get "/admin/services?selected=bridgy"
+        get "/admin/settings/services?selected=bridgy"
 
         expect(page).to have_link("webmentions →", href: "/admin/settings/socials#webmentions")
       end
@@ -273,16 +303,16 @@ RSpec.describe "Admin connected services", type: :request do
     before { sign_in_to_admin }
 
     it "offers a key form from the picker", :aggregate_failures do
-      get "/admin/services"
-      expect(page).to have_css("#connect-service a.svc-pick[href='/admin/services?connect=linear']", visible: :all)
+      get "/admin/settings/services"
+      expect(page).to have_css(pick("linear"), visible: :all)
 
-      get "/admin/services?connect=linear"
-      expect(page).to have_css(".settings-side form[action='/admin/services/linear'] input[type='password']")
+      get "/admin/settings/services?connect=linear"
+      expect(page).to have_css(".settings-side form[action='/admin/services/linear#services'] input[type='password']")
     end
 
     it "draws Linear's own mark on its tile", :aggregate_failures do
-      get "/admin/services"
-      tile = page.find("#connect-service a.svc-pick[href='/admin/services?connect=linear'] .svc-tile", visible: :all)
+      get "/admin/settings/services"
+      tile = page.find("#{pick('linear')} .svc-tile", visible: :all)
 
       expect(tile).to have_css("i.linear-mark[aria-hidden='true']", visible: :all)
       expect(tile).to have_no_css("i.fa-circle-nodes", visible: :all)
@@ -300,7 +330,7 @@ RSpec.describe "Admin connected services", type: :request do
       end
 
       it "opens the new row with a toast", :aggregate_failures do
-        expect(last_response.location).to end_with("/admin/services?selected=#{connections.first.id}")
+        expect(last_response.location).to end_with("/admin/settings/services?selected=#{connections.first.id}#services")
         follow_redirect!
         expect(toast).to include("Linear connected as ROOT")
         expect(page).to have_css(".settings-side .svc-account", text: "ROOT")
@@ -374,15 +404,15 @@ RSpec.describe "Admin connected services", type: :request do
     before { sign_in_to_admin }
 
     it "offers a test, another account and a disconnect", :aggregate_failures do
-      get "/admin/services?selected=#{connection.id}"
+      get "/admin/settings/services?selected=#{connection.id}"
 
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/test']")
-      expect(page).to have_link("Add another account", href: "/admin/services?connect=linear")
+      expect(page).to have_link("Add another account", href: "/admin/settings/services?connect=linear#services")
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/disconnect'][data-confirm]")
     end
 
     it "opens the Linear dashboard in a new tab with no opener or referrer" do
-      get "/admin/services?selected=#{connection.id}"
+      get "/admin/settings/services?selected=#{connection.id}"
 
       expect(page).to have_css(
         "a[href='https://linear.app/settings/account/security'][target='_blank'][rel='noopener noreferrer']",
@@ -408,7 +438,7 @@ RSpec.describe "Admin connected services", type: :request do
     it "deletes the row on disconnect", :aggregate_failures do
       post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token
 
-      expect(last_response.location).to end_with("/admin/services")
+      expect(last_response.location).to end_with("/admin/settings/services#services")
       expect(connections).to be_empty
     end
 

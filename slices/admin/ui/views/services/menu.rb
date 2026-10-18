@@ -15,7 +15,7 @@ module Admin
 
           def view_template
             ContextMenu(label: definition.name) do |menu|
-              menu.link(t(".details"), href: path(:admin_services, selected: @row.key), icon: OPEN_ICON)
+              menu.link(t(".details"), href: Helpers::ServiceTab.services(routes, selected: @row.key), icon: OPEN_ICON)
               reconnect(menu) if @row.reconnect?
               checks(menu) if @connectable
               dashboard(menu) if definition.dashboard
@@ -26,7 +26,8 @@ module Admin
           private
 
           def another(menu)
-            menu.link(t(".another"), href: path(:admin_services, connect: definition.id), icon: BUTTONS::ANOTHER_ICON)
+            href = Helpers::ServiceTab.services(routes, connect: definition.id)
+            menu.link(t(".another"), href:, icon: BUTTONS::ANOTHER_ICON)
           end
 
           def checks(menu)

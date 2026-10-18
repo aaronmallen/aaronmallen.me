@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module Tokens
-        class Index < View
-          include Components::Tokens
-
+        class List < Component
           MINTED = "minted_token"
           SCOPES = [Blog::Types::OAuthScope["read"]].freeze
 
@@ -18,8 +16,6 @@ module Admin
           prop :tokens, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
-            SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               live
               Card(title: t(".mint"), class: "settings-side") do
