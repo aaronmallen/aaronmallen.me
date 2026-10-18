@@ -22,7 +22,7 @@ module Shares
 
       def delete(group)
         group_mutations.delete(group.short_code_id)
-        group.share_group_files.each { delete_object(it.key) }
+        StoredKeys.of(group.share_group_files).each { delete_object(it) }
         Success(group)
       end
 

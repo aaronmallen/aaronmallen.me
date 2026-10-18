@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "vips"
+
 RSpec.describe "Admin file groups", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
@@ -7,6 +9,8 @@ RSpec.describe "Admin file groups", type: :request do
   let(:drawer) { page.find("dialog#share-group-#{group.id}-drawer", visible: :all) }
 
   def csrf = { "HTTP_X_CSRF_TOKEN" => admin_csrf_token }
+
+  def dot = Vips::Image.black(30, 30).write_to_buffer(".png")
 
   def file(bytes, name, type) = Rack::Test::UploadedFile.new(StringIO.new(bytes), type, original_filename: name)
 
@@ -222,6 +226,15 @@ RSpec.describe "Admin file groups", type: :request do
 
       expect(files.map { it[:filename] }).to eq(%w[shot.png])
       expect(removed).to have_been_requested
+    end
+
+    it "drops an image's preview with it" do
+      stub_request(:delete, %r{\A#{share_store_url}/})
+      photo = make_group([dot, "dot.png", "image/png"], %w[b b.txt text/plain])
+      file = photo.share_group_files.first
+      post("/admin/files/groups/#{photo.id}/files/#{file.id}/delete", {}, csrf)
+
+      expect(a_request(:delete, share_store_url(file.preview_key))).to have_been_made
     end
 
     it "says it removed it" do

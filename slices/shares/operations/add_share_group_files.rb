@@ -4,6 +4,7 @@ module Shares
   module Operations
     class AddShareGroupFiles < Blog::Operation
       include Deps[
+        "operations.store_preview",
         client: "share_store.client",
         contract: "contracts.upload_contract",
         group_mutations: "repos.share_group_mutations",
@@ -35,6 +36,8 @@ module Shares
         }
       end
 
+      def keys(stored) = stored.flat_map { |key, fields| [key, fields[:preview_key]] }.compact
+
       def put(fields)
         key = ObjectStore::Key.generate
         fields[:file].rewind
@@ -44,23 +47,22 @@ module Shares
       def save(id, stored)
         transaction do
           stored.each do |key, fields|
-            group_mutations.add_file(
-              id, key:, filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
-            )
+            fields => { file:, **columns }
+            group_mutations.add_file(id, key:, byte_size: file.size, **columns)
           end
           group_queries.find(id)
         end
       rescue StandardError
-        client.discard(stored.keys)
+        client.discard(keys(stored))
         raise
       end
 
       def store(files)
         stored = {}
-        files.each { stored[put(it)] = it }
+        files.each { stored[put(it)] = it.merge(preview_key: store_preview.call(it[:file])) }
         Success(stored)
       rescue ObjectStore::Client::Error
-        client.discard(stored.keys)
+        client.discard(keys(stored))
         Failure([:unavailable])
       end
 

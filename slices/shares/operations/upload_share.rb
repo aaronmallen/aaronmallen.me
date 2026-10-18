@@ -6,6 +6,7 @@ module Shares
       UNKNOWN_TYPE = "application/octet-stream"
 
       include Deps[
+        "operations.store_preview",
         client: "share_store.client",
         contract: "contracts.upload_contract",
         share_mutations: "repos.share_mutations",
@@ -18,17 +19,17 @@ module Shares
         fields = step validate(Hash(upload))
         key = step store(fields)
 
-        save(key, fields)
+        save(key, store_preview.call(fields[:file]), fields)
       end
 
       private
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def create(key, fields)
+      def create(key, preview_key, fields)
         Helpers::Code.retrying(share_mutations) do
           share_mutations.create(
-            code: short_code_queries.free_code, key:,
+            code: short_code_queries.free_code, key:, preview_key:,
             filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
           )
         end
@@ -40,10 +41,10 @@ module Shares
         { file: upload[:tempfile], filename: upload[:filename], content_type: type.empty? ? UNKNOWN_TYPE : type }
       end
 
-      def save(key, fields)
-        transaction { share_queries.find(create(key, fields)) }
+      def save(key, preview_key, fields)
+        transaction { share_queries.find(create(key, preview_key, fields)) }
       rescue StandardError
-        client.discard([key])
+        client.discard([key, preview_key].compact)
         raise
       end
 

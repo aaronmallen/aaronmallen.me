@@ -4397,9 +4397,11 @@ CREATE TABLE public.share_group_files (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     short_code_id integer,
+    preview_key text,
     CONSTRAINT share_group_files_counts_check CHECK (((byte_size >= 0) AND (download_count >= 0))),
     CONSTRAINT share_group_files_key_check CHECK ((key ~ '^[0-9a-f]{32}$'::text)),
-    CONSTRAINT share_group_files_owner_check CHECK ((num_nonnulls(short_code_id, share_group_id) = 1))
+    CONSTRAINT share_group_files_owner_check CHECK ((num_nonnulls(short_code_id, share_group_id) = 1)),
+    CONSTRAINT share_group_files_preview_key_check CHECK ((preview_key ~ '^[0-9a-f]{32}$'::text))
 );
 
 
@@ -6064,6 +6066,14 @@ ALTER TABLE ONLY public.share_group_files
 
 ALTER TABLE ONLY public.share_group_files
     ADD CONSTRAINT share_group_files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: share_group_files share_group_files_preview_key_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.share_group_files
+    ADD CONSTRAINT share_group_files_preview_key_key UNIQUE (preview_key);
 
 
 --
@@ -9527,4 +9537,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018080001_add_earlier_author_to_memory_events.rb'),
 ('20261018080004_add_visitor_hash_to_sign_ins.rb'),
 ('20261018080007_add_series_id_to_tasks.rb'),
-('20261018090001_store_plain_line_breaks.rb');
+('20261018090001_store_plain_line_breaks.rb'),
+('20261018090002_add_preview_key_to_share_group_files.rb');

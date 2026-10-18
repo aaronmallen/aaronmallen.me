@@ -6,6 +6,8 @@ module Shares
 
     config.shared_app_component_keys += %w[honeybadger.agent page_fetcher.link_title share_store.client]
 
+    import keys: %w[operations.detect_photo_type operations.process_photo], from: :media
+
     export %w[
       operations.add_share_group_files operations.add_shares_to_group operations.check_short_links
       operations.create_short_link operations.delete_share operations.delete_share_group operations.delete_short_link

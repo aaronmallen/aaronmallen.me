@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "vips"
+
 RSpec.describe Shares::Operations::DeleteShare do
   let(:share) { upload_share.value! }
 
@@ -19,6 +21,13 @@ RSpec.describe Shares::Operations::DeleteShare do
     expect(rows(:short_codes)).to eq(0)
     expect(a_request(:delete, share_store_url(share.key))).to have_been_made
     expect(a_request(:any, /store\.example/)).not_to have_been_made
+  end
+
+  it "removes the image's preview from the bucket too" do
+    image = upload_share(Vips::Image.black(30, 30).write_to_buffer(".png"), "dot.png", "image/png").value!
+    delete(image.id)
+
+    expect(a_request(:delete, share_store_url(image.preview_key))).to have_been_made
   end
 
   it "keeps the share when the store fails", :aggregate_failures do

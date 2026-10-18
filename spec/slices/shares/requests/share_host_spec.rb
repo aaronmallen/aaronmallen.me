@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "vips"
+
 RSpec.describe "The share host", type: :request do
   let(:app) { Rack::Builder.parse_file(Hanami.app.root.join(".config/config.ru").to_s) }
   let(:bytes) { "0123456789" }
@@ -277,6 +279,8 @@ RSpec.describe "The share host", type: :request do
       group
       started = Queue.new
       store = instance_double(ObjectStore::Client, configured?: true, exists?: true)
+      small = ObjectStore::Client::Stored.new(body: "small", content_type: "image/jpeg")
+      allow(store).to receive(:get).and_return(small)
       allow(store).to receive(:stream) do |*, &chunk|
         started << true
         gate.pop(timeout: 5)
@@ -311,6 +315,14 @@ RSpec.describe "The share host", type: :request do
       fetch("/#{group.code}.zip")
 
       expect(last_response.status).to eq(503)
+    end
+
+    it "still serves an image's preview", :aggregate_failures do
+      Shares::Slice["relations.share_group_files"].where(share_group_id: group.id).update(preview_key: "b" * 32)
+      fetch("#{download}?preview")
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq("small")
     end
 
     it "still serves the group's page" do
@@ -486,6 +498,56 @@ RSpec.describe "The share host", type: :request do
       it "skips a bot" do
         expect { fetch("/#{group.code}/#{file('paper.pdf').id}", "HTTP_USER_AGENT" => "curl/8.4.0") }
           .not_to(change { file_downloads("paper.pdf") })
+      end
+    end
+
+    describe "an image's preview" do
+      let(:group) do
+        uploads = [share_upload(photo, "wide.jpg", "image/jpeg"), share_upload(bytes, "notes.txt", "text/plain")]
+        Shares::Slice["operations.upload_share_group"].call(uploads).value!
+      end
+
+      def photo = Vips::Image.black(3000, 1500).write_to_buffer(".jpg")
+
+      def preview_key = file("wide.jpg").preview_key
+
+      before do
+        stub_request(:get, share_store_url(preview_key))
+          .to_return(body: "small", headers: { "Content-Type" => "image/jpeg" })
+      end
+
+      it "serves the small copy in place of the original", :aggregate_failures do
+        fetch("/#{group.code}/#{file('wide.jpg').id}?preview")
+
+        expect([last_response.status, last_response.body]).to eq([200, "small"])
+        expect(last_response.headers.slice("cache-control", "content-type"))
+          .to eq("cache-control" => "private, no-store", "content-type" => "image/jpeg")
+        expect(a_request(:any, share_store_url(file("wide.jpg").key)).with { it.method != :put }).not_to have_been_made
+      end
+
+      it "stops serving the moment the group is deleted", :aggregate_failures do
+        stub_request(:delete, %r{\A#{share_store_url}/})
+        Shares::Slice["operations.delete_share_group"].call(group.id)
+        fetch("/#{group.code}/#{file('wide.jpg').id}?preview")
+
+        expect(last_response.status).to eq(404)
+        expect(a_request(:delete, share_store_url(preview_key))).to have_been_made
+      end
+
+      it "falls back to the original for an image stored before previews" do
+        Shares::Slice["relations.share_group_files"].by_pk(file("wide.jpg").id).update(preview_key: nil)
+        stub_request(:get, share_store_url(file("wide.jpg").key)).to_return(body: photo)
+        fetch("/#{group.code}/#{file('wide.jpg').id}?preview")
+
+        expect(last_response.body.b).to eq(photo.b)
+      end
+
+      it "falls back to the original when the small copy is gone" do
+        stub_request(:get, share_store_url(preview_key)).to_return(status: 404)
+        stub_request(:get, share_store_url(file("wide.jpg").key)).to_return(body: photo)
+        fetch("/#{group.code}/#{file('wide.jpg').id}?preview")
+
+        expect(last_response.body.b).to eq(photo.b)
       end
     end
 

@@ -50,6 +50,12 @@ module Media
         nil
       end
 
+      def preview(bytes, type, edge)
+        save(thumbnail(bytes, edge, type), type)
+      rescue Vips::Error
+        nil
+      end
+
       def variants(bytes, type)
         resize(Vips::Image.new_from_buffer(bytes, load_options(type)).copy_memory, type)
       rescue Vips::Error

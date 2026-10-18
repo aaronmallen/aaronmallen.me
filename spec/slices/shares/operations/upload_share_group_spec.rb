@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require "vips"
+
 RSpec.describe Shares::Operations::UploadShareGroup do
   let(:stored) { {} }
+
+  def dot = Vips::Image.black(30, 30).write_to_buffer(".png")
 
   def fail_second_put
     stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
@@ -60,6 +64,44 @@ RSpec.describe Shares::Operations::UploadShareGroup do
           { body: "a", content_type: "text/plain" }, { body: "%PDF", content_type: "application/pdf" },
         )
       end
+    end
+
+    describe "an image" do
+      let(:photo) { Vips::Image.black(3000, 1500).write_to_buffer(".jpg") }
+      let!(:group) do
+        upload(share_upload(photo, "wide.jpg", "image/jpeg"), share_upload("a", "a.txt", "text/plain")).value!
+      end
+
+      def file(name) = group.share_group_files.find { it.filename == name }
+
+      it "stores a small preview beside the original", :aggregate_failures do
+        preview = stored.fetch(file("wide.jpg").preview_key)
+
+        expect(preview[:content_type]).to eq("image/jpeg")
+        expect(Vips::Image.new_from_buffer(preview[:body], "").width).to eq(Shares::Operations::StorePreview::EDGE)
+        expect(stored.fetch(file("wide.jpg").key)[:body]).to eq(photo.b)
+      end
+
+      it "stores no preview for a file that is not an image" do
+        expect(file("a.txt").preview_key).to be_nil
+      end
+    end
+
+    it "keeps the upload with no preview when the store refuses the preview", :aggregate_failures do
+      stub_request(:put, %r{\A#{share_store_url}/}).to_return({ status: 200 }, { status: 500 })
+
+      group = upload(share_upload(dot, "dot.png", "image/png")).value!
+
+      expect(group.share_group_files.map(&:preview_key)).to eq([nil])
+    end
+
+    it "deletes the previews too when an insert fails", :aggregate_failures do
+      keep_deletes
+      allow(ObjectStore::Key).to receive(:generate).and_return("a" * 32, "b" * 32, "not-a-key")
+
+      expect { upload(share_upload(dot, "dot.png", "image/png"), share_upload("b", "b.txt", "text/plain")) }
+        .to raise_error(ROM::SQL::CheckConstraintError)
+      expect([groups, files, stored]).to all(be_empty)
     end
 
     it "calls a file sent with no type an octet stream" do

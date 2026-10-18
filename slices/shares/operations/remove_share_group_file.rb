@@ -21,11 +21,13 @@ module Shares
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
+      def delete_objects(file) = StoredKeys.of(file).each { client.delete(it) }
+
       def remove(group, file)
         transaction do
           group_mutations.remove_file(file.id)
           group_mutations.delete(group.short_code_id) if group.share_group_files.one?
-          client.delete(file.key)
+          delete_objects(file)
         end
         Success(group_queries.find(group.id))
       rescue ObjectStore::Client::Error

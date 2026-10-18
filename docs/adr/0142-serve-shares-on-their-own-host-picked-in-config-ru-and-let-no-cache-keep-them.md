@@ -5,7 +5,7 @@ status: active
 created: 2026-10-10
 area: [config]
 issue: "#1055"
-amended: ["#1259", "#1384"]
+amended: ["#1259", "#1384", "#1775"]
 tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, cache-control, puma, aa-cool]
 ---
 
@@ -67,7 +67,10 @@ that seeks with many range requests, could tie up the threads that blog pages ne
 `share_site.transfers` setting, which `SHARE_TRANSFERS` sets, caps the downloads, range requests and zips each worker
 streams at once. Unset, it leaves two threads free, so three at the defaults. Past the cap the share host answers
 `503` with `Retry-After` at once rather than wait for a thread. A share group's page and a short link's redirect stay
-outside the cap, but each image the group page previews counts against it.
+outside the cap. Since #1775 an image's preview does too: an upload stores a copy no wider or taller than 1280px
+beside the original, and `?preview` reads that copy whole and sends it with no slot taken. It counts no download and
+carries `no-store` like the rest, so deleting the share or its group stops it at once. An image stored before #1775,
+or one libvips cannot read, has no copy, and its preview streams the original under the cap as before.
 
 `.config/config.ru` holds routing for the first time. A spec has to build the app from that file to reach the share
 host, as the strict transport spec does under [ADR 0111][0111], and any other way to start the site has to use it or

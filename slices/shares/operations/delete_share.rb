@@ -21,7 +21,7 @@ module Shares
       def delete(share)
         transaction do
           share_mutations.delete(share.short_code_id)
-          client.delete(share.key)
+          StoredKeys.of(share).each { client.delete(it) }
         end
         Success(share)
       rescue ObjectStore::Client::Error

@@ -17,7 +17,7 @@ module Shares
         group = nil
         transaction { group = step add_share_group_files.call(create, uploads) }
       rescue StandardError
-        client.discard(group.share_group_files.map(&:key)) if group
+        client.discard(StoredKeys.of(group.share_group_files)) if group
         raise
       end
 

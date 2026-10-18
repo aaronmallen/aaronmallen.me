@@ -139,6 +139,10 @@ should still say `DYNAMIC`, never `HIT`.
 The app sends `private, no-store` on every answer from the share host, a share, a short link redirect and a 404
 alike, so no cache keeps one ([ADR 0142][0142]). Each download reaches the app and counts.
 
+An uploaded image gets a small copy beside it in the bucket, which the group page and the admin load with
+`?preview`. The app reads that copy whole and sends it outside the `SHARE_TRANSFERS` cap, so a page full of images
+never answers `503`. Images uploaded before #1775 have no copy and stream the original under the cap.
+
 The cache rules of [ADR 0090][0090] do not reach `aa.cool`. Cloudflare keeps cache rules per zone, and both rules
 live on the blog's zone. The first matches only the blog's host, and the second, which skips the cache for the
 `admin.session` and `site_theme` cookies, has nothing to skip on `aa.cool`, where no page sets either. The new zone

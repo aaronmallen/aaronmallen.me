@@ -7,6 +7,7 @@ module Shares
   class Server
     CODE_PATH = %r{\A/(?<code>[^/.]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
     FILE_POLICY = "sandbox; default-src 'none'; style-src 'unsafe-inline'"
+    FILE_HEADERS = { "content-security-policy" => FILE_POLICY, "x-content-type-options" => "nosniff" }.freeze
     PAGE_HEADERS = {
       "content-security-policy" => "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'",
       "content-type" => "text/html; charset=utf-8",
@@ -20,7 +21,7 @@ module Shares
     include Deps[
       client: "share_store.client", share_group_mutations: "repos.share_group_mutations",
       share_group_queries: "repos.share_group_queries", share_mutations: "repos.share_mutations",
-      share_queries: "repos.share_queries", settings: "settings",
+      preview: "preview", share_queries: "repos.share_queries", settings: "settings",
       short_code_queries: "repos.short_code_queries", short_link_mutations: "repos.short_link_mutations",
     ]
 
@@ -110,21 +111,19 @@ module Shares
     def share(request, id) = stream(request, share_queries.find(id)) { share_mutations.count_download(id) }
 
     def share_headers(share)
-      {
-        "accept-ranges" => "bytes",
-        "content-disposition" => disposition(share),
-        "content-security-policy" => FILE_POLICY,
-        "content-length" => share.byte_size.to_s,
-        "content-type" => share.content_type,
-        "x-content-type-options" => "nosniff",
-      }
+      FILE_HEADERS.merge(
+        "accept-ranges" => "bytes", "content-disposition" => disposition(share),
+        "content-length" => share.byte_size.to_s, "content-type" => share.content_type,
+      )
     end
 
     def stream(request, file, &)
       return [404, {}, []] unless file
       return [503, {}, []] unless client.configured?
 
-      @transfers.call { client.exists?(file.key) ? serve(request, file, &) : [404, {}, []] }
+      preview.call(request, file) || @transfers.call do
+        client.exists?(file.key) ? serve(request, file, &) : [404, {}, []]
+      end
     end
 
     def zip(request, code)
@@ -147,12 +146,8 @@ module Shares
     end
 
     def zip_headers(group)
-      {
-        "content-disposition" => named("attachment", "#{group.name || group.code}.zip"),
-        "content-security-policy" => FILE_POLICY,
-        "content-type" => "application/zip",
-        "x-content-type-options" => "nosniff",
-      }
+      name = "#{group.name || group.code}.zip"
+      FILE_HEADERS.merge("content-disposition" => named("attachment", name), "content-type" => "application/zip")
     end
   end
 end
