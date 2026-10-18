@@ -6,8 +6,6 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
 
-inherit_from: rubocop_todo.yml
-
 inherit_mode:
   merge:
     - Include

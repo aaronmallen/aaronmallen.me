@@ -1,29 +1,7 @@
 #!/usr/bin/env sh
 #MISE description="Lint all ruby files"
 #MISE alias=["l:rb", "l:ruby", "lint:rb"]
-#USAGE flag "--todo" help="Write the Hanami/UnusedDeps offenses to .config/rubocop_todo.yml in place of linting"
 
 set -e
 
-config=.config/rubocop.yml
-
-if [ "$1" != "--todo" ]; then
-  exec bundle exec rubocop --config "$config"
-fi
-
-todo=.config/rubocop_todo.yml
-saved="$(mktemp -d)"
-cp "$config" "$todo" "$saved/"
-restore() {
-  cp "$saved/rubocop.yml" "$config"
-  [ -n "$finished" ] || cp "$saved/rubocop_todo.yml" "$todo"
-  rm -rf "$saved" .rubocop_todo.yml
-}
-trap restore EXIT
-trap 'exit 130' INT TERM
-: >"$todo"
-
-bundle exec rubocop --config "$config" --only Hanami/UnusedDeps --auto-gen-config --auto-gen-only-exclude \
-  --exclude-limit 1000 --no-offense-counts --no-auto-gen-timestamp >/dev/null || [ $? -eq 1 ]
-mv .rubocop_todo.yml "$todo"
-finished=1
+bundle exec rubocop --config .config/rubocop.yml

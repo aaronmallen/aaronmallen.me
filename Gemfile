@@ -61,7 +61,7 @@ group :lint do
   gem "bundler-audit"
   gem "rubocop"
   gem "rubocop-capybara"
-  gem "rubocop-hanami"
+  gem "rubocop-hanami", ">= 0.2.1"
   gem "rubocop-i18n"
   gem "rubocop-ordered_methods"
   gem "rubocop-performance"
