@@ -14,14 +14,22 @@ RSpec.describe "API memory", type: :request do
     call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", author)
 
     expect(call_api(:get, "/memory").fetch("markdown")).to eq(<<~MARKDOWN)
-      <!-- global · 1 fact -->
+      <!-- file #{file} · global · 1 fact -->
 
       # hanami
 
       ## Gotchas
 
-      - Mind the query cache
+      - [fact #{fact}] Mind the query cache
     MARKDOWN
+  end
+
+  it "lists the loaded files without their facts" do
+    fact
+
+    loaded = { "id" => file, "path" => "hanami.md", "scope" => "global", "repo" => nil, "project_id" => nil }
+
+    expect(call_api(:get, "/memory").fetch("files")).to eq([loaded.merge("task_id" => nil)])
   end
 
   it "refuses to add a fact that names no agent" do

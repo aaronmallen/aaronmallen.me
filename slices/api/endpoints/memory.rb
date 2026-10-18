@@ -20,13 +20,13 @@ module API
         description: "the fact, #{::Agents::Contracts::MemoryFactContract::TEXT_LIMIT} characters at most",
       }.freeze
       ID = Helpers::Schema::ID
+      MARKDOWN =
+        "the files as an agent loads them, each headed by file <id> and each fact led by [fact <id>]; marked " \
+        "untrusted when an agent wrote any of the facts"
       LOADED = {
-        markdown: {
-          type: "string",
-          description: "the files as an agent loads them; marked untrusted when an agent wrote any of the facts",
-        },
-        files: Helpers::Schema.list(Serializers::MemoryFile.reference).merge(
-          description: "the files that loaded: global, then repo, project and task",
+        markdown: { type: "string", description: MARKDOWN },
+        files: Helpers::Schema.list(Serializers::LoadedMemoryFile.reference).merge(
+          description: "the files that loaded, without their facts: global, then repo, project and task",
         ),
       }.freeze
       SCOPED = "only a %s file takes %s"
@@ -82,7 +82,7 @@ module API
 
         {
           markdown: files.any?(&:agent_written?) ? Helpers::Untrusted.call(markdown) : markdown,
-          files: Serializers::MemoryFile.new(files).serializable_hash,
+          files: Serializers::LoadedMemoryFile.new(files).serializable_hash,
         }
       end
 

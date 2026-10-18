@@ -12,18 +12,23 @@ module Agents
       def facts = memory_facts
 
       def markdown
-        "<!-- #{[scope, target].compact.join(' ')} · #{facts.size} #{facts.one? ? 'fact' : 'facts'} -->\n\n" \
-          "# #{path.delete_suffix('.md')}\n#{sections.join}"
+        "<!-- #{header} -->\n\n# #{path.delete_suffix('.md')}\n#{sections.join}"
       end
 
       def target = repo || project_id || task_id
 
       private
 
+      def bullet(fact) = "- [fact #{fact.id}] #{fact.text.gsub("\n", "\n  ")}"
+
+      def header
+        ["file #{id}", [scope, target].compact.join(" "), "#{facts.size} #{facts.one? ? 'fact' : 'facts'}"].join(" · ")
+      end
+
       def sections
         HEADINGS.filter_map do |type, heading|
           listed = facts.select { it.type == type }
-          "\n## #{heading}\n\n#{listed.map { "- #{it.text.gsub("\n", "\n  ")}" }.join("\n")}\n" if listed.any?
+          "\n## #{heading}\n\n#{listed.map { bullet(it) }.join("\n")}\n" if listed.any?
         end
       end
     end

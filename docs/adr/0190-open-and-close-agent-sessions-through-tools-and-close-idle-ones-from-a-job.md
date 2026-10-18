@@ -27,7 +27,10 @@ An agent opens a session with `start_session` and closes it with `end_session`.
 
 - **`start_session`** takes a title, agent and model slugs ([ADR 0189][0189]), a client string, a repo, a branch
   and tasks. It records which memory files loaded and returns the session id with that memory as markdown, so one
-  call both opens the run and hands the agent its memory.
+  call both opens the run and hands the agent its memory. Since #1853 the markdown carries the IDs: each file's
+  header comment names `file <id>`, and each fact's bullet starts with `[fact <id>]`. The reply's `files` lists
+  each file's ID, path and scope without its facts, which `read_memory_file` gives whole, so the reply holds each
+  fact once.
 - **Writes name the session.** Memory and artifact writes take an optional session id and record the change against
   it. A write without one belongs to no session. Each call that names a session moves its last-seen time. Since
   #1747 a write that names a session that ended or never existed is refused.

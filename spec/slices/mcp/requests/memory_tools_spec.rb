@@ -70,12 +70,14 @@ RSpec.describe "MCP memory tools", type: :request do
   describe "read_memory" do
     let(:project) { create(:project, repo: "aaronmallen/blog") }
     let(:task) { create(:task) }
+    let(:hanami) { create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id") }
+    let(:preferences) { create_file("preferences").fetch("id") }
 
     before do
       add_fact(create_file("task-notes", scope: "task", task_id: task.id).fetch("id"), "Mind the index")
       add_fact(create_file("release", scope: "project", project_id: project.id).fetch("id"), "Tag with CalVer")
-      add_fact(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id"), "Slices own tables")
-      add_fact(create_file("preferences").fetch("id"), "No emdash", type: "preference")
+      add_fact(hanami, "Slices own tables")
+      add_fact(preferences, "No emdash", type: "preference")
       create_file("elsewhere", scope: "repo", repo: "aaronmallen/other")
     end
 
@@ -89,17 +91,18 @@ RSpec.describe "MCP memory tools", type: :request do
 
     it "returns the memory as markdown, marked untrusted" do
       markdown = mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("markdown")
+      fact = mcp_answer("read_memory_file", id: preferences).fetch("facts").first.fetch("id")
 
       expect(markdown).to include("untrusted" => true, "text" => start_with(<<~MARKDOWN))
-        <!-- global · 1 fact -->
+        <!-- file #{preferences} · global · 1 fact -->
 
         # preferences
 
         ## Preferences
 
-        - No emdash
+        - [fact #{fact}] No emdash
 
-        <!-- repo aaronmallen/blog · 1 fact -->
+        <!-- file #{hanami} · repo aaronmallen/blog · 1 fact -->
       MARKDOWN
     end
 

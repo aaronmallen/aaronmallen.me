@@ -30,8 +30,14 @@ RSpec.describe "MCP session tools", type: :request do
       expect(paths).to eq(%w[preferences.md hanami.md release.md task-notes.md])
     end
 
-    it "returns the memory as markdown" do
-      expect(started.fetch("markdown")).to start_with("<!-- global · 0 facts -->\n\n# preferences\n")
+    it "returns the memory as markdown, headed by each file's ID" do
+      id = started.fetch("files").first.fetch("id")
+
+      expect(started.fetch("markdown")).to start_with("<!-- file #{id} · global · 0 facts -->\n\n# preferences\n")
+    end
+
+    it "lists the loaded files without their facts" do
+      expect(started.fetch("files").map(&:keys).uniq).to eq([%w[id path scope repo project_id task_id]])
     end
 
     it "loads and records a repo named in mixed case or with spaces around it as its lower case name" do
