@@ -75,6 +75,15 @@ RSpec.describe "Admin people", type: :feature do
       expect(finder).to have_css(".empty", text: "No accounts match")
     end
 
+    it "keeps the results when a change redraws the page" do
+      stub_bluesky_search("nobody")
+      search("bluesky", "nobody")
+      finder.find(".empty")
+      create(:person, name: "Grace Hopper", key: "grace")
+
+      expect(page).to have_css(".person-row-name", text: "Grace").and have_css("#person-finder .empty")
+    end
+
     it "shows the error when the network fails" do
       stub_bluesky_search("ada", status: 502)
       search("bluesky", "ada")
