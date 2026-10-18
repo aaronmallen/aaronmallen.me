@@ -22,6 +22,7 @@ depends = ["lint:**"]
 aube = "latest"
 biome = "latest"
 editorconfig-checker = "latest"
+jj = "latest"
 markdownlint-cli2 = "latest"
 osv-scanner = "latest"
 pitchfork = "latest"

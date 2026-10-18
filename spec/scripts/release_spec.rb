@@ -271,7 +271,7 @@ RSpec.describe "mise run release", type: :script do
     end
   end
 
-  context "with jj", skip: ("jj is not installed" unless system("command -v jj >/dev/null 2>&1")) do
+  context "with jj" do
     let!(:target) do
       run("jj", "git", "init", "--colocate", "--quiet")
       write_changelog("26.10.0")
