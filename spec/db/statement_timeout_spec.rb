@@ -22,6 +22,25 @@ RSpec.describe "The web statement timeout", type: :request do
     expect { get "/writing" }.to raise_error(Sequel::DatabaseError, /statement timeout/)
   end
 
+  context "when a request runs past the limit", :commits do
+    before do
+      serve_like_puma
+      allow(Hanami.app["settings"]).to receive(:web_statement_timeout).and_return(0.05)
+      post_queries = instance_double(Posts::Repos::PostQueries)
+      allow(post_queries).to receive(:published_page) { db.get(Sequel.function(:pg_sleep, 1)) }
+      replace_component("posts.repos.post_queries", post_queries)
+      get "/writing" rescue Sequel::DatabaseError
+      reply
+    end
+
+    after { db.disconnect }
+
+    it "still writes the request's timing row" do
+      expect(Performance::Slice["db.rom"].relations[:performance_requests].to_a)
+        .to contain_exactly(include(route: "/writing", status: 500))
+    end
+  end
+
   it "leaves a new connection unlimited, as migrations open one" do
     timeout = Sequel.connect(db.opts.merge(keep_reference: false)) { statement_timeout(it) }
 
