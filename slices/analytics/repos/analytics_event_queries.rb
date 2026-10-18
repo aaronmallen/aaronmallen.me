@@ -47,7 +47,7 @@ module Analytics
       end
 
       def oldest_day
-        memo(:oldest_day) { analytics_events.oldest_occurred_at&.then { Blog::TimeZone.today(it) } }
+        memo(:oldest_day) { analytics_events.oldest_occurred_at&.then { Blog::TimeZone.local_date(it) } }
       end
 
       def reach_by_path(from:, to:)

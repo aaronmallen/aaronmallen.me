@@ -27,7 +27,7 @@ module Admin
           def days
             return Empty { t(".empty") } if @sessions.rows.empty?
 
-            @sessions.rows.group_by { Blog::TimeZone.today(it.started_at) }.each do |date, rows|
+            @sessions.rows.group_by { Blog::TimeZone.local_date(it.started_at) }.each do |date, rows|
               section do
                 DayHead(date:, today: @today, count: rows.size)
                 rows.each { SessionRow(session: it, place:) }

@@ -26,7 +26,7 @@ module Admin
 
       def call(page:, tab: TODAY, pool: nil, query: nil, from: nil, to: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
-        today = Blog::TimeZone.today(now)
+        today = Blog::TimeZone.local_date(now)
         planned = sprint_queries.after(today)
         filters = { query: Blog::Types::TrimmedText[query], **closed_range(from, to) }
         tasks = step listed(tab, sprint, planned, page, filters)

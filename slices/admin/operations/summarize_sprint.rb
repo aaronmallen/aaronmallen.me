@@ -16,7 +16,7 @@ module Admin
 
         {
           counts: task_queries.open_counts(sprint:, planned: EMPTY_ARRAY),
-          date: Blog::TimeZone.today(now),
+          date: Blog::TimeZone.local_date(now),
           pool:,
           pools: { pool => task_queries.list(pool, sprint: nil, page:).rows },
           tasks: task_queries.in_sprint(sprint.id),

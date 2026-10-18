@@ -23,7 +23,7 @@ module Calendar
       def first_day(item)
         start = item.fetch("start")
 
-        start["date"] ? Date.iso8601(start["date"]) : Blog::TimeZone.today(Time.iso8601(start.fetch("dateTime")))
+        start["date"] ? Date.iso8601(start["date"]) : Blog::TimeZone.local_date(Time.iso8601(start.fetch("dateTime")))
       end
 
       def timing(fields, date, span)

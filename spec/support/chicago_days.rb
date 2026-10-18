@@ -8,7 +8,7 @@ module Spec
 
     def days_ahead(days)
       now = Time.now
-      today = Blog::TimeZone.today(now)
+      today = Blog::TimeZone.local_date(now)
       clock = now - Blog::TimeZone.day_start(today)
       start = Blog::TimeZone.day_start(today + days)
 

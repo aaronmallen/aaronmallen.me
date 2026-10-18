@@ -81,7 +81,7 @@ module Admin
             seconds = (at - @now).to_i
 
             Moment(at:, class: "sq-time") do
-              seconds.positive? ? relative(seconds) : l(Blog::TimeZone.today(at), format: :short)
+              seconds.positive? ? relative(seconds) : l(Blog::TimeZone.local_date(at), format: :short)
             end
           end
         end

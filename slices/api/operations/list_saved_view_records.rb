@@ -101,7 +101,7 @@ module API
 
         case tab
           when COMPLETED then finished(page, filters, search)
-          when UPCOMING then upcoming(Blog::TimeZone.today(now), search)
+          when UPCOMING then upcoming(Blog::TimeZone.local_date(now), search)
           when RECURRING then recurring
           else open_tasks(tab, step(current_sprint.call(now:)), page, search)
         end

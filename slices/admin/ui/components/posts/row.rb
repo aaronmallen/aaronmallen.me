@@ -75,7 +75,7 @@ module Admin
           end
 
           def sub
-            date = l(Blog::TimeZone.today(@post.published_at || @post.updated_at), format: :medium)
+            date = l(Blog::TimeZone.local_date(@post.published_at || @post.updated_at), format: :medium)
             words = t(".words", count: @stats.fetch(:words))
             dotted(path(:post, slug: @post.slug), date, words, *readership)
           end

@@ -46,7 +46,7 @@ module Public
         end
 
         def recent(post)
-          day = Blog::TimeZone.local(post.published_at).to_date
+          day = Blog::TimeZone.local_date(post.published_at)
 
           li do
             a(href: path(:post, slug: post.slug)) { post.title }

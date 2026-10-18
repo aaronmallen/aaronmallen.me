@@ -62,7 +62,7 @@ module Admin
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }
             span { @share.content_type }
-            span { t(".uploaded", on: l(Blog::TimeZone.today(@share.created_at), format: :long)) }
+            span { t(".uploaded", on: l(Blog::TimeZone.local_date(@share.created_at), format: :long)) }
             span { t(".downloads", count: @share.download_count, downloads:) }
           end
 

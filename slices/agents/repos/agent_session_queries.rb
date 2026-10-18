@@ -34,7 +34,7 @@ module Agents
       def by_agents(relation, day) = relation.where(created_at: day).exclude(agent: nil)
 
       def day_of(now)
-        today = Blog::TimeZone.today(now)
+        today = Blog::TimeZone.local_date(now)
 
         Range.new(*Blog::TimeZone.day_bounds(today, today), true)
       end

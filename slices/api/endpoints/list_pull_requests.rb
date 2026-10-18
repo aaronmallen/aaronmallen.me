@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ListPullRequests < Endpoint
-      DAY = ->(pull_request) { Blog::TimeZone.today(pull_request.moved_at) }
+      DAY = ->(pull_request) { Blog::TimeZone.local_date(pull_request.moved_at) }
 
       SCHEMA = {
         additionalProperties: false,

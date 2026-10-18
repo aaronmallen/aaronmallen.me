@@ -42,7 +42,7 @@ module Tasks
 
       def validate(params, now)
         fields = every_field(params)
-        fields[:starts_on] = Blog::TimeZone.today(now) if fields[:starts_on].to_s.empty?
+        fields[:starts_on] = Blog::TimeZone.local_date(now) if fields[:starts_on].to_s.empty?
 
         validated(contract.call(fields))
       end

@@ -51,7 +51,7 @@ module Admin
 
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }
-            span { l(Blog::TimeZone.today(@share.created_at), format: :medium) }
+            span { l(Blog::TimeZone.local_date(@share.created_at), format: :medium) }
             span { t(".downloads", count: @share.download_count, downloads: downloads) }
           end
 

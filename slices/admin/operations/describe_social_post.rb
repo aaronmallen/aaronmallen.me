@@ -9,7 +9,7 @@ module Admin
         posted_at = social_post.posted_at
 
         {
-          date: posted_at && i18n.l(Blog::TimeZone.today(posted_at), format: :medium),
+          date: posted_at && i18n.l(Blog::TimeZone.local_date(posted_at), format: :medium),
           networks: networks(social_post),
           time: posted_at && i18n.l(Blog::TimeZone.local(posted_at), format: :clock),
         }

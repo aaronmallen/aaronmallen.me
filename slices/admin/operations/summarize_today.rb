@@ -73,7 +73,7 @@ module Admin
           entries: commit_queries.today(now:, limit: COMMIT_LIMIT),
           last_synced_at: commit_queries.last_synced_at,
           repos: commit_queries.today_repos(now:).size,
-          today: Blog::TimeZone.today(now),
+          today: Blog::TimeZone.local_date(now),
           configured: client.configured?,
         }
       end
@@ -85,7 +85,7 @@ module Admin
       end
 
       def counts(now)
-        { clients: client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.today(now)) }
+        { clients: client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.local_date(now)) }
       end
 
       def failures
@@ -93,7 +93,7 @@ module Admin
       end
 
       def last_night(now)
-        today = Blog::TimeZone.today(now)
+        today = Blog::TimeZone.local_date(now)
 
         health_queries.days(from: today, to: today)[today]
       end

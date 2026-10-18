@@ -34,7 +34,7 @@ module API
           **summary,
           days: dated(days),
           **raw,
-          **(found ? { since_publish: since_publish(days, Blog::TimeZone.today(found.published_at)) } : {}),
+          **(found ? { since_publish: since_publish(days, Blog::TimeZone.local_date(found.published_at)) } : {}),
         }
       end
 

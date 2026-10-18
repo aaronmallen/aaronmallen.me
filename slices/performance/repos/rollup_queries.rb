@@ -9,7 +9,7 @@ module Performance
         tables = [performance_jobs, performance_pages, performance_requests]
         occurred_at = tables.filter_map { it.dataset.min(:occurred_at) }.min
 
-        Blog::TimeZone.today(occurred_at) if occurred_at
+        Blog::TimeZone.local_date(occurred_at) if occurred_at
       end
     end
   end

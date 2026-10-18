@@ -30,14 +30,14 @@ module Record
       def synced_through(repo) = state_at(SYNC_KIND, repo)
 
       def today(now: Time.now, limit: nil)
-        found = commits.on(Blog::TimeZone.today(now)).newest_first
+        found = commits.on(Blog::TimeZone.local_date(now)).newest_first
 
         found.limit(limit).to_a
       end
 
-      def today_repos(now: Time.now) = commits.on(Blog::TimeZone.today(now)).repo_names
+      def today_repos(now: Time.now) = commits.on(Blog::TimeZone.local_date(now)).repo_names
 
-      def today_totals(now: Time.now) = commits.on(Blog::TimeZone.today(now)).day_totals.one.to_h
+      def today_totals(now: Time.now) = commits.on(Blog::TimeZone.local_date(now)).day_totals.one.to_h
 
       def walks = sync_states.of_kind(BACKFILL_KIND).to_a.to_h { [it.repo, it.updated_at] }
 

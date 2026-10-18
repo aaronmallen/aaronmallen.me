@@ -14,7 +14,7 @@ module Tasks
 
       private
 
-      def ahead(sprint, now) = sprint.sprint_date > Blog::TimeZone.today(now) ? Success(sprint) : Failure(:started)
+      def ahead(sprint, now) = sprint.sprint_date > Blog::TimeZone.local_date(now) ? Success(sprint) : Failure(:started)
 
       def drop(sprint, now)
         transaction do

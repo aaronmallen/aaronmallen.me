@@ -13,7 +13,7 @@ module Analytics
         return if signed_in
 
         now = Time.now
-        day = Blog::TimeZone.today(now)
+        day = Blog::TimeZone.local_date(now)
         count = parse_aggregator.call(user_agent)
         return feed_mutations.record_subscribers(day:, path:, **count.to_h) if count
 

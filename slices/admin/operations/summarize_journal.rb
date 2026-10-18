@@ -22,7 +22,7 @@ module Admin
           days:,
           linked: record_link_queries.counts(KIND, days.rows.flat_map(&:last).map(&:id)),
           saved_views: list_saved_views.call(SCREEN, filters),
-          today: Blog::TimeZone.today(now),
+          today: Blog::TimeZone.local_date(now),
           **journal_entry_queries.summary(now:),
         }
       end

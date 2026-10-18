@@ -34,7 +34,7 @@ module Admin
             )
           end
 
-          def date(time) = l(Blog::TimeZone.today(time), format: :medium)
+          def date(time) = l(Blog::TimeZone.local_date(time), format: :medium)
 
           def host = self.class.host(@link.destination)
 

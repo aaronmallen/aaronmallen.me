@@ -43,7 +43,7 @@ module Tasks
         task = task_queries.detailed(id)
         return unless task.closed?
 
-        day = next_cadence_date.call(series.to_h, task.recurs_after(Blog::TimeZone.today(at)))
+        day = next_cadence_date.call(series.to_h, task.recurs_after(Blog::TimeZone.local_date(at)))
         copy = clone(task, series, day, at)
         task_series_mutations.advance(series.id, copy.id, at)
         task_queries.by_id(copy.id)

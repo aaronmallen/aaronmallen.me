@@ -68,7 +68,7 @@ module Admin
 
           def label(text) = p(class: "svc-group-label") { text }
 
-          def lapse_date = l(Blog::TimeZone.today(@row.connection.lapses_at), format: :medium)
+          def lapse_date = l(Blog::TimeZone.local_date(@row.connection.lapses_at), format: :medium)
 
           def line(text, note = nil, name: "svc-line-name", &)
             div(class: "svc-line") do

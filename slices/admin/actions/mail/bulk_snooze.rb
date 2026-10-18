@@ -22,7 +22,7 @@ module Admin
 
         def done(request, response, records)
           at = Blog::TimeZone.parse_time(request.params[:pick])
-          date = i18n.l(Blog::TimeZone.today(at), format: :medium)
+          date = i18n.l(Blog::TimeZone.local_date(at), format: :medium)
 
           toast(response, SNOOZED, count: records.size, date:)
         end

@@ -124,7 +124,7 @@ module Admin
           Stamped(text: t(".synced_today", time: Stamped::MARK), at: @last_synced_at, format: :clock)
         end
 
-        def synced_today? = Blog::TimeZone.today(@last_synced_at) == @today
+        def synced_today? = Blog::TimeZone.local_date(@last_synced_at) == @today
       end
     end
   end

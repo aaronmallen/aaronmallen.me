@@ -88,7 +88,7 @@ module Admin
             a(class: "record-link-title", href: path(:admin_task, id: found.id)) { found.title }
           end
 
-          def title = t(".title", date: l(Blog::TimeZone.today(@session.started_at), format: :medium))
+          def title = t(".title", date: l(Blog::TimeZone.local_date(@session.started_at), format: :medium))
         end
       end
     end

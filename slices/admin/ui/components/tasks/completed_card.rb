@@ -23,7 +23,7 @@ module Admin
             Pager(page: @tasks, route: :admin_tasks, params:)
           end
 
-          def days = @days ||= @tasks.rows.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
+          def days = @days ||= @tasks.rows.group_by { Blog::TimeZone.local_date(it.completed_at) }.to_a
 
           def empty = (t(filtering? ? ".no_match" : ".empty") if days.empty?)
 

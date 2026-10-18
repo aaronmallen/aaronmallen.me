@@ -28,7 +28,7 @@ module Activity
 
       def listed?(kind:, record_id:) = attention.where(kind:, record_id:).exist?
 
-      def stalled(now: Time.now, on: Blog::TimeZone.today(now))
+      def stalled(now: Time.now, on: Blog::TimeZone.local_date(now))
         limits = settings.attention
 
         attention.stalled(on:, now:, **limits).to_a.map { Structs::StalledRow.from(it, on:, limits:) }.sort_by(&:rank)

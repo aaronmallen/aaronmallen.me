@@ -25,7 +25,7 @@ module Admin
           end
 
           def written
-            date = l(Blog::TimeZone.today(@current.created_at), format: :medium)
+            date = l(Blog::TimeZone.local_date(@current.created_at), format: :medium)
 
             t(".written", date:, who: Helpers::AgentBrand.author(@current) || t(".you"))
           end

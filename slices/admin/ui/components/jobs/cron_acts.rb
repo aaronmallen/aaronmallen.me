@@ -13,7 +13,7 @@ module Admin
           def self.performance(entry, base) = "#{base}##{Performance::TimingTable.anchor(entry.job)}"
 
           def self.range(entry)
-            days = Blog::TimeZone.today - Blog::TimeZone.today(entry.last[:occurred_at]) + 1
+            days = Blog::TimeZone.today - Blog::TimeZone.local_date(entry.last[:occurred_at]) + 1
 
             RANGES.find { it >= days } || RANGES.last
           end

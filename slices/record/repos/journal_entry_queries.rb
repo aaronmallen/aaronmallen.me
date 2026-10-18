@@ -34,13 +34,13 @@ module Record
       def page_by_tag(tag, page) = page.fill(journal_entries.tagged([tag]).newest_first.opening.paged(page).to_a)
 
       def summary(now: Time.now)
-        today = Blog::TimeZone.today(now)
+        today = Blog::TimeZone.local_date(now)
         totals = journal_entries.totals(today - (STREAK_DAYS - 1), today)
 
         { entries: totals[:entries], words: totals[:words], streak: { days: STREAK_DAYS, written: totals[:written] } }
       end
 
-      def today(now: Time.now) = with_tags.on(Blog::TimeZone.today(now)).newest_first.to_a
+      def today(now: Time.now) = with_tags.on(Blog::TimeZone.local_date(now)).newest_first.to_a
 
       private
 

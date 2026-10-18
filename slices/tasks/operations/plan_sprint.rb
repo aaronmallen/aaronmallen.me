@@ -15,7 +15,7 @@ module Tasks
 
       private
 
-      def ahead(day, now) = day > Blog::TimeZone.today(now) ? Success(day) : Failure(:past)
+      def ahead(day, now) = day > Blog::TimeZone.local_date(now) ? Success(day) : Failure(:past)
 
       def parse(date)
         day = Blog::TimeZone.parse_day(date)

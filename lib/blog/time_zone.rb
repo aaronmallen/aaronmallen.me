@@ -22,6 +22,8 @@ module Blog
 
     def local(time) = ZONE.to_local(time)
 
+    def local_date(time) = local(time).to_date
+
     def local_time(year, month, day, hour = 0, minute = 0)
       ZONE.local_time(year, month, day, hour, minute, 0, 0, true)
     end
@@ -52,7 +54,7 @@ module Blog
       nil
     end
 
-    def today(time = Time.now) = local(time).to_date
+    def today = local_date(Time.now)
 
     def valid_clock?(year, month, day, hour, minute) = Date.valid_date?(year, month, day) && hour < 24 && minute < 60
   end

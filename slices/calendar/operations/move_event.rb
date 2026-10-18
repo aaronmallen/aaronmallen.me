@@ -36,7 +36,7 @@ module Calendar
         { **dates, starts_at: shifted(event.starts_at, days), ends_at: shifted(event.ends_at, days) }
       end
 
-      def shifted(time, days) = Blog::TimeZone.on_day(time, Blog::TimeZone.today(time) + days)
+      def shifted(time, days) = Blog::TimeZone.on_day(time, Blog::TimeZone.local_date(time) + days)
     end
   end
 end

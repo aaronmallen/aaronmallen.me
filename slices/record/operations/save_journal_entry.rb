@@ -13,7 +13,7 @@ module Record
         journal_entry_queries: "repos.journal_entry_queries",
       ]
 
-      def call(params, now: Time.now, latest: Blog::TimeZone.today(now))
+      def call(params, now: Time.now, latest: Blog::TimeZone.local_date(now))
         attributes = step validate(params, now, latest)
         step persist(attributes, now)
       end
@@ -31,7 +31,7 @@ module Record
 
       def validate(params, now, latest)
         attributes = step validated(contract.call(form(params), today: latest))
-        Success(attributes.merge(entry_date: attributes[:entry_date] || Blog::TimeZone.today(now)))
+        Success(attributes.merge(entry_date: attributes[:entry_date] || Blog::TimeZone.local_date(now)))
       end
 
       def write(attributes, time)

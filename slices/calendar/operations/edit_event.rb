@@ -42,7 +42,7 @@ module Calendar
       def span(event)
         return event.ends_on - event.starts_on if event.all_day?
 
-        Blog::TimeZone.today(event.ends_at) - Blog::TimeZone.today(event.starts_at)
+        Blog::TimeZone.local_date(event.ends_at) - Blog::TimeZone.local_date(event.starts_at)
       end
 
       def validate(params, event) = validated(contract.call(every_field(params), span: span(event)))

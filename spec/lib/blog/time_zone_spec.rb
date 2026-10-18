@@ -18,4 +18,10 @@ RSpec.describe Blog::TimeZone do
       expect(described_class.day_bounds(Date.new(2026, 3, 1), nil)).to eq([described_class.local_time(2026, 3, 1), nil])
     end
   end
+
+  describe ".local_date" do
+    it "returns the Chicago date of a time past midnight UTC" do
+      expect(described_class.local_date(Time.utc(2026, 3, 2, 3))).to eq(Date.new(2026, 3, 1))
+    end
+  end
 end

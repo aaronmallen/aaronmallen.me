@@ -15,7 +15,7 @@ module Admin
 
           def view_template
             now = Time.now
-            today = Blog::TimeZone.today(now)
+            today = Blog::TimeZone.local_date(now)
 
             @menu.sub(t(".snooze"), icon: "fa-regular fa-bell-slash") do
               SnoozeForm.quick_picks(now).each { |key, at| pick(key, at, today) }
@@ -25,7 +25,7 @@ module Admin
           private
 
           def hint(at, today)
-            day = Blog::TimeZone.today(at)
+            day = Blog::TimeZone.local_date(at)
             day - today > 1 ? l(day, format: :short) : l(Blog::TimeZone.local(at), format: :clock)
           end
 

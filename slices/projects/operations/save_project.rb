@@ -81,7 +81,7 @@ module Projects
 
       def validate(params, id, now)
         context = { slugs: project_queries.slugs_besides(id), stored_name: project_queries.name_of(id) }
-        validated(contract.call(form(params), **context, today: Blog::TimeZone.today(now)))
+        validated(contract.call(form(params), **context, today: Blog::TimeZone.local_date(now)))
       end
     end
   end

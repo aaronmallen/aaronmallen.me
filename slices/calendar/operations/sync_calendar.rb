@@ -74,7 +74,7 @@ module Calendar
         attendees.reject { it["self"] || it["resource"] }.map { it["displayName"] || it.fetch("email") }
       end
 
-      def last_day(time) = Blog::TimeZone.today(time - 1)
+      def last_day(time) = Blog::TimeZone.local_date(time - 1)
 
       def since(token, from, to)
         return { syncToken: token } if token
@@ -101,7 +101,7 @@ module Calendar
         return whole_days(start, finish) if start.key?("date")
 
         starts_at, ends_at = [start, finish].map { Time.iso8601(it.fetch("dateTime")) }
-        starts_on = Blog::TimeZone.today(starts_at)
+        starts_on = Blog::TimeZone.local_date(starts_at)
 
         { starts_on:, ends_on: [starts_on, last_day(ends_at)].max, starts_at:, ends_at: }
       end

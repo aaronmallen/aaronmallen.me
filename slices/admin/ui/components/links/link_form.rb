@@ -32,7 +32,7 @@ module Admin
 
           def check_form = Form(id: self.class.check_id(@link), action: path(:admin_check_link, id: @link.id))
 
-          def date(time, format) = l(Blog::TimeZone.today(time), format:)
+          def date(time, format) = l(Blog::TimeZone.local_date(time), format:)
 
           def delete_form
             Form(

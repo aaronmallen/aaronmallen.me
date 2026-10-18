@@ -35,7 +35,7 @@ module Admin
         return unless lapses_at
         return :lapsed if lapses_at <= Time.now
 
-        :lapsing if Blog::TimeZone.today(lapses_at) <= Blog::TimeZone.today + settings.attention[:lapsing_days]
+        :lapsing if Blog::TimeZone.local_date(lapses_at) <= Blog::TimeZone.today + settings.attention[:lapsing_days]
       end
 
       def connected(connections)

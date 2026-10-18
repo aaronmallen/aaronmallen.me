@@ -51,7 +51,7 @@ module Admin
 
           def date = @day.day
 
-          def day_workouts = @workouts.select { Blog::TimeZone.local(it.started_at).to_date == date }
+          def day_workouts = @workouts.select { Blog::TimeZone.local_date(it.started_at) == date }
 
           def head
             div(class: "health-day-head") do

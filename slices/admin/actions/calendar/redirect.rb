@@ -32,7 +32,7 @@ module Admin
 
         def moved_to(time)
           {
-            date: i18n.l(Blog::TimeZone.today(time), format: :medium),
+            date: i18n.l(Blog::TimeZone.local_date(time), format: :medium),
             time: i18n.l(Blog::TimeZone.local(time), format: :clock),
           }
         end

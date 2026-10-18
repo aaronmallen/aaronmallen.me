@@ -21,7 +21,7 @@ module Calendar
 
       private
 
-      def by_day(rows) = rows.group_by { Blog::TimeZone.today(yield(it)) }
+      def by_day(rows) = rows.group_by { Blog::TimeZone.local_date(yield(it)) }
 
       def day(date, sprints:, posts:, social_posts:, journal:, events:)
         Structs::CalendarDay.new(

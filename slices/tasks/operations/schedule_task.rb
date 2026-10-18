@@ -24,12 +24,12 @@ module Tasks
         day = step parse(asked)
         placed = asked == held(task) ? task : place(task, day, now)
 
-        [day == Blog::TimeZone.today(now) ? :pulled_in : :scheduled, placed, day]
+        [day == Blog::TimeZone.local_date(now) ? :pulled_in : :scheduled, placed, day]
       end
 
       private
 
-      def ahead(day, now) = day >= Blog::TimeZone.today(now) ? Success(day) : Failure(:past)
+      def ahead(day, now) = day >= Blog::TimeZone.local_date(now) ? Success(day) : Failure(:past)
 
       def find(id)
         found(task_queries.by_id(id))
@@ -43,7 +43,7 @@ module Tasks
 
       def join(task, day, now)
         transaction do
-          sprint = step current_sprint.call(now:) if day == Blog::TimeZone.today(now)
+          sprint = step current_sprint.call(now:) if day == Blog::TimeZone.local_date(now)
 
           task_event_mutations.track(task.id, now) do
             sprint ? task_mutations.join_sprint(task.id, sprint.id) : wait(task, day, now)

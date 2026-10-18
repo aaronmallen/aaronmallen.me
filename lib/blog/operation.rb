@@ -65,7 +65,7 @@ module Blog
       day = TimeZone.parse_day(date)
       return Failure(:invalid) unless day
 
-      day >= TimeZone.today(now) ? Success(day) : Failure(:past)
+      day >= TimeZone.local_date(now) ? Success(day) : Failure(:past)
     end
 
     def validate(params) = validated(contract.call(every_field(params)))

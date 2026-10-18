@@ -194,7 +194,7 @@ RSpec.describe "API search", type: :request do
       end
 
       it "carries the day it went out" do
-        expect(only("crumb").fetch("date")).to eq(Blog::TimeZone.local(post.published_at).to_date.iso8601)
+        expect(only("crumb").fetch("date")).to eq(Blog::TimeZone.local_date(post.published_at).iso8601)
       end
     end
 

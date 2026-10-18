@@ -62,7 +62,7 @@ module Admin
             end
           end
 
-          def exercise = @exercise ||= @report.workouts.group_by { Blog::TimeZone.local(it.started_at).to_date }
+          def exercise = @exercise ||= @report.workouts.group_by { Blog::TimeZone.local_date(it.started_at) }
 
           def figure(unit, value)
             return t(".none") if value.nil?

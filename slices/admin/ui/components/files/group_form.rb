@@ -75,7 +75,7 @@ module Admin
 
           def meta
             span { Blog::Helpers::Figures.size(files.sum(&:byte_size)) }
-            span { t(".uploaded", on: l(Blog::TimeZone.today(@group.created_at), format: :long)) }
+            span { t(".uploaded", on: l(Blog::TimeZone.local_date(@group.created_at), format: :long)) }
             span { t(".views", count: @group.view_count, views: count(@group.view_count)) }
             span { t(".zips", count: @group.zip_download_count, zips: count(@group.zip_download_count)) }
           end

@@ -42,7 +42,7 @@ module Admin
           return t(".state_line", reason: reason(failure), sync: sync(failure)) unless failure[:at]
 
           at = Stamped::MARK
-          since = failure[:since] && l(Blog::TimeZone.today(failure[:since]), format: :medium)
+          since = failure[:since] && l(Blog::TimeZone.local_date(failure[:since]), format: :medium)
 
           t(line_key(failure), at:, reason: reason(failure), repo: failure[:repo], since:, sync: sync(failure))
         end

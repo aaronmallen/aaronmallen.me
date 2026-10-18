@@ -12,14 +12,14 @@ module Analytics
       include Deps["settings"]
 
       def call(address:, user_agent: nil, at: Time.now, period: DAY)
-        parts = [settings.analytics_salt, Blog::TimeZone.today(at).strftime(period), address, user_agent].compact
+        parts = [settings.analytics_salt, Blog::TimeZone.local_date(at).strftime(period), address, user_agent].compact
 
         Digest::SHA256.hexdigest(parts.join(SEPARATOR))
       end
 
       def throttle_hashes(address, at: Time.now)
         key = Blog::Types::ThrottleKey[address]
-        yesterday = Blog::TimeZone.day_start(Blog::TimeZone.today(at) - 1)
+        yesterday = Blog::TimeZone.day_start(Blog::TimeZone.local_date(at) - 1)
 
         [call(address: key, at:), call(address: key, at: yesterday)]
       end

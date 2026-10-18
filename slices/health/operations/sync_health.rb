@@ -59,7 +59,7 @@ module Health
         filter = "sleep.interval.end_time >= #{bounds[0]} AND sleep.interval.end_time < #{bounds[1]}"
         nights = points(account, "sleep", filter).map { it["sleep"] }
 
-        nights.group_by { Blog::TimeZone.today(Time.iso8601(it.dig("interval", "endTime"))) }
+        nights.group_by { Blog::TimeZone.local_date(Time.iso8601(it.dig("interval", "endTime"))) }
               .transform_values { night(it) }
       end
 

@@ -13,11 +13,11 @@ module Admin
           def self.morning(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, MORNING_HOUR)
 
           def self.quick_picks(now)
-            today = Blog::TimeZone.today(now)
+            today = Blog::TimeZone.local_date(now)
             later = Time.at(((now.to_i / HOUR) + LATER_HOURS) * HOUR)
 
             {
-              later_today: (later if Blog::TimeZone.today(later) == today),
+              later_today: (later if Blog::TimeZone.local_date(later) == today),
               tomorrow: morning(today + 1),
               next_week: morning(today + 7 - ((today.wday - MONDAY) % 7)),
             }.compact

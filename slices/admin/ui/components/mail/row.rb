@@ -89,7 +89,7 @@ module Admin
 
           def unread? = @thread.status == UNREAD
 
-          def wake_day = l(Blog::TimeZone.today(@thread.snoozed_until), format: :medium)
+          def wake_day = l(Blog::TimeZone.local_date(@thread.snoozed_until), format: :medium)
         end
       end
     end

@@ -16,7 +16,7 @@ module Health
       def first_day(today)
         since = sync_state_queries.failure(SYNC)&.fetch(:since)
 
-        [today, since && Blog::TimeZone.today(since)].compact.min - REREAD_DAYS
+        [today, since && Blog::TimeZone.local_date(since)].compact.min - REREAD_DAYS
       end
     end
   end

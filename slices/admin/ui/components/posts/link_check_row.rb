@@ -41,7 +41,7 @@ module Admin
 
           def failing? = @check&.reason
 
-          def first_failed = l(Blog::TimeZone.today(@check.first_failed_at || @check.checked_at), format: :medium)
+          def first_failed = l(Blog::TimeZone.local_date(@check.first_failed_at || @check.checked_at), format: :medium)
 
           def meta
             p(class: "li-sub post-link-meta") do
