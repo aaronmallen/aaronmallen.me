@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, public, admin, mcp]
 issue: AA-667
-amended: ["#1304"]
+amended: ["#1304", "#1824"]
 tags: [css, tailwind, design, phlex, ui]
 ---
 
@@ -27,7 +27,7 @@ the thing is rather than how it looks".
 
 ## Decision
 
-Every class a view writes names a thing, and `config/tailwind/shared.css` defines it once as an `@utility`, 350 of them.
+Every class a view writes names a thing, and `config/tailwind/shared.css` defines it once as an `@utility`.
 A utility builds on the theme tokens in the one `@theme` block and on other utilities through `@apply`: `page-column` is
 `mx-auto max-w-page pt-12`, and `form` is `form-stack max-w-measure`.
 
@@ -67,6 +67,6 @@ Nothing checks a class name. Tailwind emits a utility only when it finds the nam
 class matches nothing and renders unstyled with every request spec passing. Only a browser spec that reads the
 computed style, such as `spec/slices/public/browser/home_spec.rb`, would notice.
 
-The stylesheet grows with every element. At 350 utilities it is the longest file in the tree.
+The stylesheet grows with every element, and is among the longest files in the tree.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

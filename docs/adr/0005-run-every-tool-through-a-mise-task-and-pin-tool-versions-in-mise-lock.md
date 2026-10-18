@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-654
-amended: [AA-787, "#711", "#921", "#957", "#1718", "#1815"]
+amended: [AA-787, "#711", "#921", "#957", "#1718", "#1815", "#1824"]
 tags: [mise, tasks, lockfile, ruby, dotenv, pitchfork, ci, deploy]
 ---
 
@@ -34,7 +34,8 @@ compose alone. AA-787 added the `pg_isready` check.
 
 mise pins every tool and Ruby. `.config/mise.toml` asks for Ruby `"4"` and every other tool `"latest"`, with
 `lockfile = true`, so the exact versions and checksums live in `.config/mise.lock`. The lock holds Ruby 4.0.7
-(#957) with `compile = "true"`, built from source by ruby-build.
+(#957) with `compile = "true"`, built from source by ruby-build. The lock keys each Ruby entry by that option, so
+`.config/mise.toml` sets `ruby.compile = true` and every machine, CI included, finds the entry the lock holds.
 
 mise loads `.env` through `[env] _.file`. The Gemfile has no dotenv, so `Hanami::Env.load` returns at once.
 
@@ -57,8 +58,8 @@ Since #1815 that database, like `db:rebuild`, starts from the newest tag's `conf
 the migrations after it, so CI never replays a shipped migration that a new Postgres might break. With no tag, both
 replay every migration. CI fetches the tags first, since the checkout leaves them out.
 
-On the Pi, systemd starts Puma and Sidekiq through `mise exec`, which hands them the locked Ruby and `.env`. The tree
-holds no units yet; AA-307 writes them.
+On the Pi, systemd starts Puma and Sidekiq through `mise exec`, which hands them the locked Ruby and `.env`. The units
+live on the Pi, not in the repo; [Deploy](../deploy.md) lists them.
 
 So a laptop, CI and the Pi run the same tools, at the same versions, with the same flags.
 
@@ -88,8 +89,9 @@ A new tool needs a `lint:` and a `format:` script before `mise run lint` and `mi
 Every tool but Ruby asks for `"latest"`, so `mise upgrade` moves them all at once, and Ruby to the newest 4.x. Only
 the lock says what ran.
 
-`compile = "true"` means the Pi builds Ruby from source, which is slow and needs a compiler. `.config/mise.toml` does
-not set it. The lock took it from the mise config of the machine that wrote it.
+`compile = "true"` means the Pi builds Ruby from source, which is slow and needs a compiler. Without
+`ruby.compile` in `.config/mise.toml`, a machine with no global mise setting for it, such as CI, looks for a lock entry
+that is not there, and `mise install --locked` fails with "ruby@4 is not in the lockfile".
 
 A task does not always suit the Pi. `mise run db:migrate` starts a local Postgres container first, so the deploy
 calls `hanami db migrate` itself (ADR 0006).

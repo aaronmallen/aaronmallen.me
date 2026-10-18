@@ -1,8 +1,11 @@
 # aaronmallen.me
 
-My personal website and blog, live at aaronmallen.me: a public blog (`slices/public`), an admin behind GitHub
-sign-in (`slices/admin`), and an MCP server for proofreading drafts (`slices/mcp`). Schema changes need a new
-migration; never edit one that has shipped.
+My personal website and blog, live at aaronmallen.me. Four slices answer requests: the public blog
+(`slices/public`), an admin behind GitHub sign-in (`slices/admin`), a JSON API (`slices/api`) and an MCP server
+(`slices/mcp`). `slices/shares` serves shared files on a host of its own. Every other slice owns one part of the app,
+such as `posts`, `tasks`, `mail` or `calendar`, and has no routes. The MCP server lets agents
+do what the admin does: posts and suggestions, tasks and sprints, decisions, the journal, mail, the calendar, shares,
+artifacts, and agent memory and sessions. Schema changes need a new migration; never edit one that has shipped.
 
 ## Stack
 

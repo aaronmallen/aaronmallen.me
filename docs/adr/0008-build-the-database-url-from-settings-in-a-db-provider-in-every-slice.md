@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, activity, admin, analytics, contact, mcp, posts, projects, record, social, suggestions, tags, tasks]
 issue: AA-594
-amended: [AA-808, "#711", "#957"]
+amended: [AA-808, "#711", "#957", "#1824"]
 tags: [database, settings, providers, hanami, connection-pool, postgres]
 ---
 
@@ -36,13 +36,14 @@ We build the connection from the `database` settings, never from `DATABASE_URL`.
 
 - `Blog::Providers::DBProvider.configure` builds a `postgres://` URL from `settings.database`, escaping the user and
   password, and sets it on the default gateway.
-- `config/providers/db.rb` and a three-line `config/providers/db.rb` in each slice with `relations/` call it. Twenty
-  slices carry one today (#957).
+- `config/providers/db.rb` and a three-line `config/providers/db.rb` in each slice with `relations/` call it.
 - The pool holds a connection per thread plus one for the commit import lock, capped by `database.max_connections`
   (`DBProvider.max_connections`, AA-309). `DBProvider` reads Sidekiq's concurrency in the worker and the
   `web_threads` setting, which `HANAMI_MAX_THREADS` sets, in the web process (#957).
 - `config/settings/test.yml` adds `_test` to `DATABASE_NAME` itself. #711 adds `_<id>` after it when
-  `WORKSPACE_ID` is set, so each agent workspace tests against a database of its own ([ADR 0125][0125]).
+  `WORKSPACE_ID` is set, so each agent workspace tests against a database of its own ([ADR 0125][0125]). It adds
+  `_w<n>` last when `parallel_tests` sets `TEST_ENV_NUMBER`, so each spec worker gets a database too
+  ([ADR 0145][0145]).
 
 ## Alternatives
 
@@ -69,4 +70,5 @@ names both: the name and the name with `_test`. A workspace sets `WORKSPACE_ID` 
 database (#711).
 
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
+[0145]: 0145-run-specs-in-parallel-with-parallel-tests-on-a-database-per-worker-and-split-ci-into-two-spec-jobs.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
