@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-654
-amended: [AA-787, "#711", "#921", "#957"]
+amended: [AA-787, "#711", "#921", "#957", "#1718"]
 tags: [mise, tasks, lockfile, ruby, dotenv, pitchfork, ci, deploy]
 ---
 
@@ -45,6 +45,8 @@ Postgres, Redis and the asset watchers, and the worker only after Postgres and R
 one-shot starts with nothing on exit, so `mise run dev:stop` leaves the shared containers up for any suite still
 using them (AA-417). The script still ran `compose down`, so #711 made it stop only the pitchfork daemons and moved
 the starts into `db:start` and `redis:start`, which pitchfork wraps ([ADR 0125][0125]).
+No daemon sets `auto`, so entering or leaving the directory starts and stops nothing; only `dev` and `dev:stop` do
+(#1718).
 
 CI installs the locked tools with `jdx/mise-action` and runs each step as a mise task. Postgres runs there as a
 `postgres:18` service container, which GitHub starts and waits on before the first step, and `ensure_postgres` finds it

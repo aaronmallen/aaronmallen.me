@@ -1,39 +1,32 @@
 [daemons.assets]
-auto = ["start", "stop"]
 mise = true
 run = "mise run dev:assets"
 
 [daemons.media-store]
-auto = ["start"]
 mise = true
 oneshot = true
 run = "scripts/util/compose run --rm media-store-bucket"
 
 [daemons.postgres]
-auto = ["start"]
 mise = true
 oneshot = true
 run = "mise run db:start"
 
 [daemons.redis]
-auto = ["start"]
 mise = true
 oneshot = true
 run = "mise run redis:start"
 
 [daemons.server]
-auto = ["start", "stop"]
 depends = ["assets", "media-store", "postgres", "redis", "tailwind"]
 mise = true
 run = "mise run dev:server"
 
 [daemons.tailwind]
-auto = ["start", "stop"]
 mise = true
 run = "mise run dev:tailwind"
 
 [daemons.worker]
-auto = ["start", "stop"]
 depends = ["media-store", "postgres", "redis"]
 mise = true
 run = "mise run dev:worker"
