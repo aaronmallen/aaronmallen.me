@@ -8,6 +8,7 @@ module Agents
       REVERT = Blog::Types::MemoryEventOp["revert"]
       REVERTIBLE = [ADD, EDIT, Blog::Types::MemoryEventOp["remove"]].freeze
 
+      include SessionWrite
       include Deps[
         contract: "contracts.author_contract",
         memory_fact_mutations: "repos.memory_fact_mutations",
@@ -44,7 +45,7 @@ module Agents
       def restored(event, fact, author, at)
         case event.op
           when ADD then [{ removed_at: at }, {}]
-          when EDIT then [{ **earlier(event), **author }, earlier(event)]
+          when EDIT then [{ **earlier(event), **author.except(:session_id) }, earlier(event)]
           else [{ removed_at: nil }, { type: fact.type, text: fact.text }]
         end
       end

@@ -32,8 +32,9 @@ module MCP
         "workouts and their patterns. Only the mail permission grants mail from every account, contact form messages",
         "included: it reads, marks, tags, snoozes and deletes threads, and lets search and the inbox show them. Only",
         "the agents permission grants agent memory: files of facts that load into each agent's work, their history",
-        "and reverts, and artifacts: numbered plans, specs and handoffs kept in versions; deleting a memory file or an",
-        "artifact needs delete as well. The tool list holds only what this connection was granted.",
+        "and reverts, artifacts: numbered plans, specs and handoffs kept in versions, and sessions: each run from",
+        "start_session to end_session with what it loaded and wrote; deleting a memory file or an artifact needs",
+        "delete as well. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       BATCH_OPENING = /\A[ \t\r\n]*\[/

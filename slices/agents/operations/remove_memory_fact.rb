@@ -5,6 +5,7 @@ module Agents
     class RemoveMemoryFact < Blog::Operation
       REMOVE = Blog::Types::MemoryEventOp["remove"]
 
+      include SessionWrite
       include Deps[
         contract: "contracts.author_contract",
         find_memory_fact: "operations.find_memory_fact",

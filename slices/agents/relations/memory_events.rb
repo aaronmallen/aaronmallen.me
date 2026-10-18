@@ -8,6 +8,8 @@ module Agents
           belongs_to :memory_file
         end
       end
+
+      def session_listed = select(:id, :memory_file_id, :memory_fact_id, :op, :session_id).order(self[:id].asc)
     end
   end
 end

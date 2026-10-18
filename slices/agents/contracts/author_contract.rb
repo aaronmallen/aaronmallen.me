@@ -6,6 +6,7 @@ module Agents
       AUTHOR = Dry::Schema.Params do
         optional(:agent).maybe(Blog::Types::Normalized::ContributorSlug)
         optional(:model).maybe(Blog::Types::Normalized::ContributorSlug)
+        optional(:session_id).maybe(:integer)
       end
 
       params(AUTHOR)

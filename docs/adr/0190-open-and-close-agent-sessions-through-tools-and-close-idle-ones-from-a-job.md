@@ -5,6 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
+amended: ["#1747"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -28,10 +29,11 @@ An agent opens a session with `start_session` and closes it with `end_session`.
   and tasks. It records which memory files loaded and returns the session id with that memory as markdown, so one
   call both opens the run and hands the agent its memory.
 - **Writes name the session.** Memory and artifact writes take an optional session id and record the change against
-  it. A write without one belongs to no session. Each call that names a session moves its last-seen time.
+  it. A write without one belongs to no session. Each call that names a session moves its last-seen time. Since
+  #1747 a write that names a session that ended or never existed is refused.
 - **`end_session`** sets the end time. A second call is refused.
-- **A sidekiq-scheduler job** closes each session not seen for 2 hours. It never retries and catches up on its next
-  run ([ADR 0012][0012]).
+- **A sidekiq-scheduler job** closes each session not seen for 2 hours, and #1747 sets its end time to when a call
+  last named it. It never retries and catches up on its next run ([ADR 0012][0012]).
 
 Sessions stay for good.
 
@@ -47,6 +49,9 @@ calls `end_session` shows as open for 2 hours after its last call.
 
 Nothing ties a session to the token that opened it, so any client holding `agents` can write into any open session
 whose id it knows.
+
+Since #1747 a session keeps its tasks and loaded files as links, so deleting a task or a memory file drops it from
+each session that named or loaded it.
 
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md
 [0058]: 0058-serve-mcp-as-one-stateless-post-action.md

@@ -51,8 +51,8 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "agents" => %w[
         add_memory_fact create_artifact create_memory_file delete_artifact delete_memory_file edit_memory_fact
-        list_artifacts read_artifact read_memory read_memory_file remove_memory_fact restore_artifact_version
-        revert_memory_event update_artifact
+        end_session list_artifacts list_sessions read_artifact read_memory read_memory_file remove_memory_fact
+        restore_artifact_version revert_memory_event start_session update_artifact
       ],
       "delete" => %w[
         delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_journal_entry

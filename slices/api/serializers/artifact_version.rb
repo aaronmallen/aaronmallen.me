@@ -13,6 +13,7 @@ module API
                                             description: "the agent that wrote it; null for the owner" }),
           model: Helpers::Schema.nullable({ type: "string",
                                             description: "the model that wrote it; null for the owner" }),
+          session_id: Helpers::Schema.nullable({ type: "integer", description: "the session it was written in" }),
           created_at: Helpers::Schema::STAMP,
         },
       ).freeze

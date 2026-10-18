@@ -3,6 +3,7 @@
 module Agents
   module Operations
     class CreateArtifact < Blog::Operation
+      include SessionWrite
       include Deps[
         artifact_mutations: "repos.artifact_mutations",
         artifact_queries: "repos.artifact_queries",
@@ -16,7 +17,7 @@ module Agents
           id = artifact_mutations.create(
             **fields.slice(:title, :type, :tags), title_agent: fields[:agent], title_model: fields[:model],
           ).id
-          artifact_mutations.add_version(id, **fields.slice(:body, :note, :agent, :model))
+          artifact_mutations.add_version(id, **fields.slice(:body, :note, :agent, :model, :session_id))
           artifact_queries.by_id(id)
         end
       end

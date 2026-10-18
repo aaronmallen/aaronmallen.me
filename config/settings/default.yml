@@ -48,6 +48,7 @@ honeybadger:
   check_ins:
     back_up_database: <%= ENV["HONEYBADGER_CHECK_IN_BACK_UP_DATABASE"].to_json %>
     check_post_links: <%= ENV["HONEYBADGER_CHECK_IN_CHECK_POST_LINKS"].to_json %>
+    close_idle_sessions: <%= ENV["HONEYBADGER_CHECK_IN_CLOSE_IDLE_SESSIONS"].to_json %>
     import_commits: <%= ENV["HONEYBADGER_CHECK_IN_IMPORT_COMMITS"].to_json %>
     import_pull_requests: <%= ENV["HONEYBADGER_CHECK_IN_IMPORT_PULL_REQUESTS"].to_json %>
     prune_access_records: <%= ENV["HONEYBADGER_CHECK_IN_PRUNE_ACCESS_RECORDS"].to_json %>

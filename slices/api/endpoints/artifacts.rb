@@ -14,7 +14,7 @@ module API
       TYPE = { type: "string", enum: Blog::Types::ArtifactType.values }.freeze
 
       COMPLAINTS = {
-        **Memory::COMPLAINTS.slice(:agent, :model),
+        **Memory::COMPLAINTS.slice(:agent, :model, :session_id),
         body: {
           Blog::Contract::BLANK => "write the body first",
           "long" => "keep a body to #{BODY_LIMIT} characters",

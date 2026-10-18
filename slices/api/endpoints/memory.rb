@@ -10,6 +10,9 @@ module API
           description: "the agent making the change, such as claude-code; leave agent and model out for the owner",
         },
         model: { type: "string", description: "the model making the change, such as claude-opus-5-5" },
+        session_id: Helpers::Schema::ID.merge(
+          description: "the open session start_session gave, to record the change against it; leave it out for none",
+        ),
       }.freeze
       FACT_TYPE = { type: "string", enum: Blog::Types::MemoryFactType.values }.freeze
       FACT_TEXT = {
@@ -17,6 +20,15 @@ module API
         description: "the fact, #{::Agents::Contracts::MemoryFactContract::TEXT_LIMIT} characters at most",
       }.freeze
       ID = Helpers::Schema::ID
+      LOADED = {
+        markdown: {
+          type: "string",
+          description: "the files as an agent loads them; marked untrusted when an agent wrote any of the facts",
+        },
+        files: Helpers::Schema.list(Serializers::MemoryFile.reference).merge(
+          description: "the files that loaded: global, then repo, project and task",
+        ),
+      }.freeze
       PAIRED = "give agent and model together"
       SCOPED = "only a %s file takes %s"
 
@@ -40,6 +52,9 @@ module API
           Blog::Contract::MISSING => "a task file needs a task that exists",
           "extra" => format(SCOPED, "task", "task_id"),
         },
+        session_id: {
+          ::Agents::Operations::TouchSession::CLOSED => "that session is not open; start_session opens one",
+        },
         text: {
           Blog::Contract::BLANK => "write the fact first",
           "long" => "keep a fact to #{::Agents::Contracts::MemoryFactContract::TEXT_LIMIT} characters",
@@ -47,6 +62,15 @@ module API
       }.freeze
 
       module_function
+
+      def loaded(files)
+        markdown = files.map(&:markdown).join("\n")
+
+        {
+          markdown: files.any?(&:agent_written?) ? Helpers::Untrusted.call(markdown) : markdown,
+          files: Serializers::MemoryFile.new(files).serializable_hash,
+        }
+      end
 
       def missing_event(id, event_id) = "memory file #{id} has no history entry with the ID #{event_id}"
 

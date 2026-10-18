@@ -12,28 +12,11 @@ module API
         },
       }.freeze
 
-      MARKDOWN = "the files as an agent loads them; marked untrusted when an agent wrote any of the facts"
-
-      REPLY = Helpers::Schema.object(
-        {
-          markdown: { type: "string", description: MARKDOWN },
-          files: Helpers::Schema.list(Serializers::MemoryFile.reference).merge(
-            description: "the files that loaded: global, then repo, project and task",
-          ),
-        },
-      ).freeze
+      REPLY = Helpers::Schema.object(Memory::LOADED).freeze
 
       include Deps[load_memory: "agents.operations.load_memory"]
 
-      def handle(**where)
-        files = load_memory.call(**where)
-        markdown = files.map(&:markdown).join("\n")
-
-        Success(
-          markdown: files.any?(&:agent_written?) ? Helpers::Untrusted.call(markdown) : markdown,
-          files: serialized(Serializers::MemoryFile, files),
-        )
-      end
+      def handle(task_id: nil, **where) = Success(Memory.loaded(load_memory.call(task_ids: [task_id].compact, **where)))
     end
   end
 end

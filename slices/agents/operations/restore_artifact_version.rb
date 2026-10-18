@@ -5,6 +5,7 @@ module Agents
     class RestoreArtifactVersion < Blog::Operation
       RESTORED = "Restored version %d"
 
+      include SessionWrite
       include Deps[
         artifact_mutations: "repos.artifact_mutations",
         artifact_queries: "repos.artifact_queries",

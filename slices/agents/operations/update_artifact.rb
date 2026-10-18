@@ -3,6 +3,7 @@
 module Agents
   module Operations
     class UpdateArtifact < Blog::Operation
+      include SessionWrite
       include Deps[
         artifact_mutations: "repos.artifact_mutations",
         artifact_queries: "repos.artifact_queries",
@@ -15,7 +16,7 @@ module Agents
         transaction do
           artifact = step found(artifact_mutations.by_id_for_update(id))
           artifact_mutations.update(id, { **fields.slice(:type, :tags), **retitled(artifact, **fields) })
-          revise(artifact, **fields.slice(:body, :note, :agent, :model))
+          revise(artifact, **fields.slice(:body, :note, :agent, :model, :session_id))
           artifact_queries.by_id(id)
         end
       end

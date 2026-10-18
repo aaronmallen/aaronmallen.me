@@ -5,6 +5,7 @@ module Agents
     class EditMemoryFact < Blog::Operation
       EDIT = Blog::Types::MemoryEventOp["edit"]
 
+      include SessionWrite
       include Deps[
         contract: "contracts.memory_fact_contract",
         memory_fact_mutations: "repos.memory_fact_mutations",
@@ -23,13 +24,13 @@ module Agents
 
       private
 
-      def revise(fact, type:, text:, agent:, model:)
+      def revise(fact, type:, text:, agent:, model:, session_id:)
         return Success(fact) if fact.type == type && fact.text == text
 
         saved = memory_fact_mutations.update(fact.id, type:, text:, agent:, model:)
         memory_file_mutations.record(
           fact.memory_file_id, EDIT,
-          memory_fact_id: fact.id, type:, text:, was_type: fact.type, was_text: fact.text, agent:, model:,
+          memory_fact_id: fact.id, type:, text:, was_type: fact.type, was_text: fact.text, agent:, model:, session_id:,
         )
         Success(saved)
       end
