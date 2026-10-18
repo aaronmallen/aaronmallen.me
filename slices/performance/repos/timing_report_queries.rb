@@ -8,6 +8,7 @@ module Performance
       EMPTY_DAY = { count: 0, p50: nil, p95: nil }.freeze
       METRICS = Blog::Types::PerformancePageMetric.values.map(&:to_sym).freeze
       QUERIES = %i[query_count query_time].freeze
+      RETENTION_DAYS = 30
       TOTAL = Sequel.function(:sum, :count)
 
       def days(range)

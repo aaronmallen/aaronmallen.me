@@ -3,8 +3,6 @@
 module Social
   module Operations
     class ShortenLinks
-      UNMADE = "x" * 5
-
       include Deps[
         "settings",
         scan_links: "operations.scan_links",
@@ -21,7 +19,7 @@ module Social
       def code(url, make)
         return shorten_link.call(url).fmap(&:code).value_or(nil) if make
 
-        short_link_queries.by_destination(url)&.code || UNMADE
+        short_link_queries.by_destination(url)&.code || Blog::Constants::UNMADE_SHORT_CODE
       end
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }

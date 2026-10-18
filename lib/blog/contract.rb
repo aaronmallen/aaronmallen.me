@@ -7,6 +7,7 @@ Dry::Validation.load_extensions(:monads)
 module Blog
   class Contract < Dry::Validation::Contract
     BLANK = "blank"
+    CLOSED = "closed"
     CONTROL = "control"
     FORMAT = "format"
     FUTURE = "future"

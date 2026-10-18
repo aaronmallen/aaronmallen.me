@@ -21,10 +21,13 @@ module Blog
       Types::NetworkName["linkedin"] => "fa-brands fa-linkedin",
       Types::NetworkName["mastodon"] => "fa-brands fa-mastodon",
     }.freeze
+    READ_SECONDS_MAX = 20 * 60
+    REF_KEY = "ref"
     SUGGESTION_EDITS_MAX = 50
     SUGGESTION_REASON_MAX = 200
     SUGGESTION_TEXT_MAX = 1000
     TOUCH_EVERY = 5 * 60
+    UNMADE_SHORT_CODE = "x" * 5
     WRITING_PATH = "/writing"
   end
 end

@@ -27,7 +27,7 @@ RSpec.describe "Privacy", type: :request do
     expect(page.text).to include("#{Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS} days")
     expect(page.text).to include("#{Hanami.app.settings.analytics[:reader_window_months]} months")
     expect(page.text).to include("#{Hanami.app.settings.analytics[:read_through_seconds]} seconds")
-    expect(page.text).to include("#{Analytics::Operations::RecordVisit::MAX_READ_SECONDS / 60} minutes")
+    expect(page.text).to include("#{Blog::Constants::READ_SECONDS_MAX / 60} minutes")
     expect(page.text).to include("up to 20 minutes")
   end
 

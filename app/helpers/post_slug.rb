@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Posts
+module Blog
   module Helpers
     module PostSlug
       def self.derive(slug:, title:)

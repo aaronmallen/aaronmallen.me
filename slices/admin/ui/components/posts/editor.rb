@@ -112,7 +112,7 @@ module Admin
 
           def scheduling? = @preview[:time] > @now
 
-          def slug = ::Posts::Helpers::PostSlug.derive(slug: @values[:slug], title: @values[:title])
+          def slug = Blog::Helpers::PostSlug.derive(slug: @values[:slug], title: @values[:title])
 
           def sub_line
             writing = "#{path(:writing)}/"

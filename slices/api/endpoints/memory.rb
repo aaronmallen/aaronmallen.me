@@ -53,7 +53,7 @@ module API
           "extra" => format(SCOPED, "task", "task_id"),
         },
         session_id: {
-          ::Agents::Operations::TouchSession::CLOSED => "that session is not open; start_session opens one",
+          Blog::Contract::CLOSED => "that session is not open; start_session opens one",
         },
         text: {
           Blog::Contract::BLANK => "write the fact first",

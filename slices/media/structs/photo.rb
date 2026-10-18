@@ -3,10 +3,10 @@
 module Media
   module Structs
     class Photo < Blog::DB::Struct
-      def path = Helpers::MediaPath.for(key)
+      def path = Blog::Helpers::MediaPath.for(key)
 
       def srcset
-        [*widths.map { "#{Helpers::MediaPath.for(variant_key(it))} #{it}w" }, "#{path} #{width}w"].join(", ")
+        [*widths.map { "#{Blog::Helpers::MediaPath.for(variant_key(it))} #{it}w" }, "#{path} #{width}w"].join(", ")
       end
 
       def type = Blog::Types::PhotoType[File.extname(key).delete_prefix(".")]

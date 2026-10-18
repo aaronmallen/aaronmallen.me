@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class SummarizeToday < Blog::Operation
-      BACKFILL = Record::Jobs::BackfillRepoCommits.name
+      BACKFILL = Record::Repos::SyncStateQueries::BACKFILL_JOB
       COMMIT_LIMIT = 10
       COMMITS = Blog::Types::SyncName["commits"]
       COUNTRIES = "countries"

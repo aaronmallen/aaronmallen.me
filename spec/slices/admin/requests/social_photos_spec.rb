@@ -135,7 +135,7 @@ RSpec.describe "Admin social post photos", type: :request do
         .create_with_parts(parts: %w[one two], photos:, targets: %w[mastodon], status:, posted_at: at)
     end
 
-    def src(index) = Media::Helpers::MediaPath.for(photos[index].key)
+    def src(index) = Blog::Helpers::MediaPath.for(photos[index].key)
 
     {
       "queued" => %w[scheduled queued],

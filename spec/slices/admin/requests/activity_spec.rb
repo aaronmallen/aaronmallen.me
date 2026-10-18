@@ -1335,7 +1335,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         )
       end
 
-      def src(index) = Media::Helpers::MediaPath.for(photos[index].key)
+      def src(index) = Blog::Helpers::MediaPath.for(photos[index].key)
 
       it "shows each photo in part and position order with its alt text" do
         post_social(photos: [kept(2, part: 2, alt: "A bird"), kept(1, alt: "A dog"), kept(0, alt: "A cat")])

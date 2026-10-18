@@ -36,7 +36,7 @@ module Admin
           def counter_data(network, template)
             {
               joiner: network.joiner, limit: network.limit, max_bytes: network.max_bytes,
-              ref_key: ::Analytics::Operations::TagRef::KEY, reserved_per_url: network.reserved_per_url, short_link:,
+              ref_key: Blog::Constants::REF_KEY, reserved_per_url: network.reserved_per_url, short_link:,
               social_count: network.name,
               tagged_host: network.tagged_host, template:,
             }
@@ -50,7 +50,7 @@ module Admin
             end
           end
 
-          def short_link = Helpers::ShareLink.for(::Social::Operations::ShortenLinks::UNMADE)
+          def short_link = Helpers::ShareLink.for(Blog::Constants::UNMADE_SHORT_CODE)
 
           def template(network) = t(COUNTS.fetch(network.name)).sub(LIMIT, network.limit.to_s)
         end

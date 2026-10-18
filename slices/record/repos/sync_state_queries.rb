@@ -3,6 +3,7 @@
 module Record
   module Repos
     class SyncStateQueries < Blog::DB::Repo
+      BACKFILL_JOB = Jobs::BackfillRepoCommits.name
       COMMITS = Blog::Types::SyncName["commits"]
       FAILURE = Blog::Types::SyncStateKind["failure"]
       PAGE_LIMIT = "page_limit"

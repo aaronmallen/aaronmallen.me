@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class ReadAnalytics < Base
-      READ_CAP = Analytics::Operations::RecordVisit::MAX_READ_SECONDS / Blog::Helpers::Figures::MINUTE
+      READ_CAP = Blog::Constants::READ_SECONDS_MAX / Blog::Helpers::Figures::MINUTE
       DEFINITIONS = "A view is one page load. A visitor is a hash of the address and user agent that changes " \
                     "each day and sets no cookie, so visitors add up day by day and one reader on two days counts " \
                     "twice. A bounce is a visitor with one view that day across the whole site. read_seconds is " \
@@ -11,7 +11,7 @@ module MCP
                     "Nothing counts while the owner is signed in, or from a known bot or a client with no user " \
                     "agent. Days run on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RAW_DAYS = Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS
-      REF = Analytics::Operations::TagRef::KEY
+      REF = Blog::Constants::REF_KEY
       TOP = API::Helpers::AnalyticsReader::TOP
 
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \

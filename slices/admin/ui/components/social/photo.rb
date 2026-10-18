@@ -30,7 +30,7 @@ module Admin
             end
           end
 
-          def src = @key.empty? ? nil : ::Media::Helpers::MediaPath.for(@key)
+          def src = @key.empty? ? nil : Blog::Helpers::MediaPath.for(@key)
 
           def tool(icon, label, **data) = Button(variant: :gh, small: true, icon:, label:, data:)
 

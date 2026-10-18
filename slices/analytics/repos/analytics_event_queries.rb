@@ -86,7 +86,7 @@ module Analytics
       private
 
       def buckets(views)
-        ceilings = FLOORS.drop(1).map(&:pred) << Operations::RecordVisit::MAX_READ_SECONDS
+        ceilings = FLOORS.drop(1).map(&:pred) << Blog::Constants::READ_SECONDS_MAX
 
         FLOORS.zip(ceilings).map { |floor, ceiling| { from: floor, to: ceiling, views: views.fetch(floor, 0) } }
       end

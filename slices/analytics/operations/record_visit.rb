@@ -5,7 +5,6 @@ module Analytics
     class RecordVisit < Blog::Operation
       MAX_CLICKS = 50
       MAX_REFERRER = 2048
-      MAX_READ_SECONDS = 20 * Blog::Helpers::Figures::MINUTE
 
       include Deps[
         "geo.countries",
@@ -60,7 +59,7 @@ module Analytics
         matched = event_mutations.record_read(
           visitor_hashes:,
           view_token: visit[:view_token],
-          read_seconds: [visit[:read_seconds], MAX_READ_SECONDS].min,
+          read_seconds: [visit[:read_seconds], Blog::Constants::READ_SECONDS_MAX].min,
           **visit.slice(:scroll_depth),
         )
 

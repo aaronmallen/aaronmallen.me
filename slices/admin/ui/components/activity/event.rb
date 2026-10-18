@@ -112,7 +112,7 @@ module Admin
 
             div(class: "sq-photos") do
               @event.photos.each do |photo|
-                img(class: "sq-photo", src: ::Media::Helpers::MediaPath.for(photo.photo_key), alt: photo.alt_text.to_s)
+                img(class: "sq-photo", src: Blog::Helpers::MediaPath.for(photo.photo_key), alt: photo.alt_text.to_s)
               end
             end
           end

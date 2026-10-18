@@ -9,8 +9,8 @@ module Public
 
         ARTICLE = "article"
         BEACON_DEPTHS = Blog::Types::ScrollDepth.values.select(&:positive?).join(" ")
-        BEACON_READ_CAP = ::Analytics::Operations::RecordVisit::MAX_READ_SECONDS
-        BEACON_REF = ::Analytics::Operations::TagRef::KEY
+        BEACON_READ_CAP = Blog::Constants::READ_SECONDS_MAX
+        BEACON_REF = Blog::Constants::REF_KEY
         FONTS = %w[
           newsreader/newsreader-latin-opsz-normal.woff2 bricolage-grotesque/bricolage-grotesque-latin-opsz-normal.woff2
         ].freeze

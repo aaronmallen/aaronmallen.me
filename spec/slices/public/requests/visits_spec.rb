@@ -1352,7 +1352,7 @@ RSpec.describe "Visits", type: :request do
       get "/about"
 
       expect(Capybara.string(last_response.body).find("body", visible: :all)["data-beacon-read-cap"])
-        .to eq(Analytics::Operations::RecordVisit::MAX_READ_SECONDS.to_s)
+        .to eq(Blog::Constants::READ_SECONDS_MAX.to_s)
     end
 
     it "sends only the scroll depths the server takes" do

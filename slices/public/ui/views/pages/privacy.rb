@@ -5,7 +5,7 @@ module Public
     module Views
       module Pages
         class Privacy < View
-          READ_MINUTES = ::Analytics::Operations::RecordVisit::MAX_READ_SECONDS / Blog::Helpers::Figures::MINUTE
+          READ_MINUTES = Blog::Constants::READ_SECONDS_MAX / Blog::Helpers::Figures::MINUTE
           SECTIONS = {
             cookies: { heading: ".cookies.heading", paragraphs: %w[.cookies.theme .cookies.admin] },
             address: { heading: ".address.heading", paragraphs: %w[.address.use .address.log] },

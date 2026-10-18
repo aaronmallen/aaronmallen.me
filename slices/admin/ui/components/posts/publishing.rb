@@ -48,7 +48,7 @@ module Admin
                 **control,
                 name: "post[slug]",
                 value: @values[:slug],
-                placeholder: ::Posts::Helpers::PostSlug.from_title(@values[:title]),
+                placeholder: Blog::Helpers::PostSlug.from_title(@values[:title]),
                 readonly: @published,
                 data: { editor_slug: "" },
               )
