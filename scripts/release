@@ -106,6 +106,16 @@ if ! grep -q "^## \[$version\]" CHANGELOG.md; then
   exit 1
 fi
 
+if ! grep -q "^\[Unreleased\]: .*/compare/$version\.\.\.HEAD$" CHANGELOG.md; then
+  echo "CHANGELOG.md's [Unreleased] link does not compare from $version." >&2
+  exit 1
+fi
+
+if ! grep -q "^\[$version\]: .*$version$" CHANGELOG.md; then
+  echo "CHANGELOG.md has no compare link for $version." >&2
+  exit 1
+fi
+
 if [ -n "$skip_ci" ]; then
   echo "Skipped the CI check on $target."
 else

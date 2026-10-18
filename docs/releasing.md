@@ -8,7 +8,7 @@ A new tag deploys within five minutes, so releases stay manual. Work down this l
   `HONEYBADGER_CHECK_IN_*` is optional, so leave it unset unless you want Honeybadger to watch that job. Then read
   `git diff <last tag> -- docs/deploy.md` and do each new item, such as a package or a change to the deploy script.
   [Deploy](deploy.md) lists what the Pi needs.
-3. Move `[Unreleased]` in `CHANGELOG.md` under that version, dated by the UTC day, and add its compare link.
+3. Run `/changelog <version>` to move `[Unreleased]` under that version, dated by the UTC day, with its compare links.
 4. Push `main` and wait for CI to pass on that commit. `mise run release --dry-run` prints its CI state.
 5. Run `mise run release`. It checks the changelog and CI, tags the newest non-empty commit and prints the push command.
 

@@ -72,14 +72,17 @@ RSpec.describe "mise run release", type: :script do
     names.each { git("tag", "--annotate", it, "--message", it) }
   end
 
-  def write_changelog(*versions, unreleased: nil)
+  def write_changelog(*versions, unreleased: nil, links: nil)
+    url = "https://github.com/aaronmallen/aaronmallen.me/compare"
     sections = versions.map { "## [#{it}] - 2026-10-14\n\n### Fixed\n\n- Something.\n" }
+    links ||= ["[Unreleased]: #{url}/#{versions.first}...HEAD", *versions.map { "[#{it}]: #{url}/26.9.4...#{it}" }]
     File.write(File.join(repo, "CHANGELOG.md"), <<~MARKDOWN)
       # Changelog
 
       ## [Unreleased]
       #{unreleased}
       #{sections.join("\n")}
+      #{links.join("\n")}
     MARKDOWN
   end
 
@@ -213,6 +216,25 @@ RSpec.describe "mise run release", type: :script do
       end
 
       it_behaves_like "a refusal", "no section for 26.10.0"
+    end
+
+    context "when [Unreleased] does not compare from the version" do
+      before do
+        url = "https://github.com/aaronmallen/aaronmallen.me/compare"
+        write_changelog("26.10.0", links: ["[Unreleased]: #{url}/26.9.4...HEAD", "[26.10.0]: #{url}/26.9.4...26.10.0"])
+        commit("Leave [Unreleased] behind")
+      end
+
+      it_behaves_like "a refusal", "[Unreleased] link does not compare from 26.10.0"
+    end
+
+    context "when the version has no compare link" do
+      before do
+        write_changelog("26.10.0", links: ["[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.0...HEAD"])
+        commit("Drop the link")
+      end
+
+      it_behaves_like "a refusal", "no compare link for 26.10.0"
     end
 
     {

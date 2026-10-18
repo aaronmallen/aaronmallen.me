@@ -1,20 +1,25 @@
 ---
-description: Write Unreleased entries in CHANGELOG.md from the commits since the last tag.
+description: Write Unreleased entries in CHANGELOG.md from the commits since the last tag, or file them under a version.
 name: changelog
 ---
 
 # Changelog
 
-Add entries under `[Unreleased]` in `CHANGELOG.md` for the commits it does not cover yet.
+Add entries under `[Unreleased]` in `CHANGELOG.md` for the commits it does not cover yet. When the user names a
+version, such as `/changelog 26.10.23`, file those entries under that version instead: step 3 of
+`docs/releasing.md`.
 
-Releases stay manual, because a new tag deploys within five minutes. Never move `[Unreleased]` under a version, never
-bump a version and never run a tag command, in `git` or `jj`.
+Releases stay manual, because a new tag deploys within five minutes. Never bump a version and never run a tag command,
+in `git` or `jj`.
 
 Versions follow [CalVer](https://calver.org) as `YY.M.MICRO`: the two digit year, the month with no zero padding, and
 a counter that starts at 0 each month. The UTC day of the tag sets the date. When the user asks what the next release
 is called, run `mise run release --dry-run` and give the first line it prints. It reads the tags and changes none.
 If it refuses because specs name a shipped migration, give the user the files it lists.
 Never run `mise run release` without `--dry-run`, since that makes the tag. Never count tags by hand.
+
+When the user names a version, run `mise run release --dry-run` before you start. If its first line differs from the
+name the user gave, say so, then go on with the user's name.
 
 ## 1. Read the rules
 
@@ -34,7 +39,8 @@ jj log --no-pager --no-graph \
 
 When the working copy has already changed `CHANGELOG.md`, it marks the stop itself and the list comes out empty.
 
-**If the list is empty, say the changelog is up to date and stop.** Do not touch the file.
+**If the list is empty, say the changelog is up to date and stop.** Do not touch the file, unless the user named a
+version and `[Unreleased]` already holds entries. Then go to step 5 and file those.
 
 Read the diff of any commit whose message leaves you unsure what changed:
 
@@ -80,16 +86,33 @@ Each entry:
 
 Read each entry against the writing rules before you go on.
 
-## 5. Leave the rest alone
+## 5. File them under the version
 
-Change nothing outside `[Unreleased]`. Every released section, its date, every heading and every compare link at
-the foot of the file stay as they are.
+Skip this step when the user named no version.
 
-## 6. Check it
+Move everything under `[Unreleased]` into a new `## [<version>] - <UTC date>` section just below it, with today's
+UTC date as `YYYY-MM-DD`. Leave `## [Unreleased]` in place, with nothing under it.
+
+Then fix the compare links at the foot of the file. Point `[Unreleased]` at `<version>...HEAD`, and add a line for the
+version below it that compares from the previous tag, the one `[Unreleased]` named before:
+
+```markdown
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/<version>...HEAD
+[<version>]: https://github.com/aaronmallen/aaronmallen.me/compare/<previous>...<version>
+```
+
+`mise run release` refuses to tag while the section or either link is missing.
+
+## 6. Leave the rest alone
+
+Change nothing outside `[Unreleased]`, the new version's section and the two links in step 5. Every released
+section, its date, every heading and every other compare link stay as they are.
+
+## 7. Check it
 
 ```sh
 mise run lint
 ```
 
-Then show the user the `[Unreleased]` section and list which commits you left out and why. Do not commit. The user
-reviews the entries and commits them through `/commit`.
+Then show the user the `[Unreleased]` section, or the version's section, and list which commits you left out and why.
+Do not commit. The user reviews the entries and commits them through `/commit`.
