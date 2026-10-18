@@ -2,7 +2,7 @@
 
 module Public
   class Slice < Hanami::Slice
-    config.shared_app_component_keys += %w[assets]
+    config.shared_app_component_keys += %w[assets honeybadger.agent]
 
     config.actions.default_headers["Vary"] = "Cookie"
 

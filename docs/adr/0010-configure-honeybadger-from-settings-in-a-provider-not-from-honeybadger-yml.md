@@ -40,6 +40,8 @@ and registers `honeybadger.agent`. The app requires `honeybadger/ruby`, never `h
   a long one still reports from the processors that fetch work and from whatever enqueues a job.
 - **The MCP server** reports what the SDK catches. `MCP::Protocol::Handler#report` sends a tool or prompt error to
   `honeybadger.agent`, since the SDK turns it into a response and no middleware sees it.
+- **Public search** reports each `Sequel::DatabaseError` it rescues to `honeybadger.agent`: the one that turns
+  the page into the 503 error state and the one that lets a search run when its attempt cannot be counted (#1803).
 - `report_data` is on in production and off elsewhere, unless `honeybadger.report_data` says otherwise.
 - `FILTER_KEYS` is a list kept by hand, and `config/app.rb` hands it to the logger's filters too. Honeybadger matches
   each entry as a substring with no regard to case, so `token` covers `refresh_token`. Add a key when a setting

@@ -10,6 +10,7 @@ module Public
 
         include Deps[
           claim_search_attempt: "search.operations.claim_search_attempt",
+          honeybadger: "honeybadger.agent",
           post_queries: "posts.repos.post_queries",
           project_queries: "projects.repos.project_queries",
           search_queries: "search.repos.public_search_queries",
@@ -47,7 +48,8 @@ module Public
           not_found(response) if groups.values.any?(&:past_end?)
 
           { counts:, groups:, boards: boards(groups), failed: false }
-        rescue Sequel::DatabaseError
+        rescue Sequel::DatabaseError => e
+          honeybadger.notify(e)
           response.status = :service_unavailable
           { counts: {}, groups: {}, boards: [], failed: true }
         end
@@ -56,7 +58,8 @@ module Public
 
         def throttled?(request, text)
           !text.empty? && claim_search_attempt.call(read_visitor_address.call(request)).failure?
-        rescue Sequel::DatabaseError
+        rescue Sequel::DatabaseError => e
+          honeybadger.notify(e)
           false
         end
 

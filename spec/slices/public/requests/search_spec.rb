@@ -166,7 +166,10 @@ RSpec.describe "Search", type: :request do
   end
 
   describe "when the search fails" do
+    let(:agent) { Hanami.app["honeybadger.agent"] }
+
     before do
+      allow(agent).to receive(:notify)
       queries = Search::Slice["repos.public_search_queries"]
       allow(queries).to receive(:counts).and_raise(Sequel::DatabaseError)
       replace_component("search.repos.public_search_queries", queries)
@@ -181,6 +184,10 @@ RSpec.describe "Search", type: :request do
 
     it "offers to try again" do
       expect(page).to have_link("Try again", href: "/search?q=zeppelin")
+    end
+
+    it "tells Honeybadger" do
+      expect(agent).to have_received(:notify).with(Sequel::DatabaseError)
     end
   end
 
@@ -205,13 +212,24 @@ RSpec.describe "Search", type: :request do
       expect { 2.times { search } }.to change { attempts }.by(2)
     end
 
-    it "still searches when it cannot count the search" do
-      claim = Search::Slice["operations.claim_search_attempt"]
-      allow(claim).to receive(:call).and_raise(Sequel::DatabaseError)
-      replace_component("search.operations.claim_search_attempt", claim)
-      search
+    describe "when it cannot count the search" do
+      let(:agent) { Hanami.app["honeybadger.agent"] }
 
-      expect(groups).to eq(["Posts · 1"])
+      before do
+        allow(agent).to receive(:notify)
+        claim = Search::Slice["operations.claim_search_attempt"]
+        allow(claim).to receive(:call).and_raise(Sequel::DatabaseError)
+        replace_component("search.operations.claim_search_attempt", claim)
+        search
+      end
+
+      it "still searches" do
+        expect(groups).to eq(["Posts · 1"])
+      end
+
+      it "tells Honeybadger" do
+        expect(agent).to have_received(:notify).with(Sequel::DatabaseError)
+      end
     end
 
     it "locks both of the searcher's addresses in one statement" do
