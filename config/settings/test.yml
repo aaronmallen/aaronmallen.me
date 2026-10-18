@@ -2,59 +2,41 @@ analytics_salt: test-analytics-salt-not-a-real-secret-do-not-use-this-one-in-pro
 app_secret: test-app-secret-not-a-real-secret-do-not-use-this-one-in-production
 data_key: test-data-key-not-a-real-secret-do-not-use-this-one-in-production
 reader_salt: test-reader-salt-not-a-real-secret-do-not-use-this-one-in-production-either
-backup_store:
+backup_store: &no_store
   access_key: null
   bucket: null
   endpoint: null
+  path_style: null
+  read_timeout: null
+  region: null
   secret_key: null
-bluesky:
-  profile_url: https://bsky.app/profile/aaronmallen.dev
 database:
-  name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"], ("w#{ENV["TEST_ENV_NUMBER"]}" unless ENV["TEST_ENV_NUMBER"].to_s.empty?)].compact.join("_").to_json %>
   host: localhost
-  max_connections: <%= ENV.fetch("DATABASE_MAX_CONNECTIONS", 12).to_json %>
-  password: <%= ENV["DATABASE_PASSWORD"].to_json %>
-  port: <%= ENV.fetch("DATABASE_PORT", 5432).to_json %>
-  user: <%= ENV["DATABASE_USER"].to_json %>
+  name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"], ("w#{ENV["TEST_ENV_NUMBER"]}" unless ENV["TEST_ENV_NUMBER"].to_s.empty?)].compact.join("_").to_json %>
 github:
   client_id: null
   client_secret: null
-  profile_url: https://github.com/aaronmallen
 google:
   client_id: null
   client_secret: null
 honeybadger:
   api_key: null
+  check_ins: null
+  project_url: null
+  report_data: null
 linkedin:
   client_id: null
   client_secret: null
   profile_url: null
-mastodon:
-  profile_url: https://ruby.social/@aaronmallen
 maxmind:
   account_id: null
+  database_path: null
   license_key: null
-media_store:
-  access_key: null
-  bucket: null
-  endpoint: null
-  secret_key: null
+media_store: *no_store
 redis:
-  connect_timeout: <%= ENV["REDIS_CONNECT_TIMEOUT"].to_json %>
   db: 2
   host: localhost
-  password: <%= ENV["REDIS_PASSWORD"].to_json %>
-  port: <%= ENV.fetch("REDIS_PORT", 6379).to_json %>
-  reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
-  timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
-  username: <%= ENV["REDIS_USER"].to_json %>
 share_site:
+  transfers: null
   url: http://shares.localhost
-share_store:
-  access_key: null
-  bucket: null
-  endpoint: null
-  secret_key: null
-site:
-  auth_callback_path: <%= ENV.fetch("AUTH_CALLBACK_PATH", "/admin/auth/:provider/callback").to_json %>
-  url: https://aaronmallen.me
+share_store: *no_store

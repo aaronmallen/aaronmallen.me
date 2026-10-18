@@ -16,6 +16,7 @@ require "blog/extensions/hanami/router/trie/extension"
 require "blog/params_guard"
 require "blog/request_connection"
 require "blog/request_timer"
+require "blog/settings_files"
 require "blog/theme_script"
 require "blog/providers/honeybadger_provider"
 require "blog/version"
@@ -62,8 +63,7 @@ module Blog
                           -> { Hanami.app["settings"].web_statement_timeout }
 
     config.settings_store = Hanami::Settings::CompositeStore.new(
-      Hanami::Settings::FileStore.new(config.root.join("config/settings/#{Hanami.env}.yml")),
-      Hanami::Settings::FileStore.new(config.root.join("config/settings/default.yml")),
+      SettingsFiles.load(config.root.join("config/settings"), Hanami.env),
       Hanami::Settings::EnvStore.new,
     )
 

@@ -36,6 +36,13 @@ contact:
   throttle_window_minutes: <%= ENV["CONTACT_THROTTLE_WINDOW_MINUTES"].to_json %>
   total_throttle_limit: <%= ENV["CONTACT_TOTAL_THROTTLE_LIMIT"].to_json %>
 data_key: <%= ENV["DATA_KEY"].to_json %>
+database:
+  host: <%= ENV["DATABASE_HOST"].to_json %>
+  max_connections: <%= ENV["DATABASE_MAX_CONNECTIONS"].to_json %>
+  name: <%= ENV["DATABASE_NAME"].to_json %>
+  password: <%= ENV["DATABASE_PASSWORD"].to_json %>
+  port: <%= ENV["DATABASE_PORT"].to_json %>
+  user: <%= ENV["DATABASE_USER"].to_json %>
 github:
   client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["GITHUB_CLIENT_SECRET"].to_json %>
@@ -107,9 +114,20 @@ page_size:
   mcp: 100
   public: 25
 previous_data_key: <%= ENV["PREVIOUS_DATA_KEY"].to_json %>
+redis:
+  connect_timeout: <%= ENV["REDIS_CONNECT_TIMEOUT"].to_json %>
+  host: <%= ENV["REDIS_HOST"].to_json %>
+  password: <%= ENV["REDIS_PASSWORD"].to_json %>
+  port: <%= ENV["REDIS_PORT"].to_json %>
+  reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
+  timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
+  username: <%= ENV["REDIS_USER"].to_json %>
 search:
   throttle_limit: <%= ENV["SEARCH_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["SEARCH_THROTTLE_WINDOW_MINUTES"].to_json %>
+share_site:
+  transfers: <%= ENV["SHARE_TRANSFERS"].to_json %>
+  url: https://aa.cool
 share_store:
   access_key: <%= ENV["SHARE_STORE_ACCESS_KEY"].to_json %>
   bucket: <%= ENV["SHARE_STORE_BUCKET"].to_json %>
@@ -121,6 +139,9 @@ share_store:
 sign_ins:
   throttle_limit: <%= ENV["SIGN_IN_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["SIGN_IN_THROTTLE_WINDOW_MINUTES"].to_json %>
+site:
+  auth_callback_path: <%= ENV["AUTH_CALLBACK_PATH"].to_json %>
+  url: https://aaronmallen.me
 web_statement_timeout: <%= ENV["WEB_STATEMENT_TIMEOUT"].to_json %>
 web_threads: <%= ENV["HANAMI_MAX_THREADS"].to_json %>
 webmentions:

@@ -131,6 +131,55 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "in production" do
+    let(:keys) { %i[database proxy redis share_site share_store site] }
+    let(:secrets) { { analytics_salt: "a" * 64, app_secret: "s" * 64, data_key: "d" * 64, reader_salt: "r" * 64 } }
+    let(:before_path) { Hanami.app.root.join("spec/fixtures/settings/production_before_merge.yml") }
+    let(:names) { File.read(before_path).scan(/ENV(?:\.fetch\(|\[)"(\w+)"/).flatten.uniq }
+
+    let(:set) do
+      names.to_h do |name|
+        value = case name
+                  when "AUTH_CALLBACK_PATH" then "/admin/sign-in/:provider/back"
+                  when "PROXY_TRUSTED_PROXIES" then "10.0.0.0/8"
+                  when /PATH_STYLE/ then "true"
+                  when /PORT|TIMEOUT|ATTEMPTS|CONNECTIONS|TRANSFERS/ then "7"
+                  else name.downcase
+                end
+        [name, value]
+      end
+    end
+
+    def production(env)
+      stub_const("ENV", env)
+      merged = Blog::SettingsFiles.load(Hanami.app.root.join("config/settings"), :production)
+      before = Hanami::Settings::FileStore.new(before_path)
+
+      [before, nil].map do |store|
+        stores = [secrets, store, merged, Hanami::Settings::EnvStore.new].compact
+        described_class.new(Hanami::Settings::CompositeStore.new(*stores))
+      end
+    end
+
+    it "reads what production.yml read before it merged over default.yml when no variable is set" do
+      before, after = production(ENV.to_h.except(*names))
+
+      expect(keys.to_h { [it, after.public_send(it)] }).to eq(keys.to_h { [it, before.public_send(it)] })
+    end
+
+    it "reads what production.yml read before it merged over default.yml when every variable is set" do
+      before, after = production(ENV.to_h.merge(set))
+
+      expect(keys.to_h { [it, after.public_send(it)] }).to eq(keys.to_h { [it, before.public_send(it)] })
+    end
+
+    it "keeps the share_store keys default.yml holds beside the bucket production.yml names" do
+      _, after = production(ENV.to_h.merge(set))
+
+      expect(after.share_store).to include(access_key: "share_store_access_key", bucket: "aa.cool", read_timeout: 7)
+    end
+  end
+
   describe "#redis" do
     let(:blanks) { [nil, "", " "] }
     let(:names) { %w[REDIS_CONNECT_TIMEOUT REDIS_RECONNECT_ATTEMPTS REDIS_TIMEOUT] }
@@ -155,7 +204,7 @@ RSpec.describe Blog::Settings do
     end
 
     def redis_file(environment)
-      Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/#{environment}.yml")).fetch(:redis)
+      Blog::SettingsFiles.load(Hanami.app.root.join("config/settings"), environment).fetch(:redis)
     end
 
     def redis_settings(redis)

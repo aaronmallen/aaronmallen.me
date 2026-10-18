@@ -164,11 +164,11 @@ module Blog
     )
 
     setting :database, default: {}, constructor: Schema.schema(
-      name?: Types::String,
-      host?: Types::String.default("localhost"),
-      max_connections?: Types::Coercible::Integer.default(12),
+      name?: unless_set(Types::String, "blog"),
+      host?: unless_set(Types::String, "localhost"),
+      max_connections?: unless_set(Types::Coercible::Integer, 12),
       password?: Types::String.optional,
-      port?: Types::Coercible::Integer.default(5432),
+      port?: unless_set(Types::Coercible::Integer, 5432),
       user?: Types::String.optional,
     )
 
@@ -182,7 +182,7 @@ module Blog
 
     setting :honeybadger, default: {}, constructor: Schema.schema(
       api_key?: Value,
-      check_ins?: Types::Hash.map(Types::Coercible::String, Value),
+      check_ins?: unless_set(Types::Hash.map(Types::Coercible::String, Value), {}.freeze),
       project_url?: Value,
       report_data?: Types::Params::Bool.optional,
     )
@@ -222,10 +222,10 @@ module Blog
 
     setting :redis, default: {}, constructor: Schema.schema(
       connect_timeout?: unless_blank(RedisTimeout),
-      db?: Types::Coercible::Integer.default(0),
-      host?: Types::String.default("localhost"),
+      db?: unless_set(Types::Coercible::Integer, 0),
+      host?: unless_set(Types::String, "localhost"),
       password?: Value,
-      port?: Types::Coercible::Integer.default(6379),
+      port?: unless_set(Types::Coercible::Integer, 6379),
       reconnect_attempts?: unless_blank(RedisAttempts),
       timeout?: unless_blank(RedisTimeout),
       username?: Value,
@@ -240,7 +240,9 @@ module Blog
     setting :sign_ins, default: {}, constructor: throttle(DEFAULT_SIGN_IN_THROTTLE_LIMIT)
 
     setting :site, default: {}, constructor: Schema.schema(
-      auth_callback_path: Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}),
+      auth_callback_path: unless_set(
+        Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}), "/admin/auth/:provider/callback",
+      ),
       url: SiteUrl,
     )
 

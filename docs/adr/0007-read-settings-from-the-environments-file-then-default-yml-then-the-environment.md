@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-353
-amended: [AA-797, "#953"]
+amended: [AA-797, "#953", "#1816"]
 tags: [settings, environment, yaml, erb, secrets, fork, hanami-settings-stores]
 ---
 
@@ -33,13 +33,13 @@ AA-354 then moved every personal fact out of the Ruby, so that a fork edits sett
 ## Decision
 
 `config/app.rb` replaces Hanami's store with a `Hanami::Settings::CompositeStore` from `hanami-settings-stores`. It
-asks three stores in turn, and the first to hold a top level key wins:
+asks two stores in turn, and the first to hold a top level key wins:
 
-1. `config/settings/<env>.yml`, for what differs by environment: the database, Redis, `site.url`, and the pinned
-  development and test secrets.
-2. `config/settings/default.yml`, for what is the same everywhere: the owner, the profile links and the social
-  handles.
-3. The environment, for a top level key neither file holds. Production reads `APP_SECRET` and `ANALYTICS_SALT`
+1. The settings files. `Blog::SettingsFiles` reads `config/settings/default.yml`, for what is the same everywhere,
+  and lays `config/settings/<env>.yml` over it, for what differs by environment: the database name, the Redis
+  `db`, `site.url`, and the pinned development and test secrets. A key in the environment's file replaces the same
+  key in `default.yml` at any depth, and the keys beside it in `default.yml` stay. #1816 added the merge.
+2. The environment, for a top level key neither file holds. Production reads `APP_SECRET` and `ANALYTICS_SALT`
   this way.
 
 A key inside a file opts into the environment through ERB, one line per variable, as every key under `github` but
@@ -57,6 +57,12 @@ Postgres and Redis answer, and `PROXY_TRUSTED_PROXIES`. `.env.example` lists the
 lookups worked the same way, and AA-353 took it apart: the names live nowhere a reader can find them, a public fact
 reads as a secret, and every environment gets the same value unless somebody sets a variable.
 
+**The environment's file and `default.yml` as two stores, the first hit wins**, the rule until #1816. A top level
+key in `production.yml` hid the whole hash of that name in `default.yml`, so production copied all seven
+`share_store` keys to change the bucket, and a key later added to that hash in `default.yml` reached no environment
+that restated it. The database and Redis defaults sat in four places: a `.default(...)` in `config/settings.rb` that
+never fired, and an `ENV.fetch` fallback in each environment's file.
+
 **The environment first, then the files**, the order the gem's own example uses. Any variable of the right name
 would then beat a file, so the `APP_SECRET` that `mise run setup:environment` writes to `.env` would replace the
 one `test.yml` pins. AA-353 wanted each setting to choose, and the file first lets it: a literal is fixed for its
@@ -72,8 +78,14 @@ default hung on a key being absent rather than on the type.
 A setting's home is plain. A secret goes in `.env.example`, with an ERB line when it sits inside a hash. A fact
 goes in `default.yml`, and a value that differs by environment in each environment's file.
 
-The first hit wins and nothing merges. A top level key in `development.yml` hides the whole hash of that name in
-`default.yml`, so each environment file repeats every `database` key it needs.
+An environment's file holds only what differs from `default.yml`, and a key added to a hash in `default.yml`
+reaches every environment whose file does not name it. Each default lives once: the YAML reads a variable with a
+plain `ENV["NAME"]`, and the type in `config/settings.rb` supplies the value when it comes back `nil`, as it does
+for the database and Redis host and port.
+
+A file cannot take away a key `default.yml` holds. To keep a variable out of one environment, its file names the
+key: development and test set the database and Redis host to `localhost`, and test sets every store key to `null`,
+so the type's default applies. `null` gives the same value as a missing key, but the key is still there.
 
 The environment reaches a nested key only through its ERB line. Add a key to `github` with no such line and no
 variable can set it, and nothing says so.
@@ -81,7 +93,8 @@ variable can set it, and nothing says so.
 The app gets no `.env` of its own. mise loads it for every task, so `bundle exec hanami console` from a plain shell
 sees no secrets.
 
-`FileStore` raises when its file is missing, so the app boots only as `development`, `test` or `production`.
+`Blog::SettingsFiles` raises when the environment's file is missing, so the app boots only as `development`,
+`test` or `production`.
 
 [0131]: 0131-keep-owner-identities-in-the-database-and-add-the-first-by-hand.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

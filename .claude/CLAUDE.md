@@ -11,8 +11,8 @@ migration; never edit one that has shipped.
 - [dry-operation], dry-types and dry-validation for business logic (`Blog::Operation`, `Blog::Types`).
 - Postgres through ROM and Sequel (`lib/blog/db`, `config/db`). The schema lives in @config/db/structure.sql.
 - [Sidekiq] and sidekiq-scheduler for background jobs (@config/sidekiq.rb).
-- Settings come from `config/settings/<env>.yml`, then `default.yml`, then the environment, through
-  `hanami-settings-stores`.
+- Settings come from `config/settings/<env>.yml` merged key by key over `default.yml` (`Blog::SettingsFiles`), then
+  the environment, through `hanami-settings-stores`.
 - Tailwind CSS and esbuild for assets (`app/assets`, @config/assets.js). aube manages the node packages.
 - RSpec with Capybara, rack-test and rom-factory for tests (`spec`).
 

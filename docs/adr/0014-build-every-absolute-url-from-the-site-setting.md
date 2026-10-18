@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, config, lib, mcp, posts, public, social]
 issue: AA-655
-amended: [AA-819, "#957"]
+amended: [AA-819, "#957", "#1816"]
 tags: [urls, settings, routes, base-url, feeds, webmentions, oauth, tunnel]
 ---
 
@@ -82,9 +82,9 @@ The app will not boot without the setting. `config/settings.rb` requires `site.u
 A webmention that names the site by its tunnel or LAN address is refused as a foreign target. A real sender
 arrives on the public host, so this costs nothing yet.
 
-`config/settings/test.yml` carries the production URL, `https://aaronmallen.me`, so specs assert the links the
-live site gives out, as the public request specs do when they read a page's canonical link. The cost is that a
-test run cannot tell its links from production's, and a spec that needs another host has to stub
+Test keeps the production URL, `https://aaronmallen.me`, from `config/settings/default.yml`, so specs assert the
+links the live site gives out, as the public request specs do when they read a page's canonical link. The cost is
+that a test run cannot tell its links from production's, and a spec that needs another host has to stub
 `Blog::Settings#site_url` (#957). Development sets `http://localhost:2300`, so a link built there works on the
 machine that built it.
 

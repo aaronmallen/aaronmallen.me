@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
-amended: ["#63", "#132", "#396", "#1314", "#1372", "#1373"]
+amended: ["#63", "#132", "#396", "#1314", "#1372", "#1373", "#1816"]
 tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
 ---
 
@@ -44,7 +44,7 @@ The site runs on the Pi in the office and Cloudflare publishes it through a tunn
 
 The code follows from this. `config/settings/production.yml` reads the visitor address from `CF-Connecting-IP` and
 trusts only the loopback, where `cloudflared` connects. `config/puma.rb` listens on the loopback by default. Only
-`production.yml` reads `DATABASE_HOST` and `REDIS_HOST`, so development and test stay on localhost.
+production reads `DATABASE_HOST` and `REDIS_HOST`: `development.yml` and `test.yml` pin both hosts to localhost.
 
 ## Alternatives
 

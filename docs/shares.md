@@ -107,8 +107,8 @@ holds photos no visitor may see.
 
 ### Set the settings
 
-`config/settings/production.yml` names the bucket, `aa.cool`, and the share host, `https://aa.cool`, so neither
-comes from the environment. Set the rest in the shared `.env` on the Pi:
+`config/settings/production.yml` names the bucket, `aa.cool`, and `config/settings/default.yml` the share host,
+`https://aa.cool`, so neither comes from the environment. Set the rest in the shared `.env` on the Pi:
 
 | Variable | Holds |
 | --- | --- |
