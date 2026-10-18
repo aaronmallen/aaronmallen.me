@@ -15,7 +15,6 @@ module Bluesky
     def self.blob(uploaded)
       uploaded["blob"] or raise Error, "Bluesky returned no blob for an uploaded image"
     end
-    private_class_method :blob
 
     def self.embed(photos)
       return if photos.empty?
@@ -41,7 +40,6 @@ module Bluesky
         scale *= SHRINK
       end
     end
-    private_class_method :fit
 
     def self.flat(image) = image.has_alpha? ? image.flatten(background: WHITE) : image
     private_class_method :flat

@@ -5,7 +5,7 @@ module PageFetcher
     HEADERS = { "Accept" => "text/html, text/*;q=0.9, */*;q=0.8" }.freeze
 
     class << self
-      def build(http, agent:) = Client.new(connection: connection(http, agent))
+      def build(http, agent:, max_body: Client::MAX_BODY) = Client.new(connection: connection(http, agent), max_body:)
 
       private
 

@@ -730,6 +730,145 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a link card on Bluesky" do
+    let(:page) { "https://aaronmallen.me/notes/1" }
+    let(:picture) { "https://aaronmallen.me/card.png" }
+    let(:uploads) { [] }
+
+    def card = bluesky_writes.first.dig("record", "embed")
+
+    def html(head)
+      { body: "<html><head>#{head}</head><body>hi</body></html>", headers: { "Content-Type" => "text/html" } }
+    end
+
+    def link_post(text = "read #{page}", photos: [])
+      social_post_mutations.create_with_parts(targets: %w[bluesky], parts: [text], photos:, status: "scheduled",
+                                              posted_at: Time.now - 60)
+    end
+
+    def noise = Vips::Image.gaussnoise(1200, 1200).bandjoin([Vips::Image.gaussnoise(1200, 1200)] * 2).cast(:uchar)
+
+    def offer_picture(body)
+      serve(html(%(<meta property="og:image" content="#{picture}">)))
+      serve_picture(body)
+    end
+
+    def serve(response) = stub_request(:get, "#{page}?ref=bluesky").to_return(response)
+
+    def serve_picture(body, type: "image/png")
+      stub_request(:get, picture).to_return(body:, headers: { "Content-Type" => type })
+    end
+
+    def stored_photo
+      connect_media_store
+      jpeg = { body: "photo", headers: { "Content-Type" => "image/jpeg" } }
+      create(:photo, width: 640, height: 480).tap { stub_request(:get, media_store_url(it.key)).to_return(jpeg) }
+    end
+
+    def thumb = { "$type" => "blob", "ref" => { "$link" => "thumb" }, "mimeType" => "image/png" }
+
+    before do
+      stub_bluesky
+      resolves_publicly("aaronmallen.me")
+      stub_request(:post, bluesky_url("com.atproto.repo.uploadBlob")).to_return do |request|
+        uploads << request
+        json_response(blob: thumb)
+      end
+    end
+
+    it "embeds the first link with the page's title and description" do
+      head = %(<title>Plain</title><meta property="og:title" content="Notes">)
+      serve(html(%(#{head}<meta name="description" content=" A  note ">)))
+      deliver(link_post("read #{page} and https://aaronmallen.me/other"), "bluesky")
+
+      external = { "description" => "A note", "title" => "Notes", "uri" => "#{page}?ref=bluesky" }
+
+      expect(card).to eq("$type" => "app.bsky.embed.external", "external" => external)
+    end
+
+    it "takes the og:description and falls back to the title" do
+      serve(html(%(<title>Plain</title><meta property="og:description" content="Open">)))
+      deliver(link_post, "bluesky")
+
+      expect(card["external"]).to include("description" => "Open", "title" => "Plain")
+    end
+
+    it "uploads the og:image as the card's thumbnail", :aggregate_failures do
+      serve(html(%(<meta property="og:image" content="/card.png">)))
+      serve_picture("png-bytes")
+      deliver(link_post, "bluesky")
+
+      expect(uploads.first).to have_attributes(body: "png-bytes", headers: include("Content-Type" => "image/png"))
+      expect(card.dig("external", "thumb")).to eq(thumb)
+    end
+
+    it "shrinks a thumbnail over Bluesky's cap to a JPEG under it" do
+      big = noise.write_to_buffer(".png")
+      offer_picture(big)
+      deliver(link_post, "bluesky")
+
+      expect([big.bytesize, uploads.first.body.bytesize, uploads.first.headers["Content-Type"]])
+        .to match([be > Bluesky::Images::MAX_BYTES, be <= Bluesky::Images::MAX_BYTES, "image/jpeg"])
+    end
+
+    it "sends the card without a thumbnail when a big og:image will not decode", :aggregate_failures do
+      offer_picture("x" * (Bluesky::Images::MAX_BYTES + 1))
+      deliver(link_post, "bluesky")
+
+      expect(uploads).to be_empty
+      expect(card["external"]).not_to have_key("thumb")
+    end
+
+    {
+      "fails to load" => { status: 404, body: "", headers: { "Content-Type" => "text/plain" } },
+      "is not an image" => { body: "<svg/>", headers: { "Content-Type" => "image/svg+xml" } },
+    }.each do |what, response|
+      it "sends the card without a thumbnail when the og:image #{what}", :aggregate_failures do
+        serve(html(%(<title>Notes</title><meta property="og:image" content="#{picture}">)))
+        stub_request(:get, picture).to_return(response)
+        deliver(link_post, "bluesky")
+
+        expect(card.dig("external", "title")).to eq("Notes")
+        expect(card["external"]).not_to have_key("thumb")
+      end
+    end
+
+    {
+      "fails to load" => { status: 500, body: "<title>Oops</title>", headers: { "Content-Type" => "text/html" } },
+      "is not HTML" => { body: "{}", headers: { "Content-Type" => "application/json" } },
+    }.each do |what, response|
+      it "sends the post without a card when the page #{what}", :aggregate_failures do
+        serve(response)
+        deliver(link_post, "bluesky")
+
+        expect(bluesky_writes.first.fetch("record")).to include("text" => "read #{page}?ref=bluesky")
+        expect(bluesky_writes.first.fetch("record")).not_to have_key("embed")
+      end
+    end
+
+    it "sends the post without a card when the page times out" do
+      stub_request(:get, "#{page}?ref=bluesky").to_timeout
+      deliver(link_post, "bluesky")
+
+      expect(bluesky_writes.first.fetch("record")).not_to have_key("embed")
+    end
+
+    it "sends the photos and no card for a post with photos", :aggregate_failures do
+      deliver(link_post(photos: [{ part: 1, key: stored_photo.key, alt: nil }]), "bluesky")
+
+      expect(card["$type"]).to eq("app.bsky.embed.images")
+      expect(a_request(:get, "#{page}?ref=bluesky")).not_to have_been_made
+    end
+
+    it "fetches the page as a bot, so a short link counts no click" do
+      serve(html("<title>Notes</title>"))
+      deliver(link_post, "bluesky")
+
+      fetched = a_request(:get, "#{page}?ref=bluesky").with { Blog::Helpers::Bot.match?(it.headers["User-Agent"]) }
+      expect(fetched).to have_been_made
+    end
+  end
+
   describe "Bluesky refusing the send" do
     let(:social_post) { queued(targets: %w[bluesky]) }
 
@@ -1089,7 +1228,11 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   describe "a post that links to the site" do
     let(:post_url) { "https://aaronmallen.me/writing/hello" }
 
-    before { stub_bluesky }
+    before do
+      stub_bluesky
+      resolves_publicly("aaronmallen.me")
+      stub_request(:get, %r{\Ahttps://aaronmallen\.me/}).to_return(status: 404)
+    end
 
     def bluesky_text(social_post)
       deliver(social_post, "bluesky")

@@ -10,7 +10,9 @@ module Bluesky
       PUBLIC_URL = "https://public.api.bsky.app"
 
       class << self
-        def client(http) = Client.new(pds: json(http, PDS_URL), public_api: json(http, PUBLIC_URL))
+        def client(http, pages)
+          Client.new(pages:, pds: json(http, PDS_URL), public_api: json(http, PUBLIC_URL))
+        end
 
         private
 

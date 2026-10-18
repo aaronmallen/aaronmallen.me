@@ -53,8 +53,10 @@ module SocialCredentials
   def disconnect_bluesky = Services::Slice["relations.service_connections"].where(provider: "bluesky").delete
 
   def replace_social_clients
+    pages = Hanami.app["page_fetcher.link_preview"]
+
     replace_component("networks.all", {
-      "bluesky" => Bluesky::Providers::ClientProvider.client(Hanami.app["http"]),
+      "bluesky" => Bluesky::Providers::ClientProvider.client(Hanami.app["http"], pages),
       "linkedin" => LinkedIn::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"]),
       "mastodon" => Mastodon::Providers::ClientProvider.client(Hanami.app["http"]),
     }.freeze)

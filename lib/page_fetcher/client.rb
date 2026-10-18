@@ -17,7 +17,9 @@ module PageFetcher
       end
     end
 
-    Response = Data.define(:body, :headers, :status, :url)
+    Response = Data.define(:body, :bytes, :headers, :status, :url) do
+      def initialize(body:, headers:, status:, url:, bytes: body) = super
+    end
     Target = Data.define(:address, :uri)
 
     BUDGET = 15
@@ -30,8 +32,11 @@ module PageFetcher
     RETRY_STATUSES = [429, *500..599].freeze
     UNREACHABLE = [Faraday::ConnectionFailed, Faraday::SSLError].freeze
 
-    def initialize(connection:)
+    attr_reader :max_body
+
+    def initialize(connection:, max_body: MAX_BODY)
       @connection = connection
+      @max_body = max_body
     end
 
     def fetch(url) = follow(url, Deadline.after(BUDGET))
@@ -54,7 +59,7 @@ module PageFetcher
       found.first
     end
 
-    def declared_over?(env) = env.response_headers["content-length"].to_i > MAX_BODY
+    def declared_over?(env) = env.response_headers["content-length"].to_i > max_body
 
     def failure(error, verb, url, deadline)
       return TimedOut.new(url, deadline.passed? ? BUDGET : connection.options.timeout) if timed_out?(error, deadline)
@@ -97,16 +102,16 @@ module PageFetcher
     def read(url)
       held = String.new(encoding: Encoding::BINARY)
       env = catch(ENOUGH) { yield(reader(url, held)).env }
-      body = held.force_encoding(Encoding::UTF_8).scrub
+      body = held.dup.force_encoding(Encoding::UTF_8).scrub
 
-      Response.new(body:, headers: env.response_headers, status: env.status, url:)
+      Response.new(body:, bytes: held, headers: env.response_headers, status: env.status, url:)
     end
 
     def reader(url, held)
       lambda do |chunk, _size, env|
-        raise Error, "#{url} declares a body over #{MAX_BODY} bytes" if declared_over?(env)
+        raise Error, "#{url} declares a body over #{max_body} bytes" if declared_over?(env)
 
-        room = MAX_BODY - held.bytesize
+        room = max_body - held.bytesize
         held << chunk.byteslice(0, room).b
         throw ENOUGH, env if chunk.bytesize >= room
       end

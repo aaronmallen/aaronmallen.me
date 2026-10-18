@@ -17,8 +17,9 @@ module Bluesky
     SEARCH_ACTORS = "app.bsky.actor.searchActorsTypeahead"
     XRPC_PATH = "/xrpc"
 
-    def initialize(pds:, public_api:)
+    def initialize(pages:, pds:, public_api:)
       @accounts = Accounts.new { sign_in(**it) }
+      @pages = pages
       @pds = pds
       @public_api = public_api
     end
@@ -83,7 +84,7 @@ module Bluesky
 
     private
 
-    attr_reader :accounts, :pds, :public_api
+    attr_reader :accounts, :pages, :pds, :public_api
 
     def address(uri)
       match = AT_URI.match(uri.to_s) or raise Error, "#{uri} is not an at:// URI"
@@ -91,24 +92,24 @@ module Bluesky
       { collection: match[2], repo: match[1], rkey: match[3] }
     end
 
-    def procedure(connection, nsid, token: nil, **payload)
-      request(connection, :post, nsid, payload, token)
+    def embed(photos, link, session)
+      blob = ->(body, type) { upload(body, type, session) }
+      Images.embed(photos, &blob) || (link && Cards.embed(link.url, pages, &blob))
     end
 
-    def query(connection, nsid, token: nil, **params)
-      request(connection, :get, nsid, params, token)
-    end
+    def procedure(connection, nsid, token: nil, **payload) = request(connection, :post, nsid, payload, token)
+
+    def query(connection, nsid, token: nil, **params) = request(connection, :get, nsid, params, token)
 
     def record(text, mentions, photos, reply_to, session)
       social = Hanami.app.slices[:social]
-      facets = Facets.for(
-        mentions:, links: social["operations.scan_links"].call(text), tags: social["operations.scan_tags"].call(text),
-      )
+      links = social["operations.scan_links"].call(text)
+      facets = Facets.for(mentions:, links:, tags: social["operations.scan_tags"].call(text))
 
       {
         "$type" => COLLECTION,
         createdAt: Time.now.utc.iso8601,
-        embed: Images.embed(photos) { |body, type| upload(body, type, session) },
+        embed: embed(photos, links.first, session),
         facets: facets.empty? ? nil : facets,
         reply: reply_to && reply_ref(reply_to, session),
         text:,

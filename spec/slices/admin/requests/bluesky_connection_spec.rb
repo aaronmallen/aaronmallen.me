@@ -115,6 +115,8 @@ RSpec.describe "Admin Bluesky connection", type: :request do
       before do
         connection = connect_bluesky
         stub_bluesky
+        resolves_publicly("example.com")
+        stub_request(:get, "https://example.com").to_return(status: 404)
         part = Data.define(:created_at, :id).new(created_at: Time.now, id: 1)
         key = Social::Structs::PartKey.new(connection_id: 1, part:)
         bluesky.for(connection).post("See https://example.com #ruby", idempotency_key: key)
