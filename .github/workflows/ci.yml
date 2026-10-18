@@ -68,6 +68,9 @@ jobs:
           sudo apt-get install --no-install-recommends --yes postgresql-client-18
           echo /usr/lib/postgresql/18/bin >>"$GITHUB_PATH"
 
+      - name: Fetch the tags the schema check builds from
+        run: git fetch --depth=1 origin '+refs/tags/*:refs/tags/*'
+
       - name: Check the schema dump matches the migrations
         run: mise run db:check
 

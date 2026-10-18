@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-654
-amended: [AA-787, "#711", "#921", "#957", "#1718"]
+amended: [AA-787, "#711", "#921", "#957", "#1718", "#1815"]
 tags: [mise, tasks, lockfile, ruby, dotenv, pitchfork, ci, deploy]
 ---
 
@@ -53,6 +53,9 @@ CI installs the locked tools with `jdx/mise-action` and runs each step as a mise
 through `pg_isready`. AA-787 added the service container. #921 let runner setup with no laptop twin, such as installing
 the Postgres client, run outside a task. It also moved the schema dump check into `mise run db:check`, which builds a
 scratch database from the migrations, compares its dump to `config/db/structure.sql` and drops the database.
+Since #1815 that database, like `db:rebuild`, starts from the newest tag's `config/db/structure.sql` and runs only
+the migrations after it, so CI never replays a shipped migration that a new Postgres might break. With no tag, both
+replay every migration. CI fetches the tags first, since the checkout leaves them out.
 
 On the Pi, systemd starts Puma and Sidekiq through `mise exec`, which hands them the locked Ruby and `.env`. The tree
 holds no units yet; AA-307 writes them.

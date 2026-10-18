@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#MISE description="Build a scratch database from the migrations and fail when its schema dump differs from config/db/structure.sql"
+#MISE description="Build a scratch database from the newest tag's schema dump and the migrations after it, and fail when its schema dump differs from config/db/structure.sql"
 
 set -e
 

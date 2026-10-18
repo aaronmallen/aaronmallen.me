@@ -1,8 +1,15 @@
 #!/usr/bin/env sh
-#MISE description="Rebuild the database this environment names from its migrations, which db:prepare skips by loading the schema dump"
+#MISE description="Rebuild the database this environment names from the newest tag's schema dump and the migrations after it"
 
 set -e
 
 scripts/db/drop
 scripts/db/create
+
+tag=$(git tag --list --sort=-v:refname 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+if [ -n "$tag" ]; then
+  git show "$tag:config/db/structure.sql" |
+    scripts/util/psql --no-psqlrc --quiet --set ON_ERROR_STOP=1 --output /dev/null --file -
+fi
+
 scripts/db/migrate
