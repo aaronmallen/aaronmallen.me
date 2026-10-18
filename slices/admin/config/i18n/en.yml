@@ -493,10 +493,8 @@ en:
       unscheduled: "Unscheduled · back in %{list}"
   today_page:
     toasts:
-      discarded: "Job discarded"
       not_configured: "Connect GitHub first."
       queued: "Import queued · new commits show on the card shortly"
-      retried: "Job queued again"
       snoozed: "Snoozed for a week"
   tokens_page:
     toasts:
@@ -4122,6 +4120,8 @@ en:
             delete: "Click again · it won't run"
             discard: "Click again · gone for good"
             kill: "Click again · moves to dead, no more tries"
+          copied_error: "Error copied"
+          copy_error: "Copy error"
           delete: "Delete"
           discard: "Discard"
           kill: "Kill"
@@ -4270,18 +4270,6 @@ en:
           open_services: "Open services"
           snooze: "Snooze"
           write: "Write"
-        dead_job_menu:
-          confirm_discard: "Click again to discard"
-          copied_error: "Error copied"
-          copy_error: "Copy error"
-          discard: "Discard"
-          retry: "Retry"
-        dead_jobs:
-          count:
-            one: "%{count} job ran out of retries"
-            other: "%{count} jobs ran out of retries"
-          empty: "No job has run out of retries."
-          heading: "Dead jobs"
         show:
           heading: "Today"
           headline:

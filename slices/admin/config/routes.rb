@@ -69,10 +69,6 @@ module Admin
     )
     get "/agents/sessions", to: "agents.sessions", as: :agent_sessions
     get "/analytics", to: "analytics.show", as: :analytics
-    get "/attention/dead-jobs", to: "today.dead_jobs", as: :dead_jobs
-    post "/attention/dead-jobs/:jid/discard", to: "today.discard_dead_job", as: :discard_dead_job, jid: JID
-    get "/attention/dead-jobs/:jid/menu", to: "today.dead_job_menu", as: :dead_job_menu, jid: JID
-    post "/attention/dead-jobs/:jid/retry", to: "today.retry_dead_job", as: :retry_dead_job, jid: JID
     get "/attention/menu", to: "today.attention_menu", as: :attention_menu
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar

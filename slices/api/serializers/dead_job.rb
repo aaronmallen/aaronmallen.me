@@ -12,7 +12,7 @@ module API
       ).freeze
 
       schema_attributes
-      stamps :died_at
+      stamps died_at: :at
       untrusted :error
     end
   end

@@ -206,6 +206,19 @@ RSpec.describe "Admin job set actions", :frozen_clock, type: :request do
       expect(inline_confirm("discard")).to eq("Click again · gone for good")
     end
 
+    {
+      "retries" => ["retry", 60, ["Retry now", "Kill", "Copy error", "Delete"]],
+      "dead" => ["dead", -60, ["Retry now", "Copy error", "Discard"]],
+    }.each do |set, (key, offset, items)|
+      it "copies the error of a job in #{set} that failed", :aggregate_failures do
+        sets[key].add(Time.now + offset, job("error_class" => "RuntimeError", "error_message" => "boom"))
+        menu(set)
+
+        expect(menu_items).to eq(items)
+        expect(page.find("[data-copy]", visible: :all)["data-copy"]).to eq("RuntimeError: boom")
+      end
+    end
+
     it "brings each action back to the page it opened on" do
       sets["dead"].add(Time.now - 60, job)
       menu("dead")

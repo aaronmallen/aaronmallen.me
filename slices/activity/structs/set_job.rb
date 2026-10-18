@@ -35,6 +35,8 @@ module Activity
 
       def arguments = JSON.generate(args)[1...-1]
 
+      def error = [error_class, error_message].compact.join(": ")
+
       def error? = !error_class.nil?
 
       def last_failed_at = retried_at || failed_at

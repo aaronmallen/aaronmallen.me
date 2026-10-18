@@ -5,7 +5,7 @@ status: active
 created: 2026-10-09
 area: [activity, admin, api]
 issue: "#869"
-amended: ["#1731", "#1732", "#1733", "#1734"]
+amended: ["#1731", "#1732", "#1733", "#1734", "#1776"]
 tags: [activity, attention, sidekiq, redis, jobs, dead-set]
 ---
 
@@ -26,16 +26,17 @@ join it.
 
 An `activity` query reads Sidekiq's dead set through `Sidekiq::DeadSet` and hands back its rows beside the rows
 `stalled` reads from the view. `activity` exports it, and `admin` and `api` import it the way they import the
-stalled list, so the card and `list_attention` read the same dead jobs.
+stalled list, so the card and `list_attention` read the same dead jobs. It builds each one as the `SetJob` the jobs
+tab builds, and the card links the rest to the tab's dead set rather than to a page of its own.
 
 Sidekiq stays the only record of a dead job. Retry and discard act on the dead set itself, so a job leaves the card
 when it leaves the set. One `activity` operation, `act_on_set_job`, does every action on a job in a set, from the card
 and from the jobs tab: run now and delete on a scheduled job, retry now, kill and delete on a retry, and retry and
 discard on a dead job. Each finds the job by its jid and takes it out of its set through the set's own `remove_job`,
 which hands over the job only when it was still there. Then it pushes the job to its queue, moves it to the dead set
-or drops it. A job that left its set first, even between the lookup and the act, changes nothing: the card answers
-not found, and the tab says so in a toast. Each row also carries one button on hover, retry or run now, as each cron
-row does.
+or drops it. The card's retry and discard post to the tab's route, so a job that left its set first, even between the
+lookup and the act, changes nothing, and a toast says so. Each row also carries one button on hover, retry or run now,
+as each cron row does.
 
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
 as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled, and

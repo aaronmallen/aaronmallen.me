@@ -16,7 +16,10 @@ module Admin
 
           def view_template
             ContextMenu(label: @job.name, return_to: @return_to) do |menu|
-              ACTS::ACTS.fetch(@job.set).each { act(menu, it) }
+              warned, acts = ACTS::ACTS.fetch(@job.set).partition { ACTS::WARNED.include?(it) }
+              acts.each { act(menu, it) }
+              copy_error(menu) if @job.error?
+              warned.each { act(menu, it) }
             end
           end
 
@@ -31,6 +34,10 @@ module Admin
               t(LABELS.fetch(act)), action: path(:admin_act_on_set_job, set: @job.set, jid: @job.jid, act:),
                                     icon: ACTS::ICONS.fetch(act), warn:, confirm:,
             )
+          end
+
+          def copy_error(menu)
+            menu.copy(t(".copy_error"), text: @job.error, copied: t(".copied_error"), icon: :copy)
           end
         end
       end

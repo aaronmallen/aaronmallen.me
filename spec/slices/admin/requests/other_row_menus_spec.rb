@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "securerandom"
-
 RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock, type: :request do
   def copies = page.all("[data-copy]", visible: :all).to_h { [it.find(".ctx-label").text(:all), it["data-copy"]] }
 
@@ -24,7 +22,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
       /admin/tasks/0/comments/0/menu /admin/tasks/0/sessions/0/menu /admin/decisions/0/comments/0/menu
       /admin/tasks/sprints/0/menu /admin/commits/0/menu /admin/tasks/rules/0/menu /admin/tokens/0/menu
       /admin/clients/0/menu /admin/services/nothing/menu /admin/attention/menu?kind=carried&record_id=0
-      /admin/attention/dead-jobs/abc123/menu
+      /admin/attention/dead-jobs /admin/attention/dead-jobs/abc123/menu
     ].each do |gone|
       it "answers 404 at #{gone}" do
         get gone
@@ -291,27 +289,6 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
         follow_redirect!
 
         expect(toast).to eq(admin_t("today_page.toasts.snoozed"))
-      end
-    end
-
-    describe "a dead job" do
-      let(:dead_set) { Spec::FakeJobSet.new("dead") }
-      let(:jid) { SecureRandom.hex(12) }
-
-      before do
-        allow(Sidekiq::DeadSet).to receive(:new).and_return(dead_set)
-        dead_set.add(
-          Time.now - 60,
-          { "class" => "Social::Jobs::SendWebmention", "args" => [], "jid" => jid, "queue" => "default",
-            "error_class" => "RuntimeError", "error_message" => "boom" },
-        )
-        get "/admin/attention/dead-jobs/#{jid}/menu"
-      end
-
-      it "retries, copies and discards it", :aggregate_failures do
-        expect(menu_items).to eq(["Retry", "Copy error", "Discard"])
-        expect(copies["Copy error"]).to eq("RuntimeError: boom")
-        expect(inline_confirm("/admin/attention/dead-jobs/#{jid}/discard")).to eq("Click again to discard")
       end
     end
 

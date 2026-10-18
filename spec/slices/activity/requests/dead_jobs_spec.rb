@@ -95,13 +95,20 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
         .to include("Social::Jobs::SendWebmention")
     end
 
-    %w[discard retry].each do |verb|
-      it "answers a #{verb} of a job that is gone with not found" do
-        sign_in_to_admin
-        post "/admin/attention/dead-jobs/#{SecureRandom.hex(12)}/#{verb}", _csrf_token: admin_csrf_token
+    it "posts to the jobs tab's dead set and comes back to Today", :aggregate_failures do
+      forms = card.all("form:has(button[aria-label='Retry']), form:has(button[aria-label='Discard'])")
 
-        expect(last_response.status).to eq(404)
-      end
+      expect(forms.map { it[:action] }).to eq(%w[retry discard].map { "/admin/settings/jobs/dead/#{jid}/#{it}" })
+      expect(forms.map { it.find("input[name=return_to]", visible: :all).value }.uniq).to eq(["/admin"])
+    end
+
+    it "opens the jobs tab's menu for the row, which copies its error", :aggregate_failures do
+      menu = card.find(".li", text: "Social::Jobs::SendWebmention")["data-menu"]
+      get menu, return_to: "/admin"
+
+      expect(menu).to eq("/admin/settings/jobs/dead/#{jid}/menu")
+      expect(menu_items).to eq(["Retry now", "Copy error", "Discard"])
+      expect(page.find("[data-copy]", visible: :all)["data-copy"]).to eq("RuntimeError: boom")
     end
   end
 
@@ -146,7 +153,7 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
       line = found.find("a.today-line", text: "Dead jobs")
 
       expect(found.all(".li-title").map(&:text)).to eq((0..4).map { "Posts::Jobs::Job#{it}" })
-      expect([line[:href], line.text]).to eq(["/admin/attention/dead-jobs", "Dead jobs2 more →"])
+      expect([line[:href], line.text]).to eq(["/admin/settings/jobs?set=dead#jobs-dead", "Dead jobs2 more →"])
     end
 
     it "returns the newest five from list_attention with the count of all", :aggregate_failures do
@@ -154,38 +161,6 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
 
       expect(answer.fetch("dead_jobs").map { it.fetch("name") }).to eq((0..4).map { "Posts::Jobs::Job#{it}" })
       expect(answer.fetch("dead_job_count")).to eq(7)
-    end
-  end
-
-  describe "the dead jobs page" do
-    def page(query = "")
-      sign_in_to_admin
-      get "/admin/attention/dead-jobs#{query}"
-      Capybara.string(last_response.body)
-    end
-
-    it "lists every dead job newest first with the count", :aggregate_failures do
-      7.times { kill("Posts::Jobs::Job#{it}", at: Time.now - (it * 60)) }
-      found = page
-
-      expect(found.all(".li-title").map(&:text)).to eq((0..6).map { "Posts::Jobs::Job#{it}" })
-      expect(found.find(".page-head-sub").text).to eq("7 jobs ran out of retries")
-    end
-
-    it "pages past the admin page size" do
-      101.times { kill("Posts::Jobs::Job#{it}", at: Time.now - (it * 60)) }
-
-      expect(page("?page=2").all(".li-title").map(&:text)).to eq(["Posts::Jobs::Job100"])
-    end
-
-    it "says so when no job has died" do
-      expect(page.find(".card")).to have_text(Admin::Slice["i18n"].t("ui.views.today.dead_jobs.empty"))
-    end
-
-    it "answers a page past the end with not found" do
-      page("?page=2")
-
-      expect(last_response.status).to eq(404)
     end
   end
 

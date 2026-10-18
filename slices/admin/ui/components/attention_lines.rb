@@ -5,6 +5,7 @@ module Admin
     module Components
       class AttentionLines < Component
         BROKEN = Blog::Types::PostFilter["broken"]
+        DEAD = Blog::Types::JobSetName["dead"]
         PENDING = Blog::Types::WebmentionStatus["pending"]
         POSTED = Blog::Types::SocialQueue["posted"]
         QUEUED = Blog::Types::SocialQueue["queued"]
@@ -20,7 +21,7 @@ module Admin
           line(".inbox", path(:admin_inbox), ".waiting", @inbox)
           line(".cross_posts", path(:admin_social, filter: failed_queue), ".failed", @failed_social_posts.size)
           line(".webmentions", path(:admin_webmentions, status: PENDING), ".waiting", @webmentions)
-          line(".dead_jobs", path(:admin_dead_jobs), ".more", @more_dead_jobs)
+          line(".dead_jobs", dead_set, ".more", @more_dead_jobs)
           broken_links
         end
 
@@ -40,6 +41,8 @@ module Admin
             broken_count(posts, short)
           end
         end
+
+        def dead_set = "#{path(:admin_settings_jobs, set: DEAD)}##{Jobs::Set.id(DEAD)}"
 
         def failed_queue = @failed_social_posts.include?(SCHEDULED) ? QUEUED : POSTED
 
