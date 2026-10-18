@@ -15,6 +15,12 @@ module Admin
           TONES = { working: "jobs-good", quiet: "jobs-calm", stopping: "jobs-warn", not_seen: BAD }.freeze
           WARN = "jobs-warn"
 
+          def self.tone(seconds, late: LATE)
+            if seconds >= STUCK then BAD
+            elsif seconds >= late then WARN
+            end
+          end
+
           prop :health, Blog::Types::Instance(Data)
 
           def view_template
@@ -38,12 +44,10 @@ module Admin
             end
           end
 
-          def count(number) = Blog::Helpers::Figures.count(number)
-
           def counts
             cell(:busy, (WARN if full?)) { busy }
             cell(:enqueued, (WARN if @health.enqueued > CROWDED)) { count(@health.enqueued) }
-            cell(:latency, latency_tone) { Blog::Helpers::Figures.elapsed(@health.latency) }
+            cell(:latency, self.class.tone(@health.latency)) { Blog::Helpers::Figures.elapsed(@health.latency) }
             set_counts
           end
 
@@ -53,12 +57,6 @@ module Admin
             status(TONES.fetch(@health.status), t(STATUSES.fetch(@health.status))) { meta }
             div(class: "jobs-counts") { counts }
             Trend(days: @health.days)
-          end
-
-          def latency_tone
-            if @health.latency >= STUCK then BAD
-            elsif @health.latency >= LATE then WARN
-            end
           end
 
           def meta

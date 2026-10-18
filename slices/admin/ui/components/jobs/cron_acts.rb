@@ -9,7 +9,6 @@ module Admin
           RANGES = Blog::Types::AnalyticsRange.values.sort.freeze
           RUN_ICON = "fa-solid fa-play"
           SWITCH_ICONS = { "enable" => RUN_ICON, "pause" => "fa-solid fa-pause" }.freeze
-          SWITCH_LABELS = { "enable" => ".enable", "pause" => ".pause" }.freeze
 
           def self.performance(entry, base) = "#{base}##{Performance::TimingTable.anchor(entry.job)}"
 
@@ -50,7 +49,7 @@ module Admin
               hidden:,
             )
             ButtonForm(
-              action: path(:admin_switch_cron_entry, name:, switch:), label: t(SWITCH_LABELS.fetch(switch), name:),
+              action: path(:admin_switch_cron_entry, name:, switch:), label: t(["", switch].join("."), name:),
               icon: SWITCH_ICONS.fetch(switch), icon_only: true, hidden:,
             )
           end

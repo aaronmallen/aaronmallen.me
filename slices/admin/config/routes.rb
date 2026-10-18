@@ -8,7 +8,7 @@ module Admin
     INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
     JID = /\h+/
-    JOB_ACT = /run|retry|kill|delete|discard/
+    JOB_ACT = Regexp.union(Activity::Repos::JobQueries::SETS.values.flat_map { it[:acts] }.uniq)
     JOB_SET = Regexp.union(Blog::Types::JobSetName.values)
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/

@@ -6,18 +6,27 @@ module Activity
       DAYS = 7
       PEEK = Blog::Structs::Page.new(number: 1, size: 5)
       SETS = {
-        "retries" => { key: "retry", size: :retry_size },
-        "dead" => { key: "dead", size: :dead_size, reverse: true },
-        "scheduled" => { key: "schedule", size: :scheduled_size },
+        Blog::Types::JobSetName["retries"] => {
+          container: "sidekiq.retry_set", key: "retry", size: :retry_size, newest_first: false,
+          acts: %w[retry kill delete].freeze, primary: "retry",
+        }.freeze,
+        Blog::Types::JobSetName["dead"] => {
+          container: "sidekiq.dead_set", key: "dead", size: :dead_size, newest_first: true,
+          acts: %w[retry discard].freeze, primary: "retry",
+        }.freeze,
+        Blog::Types::JobSetName["scheduled"] => {
+          container: "sidekiq.scheduled_set", key: "schedule", size: :scheduled_size, newest_first: false,
+          acts: %w[run delete].freeze, primary: "run",
+        }.freeze,
       }.freeze
 
+      def self.set_deps = SETS.to_h { |name, set| [:"#{name}_set", set.fetch(:container)] }
+
       include Deps[
-        dead_set: "sidekiq.dead_set",
+        **set_deps,
         history: "sidekiq.stats_history",
         processes: "sidekiq.processes",
         queue_jobs: "sidekiq.queue_jobs",
-        retry_set: "sidekiq.retry_set",
-        scheduled_set: "sidekiq.scheduled_set",
         set_jobs: "sidekiq.set_jobs",
         stats: "sidekiq.stats",
         timing_queries: "performance.repos.timing_queries",
@@ -46,8 +55,7 @@ module Activity
       end
 
       def set_job(name, jid)
-        set = { "retries" => retry_set, "dead" => dead_set, "scheduled" => scheduled_set }.fetch(name)
-        found = set.call.find_job(jid)
+        found = sorted_sets.fetch(name).call.find_job(jid)
         Structs::SetJob.from(name, found) if found
       rescue RedisClient::Error
         nil
@@ -87,7 +95,7 @@ module Activity
 
       def set_page(name, size, page)
         set = SETS.fetch(name)
-        rows = set_jobs.call(set[:key], page.number, page.size, reverse: set.fetch(:reverse, false))
+        rows = set_jobs.call(set[:key], page.number, page.size, reverse: set[:newest_first])
 
         Blog::Structs::Paged.new(
           rows: rows.map { Structs::SetJob.from(name, it) }, number: page.number, more: size > page.offset + page.size,
@@ -102,6 +110,8 @@ module Activity
       rescue RedisClient::Error
         []
       end
+
+      def sorted_sets = SETS.keys.to_h { [it, public_send(:"#{it}_set")] }
     end
   end
 end

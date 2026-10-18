@@ -1437,15 +1437,16 @@ en:
             retries: "Retries"
             scheduled: "Scheduled"
         set_acts:
+          acts:
+            delete: "Delete"
+            discard: "Discard"
+            kill: "Kill"
+            retry: "Retry now"
+            run: "Run now"
           confirm:
             delete: "Delete %{job}? It won't run."
             discard: "Discard %{job}? It cannot be retried after."
             kill: "Kill %{job}? It moves to dead with no more tries."
-          delete: "Delete"
-          discard: "Discard"
-          kill: "Kill"
-          retry: "Retry now"
-          run: "Run now"
         trend:
           bars: "Processed and failed, last 7 days: %{days}"
           day: "%{day} %{processed} processed, %{failed} failed"
@@ -4117,10 +4118,11 @@ en:
           sub: "Sign in with an account whose verified email is on the owner list."
       settings:
         cron_entry_menu:
-          enable: "Enable"
-          pause: "Pause"
           performance: "Open in Performance"
           run: "Run now"
+          switches:
+            enable: "Enable"
+            pause: "Pause"
         jobs:
           heading: "Jobs"
         services:
@@ -4135,11 +4137,6 @@ en:
             kill: "Click again · moves to dead, no more tries"
           copied_error: "Error copied"
           copy_error: "Copy error"
-          delete: "Delete"
-          discard: "Discard"
-          kill: "Kill"
-          retry: "Retry now"
-          run: "Run now"
         socials:
           heading: "Socials"
           people: "People"

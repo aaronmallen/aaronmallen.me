@@ -6,8 +6,6 @@ module Admin
       module Settings
         class SetJobMenu < View
           ACTS = Components::Jobs::SetActs
-          CONFIRMS = %w[kill delete discard].to_h { [it, ".confirm.#{it}"] }.freeze
-          LABELS = %w[run retry kill delete discard].to_h { [it, ".#{it}"] }.freeze
 
           layout nil
 
@@ -16,7 +14,7 @@ module Admin
 
           def view_template
             ContextMenu(label: @job.name, return_to: @return_to) do |menu|
-              warned, acts = ACTS::ACTS.fetch(@job.set).partition { ACTS::WARNED.include?(it) }
+              warned, acts = ACTS.acts(@job.set).partition { ACTS::WARNED.include?(it) }
               acts.each { act(menu, it) }
               copy_error(menu) if @job.error?
               warned.each { act(menu, it) }
@@ -27,12 +25,12 @@ module Admin
 
           def act(menu, act)
             warn = ACTS::WARNED.include?(act)
-            confirm = (t(CONFIRMS[act]) if CONFIRMS.key?(act))
+            confirm = (t([".confirm", act].join(".")) if ACTS::CONFIRMED.include?(act))
 
             menu.separator if warn
             menu.post(
-              t(LABELS.fetch(act)), action: path(:admin_act_on_set_job, set: @job.set, jid: @job.jid, act:),
-                                    icon: ACTS::ICONS.fetch(act), warn:, confirm:,
+              t([ACTS::LABELS, act].join(".")), action: path(:admin_act_on_set_job, set: @job.set, jid: @job.jid, act:),
+                                                icon: ACTS::ICONS.fetch(act), warn:, confirm:,
             )
           end
 

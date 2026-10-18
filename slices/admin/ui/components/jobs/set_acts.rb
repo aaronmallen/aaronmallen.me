@@ -5,27 +5,30 @@ module Admin
     module Components
       module Jobs
         class SetActs < Component
-          ACTS = ::Activity::Operations::ActOnSetJob::ACTS
-          CONFIRMS = %w[kill delete discard].to_h { [it, ".confirm.#{it}"] }.freeze
+          CONFIRMED = %w[kill delete discard].freeze
           ICONS = {
             "run" => "fa-solid fa-play", "retry" => "fa-solid fa-rotate-right", "kill" => "fa-solid fa-skull",
             "delete" => :trash, "discard" => :trash,
           }.freeze
-          LABELS = ICONS.keys.to_h { [it, ".#{it}"] }.freeze
+          LABELS = "ui.components.jobs.set_acts.acts"
           WARNED = %w[delete discard].freeze
 
           prop :job, Blog::Types::Instance(Data)
           prop :return_to, Blog::Types::String
 
-          def view_template = ACTS.fetch(@job.set).each { act(it) }
+          def self.acts(set) = ::Activity::Repos::JobQueries::SETS.fetch(set).fetch(:acts)
+
+          def view_template = self.class.acts(@job.set).each { act(it) }
 
           private
 
           def act(act)
+            confirm = t([".confirm", act].join("."), job: @job.name) if CONFIRMED.include?(act)
+
             ButtonForm(
-              action: path(:admin_act_on_set_job, set: @job.set, jid: @job.jid, act:), label: t(LABELS.fetch(act)),
-              icon: ICONS.fetch(act), variant: (:warn if WARNED.include?(act)), morph: true,
-              confirm: (t(CONFIRMS[act], job: @job.name) if CONFIRMS.key?(act)), hidden: { return_to: @return_to },
+              action: path(:admin_act_on_set_job, set: @job.set, jid: @job.jid, act:), icon: ICONS.fetch(act),
+              label: t([LABELS, act].join(".")), variant: (:warn if WARNED.include?(act)), morph: true, confirm:,
+              hidden: { return_to: @return_to },
             )
           end
         end

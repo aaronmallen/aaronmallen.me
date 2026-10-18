@@ -21,7 +21,7 @@ module Activity
       end
 
       def dead_jobs
-        dead_set.call.first(LIMIT).map { Structs::SetJob.from("dead", it) }
+        dead_set.call.first(LIMIT).map { Structs::SetJob.from(Blog::Types::JobSetName["dead"], it) }
       rescue RedisClient::Error
         []
       end

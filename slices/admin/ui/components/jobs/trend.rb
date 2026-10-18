@@ -33,8 +33,6 @@ module Admin
             div(class: "jobs-bars", role: "img", aria: { label: }) { @days.each { bar(it, peak) } }
           end
 
-          def count(number) = Blog::Helpers::Figures.count(number)
-
           def height(part, whole) = "height: #{Blog::Helpers::Figures.share(part, whole)}%"
 
           def said(day)

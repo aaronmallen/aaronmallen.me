@@ -15,8 +15,6 @@ module Admin
 
           private
 
-          def count(number) = Blog::Helpers::Figures.count(number)
-
           def finished
             at = @health.last_job_at
             return t(".no_job") unless at

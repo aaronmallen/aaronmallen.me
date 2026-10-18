@@ -10,7 +10,7 @@ module Admin
           def view_template
             empty = t(".none") if @queues.empty?
 
-            Card(as: :aside, title: t(".title"), note: Blog::Helpers::Figures.count(@queues.size), empty:) do
+            Card(as: :aside, title: t(".title"), note: count(@queues.size), empty:) do
               @queues.each { queue(it) }
               Hint { t(".hint") }
             end
@@ -24,13 +24,7 @@ module Admin
             sub = waiting ? t(".waited", for: Blog::Helpers::Figures.elapsed(found.latency)) : t(".empty")
 
             ListItem(title: found.name, href:, sub:) do
-              span(class: ["jobs-queue-size", tone(found.latency)]) { Blog::Helpers::Figures.count(found.size) }
-            end
-          end
-
-          def tone(latency)
-            if latency >= Health::STUCK then Health::BAD
-            elsif latency >= Health::LATE then Health::WARN
+              span(class: ["jobs-queue-size", Health.tone(found.latency)]) { count(found.size) }
             end
           end
         end

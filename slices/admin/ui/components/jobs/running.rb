@@ -6,7 +6,6 @@ module Admin
       module Jobs
         class Running < Component
           LATE = 120
-          STUCK = 600
 
           prop :processes, Blog::Types::Array.of(Blog::Types::Instance(Data))
 
@@ -45,7 +44,7 @@ module Admin
 
             ListItem(title: found.name, href: nil, sub: nil) do |item|
               item.meta { job_meta(found) }
-              span(class: ["jobs-ran", tone(ran)]) { Blog::Helpers::Figures.elapsed(ran) }
+              span(class: ["jobs-ran", Health.tone(ran, late: LATE)]) { Blog::Helpers::Figures.elapsed(ran) }
             end
           end
 
@@ -77,12 +76,6 @@ module Admin
             if found.stopping? then Pill(color: :orange) { t(".stopping") }
             elsif found.jobs.any? then Pill(color: :green) { t(".working") }
             else Pill(color: :sand) { t(".quiet") }
-            end
-          end
-
-          def tone(seconds)
-            if seconds >= STUCK then Health::BAD
-            elsif seconds >= LATE then Health::WARN
             end
           end
         end

@@ -38,8 +38,6 @@ module Admin
 
           def code_hint = t("ui.components.links.link_form.code_hint", host: Helpers::ShareLink.host)
 
-          def count(value) = Blog::Helpers::Figures.count(value)
-
           def delete_form
             Form(
               id: self.class.delete_id(@group), action: path(:admin_delete_file_group, id: @group.id),

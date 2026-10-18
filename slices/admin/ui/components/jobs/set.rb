@@ -8,10 +8,7 @@ module Admin
           KEYS = Blog::Types::JobSetName.values.to_h do |name|
             [name, { empty: ".empty.#{name}", hint: ".hints.#{name}", title: ".titles.#{name}" }.freeze]
           end.freeze
-          PRIMARY = { "retries" => "retry", "dead" => "retry", "scheduled" => "run" }.transform_values do |act|
-            { act:, label: ".acts.#{act}" }.freeze
-          end.freeze
-          SOONEST_FIRST = %w[retries scheduled].freeze
+          SETS = ::Activity::Repos::JobQueries::SETS
 
           def self.id(name) = "jobs-#{name}"
 
@@ -27,7 +24,10 @@ module Admin
 
           private
 
-          def count(number) = Blog::Helpers::Figures.count(number)
+          def dead_times(found)
+            stamp(".died", found.at, "jobs-failed")
+            span { retries(found) } if found.retries
+          end
 
           def drawer_path(found)
             query = @set.all? ? { set: name, **@set.jobs.query } : {}
@@ -72,7 +72,7 @@ module Admin
 
           def keys = KEYS.fetch(name)
 
-          def labels = SOONEST_FIRST.include?(name) ? { newer: t(".sooner"), older: t(".later") } : {}
+          def labels = SETS.fetch(name)[:newest_first] ? {} : { newer: t(".sooner"), older: t(".later") }
 
           def more
             return Pager(page: @set.jobs, href: ->(query) { jobs_path(set: name, **query) }, **labels) if @set.all?
@@ -86,35 +86,30 @@ module Admin
           def name = @set.name
 
           def primary(found)
-            act, label = PRIMARY.fetch(name).values_at(:act, :label)
+            act = SETS.fetch(name)[:primary]
+            label = t([".acts", act].join("."), name: found.name)
 
             ButtonForm(
-              action: path(:admin_act_on_set_job, set: name, jid: found.jid, act:), label: t(label, name: found.name),
-              icon: SetActs::ICONS.fetch(act), icon_only: true, morph: true, hidden: { return_to: request.fullpath },
+              action: path(:admin_act_on_set_job, set: name, jid: found.jid, act:), label:, icon: SetActs::ICONS.fetch(act),
+              icon_only: true, morph: true, hidden: { return_to: request.fullpath },
             )
           end
 
           def retries(found) = t(".retries", count: found.retries, max: found.max_retries)
 
-          def retry_times(found)
+          def retries_times(found)
             span(class: "jobs-retrying") { retries(found) }
             stamp(".failed", found.last_failed_at) if found.last_failed_at
             stamp(".next", found.at)
           end
 
+          def scheduled_times(found) = stamp(".runs", found.at)
+
           def stamp(key, at, tone = nil)
             span(class: tone) { Stamped(text: t(key, at: Stamped::MARK), at:, format: :short) }
           end
 
-          def times(found)
-            case name
-              when "retries" then retry_times(found)
-              when "dead"
-                stamp(".died", found.at, "jobs-failed")
-                span { retries(found) } if found.retries
-              else stamp(".runs", found.at)
-            end
-          end
+          def times(found) = send(:"#{name}_times", found)
         end
       end
     end

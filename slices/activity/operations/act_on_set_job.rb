@@ -3,12 +3,12 @@
 module Activity
   module Operations
     class ActOnSetJob < Blog::Operation
-      ACTS = { "retries" => %w[retry kill delete], "dead" => %w[retry discard], "scheduled" => %w[run delete] }.freeze
+      SETS = Repos::JobQueries::SETS
 
-      include Deps[dead_set: "sidekiq.dead_set", retry_set: "sidekiq.retry_set", scheduled_set: "sidekiq.scheduled_set"]
+      include Deps[**Repos::JobQueries.set_deps]
 
       def call(set, jid, act)
-        step Failure(:unknown_act) unless ACTS.fetch(set, []).include?(act)
+        step Failure(:unknown_act) unless SETS.dig(set, :acts)&.include?(act)
 
         job = step found(step(lookup(set, jid)))
         message = step found(step(queued { taken(job) }))
@@ -27,11 +27,11 @@ module Activity
         end
       end
 
-      def lookup(set, jid) = queued { sets.fetch(set).call.find_job(jid) }
+      def lookup(set, jid) = queued { sorted_sets.fetch(set).call.find_job(jid) }
 
       def retried(item) = item["retry_count"] ? item.merge("retry_count" => item["retry_count"] - 1) : item
 
-      def sets = { "retries" => retry_set, "dead" => dead_set, "scheduled" => scheduled_set }
+      def sorted_sets = SETS.keys.to_h { [it, public_send(:"#{it}_set")] }
 
       def taken(job)
         message = nil

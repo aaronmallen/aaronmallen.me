@@ -6,7 +6,6 @@ module Admin
       module Settings
         class CronEntryMenu < View
           ACTS = Components::Jobs::CronActs
-          LABELS = { "enable" => ".enable", "pause" => ".pause" }.freeze
 
           layout nil
 
@@ -36,7 +35,7 @@ module Admin
 
             menu.post(t(".run"), action: path(:admin_run_cron_entry, name:), icon: ACTS::RUN_ICON, disabled:)
             action = path(:admin_switch_cron_entry, name:, switch:)
-            menu.post(t(LABELS.fetch(switch)), action:, icon: ACTS::SWITCH_ICONS.fetch(switch), disabled:)
+            menu.post(t([".switches", switch].join(".")), action:, icon: ACTS::SWITCH_ICONS.fetch(switch), disabled:)
           end
         end
       end

@@ -21,8 +21,6 @@ module Admin
 
           private
 
-          def count(number) = Blog::Helpers::Figures.count(number)
-
           def job(found)
             ListItem(title: found.name, href: nil, sub: nil) do |item|
               item.meta { p(class: "jobs-args", title: found.arguments) { found.arguments } }
