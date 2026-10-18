@@ -83,6 +83,17 @@ RSpec.describe "mise run release", type: :script do
     MARKDOWN
   end
 
+  shared_examples "a refusal" do |reason|
+    it "exits non-zero, says why and makes no new tag", :aggregate_failures do
+      tags = git("tag", "--list")
+      output, status = release("2026-10-14")
+
+      expect(status).not_to be_success
+      expect(output).to include(reason)
+      expect(git("tag", "--list")).to eq(tags)
+    end
+  end
+
   describe "naming" do
     context "with the tags in #382" do
       before { tag(*Hanami.app.root.join("spec/fixtures/tags.txt").readlines(chomp: true)) }
@@ -180,17 +191,6 @@ RSpec.describe "mise run release", type: :script do
       expect(output.lines.last.chomp).to eq("CI unknown")
     end
 
-    shared_examples "a refusal" do |reason|
-      it "exits non-zero, says why and makes no new tag", :aggregate_failures do
-        tags = git("tag", "--list")
-        output, status = release("2026-10-14")
-
-        expect(status).not_to be_success
-        expect(output).to include(reason)
-        expect(git("tag", "--list")).to eq(tags)
-      end
-    end
-
     context "when the target already carries a version tag" do
       before { git("tag", "--annotate", "26.9.4", "--message", "26.9.4", target) }
 
@@ -238,6 +238,36 @@ RSpec.describe "mise run release", type: :script do
         expect(output).to include("Skipped the CI check on #{target}.")
         expect(git("rev-parse", "26.10.0^{commit}").chomp).to eq(target)
       end
+    end
+  end
+
+  context "with a spec that names a migration" do
+    before do
+      init_git
+      write_changelog("26.10.0")
+      FileUtils.mkdir_p([File.join(repo, "config/db/migrate"), File.join(repo, "spec/db")])
+      commit("Add a migration", file: "config/db/migrate/20261001000000_add_tasks.rb")
+      commit("Add another", file: "config/db/migrate/20261002000000_add_tags.rb")
+      File.write(File.join(repo, "spec/db/tasks_spec.rb"), "config/db/migrate/20261001000000_add_tasks.rb")
+      File.write(File.join(repo, "spec/db/tags_spec.rb"), "20261002000000")
+      commit("Add the specs")
+    end
+
+    context "when a tag holds the migration" do
+      before { git("tag", "--annotate", "26.9.4", "--message", "26.9.4", "HEAD~2") }
+
+      it_behaves_like "a refusal", "spec/db/tasks_spec.rb"
+
+      it "refuses a dry run too, and names only the specs of shipped migrations", :aggregate_failures do
+        output, status = release("--dry-run", "2026-10-14")
+
+        expect(status).not_to be_success
+        expect(output.lines.map(&:chomp).drop(1)).to eq(["spec/db/tasks_spec.rb"])
+      end
+    end
+
+    it "goes on while no tag holds the migration" do
+      expect(release("--dry-run", "2026-10-14").last).to be_success
     end
   end
 

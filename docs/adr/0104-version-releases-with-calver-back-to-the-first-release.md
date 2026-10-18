@@ -43,7 +43,8 @@ the old lightweight one, so a checkout of `60471328` with its tags reads `26.10.
 
 **A mise task makes the next tag.** `mise run release` reads the tags and the UTC date, checks that CI passed on the
 commit, and makes the annotated tag (#1383). It never pushes. It prints the push command, and the owner pushes the
-tag by hand. `--dry-run` prints the version, the commit and its CI state and makes nothing.
+tag by hand. `--dry-run` prints the version, the commit and its CI state and makes nothing. Both refuse while a
+spec names a migration a tag already holds (#1799).
 
 **The cutover deploys nothing.** Every `26.x` tag sorts above every `1.x` tag, so the eight CalVer tags pushed bare
 would deploy `26.10.2`, then walk the site back one release per tick. Before any reaches GitHub, all eight go into

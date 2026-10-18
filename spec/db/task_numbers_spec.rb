@@ -2,7 +2,6 @@
 
 RSpec.describe "Task numbers", type: :app do
   let(:db) { Hanami.app["db.rom"].gateways[:default].connection }
-  let(:path) { Hanami.app.root.join("config/db/migrate/20261015010000_add_number_to_tasks.rb") }
   let(:pod) { create(:project).id }
   let(:com) { create(:project).id }
 
@@ -85,30 +84,6 @@ RSpec.describe "Task numbers", type: :app do
     db[:tasks].where(id: task).update(project_id: pod)
 
     expect(number(task)).to eq(3)
-  end
-
-  describe "the migration" do
-    let(:at) { Time.utc(2026, 1, 1) }
-
-    def migrate_again
-      view = migration(Hanami.app.root.join("config/db/migrate/20261016001466_create_public_search_documents.rb"))
-      numbers = migration(path)
-      [[view, :down], [numbers, :down], [numbers, :up], [view, :up]].each { |m, dir| m.apply(db, dir) }
-    end
-
-    def migration(file)
-      ROM::SQL.with_gateway(Hanami.app["db.rom"].gateways[:default]) { load file.to_s }
-      Sequel::Migration.descendants.last
-    end
-
-    it "numbers every task from 1 in each scope by created_at, ties to the lower id" do
-      ids = [pod, pod, nil, pod, nil].zip([60, 0, 60, 0, 0]).map do |project_id, s|
-        task(project_id, created_at: at + s)
-      end
-      migrate_again
-
-      expect(ids.map { number(it) }).to eq([3, 1, 2, 2, 1])
-    end
   end
 
   describe "two tasks created at once", :commits do

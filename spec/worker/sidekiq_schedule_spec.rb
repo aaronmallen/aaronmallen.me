@@ -6,11 +6,6 @@ RSpec.describe "The worker's schedule", type: :app do
   let(:config) { sidekiq_config }
   let(:schedule) { config.dig(:scheduler, :schedule) }
 
-  def backfilled
-    Hanami.app.root.join("config/db/migrate/20261017230003_add_schedule_key_to_performance_jobs.rb").read
-          .scan(/^\s+"([\w:]+)" => "(\w+)",$/)
-  end
-
   def cron(name) = Fugit::Cron.parse(schedule.fetch(name).fetch("cron"))
 
   it "names a scheduled job that exists in every entry" do
@@ -21,14 +16,6 @@ RSpec.describe "The worker's schedule", type: :app do
 
   it "describes every entry's schedule in words for the jobs tab" do
     expect(schedule.values.map { it["description"] }).to all(match(/\S/))
-  end
-
-  it "backfills only schedule keys the schedule still gives a class one entry runs" do
-    single = schedule.values.group_by { it.fetch("class") }.filter_map do |job, (entry, *rest)|
-      [job, Object.const_get(job).check_in_name(*entry["args"])] if rest.empty?
-    end
-
-    expect([backfilled.empty?, backfilled - single]).to eq([false, []])
   end
 
   it "never retries a scheduled job, since its next run tries again" do
