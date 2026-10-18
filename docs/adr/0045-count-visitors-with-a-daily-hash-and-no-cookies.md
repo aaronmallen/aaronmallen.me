@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [analytics, public, admin, assets, db]
 superseded-by: "0102"
 issue: AA-613
-amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210", "#183", "#371"]
+amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210", "#183", "#371", "#1772"]
 tags: [analytics, privacy, beacon, retention, geoip, throttle]
 ---
 
@@ -56,7 +56,8 @@ may come from one such address hash, counted under an advisory lock (AA-714).
 
 **Country and retention.** A local copy of the MaxMind GeoLite2 Country database gives each visitor's country, and a
 weekly job refreshes it with a license key from settings. We keep raw events for 90 days and daily rollups forever.
-The nightly rollup builds every day that has none, rebuilding each day whole (AA-485), and the prune stops at the
+The nightly rollup builds every day that has none, rebuilding each day whole (AA-485), and builds the day before
+yesterday again for the reads and clicks that land on its views after the last run (#1772). The prune stops at the
 first day with no rollup. The dashboard reads today from raw events.
 
 **What #210 added.** [ADR 0087][0087] widens what we keep: a second visitor hash salted by the calendar month, a
@@ -92,7 +93,7 @@ Visitors without JavaScript, or with strict blockers, are not counted. The numbe
 much. A person who comes back tomorrow is a new visitor, so counts across days are sums of daily counts.
 
 A read sent after a second midnight matches no view, since the hash has turned twice. The view stays with no read
-time. A read that lands on yesterday's view after the nightly rollup reaches the raw event but not that day's rollup.
+time. A read that lands on yesterday's view after the nightly rollup reaches that day's rollup a night late.
 
 Readers behind one shared address share one throttle, and past it their views are dropped.
 

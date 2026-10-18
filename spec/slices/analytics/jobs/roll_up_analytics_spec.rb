@@ -473,6 +473,33 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     end
 
     it "leaves a day it already rolled up alone" do
+      rollup(day - 2, views: 5, visitors: 3)
+      rollup(day - 1)
+      event(on: day - 2)
+      roll_up
+
+      expect(rolled(day - 2)).to have_attributes(views: 5, visitors: 3)
+    end
+  end
+
+  describe "the day before yesterday" do
+    describe "after the reads and clicks that landed since the last run" do
+      before do
+        rollup(day - 1, views: 1, visitors: 1, read_seconds: 0)
+        click(event(on: day - 1, path: "/writing/hello", read_seconds: 42))
+        roll_up
+      end
+
+      it "rolls up its read time again" do
+        expect(rolled(day - 1)).to have_attributes(views: 1, read_seconds: 42)
+      end
+
+      it "rolls up its clicks again" do
+        expect(clicks_of("/writing/hello", day - 1)).to eq([["docs.example", "/guide", 1]])
+      end
+    end
+
+    it "leaves it alone once the raw visits no longer hold it" do
       rollup(day - 1, views: 5, visitors: 3)
       roll_up
 

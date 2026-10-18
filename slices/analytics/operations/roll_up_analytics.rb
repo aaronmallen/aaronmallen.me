@@ -18,12 +18,18 @@ module Analytics
 
       private
 
-      def oldest_pending = [rollup_queries.newest_day&.next_day, event_queries.oldest_day].compact.max
+      def first_pending(yesterday)
+        oldest = event_queries.oldest_day
+        unrolled = [rollup_queries.newest_day&.next_day, oldest].compact.max || yesterday
+        late_beacons = [yesterday - 1, oldest || yesterday].max
+
+        [unrolled, late_beacons, yesterday].min
+      end
 
       def pending
         yesterday = Blog::TimeZone.today - 1
 
-        ([oldest_pending || yesterday, yesterday].min..yesterday).to_a
+        (first_pending(yesterday)..yesterday).to_a
       end
 
       def store_reach(days)

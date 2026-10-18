@@ -423,6 +423,41 @@ RSpec.describe "Visits", type: :request do
       expect(stored.first).to have_attributes(read_seconds: 42)
     end
 
+    describe "after the night's rollup" do
+      let(:day) { Blog::TimeZone.today }
+
+      def click = beacon({ kind: "click", path: "/writing/hello", view_token: token("first"), **link })
+
+      def clock(time) = allow(Time).to receive(:now).and_return(time)
+
+      def link = { link_host: "docs.example", link_path: "/guide" }
+
+      def roll_up_at(time)
+        clock(time)
+        Analytics::Jobs::RollUpAnalytics.new.perform
+      end
+
+      before do
+        clock(at(day, 23, 40))
+        view
+        roll_up_at(at(day + 1, 1))
+        clock(at(day + 1, 8))
+        read(42)
+        click
+        roll_up_at(at(day + 2, 1))
+      end
+
+      it "counts the read time on the view's day" do
+        expect(Analytics::Slice["relations.analytics_rollups"].by_pk(day).one).to include(read_seconds: 42)
+      end
+
+      it "counts the click on the view's day" do
+        clicks = Analytics::Slice["relations.analytics_rollup_clicks"].on(day).to_a
+
+        expect(clicks.map { it.to_h.values_at(:link_host, :link_path, :clicks) }).to eq([["docs.example", "/guide", 1]])
+      end
+    end
+
     it "stores the read time after a day the clocks went forward" do
       across_midnight(Date.new(2027, 3, 15))
 

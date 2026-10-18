@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375", "#1469", "#1470", "#1565"]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375", "#1469", "#1470", "#1565", "#1772"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures, check-ins]
 ---
 
@@ -42,8 +42,8 @@ picks up what this one missed. A job that records a failure in `sync_states` and
 in its `record_crash`, which records it as `crashed` (#1219, moved from the base by #1565). Each scheduled operation
 finds its work again on every run. `PostRepo#due_scheduled` and `SocialPostRepo#due_scheduled` take every row due by
 now, the commit finder starts from the newest stored commit and every failure recorded against a repository, the
-rollup walks every day since its newest rollup, the health sync reads again from two days before its failure began
-(#1114), and the reapers delete everything past its time.
+rollup walks every day since its newest rollup and the day before yesterday (#1772), the health sync reads again from
+two days before its failure began (#1114), and the reapers delete everything past its time.
 
 **A per-item job retries a few times.** `Blog::Job` sets `retry: 3`, so a job that names no count takes 3 (#1690).
 `BackfillRepoCommits` takes 3, as `CreditAgents` has since #926, and
