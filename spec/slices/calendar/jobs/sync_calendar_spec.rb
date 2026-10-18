@@ -87,6 +87,8 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
       stub_events("work@example.com", *theirs)
     end
 
+    it_behaves_like "a sync that steps aside while it runs"
+
     it "keeps each account's calendars, naming them as I do and noting which take writes" do
       run
 

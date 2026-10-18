@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, record, contact, mcp, analytics, social, tasks, search, security]
 issue: AA-644
-amended: [AA-823, "#200", "#585", "#988", "#957", "#1468", "#1759"]
+amended: [AA-823, "#200", "#585", "#988", "#957", "#1468", "#1759", "#1789"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -32,7 +32,10 @@ Every guard against a race or a flood lives in Postgres, beside the rows it guar
 Since #988 it takes a name, such as `"commit import"`, and locks on `hashtext` of it, so no lock id is numbered by
 hand. When another run holds the lock, it hands back `Failure(:lock_busy)`,
 `Record::Repos::CommitMutations#with_import_lock` passes it on,
-`Record::Jobs::ImportCommits` drops the tick, and the next one catches up.
+`Record::Jobs::ImportCommits` drops the tick, and the next one catches up. Since #1789 the Gmail, calendar and health
+syncs take one too, through `Record::SyncBookkeeping#record_locked_sync`, which locks on `"<sync> sync"` with
+`Record::Repos::SyncStateMutations#with_sync_lock`. Gmail moves its history cursor only after it stores every changed
+thread, so a run that outlasts its five minutes would otherwise send the next one to fetch the same threads again.
 
 **A transaction advisory lock around a count and a write, for a step that must not run twice at once.** The throttle
 claims on `Contact::Relations::Messages`, `MCP::Relations::OAuthClients`, `Analytics::Relations::AnalyticsEvents`,
@@ -50,7 +53,7 @@ inserts on `sprint_date` and the loser does nothing. `Social::Relations::SocialP
 A new lock key follows the ones beside it. A lock on a sender takes two keys, `hashtext` of the table and `hashtext`
 of the sender. A lock on a whole table takes the table key alone. A lock on a job takes a name. #957 found three
 in use: `IMPORT_LOCK` in `CommitMutations` and in `PullRequestMutations`, and `SYNC_LOCKS`, one for each issue
-provider, in `TaskSourceMutations`.
+provider, in `TaskSourceMutations`. #1789 added `with_sync_lock` in `SyncStateMutations`, named for the sync.
 
 ## Alternatives
 

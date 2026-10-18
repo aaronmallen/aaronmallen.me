@@ -4,7 +4,7 @@ module Record
   module SyncBookkeeping
     include Dry::Monads[:result]
 
-    def self.included(job) = job.include(Deps["operations.record_sync_outcome"])
+    def self.included(job) = job.include(Deps["operations.record_sync_outcome", "repos.sync_state_mutations"])
 
     private
 
@@ -18,6 +18,8 @@ module Record
     rescue StandardError => e
       record_and_raise(sync, Failure([reason, e.message]), e)
     end
+
+    def record_locked_sync(sync, &) = record_sync(sync) { sync_state_mutations.with_sync_lock(sync, &) }
 
     def record_outcome(sync, result)
       case result

@@ -29,6 +29,8 @@ module Record
         reason
       end
 
+      def with_sync_lock(sync, &) = sync_states.with_advisory_lock("#{sync} sync", &)
+
       private
 
       def failure_row(sync, repo) = sync_states.of(FAILURE, sync:, repo:)

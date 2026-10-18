@@ -111,6 +111,8 @@ RSpec.describe Mail::Jobs::SyncGmail do
       Mail::Jobs::BackfillGmail.jobs.clear
     end
 
+    it_behaves_like "a sync that steps aside while it runs"
+
     describe "with new mail" do
       def stored_message
         {

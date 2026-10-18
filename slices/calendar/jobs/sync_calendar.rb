@@ -8,7 +8,7 @@ module Calendar
       include Record::SyncBookkeeping
       include Deps["operations.sync_calendar"]
 
-      def perform = record_sync(SYNC) { sync_calendar.call }
+      def perform = record_locked_sync(SYNC) { sync_calendar.call }
     end
   end
 end

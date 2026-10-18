@@ -8,7 +8,7 @@ module Mail
       include Record::SyncBookkeeping
       include Deps["operations.sync_gmail"]
 
-      def perform = record_sync(SYNC) { sync_gmail.call }
+      def perform = record_locked_sync(SYNC) { sync_gmail.call }
     end
   end
 end

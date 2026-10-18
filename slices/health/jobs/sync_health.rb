@@ -9,7 +9,7 @@ module Health
       include Record::SyncBookkeeping
       include Deps["operations.sync_health", sync_state_queries: "record.repos.sync_state_queries"]
 
-      def perform = record_sync(SYNC) { Blog::TimeZone.today.then { sync_health.call(first_day(it), it) } }
+      def perform = record_locked_sync(SYNC) { Blog::TimeZone.today.then { sync_health.call(first_day(it), it) } }
 
       private
 

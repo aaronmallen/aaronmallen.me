@@ -88,6 +88,8 @@ RSpec.describe Health::Jobs::SyncHealth do
   describe "with Google Health connected" do
     before { connect_google }
 
+    it_behaves_like "a sync that steps aside while it runs"
+
     describe "a day Google holds" do
       before do
         stub_google_health(**full_day)
