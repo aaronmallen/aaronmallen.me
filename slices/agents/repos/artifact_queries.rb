@@ -7,7 +7,9 @@ module Agents
 
       def count_by_type = artifacts.tally(:type, Blog::Types::ArtifactType.values)
 
-      def current_versions(ids) = artifact_versions.current.where(artifact_id: ids).to_a.to_h { [it.artifact_id, it] }
+      def current_versions(ids)
+        artifact_versions.current_listed.where(artifact_id: ids).to_a.to_h { [it.artifact_id, it] }
+      end
 
       def latest_listed(page, **) = page.fill(found(**).latest_version_first.paged(page).to_a)
 

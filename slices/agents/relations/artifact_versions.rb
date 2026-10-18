@@ -10,6 +10,8 @@ module Agents
 
       def current = join(:artifacts, id: :artifact_id, version: :number)
 
+      def current_listed = current.select(*LISTED.map { self[it].qualified })
+
       def listed = select(*LISTED).order(self[:number].asc)
 
       def session_listed = select(:id, :artifact_id, :number, :session_id).order(self[:id].asc)

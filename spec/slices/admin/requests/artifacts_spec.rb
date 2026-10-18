@@ -54,6 +54,14 @@ RSpec.describe "Admin artifacts", type: :request do
         .to match([/\Aplan · v2 · .+ by you · #db\z/, /\Anotes · v1 · .+ by you\z/])
     end
 
+    it "dates and credits each row from its current version" do
+      agents(:update_artifact, notes.id, { title: notes.title, type: "notes", tags: "", body: "Use Valkey", **author })
+      age(notes.id, 2, Time.now - Time.utc(2026, 10, 1, 12))
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".li-sub", exact_text: "notes · v2 · Oct 1, 2026 by Anthropic claude-opus-5-5")
+    end
+
     it "filters by type" do
       get "/admin/agents/artifacts", type: "notes"
 
