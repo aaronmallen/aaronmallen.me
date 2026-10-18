@@ -3,9 +3,16 @@
 module Activity
   module Repos
     class AttentionQueries < Blog::DB::Repo
-      DEAD_JOB_LIMIT = 5
+      LIMIT = 5
 
       include Deps["settings", dead_set: "sidekiq.dead_set"]
+
+      def capped(now: Time.now)
+        rows = stalled(now:)
+        kept = rows.group_by(&:kind).values.flat_map { it.first(LIMIT) }.sort_by(&:rank)
+
+        { rows: kept, counts: Blog::Types::AttentionKind.values.to_h { [it, 0] }.merge(rows.map(&:kind).tally) }
+      end
 
       def dead_job_count
         dead_set.call.size
@@ -14,7 +21,7 @@ module Activity
       end
 
       def dead_jobs
-        dead_set.call.first(DEAD_JOB_LIMIT).map { Structs::SetJob.from("dead", it) }
+        dead_set.call.first(LIMIT).map { Structs::SetJob.from("dead", it) }
       rescue RedisClient::Error
         []
       end

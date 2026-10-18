@@ -53,7 +53,7 @@ module Admin
         dead_jobs = attention_queries.dead_jobs
 
         {
-          rows: attention_queries.stalled(now:),
+          **attention_queries.capped(now:),
           broken_links:,
           failures:,
           dead_jobs: unshown(dead_jobs, failures),

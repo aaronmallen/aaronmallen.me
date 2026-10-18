@@ -841,6 +841,18 @@ en:
           one: "%{count} waiting →"
           other: "%{count} waiting →"
         webmentions: "Webmentions"
+      attention_more:
+        kinds:
+          broken_link: "Failing links"
+          carried: "Carried tasks"
+          draft: "Stale drafts"
+          journal: "Journal"
+          lapsing: "Lapsing connections"
+          new_device: "New devices"
+          someday: "Someday tasks"
+        more:
+          one: "%{count} more →"
+          other: "%{count} more →"
       bulk_bar:
         all: "Select all"
         tag: "Tag"

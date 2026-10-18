@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351", "#353", "#655", "#706", "#869", "#868"]
+amended: ["#351", "#353", "#655", "#706", "#869", "#868", "#1792"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -72,6 +72,11 @@ ignores it.
 A broken link (#868) joins as a row per `post_link_checks` row of a published post. Its record id is the check's
 id, so a snooze holds one link, and the row carries the post's id, the URL, the reason and the failures in a row.
 The `broken_link_failures` setting holds the limit, two by default. The other kinds leave those four columns null.
+
+Broken links and someday tasks only grow, so #1792 caps the list. `capped` keeps the worst five rows of each kind,
+still worst first, and counts every row of each kind. The card draws a line for each kind with rows past the five,
+saying how many more and linking to where they live, and `list_attention` returns the counts as `attention_counts`.
+`stalled` still reads every row, so a row past the five keeps its menu and its snooze.
 
 Dead jobs stay out of the view. #869 reads them from Sidekiq's dead set in a second `activity` query, as
 [ADR 0138][0138] says.

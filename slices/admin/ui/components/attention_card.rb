@@ -9,6 +9,7 @@ module Admin
         JOURNAL_ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('journal_entry')}".freeze
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
+        prop :counts, Blog::Types::Hash.map(Blog::Types::AttentionKind, Blog::Types::Integer)
         prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
         prop :dead_jobs, Blog::Types::Array.of(Blog::Types::Instance(Data))
         prop :broken_links, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
@@ -28,6 +29,7 @@ module Admin
               more_dead_jobs: @more_dead_jobs, webmentions: @webmentions,
             )
             @rows.each { row(it) }
+            AttentionMore(more:)
           end
         end
 
@@ -74,6 +76,8 @@ module Admin
             snooze(row)
           end
         end
+
+        def more = @counts.merge(@rows.map(&:kind).tally) { |_, all, shown| all - shown }.select { _2.positive? }
 
         def move(row)
           list = t(Helpers::TaskLists.title(NEXT))
@@ -132,7 +136,7 @@ module Admin
           lines = [@inbox, @failed_social_posts.size, @webmentions, @more_dead_jobs, @broken_links.values.sum]
                   .count(&:positive?)
 
-          @rows.size + @failures.size + @dead_jobs.size + lines
+          @rows.size + @failures.size + @dead_jobs.size + lines + more.size
         end
       end
     end

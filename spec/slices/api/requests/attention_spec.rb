@@ -184,6 +184,34 @@ RSpec.describe "API attention", :frozen_clock, type: :request do
     end
   end
 
+  describe "more rows of a kind than the card holds" do
+    before do
+      7.times { create(:task, :someday, title: "Someday #{it}", updated_at: days_ago(100 + it)) }
+      create(:post, :draft, title: "Old draft", updated_at: days_ago(60))
+      create(:journal_entry, entry_date: today)
+    end
+
+    let(:worst) { ["Someday 6", "Someday 5", "Someday 4", "Someday 3", "Someday 2"] }
+
+    it "returns the worst five of each kind" do
+      expect(rows.map { it.fetch("title") }).to eq(["Old draft", *worst])
+    end
+
+    it "returns every kind's total" do
+      expect(read.fetch("attention_counts")).to eq(
+        "broken_link" => 0, "carried" => 0, "draft" => 1, "journal" => 0, "lapsing" => 0, "new_device" => 0,
+        "someday" => 7,
+      )
+    end
+
+    it "shows the worst five on the card and links to the rest", :aggregate_failures do
+      expect(card_titles).to eq(["Old draft", *worst])
+
+      line = Capybara.string(last_response.body).find("section.card[data-attention] a.today-line", text: "Someday")
+      expect([line[:href], line.text]).to eq(["/admin/tasks?filter=someday", "Someday tasks2 more →"])
+    end
+  end
+
   it "answers the MCP tool with the same JSON" do
     create(:task, carried_count: 3, title: "Carried task")
     create(:post, :draft, title: "Old draft", updated_at: days_ago(45))
