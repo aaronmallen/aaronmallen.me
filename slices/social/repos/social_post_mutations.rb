@@ -81,7 +81,7 @@ module Social
 
       def account(connection) = { connection_id: connection.id, network: connection.provider }
 
-      def by_id(id) = social_posts.combine(:parts, :deliveries).by_pk(id).one
+      def by_id(id) = social_posts.combine(:deliveries, parts: :photos).by_pk(id).one
 
       def lock_due(id, time) = social_posts.due_at(time).by_pk(id).lock(mode: :share).one
 

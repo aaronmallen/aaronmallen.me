@@ -6,6 +6,16 @@ RSpec.describe "API reading a social post", type: :request do
       .create_with_parts(parts: [body], posted_at: nil, status: "draft", targets: %w[mastodon])
   end
 
+  def compose_with_photos
+    keys = Array.new(3) { create(:photo).key }
+    photos = [
+      { part: 2, key: keys[2], alt: "A bird" }, { part: 1, key: keys[1], alt: "A dog" }, { part: 1, key: keys[0] },
+    ]
+    attrs = { parts: %w[one two three], photos:, posted_at: nil, status: "draft", targets: %w[mastodon] }
+
+    [Social::Slice["repos.social_post_mutations"].create_with_parts(**attrs), keys]
+  end
+
   def connect_two_mastodons
     connect_social_networks
     connect_another_mastodon
@@ -67,6 +77,7 @@ RSpec.describe "API reading a social post", type: :request do
       "id" => social_post.id, "status" => "posted", "post_id" => nil, "targets" => %w[mastodon bluesky],
       "posted_at" => social_post.posted_at.utc.iso8601, "created_at" => social_post.created_at.utc.iso8601,
       "updated_at" => social_post.updated_at.utc.iso8601, "parts" => [social_post.parts.first.body],
+      "photos" => [[]],
       "deliveries" => [sent_delivery, waiting_delivery], "suggestion_id" => nil, "suggestion_edits" => [],
       "lengths" => lengths(social_post), "record_links" => {},
     }
@@ -100,6 +111,14 @@ RSpec.describe "API reading a social post", type: :request do
       scheduled = create(:social_post, :scheduled)
 
       expect([draft, scheduled].map { read(it.id).fetch("status") }).to eq(%w[draft scheduled])
+    end
+
+    it "lists each part's photos in order with their key and alt text, and none for a part without" do
+      social_post, keys = compose_with_photos
+
+      first = [{ "key" => keys[1], "alt" => "A dog" }, { "key" => keys[0], "alt" => nil }]
+
+      expect(read(social_post.id).fetch("photos")).to eq([first, [{ "key" => keys[2], "alt" => "A bird" }], []])
     end
 
     it "names the post the social post announces" do
@@ -205,6 +224,12 @@ RSpec.describe "API reading a social post", type: :request do
     it "names each account as GET /api/v1/social_posts/:id does" do
       social_post = create(:social_post, :posted, targets: %w[mastodon])
       connect_two_mastodons.each { deliver(social_post, "mastodon", connection_id: it.id, **sent_counts) }
+
+      expect(trusted(mcp_answer("read_social_post", id: social_post.id))).to eq(read(social_post.id))
+    end
+
+    it "gives each part's photos as GET /api/v1/social_posts/:id does" do
+      social_post, = compose_with_photos
 
       expect(trusted(mcp_answer("read_social_post", id: social_post.id))).to eq(read(social_post.id))
     end

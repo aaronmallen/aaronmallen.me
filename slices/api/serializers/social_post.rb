@@ -8,6 +8,10 @@ module API
       POSTED = Blog::Types::SocialPostStatus["posted"]
       LENGTHS = "for each part in order, its length on each network it targets, counted the way send counts"
       NETWORKS = Blog::Types::NetworkName.values.to_h { [it.to_sym, LENGTH] }
+      PHOTO = Helpers::Schema.object(
+        { key: Helpers::Schema::STRING, alt: Helpers::Schema.nullable(Helpers::Schema::STRING) },
+      )
+      PHOTOS = "for each part in order, its photos in order, each with its key and alt text"
 
       SCHEMA = Helpers::Schema.object(
         {
@@ -19,6 +23,7 @@ module API
           created_at: Helpers::Schema::STAMP,
           updated_at: Helpers::Schema::STAMP,
           parts: { type: "array", items: Helpers::Schema::STRING, description: "the text of each part, in order" },
+          photos: Helpers::Schema.list(Helpers::Schema.list(PHOTO)).merge(description: PHOTOS),
           deliveries: Helpers::Schema.list(SocialDelivery.reference).merge(
             description: DELIVERIES,
           ),
@@ -46,6 +51,10 @@ module API
       end
 
       def parts(social_post) = social_post.parts.map(&:body)
+
+      def photos(social_post)
+        social_post.parts.map { |part| part.photos.map { { key: it.photo_key, alt: it.alt_text } } }
+      end
 
       def targets(social_post) = social_post.targets.to_a
 
