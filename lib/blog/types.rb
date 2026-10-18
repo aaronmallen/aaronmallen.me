@@ -49,6 +49,9 @@ module Blog
     ActivityScreenKind = Types::String.enum(*ActivityKind.values - %w[project sprint suggestion])
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(30)
+    ArtifactType = Types::String.enum(
+      "plan", "spec", "research", "handoff", "notes", "review", "postmortem", "other",
+    )
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link", "lapsing")
     Checkbox = Types::Bool.constructor { |value| value == Blog::Constants::CHECKED }
     ClosedTaskSourceState = Types::String.enum("completed", "not_planned", "unassigned")

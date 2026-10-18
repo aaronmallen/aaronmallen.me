@@ -5,6 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
+amended: ["#1745"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 
@@ -34,6 +35,10 @@ read it through its exported read repos and operations and never write its table
 - **Nothing is public.** No public page reads the slice.
 - **Nothing expires.** History, versions and sessions stay. Caps on fact text (1,000 characters) and artifact bodies
   (100,000) keep each row small.
+- **Artifact tags sit in a `text[]` column on `artifacts`**, with a CHECK that holds each one to the tag slug format,
+  not in the shared `tags` table. A join to `tags` would put artifacts on the tag screens and in the tag counts,
+  which the slice stays out of, as it stays out of search. A `tag_name[]` column would carry the domain, but
+  Sequel reads an array of a domain back as a plain string, so the CHECK stands in for it.
 
 ## Alternatives
 

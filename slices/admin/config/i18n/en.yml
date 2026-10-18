@@ -2951,7 +2951,7 @@ en:
           mint: "Mint token"
           placeholder: "Name the client that will use it…"
           scope:
-            agents: "Read and change agent memory"
+            agents: "Read and change agent memory and artifacts"
             delete: "Delete records for good"
             health: "Read health data"
             mail: "Read and sort mail"

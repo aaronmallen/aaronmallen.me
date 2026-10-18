@@ -6,8 +6,8 @@ module API
     class Forward < Action
       AGENTS = Blog::Types::OAuthScope["agents"]
       AGENTS_ENDPOINTS = %w[
-        add_memory_fact create_memory_file edit_memory_fact read_memory read_memory_file remove_memory_fact
-        revert_memory_event
+        add_memory_fact create_artifact create_memory_file edit_memory_fact list_artifacts read_artifact read_memory
+        read_memory_file remove_memory_fact restore_artifact_version revert_memory_event update_artifact
       ].freeze
       DELETE = Blog::Types::OAuthScope["delete"]
       HEALTH = Blog::Types::OAuthScope["health"]
@@ -34,7 +34,7 @@ module API
         "upload_share_group" => PUBLISH,
         **MAIL_ENDPOINTS.to_h { [it, MAIL] },
         **AGENTS_ENDPOINTS.to_h { [it, AGENTS] },
-        "delete_memory_file" => [AGENTS, DELETE],
+        "delete_artifact" => [AGENTS, DELETE], "delete_memory_file" => [AGENTS, DELETE],
       }.freeze
 
       include Deps[build_document: "operations.build_document"] # rubocop:disable Blog/UnusedDeps

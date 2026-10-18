@@ -50,13 +50,14 @@ RSpec.describe "MCP tool scopes", type: :request do
         read_mail_thread snooze_mail_threads tag_mail_threads untag_mail_threads
       ],
       "agents" => %w[
-        add_memory_fact create_memory_file delete_memory_file edit_memory_fact read_memory read_memory_file
-        remove_memory_fact revert_memory_event
+        add_memory_fact create_artifact create_memory_file delete_artifact delete_memory_file edit_memory_fact
+        list_artifacts read_artifact read_memory read_memory_file remove_memory_fact restore_artifact_version
+        revert_memory_event update_artifact
       ],
       "delete" => %w[
-        delete_decision_comment delete_memory_file delete_decision_option delete_journal_entry delete_person delete_post
-        delete_posts delete_saved_view delete_social_post delete_task delete_task_comment delete_task_rule
-        delete_tasks delete_work_entry delete_work_session remove_tag remove_trusted_author
+        delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_journal_entry
+        delete_person delete_post delete_posts delete_saved_view delete_social_post delete_task delete_task_comment
+        delete_task_rule delete_tasks delete_work_entry delete_work_session remove_tag remove_trusted_author
       ],
     }
   end

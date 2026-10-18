@@ -5,9 +5,10 @@ module Agents
     import keys: %w[repos.project_queries], from: :projects
 
     export %w[
-      operations.add_memory_fact operations.create_memory_file operations.delete_memory_file
-      operations.edit_memory_fact operations.load_memory operations.remove_memory_fact
-      operations.revert_memory_event repos.memory_file_queries
+      operations.add_memory_fact operations.create_artifact operations.create_memory_file
+      operations.delete_artifact operations.delete_memory_file operations.edit_memory_fact operations.load_memory
+      operations.remove_memory_fact operations.restore_artifact_version operations.revert_memory_event
+      operations.update_artifact repos.artifact_queries repos.memory_file_queries
     ]
   end
 end
