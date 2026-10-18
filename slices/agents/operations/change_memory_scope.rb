@@ -7,7 +7,7 @@ module Agents
       REFUSALS = CreateMemoryFile::REFUSALS.merge(
         "memory_files_scope_path_index" => [:scope, CreateMemoryFile::TAKEN],
       ).freeze
-      TARGETS = Contracts::MemoryScopeContract::TARGETS.values.to_h { [it, nil] }.freeze
+      CLEARED = Contracts::MemoryScopeContract::TARGETS.values.to_h { [it, nil] }.freeze
 
       include SessionWrite
       include Deps[
@@ -29,7 +29,7 @@ module Agents
 
       def move(id, fields)
         file = step found(memory_file_mutations.by_id_for_update(id))
-        place = { **TARGETS, **fields.except(*AUTHOR) }
+        place = { **CLEARED, **fields.except(*AUTHOR) }
         return if place.all? { |field, value| file[field] == value }
 
         memory_file_mutations.update(id, place)

@@ -56,6 +56,13 @@ RSpec.describe "MCP session tools", type: :request do
     expect(mcp_message).to include("name tasks that exist")
   end
 
+  it "names the idle time that closes a session in the tool's description" do
+    mcp_rpc("tools/list")
+
+    expect(mcp_result.fetch("tools").find { it.fetch("name") == "start_session" }.fetch("description"))
+      .to include("a session no call names for 2 hours closes on its own")
+  end
+
   describe "writes that name a session" do
     let(:session_id) { start.fetch("session_id") }
     let(:file) { create_file("hanami").fetch("id") }

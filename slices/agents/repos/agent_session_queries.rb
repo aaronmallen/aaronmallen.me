@@ -4,6 +4,7 @@ module Agents
   module Repos
     class AgentSessionQueries < Blog::DB::Repo
       CHILDREN = %i[agent_session_tasks agent_session_loads memory_events artifact_versions].freeze
+      IDLE_HOURS = 2
 
       def artifact_writes(session_id) = artifact_versions.where(session_id:).session_writes.to_a
 

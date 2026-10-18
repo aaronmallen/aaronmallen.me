@@ -3,7 +3,7 @@
 module Agents
   module Operations
     class CloseIdleSessions
-      IDLE = 2 * 60 * 60
+      IDLE = Repos::AgentSessionQueries::IDLE_HOURS * 60 * 60
 
       include Deps[agent_session_mutations: "repos.agent_session_mutations"]
 
