@@ -69,7 +69,7 @@ group :lint do
 end
 
 group :test do
-  gem "axe-core-api", "~> 4.13"
+  gem "axe-core-api", "~> 4.14"
   gem "capybara"
   gem "cuprite"
   gem "database_cleaner-sequel"
