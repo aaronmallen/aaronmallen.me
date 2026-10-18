@@ -7,6 +7,7 @@ module Admin
         include Deps[
           "settings",
           api_token_queries: "api.repos.api_token_queries",
+          build_settings_tabs: "operations.build_settings_tabs",
           client_queries: "api.repos.client_queries",
           sighting_queries: "security.repos.sighting_queries",
           sign_in_queries: "security.repos.sign_in_queries",
@@ -18,12 +19,19 @@ module Admin
 
           response.render(
             view,
-            clients: client_queries.connected,
+            **credentials,
             honeybadger_url: settings.honeybadger[:project_url],
-            sightings: sighting_queries.newest_first,
             sign_ins:,
-            tokens: api_token_queries.live,
+            tabs: build_settings_tabs.call,
           )
+        end
+
+        private
+
+        def credentials
+          {
+            clients: client_queries.connected, sightings: sighting_queries.newest_first, tokens: api_token_queries.live,
+          }
         end
       end
     end

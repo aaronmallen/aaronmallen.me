@@ -14,11 +14,12 @@ module Admin
           prop :honeybadger_url, Blog::Types::String.optional
           prop :sightings, ROWS
           prop :sign_ins, Blog::Types::Instance(Blog::Structs::Paged)
+          prop :tabs, Blog::Types::Hash
           prop :tokens, ROWS
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :security, title: t(".heading")) { honeybadger_link if @honeybadger_url }
+            SettingsHead(tab: :security, title: t(".heading"), counts: @tabs) { honeybadger_link if @honeybadger_url }
             p(class: "settings-aside") { t(".sub") }
             div(class: "g-main even") do
               sign_ins

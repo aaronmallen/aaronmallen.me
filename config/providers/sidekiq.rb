@@ -17,7 +17,6 @@ Hanami.app.register_provider :sidekiq do
     register("sidekiq.dead_set") { -> { Sidekiq::DeadSet.new } }
     register("sidekiq.processes") { -> { Sidekiq::ProcessSet.new } }
     register("sidekiq.queue_jobs") { Blog::SidekiqQueuePage }
-    register("sidekiq.queues") { -> { Sidekiq::Queue.all } }
     register("sidekiq.retry_set") { -> { Sidekiq::RetrySet.new } }
     register("sidekiq.scheduled_set") { -> { Sidekiq::ScheduledSet.new } }
     register("sidekiq.set_jobs") { Blog::SidekiqSetPage }

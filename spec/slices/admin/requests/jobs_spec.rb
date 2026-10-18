@@ -60,6 +60,22 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
     end
   end
 
+  describe "one load" do
+    let(:timing_queries) { Performance::Slice["repos.timing_queries"] }
+
+    before do
+      allow(timing_queries).to receive(:last_scheduled_runs).and_call_original
+      replace_component("performance.repos.timing_queries", timing_queries)
+      visit
+    end
+
+    it "reads the stats, the processes and the cron history once each", :aggregate_failures do
+      expect(Sidekiq::Stats).to have_received(:new).once
+      expect(Sidekiq::ProcessSet).to have_received(:new).once
+      expect(timing_queries).to have_received(:last_scheduled_runs).once
+    end
+  end
+
   describe "the last seven days" do
     let(:today) { Time.now.utc.to_date }
 
@@ -400,8 +416,8 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
   describe "queues" do
     let(:queues) do
       [
-        Spec::FakeQueue.new(name: "default", size: 250, latency: 700.0),
-        Spec::FakeQueue.new(name: "mailers", size: 0, latency: 0.0),
+        Sidekiq::Stats::QueueSummary.new(name: "mailers", size: 0, latency: 0.0, paused: false),
+        Sidekiq::Stats::QueueSummary.new(name: "default", size: 250, latency: 700.0, paused: false),
       ]
     end
 
@@ -423,7 +439,7 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
     end
 
     before do
-      allow(Sidekiq::Queue).to receive(:all).and_return(queues)
+      stats(queue_summaries: queues)
       replace_component("sidekiq.queue_jobs", method(:queued))
     end
 

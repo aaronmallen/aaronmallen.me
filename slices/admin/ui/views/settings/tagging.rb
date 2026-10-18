@@ -8,11 +8,12 @@ module Admin
           LIVE_TABLES = (Components::Tags::List::LIVE_TABLES | Components::TaskRules::List::LIVE_TABLES).freeze
 
           prop :rules, Blog::Types::Hash
+          prop :tabs, Blog::Types::Hash
           prop :tags, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :tagging, title: t(".heading"))
+            SettingsHead(tab: :tagging, title: t(".heading"), counts: @tabs)
             div(class: "settings-stack") do
               SettingsSection(id: Helpers::TagList::TAGS, title: t(".tags")) { Components::Tags::List(**@tags) }
               SettingsSection(id: Helpers::TagList::RULES, title: t(".rules")) { Components::TaskRules::List(**@rules) }

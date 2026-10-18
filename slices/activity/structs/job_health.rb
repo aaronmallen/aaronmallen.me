@@ -15,8 +15,8 @@ module Activity
 
       def self.down(error) = new(**members.to_h { [it, nil] }, error: "#{error.class}: #{error.message}")
 
-      def self.from(stats:, history:, processes:, last_job_at:)
-        latency = stats.queue_summaries.map(&:latency).max.to_f
+      def self.from(stats:, queues:, history:, processes:, last_job_at:)
+        latency = queues.map(&:latency).max.to_f
         sets = { scheduled: stats.scheduled_size, retries: stats.retry_size, dead: stats.dead_size }
 
         new(**workers(processes), **sets, enqueued: stats.enqueued, latency:, days: days(history), last_job_at:,
@@ -39,6 +39,8 @@ module Activity
       end
 
       def down? = !error.nil?
+
+      def flagged = (retries + dead unless down?)
 
       def today = days.last
     end

@@ -8,11 +8,12 @@ module Admin
           LIVE_TABLES = (Components::People::List::LIVE_TABLES | Components::Webmentions::Settings::LIVE_TABLES).freeze
 
           prop :people, Blog::Types::Hash
+          prop :tabs, Blog::Types::Hash
           prop :webmentions, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :socials, title: t(".heading"))
+            SettingsHead(tab: :socials, title: t(".heading"), counts: @tabs)
             div(class: "settings-stack") do
               SettingsSection(id: Helpers::Socials::PEOPLE, title: t(".people")) do
                 Components::People::List(**@people)

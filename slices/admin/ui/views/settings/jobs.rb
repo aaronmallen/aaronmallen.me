@@ -10,6 +10,7 @@ module Admin
           prop :cron, Blog::Types::Array.of(Blog::Types::Instance(Data))
           prop :cron_filter, Blog::Types::CronFilter
           prop :health, Blog::Types::Instance(Data)
+          prop :tabs, Blog::Types::Hash
           prop :running, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
           prop :queues, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
           prop :queue, Blog::Types::Instance(Data).optional, default: nil
@@ -18,7 +19,7 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :jobs, title: t(".heading"))
+            SettingsHead(tab: :jobs, title: t(".heading"), counts: @tabs)
             div(class: "jobs") do
               Components::Jobs::Warnings(health: @health)
               Components::Jobs::Health(health: @health)

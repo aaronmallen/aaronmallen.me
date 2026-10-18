@@ -8,17 +8,11 @@ module Admin
           socials: :admin_settings_socials, tagging: :admin_settings_tagging, services: :admin_settings_services,
           security: :admin_security, jobs: :admin_settings_jobs,
         }.freeze
-        UNKNOWN = "!"
         LABELS = TABS.keys.to_h { [it, ".tabs.#{it}"] }.freeze
 
         prop :tab, Blog::Types::Symbol.enum(*TABS.keys).optional, default: nil
         prop :title, Blog::Types::String
-
-        include Deps[
-          cron_queries: "activity.repos.cron_queries", job_queries: "activity.repos.job_queries",
-          list_services: "operations.list_services", person_queries: "social.repos.person_queries",
-          task_rule_queries: "tasks.repos.task_rule_queries",
-        ]
+        prop :counts, Blog::Types::Hash
 
         def view_template
           content_for(:title, @title)
@@ -30,17 +24,6 @@ module Admin
         end
 
         private
-
-        def counts
-          {
-            socials: person_queries.count, tagging: task_rule_queries.count, services: list_services.count, jobs:,
-          }
-        end
-
-        def jobs
-          flagged = job_queries.flagged
-          flagged ? flagged + cron_queries.failed : UNKNOWN
-        end
 
         def maintenance
           ButtonForm(
@@ -62,11 +45,9 @@ module Admin
         end
 
         def tabs
-          found = counts
-
           div(class: "screen-tabs") do
             nav(class: "screen-tabs-list", aria: { label: t(".tabs.label") }) do
-              TABS.each { |name, route| tab(name, route, found[name]) }
+              TABS.each { |name, route| tab(name, route, @counts[name]) }
             end
           end
         end

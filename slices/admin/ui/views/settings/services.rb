@@ -9,11 +9,12 @@ module Admin
 
           prop :clients, Blog::Types::Hash
           prop :services, Blog::Types::Hash
+          prop :tabs, Blog::Types::Hash
           prop :tokens, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :services, title: t(".heading"))
+            SettingsHead(tab: :services, title: t(".heading"), counts: @tabs)
             div(class: "settings-stack") do
               part(Helpers::ServiceTab::SERVICES, t(".services")) { Components::Services::List(**@services) }
               part(Helpers::ServiceTab::TOKENS, t(".tokens")) { Components::Tokens::List(**@tokens) }

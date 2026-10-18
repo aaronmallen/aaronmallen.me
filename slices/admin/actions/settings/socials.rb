@@ -6,6 +6,7 @@ module Admin
       class Socials < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
+          build_settings_tabs: "operations.build_settings_tabs",
           networks: "social_networks.all",
           person_queries: "social.repos.person_queries",
           post_queries: "posts.repos.post_queries",
@@ -13,13 +14,16 @@ module Admin
         ]
 
         def handle(_request, response)
+          people = person_queries.all
+
           response.render(
             view,
-            people: { people: person_queries.all, editor: build_person_editor.call, searchable: },
+            people: { people:, editor: build_person_editor.call, searchable: },
             webmentions: {
               posts: post_queries.summaries, settings: webmention_queries.settings,
               trusted: webmention_queries.trusted,
             },
+            tabs: build_settings_tabs.call(socials: people.size),
           )
         end
 

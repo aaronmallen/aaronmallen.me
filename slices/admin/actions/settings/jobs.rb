@@ -4,14 +4,21 @@ module Admin
   module Actions
     module Settings
       class Jobs < Action
-        include Deps[cron_queries: "activity.repos.cron_queries", job_queries: "activity.repos.job_queries"]
+        include Deps[
+          build_settings_tabs: "operations.build_settings_tabs",
+          cron_queries: "activity.repos.cron_queries",
+          job_queries: "activity.repos.job_queries",
+        ]
 
         def handle(request, response)
-          health = job_queries.health
-          cron = { cron: cron_queries.entries, cron_filter: Blog::Types::CronFilterParam[request.params[:cron]] }
-          return response.render(view, health:, **cron) if health.down?
+          cron = cron_queries.entries
+          work = work(request)
+          health = work.fetch(:health)
+          work[:job] = job(request) unless health.down?
 
-          response.render(view, health:, **cron, **work(request))
+          filter = Blog::Types::CronFilterParam[request.params[:cron]]
+
+          response.render(view, **work, cron:, cron_filter: filter, tabs: tabs(health, cron))
         end
 
         private
@@ -24,18 +31,16 @@ module Admin
 
         def page(request) = Blog::Structs::Page.new(number: page_number(request), size: page_size)
 
-        def queue(request)
-          name = request.params[:queue]
-          job_queries.queue(name, page(request)) if name
+        def tabs(health, cron)
+          jobs = build_settings_tabs.jobs(flagged: health.flagged, failed: cron.count(&:failed?))
+
+          build_settings_tabs.call(jobs:)
         end
 
-        def sets(request) = job_queries.sets(Blog::Types::JobSetParam[request.params[:set]], page(request))
-
         def work(request)
-          {
-            running: job_queries.running, queues: job_queries.queue_list, queue: queue(request), sets: sets(request),
-            job: job(request),
-          }
+          job_queries.overview(
+            open: Blog::Types::JobSetParam[request.params[:set]], page: page(request), queue: request.params[:queue],
+          )
         end
       end
     end

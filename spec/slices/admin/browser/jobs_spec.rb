@@ -13,15 +13,15 @@ RSpec.describe "Admin jobs", type: :feature do
     work = Sidekiq::Work.new("w", "t", "queue" => "default", "run_at" => Time.now.to_i - 90, "payload" => payload)
     allow(Sidekiq::ProcessSet).to receive(:new).and_return([worker])
     allow(Sidekiq::WorkSet).to receive(:new).and_return([["w", "t", work]])
-    queue = Spec::FakeQueue.new(name: "default", size: 1_820_000, latency: 90.0)
-    allow(Sidekiq::Queue).to receive(:all).and_return([queue])
     failed = payload.merge(
       "jid" => "j", "queue" => "default", "retry_count" => 3, "error_class" => "Net::OpenTimeout",
       "error_message" => "Failed to open TCP connection to #{'b' * 200}",
     )
+    queue = Sidekiq::Stats::QueueSummary.new(name: "default", size: 1_820_000, latency: 90.0, paused: false)
     replace_component("sidekiq.set_jobs", ->(*, **) { [Sidekiq::SortedEntry.new(nil, Time.now.to_f, failed.to_json)] })
     allow(Sidekiq::Stats).to receive(:new)
-      .and_return(Spec::FakeStats.new(enqueued: 1_820_000, retry_size: 342, dead_size: 57, scheduled_size: 140))
+      .and_return(Spec::FakeStats.new(enqueued: 1_820_000, retry_size: 342, dead_size: 57, scheduled_size: 140,
+                                      queue_summaries: [queue]))
     sign_in_to_admin
   end
 

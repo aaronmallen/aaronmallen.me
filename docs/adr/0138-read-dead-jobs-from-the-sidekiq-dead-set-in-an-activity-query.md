@@ -39,7 +39,7 @@ lookup and the act, changes nothing, and a toast says so. Each row also carries 
 as each cron row does.
 
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
-as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled, and
+as a `sidekiq.*` key: stats with their queue summaries and daily history, processes, work, retries and scheduled, and
 sidekiq-scheduler's next run times and paused states. `sidekiq.queue_jobs` reads one page of a queue's jobs, oldest
 first, and `sidekiq.set_jobs` one page of the retry, dead or scheduled set, both through `Sidekiq::Paginator`. An
 `activity` query builds the jobs tab on Settings from them, with the time the last job finished, which it reads

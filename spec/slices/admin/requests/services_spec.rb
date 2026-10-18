@@ -65,6 +65,15 @@ RSpec.describe "Admin connected services", type: :request do
       expect(page.find("a.screen-tab[aria-current='page']")).to have_text("connected services #{shown}")
     end
 
+    it "counts the same services on the tab label from another tab" do
+      add_connection("linear", "acct-1", "Workspace")
+      get "/admin/settings/services"
+      shown = page.all(".svc-list .li").size
+      get "/admin/settings/security"
+
+      expect(page.find("a.screen-tab", text: "connected services")).to have_text("connected services #{shown}")
+    end
+
     it "sends the old address to its section of the tab, keeping the pick" do
       expect([moved, moved(selected: "maxmind"), moved(connect: "linear")])
         .to eq(%w[/admin/settings/services#services /admin/settings/services?selected=maxmind#services
