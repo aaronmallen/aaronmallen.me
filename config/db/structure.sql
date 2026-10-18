@@ -6583,6 +6583,13 @@ CREATE UNIQUE INDEX artifact_versions_artifact_id_number_index ON public.artifac
 
 
 --
+-- Name: artifact_versions_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX artifact_versions_created_at_index ON public.artifact_versions USING btree (created_at);
+
+
+--
 -- Name: artifact_versions_session_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6884,6 +6891,13 @@ CREATE INDEX mail_threads_waiting_unread_index ON public.mail_threads USING btre
 
 
 --
+-- Name: memory_events_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX memory_events_created_at_index ON public.memory_events USING btree (created_at);
+
+
+--
 -- Name: memory_events_memory_fact_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6895,6 +6909,13 @@ CREATE INDEX memory_events_memory_fact_id_index ON public.memory_events USING bt
 --
 
 CREATE INDEX memory_events_memory_file_id_created_at_index ON public.memory_events USING btree (memory_file_id, created_at);
+
+
+--
+-- Name: memory_events_reverted_event_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX memory_events_reverted_event_id_index ON public.memory_events USING btree (reverted_event_id);
 
 
 --
@@ -9538,4 +9559,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018080004_add_visitor_hash_to_sign_ins.rb'),
 ('20261018080007_add_series_id_to_tasks.rb'),
 ('20261018090001_store_plain_line_breaks.rb'),
-('20261018090002_add_preview_key_to_share_group_files.rb');
+('20261018090002_add_preview_key_to_share_group_files.rb'),
+('20261018100006_index_agent_events_by_created_at_and_revert.rb');
