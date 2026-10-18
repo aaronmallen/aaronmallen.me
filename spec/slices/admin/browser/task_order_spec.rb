@@ -59,10 +59,7 @@ RSpec.describe "Admin task order", type: :feature do
     touch(finish, nil)
   end
 
-  def wait_for_save(count = 1, title: "first")
-    path = place_path(title)
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered(path) >= count }
-  end
+  def wait_for_save(count = 1, title: "first") = wait_for_answer(place_path(title), count)
 
   before do
     create(:sprint, sprint_date: today)
@@ -218,12 +215,13 @@ RSpec.describe "Admin task order", type: :feature do
     def renders = request_gate.count("/admin/tasks")
 
     before do
-      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      wait_for_stream
       saving
       nudge("first", :down)
       saving.wait_for_arrival
+      at = Admin::Live::Clock.now
       Tasks::Slice["db.rom"].gateways[:default].connection.notify("admin_changes", payload: "tasks")
-      sleep 1.2
+      settle_live(at)
     end
 
     after { saving.release }
@@ -234,7 +232,7 @@ RSpec.describe "Admin task order", type: :feature do
 
     it "refetches once the save lands and keeps the new order", :aggregate_failures do
       saving.release
-      Timeout.timeout(5) { sleep 0.05 until renders >= 2 }
+      wait_for(be >= 2) { renders }
 
       expect(shown).to eq(%w[second first third])
       expect(listed).to eq(%w[second first third])

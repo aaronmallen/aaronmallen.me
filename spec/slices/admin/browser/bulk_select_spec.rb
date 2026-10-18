@@ -4,7 +4,7 @@ RSpec.describe "Admin bulk select mode", type: :feature do
   def await_refresh
     screen = path.split("?").first
     asked = request_gate.count(screen)
-    yield.tap { Timeout.timeout(5) { sleep 0.05 until request_gate.answered(screen) > asked } }
+    yield.tap { wait_for_answer(screen, asked + 1) }
   end
 
   def boxes = page.all("input[name='ids[]']", visible: :all)
@@ -27,10 +27,6 @@ RSpec.describe "Admin bulk select mode", type: :feature do
   def select_mode = click_button("Select")
 
   def ticked = boxes.select(&:checked?).map(&:value)
-
-  def wait_for_stream
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
-  end
 
   shared_examples "a screen with bulk select" do
     before { sign_in_to_admin }

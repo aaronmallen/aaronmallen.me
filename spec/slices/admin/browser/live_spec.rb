@@ -32,10 +32,6 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     JS
   end
 
-  def wait_for_stream
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered(events) >= 1 }
-  end
-
   it "updates the inbox badge when issues sync from Tasks > External", :aggregate_failures do
     live "/admin/tasks?filter=external"
     expect(page).to have_no_css(".pill-nav-dot")
@@ -94,8 +90,8 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       it "shows it once while refetches keep failing" do
         find(".toast-failed")
         create(:message, subject: "Hello again")
-        Timeout.timeout(5) { sleep 0.05 until request_gate.count("/admin/inbox") >= 3 }
-        sleep 0.5
+        wait_for(be >= 3) { request_gate.count("/admin/inbox") }
+        settle_live
 
         expect(toasts).to eq(1)
       end
@@ -215,10 +211,16 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
     def notify(table) = Tasks::Slice["db.rom"].gateways[:default].connection.notify("admin_changes", payload: table)
 
+    def notify_and_settle(table)
+      at = Admin::Live::Clock.now
+      notify(table)
+      settle_live(at)
+    end
+
     def renders(path = "/admin/tasks") = request_gate.count(path)
 
     def wait_for_renders(count, path = "/admin/tasks")
-      Timeout.timeout(5) { sleep 0.05 until renders(path) >= count }
+      wait_for(be >= count) { renders(path) }
     end
 
     it "lists the tables behind the page and the top bar" do
@@ -229,8 +231,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
     it "ignores a change to a table it does not list" do
       live "/admin/tasks"
-      notify("decisions")
-      sleep 1
+      notify_and_settle("decisions")
 
       expect(renders).to eq(1)
     end
@@ -239,20 +240,19 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       live "/admin/tasks"
       notify("task_tags")
 
-      expect { wait_for_renders(2) }.not_to raise_error
+      using_wait_time(Spec::Browser::WAIT) { expect { renders }.to eventually(be >= 2) }
     end
 
     it "refetches on the catch-up event" do
       live "/admin/tasks"
       notify(Admin::Live::Hub::CATCH_UP)
 
-      expect { wait_for_renders(2) }.not_to raise_error
+      using_wait_time(Spec::Browser::WAIT) { expect { renders }.to eventually(be >= 2) }
     end
 
     it "ignores a new commit on the calendar" do
       live "/admin/calendar"
-      notify("commits")
-      sleep 1
+      notify_and_settle("commits")
 
       expect(renders("/admin/calendar")).to eq(1)
     end
@@ -266,21 +266,23 @@ RSpec.describe "Admin pages that stay live", type: :feature do
         notify("task_tags")
         landing.wait_for_arrival
         2.times do
+          at = Admin::Live::Clock.now
           notify("task_tags")
-          sleep 1.2
+          hear_live(at)
         end
       end
 
       after { landing.release }
 
-      it "starts no other" do
+      it "starts no other", :aggregate_failures do
+        expect(refetch_state).to eq("asking")
         expect(renders).to eq(2)
       end
 
       it "refetches once more after it lands" do
         landing.release
         wait_for_renders(3)
-        sleep 1
+        settle_live
 
         expect(renders).to eq(3)
       end
@@ -290,24 +292,27 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       live "/admin/calendar"
       notify("calendar_events")
 
-      expect { wait_for_renders(2, "/admin/calendar") }.not_to raise_error
+      using_wait_time(Spec::Browser::WAIT) { expect { renders("/admin/calendar") }.to eventually(be >= 2) }
     end
   end
 
   describe "after an in-place submit" do
     let(:sprint) { Tasks::Slice["repos.sprint_queries"].on(today) || create(:sprint, sprint_date: today) }
 
+    let(:started) { Admin::Live::Clock.now }
+
     def renders = request_gate.count("/admin/tasks")
 
     before do
       create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
       live "/admin/tasks?filter=today"
+      started
       find(".task-title", exact_text: "Ship it").ancestor(".task").tap(&:hover).click_button("Start")
       assert_selector :button, "Stop"
     end
 
     it "renders the page once" do
-      sleep 1
+      settle_live(started)
 
       expect(renders).to eq(2)
     end
@@ -329,7 +334,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
         window.changes = [];
         new EventSource("/admin/events").addEventListener("change", (event) => window.changes.push([Number(event.lastEventId), event.data]));
       JS
-      Timeout.timeout(5) { sleep 0.05 until request_gate.answered(events) >= 2 }
+      wait_for_answer(events, 2)
     end
 
     before do
@@ -343,7 +348,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       saved = Admin::Live::Clock.now
       find("dialog#task-panel[open]").click_button("Save")
       find("dialog#task-panel[open] [data-task-read] h1", exact_text: "Email the bookkeeper")
-      Timeout.timeout(5) { sleep 0.05 until changed_since?(saved) }
+      wait_for(be(true)) { changed_since?(saved) }
       find("dialog#task-panel[open] [data-task-read] .task-drawer-close").click
     end
 
@@ -452,6 +457,12 @@ RSpec.describe "Admin pages that stay live", type: :feature do
   describe "in a hidden tab" do
     let(:message) { create(:message) }
 
+    def change
+      at = Admin::Live::Clock.now
+      message
+      settle_live(at)
+    end
+
     def hide(hidden)
       execute_script(<<~JS, hidden)
         Object.defineProperty(document, "hidden", { configurable: true, value: arguments[0] });
@@ -459,23 +470,21 @@ RSpec.describe "Admin pages that stay live", type: :feature do
       JS
     end
 
-    def renders = request_gate.count("/admin/inbox")
-
     before do
       live "/admin/inbox"
       hide(true)
     end
 
+    def renders = request_gate.count("/admin/inbox")
+
     it "makes no request when a change arrives" do
-      message
-      sleep 1
+      change
 
       expect(renders).to eq(1)
     end
 
     it "refetches once it shows again", :aggregate_failures do
-      message
-      sleep 1
+      change
       hide(false)
 
       expect(page).to have_css("#message-#{message.id}")
@@ -484,7 +493,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
     it "makes no request when it shows again with nothing missed" do
       hide(false)
-      sleep 1
+      settle_live
 
       expect(renders).to eq(1)
     end

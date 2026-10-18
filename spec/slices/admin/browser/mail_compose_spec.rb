@@ -208,7 +208,7 @@ RSpec.describe "Admin mail compose", type: :feature do
 
     def live_update
       click_button "Discard"
-      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      wait_for_stream
       find("#thread-#{create(:message, subject: 'Hello there').id}")
     end
 

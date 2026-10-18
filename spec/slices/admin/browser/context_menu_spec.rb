@@ -331,11 +331,9 @@ RSpec.describe "Admin row context menu", type: :feature do
   end
 
   describe "a live update" do
-    let(:events) { "/admin/events" }
-
     before do
       visit "/admin/tasks?filter=next"
-      Timeout.timeout(5) { sleep 0.05 until request_gate.answered(events) >= 1 }
+      wait_for_stream
       open_menu
       menu
       create(:task, title: "Arrived live")

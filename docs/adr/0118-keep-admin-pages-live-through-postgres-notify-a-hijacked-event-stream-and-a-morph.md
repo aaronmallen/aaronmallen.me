@@ -171,6 +171,9 @@ Each web process opens one more Postgres connection, 7 at the defaults.
 
 The hub writes to sockets outside Rack, so no middleware sees what it sends, Honeybadger included, and the hub has
 to report its own errors. rack-test cannot read a hijacked stream, so stream specs run in the browser against Puma.
+Since #1810 `live.js` writes the newest event id it has heard to `data-live-heard` on `<html>`, and `setupFetch`
+marks `data-fetch` there `waiting` or `asking` while a refetch is due or in flight, so those specs wait on what the
+page did, not a fixed sleep.
 
 A Puma restart drops every stream. Each tab reconnects and refetches once.
 

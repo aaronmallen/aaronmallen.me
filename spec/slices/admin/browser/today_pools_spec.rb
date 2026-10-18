@@ -12,7 +12,7 @@ RSpec.describe "Admin today pools", type: :feature do
 
   def await_swap
     expect(page).to have_current_path(/pool=someday/)
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin") >= request_gate.count("/admin") }
+    wait_for(be(true)) { request_gate.answered("/admin") >= request_gate.count("/admin") }
   end
 
   def copied = Admin::Slice["i18n"].t("ui.components.record_key.copied.task", key: someday.label)

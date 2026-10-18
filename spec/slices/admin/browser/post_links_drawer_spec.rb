@@ -14,7 +14,7 @@ RSpec.describe "Admin post links drawer", type: :feature do
   before do
     sign_in_to_admin
     visit "/admin/posts/#{post.id}/edit"
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+    wait_for_stream
     find("button[data-dialog-open='post-links']").click
   end
 

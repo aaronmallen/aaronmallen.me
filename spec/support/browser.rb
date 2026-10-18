@@ -9,6 +9,8 @@ require_relative "features"
 
 module Spec
   module Browser
+    WAIT = 5
+
     class RequestGate
       HOLD_TIMEOUT = 5
 
@@ -123,6 +125,10 @@ module Spec
       assert_selector "h1", text: "Form expired"
     end
 
+    def hear_live(since)
+      wait_for(be > since) { evaluate_script("Number(document.documentElement.dataset.liveHeard) || 0") }
+    end
+
     def item(label) = menu.first(".ctx-item", text: label)
 
     def keep_page = execute_script("window.kept = true")
@@ -133,6 +139,8 @@ module Spec
 
     def press(*keys) = page.driver.browser.keyboard.type(*keys)
 
+    def refetch_state = evaluate_script("document.documentElement.dataset.fetch ?? null")
+
     def request_gate = Capybara.app
 
     def settle(selector)
@@ -140,6 +148,11 @@ module Spec
         const done = arguments[arguments.length - 1];
         Promise.all(document.querySelector(arguments[0]).getAnimations().map((a) => a.finished)).then(() => done(true));
       JS
+    end
+
+    def settle_live(since = nil)
+      hear_live(since) if since
+      wait_for(be_nil) { refetch_state }
     end
 
     def show(screen)
@@ -154,6 +167,12 @@ module Spec
         path: Blog::SessionCookie::PATH,
       )
     end
+
+    def wait_for(matcher, &) = using_wait_time(WAIT) { expect(&).to eventually(matcher) }
+
+    def wait_for_answer(path, count = 1) = wait_for(be >= count) { request_gate.answered(path) }
+
+    def wait_for_stream = wait_for_answer("/admin/events")
 
     def watch_clipboard
       execute_script(<<~JS)

@@ -98,13 +98,15 @@ RSpec.describe "Admin task row actions", type: :feature do
       before do
         create(:task, title: "Plan it")
         visit "/admin/tasks?filter=next"
+        wait_for_stream
         landing = request_gate.hold("/admin/tasks")
+        at = Admin::Live::Clock.now
         row("Plan it").click_button(admin_t("ui.components.tasks.controls.start"))
         landing.wait_for_arrival
-        sleep 1
+        hear_live(at)
         landing.release
         find(".toast", text: admin_t("tasks_page.toasts.started"))
-        sleep 1
+        settle_live
       end
 
       it "asks for no refresh and keeps the list it landed on", :aggregate_failures do

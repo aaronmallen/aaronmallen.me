@@ -14,7 +14,7 @@ RSpec.describe "Admin broken links", type: :feature do
     short_checks.record(short_link_id: link.id, url: dead, reason: "404 Not Found", at: Time.now)
     sign_in_to_admin
     visit "/admin/posts?status=broken"
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+    wait_for_stream
   end
 
   it "queues a post link check and stays on the list", :aggregate_failures do

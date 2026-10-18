@@ -16,6 +16,11 @@ RSpec.describe "Analytics beacon", type: :feature do
     JS
   end
 
+  def found(&)
+    wait_for(be_truthy, &)
+    yield
+  end
+
   def leave_page = fire("pagehide")
 
   def pulses = request_gate.count("/pulse")
@@ -25,14 +30,14 @@ RSpec.describe "Analytics beacon", type: :feature do
     recorded("/writing")
     request_gate.reset
     restore
-    wait_for { pulses == 1 }
+    found { pulses == 1 }
   end
 
   def read_time(path)
-    wait_for { events.find { it.path == path && it.read_seconds.positive? } }
+    found { events.find { it.path == path && it.read_seconds.positive? } }
   end
 
-  def recorded(path) = wait_for { events.find { it.path == path } }
+  def recorded(path) = found { events.find { it.path == path } }
 
   def restore
     leave_page
@@ -57,27 +62,16 @@ RSpec.describe "Analytics beacon", type: :feature do
     )
   end
 
-  def wait_for
-    Timeout.timeout(5) do
-      loop do
-        found = yield
-        return found if found
-
-        sleep 0.05
-      end
-    end
-  end
-
   it "stores one view when a public page loads" do
     visit "/writing"
 
-    expect(wait_for { events.first }).to have_attributes(path: "/writing", read_seconds: 0)
+    expect(found { events.first }).to have_attributes(path: "/writing", read_seconds: 0)
   end
 
   it "stores the title of the page" do
     visit "/writing"
 
-    expect(wait_for { events.first }.title).to eq(page.title)
+    expect(found { events.first }.title).to eq(page.title)
   end
 
   it "stores the ref of a tagged link as the source, apart from the path" do
@@ -120,7 +114,7 @@ RSpec.describe "Analytics beacon", type: :feature do
     pulses_through_restore
     leave_page
 
-    expect(wait_for { pulses == 2 }).to be_truthy
+    expect(found { pulses == 2 }).to be_truthy
   end
 
   it "stores one event for each page and no more" do
@@ -177,7 +171,7 @@ RSpec.describe "Analytics beacon", type: :feature do
       recorded("/writing/long")
       scroll_through(1)
 
-      expect(wait_for { depth == 100 }).to be(true)
+      expect(found { depth == 100 }).to be(true)
     end
 
     it "sends only the deepest depth reached, with the read" do
@@ -253,7 +247,7 @@ RSpec.describe "Analytics beacon", type: :feature do
     it "stores the click against the view" do
       follow("the guide")
 
-      expect(wait_for { clicks.first }.to_h.values_at(:event_id, :link_host, :link_path))
+      expect(found { clicks.first }.to_h.values_at(:event_id, :link_host, :link_path))
         .to eq([recorded("/writing/links").id, "docs.example", "/guide"])
     end
 
@@ -304,14 +298,14 @@ RSpec.describe "Analytics beacon", type: :feature do
     it "stores the timing under the route" do
       leave_loaded_page
 
-      expect(wait_for { timings.first }).to include(route: "/writing", device_class: "desktop")
+      expect(found { timings.first }).to include(route: "/writing", device_class: "desktop")
     end
 
     it "sends the timing once when the page is left a second time" do
       leave_loaded_page
       restore
       leave_page
-      wait_for { request_gate.answered("/pulse") == 3 }
+      found { request_gate.answered("/pulse") == 3 }
 
       expect(timings).to have(1).item
     end
@@ -319,7 +313,7 @@ RSpec.describe "Analytics beacon", type: :feature do
 
   it "sets no cookie" do
     visit "/writing"
-    wait_for { events.first }
+    found { events.first }
 
     expect(evaluate_script("document.cookie")).to be_empty
   end
@@ -334,7 +328,7 @@ RSpec.describe "Analytics beacon", type: :feature do
   it "records nothing while the admin signs in" do
     sign_in_to_admin
     visit "/writing"
-    wait_for { request_gate.answered("/pulse") == 1 }
+    found { request_gate.answered("/pulse") == 1 }
 
     expect(events).to be_empty
   end

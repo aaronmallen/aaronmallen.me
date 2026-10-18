@@ -79,7 +79,7 @@ RSpec.describe "Admin project board", type: :feature do
       override_setting(:board, :column_size, to: 1)
       link(create(:task, title: "Second brief"))
       visit "/admin/projects/#{project.id}"
-      Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/events") >= 1 }
+      wait_for_stream
       keep_page
       click_button "Load more · 1 left"
     end

@@ -381,7 +381,7 @@ RSpec.describe "Admin command palette", type: :feature do
         query.send_keys(*Array.new(7, :backspace), *"accountant".chars)
         page.assert_selector(".pal-r", text: "Email the accountant")
         hold.release
-        Timeout.timeout(5) { sleep 0.05 until request_gate.answered(search_path) >= 2 }
+        wait_for_answer(search_path, 2)
         page.driver.wait_for_network_idle
       end
 

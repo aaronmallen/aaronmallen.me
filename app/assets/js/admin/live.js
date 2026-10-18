@@ -81,6 +81,7 @@ export function setupLive() {
   };
 
   refetch = setupFetch({
+    marks: document.documentElement,
     queue: true,
     request: () => {
       asked = wanted;
@@ -157,6 +158,7 @@ function untouched(node) {
 }
 
 function listen(url, changed) {
+  let heard = 0;
   let opened = false;
   let source = null;
   let timer = null;
@@ -173,6 +175,8 @@ function listen(url, changed) {
     });
     current.addEventListener("change", (event) => {
       if (shows(event.data)) changed(Number(event.lastEventId) || Infinity);
+      heard = Math.max(heard, Number(event.lastEventId) || 0);
+      document.documentElement.dataset.liveHeard = heard;
     });
     current.addEventListener("error", () => {
       if (current.readyState !== EventSource.CLOSED) return;

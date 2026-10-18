@@ -5,7 +5,7 @@ RSpec.describe "Admin maintenance mode", type: :feature do
   let(:question) { admin_t("ui.components.settings_head.maintenance.confirm") }
 
   def activated
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered("/admin/maintenance") >= 1 }
+    wait_for_answer("/admin/maintenance")
     page.document.synchronize { raise Capybara::ExpectationNotMet if kept_page? }
   end
 

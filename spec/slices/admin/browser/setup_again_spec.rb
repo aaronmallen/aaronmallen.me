@@ -119,7 +119,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
 
   it "saves a drag once", :aggregate_failures do
     drag("first", below: "third")
-    Timeout.timeout(5) { sleep 0.05 until request_gate.answered(place_path) >= 1 }
+    wait_for_answer(place_path)
 
     expect(shown).to eq(%w[second third first])
     expect(request_gate.count(place_path)).to eq(1)
