@@ -6,11 +6,11 @@ RSpec.describe "Sitemap", type: :request do
 
   def lastmod(loc) = sitemap.at_xpath("//xmlns:url[xmlns:loc='#{loc}']/xmlns:lastmod")&.text
 
-  def listed
-    %w[/ /about /projects /contact /writing /writing/hello /writing/again /writing/tags/hanami /writing/tags/ruby]
-  end
+  def listed = pages + %w[/writing/hello /writing/again /writing/tags/hanami /writing/tags/ruby]
 
   def locs = sitemap.xpath("//xmlns:url/xmlns:loc").map(&:text)
+
+  def pages = %w[/ /about /projects /contact /writing /privacy]
 
   def publish(slug, **attrs) = create(:post, :published, slug:, **attrs)
 
@@ -42,7 +42,7 @@ RSpec.describe "Sitemap", type: :request do
     %i[draft scheduled].each { create(:post, it, slug: "hidden-#{it}", tags: %w[secret]) }
     get "/sitemap.xml"
 
-    expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
+    expect(locs).to eq(pages.map { site(it) })
   end
 
   it "lists the tags of live public projects" do
@@ -57,7 +57,7 @@ RSpec.describe "Sitemap", type: :request do
     create(:project, :archived, tags: %w[retired])
     get "/sitemap.xml"
 
-    expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
+    expect(locs).to eq(pages.map { site(it) })
   end
 
   it "lists each public project's published board, dated by its last change" do
@@ -72,7 +72,7 @@ RSpec.describe "Sitemap", type: :request do
     create(:project, name: "Unpublished")
     get "/sitemap.xml"
 
-    expect(locs).to eq(%w[/ /about /projects /contact /writing].map { site(it) })
+    expect(locs).to eq(pages.map { site(it) })
   end
 
   it "leaves out the admin, API and MCP paths" do

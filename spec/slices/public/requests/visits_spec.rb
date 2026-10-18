@@ -824,7 +824,7 @@ RSpec.describe "Visits", type: :request do
   end
 
   describe "a path that names a page on the site" do
-    %w[/ /about /contact /projects /writing /writing/hello /writing/tags/ruby].each do |path|
+    %w[/ /about /contact /privacy /projects /writing /writing/hello /writing/tags/ruby].each do |path|
       it "accepts #{path}" do
         beacon({ kind: "view", path: })
 

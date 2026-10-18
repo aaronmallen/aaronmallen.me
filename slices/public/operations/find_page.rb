@@ -4,7 +4,7 @@ module Public
   module Operations
     class FindPage
       FEED = ".atom"
-      PAGES = %i[root writing about projects contact].freeze
+      PAGES = %i[root writing about projects contact privacy].freeze
 
       include Deps[
         post_queries: "posts.repos.post_queries",

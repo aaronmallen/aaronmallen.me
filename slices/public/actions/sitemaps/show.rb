@@ -7,7 +7,7 @@ module Public
     module Sitemaps
       class Show < Action
         NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
-        PAGES = %i[root about projects contact writing].freeze
+        PAGES = %i[root about projects contact writing privacy].freeze
 
         include Deps[
           post_queries: "posts.repos.post_queries",
