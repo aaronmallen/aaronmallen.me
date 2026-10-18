@@ -92,6 +92,10 @@ module Social
 
       def queued_page(page) = page_of(social_posts.with_status(SCHEDULED).oldest_first, page)
 
+      def scheduled_mentioning(key)
+        social_posts.with_status(SCHEDULED).matching("@{#{key}}").oldest_first.limit(1).pluck(:id).first
+      end
+
       def syndication_urls(post_id)
         social_post_deliveries.syndicated_for_post(post_id).to_a.to_h { [it.network, it.remote_url] }
       end

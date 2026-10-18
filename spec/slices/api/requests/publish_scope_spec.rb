@@ -2,6 +2,7 @@
 
 RSpec.describe "Changes that show in public", type: :request do
   let(:board) { create(:project, name: "Doing It", board_published: true) }
+  let(:jane) { create(:person, key: "jane") }
 
   def on_board(task = create(:task))
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: board.id })
@@ -21,9 +22,9 @@ RSpec.describe "Changes that show in public", type: :request do
     Tasks::Slice["operations.save_task_rule"].call(fields).value!
   end
 
-  def scheduled_social_post
+  def scheduled_social_post(text = "teh one", status: "scheduled")
     Social::Slice["repos.social_post_mutations"]
-      .create_with_parts(parts: ["teh one"], posted_at: Time.now + 86_400, status: "scheduled", targets: %w[mastodon])
+      .create_with_parts(parts: [text], posted_at: Time.now + 86_400, status:, targets: %w[mastodon])
   end
 
   def suggest(post) = Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, [typo])
@@ -239,6 +240,44 @@ RSpec.describe "Changes that show in public", type: :request do
       expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.first.body).to eq("teh one")
     end
 
+    it "cannot change a person a scheduled social post mentions, and the refusal names the post", :aggregate_failures do
+      social_post = scheduled_social_post("hi @{jane}")
+      response = response_to(:patch, "/people/#{jane.id}", { mastodon_handle: "@someone@else.social" })
+
+      expect(response).to be_refused
+      expect(JSON.parse(response.body).fetch("error_description")).to include("social post #{social_post.id}")
+      expect(Social::Slice["repos.person_queries"].by_id(jane.id).mastodon_handle).to eq(jane.mastodon_handle)
+    end
+
+    it "cannot rename a person to a key a scheduled social post mentions" do
+      scheduled_social_post("hi @{joan}")
+
+      expect(response_to(:patch, "/people/#{jane.id}", { key: "joan" })).to be_refused
+    end
+
+    it "cannot add a person a scheduled social post mentions, and the refusal names the post", :aggregate_failures do
+      social_post = scheduled_social_post("hi @{joan}")
+      response = response_to(:post, "/people", { name: "Joan", key: "joan", mastodon_handle: "@joan@ruby.social" })
+
+      expect(response).to be_refused
+      expect(JSON.parse(response.body).fetch("error_description")).to include("social post #{social_post.id}")
+      expect(Social::Slice["repos.person_queries"].by_keys(%w[joan])).to be_empty
+    end
+
+    it "still adds a person whose key only a draft social post mentions" do
+      scheduled_social_post("hi @{joan}", status: "draft")
+      body = { name: "Joan", key: "joan", mastodon_handle: "@joan@ruby.social" }
+
+      expect(response_to(:post, "/people", body).status).to eq(201)
+    end
+
+    it "still changes a person no scheduled social post mentions" do
+      scheduled_social_post("hi @{jane}", status: "draft")
+      scheduled_social_post("hi @{janet}")
+
+      expect(response_to(:patch, "/people/#{jane.id}", { name: "Jane Doe" }).status).to eq(200)
+    end
+
     it "still changes a task on no published board" do
       expect(response_to(:patch, "/tasks/#{create(:task).id}", { title: "changed" }).status).to eq(200)
     end
@@ -402,6 +441,20 @@ RSpec.describe "Changes that show in public", type: :request do
 
       expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }, scopes: %w[write publish]).status)
         .to eq(200)
+    end
+
+    it "changes a person a scheduled social post mentions" do
+      scheduled_social_post("hi @{jane}")
+
+      expect(response_to(:patch, "/people/#{jane.id}", { name: "Jane Doe" }, scopes: %w[write publish]).status)
+        .to eq(200)
+    end
+
+    it "adds a person whose key a scheduled social post mentions" do
+      scheduled_social_post("hi @{joan}")
+      body = { name: "Joan", key: "joan", mastodon_handle: "@joan@ruby.social" }
+
+      expect(response_to(:post, "/people", body, scopes: %w[write publish]).status).to eq(201)
     end
 
     it "accepts edits to a scheduled social post" do

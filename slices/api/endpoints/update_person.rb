@@ -11,7 +11,11 @@ module API
 
       REPLY = Serializers::Person.reference
 
-      include Deps[person_queries: "social.repos.person_queries", save_person: "social.operations.save_person"]
+      include Deps[
+        person_queries: "social.repos.person_queries",
+        save_person: "social.operations.save_person",
+        social_post_queries: "social.repos.social_post_queries",
+      ]
 
       def handle(id:, **fields)
         person = person_queries.by_id(id)
@@ -21,6 +25,17 @@ module API
       end
 
       private
+
+      def public_in(fields)
+        stored = person_queries.by_id(fields[:id])&.key
+        return if stored.nil?
+
+        [stored, fields[:key]].compact.uniq.each do |key|
+          id = social_post_queries.scheduled_mentioning(key)
+          return format(People::MENTIONED, id, key) if id
+        end
+        nil
+      end
 
       def saved(id, result)
         case result

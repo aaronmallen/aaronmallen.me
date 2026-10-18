@@ -15,7 +15,9 @@ module MCP
                   "mention them as @{key}. A new person needs a name, a key and at least one handle. A Bluesky " \
                   "handle is looked up on Bluesky as it saves, and one Bluesky does not know is refused. On an " \
                   "edit, a field you leave out keeps what it has, and null clears a handle. Use search_accounts " \
-                  "to find a handle"
+                  "to find a handle. A scheduled social post sends @{key} as the handles its person holds then, or " \
+                  "as the bare key when nobody holds it, so adding or editing a person whose key one mentions " \
+                  "needs the publish scope"
       input_schema(SCHEMA)
       scope Blog::Types::OAuthScope["write"]
 

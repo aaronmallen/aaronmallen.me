@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
-amended: ["#941", "#1335", "#1441", "#1599"]
+amended: ["#941", "#1335", "#1441", "#1599", "#1761"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 
@@ -34,7 +34,8 @@ on the consent page. The owner wants to grant edits without either power.
   and a task on a published board ([ADR 0160][0160]), which takes in linking a task to such a project. #1441 added
   scheduled posts, since their text goes out with them, and an issue sync that can reach a published board: one a
   task rule files into, one that tracks a repo, or one that holds a synced task. #1597 added scheduled social posts
-  for the same reason.
+  for the same reason, and #1761 adding or editing a person whose key one of them mentions, since the post takes
+  that person's handle or name, or the bare key when nobody holds it, when it sends ([ADR 0079][0079]).
 - **`delete`** guards every tool that removes a record for good: each `delete_*` tool, `remove_tag` and
   `remove_trusted_author`. It also guards a spam verdict, one at a time or in bulk, when the author of any webmention
   it names sits on the trusted list, since the verdict takes them off it. #1599 added the trusted list, which #1441
@@ -80,5 +81,6 @@ A new tool that removes a record or shows something in public has to name the ri
 Nothing checks that it does beyond `spec/slices/mcp/requests/scopes_spec.rb`, which lists each tool under the scope it
 expects, and `spec/slices/api/requests/publish_scope_spec.rb`, which tries each public target without `publish`.
 
+[0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

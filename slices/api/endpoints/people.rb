@@ -6,6 +6,7 @@ module API
     module People
       FIELDS = %i[name key mastodon_handle bluesky_handle].freeze
       ID = Helpers::Schema::ID
+      MENTIONED = "scheduled social post %s, which mentions @{%s},"
       UNSAVED = "could not save the person"
 
       COMPLAINTS = {
