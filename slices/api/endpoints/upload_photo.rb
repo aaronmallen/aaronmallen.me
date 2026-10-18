@@ -1,15 +1,11 @@
 # frozen_string_literal: true
 
-require "base64"
-require "stringio"
-
 module API
   module Endpoints
     class UploadPhoto < Endpoint
       CONTRACTS = [::Media::Contracts::PhotoContract].freeze
       ERRORS = "photo_upload.errors"
       UNAVAILABLE = true
-      WHITESPACE = /\s/
 
       SCHEMA = {
         additionalProperties: false,
@@ -25,7 +21,7 @@ module API
       include Deps["i18n", upload_photo: "media.operations.upload_photo"]
 
       def handle(data:, filename:)
-        bytes = decoded(data)
+        bytes = Helpers::Upload.decoded(data)
         return refuse(:unreadable) unless bytes
 
         case upload_photo.call(Blog::Types::UploadParam[upload(bytes, filename)])
@@ -38,17 +34,11 @@ module API
 
       private
 
-      def decoded(data)
-        Base64.strict_decode64(data.match?(WHITESPACE) ? data.gsub(WHITESPACE, "") : data)
-      rescue ArgumentError
-        nil
-      end
-
       def message(code) = i18n.t(code, scope: ERRORS, **::Media::Operations::UploadPhoto::LIMITS)
 
       def refuse(code) = invalid({ data: [message(code)] })
 
-      def upload(bytes, filename) = bytes.empty? ? nil : { tempfile: StringIO.new(bytes), filename: }
+      def upload(bytes, filename) = bytes.empty? ? nil : Helpers::Upload.file(bytes, filename:)
     end
   end
 end

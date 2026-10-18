@@ -80,6 +80,12 @@ RSpec.describe "API shares", type: :request do
       end
     end
 
+    it "takes base64 broken across lines" do
+      call_api(:post, "/shares", { data: Base64.encode64("hello"), filename: "hello.txt" })
+
+      expect([status, stored.fetch(shares.first[:key])[:body]]).to eq([201, "hello"])
+    end
+
     it "refuses data that is not base64 and stores nothing", :aggregate_failures do
       answered = call_api(:post, "/shares", { data: "not*base64!", filename: "a.txt" })
 

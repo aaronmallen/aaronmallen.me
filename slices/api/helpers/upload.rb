@@ -25,7 +25,7 @@ module API
       module_function
 
       def decoded(data)
-        Base64.strict_decode64(data.gsub(WHITESPACE, ""))
+        Base64.strict_decode64(data.match?(WHITESPACE) ? data.gsub(WHITESPACE, "") : data)
       rescue ArgumentError
         nil
       end
