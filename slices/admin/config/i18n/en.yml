@@ -1138,6 +1138,29 @@ en:
             stopping: "Stopping"
             working: "Working"
           unknown: "unknown"
+        job_drawer:
+          arguments: "Arguments"
+          backtrace: "Backtrace"
+          jid: "jid"
+          lines:
+            one: "%{count} line"
+            other: "%{count} lines"
+          queue: "queue"
+          retried: "%{count} of %{max}"
+          retries: "retries"
+          sets:
+            dead: "dead"
+            retries: "retry"
+            scheduled: "scheduled"
+          times:
+            created: "created"
+            dead: "died"
+            enqueued: "enqueued"
+            failed: "failed"
+            retried: "retried"
+            retries: "next try"
+            scheduled: "runs"
+          title: "%{set} · %{jid}"
         queue_drawer:
           earlier: "earlier"
           enqueued: "enqueued %{at}"
@@ -1168,6 +1191,28 @@ en:
           stopping: "stopping"
           title: "Running now"
           working: "working"
+        set:
+          all: "Show all %{formatted}"
+          died: "died %{at}"
+          empty:
+            dead: "No dead jobs."
+            retries: "No retries waiting."
+            scheduled: "Nothing scheduled."
+          failed: "failed %{at}"
+          fewer: "Show fewer"
+          hints:
+            dead: "Out of retries, newest first. Nothing runs these again unless you retry them."
+            retries: "Failed jobs waiting to try again, soonest first. Sidekiq waits longer after each failure, and a job out of tries moves to dead."
+            scheduled: "Jobs set to run later, soonest first."
+          later: "later"
+          next: "next %{at}"
+          retries: "retries %{count} of %{max}"
+          runs: "runs %{at}"
+          sooner: "sooner"
+          titles:
+            dead: "Dead"
+            retries: "Retries"
+            scheduled: "Scheduled"
         trend:
           bars: "Processed and failed, last 7 days: %{days}"
           day: "%{day} %{processed} processed, %{failed} failed"

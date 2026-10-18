@@ -6962,6 +6962,61 @@
   }
 }
 
+@utility jobs-error {
+  @apply mt-2 mb-0 line-clamp-2 font-mono text-meta wrap-anywhere text-ink;
+
+  & b {
+    @apply font-medium text-mk-pink-text;
+  }
+}
+
+@utility jobs-error-full {
+  @apply mt-0 mb-4 line-clamp-none rounded-panel border bg-ground px-3.5 py-3;
+  border-color: color-mix(in oklab, var(--color-mk-pink) 45%, var(--color-line));
+}
+
+@utility jobs-retrying {
+  @apply text-mk-orange-text;
+}
+
+@utility jobs-all {
+  @apply mt-1 flex min-h-tap items-center justify-center border-t border-line meta text-ink-muted no-underline hover:text-ink admin-focus;
+}
+
+@utility jobs-job-name {
+  @apply mt-0 mb-4 font-display text-[clamp(1.3rem,2vw,1.7rem)] leading-tight font-bold tracking-[-.02em] wrap-anywhere;
+}
+
+@utility jobs-facts {
+  @apply mt-0 mb-5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4.5 gap-y-2 font-mono text-meta;
+
+  & dt {
+    @apply text-ink-muted;
+  }
+
+  & dd {
+    @apply m-0 wrap-anywhere text-ink;
+  }
+}
+
+@utility jobs-label {
+  @apply m-0 f;
+}
+
+@utility jobs-pre {
+  @apply mt-1.5 mb-4.5 rounded-panel border border-line bg-ground px-3.5 py-3 font-mono text-meta leading-relaxed whitespace-pre-wrap wrap-anywhere text-ink;
+}
+
+@utility jobs-backtrace {
+  & > summary {
+    @apply flex cursor-pointer items-center gap-2.5 f admin-focus;
+  }
+
+  & > summary span {
+    @apply ml-auto;
+  }
+}
+
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 

@@ -20,6 +20,7 @@ Hanami.app.register_provider :sidekiq do
     register("sidekiq.queues") { -> { Sidekiq::Queue.all } }
     register("sidekiq.retry_set") { -> { Sidekiq::RetrySet.new } }
     register("sidekiq.scheduled_set") { -> { Sidekiq::ScheduledSet.new } }
+    register("sidekiq.set_jobs") { Blog::SidekiqSetPage }
     register("sidekiq.schedule", Blog::SidekiqConfig.load.dig(:scheduler, :schedule).freeze)
     register("sidekiq.schedule_states") { -> { hash.call(SidekiqScheduler::RedisManager.schedules_state_key) } }
     register("sidekiq.schedule_times") { -> { hash.call(SidekiqScheduler::RedisManager.next_times_key) } }

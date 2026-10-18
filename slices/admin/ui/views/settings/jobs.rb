@@ -11,6 +11,8 @@ module Admin
           prop :running, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
           prop :queues, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
           prop :queue, Blog::Types::Instance(Data).optional, default: nil
+          prop :sets, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
+          prop :job, Blog::Types::Instance(Data).optional, default: nil
 
           def view_template
             SettingsHead(tab: :jobs, title: t(".heading"))
@@ -29,7 +31,9 @@ module Admin
               Components::Jobs::Running(processes: @running)
               Components::Jobs::Queues(queues: @queues)
             end
+            @sets.each { Components::Jobs::Set(set: it) }
             Components::Jobs::QueueDrawer(queue: @queue) if @queue
+            Components::Jobs::JobDrawer(job: @job) if @job
           end
         end
       end

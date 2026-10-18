@@ -5,7 +5,7 @@ status: active
 created: 2026-10-09
 area: [activity, admin, api]
 issue: "#869"
-amended: ["#1731", "#1732"]
+amended: ["#1731", "#1732", "#1733"]
 tags: [activity, attention, sidekiq, redis, jobs, dead-set]
 ---
 
@@ -34,8 +34,10 @@ when it leaves the set.
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
 as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled, and
 sidekiq-scheduler's next run times and paused states. `sidekiq.queue_jobs` reads one page of a queue's jobs, oldest
-first, through `Sidekiq::Paginator`. An `activity` query builds the jobs tab on Settings from them, with the time the
-last job finished, which it reads through the `performance` slice. A second query builds the tab's cron schedule
+first, and `sidekiq.set_jobs` one page of the retry, dead or scheduled set, both through `Sidekiq::Paginator`. An
+`activity` query builds the jobs tab on Settings from them, with the time the last job finished, which it reads
+through the `performance` slice. The tab lists retries and scheduled jobs soonest first and dead jobs newest first,
+and opens one job from any of the three sets by its jid. A second query builds the tab's cron schedule
 from `config/sidekiq.yml.erb`, the scheduler's keys and each entry's newest `performance_jobs` row. Every read
 rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
 

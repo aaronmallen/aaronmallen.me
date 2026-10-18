@@ -472,4 +472,167 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
       expect(page).to have_no_css("dialog#jobs-queue")
     end
   end
+
+  describe "the job sets" do
+    let(:sets) { %w[retry dead schedule].to_h { [it, Spec::FakeJobSet.new(it)] } }
+
+    def card(name) = page.find_by_id("jobs-#{name}")
+
+    def drawer = Capybara.string(last_response.body).find("dialog#jobs-job")
+
+    def failed(klass, *args, error: "Faraday::TimeoutError", message: "execution expired", **)
+      ms = ->(time) { (time.to_f * 1_000).to_i }
+
+      {
+        "class" => klass, "args" => args, "jid" => SecureRandom.hex(12), "queue" => "default",
+        "created_at" => ms.call(Time.now - 600), "enqueued_at" => ms.call(Time.now - 600),
+        "failed_at" => ms.call(Time.now - 300),
+        "retry_count" => 2, "error_class" => error, "error_message" => message, **,
+      }
+    end
+
+    def fill(name, at, item)
+      sets.fetch(name).add(at, item)
+      stats(retry_size: sets["retry"].size, dead_size: sets["dead"].size, scheduled_size: sets["schedule"].size)
+      item
+    end
+
+    def set_page(key, number, size, reverse: false)
+      entries = sets.fetch(key).to_a
+      (reverse ? entries : entries.reverse).drop((number - 1) * size).first(size)
+    end
+
+    def titles(name) = card(name).all(".li-title").map(&:text)
+
+    before do
+      allow(Sidekiq::RetrySet).to receive(:new).and_return(sets["retry"])
+      allow(Sidekiq::DeadSet).to receive(:new).and_return(sets["dead"])
+      allow(Sidekiq::ScheduledSet).to receive(:new).and_return(sets["schedule"])
+      replace_component("sidekiq.set_jobs", method(:set_page))
+    end
+
+    it "says so when each set is empty", :aggregate_failures do
+      visit
+
+      expect(card("retries")).to have_text(admin_t("ui.components.jobs.set.empty.retries"))
+      expect(card("dead")).to have_text(admin_t("ui.components.jobs.set.empty.dead"))
+      expect(card("scheduled")).to have_text(admin_t("ui.components.jobs.set.empty.scheduled"))
+    end
+
+    describe "with retries" do
+      before do
+        fill("retry", Time.now + 600, failed("Later::Job"))
+        fill("retry", Time.now + 60, failed("Social::Jobs::CrossPost", 42, "mastodon"))
+        visit
+      end
+
+      it "lists them soonest first" do
+        expect(titles("retries")).to eq(%w[Social::Jobs::CrossPost Later::Job])
+      end
+
+      it "shows each one's arguments, error, retry count and next try" do
+        expect(card("retries").first(".li")).to have_css(".jobs-args", exact_text: '42,"mastodon"')
+          .and have_css(".jobs-error", exact_text: "Faraday::TimeoutError execution expired")
+          .and have_css(".jobs-retrying", exact_text: "retries 2 of 25")
+          .and have_css("time[datetime='#{Blog::TimeZone.local(Time.now + 60).iso8601}']")
+      end
+    end
+
+    describe "with dead jobs" do
+      before do
+        fill("dead", Time.now - 600, failed("Older::Job", "retry_count" => 25))
+        fill("dead", Time.now - 60, failed("Newer::Job", error: "PG::Error", message: "disk full", "retry_count" => 25))
+        visit
+      end
+
+      it "lists them newest first" do
+        expect(titles("dead")).to eq(%w[Newer::Job Older::Job])
+      end
+
+      it "shows each one's error and retry count" do
+        expect(card("dead").first(".li")).to have_css(".jobs-error", exact_text: "PG::Error disk full")
+          .and have_text("retries 25 of 25")
+      end
+    end
+
+    it "lists scheduled jobs soonest first, with no error", :aggregate_failures do
+      fill("schedule", Time.now + 600, { "class" => "Later::Job", "args" => [], "jid" => "b", "queue" => "default" })
+      fill("schedule", Time.now + 60, { "class" => "Soon::Job", "args" => [1], "jid" => "a", "queue" => "default" })
+      visit
+
+      expect(titles("scheduled")).to eq(%w[Soon::Job Later::Job])
+      expect(card("scheduled")).to have_no_css(".jobs-error")
+    end
+
+    describe "with more jobs than fit" do
+      before { 120.times { fill("retry", Time.now + it, failed("Job#{it}")) } }
+
+      it "shows five and links to the rest", :aggregate_failures do
+        visit
+
+        expect(titles("retries")).to eq((0..4).map { "Job#{it}" })
+        expect(card("retries")).to have_link("Show all 120", href: "/admin/settings/jobs?set=retries#jobs-retries")
+      end
+
+      it "shows 100 to a page with page links that read sooner and later", :aggregate_failures do
+        get "/admin/settings/jobs?set=retries"
+
+        expect(titles("retries").size).to eq(100)
+        expect(card("retries")).to have_link("later", href: "/admin/settings/jobs?set=retries&page=2#jobs-retries")
+          .and have_link(admin_t("ui.components.jobs.set.fewer"), href: "/admin/settings/jobs#jobs-retries")
+      end
+
+      it "pages to later retries" do
+        get "/admin/settings/jobs?set=retries&page=2"
+
+        expect(titles("retries")).to eq((100..119).map { "Job#{it}" })
+      end
+    end
+
+    it "labels dead pages newer and older, since the newest death comes first" do
+      101.times { fill("dead", Time.now - it, failed("Job#{it}")) }
+      get "/admin/settings/jobs?set=dead"
+
+      expect(card("dead").find(".pager-link[rel='next']").text.strip).to eq("Older")
+    end
+
+    describe "the job drawer" do
+      let(:backtrace) { ["app/jobs/cross_post.rb:31:in 'perform'", "sidekiq/processor.rb:220:in 'execute_job'"] }
+
+      let!(:job) do
+        compressed = [Zlib::Deflate.deflate(JSON.generate(backtrace))].pack("m0")
+        item = failed("Social::Jobs::CrossPost", 42, { "thread" => true }, "error_backtrace" => compressed)
+        fill("retry", Time.now + 60, item)
+      end
+
+      it "opens from a row" do
+        visit
+        get card("retries").find_link("Social::Jobs::CrossPost")[:href]
+
+        expect(drawer).to have_css(".jobs-job-name", exact_text: "Social::Jobs::CrossPost")
+      end
+
+      it "shows the jid, queue, retry count and every time", :aggregate_failures do
+        get "/admin/settings/jobs?open=retries&jid=#{job['jid']}"
+
+        facts = drawer.all(".jobs-facts dt").map(&:text).zip(drawer.all(".jobs-facts dd").map(&:text)).to_h
+        expect(facts).to include("jid" => job["jid"], "queue" => "default", "retries" => "2 of 25")
+        expect(facts.keys).to include("created", "enqueued", "failed", "next try")
+      end
+
+      it "shows the error, the arguments in full and the backtrace", :aggregate_failures do
+        get "/admin/settings/jobs?open=retries&jid=#{job['jid']}"
+
+        expect(drawer).to have_css(".jobs-error", exact_text: "Faraday::TimeoutError execution expired")
+        expect(drawer.first(".jobs-pre").text).to eq(JSON.pretty_generate([42, { "thread" => true }]))
+        expect(drawer.find(".jobs-backtrace")).to have_text("2 lines").and have_text(backtrace.last)
+      end
+
+      it "opens no drawer for an unknown job" do
+        get "/admin/settings/jobs?open=dead&jid=#{job['jid']}"
+
+        expect(page).to have_no_css("dialog#jobs-job")
+      end
+    end
+  end
 end

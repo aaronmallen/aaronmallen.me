@@ -15,6 +15,11 @@ RSpec.describe "Admin jobs", type: :feature do
     allow(Sidekiq::WorkSet).to receive(:new).and_return([["w", "t", work]])
     queue = Spec::FakeQueue.new(name: "default", size: 1_820_000, latency: 90.0)
     allow(Sidekiq::Queue).to receive(:all).and_return([queue])
+    failed = payload.merge(
+      "jid" => "j", "queue" => "default", "retry_count" => 3, "error_class" => "Net::OpenTimeout",
+      "error_message" => "Failed to open TCP connection to #{'b' * 200}",
+    )
+    replace_component("sidekiq.set_jobs", ->(*, **) { [Sidekiq::SortedEntry.new(nil, Time.now.to_f, failed.to_json)] })
     allow(Sidekiq::Stats).to receive(:new)
       .and_return(Spec::FakeStats.new(enqueued: 1_820_000, retry_size: 342, dead_size: 57, scheduled_size: 140))
     sign_in_to_admin
@@ -24,7 +29,7 @@ RSpec.describe "Admin jobs", type: :feature do
     page.current_window.resize_to(375, 800)
     visit "/admin/settings/jobs"
 
-    expect(page).to have_css(".jobs-health").and have_css(".jobs-args").and have_css(".jobs-queue-size")
+    %w[.jobs-health .jobs-args .jobs-queue-size .jobs-error].each { expect(page).to have_css(it) }
     expect(evaluate_script("document.documentElement.scrollWidth - innerWidth")).to be <= 0
     expect(box(".jobs-bars")["top"]).to be >= box(".jobs-big-small")["bottom"]
   end
