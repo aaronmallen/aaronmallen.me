@@ -78,6 +78,12 @@ module Social
         social_post_photos.for_parts(part_ids).in_order.to_a.group_by(&:social_post_part_id)
       end
 
+      def photos_by_post(social_post_ids)
+        parts = social_post_parts.where(social_post_id: social_post_ids).in_order.combine(:photos)
+
+        parts.to_a.group_by(&:social_post_id).transform_values { it.flat_map(&:photos) }
+      end
+
       def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
 
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a

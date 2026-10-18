@@ -1322,6 +1322,49 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
     end
 
+    describe "a social post's photos" do
+      let(:photos) { Array.new(3) { create(:photo) } }
+
+      def event_photos = page.all(".activity-event .sq-photo").map { [it[:src], it[:alt]] }
+
+      def kept(index, part: 1, alt: nil) = { part:, key: photos[index].key, alt: }
+
+      def post_social(photos: nil, hour: 12)
+        Social::Slice["repos.social_post_mutations"].create_with_parts(
+          parts: %w[one two], photos:, targets: %w[mastodon], status: "posted", posted_at: at(today, hour),
+        )
+      end
+
+      def src(index) = Media::Helpers::MediaPath.for(photos[index].key)
+
+      it "shows each photo in part and position order with its alt text" do
+        post_social(photos: [kept(2, part: 2, alt: "A bird"), kept(1, alt: "A dog"), kept(0, alt: "A cat")])
+        visit_activity
+
+        expect(event_photos).to eq([[src(1), "A dog"], [src(0), "A cat"], [src(2), "A bird"]])
+      end
+
+      it "shows no photos for a social post without any" do
+        post_social
+        visit_activity
+
+        expect(page).to have_no_css(".activity-event .sq-photos")
+      end
+
+      it "shows no photos on other kinds of events" do
+        create(:journal_entry, entry_date: today, body: "walked the dog")
+        visit_activity
+
+        expect(page).to have_no_css(".activity-event .sq-photos")
+      end
+
+      it "reads every event's photos in one query" do
+        3.times { post_social(photos: [kept(it, alt: "A cat")], hour: 9 + it) }
+
+        expect(counting(/"social_post_photos"/) { visit_activity }.size).to eq(1)
+      end
+    end
+
     describe "a journal row's markdown" do
       def name_html = page.find(".activity-event-name").native.inner_html
 

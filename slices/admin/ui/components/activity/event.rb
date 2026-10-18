@@ -101,10 +101,21 @@ module Admin
             div(class: "activity-event-main") do
               span(class: ["activity-event-name", ("prose" if type.prose)]) { name }
               span(class: "activity-event-sub") { @event.sub_line }
+              photos
             end
           end
 
           def owner_href = @event.decision_id ? path(:admin_decision, id: @event.decision_id) : task_href
+
+          def photos
+            return if @event.photos.empty?
+
+            div(class: "sq-photos") do
+              @event.photos.each do |photo|
+                img(class: "sq-photo", src: ::Media::Helpers::MediaPath.for(photo.photo_key), alt: photo.alt_text.to_s)
+              end
+            end
+          end
 
           def row
             Icon(["fa-solid", type.icon, "activity-icon", type.color.to_s])

@@ -31,6 +31,7 @@ module Admin
       include Deps[
         "i18n",
         activity_queries: "activity.repos.activity_queries",
+        social_post_queries: "social.repos.social_post_queries",
       ]
 
       def call(from:, to:, day:, size:, **filters)
@@ -38,8 +39,9 @@ module Admin
         pages = Helpers::DayPages.call(counts, day:, to:, size:)
         rows = activity_queries.between(from: pages[:start] || from, to: day, **filters)
         views = activity_queries.views(rows)
+        photos = social_photos(rows)
 
-        { events: rows.map { event(it, views) }, older: pages[:older], newer: pages[:newer], days: counts.size }
+        { events: rows.map { event(it, views, photos) }, older: pages[:older], newer: pages[:newer], days: counts.size }
       end
 
       private
@@ -62,7 +64,7 @@ module Admin
 
       def display_name(row) = row.type == COMMIT ? Helpers::CommitMessage.subject(row.name) : row.preview || row.name
 
-      def event(row, views)
+      def event(row, views, photos)
         Structs::ActivityEvent.new(
           type: row.type,
           source_id: row.source_id,
@@ -73,6 +75,7 @@ module Admin
           sub_line: sub_line(row, views),
           task_id: row.task_id,
           decision_id: row.decision_id,
+          photos: photos_of(row, photos),
         )
       end
 
@@ -85,6 +88,8 @@ module Admin
       def networks(targets)
         targets.to_a.map { i18n.t!(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
       end
+
+      def photos_of(row, photos) = (photos[row.source_id] if row.type == SOCIAL) || Blog::Constants::EMPTY_ARRAY
 
       def post_line(row, views)
         i18n.t!(
@@ -101,6 +106,10 @@ module Admin
 
       def social_line(row)
         i18n.t!("activity_page.sub_lines.social", status: status(row.status), networks: networks(row.targets))
+      end
+
+      def social_photos(rows)
+        social_post_queries.photos_by_post(rows.filter_map { it.source_id if it.type == SOCIAL })
       end
 
       def status(value) = i18n.t!(STATUSES.fetch(value))
