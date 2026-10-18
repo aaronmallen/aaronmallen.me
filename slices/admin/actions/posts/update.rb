@@ -22,7 +22,6 @@ module Admin
             in Success[outcome, post] then saved(response, outcome, post)
             in Failure(:not_found) then halt :not_found
             in Failure[:invalid, errors] then invalid(request, response, params, errors, id:)
-            else halt :internal_server_error
           end
         end
 

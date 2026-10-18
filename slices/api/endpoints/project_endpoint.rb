@@ -108,7 +108,7 @@ module API
           in Success(project) then Success(serialized(Serializers::Project, project))
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in Failure(:not_found) then missing("project", id)
-          else failed(UNSAVED)
+          in unmatched then unhandled(unmatched, UNSAVED)
         end
       end
     end

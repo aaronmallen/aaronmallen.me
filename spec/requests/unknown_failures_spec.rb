@@ -8,24 +8,38 @@ RSpec.describe "An unknown failure reason", type: :request do
   end
 
   describe "an admin action" do
+    let(:project) { create(:project) }
+
     before { sign_in_to_admin }
 
-    it "answers 500 rather than raising" do
-      token = admin_csrf_token
-      project = create(:project)
-      refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject)
-      post "/admin/projects/#{project.id}/archive", _csrf_token: token
+    def archive = post("/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token)
 
-      expect(last_response.status).to eq(500)
+    it "raises outside production, naming the reason" do
+      refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject)
+
+      expect { archive }.to raise_error(NoMatchingPatternError, "Failure(:gone_wrong)")
     end
 
-    it "answers 500 for a reason carrying a payload" do
-      token = admin_csrf_token
-      project = create(:project)
-      refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject, [:gone_wrong, {}])
-      post "/admin/projects/#{project.id}/archive", _csrf_token: token
+    describe "in production" do
+      before do
+        allow(Hanami).to receive(:env?).and_call_original
+        allow(Hanami).to receive(:env?).with(:production).and_return(true)
+        allow(Hanami.app["honeybadger.agent"]).to receive(:notify)
+      end
 
-      expect(last_response.status).to eq(500)
+      it "answers 500 rather than raising" do
+        refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject)
+        archive
+
+        expect(last_response.status).to eq(500)
+      end
+
+      it "answers 500 for a reason carrying a payload" do
+        refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject, [:gone_wrong, {}])
+        archive
+
+        expect(last_response.status).to eq(500)
+      end
     end
   end
 

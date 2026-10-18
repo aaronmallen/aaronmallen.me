@@ -35,7 +35,7 @@ module API
           in Success(snooze) then Success(serialized(Serializers::InboxSnooze, snooze))
           in Failure(:invalid | :past => code) then invalid(snoozed_until: [Helpers::Wording::SNOOZE_REFUSALS[code]])
           in Failure(:not_found) then not_found("no #{kind} row has the id #{id}")
-          else failed("could not snooze the row")
+          in unmatched then unhandled(unmatched, "could not snooze the row")
         end
       end
     end

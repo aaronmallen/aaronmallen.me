@@ -12,7 +12,7 @@ module API
         case delete_post.call(id)
           in Success(post) then Success(id: post.id, deleted: true)
           in Failure(:not_found) then missing("blog post", id)
-          else failed("could not delete the blog post")
+          in unmatched then unhandled(unmatched, "could not delete the blog post")
         end
       end
     end

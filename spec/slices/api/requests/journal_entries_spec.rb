@@ -227,12 +227,25 @@ RSpec.describe "API journal entries", type: :request do
       expect([call_api(:post, "/journal_entries", "[]").fetch("error"), status]).to eq(["invalid_json", 400])
     end
 
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Record::Operations::SaveJournalEntry, call: Failure(:unexpected))
-      replace_component("record.operations.save_journal_entry", failing)
+    describe "when the save fails in a way it did not expect" do
+      let(:agent) { Hanami.app["honeybadger.agent"] }
 
-      expect([create_entry(body: "Lost"), status])
-        .to eq([{ "error" => "failed", "message" => "could not save the journal entry" }, 500])
+      before do
+        allow(agent).to receive(:notify)
+        failing = instance_double(Record::Operations::SaveJournalEntry, call: Failure(:unexpected))
+        replace_component("record.operations.save_journal_entry", failing)
+      end
+
+      it "answers with a 500" do
+        expect([create_entry(body: "Lost"), status])
+          .to eq([{ "error" => "failed", "message" => "could not save the journal entry" }, 500])
+      end
+
+      it "tells Honeybadger the failure" do
+        create_entry(body: "Lost")
+
+        expect(agent).to have_received(:notify).with(have_attributes(message: "Failure(:unexpected)"))
+      end
     end
   end
 

@@ -11,7 +11,7 @@ module API
         case restore_project.call(id)
           in Success(_) then answered(id)
           in Failure(:not_found) then missing("archived project", id)
-          else failed("could not restore the project")
+          in unmatched then unhandled(unmatched, "could not restore the project")
         end
       end
     end

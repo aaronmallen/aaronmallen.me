@@ -3,9 +3,9 @@ id: "0025"
 title: Inherit Blog::Operation only in a class that can refuse or steps a Result
 status: active
 created: 2026-09-28
-area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area: [lib, activity, admin, analytics, api, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-661
-amended: [AA-757, "#718", "#955", "#996"]
+amended: [AA-757, "#718", "#955", "#996", "#1805"]
 tags: [operations, dry-operation, monads, result, callables, transactions]
 ---
 
@@ -30,7 +30,7 @@ could never fail, so "Nothing saved" showed only under a stub.
 
 A class under `slices/*/operations` inherits `Blog::Operation` only when it can refuse or when it steps another
 operation's `Result`. It answers `Success` or a named `Failure`, such as `Failure(:not_found)`, and its caller
-matches with `case ... in` and a fallback branch. `Admin::Operations::BuildTasksPage` inherits it because it steps
+matches with `case ... in`. `Admin::Operations::BuildTasksPage` inherits it because it steps
 `Tasks::Operations::CurrentSprint`.
 
 A class that cannot fail stays a plain callable, with `Deps` and a `#call` that returns its value. Wrapping it
@@ -53,14 +53,20 @@ the published check into `Posts::Operations::LockUnpublishedPost`, which answers
 Since #718, parsers and scanners from `lib` become operations too (ADR 0126). One that cannot refuse is a plain
 callable under this rule.
 
+Since #1805 no match ends in the `else halt :internal_server_error` or `else failed(...)` that AA-326 put on every
+one, since both dropped the failure they caught. An admin action leaves the `else` out: the unmatched value raises
+`NoMatchingPatternError`, which `Admin::Action` reports to Honeybadger before it answers a 500 in production. An
+API endpoint ends with `in unmatched then unhandled(unmatched, message)`, which reports the value and answers its
+`failed` refusal.
+
 No name prefix marks the kind. The superclass alone does.
 
 ## Alternatives
 
 **Make every class under `operations/` a `Dry::Operation`**, the shape the guide gives. One rule, and every caller
 reads a `Result`. It lost because `Dry::Operation` wraps whatever `#call` returns, so every builder that cannot
-fail would carry the dead `Success` and fallback branch above. `Admin::Actions::Tasks::Index` shows the shape:
-`in Success(screen)`, then `else halt 500`.
+fail would carry the dead `Success` and fallback branch above. `Admin::Actions::Tasks::Index` showed the shape until
+it lost its fallback in #1805: `in Success(screen)`, then `else halt 500`.
 
 ## Consequences
 
@@ -71,6 +77,7 @@ and `RecordVisit` answer a `Result`, `ReplaceSocialPostParts` and `RecordSyncOut
 file and reads the superclass.
 
 A plain class that gains a way to refuse moves across, and every caller changes with it. AA-756 touched six call
-sites for six classes. No guard spec checks the rule, so a new refusal can still travel as `nil`.
+sites for six classes. No guard spec checks the rule, so a new refusal can still travel as `nil`. One that reaches a
+caller who misses it does not travel unseen: since #1805 Honeybadger gets its value.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -18,7 +18,6 @@ module Admin
           case set_task_column.call(id, column)
             in Success(_) then moved(request, response, id, column)
             in Failure(:not_found) then halt :not_found
-            else halt :internal_server_error
           end
         end
 

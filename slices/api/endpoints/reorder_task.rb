@@ -36,7 +36,7 @@ module API
           in Success(*) then answered(id, moved: true)
           in Failure(:not_moved | :not_placed) then answered(id, moved: false)
           in Failure(:not_found) then missing("task", id)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

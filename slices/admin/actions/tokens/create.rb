@@ -20,7 +20,6 @@ module Admin
               minted(response, value)
             in Failure[:invalid, errors]
               invalid(response, params, errors)
-            else halt :internal_server_error
           end
         end
 

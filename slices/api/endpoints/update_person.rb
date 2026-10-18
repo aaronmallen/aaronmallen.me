@@ -43,7 +43,7 @@ module API
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
           in Failure(:not_found) then missing("person", id)
-          else failed(People::UNSAVED)
+          in unmatched then unhandled(unmatched, People::UNSAVED)
         end
       end
     end

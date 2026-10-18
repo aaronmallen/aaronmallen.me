@@ -18,7 +18,7 @@ module API
           in Success(view) then Success(serialized(Serializers::SavedView, view))
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
-          else failed(SavedViews::UNSAVED)
+          in unmatched then unhandled(unmatched, SavedViews::UNSAVED)
         end
       end
     end

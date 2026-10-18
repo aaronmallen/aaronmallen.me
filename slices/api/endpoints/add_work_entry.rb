@@ -36,7 +36,7 @@ module API
         case add_work_entry.call({ blurb:, from_year: from_year.to_s, org:, role:, to_year: to_year&.to_s })
           in Success(entry) then Success(serialized(Serializers::WorkEntry, entry))
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
-          else failed("could not add the role")
+          in unmatched then unhandled(unmatched, "could not add the role")
         end
       end
     end

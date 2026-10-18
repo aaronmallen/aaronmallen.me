@@ -52,7 +52,7 @@ module API
           in Success[outcome, post] then Success(serialized(Serializers::Post, post).merge(outcome: outcome.to_s))
           in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
           in Failure(:not_found) then missing("blog post", id)
-          else failed("could not save the blog post")
+          in unmatched then unhandled(unmatched, "could not save the blog post")
         end
       end
     end

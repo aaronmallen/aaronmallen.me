@@ -20,7 +20,7 @@ module API
         case update_webmention_settings.call(**changes(fields))
           in Success(settings) then answered(settings)
           in Failure(:unchanged) then invalid(ROOT => ["nothing saved, since no setting changed"])
-          else failed("could not save the webmention settings")
+          in unmatched then unhandled(unmatched, "could not save the webmention settings")
         end
       end
 

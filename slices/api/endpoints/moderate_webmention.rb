@@ -42,7 +42,7 @@ module API
         case moderate_webmention.call(id, verdict, reason:)
           in Success(mention) then Success(id: mention.id, status: mention.status)
           in Failure(:not_found) then missing("webmention", id)
-          else failed("could not moderate the webmention")
+          in unmatched then unhandled(unmatched, "could not moderate the webmention")
         end
       end
 

@@ -11,7 +11,6 @@ module Admin
             in Success(_) then response.status = :no_content
             in Failure(:not_found) then halt :not_found
             in Failure(:not_placed | :apart | :after_not_found) then halt :unprocessable_content
-            else halt :internal_server_error
           end
         end
 

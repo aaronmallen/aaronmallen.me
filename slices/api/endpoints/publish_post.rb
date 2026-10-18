@@ -16,7 +16,7 @@ module API
           in Failure(:not_found) then missing("blog post", id)
           in Failure(:published) then invalid(id: [format(PUBLISHED, id)])
           in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

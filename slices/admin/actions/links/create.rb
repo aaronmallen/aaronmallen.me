@@ -26,7 +26,6 @@ module Admin
           case create_short_link.call(params.slice(:destination, :code))
             in Success(link) then created(request, response, link)
             in Failure[:invalid, errors] then refuse(response, params, errors:)
-            else halt :internal_server_error
           end
         end
 

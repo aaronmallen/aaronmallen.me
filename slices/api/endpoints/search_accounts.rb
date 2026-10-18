@@ -27,7 +27,7 @@ module API
           in Success(*accounts) then Success(accounts: serialized(Serializers::Account, accounts))
           in Failure(:unconfigured) then unavailable("#{name} has no credentials, so it cannot be searched")
           in Failure(:rate_limited) then unavailable("#{name} has had too many searches; wait a minute and try again")
-          else failed("#{name} did not answer; try again")
+          in unmatched then unhandled(unmatched, "#{name} did not answer; try again")
         end
       end
 

@@ -12,7 +12,7 @@ module API
           in Success(*) then answered(kind, id)
           in Failure(:not_found) then missing(RecordLinks.name(kind), id)
           in Failure[:invalid, errors] then rejected(errors, RecordLinks::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

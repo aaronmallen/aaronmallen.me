@@ -35,7 +35,7 @@ module API
         case save_review_note.call(body, period:, on:)
           in Success(note) then Success(answered(note))
           in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, COMPLAINTS, named: true))
-          else failed(UNSAVED)
+          in unmatched then unhandled(unmatched, UNSAVED)
         end
       end
 

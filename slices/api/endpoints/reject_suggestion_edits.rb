@@ -30,7 +30,7 @@ module API
           in Failure(:not_found) then missing("suggestion", id)
           in Failure(:nothing_open) then invalid(edit_ids: ["suggestion #{id} has no open edit with those IDs"])
           in Failure(:already_posted) then invalid(suggestion_id: [format(Suggestions::SENT, id)])
-          else failed("could not reject the edits")
+          in unmatched then unhandled(unmatched, "could not reject the edits")
         end
       end
     end

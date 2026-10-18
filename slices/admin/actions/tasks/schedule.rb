@@ -22,7 +22,6 @@ module Admin
             in Failure(:closed) then done(request, response, CLOSED)
             in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
             in Failure(:not_found) then halt :not_found
-            else halt :internal_server_error
           end
         end
 

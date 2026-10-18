@@ -43,7 +43,7 @@ module API
         case start_session.call({ **fields, task_ids: tasks })
           in Success[id, files] then Success(session_id: id, **Memory.loaded(files))
           in Failure[:invalid, errors] then rejected(errors.transform_keys(task_ids: :tasks), COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

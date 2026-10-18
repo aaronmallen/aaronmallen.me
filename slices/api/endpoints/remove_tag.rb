@@ -18,12 +18,18 @@ module API
       def handle(id:, scope:, scopes:)
         return invalid(id: [format(MAIL_TAG, id, "removing")]) if !mail?(scopes) && tag_queries.mail?(scope, id)
 
-        case remove_tag.call(id, scope:)
+        removed(remove_tag.call(id, scope:), id)
+      end
+
+      private
+
+      def removed(result, id)
+        case result
           in Success(_) then Success(id:, removed: true)
           in Failure[:last_tag_of_rules, patterns]
             invalid(id: [format(LAST_TAG, id, RULES.fetch(patterns.one?), patterns.join(", "))])
           in Failure(:not_found) then missing("tag", id)
-          else failed("could not remove the tag")
+          in unmatched then unhandled(unmatched, "could not remove the tag")
         end
       end
     end

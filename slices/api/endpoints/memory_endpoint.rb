@@ -7,6 +7,7 @@ module API
       CHANGED = "the fact changed since, in history entry %s; revert that entry first"
       REMOVED = "the fact was removed; revert its removal first"
       UNREVERTIBLE = "only an add, an edit or a remove can be reverted"
+      REFUSALS = { removed: { fact_id: [REMOVED] }, unrevertible: { event_id: [UNREVERTIBLE] } }.freeze
 
       private
 
@@ -14,11 +15,10 @@ module API
         case result
           in Success(value) then Success(yield(value))
           in Failure(:not_found) then not_found(missing)
-          in Failure(:removed) then invalid(fact_id: [REMOVED])
-          in Failure(:unrevertible) then invalid(event_id: [UNREVERTIBLE])
+          in Failure(:removed | :unrevertible => reason) then invalid(REFUSALS.fetch(reason))
           in Failure[:changed, later] then invalid(event_id: [format(CHANGED, later)])
           in Failure[:invalid, errors] then rejected(errors, Memory::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

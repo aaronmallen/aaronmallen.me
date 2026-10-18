@@ -12,7 +12,7 @@ module API
         case delete_journal_entry.call(id)
           in Success(_) then Success(id:, deleted: true)
           in Failure(:not_found) then missing("journal entry", id)
-          else failed("could not delete the journal entry")
+          in unmatched then unhandled(unmatched, "could not delete the journal entry")
         end
       end
     end

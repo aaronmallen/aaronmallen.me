@@ -11,7 +11,6 @@ module Admin
           case build_task_page.call(record_id(request), **page_params(request))
             in Success(page) then response.render(view, **shown(page), **return_to(request))
             in Failure(:not_found) then not_found(response)
-            else halt :internal_server_error
           end
         end
 

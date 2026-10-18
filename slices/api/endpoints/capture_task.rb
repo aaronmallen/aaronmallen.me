@@ -34,7 +34,7 @@ module API
           in Failure(:past) then sprint_past
           in Failure(:invalid) then sprint_unread
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

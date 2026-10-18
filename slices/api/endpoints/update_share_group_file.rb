@@ -24,7 +24,7 @@ module API
         case rename_share_file.call(file_id, { filename: })
           in Success(_) then Success(reply(id))
           in Failure[:invalid, errors] then rejected(errors, {})
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

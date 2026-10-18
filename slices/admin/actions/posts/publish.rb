@@ -21,7 +21,6 @@ module Admin
             in Failure(:not_found) then halt :not_found
             in Failure(:published) then failed(response, id, :published)
             in Failure[:invalid, _] then failed(response, id, :invalid)
-            else halt :internal_server_error
           end
 
           response.redirect_to(back(request))

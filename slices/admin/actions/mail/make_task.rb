@@ -26,7 +26,6 @@ module Admin
             in Failure[:unarchived, task] then toast(response, UNARCHIVED, key: label(task))
             in Failure(:tasked) then toast(response, ALREADY)
             in Failure[:invalid, _] then toast(response, UNTITLED)
-            else halt :internal_server_error
           end
           response.redirect_to(back(request, id))
         end

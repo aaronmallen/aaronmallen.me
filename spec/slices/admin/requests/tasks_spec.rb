@@ -28,12 +28,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "answers with a server error when the day's sprint cannot be rolled" do
+    it "raises the failure when the day's sprint cannot be rolled" do
       create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
       lose_the_roll
-      get "/admin/tasks"
 
-      expect(last_response.status).to eq(500)
+      expect { get "/admin/tasks" }.to raise_error(NoMatchingPatternError)
     end
 
     describe "the three lists" do
@@ -1979,12 +1978,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(Capybara.string(last_response.body)).to have_css("[data-toast]", text: "Task saved")
       end
 
-      it "answers with a server error when the day's sprint cannot be rolled" do
+      it "raises the failure when the day's sprint cannot be rolled" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
         lose_the_roll
-        get "/admin/tasks/#{task.id}/edit"
 
-        expect(last_response.status).to eq(500)
+        expect { get "/admin/tasks/#{task.id}/edit" }.to raise_error(NoMatchingPatternError)
       end
 
       it "leaves a finished task saved from the completed tab on the sprint it ran in" do

@@ -26,7 +26,7 @@ module API
                 MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD] }.freeze
 
     include Dry::Monads[:result]
-    include Deps["settings", task_queries: "tasks.repos.task_queries"]
+    include Deps["settings", honeybadger: "honeybadger.agent", task_queries: "tasks.repos.task_queries"]
 
     def self.checker = @checker ||= JSONSchemer.schema(JSON.parse(JSON.generate(self::SCHEMA)))
 
@@ -61,8 +61,6 @@ module API
     end
 
     def failed(message) = Failure(Structs::Refusal.failed(message))
-
-    def flat(errors) = errors.transform_values { it.is_a?(Hash) ? it.values.flatten.uniq : it }
 
     def guarded?(row, kinds) = row.is_a?(Hash) && kinds.include?((row[:kind] || row["kind"]).to_s)
 
@@ -121,6 +119,8 @@ module API
     end
 
     def task_id(reference) = reference.is_a?(Integer) ? reference : task_queries.id_by_label(reference)
+
+    def unhandled(value, text) = failed(text).tap { honeybadger.notify(NoMatchingPatternError.new(value.inspect)) }
 
     def unpublished(fields, scopes)
       shown = public_in(fields) unless scopes.include?(PUBLISH)

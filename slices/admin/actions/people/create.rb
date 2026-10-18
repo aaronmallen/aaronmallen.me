@@ -22,7 +22,6 @@ module Admin
             in Success(person) then added(request, response, person)
             in Failure[:invalid, errors]
               unprocessable(response, new_view, **build_person_editor.call(params:, errors:))
-            else halt :internal_server_error
           end
         end
 

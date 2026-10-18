@@ -22,7 +22,6 @@ module Admin
           case save_review_note.call(body, period:, on:)
             in Success(_) then saved(response, period, on)
             in Failure[:invalid, errors] then invalid(response, period, on, body, errors)
-            else halt :internal_server_error
           end
         end
 

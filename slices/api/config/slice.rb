@@ -5,6 +5,7 @@ require_relative "operations"
 module API
   class Slice < Hanami::Slice
     config.no_auto_register_paths += %w[serializers]
+    config.shared_app_component_keys += %w[honeybadger.agent]
 
     import keys: %w[
       operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries

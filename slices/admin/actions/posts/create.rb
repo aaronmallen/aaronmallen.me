@@ -18,7 +18,6 @@ module Admin
               saved(response, outcome, post)
             in Failure[:invalid, errors]
               unprocessable(response, view, **build_post_editor.call(params:, errors:, view: request.params[:view]))
-            else halt :internal_server_error
           end
         end
 

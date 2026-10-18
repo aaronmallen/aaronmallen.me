@@ -19,7 +19,6 @@ module Admin
             in Failure[:invalid, errors] then retry_draft(request, response, fields, errors)
             in Failure[:gmail_failed, _] then retry_draft(request, response, fields, GMAIL_FAILED)
             in Failure(:not_found) then halt :not_found
-            else halt :internal_server_error
           end
         end
 

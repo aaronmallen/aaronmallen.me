@@ -30,7 +30,6 @@ module Admin
             in Failure(:stale) then toast(response, APPLIED, count: 0)
             in Failure(:published) then toast(response, LIVE)
             in Failure(:not_found) then nil
-            else halt :internal_server_error
           end
         end
 

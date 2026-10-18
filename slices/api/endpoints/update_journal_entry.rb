@@ -38,7 +38,7 @@ module API
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
           in Failure(:not_found) then missing("journal entry", id)
-          else failed(UNSAVED)
+          in unmatched then unhandled(unmatched, UNSAVED)
         end
       end
     end

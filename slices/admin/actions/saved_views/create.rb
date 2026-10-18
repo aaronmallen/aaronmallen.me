@@ -14,7 +14,6 @@ module Admin
           case create_saved_view.call(**name_params(request), screen: params[:screen], filters: params[:filters])
             in Success(_) then answer(request, response, SAVED)
             in Failure[:invalid, _] then invalid(request, response)
-            else halt :internal_server_error
           end
         end
       end

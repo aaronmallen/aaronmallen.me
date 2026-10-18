@@ -31,7 +31,6 @@ module Admin
             in Failure[:invalid, errors] if form then refuse(request, response, { **form, errors: })
             in Failure(:not_found | :removed) then halt :not_found
             in Failure(:unrevertible) | Failure[:changed, _] then toast_back(response, STALE, file_path(request))
-            else halt :internal_server_error
           end
         end
       end

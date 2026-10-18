@@ -111,7 +111,7 @@ module API
           in Success(suggestion)
             Success(suggestion_id: suggestion.id, target:, edits: suggestion.edits.length, status: PENDING)
           in Failure[:invalid, errors] then invalid(edits: faults(errors))
-          else failed("could not store the edits")
+          in unmatched then unhandled(unmatched, "could not store the edits")
         end
       end
 

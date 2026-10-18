@@ -25,7 +25,6 @@ module Admin
             in Success[:pulled_in | :scheduled, *] then done(request, response, CAPTURED, filter: UPCOMING)
             in Failure(:past) | Failure(:invalid) then done(request, response, PAST, filter:)
             in Failure[:invalid, errors] then invalid(request, response, params, errors)
-            else halt :internal_server_error
           end
         end
 

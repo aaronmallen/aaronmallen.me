@@ -15,7 +15,7 @@ module API
           in Failure(:archived) then invalid(id: [ARCHIVED])
           in Failure(:not_started) then invalid(id: [NOT_STARTED])
           in Failure(:not_found) then missing("project", id)
-          else failed("could not archive the project")
+          in unmatched then unhandled(unmatched, "could not archive the project")
         end
       end
     end

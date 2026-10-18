@@ -25,7 +25,6 @@ module Admin
             in Success[_, _, day] then done(request, response, :moved_task, date: i18n.l(day, format: :medium))
             in Failure(:invalid | :past => refusal) then done(request, response, refusal)
             in Failure(:not_found) then halt :not_found
-            else halt :internal_server_error
           end
         end
       end

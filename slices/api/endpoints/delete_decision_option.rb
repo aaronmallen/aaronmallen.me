@@ -20,7 +20,7 @@ module API
           in Success(*) then Success(id:, option_id:, deleted: true)
           in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
           in Failure[:invalid, _] then chosen
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

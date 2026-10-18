@@ -47,7 +47,7 @@ module API
           in Success(tag) then Success(id: tag.id, name: tag.name, color: tag.color, description: tag.description)
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in Failure(:not_found) then missing("tag", id)
-          else failed("could not save the tag")
+          in unmatched then unhandled(unmatched, "could not save the tag")
         end
       end
     end

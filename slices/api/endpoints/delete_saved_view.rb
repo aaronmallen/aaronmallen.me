@@ -12,7 +12,7 @@ module API
         case delete_saved_view.call(id)
           in Success(_) then Success(id:, deleted: true)
           in Failure(:not_found) then missing("saved view", id)
-          else failed("could not delete the saved view")
+          in unmatched then unhandled(unmatched, "could not delete the saved view")
         end
       end
     end

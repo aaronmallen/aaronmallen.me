@@ -318,12 +318,11 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(facts[fact(:sprint)]).to eq(Blog::TimeZone.today.strftime("%b %-d, %Y"))
       end
 
-      it "answers with a server error when the day's sprint cannot be rolled" do
+      it "raises the failure when the day's sprint cannot be rolled" do
         task = left_yesterday
         lose_the_roll
-        read(task)
 
-        expect(last_response.status).to eq(500)
+        expect { read(task) }.to raise_error(NoMatchingPatternError)
       end
 
       it "says when it is set for no sprint day" do

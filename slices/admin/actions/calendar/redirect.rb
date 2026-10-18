@@ -27,7 +27,6 @@ module Admin
             in Success(record) then done(request, response, :moved, **moved_to(record[at]))
             in Failure(:not_found) then halt :not_found
             in Failure(:invalid | :not_scheduled | :past => refusal) then done(request, response, refusal)
-            else halt :internal_server_error
           end
         end
 
@@ -51,7 +50,6 @@ module Admin
             in Failure(:read_only) then done(request, response, :read_only)
             in Failure[:invalid, errors] then refused(request, response, errors, &)
             in Failure[:google_failed, _] then done(request, response, :google_failed)
-            else halt :internal_server_error
           end
         end
       end

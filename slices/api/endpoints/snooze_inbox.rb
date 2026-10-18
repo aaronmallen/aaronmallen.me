@@ -46,7 +46,7 @@ module API
           in Failure[:record, kind, id, _] then invalid(kind => [Helpers::Wording.missing(NOUNS.fetch(kind), id)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
           in Failure(:invalid | :past => code) then invalid(snoozed_until: [Helpers::Wording::SNOOZE_REFUSALS[code]])
-          else failed("could not snooze the rows")
+          in unmatched then unhandled(unmatched, "could not snooze the rows")
         end
       end
     end

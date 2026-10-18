@@ -12,7 +12,7 @@ module API
         case delete_work_entry.call(id)
           in Success(entry) then Success(serialized(Serializers::WorkEntry, entry).merge(deleted: true))
           in Failure(:not_found) then missing("role", id)
-          else failed("could not remove the role")
+          in unmatched then unhandled(unmatched, "could not remove the role")
         end
       end
     end

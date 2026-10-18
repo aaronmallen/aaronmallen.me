@@ -3,9 +3,9 @@ id: "0010"
 title: Configure Honeybadger from settings in a provider, not from honeybadger.yml
 status: active
 created: 2026-09-28
-area: [config, lib, mcp]
+area: [config, lib, admin, api, mcp]
 issue: AA-660
-amended: [AA-819, "#237", "#467", "#1012"]
+amended: [AA-819, "#237", "#467", "#1012", "#1805"]
 tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
 ---
 
@@ -42,6 +42,11 @@ and registers `honeybadger.agent`. The app requires `honeybadger/ruby`, never `h
   `honeybadger.agent`, since the SDK turns it into a response and no middleware sees it.
 - **Public search** reports each `Sequel::DatabaseError` it rescues to `honeybadger.agent`: the one that turns
   the page into the 503 error state and the one that lets a search run when its attempt cannot be counted (#1803).
+- **A `Result` no branch matches** reports its value (#1805). An admin action's `case ... in` raises
+  `NoMatchingPatternError`. In production `Admin::Action` logs it, sends it to `honeybadger.agent` and answers the
+  same bare 500 as before; in development and test it raises again, so Hanami's error page and a failing spec show
+  the cause. An API endpoint ends its match with `in unmatched then unhandled(unmatched, message)`, which reports the
+  value and answers the `failed` refusal, so the API and MCP clients read the same message.
 - `report_data` is on in production and off elsewhere, unless `honeybadger.report_data` says otherwise.
 - `FILTER_KEYS` is a list kept by hand, and `config/app.rb` hands it to the logger's filters too. Honeybadger matches
   each entry as a substring with no regard to case, so `token` covers `refresh_token`. Add a key when a setting

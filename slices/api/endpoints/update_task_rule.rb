@@ -51,7 +51,7 @@ module API
           in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
           in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, TaskRules::COMPLAINTS))
           in Failure(:not_found) then missing("task rule", id)
-          else failed(TaskRules::UNSAVED)
+          in unmatched then unhandled(unmatched, TaskRules::UNSAVED)
         end
       end
     end

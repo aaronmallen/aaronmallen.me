@@ -26,7 +26,6 @@ module Admin
         def read(id)
           case mark_message.call(id, READ)
             in Success(_) | Failure(:gmail_failed) then nil
-            else halt :internal_server_error
           end
         end
       end

@@ -13,7 +13,7 @@ module API
           in Success(sprint) then Success(serialized(Serializers::Sprint, sprint).merge(dropped: true))
           in Failure(:started) then invalid(id: ["that sprint has already started"])
           in Failure(:not_found) then missing("sprint", id)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

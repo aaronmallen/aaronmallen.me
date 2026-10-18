@@ -14,7 +14,6 @@ module Admin
         in Success(*rejected) then toast(response, self.class::REJECTED, count: rejected.length)
         in Failure(:nothing_open) then toast(response, self.class::REJECTED, count: 0)
         in Failure(:already_posted | :not_found) then halt :not_found
-        else halt :internal_server_error
       end
     end
   end

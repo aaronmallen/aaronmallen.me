@@ -7,12 +7,12 @@ module Admin
 
     include CSRFToken
     include Deps[
-      "operations.build_navigation", "settings",
-      not_found_view: "ui.views.not_found", rejected_view: "ui.views.forms.rejected",
+      "logger", "operations.build_navigation", "settings",
+      honeybadger: "honeybadger.agent", not_found_view: "ui.views.not_found", rejected_view: "ui.views.forms.rejected",
     ]
 
     config.formats.accept :html
-    config.handle_exception BodyParsingError => 400
+    config.handle_exception BodyParsingError => 400, NoMatchingPatternError => :unhandled
 
     verify_csrf_under_test
 
@@ -88,7 +88,6 @@ module Admin
         in Failure(:queue_unavailable) then toast_back(response, QUEUE_UNAVAILABLE, path)
         in Failure[:invalid, errors] if block_given? then yield errors
         in Failure(:not_found) then halt :not_found
-        else halt :internal_server_error
       end
     end
 
@@ -105,6 +104,14 @@ module Admin
     def toast_back(response, key, path)
       toast(response, key)
       response.redirect_to(path)
+    end
+
+    def unhandled(_request, _response, error)
+      raise error unless Hanami.env?(:production)
+
+      logger.error(error)
+      honeybadger.notify(error)
+      halt :internal_server_error
     end
 
     def unprocessable(response, view, **)

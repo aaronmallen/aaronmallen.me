@@ -55,7 +55,7 @@ module API
 
         case list_saved_view_records.call(view, page:, continue_to: cursor, kinds: activity_kinds(scopes))
           in Success(found) then Success(answered(view, found))
-          else failed(NO_SPRINT)
+          in unmatched then unhandled(unmatched, NO_SPRINT)
         end
       end
 

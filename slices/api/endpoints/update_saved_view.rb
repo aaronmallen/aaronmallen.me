@@ -35,7 +35,7 @@ module API
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
           in Failure(:not_found) then missing("saved view", id)
-          else failed(SavedViews::UNSAVED)
+          in unmatched then unhandled(unmatched, SavedViews::UNSAVED)
         end
       end
     end

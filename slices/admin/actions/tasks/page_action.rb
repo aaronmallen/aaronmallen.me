@@ -15,7 +15,6 @@ module Admin
             in Success(page)
               unprocessable(response, task_view, **page, **return_to(request))
             in Failure(:not_found) then halt :not_found
-            else halt :internal_server_error
           end
         end
       end

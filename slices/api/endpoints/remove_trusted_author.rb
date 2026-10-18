@@ -17,7 +17,7 @@ module API
         case remove_trusted_author.call(author_url)
           in Success(removed) then Success(author_url: removed, removed: true)
           in Failure(:not_found) then missing("trusted author", author_url, by: "URL")
-          else failed("could not remove the trusted author")
+          in unmatched then unhandled(unmatched, "could not remove the trusted author")
         end
       end
     end

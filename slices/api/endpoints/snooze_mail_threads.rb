@@ -15,7 +15,7 @@ module API
           in Success(messages:) then Success(mail_threads: answered(messages))
           in Failure[:record, _, id, _] then invalid(ids: [Helpers::Wording.missing("mail thread", id)])
           in Failure(:invalid | :past => code) then invalid(snoozed_until: [Helpers::Wording::SNOOZE_REFUSALS[code]])
-          else failed("could not snooze the mail threads")
+          in unmatched then unhandled(unmatched, "could not snooze the mail threads")
         end
       end
 

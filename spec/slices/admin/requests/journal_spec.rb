@@ -1006,12 +1006,40 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect([last_response.status, repo.count]).to eq([404, 1])
       end
 
-      it "answers with a server error when the delete fails", :aggregate_failures do
-        replace_component("record.operations.delete_journal_entry", ->(_id) { Failure(:unexpected) })
-        delete_entry
+      describe "when the delete fails in a way it did not expect" do
+        let(:agent) { Hanami.app["honeybadger.agent"] }
+        let(:logger) { Hanami.app["logger"] }
 
-        expect([last_response.status, repo.count]).to eq([500, 1])
-        expect(last_response.headers["Location"]).to be_nil
+        before do
+          allow(agent).to receive(:notify)
+          allow(logger).to receive(:error)
+          replace_component("record.operations.delete_journal_entry", ->(_id) { Failure(:unexpected) })
+        end
+
+        it "raises the failure outside production" do
+          expect { delete_entry }.to raise_error(NoMatchingPatternError, "Failure(:unexpected)")
+        end
+
+        describe "in production" do
+          before do
+            allow(Hanami).to receive(:env?).and_call_original
+            allow(Hanami).to receive(:env?).with(:production).and_return(true)
+            delete_entry
+          end
+
+          it "answers with a server error", :aggregate_failures do
+            expect([last_response.status, last_response.body, repo.count]).to eq([500, "Internal Server Error", 1])
+            expect(last_response.headers["Location"]).to be_nil
+          end
+
+          it "tells Honeybadger the failure" do
+            expect(agent).to have_received(:notify).with(have_attributes(message: "Failure(:unexpected)"))
+          end
+
+          it "logs the failure" do
+            expect(logger).to have_received(:error).with(have_attributes(message: "Failure(:unexpected)"))
+          end
+        end
       end
 
       it "rejects a delete without a CSRF token" do

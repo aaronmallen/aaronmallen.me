@@ -1294,12 +1294,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(panel.all(".sprint-rows .task-title").map(&:text)).to eq(["Read the design"])
       end
 
-      it "answers with a server error when the day's sprint cannot be rolled" do
+      it "raises the failure when the day's sprint cannot be rolled" do
         create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today - 1).id)
         lose_the_roll
-        get "/admin"
 
-        expect(last_response.status).to eq(500)
+        expect { get "/admin" }.to raise_error(NoMatchingPatternError)
       end
 
       it "offers the Create Task button, with a page to fall back on", :aggregate_failures do

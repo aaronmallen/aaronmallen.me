@@ -18,7 +18,6 @@ module Admin
           case create_memory_file.call({ path: values[:path], **Helpers::MemoryScope.fields(values[:scope]) })
             in Success(file) then toast_back(response, CREATED, routes.path(:admin_agent_memory_file, id: file.id))
             in Failure[:invalid, errors] then refuse(response, values, errors)
-            else halt :internal_server_error
           end
         end
 

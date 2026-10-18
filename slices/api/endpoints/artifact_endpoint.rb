@@ -24,7 +24,7 @@ module API
           in Success(value) then Success(yield(value))
           in Failure(:not_found) then not_found(missing)
           in Failure[:invalid, errors] then rejected(errors, Artifacts::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

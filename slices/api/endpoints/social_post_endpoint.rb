@@ -41,7 +41,7 @@ module API
           in Failure[:invalid, errors] then invalid(refusals(errors, params))
           in Failure(:already_posted) then gone(id, "saved")
           in Failure(:not_found) then missing("social post", id)
-          else failed(UNSAVED)
+          in unmatched then unhandled(unmatched, UNSAVED)
         end
       end
 

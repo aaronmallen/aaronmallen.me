@@ -21,7 +21,6 @@ module Admin
               response.redirect_to(routes.path(:admin_edit_project, id: project.id))
             in Failure[:invalid, errors]
               unprocessable(response, view, **build_project_editor.call(params:, errors:))
-            else halt :internal_server_error
           end
         end
 

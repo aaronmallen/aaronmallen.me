@@ -22,7 +22,7 @@ module API
         case save_task_rule.call({ pattern:, provider:, tags: Blog::Types::TagField[tags], projects: })
           in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
           in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, TaskRules::COMPLAINTS))
-          else failed(TaskRules::UNSAVED)
+          in unmatched then unhandled(unmatched, TaskRules::UNSAVED)
         end
       end
 

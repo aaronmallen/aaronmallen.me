@@ -65,7 +65,6 @@ module Admin
           case result
             in Success(email) then signed_in(request, response, email)
             in Failure(reason) then fail_sign_in(request, response, reason)
-            else halt :internal_server_error
           end
         end
 

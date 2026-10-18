@@ -21,7 +21,6 @@ module Admin
               saved(response, outcome, social_post)
             in Failure[:invalid, errors]
               unprocessable(response, index_view, **build_social_page.call(params:, errors:))
-            else halt :internal_server_error
           end
         end
 

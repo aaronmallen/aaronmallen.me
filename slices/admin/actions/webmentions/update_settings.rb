@@ -20,7 +20,6 @@ module Admin
           case update_webmention_settings.call(**settings(request))
             in Success(_) then :saved
             in Failure(:unchanged) then :unchanged
-            else halt :internal_server_error
           end
         end
 

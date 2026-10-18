@@ -13,7 +13,7 @@ module API
           in Success(_) then Success(id:, deleted: true)
           in Failure(:already_posted) then gone(id, "removed")
           in Failure(:not_found) then missing("social post", id)
-          else failed("could not delete the social post")
+          in unmatched then unhandled(unmatched, "could not delete the social post")
         end
       end
     end

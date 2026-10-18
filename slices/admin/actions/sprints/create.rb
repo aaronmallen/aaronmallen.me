@@ -18,7 +18,6 @@ module Admin
             in Failure[:planned, date] then done(response, TAKEN, date)
             in Failure(:past) then done(response, AHEAD)
             in Failure(:invalid) then done(response, INVALID)
-            else halt :internal_server_error
           end
         end
 

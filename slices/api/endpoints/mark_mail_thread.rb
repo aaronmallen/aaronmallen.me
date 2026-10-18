@@ -17,7 +17,7 @@ module API
         case mark_message.call(id, status)
           in Success(thread) then Success(id: thread.id, status: thread.status)
           in Failure(:not_found) then missing("mail thread", id)
-          else failed("could not mark the mail thread")
+          in unmatched then unhandled(unmatched, "could not mark the mail thread")
         end
       end
     end

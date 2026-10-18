@@ -32,7 +32,7 @@ module API
           in Success(post) then Success(SHOWN.to_h { [it, post.public_send(it)] })
           in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
           in Failure(:not_found) then missing("blog post", id)
-          else failed("could not save the social card fields")
+          in unmatched then unhandled(unmatched, "could not save the social card fields")
         end
       end
 

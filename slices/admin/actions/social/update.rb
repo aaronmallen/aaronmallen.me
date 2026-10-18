@@ -23,7 +23,6 @@ module Admin
             in Failure(:already_posted) then sent(response)
             in Failure(:not_found) then halt :not_found
             in Failure[:invalid, errors] then invalid(response, id, params, errors)
-            else halt :internal_server_error
           end
         end
 

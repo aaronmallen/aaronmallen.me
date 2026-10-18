@@ -26,7 +26,7 @@ module API
           in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
-          else failed(UNSAVED)
+          in unmatched then unhandled(unmatched, UNSAVED)
         end
       end
     end

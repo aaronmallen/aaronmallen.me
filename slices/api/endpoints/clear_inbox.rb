@@ -33,7 +33,7 @@ module API
           in Success => cleared then cleared
           in Failure[:record, kind, id, reason] then invalid(kind => [refused(NOUNS.fetch(kind), id, reason)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

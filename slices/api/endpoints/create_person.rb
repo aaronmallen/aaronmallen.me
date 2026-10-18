@@ -16,7 +16,7 @@ module API
           in Success(person) then Success(serialized(Serializers::Person, person))
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
-          else failed(People::UNSAVED)
+          in unmatched then unhandled(unmatched, People::UNSAVED)
         end
       end
 

@@ -20,7 +20,7 @@ module API
         case open_decision.call({ title:, problem:, tags: Blog::Types::TagField[tags] })
           in Success(decision) then answered(decision.id)
           in Failure[:invalid, errors] then rejected(errors, Decisions::COMPLAINTS)
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
     end

@@ -36,7 +36,7 @@ module API
           in Success(*) then answered(id)
           in Failure(:not_found) then missing("task", id)
           in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
-          else failed(Helpers::Wording::UNSAVED)
+          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

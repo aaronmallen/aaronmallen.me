@@ -62,7 +62,7 @@ module API
           in Failure(:stale) then invalid(edit_ids: ["the edits you chose on suggestion #{id} have gone stale"])
           in Failure(:already_posted) then invalid(suggestion_id: [format(Suggestions::SENT, id)])
           in Failure(:published) then invalid(suggestion_id: [format(PUBLISHED, id)])
-          else failed("could not accept the edits")
+          in unmatched then unhandled(unmatched, "could not accept the edits")
         end
       end
     end

@@ -7,7 +7,7 @@ area: [app, config, lib, activity, admin, analytics, api, backups, contact, deci
   projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 issue: AA-587
 amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957",
-  "#1171", "#1702"]
+  "#1171", "#1702", "#1805"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -66,8 +66,8 @@ changed this for clients of an outside service: they register at app level, and 
 **The app shares only what no slice owns, and a slice names each piece it takes** in
 `config.shared_app_component_keys`: `assets`, the one compiled bundle, for `public`, `admin` and `mcp`; `http`, the
 connection builder under the GitHub, network, webmention and GeoLite2 clients, for `analytics`, `record` and
-`social` (AA-747); `honeybadger.agent` for `admin`, `calendar`, `health`, `mail`, `mcp`, `posts`, `projects`,
-`public`, `shares` and `social` (#1803); and `sidekiq.dead_set` for `activity` (#951).
+`social` (AA-747); `honeybadger.agent` for `admin`, `api`, `calendar`, `health`, `mail`, `mcp`, `posts`,
+`projects`, `public`, `shares` and `social` (#1803, #1805); and `sidekiq.dead_set` for `activity` (#951).
 
 Four keys break the rule on purpose, and `config/app.rb` shares them with every slice:
 `contracts.contributor_terms_contract`, `contracts.review_range_contract`, `contracts.search_query_contract` and
