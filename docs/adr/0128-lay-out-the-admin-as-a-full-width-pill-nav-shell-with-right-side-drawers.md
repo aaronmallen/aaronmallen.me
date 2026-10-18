@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102", "#1106", "#1742"]
+amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -35,10 +35,11 @@ cap at `--container-measure`, 44em, in `config/tailwind.css`. #919 moved that ru
 a search button that opens the palette, and an avatar menu. The pills are Today, Inbox, Tasks, Journal, Publish
 and Insights, and the active one carries `aria-current="page"`. Each pill's screens show as sub-tabs under the
 page header, in the README's table, and the time report sits under Insights. The Inbox pill wears the dot the
-jump button wore. Settings (tags, people, task rules, webmentions, API tokens, connected services, MCP clients and
-security) move to the avatar menu, with the site links, the key help, the theme toggle and sign out. Pills and
-sub-tabs are links, so every screen they name opens without scripts. `live.js`
-morphs the top bar where it morphed the context bar ([ADR 0118][0118]).
+jump button wore. The avatar menu holds the site links, the key help, the theme toggle, one Settings item with a
+gear that opens `/settings`, and sign out. #1727 folded its list of settings screens into that one item: the
+Settings page draws its own tab bar, so its screens show no sub-tabs. Pills and sub-tabs are links, so every
+screen they name opens without scripts. `live.js` morphs the top bar where it morphed the context bar
+([ADR 0118][0118]).
 
 **The palette stays, regrouped.** It lists Actions, Records, Saved views, one group per category (Today, Inbox,
 Tasks, Journal, Publish, Insights and Settings) and Search, in that order. Each screen sits under its category's

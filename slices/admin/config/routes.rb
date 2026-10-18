@@ -241,7 +241,7 @@ module Admin
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
-    redirect_temporary "/settings", to: "/settings/socials"
+    redirect_temporary "/settings", to: "/settings/socials", as: :settings
     get "/settings/jobs", to: "settings.jobs", as: :settings_jobs
     get "/settings/security", to: "security.show", as: :security
     get "/settings/services", to: "settings.services", as: :settings_services

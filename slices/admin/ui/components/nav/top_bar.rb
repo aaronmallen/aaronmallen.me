@@ -18,7 +18,7 @@ module Admin
               pills
               Switcher(navigation: @navigation)
               search
-              AvatarMenu(settings: @navigation.settings)
+              AvatarMenu()
             end
           end
 

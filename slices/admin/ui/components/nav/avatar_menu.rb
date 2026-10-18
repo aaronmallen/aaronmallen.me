@@ -14,8 +14,6 @@ module Admin
             %i[contact fa-envelope .pages.contact].freeze,
           ].freeze
 
-          prop :settings, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
-
           include Deps[app_settings: "settings"]
 
           def view_template
@@ -31,10 +29,9 @@ module Admin
           def entries
             site
             rule
-            settings
-            rule
             keys
             themes
+            settings
             rule
             sign_out
           end
@@ -63,12 +60,7 @@ module Admin
 
           def rule = hr(class: "avatar-menu-rule")
 
-          def settings
-            heading(".settings")
-            @settings.each do |section|
-              item(section.icon, href: section.path) { plain t(section.label_key) }
-            end
-          end
+          def settings = item("fa-gear", href: path(:admin_settings)) { plain t(".settings") }
 
           def sign_out
             Form(action: path(:admin_sign_out)) do

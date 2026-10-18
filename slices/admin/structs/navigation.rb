@@ -9,11 +9,8 @@ module Admin
 
       def pills = sections.group_by(&:group).except(:settings)
 
-      def settings = sections.select { it.group == :settings }
-
       def tabs
-        group = current&.group
-        found = sections.select { it.group == group }
+        found = pills.fetch(current&.group, [])
         found.size > 1 ? found : []
       end
     end

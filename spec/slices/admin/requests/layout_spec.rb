@@ -55,10 +55,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "lists every screen but settings in the switcher, grouped", :aggregate_failures do
-      settings = page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] }
       rows = page.all("#nav-switcher a.switcher-row", visible: :all).map { it["href"] }
 
-      expect(rows).to eq(screens - settings)
+      expect(rows).to eq(screens.grep_v(%r{\A/admin/settings/}))
       expect(page.all("#nav-switcher .switcher-heading", visible: :all).map { it.text(:all) })
         .to eq(%w[Inbox Tasks Journal Publish Insights])
     end
@@ -69,12 +68,13 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css("button.switcher[aria-label='Navigate. Current: Today']")
     end
 
-    it "links the site and every settings tab from the avatar menu" do
+    it "links the site and one Settings item from the avatar menu" do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
-        .to eq(%w[/writing /about /projects /contact /admin/settings/tagging#tags /admin/settings/socials#people
-                  /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
-                  /admin/settings/services#tokens /admin/settings/services#services
-                  /admin/settings/services#clients /admin/settings/security /admin/settings/jobs])
+        .to eq(%w[/writing /about /projects /contact /admin/settings])
+    end
+
+    it "marks the Settings item with a gear" do
+      expect(page).to have_css("#avatar-menu a.avatar-menu-item[href='/admin/settings'] .fa-gear", visible: :all)
     end
 
     it "offers the keys, the themes and sign out in the avatar menu", :aggregate_failures do
@@ -254,6 +254,12 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
         expect(page).to have_css(".page-head h1", exact_text: "Settings")
         expect(page).to have_title("#{title} | Admin | #{Hanami.app.settings.owner_name}")
+      end
+
+      it "shows only the Settings tab bar on #{route}" do
+        get route
+
+        expect(page).to have_css(".screen-tabs", count: 1)
       end
     end
   end
