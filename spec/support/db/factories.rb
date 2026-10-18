@@ -1,68 +1,11 @@
 # frozen_string_literal: true
 
-require "blog/extensions"
 require "rom-factory"
-
-module ROM
-  module Factory
-    class Factories
-      module Tagging
-        def create(name, *traits, **attrs)
-          Spec::DB::Tagging.call(name, super(name, *traits, **attrs.except(:tags)), attrs[:tags])
-        end
-      end
-
-      module Linking
-        def create(name, *traits, **attrs)
-          super(name, *traits, **Spec::DB::Linking.call(name, attrs))
-        end
-      end
-
-      module Threading
-        def create(name, *traits, **attrs)
-          return super unless name == :message
-
-          letter = attrs.slice(*Spec::DB::Threading::LETTER)
-          thread = super(name, *traits, **attrs.except(*letter.keys))
-          super(:mail_message, mail_thread_id: thread.id, **thread.to_h.slice(:subject, :received_at), **letter)
-
-          Mail::Slice["repos.message_queries"].by_id(thread.id)
-        end
-      end
-    end
-  end
-end
-
-Blog::Extensions.apply(
-  ROM::Factory::Factories,
-  ROM::Factory::Factories::Linking,
-  gem: "rom-factory",
-  version: "0.14.1",
-  reason: "create takes a record such as post: and stores its id, which rom-factory has no way to do",
-  upstream: nil,
-)
-
-Blog::Extensions.apply(
-  ROM::Factory::Factories,
-  ROM::Factory::Factories::Threading,
-  gem: "rom-factory",
-  version: "0.14.1",
-  reason: "create(:message) builds the thread and its first message as one, which rom-factory has no way to do",
-  upstream: nil,
-)
-
-Blog::Extensions.apply(
-  ROM::Factory::Factories,
-  ROM::Factory::Factories::Tagging,
-  gem: "rom-factory",
-  version: "0.14.1",
-  reason: "create takes tags: and writes them through the repo, which rom-factory has no way to do",
-  upstream: nil,
-)
 
 module Spec
   module DB
     module Factories
+      LETTER = %i[reply_to body visitor_hash from_name].freeze
       STRUCT_MODULE_NAME = :Structs
 
       class << self
@@ -70,7 +13,12 @@ module Spec
           registry.fetch((slice_name || Hanami.app.slice_name).to_sym)
         end
 
-        def create(name, ...) = for_factory(name).create(name, ...)
+        def create(name, *traits, tags: nil, **attrs)
+          return create_message(*traits, **attrs) if name == :message
+
+          record = for_factory(name).create(name, *traits, **Linking.call(name, attrs))
+          Tagging.call(name, record, tags)
+        end
 
         def define(...)
           (@defining || self[]).define(...)
@@ -86,6 +34,14 @@ module Spec
           ROM::Factory
             .configure(slice.slice_name.namespace_name) { |config| config.rom = slice["db.rom"] }
             .struct_namespace(struct_namespace(slice))
+        end
+
+        def create_message(*traits, **attrs)
+          letter = attrs.slice(*LETTER)
+          thread = for_factory(:message).create(:message, *traits, **attrs.except(*letter.keys))
+          create(:mail_message, mail_thread_id: thread.id, **thread.to_h.slice(:subject, :received_at), **letter)
+
+          Mail::Slice["repos.message_queries"].by_id(thread.id)
         end
 
         def definitions_root(slice)
@@ -139,10 +95,6 @@ module Spec
           linked[:"#{key}_id"] = record.id if record
         end
       end
-    end
-
-    module Threading
-      LETTER = %i[reply_to body visitor_hash from_name].freeze
     end
 
     module Tagging
