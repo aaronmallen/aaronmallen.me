@@ -40,6 +40,35 @@ differs from the one you installed, put `/usr/lib/postgresql/18/bin` first on th
 The job connects with the database settings the site already reads, through `PGHOST`, `PGPORT`, `PGUSER`,
 `PGPASSWORD` and `PGDATABASE`, so `pg_dump` needs nothing else.
 
+## Where the dump lands
+
+The job writes the whole dump to a scratch folder, then uploads it, and `mise run db:restore` downloads a dump the
+same way. Ruby picks the folder from `TMPDIR` and falls back to `/tmp`. On the Pi `/tmp` lives in RAM, capped at
+about half of memory, so each dump takes its own size in RAM for the length of the run, and one a killed worker
+leaves behind keeps it until reboot. Once the dump outgrows the cap, `pg_dump` fails and no backup lands.
+
+Point `TMPDIR` at a folder on disk. Make the folder as the user the worker runs as:
+
+```sh
+mkdir -p /opt/aaronmallen.me/shared/tmp
+```
+
+Then run `sudo systemctl edit aaronmallen-worker` and add these lines:
+
+```ini
+[Service]
+Environment=TMPDIR=/opt/aaronmallen.me/shared/tmp
+```
+
+If `systemctl show --property ProtectSystem --value aaronmallen-worker` prints `strict`, add
+`ReadWritePaths=/opt/aaronmallen.me/shared/tmp` under the same `[Service]` line. Then restart the worker:
+
+```sh
+sudo systemctl restart aaronmallen-worker
+```
+
+A dump a killed worker leaves in the folder stays there. It costs disk, not RAM, but delete it by hand.
+
 ## Production
 
 The steps use `rc`, the RustFS command line client. The RustFS console does each step too. Run them from any
@@ -126,9 +155,14 @@ dump into it with `pg_restore`, and counts the rows in `schema_migrations`, `pos
 count, then drops the scratch database. It fails when any of those tables comes back empty or the dump does not
 load. It never writes to the database the settings name.
 
-Run it where the worker runs, with the same settings. It needs `pg_restore`, `psql`, `createdb` and `dropdb` from the
-same client as `pg_dump`, a database user that may create databases, and `s3:GetObject` on the bucket to fetch a dump
-by name.
+Run it where the worker runs, with the same settings and the same `TMPDIR`, so the download lands on disk too:
+
+```sh
+TMPDIR=/opt/aaronmallen.me/shared/tmp mise run db:restore database-20261004T053000Z.dump
+```
+
+It needs `pg_restore`, `psql`, `createdb` and `dropdb` from the same client as `pg_dump`, a database user that may
+create databases, and `s3:GetObject` on the bucket to fetch a dump by name.
 
 A dump holds the OAuth tokens sealed under `data_key` ([ADR 0130][0130]). A restore under any other `data_key`
 brings back the rows but no working credentials, so keep `data_key` somewhere apart from the site, and set the same
