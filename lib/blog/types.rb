@@ -10,6 +10,7 @@ module Blog
   Types = Dry.Types(default: :strict)
 
   module Types
+    CONTRIBUTOR_SLUG_LIMIT = 64
     IPV6_PREFIX = 64
     REDIRECT_HOSTS = {
       "http" => ->(uri) { %w[127.0.0.1 ::1 localhost].include?(uri.hostname) },
@@ -59,7 +60,8 @@ module Blog
     ClosedTaskStatus = Types::String.enum("done", "canceled")
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")
-    ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/, max_size: 64)
+    ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/,
+                                                max_size: CONTRIBUTOR_SLUG_LIMIT)
     Contributor = [
       { kind: Types::String.constrained(eql: "owner") },
       { kind: Types::String.constrained(eql: "agent"), agent: ContributorSlug, model: ContributorSlug },

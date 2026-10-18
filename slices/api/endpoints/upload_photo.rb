@@ -6,6 +6,8 @@ require "stringio"
 module API
   module Endpoints
     class UploadPhoto < Endpoint
+      CONTRACTS = [::Media::Contracts::PhotoContract].freeze
+      ERRORS = "photo_upload.errors"
       UNAVAILABLE = true
       WHITESPACE = /\s/
 
@@ -42,7 +44,7 @@ module API
         nil
       end
 
-      def message(code) = i18n.t(code, scope: "photo_upload.errors", **::Media::Operations::UploadPhoto::LIMITS)
+      def message(code) = i18n.t(code, scope: ERRORS, **::Media::Operations::UploadPhoto::LIMITS)
 
       def refuse(code) = invalid({ data: [message(code)] })
 

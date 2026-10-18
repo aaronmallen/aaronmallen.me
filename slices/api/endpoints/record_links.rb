@@ -7,6 +7,7 @@ module API
       ID = Helpers::Schema::ID
       KIND = { type: "string", enum: Serializers::Link::KINDS }.freeze
 
+      CONTRACTS = [::Links::Contracts::RecordLinkContract].freeze
       COMPLAINTS = {
         other_id: {
           Blog::Contract::FORMAT => "pick a record by its ID",

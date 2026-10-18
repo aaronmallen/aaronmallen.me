@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class BulkPostEndpoint < BulkEndpoint
+      CONTRACTS = [::Posts::Contracts::BulkContract].freeze
       COMPLAINTS = Posts::COMPLAINTS
       KEY = :posts
       NOUN = "blog post"

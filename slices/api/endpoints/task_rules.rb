@@ -7,6 +7,7 @@ module API
       ID = Helpers::Schema::ID
       UNSAVED = "could not save the rule"
 
+      CONTRACTS = [::Tasks::Contracts::TaskRuleContract].freeze
       COMPLAINTS = {
         pattern: {
           Blog::Contract::BLANK => "name a repo or team first",

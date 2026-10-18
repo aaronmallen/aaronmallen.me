@@ -61,6 +61,18 @@ RSpec.describe "API memory", type: :request do
     expect([last_response.status, document.fetch("errors")]).to eq([422, { "model" => ["model is missing"] }])
   end
 
+  it "refuses a blank agent beside a model" do
+    call_api(:post, "/memory_files", { path: "hanami", scope: "global", agent: "", model: "claude-opus-5-5" })
+
+    expect(document.fetch("errors")).to eq("agent" => ["name the agent along with its model"])
+  end
+
+  it "refuses an agent over the slug limit" do
+    call_api(:post, "/memory_files", { path: "hanami", scope: "global", **author, agent: "a" * 65 })
+
+    expect(document.fetch("errors")).to eq("agent" => ["keep an agent to 64 characters"])
+  end
+
   it "refuses a repo file without a repo" do
     call_api(:post, "/memory_files", { path: "hanami", scope: "repo", **author })
 

@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class AddWorkEntry < Endpoint
+      CONTRACTS = [::Projects::Contracts::WorkEntryContract].freeze
       COMPLAINTS = {
         from_year: {
           Blog::Contract::BLANK => "add the year this started",

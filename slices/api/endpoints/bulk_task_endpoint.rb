@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class BulkTaskEndpoint < BulkEndpoint
+      CONTRACTS = [::Tasks::Contracts::BulkContract].freeze
       COMPLAINTS = Tasks::COMPLAINTS
       FIELDS = { to: :list }.freeze
       KEY = :tasks

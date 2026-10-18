@@ -13,6 +13,7 @@ module API
       TITLE = { type: "string", description: "its title, #{TITLE_LIMIT} characters at most" }.freeze
       TYPE = { type: "string", enum: Blog::Types::ArtifactType.values }.freeze
 
+      CONTRACTS = [::Agents::Contracts::ArtifactContract, ::Agents::Contracts::ArtifactVersionContract].freeze
       COMPLAINTS = {
         **Memory::COMPLAINTS.slice(:agent, :model, :session_id),
         body: {

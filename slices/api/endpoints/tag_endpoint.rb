@@ -12,6 +12,7 @@ module API
         description: "public holds the tags on posts and projects; private holds those on #{PRIVATE_KINDS}",
       }.freeze
 
+      CONTRACTS = [::Tags::Contracts::TagContract].freeze
       COMPLAINTS = {
         color: { Blog::Contract::FORMAT => "pick one of the six colours" },
         name: {

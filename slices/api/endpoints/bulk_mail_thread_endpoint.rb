@@ -4,7 +4,8 @@
 module API
   module Endpoints
     class BulkMailThreadEndpoint < BulkEndpoint
-      COMPLAINTS = MailThreads::COMPLAINTS
+      CONTRACTS = [::Mail::Contracts::BulkContract].freeze
+      COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
       KEY = :mail_threads
       NOUN = "mail thread"
       REPLY = Helpers::Schema.object({ mail_threads: Helpers::Schema.list(Serializers::MailThread.reference) }).freeze

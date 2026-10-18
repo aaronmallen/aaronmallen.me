@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class UpdateShare < Endpoint
+      COMPLAINTS = Helpers::Upload::COMPLAINTS
+      CONTRACTS = [::Shares::Contracts::ShareContract].freeze
       FILENAME = { type: "string", description: "the name a download saves as; the link stays the same" }.freeze
 
       SCHEMA = {
@@ -22,7 +24,7 @@ module API
 
         case rename_share_file.call(id, { filename: })
           in Success(_) then Success(serialized(Serializers::Share, share_queries.find(id), settings:))
-          in Failure[:invalid, errors] then rejected(errors, {})
+          in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end

@@ -8,6 +8,13 @@ module API
       NOTE = { type: "string", description: "why it changed; a resolved or dropped decision needs one" }.freeze
       REASON = { type: "string", description: "why, in Markdown" }.freeze
 
+      CONTRACTS = [
+        ::Decisions::Contracts::DecisionCommentContract,
+        ::Decisions::Contracts::DecisionContract,
+        ::Decisions::Contracts::DecisionOptionContract,
+        ::Decisions::Contracts::ReasonContract,
+        ::Decisions::Contracts::ResolutionContract,
+      ].freeze
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
         note: {

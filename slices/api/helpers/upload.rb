@@ -6,6 +6,10 @@ require "stringio"
 module API
   module Helpers
     module Upload
+      COMPLAINTS = {
+        content_type: { Blog::Contract::FORMAT => "content_type is a media type, such as image/png" },
+        filename: { Blog::Contract::FORMAT => "filename is a bare name, with no slash, and not . or .." },
+      }.freeze
       DATA = { type: "string", description: "the file's bytes in base64" }.freeze
       FILE = Schema.object(
         { data: DATA, filename: { type: "string", description: "the file's name, as the link hands it out" } },

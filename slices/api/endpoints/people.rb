@@ -9,6 +9,7 @@ module API
       MENTIONED = "scheduled social post %s, which mentions @{%s},"
       UNSAVED = "could not save the person"
 
+      CONTRACTS = [::Social::Contracts::PersonContract].freeze
       COMPLAINTS = {
         bluesky_handle: {
           Blog::Contract::FORMAT => "a Bluesky handle looks like ada.bsky.social",

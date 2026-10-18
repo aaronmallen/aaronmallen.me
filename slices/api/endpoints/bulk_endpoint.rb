@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class BulkEndpoint < Endpoint
+      CONTRACTS = Blog::Constants::EMPTY_ARRAY
       COMPLAINTS = Blog::Constants::EMPTY_HASH
       REFUSALS = Blog::Constants::EMPTY_HASH
       UNCHANGED = "could not change %s %s"

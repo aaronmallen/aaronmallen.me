@@ -26,6 +26,7 @@ module API
           **Memory::LOADED },
       ).freeze
 
+      CONTRACTS = [::Agents::Contracts::SessionContract].freeze
       COMPLAINTS = {
         **Memory::COMPLAINTS.slice(:agent, :model, :repo),
         branch: { "long" => "keep a branch to #{LIMITS::BRANCH_LIMIT} characters" },

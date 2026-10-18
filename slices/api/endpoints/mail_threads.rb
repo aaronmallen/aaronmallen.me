@@ -5,7 +5,6 @@ module API
   module Endpoints
     module MailThreads
       BULK = Helpers::Schema.bulk("mail threads")
-      COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
       TAG = Helpers::Tags.schema("private")
 
       THREAD = Serializers::MailThread::SCHEMA

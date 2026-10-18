@@ -13,6 +13,7 @@ module API
       UNCHECKED = "0"
       UNSAVED = "could not save the project"
 
+      CONTRACTS = [::Projects::Contracts::ProjectContract].freeze
       COMPLAINTS = {
         key: {
           Blog::Contract::FORMAT => "use 2 to 6 letters and digits that start with a letter, as POD",

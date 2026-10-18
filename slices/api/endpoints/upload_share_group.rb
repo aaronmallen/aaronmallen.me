@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class UploadShareGroup < Endpoint
+      COMPLAINTS = Helpers::Upload::COMPLAINTS
+      CONTRACTS = [::Shares::Contracts::UploadContract].freeze
       UNAVAILABLE = true
 
       SCHEMA = {
@@ -36,7 +38,7 @@ module API
       def read(file) = Helpers::Upload.decoded(file.fetch(:data))&.then { Helpers::Upload.file(it, **file) }
 
       def refused(errors)
-        complaints = { files: Helpers::Wording.complaints(errors, {}, named: true).values.flatten }
+        complaints = { files: Helpers::Wording.complaints(errors, COMPLAINTS, named: true).values.flatten }
 
         Failure(Structs::Refusal.invalid(complaints, message: Helpers::Wording.summary(complaints)))
       end

@@ -31,9 +31,23 @@ module API
       }.freeze
       SCOPED = "only a %s file takes %s"
 
+      CONTRACTS = [
+        ::Agents::Contracts::AuthorContract,
+        ::Agents::Contracts::MemoryFactContract,
+        ::Agents::Contracts::MemoryFileContract,
+        ::Agents::Contracts::MemoryScopeContract,
+      ].freeze
       COMPLAINTS = {
-        agent: { Blog::Contract::FORMAT => "use a slug such as claude-code" },
-        model: { Blog::Contract::FORMAT => "use a slug such as claude-opus-5-5" },
+        agent: {
+          Blog::Contract::FORMAT => "use a slug such as claude-code",
+          Blog::Contract::MISSING => "name the agent along with its model",
+          "long" => "keep an agent to #{Blog::Types::CONTRIBUTOR_SLUG_LIMIT} characters",
+        },
+        model: {
+          Blog::Contract::FORMAT => "use a slug such as claude-opus-5-5",
+          Blog::Contract::MISSING => "name the model along with its agent",
+          "long" => "keep a model to #{Blog::Types::CONTRIBUTOR_SLUG_LIMIT} characters",
+        },
         path: {
           Blog::Contract::FORMAT => "use letters, digits, _, ., / and - only",
           "taken" => "a file in this scope already has this path",

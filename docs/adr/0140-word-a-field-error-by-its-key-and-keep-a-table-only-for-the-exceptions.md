@@ -6,7 +6,7 @@ created: 2026-10-10
 area: [lib, admin, api, public, mcp]
 supersedes: ["0027"]
 issue: "#1002"
-amended: ["#1435", "#1559", "#1670"]
+amended: ["#1435", "#1559", "#1670", "#1817"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -75,6 +75,12 @@ first (#1390). It reads the codes each contract can return, from its schema, `co
 calls in its rules and macros, and wants a key for each field the form shows, or a shared
 `ui.field_error.<field>.<code>` or `ui.field_error.<code>` key. `mise run lint` fails on a locale key no code reads;
 `.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
+
+An API endpoint or module that words contract codes names those contracts in `CONTRACTS`, and words them through
+a `COMPLAINTS` table or, as `UploadPhoto` does, through the i18n scope in its `ERRORS`.
+`spec/slices/api/helpers/wording_codes_spec.rb` reads their codes the same way and fails on a code with no words,
+so an agent never gets a bare "is not valid" (#1817). A list in the spec, each row with its reason, skips codes the
+endpoint never sees, most of them ruled out by the JSON schema, and the spec fails on a row no contract can return.
 
 `Public::UI::Components::ContactFieldError` words its codes the same way. It also hands the browser the copy for
 `blank` and `format` before any code arrives, and finds those by the same `.<field>.<code>` key, so a field with no

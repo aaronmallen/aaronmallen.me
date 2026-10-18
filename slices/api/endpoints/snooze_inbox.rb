@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class SnoozeInbox < Endpoint
+      CONTRACTS = [Contracts::ClearInboxContract].freeze
       EMPTY = "name at least one row to snooze"
       IDS = ClearInbox::IDS
       NOUNS = ClearInbox::NOUNS

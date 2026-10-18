@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class SnoozeMailThreads < Endpoint
+      CONTRACTS = [Contracts::ClearInboxContract].freeze
       SCHEMA = Helpers::Schema.widen(
         MailThreads::BULK, snoozed_until: SnoozeInboxRow::SCHEMA.dig(:properties, :snoozed_until),
       ).freeze

@@ -6,6 +6,7 @@ module API
     module JournalEntries
       ID = Helpers::Schema::ID
 
+      CONTRACTS = [::Record::Contracts::JournalEditContract, ::Record::Contracts::JournalEntryContract].freeze
       COMPLAINTS = {
         body: { Blog::Contract::BLANK => "body needs a character that is not a space" },
         entry_date: {

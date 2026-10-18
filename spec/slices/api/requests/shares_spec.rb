@@ -24,6 +24,8 @@ RSpec.describe "API shares", type: :request do
     Shares::Slice["operations.upload_share"].call(share_upload(text, filename, type)).value!
   end
 
+  def refused(field) = { field.to_s => [API::Helpers::Upload::COMPLAINTS.dig(field, "format")] }
+
   def shares = Shares::Slice["relations.shares"].to_a
 
   before do
@@ -59,7 +61,7 @@ RSpec.describe "API shares", type: :request do
     it "refuses a content type that holds more than one type and stores nothing", :aggregate_failures do
       answered = call_api(:post, "/shares", file("<p>hi</p>", "photo.png", "image/png, text/html"))
 
-      expect([status, answered.fetch("errors")]).to eq([422, { "content_type" => ["is not valid"] }])
+      expect([status, answered.fetch("errors")]).to eq([422, refused(:content_type)])
       expect(shares).to be_empty
     end
 
@@ -73,7 +75,7 @@ RSpec.describe "API shares", type: :request do
       it "refuses the filename #{name} and stores nothing", :aggregate_failures do
         answered = call_api(:post, "/shares", file("data", name))
 
-        expect([status, answered.fetch("errors")]).to eq([422, { "filename" => ["is not valid"] }])
+        expect([status, answered.fetch("errors")]).to eq([422, refused(:filename)])
         expect(shares).to be_empty
       end
     end

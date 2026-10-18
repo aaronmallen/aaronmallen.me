@@ -9,6 +9,7 @@ module API
       PENDING = Blog::Types::SuggestionEditStatus["pending"]
       PUBLISHED = "blog post %s is published; suggest edits only on a draft or scheduled post"
 
+      CONTRACTS = [::Suggestions::Contracts::EditsContract].freeze
       COMPLAINTS = Helpers::Wording::SHARED.merge(
         Blog::Contract::BLANK => "needs a character that is not a space",
         LONG => "is too long",

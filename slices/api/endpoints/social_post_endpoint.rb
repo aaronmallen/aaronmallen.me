@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class SocialPostEndpoint < Endpoint
+      CONTRACTS = [::Social::Contracts::ComposeSocialPostContract, ::Social::Contracts::SocialPostContract].freeze
       COMPLAINTS = Helpers::Wording::SHARED.merge(
         Blog::Contract::FORMAT => "needs a date and time, as 2026-10-01T09:30",
         "too_long" => "has a part over the limit for a network you picked",

@@ -40,8 +40,8 @@ A slice names a constant another slice owns in five cases, and no others:
 - **In `mcp`, a constant `api` may name by the case above.** Mcp imports all of api, and each tool describes the
   endpoint it hands to ([ADR 0088][0088]). `MCP::Tools::ReadAnalytics` quotes
   `Analytics::Repos::AnalyticsPageQueries::FIRST_DAYS`, which `api` imports.
-- **A contract**, which a field error names for its limits and codes, and a form or tool description names to quote
-  a limit.
+- **A contract**, which a field error or an API endpoint's `COMPLAINTS` table names for its limits and codes, and a
+  form or tool description names to quote a limit.
 - **A struct named as a type**, in a prop or an `Instance` check.
 - **A job constant enqueued from `after_commit`**, the third of ADR 0003's ways across.
 

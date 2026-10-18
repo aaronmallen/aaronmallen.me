@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class ClearInbox < Endpoint
+      CONTRACTS = [Contracts::ClearInboxContract].freeze
       EMPTY = "name at least one row to clear"
       IDS = Helpers::Schema.list(Helpers::Schema::ID).freeze
       NOUNS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze

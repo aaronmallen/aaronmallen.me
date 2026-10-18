@@ -8,6 +8,7 @@ module API
       MAX_NAME = ::SavedViews::Contracts::SavedViewContract::MAX_NAME
       UNSAVED = "could not save the saved view"
 
+      CONTRACTS = [::SavedViews::Contracts::SavedViewContract].freeze
       COMPLAINTS = {
         filters: { Blog::Contract::CONTROL => "filters hold a control character" },
         name: {

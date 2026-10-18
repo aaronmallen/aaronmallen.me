@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class UpdateShareGroupFile < Endpoint
+      COMPLAINTS = Helpers::Upload::COMPLAINTS
+      CONTRACTS = [::Shares::Contracts::ShareContract].freeze
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Helpers::Schema::ID, file_id: Helpers::Schema::ID, filename: UpdateShare::FILENAME },
@@ -23,7 +25,7 @@ module API
 
         case rename_share_file.call(file_id, { filename: })
           in Success(_) then Success(reply(id))
-          in Failure[:invalid, errors] then rejected(errors, {})
+          in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end

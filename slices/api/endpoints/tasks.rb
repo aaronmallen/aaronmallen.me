@@ -72,6 +72,14 @@ module API
         ].join(" "),
       }.freeze
 
+      CONTRACTS = [
+        ::Tasks::Contracts::TaskCadenceContract,
+        ::Tasks::Contracts::TaskCommentContract,
+        ::Tasks::Contracts::TaskContract,
+        ::Tasks::Contracts::TaskLinkContract,
+        ::Tasks::Contracts::WorkSessionContract,
+        ::Tasks::Contracts::WorkedContract,
+      ].freeze
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
         cadence: {

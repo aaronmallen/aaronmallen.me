@@ -4,6 +4,8 @@ module API
   module Endpoints
     class UploadShare < Endpoint
       FIELDS = { file: :data }.freeze
+      COMPLAINTS = Helpers::Upload::COMPLAINTS
+      CONTRACTS = [::Shares::Contracts::UploadContract].freeze
       UNAVAILABLE = true
 
       SCHEMA = Helpers::Upload::FILE.except(:type).freeze
@@ -17,7 +19,7 @@ module API
 
         case upload_share.call(Helpers::Upload.file(bytes, **fields))
           in Success(share) then Success(serialized(Serializers::Share, share, settings:))
-          in Failure[:invalid, errors] then rejected(errors.transform_keys { FIELDS.fetch(it, it) }, {})
+          in Failure[:invalid, errors] then rejected(errors.transform_keys { FIELDS.fetch(it, it) }, COMPLAINTS)
           in Failure[:unavailable] then Failure(Structs::Refusal.unavailable(Helpers::Upload::STORE_DOWN))
         end
       end

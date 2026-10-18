@@ -3,6 +3,8 @@
 module API
   module Endpoints
     class UpdateShareGroup < Endpoint
+      COMPLAINTS = Blog::Constants::EMPTY_HASH
+      CONTRACTS = [::Shares::Contracts::ShareContract].freeze
       SCHEMA = {
         additionalProperties: false,
         properties: {
@@ -22,7 +24,7 @@ module API
         case name_share_group.call(id, { name: })
           in Success(group) then Success(serialized(Serializers::ShareGroup, group, settings:))
           in Failure(:not_found) then missing("share group", id)
-          in Failure[:invalid, errors] then rejected(errors, {})
+          in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
         end
       end
     end

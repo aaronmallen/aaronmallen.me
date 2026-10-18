@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class SaveReviewNote < Endpoint
+      CONTRACTS = [::Record::Contracts::ReviewNoteContract].freeze
       COMPLAINTS = { body: { Blog::Contract::BLANK => "body needs a character that is not a space" } }.freeze
       UNSAVED = "could not save the review note"
 
