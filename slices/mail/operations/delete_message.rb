@@ -10,18 +10,19 @@ module Mail
         message_queries: "repos.message_queries",
       ]
 
-      def call(id)
+      def call(id, client: google, local: true, remote: true)
         thread = step found(message_queries.by_id(id))
-        step erased(thread)
+        step erased(thread, client) if remote
+        return thread unless local
 
         message_mutations.delete(id)
       end
 
       private
 
-      def erased(thread)
+      def erased(thread, client)
         address = thread.gmail_id && gmail_queries.address(thread.mail_account_id)
-        Mailbox.new(google, address).delete("threads/#{thread.gmail_id}") if address
+        Mailbox.new(client, address).delete("threads/#{thread.gmail_id}") if address
         Success(thread)
       rescue Google::NotFound
         Success(thread)

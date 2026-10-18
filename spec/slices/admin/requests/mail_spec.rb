@@ -826,6 +826,28 @@ RSpec.describe "Admin mail", type: :request do
           expect(toast).to eq("Nothing changed · Gmail refused thread ##{refused.id} #{refused.subject}")
         end
 
+        it "deletes none when Gmail refuses the last thread" do
+          refused = gmail(gmail_id: "refused")
+          bulk("delete", [*picked, refused])
+
+          expect([*picked, refused].map { stored(it) }).not_to include(nil)
+        end
+
+        it "deletes every thread in Gmail with no transaction open", :commits do
+          db = Mail::Slice["db.rom"].gateways[:default].connection
+          open = []
+          stub_request(:delete, %r{\A#{threads}/}o).to_return { open << db.in_transaction? and { status: 204 } }
+          bulk("delete", picked)
+
+          expect([open, picked.map { stored(it) }]).to eq([[false, false], [nil, nil]])
+        end
+
+        it "loads the Google connections once for a bulk delete" do
+          queries = counting { bulk("delete", picked) }
+
+          expect(queries.grep(/FROM "service_connections"/).size).to eq(1)
+        end
+
         it "offers Restore and Delete forever in the trash" do
           picked
           get "/admin/mail", folder: "trash"

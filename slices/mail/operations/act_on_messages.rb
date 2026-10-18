@@ -7,7 +7,7 @@ module Mail
       MOVE = Blog::Types::MessageBulkAction["move"]
       TAG = Blog::Types::MessageBulkAction["tag"]
       UNTAG = Blog::Types::MessageBulkAction["untag"]
-      LOCAL_FIRST = [DELETE, Blog::Types::MessageBulkAction["label"], TAG, UNTAG].freeze
+      LOCAL_FIRST = [Blog::Types::MessageBulkAction["label"], TAG, UNTAG].freeze
 
       include Deps[
         change_thread: "operations.change_thread",
@@ -32,7 +32,7 @@ module Mail
 
       def single(act, id, fields, remote:)
         case act
-          when DELETE then delete_message.call(id)
+          when DELETE then delete_message.call(id, remote:)
           when TAG then tagged(id) { message_tag_mutations.add(id, fields[:tag]) }
           when UNTAG then tagged(id) { message_tag_mutations.remove(id, fields[:tag]) }
           else change_thread.call(id, act, label: fields[:label], remote:)
@@ -46,9 +46,15 @@ module Mail
         found(message_queries.by_id(id))
       end
 
+      def told(act, id, client)
+        return delete_message.call(id, client:, local: false) if act == DELETE
+
+        change_thread.call(id, act, client:, local: false)
+      end
+
       def told_gmail(act, ids)
         client = google.loaded
-        ids.each { |id| step(change_thread.call(id, act, client:, local: false).alt_map { [:record, id, it] }) }
+        ids.each { |id| step(told(act, id, client).alt_map { [:record, id, it] }) }
       end
     end
   end
