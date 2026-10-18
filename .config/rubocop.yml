@@ -16,7 +16,6 @@ AllCops:
   Include:
     - .config/Guardfile
     - .config/config.ru
-    - .config/i18n/*.rb
   NewCops: enable
   TargetRubyVersion: 4
 

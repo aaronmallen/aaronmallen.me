@@ -5,4 +5,4 @@
 set -e
 
 shfmt -d scripts
-find scripts -type f -exec shellcheck {} +
+shfmt -f scripts | xargs shellcheck

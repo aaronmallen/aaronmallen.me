@@ -9,7 +9,7 @@ RSpec.describe "mise run lint:i18n", type: :script do
       write(root, ".config/i18n/allowed.yml", allowed.to_yaml)
       write(root, "slices/demo/config/i18n/en.yml", { "en" => keys }.to_yaml)
       sources.each { |path, source| write(root, path, source) }
-      Open3.capture2e("bundle", "exec", "ruby", ".config/i18n/unused.rb", root, chdir: Hanami.app.root.to_s)
+      Open3.capture2e("scripts/lint/i18n", root, chdir: Hanami.app.root.to_s)
     end
   end
 
