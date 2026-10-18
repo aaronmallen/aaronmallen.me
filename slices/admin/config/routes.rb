@@ -25,6 +25,7 @@ module Admin
 
     get "/", to: "today.show", as: :root
     get "/activity", to: "activity.show", as: :activity
+    get "/agents/sessions", to: "agents.sessions", as: :agent_sessions
     get "/analytics", to: "analytics.show", as: :analytics
     get "/attention/dead-jobs", to: "today.dead_jobs", as: :dead_jobs
     post "/attention/dead-jobs/:jid/discard", to: "today.discard_dead_job", as: :discard_dead_job, jid: JID

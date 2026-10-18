@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727"]
+amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727", "#1752"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -31,22 +31,22 @@ grows with the window, `clamp(20px, 2.2vw, 56px)`. Prose keeps its own measure: 
 cap at `--container-measure`, 44em, in `config/tailwind.css`. #919 moved that rule here from [ADR 0034][0034], which ADR
 0136 superseded.
 
-**A sticky top bar replaces the context bar and the slash button.** It holds, in order, the wordmark, six pills,
-a search button that opens the palette, and an avatar menu. The pills are Today, Inbox, Tasks, Journal, Publish
-and Insights, and the active one carries `aria-current="page"`. Each pill's screens show as sub-tabs under the
-page header, in the README's table, and the time report sits under Insights. The Inbox pill wears the dot the
-jump button wore. The avatar menu holds the site links, the key help, the theme toggle, one Settings item with a
-gear that opens `/settings`, and sign out. #1727 folded its list of settings screens into that one item: the
-Settings page draws its own tab bar, so its screens show no sub-tabs. Pills and sub-tabs are links, so every
-screen they name opens without scripts. `live.js` morphs the top bar where it morphed the context bar
-([ADR 0118][0118]).
+**A sticky top bar replaces the context bar and the slash button.** It holds, in order, the wordmark, the pills, a
+search button that opens the palette, and an avatar menu. The pills are Today, Inbox, Tasks, Journal, Publish and
+Insights, and the active one carries `aria-current="page"`. Each pill's screens show as sub-tabs under the page
+header, in the README's table, and the time report sits under Insights. #1752 added an Agents pill between Publish
+and Insights for agent sessions. The Inbox pill wears the dot the jump button wore. The avatar menu holds the site
+links, the key help, the theme toggle, one Settings item with a gear that opens `/settings`, and sign out. #1727
+folded its list of settings screens into that one item: the Settings page draws its own tab bar, so its screens
+show no sub-tabs. Pills and sub-tabs are links, so every screen they name opens without scripts. `live.js` morphs
+the top bar where it morphed the context bar ([ADR 0118][0118]).
 
-**The palette stays, regrouped.** It lists Actions, Records, Saved views, one group per category (Today, Inbox,
-Tasks, Journal, Publish, Insights and Settings) and Search, in that order. Each screen sits under its category's
-header and keeps its jump letter, and Settings holds every Settings tab. A search hides each header whose rows it
-filters out, and a category's name finds its screens. Records search works as it does today ([ADR 0096][0096]).
-The search page has no nav entry: it opens only from the palette's "See all results" row.
-Actions keep `ListActions::ALL` and its `needs` and `from` rules, and a new action joins as an entry there.
+**The palette stays, regrouped.** It lists Actions, Records, Saved views, one group per category (Today, Inbox, Tasks,
+Journal, Publish, Agents since #1752, Insights and Settings) and Search, in that order. Each screen sits under its
+category's header and keeps its jump letter, and Settings holds every Settings tab. A search hides each header whose
+rows it filters out, and a category's name finds its screens. Records search works as it does today ([ADR 0096][0096]).
+The search page has no nav entry: it opens only from the palette's "See all results" row. Actions keep
+`ListActions::ALL` and its `needs` and `from` rules, and a new action joins as an entry there.
 
 **Drawers open from the right.** A drawer is `min(620px, 100%)` wide, or 760px for the wide variant, with a header,
 a body that scrolls and a footer. The task panel becomes the wide drawer and loads `/admin/tasks/:id` the way it

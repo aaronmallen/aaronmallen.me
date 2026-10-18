@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
-amended: ["#1747"]
+amended: ["#1747", "#1752"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -35,7 +35,9 @@ An agent opens a session with `start_session` and closes it with `end_session`.
 - **A sidekiq-scheduler job** closes each session not seen for 2 hours, and #1747 sets its end time to when a call
   last named it. It never retries and catches up on its next run ([ADR 0012][0012]).
 
-Sessions stay for good.
+Sessions stay for good. Since #1752 the admin lists them by day under Agents, read only, and a drawer shows each
+one's tasks, the memory it loaded and changed and the artifacts it wrote. Today counts the day's sessions, the
+memory changes agents made and the artifacts they wrote.
 
 ## Alternatives
 

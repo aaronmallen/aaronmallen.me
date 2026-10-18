@@ -7,10 +7,11 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:screens) do
     %w[
       /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
-      /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/analytics
-      /admin/activity /admin/health /admin/time /admin/settings/tagging#tags /admin/settings/socials#people
-      /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/settings/services#tokens
-      /admin/settings/services#services /admin/settings/services#clients /admin/settings/security /admin/settings/jobs
+      /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/agents/sessions
+      /admin/analytics /admin/activity /admin/health /admin/time /admin/settings/tagging#tags
+      /admin/settings/socials#people /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
+      /admin/settings/services#tokens /admin/settings/services#services /admin/settings/services#clients
+      /admin/settings/security /admin/settings/jobs
     ]
   end
 
@@ -29,13 +30,15 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css("header.top-bar > a.top-bar-skip[href='#main'] + a.wordmark[href='/']")
     end
 
-    it "shows the six pills" do
-      expect(page.all("nav.pill-nav a.pill-nav-link").map(&:text)).to eq(%w[Today Inbox Tasks Journal Publish Insights])
+    it "shows the seven pills" do
+      expect(page.all("nav.pill-nav a.pill-nav-link").map(&:text))
+        .to eq(%w[Today Inbox Tasks Journal Publish Agents Insights])
     end
 
     it "links each pill to its first screen" do
       expect(page.all("a.pill-nav-link").map { it["href"] })
-        .to eq(%w[/admin /admin/inbox /admin/tasks /admin/journal /admin/posts /admin/analytics])
+        .to eq(%w[/admin /admin/inbox /admin/tasks /admin/journal /admin/posts /admin/agents/sessions
+                  /admin/analytics])
     end
 
     it "marks today current" do

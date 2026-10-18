@@ -19,6 +19,7 @@ module Admin
         [:social, :publish, KINDS.icon("social_post"), :admin_social].freeze,
         %i[files publish fa-paperclip admin_files].freeze,
         %i[links publish fa-link admin_links].freeze,
+        %i[sessions agents fa-terminal admin_agent_sessions].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[health insights fa-heart-pulse admin_health].freeze,

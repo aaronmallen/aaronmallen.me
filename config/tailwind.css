@@ -1980,6 +1980,18 @@
   }
 }
 
+@utility agent-days {
+  @apply flex min-w-0 flex-col gap-4;
+}
+
+@utility agent-change {
+  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+}
+
+@utility agent-change-text {
+  @apply my-0 font-serif text-li break-words text-ink-muted;
+}
+
 @utility avatar {
   @apply grid size-avatar shrink-0 cursor-pointer place-items-center rounded-full border-0 bg-wash;
   @apply font-display text-nav font-extrabold text-ink admin-focus;

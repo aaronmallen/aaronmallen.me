@@ -81,7 +81,7 @@ RSpec.describe "Admin command palette", type: :feature do
       names = groups.map { it.sub(/\Acommand-palette-(group-)?/, "").sub(/\Akind-.+/, "records") }
 
       expect(names.uniq).to eq(
-        %w[actions records saved-views today inbox tasks journal publish insights settings see-all],
+        %w[actions records saved-views today inbox tasks journal publish agents insights settings see-all],
       )
     end
 

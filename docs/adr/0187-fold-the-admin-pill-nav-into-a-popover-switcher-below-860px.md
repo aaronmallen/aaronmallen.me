@@ -5,6 +5,7 @@ status: active
 created: 2026-10-17
 area: [admin, assets]
 issue: "#1742"
+amended: ["#1752"]
 tags: [admin, layout, navigation, top-bar, popover, responsive, mobile, design]
 ---
 
@@ -25,7 +26,7 @@ do not fit, and the order the design gives the menu.
 ## Decision
 
 **Inbox comes second.** The pills, the palette groups and the switcher list Today, Inbox, Tasks, Journal, Publish and
-Insights, in that order.
+Insights, in that order. #1752 put Agents between Publish and Insights.
 
 **Below 860px one switcher button takes the pills' place, and the bar keeps to one row.** The button names the
 current group and screen and wears the Inbox dot. It opens a panel under the bar that lists every screen but

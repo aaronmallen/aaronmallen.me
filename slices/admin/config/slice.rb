@@ -22,6 +22,8 @@ module Admin
       repos.review_queries
     ], from: :activity
 
+    import keys: %w[repos.agent_session_queries], from: :agents
+
     import keys: %w[
       repos.analytics_event_queries repos.analytics_page_queries repos.analytics_rollup_queries repos.country_queries
     ], from: :analytics

@@ -17,6 +17,15 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def agent_session = @agent_session ||= seed_agent_session
+
+  def agent_sessions
+    {
+      "agent sessions" => -> { agent_session.then { visit "/admin/agents/sessions" } },
+      "agent session open" => -> { visit "/admin/agents/sessions?session=#{agent_session}" },
+    }
+  end
+
   def calendars
     { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{today.iso8601}" }
   end
@@ -34,7 +43,7 @@ RSpec.describe "Admin screens", type: :feature do
         find(".compose-accounts summary").click
         find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
-    }.merge(files, short_links, recurring_screens, tag_fields)
+    }.merge(files, short_links, recurring_screens, tag_fields, agent_sessions)
   end
 
   def decision(title, close: nil)
@@ -374,6 +383,22 @@ RSpec.describe "Admin screens", type: :feature do
     seed_saved_views
     seed_security(create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude")).oauth_client_id)
     person
+  end
+
+  def seed_agent_session
+    author = { agent: "claude-code", model: "claude-opus-5-5" }
+    run = ->(name, *args) { Agents::Slice["operations.#{name}"].call(*args).value! }
+    global = run.call(:create_memory_file, { path: "preferences-for-every-session", scope: "global" })
+    id, = run.call(
+      :start_session,
+      { title: "Index the activities table for date-range search", **author, client: "Claude Code 2.4 on macOS",
+        repo: "aaronmallen/aaronmallen.me", branch: "activities-index-for-date-range-search", task_ids: [task.id] },
+    )
+    session = { **author, session_id: id }
+    text = "Run every spec through the mise task, never a bare rspec, so the database checks run first"
+    run.call(:add_memory_fact, global.id, { type: "gotcha", text:, **session })
+    run.call(:create_artifact, { title: "Plan the index", type: "plan", tags: "", body: "Add an index", **session })
+    id
   end
 
   def seed_analytics

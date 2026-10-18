@@ -55,11 +55,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "puts the sprint on the left and Shipped today on the right", :aggregate_failures do
+    it "puts the sprint on the left and Shipped today and Agents on the right", :aggregate_failures do
       get "/admin"
 
       expect(column("main")).to eq(["Today's sprint"])
-      expect(column("side")).to eq(["Shipped today"])
+      expect(column("side")).to eq(["Shipped today", "Agents"])
     end
 
     it "reads the mail settings once" do
@@ -199,7 +199,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
 
         expect(line_value("Last night")).to eq("7h 05m asleep · hrv 48 · rhr 54")
-        expect(page.all(".today-line > span:first-child").map(&:text)[2]).to eq("Last night")
+        expect(page.find(".card", text: "What ships next").all(".today-line > span:first-child").map(&:text)[2])
+          .to eq("Last night")
       end
 
       it "leaves the line out without last night's data" do

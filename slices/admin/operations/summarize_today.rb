@@ -13,6 +13,7 @@ module Admin
 
       include Deps[
         "operations.summarize_sprint",
+        agent_session_queries: "agents.repos.agent_session_queries",
         attention_queries: "activity.repos.attention_queries",
         client: "github.client",
         client_queries: "api.repos.client_queries",
@@ -33,6 +34,7 @@ module Admin
 
         {
           **counts(now),
+          agents: agent_session_queries.today_counts(now:),
           attention: attention(now, inbox),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),

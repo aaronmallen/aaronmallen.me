@@ -8,14 +8,15 @@ module Admin
           include Components::Tasks
 
           LIVE_TABLES = %w[
-            attention_snoozes commits health_days journal_entries journal_entry_tags link_check_runs oauth_clients
-            oauth_tokens post_link_checks posts projects service_connections short_link_checks short_links
-            social_post_deliveries social_posts sprints sync_states task_comments task_contributors task_links
-            task_series task_tags work_sessions
+            agent_sessions artifact_versions attention_snoozes commits health_days journal_entries journal_entry_tags
+            link_check_runs memory_events oauth_clients oauth_tokens post_link_checks posts projects
+            service_connections short_link_checks short_links social_post_deliveries social_posts sprints sync_states
+            task_comments task_contributors task_links task_series task_tags work_sessions
           ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
+          prop :agents, Blog::Types::Hash
           prop :attention, Blog::Types::Hash
           prop :clients, Blog::Types::Integer
           prop :commits, Blog::Types::Hash
@@ -84,6 +85,7 @@ module Admin
           def side_cards
             AttentionCard(**@attention)
             CommitsCard(**@commits, totals: @commit_totals)
+            Components::Agents::TodayCard(**@agents)
             QuietCard(
               entries: @entries, last_night: @last_night, publishing: @publishing, visitors: @visitors,
               clients: @clients,
