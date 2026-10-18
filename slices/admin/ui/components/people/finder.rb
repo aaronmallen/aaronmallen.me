@@ -19,7 +19,8 @@ module Admin
             ) do |card|
               card.side { toggle }
               search_form
-              div(class: "person-finder-results", aria: { live: "polite" }, data: { person_finder_results: "" })
+              div(class: "person-finder-results", aria: { live: "polite" },
+                  data: { person_finder_results: "", live_keep: "" })
             end
           end
 

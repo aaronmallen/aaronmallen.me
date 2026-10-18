@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473", "#1785", "#1418", "#1811", "#1810"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473", "#1785", "#1418", "#1811", "#1810", "#1841"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -104,6 +104,9 @@ failed toast, so the page never goes stale in silence. The toast shows once and 
 - **Edits hold their controls.** The morph skips a control the owner typed in, and a form that holds one. A box
   whose tick differs from what the server drew counts as an edit too, so boxes a script ticked, such as the
   remembered social accounts or "select all", keep their ticks.
+- **Marked regions stay.** Since #1841 the morph leaves a node marked `data-live-keep`, and all it holds, as the
+  page has it. A region a script fills and the server draws empty carries the mark, such as the people finder's
+  results, so it needs no code of its own to come back.
 - **Rows carry ids.** A row in a list that can grow draws an `id` from its record, such as `message-12`, so
   idiomorph matches it by record and the row the key map has focused keeps its focus when a new row lands above.
 - **Reconnects catch up.** After every `open` but the first, `live.js` refetches once. When the stream ends for good,

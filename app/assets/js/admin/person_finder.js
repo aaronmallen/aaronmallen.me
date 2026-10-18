@@ -10,17 +10,12 @@ const DRAWER = "person-new-drawer";
 const HANDLES = { bluesky: "bluesky_handle", mastodon: "mastodon_handle" };
 
 const ready = new WeakSet();
-const shown = new WeakMap();
 
 export function setupPersonFinder() {
   const finders = document.querySelectorAll("[data-person-finder]");
 
   for (const finder of fresh(ready, finders)) setup(finder);
-  for (const finder of finders) {
-    finder.hidden = false;
-    const results = finder.querySelector("[data-person-finder-results]");
-    if (!results.hasChildNodes()) results.replaceChildren(...(shown.get(finder) ?? []));
-  }
+  for (const finder of finders) finder.hidden = false;
 }
 
 function setup(finder) {
@@ -30,11 +25,6 @@ function setup(finder) {
   const results = finder.querySelector("[data-person-finder-results]");
   const network = () => finder.querySelector("input[name='network']:checked");
 
-  const show = (...nodes) => {
-    shown.set(finder, nodes);
-    results.replaceChildren(...nodes);
-  };
-
   const fetcher = setupFetch({
     request: (query) => ({ url: `${network().dataset.personFinderUrl}?${new URLSearchParams({ q: query })}` }),
     read: (response) => {
@@ -43,12 +33,12 @@ function setup(finder) {
 
       return response.text();
     },
-    done: (html) => show(...parse(html).body.childNodes),
+    done: (html) => results.replaceChildren(...parse(html).body.childNodes),
     failed: () => {
       const note = document.createElement("p");
       note.className = "hint bad";
       note.textContent = finder.dataset.personFinderFailed;
-      show(note);
+      results.replaceChildren(note);
     },
   });
 
@@ -65,7 +55,7 @@ function setup(finder) {
     label.textContent = personFinderLabel;
     input.placeholder = personFinderPlaceholder;
     fetcher.stop();
-    show();
+    results.replaceChildren();
   });
 
   results.addEventListener("click", (event) => {

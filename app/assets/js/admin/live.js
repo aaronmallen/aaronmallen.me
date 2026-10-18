@@ -7,6 +7,7 @@ import { showToast } from "./toast.js";
 
 const CATCH_UP = "*";
 const FAILED = "[data-live-failed]";
+const KEEP = "data-live-keep";
 const LONGEST_WAIT = 30000;
 const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
@@ -52,7 +53,7 @@ export function morphPage(next) {
     if (now && drawn)
       Idiomorph.morph(now, drawn, {
         ignoreActiveValue: typing,
-        callbacks: { beforeNodeMorphed: untouched, beforeNodeRemoved: keepsEdits, beforeAttributeUpdated: keepsOpen },
+        callbacks: { beforeNodeMorphed: morphs, beforeNodeRemoved: keepsEdits, beforeAttributeUpdated: keepsOpen },
       });
   }
 
@@ -136,6 +137,10 @@ function keepsEdits(node) {
 
 function keepsOpen(name, node, change) {
   return !(change === "remove" && name === "open" && node.matches(OPENS));
+}
+
+function morphs(node) {
+  return !node.hasAttribute?.(KEEP) && untouched(node);
 }
 
 function shows(table) {
