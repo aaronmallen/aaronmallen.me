@@ -77,6 +77,13 @@ module API
         )
       end
 
+      def going_public(fields)
+        current = project_queries.by_id(fields[:id]) if fields.key?(:id)
+        return if fields.key?(:id) && current.nil?
+
+        "this project" if fields.fetch(:visibility) { current&.visibility } == PUBLIC
+      end
+
       def kept(project)
         return Blog::Constants::EMPTY_HASH unless project
 
@@ -92,13 +99,6 @@ module API
           url: project.url,
           visibility: project.visibility,
         }
-      end
-
-      def public_in(fields)
-        current = project_queries.by_id(fields[:id]) if fields.key?(:id)
-        return if fields.key?(:id) && current.nil?
-
-        "this project" if fields.fetch(:visibility) { current&.visibility } == PUBLIC
       end
 
       def saved(fields, current: nil)

@@ -45,15 +45,15 @@ module API
 
       private
 
-      def ids(edits) = edits.map(&:id)
-
-      def public_in(fields)
+      def going_public(fields)
         suggestion = suggestion_queries.by_id(fields[:suggestion_id])
         return if suggestion.nil?
         return "this blog post" if suggestion.post_id && post_queries.shown?(suggestion.post_id)
 
         "this social post" if social_post_queries.by_id(suggestion.social_post_id)&.status == SCHEDULED
       end
+
+      def ids(edits) = edits.map(&:id)
 
       def refused(id, failure)
         case failure

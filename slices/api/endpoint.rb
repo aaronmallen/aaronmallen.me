@@ -61,11 +61,20 @@ module API
 
     def failed(message) = Failure(Structs::Refusal.failed(message))
 
+    def going_public(fields)
+      return unless self.class::SHOWS_TASKS
+
+      ids = self.class.task_fields.flat_map { Array(fields[it]) }
+      PUBLIC_TASK if task_queries.public_board_slugs(ids).any?
+    end
+
     def guarded?(row, kinds) = row.is_a?(Hash) && kinds.include?((row[:kind] || row["kind"]).to_s)
 
     def handled(fields, scopes)
-      unpublished(fields, scopes) ||
-        (self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields)).fmap { hidden(it, scopes) }
+      refusal = publish_refusal(fields, scopes)
+      return refusal if refusal
+
+      (self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields)).fmap { hidden(it, scopes) }
     end
 
     def hidden(payload, scopes)
@@ -94,11 +103,9 @@ module API
 
     def page_of(number) = Helpers::Page.of(number, settings)
 
-    def public_in(fields)
-      return unless self.class::SHOWS_TASKS
-
-      ids = self.class.task_fields.flat_map { Array(fields[it]) }
-      PUBLIC_TASK if task_queries.public_board_slugs(ids).any?
+    def publish_refusal(fields, scopes)
+      shown = going_public(fields) unless scopes.include?(OperationTable::PUBLISH)
+      Failure(Structs::Refusal.unpublished(format(UNPUBLISHED, shown))) if shown
     end
 
     def refuse_mail(field, wanted, scopes) = (invalid(field => [MAIL_ROWS]) if wanted && !mail?(scopes))
@@ -119,17 +126,17 @@ module API
 
     def task_id(reference) = reference.is_a?(Integer) ? reference : task_queries.id_by_label(reference)
 
-    def unhandled(value, text) = failed(text).tap { honeybadger.notify(NoMatchingPatternError.new(value.inspect)) }
+    def task_ids(given) = Array(given).map { task_id(it) }
 
-    def unpublished(fields, scopes)
-      shown = public_in(fields) unless scopes.include?(OperationTable::PUBLISH)
-      Failure(Structs::Refusal.unpublished(format(UNPUBLISHED, shown))) if shown
-    end
+    def unhandled(value, text) = failed(text).tap { honeybadger.notify(NoMatchingPatternError.new(value.inspect)) }
 
     def with_tasks(fields)
       self.class.task_fields.select { fields.key?(it) }.each do |name|
         given = fields.fetch(name)
-        ids = Array(given).map { task_id(it) || (return lost_task(name, it)) }
+        ids = task_ids(given)
+        lost = ids.index(nil)
+        return lost_task(name, Array(given)[lost]) if lost
+
         fields[name] = given.is_a?(Array) ? ids : ids.first
       end
 

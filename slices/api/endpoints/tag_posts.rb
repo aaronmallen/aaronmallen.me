@@ -12,7 +12,7 @@ module API
 
       private
 
-      def public_in(fields) = ("a blog post in the list" if post_queries.shown?(fields[:ids]))
+      def going_public(fields) = ("a blog post in the list" if post_queries.shown?(fields[:ids]))
     end
   end
 end

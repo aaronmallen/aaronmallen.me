@@ -28,7 +28,7 @@ module API
 
       private
 
-      def public_in(fields)
+      def going_public(fields)
         "a published board" if project_queries.public_boards(Array(fields[:projects]).first(1)).any?
       end
     end

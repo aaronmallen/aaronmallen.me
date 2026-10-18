@@ -43,12 +43,12 @@ module API
 
       private
 
+      def going_public(fields) = ("this blog post" if post_queries.shown?(fields[:id]))
+
       def past?(post, given, now)
         time = given.key?(:publish_at) ? Blog::Types::LocalTime[given[:publish_at]] : post.published_at
         time.nil? || (time.is_a?(Time) && time <= now)
       end
-
-      def public_in(fields) = ("this blog post" if post_queries.shown?(fields[:id]))
     end
   end
 end

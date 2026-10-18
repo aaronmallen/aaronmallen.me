@@ -28,7 +28,7 @@ module API
 
       private
 
-      def public_in(fields)
+      def going_public(fields)
         name = tag_queries.find_in(fields[:scope], fields[:id])&.name if fields[:scope] == PUBLIC
         return if name.nil?
         return "a blog post with this tag" if post_queries.shown?(post_queries.by_tag(name).map(&:id))

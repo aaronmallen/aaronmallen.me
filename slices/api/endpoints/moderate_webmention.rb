@@ -52,7 +52,7 @@ module API
         !scopes.include?(OperationTable::DELETE) && webmention_queries.trusted_author_among?(id)
       end
 
-      def public_in(fields) = ("an approved webmention" if fields[:verdict] == APPROVED)
+      def going_public(fields) = ("an approved webmention" if fields[:verdict] == APPROVED)
     end
   end
 end

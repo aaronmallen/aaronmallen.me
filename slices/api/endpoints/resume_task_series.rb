@@ -12,7 +12,7 @@ module API
 
       private
 
-      def public_in(fields)
+      def going_public(fields)
         PUBLIC_TASK if task_queries.public_board_slugs([task_series_queries.by_id(fields[:id])&.task_id]).any?
       end
     end

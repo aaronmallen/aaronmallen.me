@@ -31,19 +31,19 @@ module API
         Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id), Serializers::Link::KINDS))
       end
 
-      def handled(fields, scopes)
-        sides = fields.values_at(:kind, :other_kind)
-        scope, = GUARDED.except(*scopes).find { |_, kinds| kinds.intersect?(sides) }
-
-        scope ? Failure(Structs::Refusal.unscoped(scope)) : super
-      end
-
-      def public_in(fields)
+      def going_public(fields)
         sides = { fields[:kind] => fields[:id], fields[:other_kind] => fields[:other_id] }
         return unless PLACED.all? { sides.key?(it) }
 
         on_board = task_queries.public_board_slugs([sides["task"]]).any?
         PUBLIC_TASK if on_board || project_queries.public_boards([sides["project"]]).any?
+      end
+
+      def handled(fields, scopes)
+        sides = fields.values_at(:kind, :other_kind)
+        scope, = GUARDED.except(*scopes).find { |_, kinds| kinds.intersect?(sides) }
+
+        scope ? Failure(Structs::Refusal.unscoped(scope)) : super
       end
     end
   end

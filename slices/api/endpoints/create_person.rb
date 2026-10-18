@@ -22,7 +22,7 @@ module API
 
       private
 
-      def public_in(fields)
+      def going_public(fields)
         id = social_post_queries.scheduled_mentioning(fields[:key])
         format(People::MENTIONED, id, fields[:key]) if id
       end

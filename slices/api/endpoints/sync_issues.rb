@@ -24,7 +24,7 @@ module API
 
       private
 
-      def public_in(_fields) = ("a published board" if task_source_queries.synced_to_public_board?)
+      def going_public(_fields) = ("a published board" if task_source_queries.synced_to_public_board?)
     end
   end
 end

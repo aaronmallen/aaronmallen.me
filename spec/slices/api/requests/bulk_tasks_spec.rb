@@ -68,6 +68,10 @@ RSpec.describe "API bulk task actions", type: :request do
           .to eq([refusal("no task has the label POD-9"), 422, %w[open open]])
       end
 
+      it "names the first label that finds no task" do
+        expect(act(name, ["POD-8", *ids(picked), "POD-9"])).to eq(refusal("no task has the label POD-8"))
+      end
+
       it "changes none when one ID is gone and names it" do
         gone = gone_id
 

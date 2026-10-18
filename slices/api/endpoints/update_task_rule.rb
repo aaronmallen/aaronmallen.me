@@ -39,7 +39,7 @@ module API
         { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags:, projects: }
       end
 
-      def public_in(fields)
+      def going_public(fields)
         projects = fields.fetch(:projects) { rule(fields[:id])&.projects&.map(&:id) }
         "a published board" if project_queries.public_boards(Array(projects).first(1)).any?
       end

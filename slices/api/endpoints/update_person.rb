@@ -26,7 +26,7 @@ module API
 
       private
 
-      def public_in(fields)
+      def going_public(fields)
         stored = person_queries.by_id(fields[:id])&.key
         return if stored.nil?
 

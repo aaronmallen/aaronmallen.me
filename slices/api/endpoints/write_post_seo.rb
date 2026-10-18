@@ -38,7 +38,7 @@ module API
 
       private
 
-      def public_in(fields) = ("this blog post" if post_queries.shown?(fields[:id]))
+      def going_public(fields) = ("this blog post" if post_queries.shown?(fields[:id]))
     end
   end
 end
