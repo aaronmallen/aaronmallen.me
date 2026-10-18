@@ -5,6 +5,119 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.23] - 2026-10-18
+
+### Added
+
+- Agent memory. Agents keep Markdown memory files of typed facts, scoped to every session, a repo, a project or a task,
+  and each change lands in a history that names the agent and model and offers a revert. The MCP tools `read_memory`,
+  `read_memory_file`, `create_memory_file`, `move_memory_file`, `add_memory_fact`, `edit_memory_fact`,
+  `remove_memory_fact`, `revert_memory_event` and `delete_memory_file`, and their API endpoints, need a new `agents`
+  scope that `read` does not cover. `delete_memory_file` needs `delete` too. `read_memory_file` pages the history. Each
+  write must name its agent and model, and agent text comes back marked untrusted.
+- Agent artifacts: titled, typed and tagged documents where each body change adds a numbered version. `list_artifacts`,
+  `create_artifact`, `read_artifact`, `update_artifact`, `restore_artifact_version` and `delete_artifact` need `agents`,
+  and the last needs `delete` too.
+- Agent sessions. `start_session` opens one and returns the memory its repo loads, `end_session` closes it and
+  `list_sessions` reads them back. Memory and artifact writes take a `session_id`. A job runs every 15 minutes and
+  closes sessions idle for 2 hours. Set `HONEYBADGER_CHECK_IN_CLOSE_IDLE_SESSIONS` to watch it.
+- An Agents pill in the admin, with Memories, Artifacts and Sessions. Memories lists files by scope, shows what a
+  session in a repo loads, and adds, edits, removes and reverts facts, moves a file and links records. Artifacts lists
+  and searches them, edits in a two pane editor and restores old versions, and the palette gains New artifact. Sessions
+  lists each day's sessions, with a drawer of the tasks, memory and artifacts each one touched. Today gains an Agents
+  card, and record links take memory files and artifacts.
+- Settings has tabs: Socials holds people and webmention settings, Tagging holds tags and task rules, Connected services
+  holds services, API tokens and MCP clients, then Security and Jobs. `/settings` opens Socials, each old page redirects
+  to its section, and the avatar menu holds one Settings item in place of a link per screen.
+- The Jobs tab shows Sidekiq: a health card with seven days of processed and failed jobs, by UTC day, what each worker
+  runs now, each queue with a drawer of its jobs, and the retry, dead and scheduled sets with a drawer for each job. A
+  set's jobs run, retry, kill, delete or discard from a row menu, a "..." button or the drawer. A cron section lists
+  each scheduled job with when it runs and how its last run went, error included, and filters to failed or paused ones.
+  Run now, Pause and Enable act on each, and a pause holds across restarts. The tab label counts retries, dead jobs and
+  failed cron entries.
+- Activate maintenance mode, a button on Settings and a palette command, writes the flag file and sets a signed owner
+  cookie. With that cookie the maintenance page offers Deactivate maintenance mode, which removes the flag. Everyone
+  else sees the page as before.
+- Bluesky posts with no photos carry a link card for their first link, with the page's title, description and image.
+- Image shares store a copy no wider or taller than 1280px on upload, and pages show it in place of the original, so a
+  group page with many images no longer answers 503s. Run `BackfillPreviews` on the Pi, as `docs/shares.md` says, for
+  images stored before.
+- The social queue and the activity feed show each part's photos, and the API and MCP `read_social_post` return them as
+  `photos`.
+- `mise run release --dry-run` lists each variable `.env.example` gained since the last tag.
+
+### Changed
+
+- Below 860px the admin top bar folds its pills into one switcher button that opens a panel of every screen, and at
+  480px and 400px it tightens again, down to an "A/A" wordmark. Inbox moves second in the pills, the switcher and the
+  palette.
+- MCP `read_tag` pages each kind as the admin tag page does and returns short rows, such as id, title and status. Send a
+  kind and a page to read more of one kind, which reports its own `partial` and `next_page`. The read tools give whole
+  records.
+- The API keeps each element of a tag array whole and refuses an element holding a comma rather than split it into two
+  tags. API checkbox fields take JSON `true`.
+- The deploy migration rewrites `\r\n` and lone `\r` line breaks in stored post bodies, social post parts and suggested
+  edits to `\n`, and saves store `\n` alone from now on. A suggested edit can now span a line break in a post written in
+  the admin.
+- A query from a web request stops after 15 seconds and the request answers 500. `WEB_STATEMENT_TIMEOUT` sets the limit.
+  Jobs, migrations and backups run without one.
+- Today's attention card shows the worst five rows of each kind and a line that counts and links to the rest.
+  `list_attention` and the API return `attention_counts`.
+- Post link checks fetch each URL once a run, however many posts link it, and read only the status, so a large or slow
+  page no longer times out. The run's counts count distinct URLs.
+- Admin actions, API endpoints and search report unexpected failures to Honeybadger, where before they answered a bare
+  500 or refusal and left no trace.
+- API refusals for share uploads and renames name what is wrong with a filename or content type, and a post refusal
+  lists every rule a field breaks.
+- `mise run release` refuses to tag when a compare link is missing, or when a spec names a migration a tag has shipped.
+- `mise run db:check` and `mise run db:rebuild` load the schema from the newest tag and run only the migrations after
+  it.
+- Entering the project no longer starts the pitchfork daemons, and leaving it no longer stops them. `mise run dev` and
+  `mise run dev:stop` do.
+
+### Removed
+
+- The dead jobs page at `/admin/attention/dead-jobs`. The attention card's Dead jobs line opens the dead set on the Jobs
+  tab, and the card's rows use that tab's menu, Copy error included.
+
+### Fixed
+
+- Bulk mail actions and bulk delete held a database connection while Gmail answered, which could stall mail sync.
+- Two Gmail, calendar or health syncs could run at once, and a slow Gmail catch up sent the next run after the same
+  threads.
+- A Gmail body past about 1 MB, or an attachment name holding NUL, stopped mail sync for that account and every later
+  one, on every run. Bodies now stop at 100,000 characters, and a thread that still fails goes to Honeybadger while sync
+  moves on.
+- A reply draft left in Gmail could become the message a sent reply answered, and the thread's preview.
+- A failed mail draft save kept showing the last saved time. The hint now says the draft is not saved.
+- Gmail settings syncs, Google token renewals and calendar runs made every open admin tab refetch.
+- Reads, scrolls and clicks that came in after the 01:00 rollup never reached the admin totals. Each run now rebuilds
+  the day before yesterday too.
+- A cadence set on a past copy of a recurring task made a second series and a second open copy. The site now refuses it
+  as moved.
+- A live refresh after the session ended failed without a word and left stale data. The page now reloads to sign-in, and
+  other failures show a toast.
+- A failed person dialog in the social composer went to the new person page and lost the post. It now shows a toast and
+  keeps the text.
+- A live refresh wiped a people finder search.
+- REST share uploads stopped at about 768 KB, where MCP took 25 MB.
+- Short links took no title from a page served as `TEXT/HTML`, and control characters in a title came through.
+- The privacy page was missing from the sitemap and its views went uncounted.
+- The share group editor's file name link stood 23px tall on a phone.
+- The `drop_sprint` description said every task goes back to Next. Synced tasks go to External.
+
+### Security
+
+- A fake Authorization header made the app parse up to 33 MB on `/api/v1/photos` before it answered 401. Only a live
+  token raises the cap now, and `POST /pulse` refuses a body over 8 KB.
+- `capture_task` with a lowercase or padded project key, such as `pod`, skipped the publish check and put the task on a
+  public board.
+- Adding or editing a person whose key a scheduled social post mentions needs `publish`, since it changes who the
+  mention names.
+- Suggested edit text and `read_analytics` sources come back marked untrusted.
+- Failed sign-ins write at most 10 rows an hour per sender, which `SIGN_IN_THROTTLE_LIMIT` and
+  `SIGN_IN_THROTTLE_WINDOW_MINUTES` change. Successful sign-ins always record, and the Security tab pages the list.
+
 ## [26.10.22] - 2026-10-17
 
 ### Fixed
@@ -1348,7 +1461,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...HEAD
+[26.10.23]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...26.10.23
 [26.10.22]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...26.10.22
 [26.10.21]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...26.10.21
 [26.10.20]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.19...26.10.20
