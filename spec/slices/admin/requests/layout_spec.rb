@@ -6,8 +6,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/tasks /admin/calendar /admin/projects /admin/journal /admin/decisions /admin/review /admin/posts
-      /admin/social /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
+      /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
+      /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/analytics
       /admin/activity /admin/health /admin/time /admin/settings/tagging#tags /admin/settings/socials#people
       /admin/settings/tagging#task-rules /admin/settings/socials#webmentions /admin/settings/services#tokens
       /admin/settings/services#services /admin/settings/services#clients /admin/settings/security /admin/settings/jobs
@@ -30,12 +30,12 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "shows the six pills" do
-      expect(page.all("nav.pill-nav a.pill-nav-link").map(&:text)).to eq(%w[Today Tasks Journal Publish Inbox Insights])
+      expect(page.all("nav.pill-nav a.pill-nav-link").map(&:text)).to eq(%w[Today Inbox Tasks Journal Publish Insights])
     end
 
     it "links each pill to its first screen" do
       expect(page.all("a.pill-nav-link").map { it["href"] })
-        .to eq(%w[/admin /admin/tasks /admin/journal /admin/posts /admin/inbox /admin/analytics])
+        .to eq(%w[/admin /admin/inbox /admin/tasks /admin/journal /admin/posts /admin/analytics])
     end
 
     it "marks today current" do
@@ -60,7 +60,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
       expect(rows).to eq(screens - settings)
       expect(page.all("#nav-switcher .switcher-heading", visible: :all).map { it.text(:all) })
-        .to eq(%w[Tasks Journal Publish Inbox Insights])
+        .to eq(%w[Inbox Tasks Journal Publish Insights])
     end
 
     it "marks today current in the switcher", :aggregate_failures do

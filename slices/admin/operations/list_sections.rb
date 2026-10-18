@@ -6,6 +6,9 @@ module Admin
       KINDS = Blog::Helpers::RecordKinds
       ALL = [
         %i[today today fa-sun admin_root].freeze,
+        %i[inbox inbox fa-inbox admin_inbox].freeze,
+        %i[mail inbox fa-envelope admin_mail].freeze,
+        %i[webmentions inbox fa-at admin_webmentions].freeze,
         [:tasks, :tasks, KINDS.icon("task"), :admin_tasks].freeze,
         %i[calendar tasks fa-calendar-days admin_calendar].freeze,
         [:projects, :tasks, KINDS.icon("project"), :admin_projects].freeze,
@@ -16,9 +19,6 @@ module Admin
         [:social, :publish, KINDS.icon("social_post"), :admin_social].freeze,
         %i[files publish fa-paperclip admin_files].freeze,
         %i[links publish fa-link admin_links].freeze,
-        %i[inbox inbox fa-inbox admin_inbox].freeze,
-        %i[mail inbox fa-envelope admin_mail].freeze,
-        %i[webmentions inbox fa-at admin_webmentions].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[health insights fa-heart-pulse admin_health].freeze,
