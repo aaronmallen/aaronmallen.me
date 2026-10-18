@@ -5,6 +5,7 @@ module Analytics
     class RecordVisit < Blog::Operation
       MAX_CLICKS = 50
       MAX_REFERRER = 2048
+      SKIPPED = :skipped
 
       include Deps[
         "geo.countries",
@@ -20,7 +21,7 @@ module Analytics
 
       def call(payload, address:, user_agent:, base_url:, signed_in: false)
         visit = step check_visit.call(payload)
-        return nil if signed_in || Blog::Helpers::Bot.match?(user_agent)
+        return SKIPPED if signed_in || Blog::Helpers::Bot.match?(user_agent)
 
         address_hashes = hash_visitor.throttle_hashes(address)
         step within_limit(address_hashes) unless view?(visit)

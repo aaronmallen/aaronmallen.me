@@ -7,7 +7,6 @@ module Public
     module Visits
       class Create < Action
         CLICK = Blog::Types::VisitKind["click"]
-        MALFORMED = :malformed
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
         TIMING = "timing"
         VIEW = Blog::Types::VisitKind["view"]
@@ -30,9 +29,11 @@ module Public
 
         def follow_up(request, visit, route)
           result = outcome(request, visit)
-          return :accepted if result.failure? && result.failure != MALFORMED && !find_page.call(route)
-
-          store(request, visit, route, result)
+          case result
+            in Failure(Analytics::Operations::CheckVisit::MALFORMED) then :bad_request
+            in Failure unless find_page.call(route) then :accepted
+            else recorded(request, visit, route, result)
+          end
         end
 
         def outcome(request, visit)
@@ -43,6 +44,23 @@ module Public
             signed_in: signed_in?(request),
             user_agent: request.get_header("HTTP_USER_AGENT"),
           )
+        end
+
+        def page_view(request, visit, route)
+          return uncounted(visit) unless find_page.call(route)
+
+          recorded(request, visit, route, outcome(request, visit))
+        end
+
+        def recorded(request, visit, route, result)
+          case result
+            in Success(Analytics::Operations::RecordVisit::SKIPPED) then :accepted
+            in Success
+              time(request, visit, route)
+              :accepted
+            in Failure(Blog::Throttle::THROTTLED) then :too_many_requests
+            in Failure then :bad_request
+          end
         end
 
         def reject(_request, response, _exception) = respond(response, :bad_request)
@@ -70,19 +88,9 @@ module Public
           return :bad_request unless route
 
           case visit["kind"]
-            in VIEW then find_page.call(route) ? store(request, visit, route) : uncounted(visit)
+            in VIEW then page_view(request, visit, route)
             in CLICK unless route.params.key?(:slug) then uncounted(visit)
             else follow_up(request, visit, route)
-          end
-        end
-
-        def store(request, visit, route, result = outcome(request, visit))
-          case result
-            in Success(counted)
-              time(request, visit, route) if counted
-              :accepted
-            in Failure(Blog::Throttle::THROTTLED) then :too_many_requests
-            else :bad_request
           end
         end
 
