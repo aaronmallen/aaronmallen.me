@@ -14,7 +14,7 @@ module API
           note: Artifacts::NOTE.merge(description: "what the new body changes; kept only when the body changes"),
           **Memory::AUTHOR,
         },
-        required: %w[id],
+        required: %w[id agent model],
       }.freeze
 
       include Deps[update_artifact: "agents.operations.update_artifact"]

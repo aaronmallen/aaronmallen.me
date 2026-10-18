@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Memory::ID, fact_id: Memory::ID, **Memory::AUTHOR },
-        required: %w[id fact_id],
+        required: %w[id fact_id agent model],
       }.freeze
 
       REPLY = Serializers::MemoryEvent.reference

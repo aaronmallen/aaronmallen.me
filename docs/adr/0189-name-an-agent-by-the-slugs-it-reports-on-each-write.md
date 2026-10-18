@@ -26,6 +26,10 @@ An agent names itself on each write. MCP writes and `start_session` carry an age
 a model slug, the model's own id, such as `claude-opus-5-5`. Both sit in the `contributor_slug` domain, as on
 `task_contributors`. A write from the admin names me, with no slugs.
 
+The API and MCP refuse a write to memory or artifacts that leaves out either slug. So a token write always names an
+agent and reads back marked untrusted, whatever slugs it reports, and an edit through a token never turns an agent's
+fact into mine. Only the admin writes as me.
+
 There is no table of agents. The admin works out a brand from the model slug for display, and filters match the
 stored slug.
 

@@ -7,7 +7,7 @@ module API
       AUTHOR = {
         agent: {
           type: "string",
-          description: "the agent making the change, such as claude-code; leave agent and model out for the owner",
+          description: "the agent making the change, such as claude-code",
         },
         model: { type: "string", description: "the model making the change, such as claude-opus-5-5" },
         session_id: Helpers::Schema::ID.merge(
@@ -29,12 +29,11 @@ module API
           description: "the files that loaded: global, then repo, project and task",
         ),
       }.freeze
-      PAIRED = "give agent and model together"
       SCOPED = "only a %s file takes %s"
 
       COMPLAINTS = {
-        agent: { Blog::Contract::MISSING => PAIRED, Blog::Contract::FORMAT => "use a slug such as claude-code" },
-        model: { Blog::Contract::MISSING => PAIRED, Blog::Contract::FORMAT => "use a slug such as claude-opus-5-5" },
+        agent: { Blog::Contract::FORMAT => "use a slug such as claude-code" },
+        model: { Blog::Contract::FORMAT => "use a slug such as claude-opus-5-5" },
         path: {
           Blog::Contract::FORMAT => "use letters, digits, _, ., / and - only",
           "taken" => "a file in this scope already has this path",

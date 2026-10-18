@@ -1,29 +1,36 @@
 # frozen_string_literal: true
 
 RSpec.describe "API record IDs", type: :request do
+  def author = { agent: "claude-code", model: "claude-opus-5-5" }
+
   def bodies
     {
       "add_decision_comment" => { body: "A note" },
       "add_decision_option" => { title: "Rent" },
-      "add_memory_fact" => { type: "gotcha", text: "A note" },
+      "add_memory_fact" => { type: "gotcha", text: "A note", **author },
       "add_shares_to_group" => { ids: [1] },
       "add_task_comment" => { body: "A note" },
       "add_work_session" => { started_at: "2026-10-01T09:00", ended_at: "2026-10-01T10:00" },
       "drop_decision" => { reason: "Moot" },
       "edit_decision_comment" => { body: "A note" },
+      "edit_memory_fact" => author,
       "edit_task_comment" => { body: "A note" },
       "link_records" => { other_kind: "post", other_id: 1 },
       "link_tasks" => { kind: "relates", other_id: 1 },
       "mark_mail_thread" => { status: "read" },
       "moderate_webmention" => { verdict: "approved" },
-      "move_memory_file" => { scope: "global" },
+      "move_memory_file" => { scope: "global", **author },
       "move_task" => { list: "next" },
       "reopen_decision" => { reason: "Back" },
+      "remove_memory_fact" => author,
       "reorder_task" => { direction: "up" },
       "resolve_decision" => { option_id: 1, reason: "Cheaper" },
+      "restore_artifact_version" => author,
+      "revert_memory_event" => author,
       "schedule_task" => { sprint_on: "" },
       "stage_task" => { stage: "ready" },
       "tag_decision" => { tags: ["house"] },
+      "update_artifact" => author,
       "update_post_edit_note" => { note: "Typo" },
       "update_share" => { filename: "notes.txt" },
       "update_share_group" => { name: "Trip" },

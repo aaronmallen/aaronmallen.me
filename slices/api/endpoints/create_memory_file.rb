@@ -13,7 +13,7 @@ module API
           task_id: Helpers::Schema::TASK.merge(description: "the task of a task file"),
           **Memory::AUTHOR,
         },
-        required: %w[path scope],
+        required: %w[path scope agent model],
       }.freeze
 
       REPLY = Serializers::MemoryFile.reference

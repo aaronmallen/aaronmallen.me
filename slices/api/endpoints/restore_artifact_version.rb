@@ -11,7 +11,7 @@ module API
           note: Artifacts::NOTE.merge(description: "why; Restored version N when left out"),
           **Memory::AUTHOR,
         },
-        required: %w[id version],
+        required: %w[id version agent model],
       }.freeze
 
       include Deps[restore_artifact_version: "agents.operations.restore_artifact_version"]

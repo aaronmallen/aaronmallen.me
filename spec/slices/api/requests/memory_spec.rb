@@ -3,13 +3,15 @@
 RSpec.describe "API memory", type: :request do
   let(:author) { { agent: "claude-code", model: "claude-opus-5-5" } }
   let(:file) { call_api(:post, "/memory_files", { path: "hanami", scope: "global", **author }).fetch("id") }
-  let(:fact) { call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Mind the cache" }).fetch("id") }
+  let(:fact) do
+    call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Mind the cache", **author }).fetch("id")
+  end
 
   it "walks a file through every change and answers each as documented" do
     call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Mind the query cache", **author })
     call_api(:post, "/memory_files/#{file}/facts/#{fact}/remove", author)
     removed = call_api(:get, "/memory_files/#{file}").fetch("history").last.fetch("id")
-    call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", {})
+    call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", author)
 
     expect(call_api(:get, "/memory").fetch("markdown")).to eq(<<~MARKDOWN)
       <!-- global · 1 fact -->
@@ -22,27 +24,51 @@ RSpec.describe "API memory", type: :request do
     MARKDOWN
   end
 
-  it "names the owner when a write names no agent" do
-    fact
+  it "refuses to add a fact that names no agent" do
+    call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Trust me" })
 
-    expect(call_api(:get, "/memory_files/#{file}").fetch("facts").first).to include("agent" => nil, "model" => nil)
+    expect([last_response.status, document.fetch("errors")])
+      .to eq([422, { "agent" => ["agent is missing"], "model" => ["model is missing"] }])
+  end
+
+  it "refuses to edit a fact without naming an agent and keeps the agent's name on it" do
+    call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Trust me" })
+    status = last_response.status
+
+    expect([status, call_api(:get, "/memory_files/#{file}").fetch("facts").first])
+      .to match([422, include("text" => "Mind the cache", "agent" => "claude-code", "model" => "claude-opus-5-5")])
+  end
+
+  it "names the agent that edits another agent's fact" do
+    call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Trust me", agent: "codex", model: "gpt-5" })
+
+    expect(call_api(:get, "/memory_files/#{file}").fetch("facts").first)
+      .to include("text" => "Trust me", "agent" => "codex", "model" => "gpt-5")
+  end
+
+  it "refuses to revert a change without naming an agent" do
+    call_api(:post, "/memory_files/#{file}/facts/#{fact}/remove", author)
+    removed = call_api(:get, "/memory_files/#{file}").fetch("history").last.fetch("id")
+    call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", {})
+
+    expect([last_response.status, document.fetch("errors")])
+      .to eq([422, { "agent" => ["agent is missing"], "model" => ["model is missing"] }])
   end
 
   it "refuses an agent without a model" do
     call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Half named", agent: "claude-code" })
 
-    expect([last_response.status,
-            document.fetch("errors")]).to eq([422, { "model" => ["give agent and model together"] }])
+    expect([last_response.status, document.fetch("errors")]).to eq([422, { "model" => ["model is missing"] }])
   end
 
   it "refuses a repo file without a repo" do
-    call_api(:post, "/memory_files", { path: "hanami", scope: "repo" })
+    call_api(:post, "/memory_files", { path: "hanami", scope: "repo", **author })
 
     expect(document.fetch("errors")).to eq("repo" => ["a repo file needs a repo"])
   end
 
   it "refuses a task file for a task that does not exist" do
-    call_api(:post, "/memory_files", { path: "notes", scope: "task", task_id: 999_999 })
+    call_api(:post, "/memory_files", { path: "notes", scope: "task", task_id: 999_999, **author })
 
     expect([last_response.status,
             document.fetch("errors")]).to eq([422, { "task_id" => ["a task file needs a task that exists"] }])
@@ -50,14 +76,14 @@ RSpec.describe "API memory", type: :request do
 
   it "refuses a revert of the file's creation" do
     created = call_api(:get, "/memory_files/#{file}").fetch("history").first.fetch("id")
-    call_api(:post, "/memory_files/#{file}/history/#{created}/revert", {})
+    call_api(:post, "/memory_files/#{file}/history/#{created}/revert", author)
 
     expect(document.fetch("errors")).to eq("event_id" => ["only an add, an edit or a remove can be reverted"])
   end
 
   it "refuses an edit to a removed fact" do
-    call_api(:post, "/memory_files/#{file}/facts/#{fact}/remove", {})
-    call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Back again" })
+    call_api(:post, "/memory_files/#{file}/facts/#{fact}/remove", author)
+    call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Back again", **author })
 
     expect(last_response.status).to eq(404)
   end

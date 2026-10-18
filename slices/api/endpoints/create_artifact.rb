@@ -13,7 +13,7 @@ module API
           note: Artifacts::NOTE,
           **Memory::AUTHOR,
         },
-        required: %w[title type body],
+        required: %w[title type body agent model],
       }.freeze
 
       include Deps[create_artifact: "agents.operations.create_artifact"]

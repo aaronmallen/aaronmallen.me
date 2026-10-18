@@ -11,7 +11,7 @@ module API
           text: Memory::FACT_TEXT,
           **Memory::AUTHOR,
         },
-        required: %w[id type text],
+        required: %w[id type text agent model],
       }.freeze
 
       REPLY = Serializers::MemoryFact.reference

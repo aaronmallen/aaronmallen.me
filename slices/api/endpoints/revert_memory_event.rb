@@ -10,7 +10,7 @@ module API
           event_id: Memory::ID.merge(description: "the history entry to undo: an add, an edit or a remove"),
           **Memory::AUTHOR,
         },
-        required: %w[id event_id],
+        required: %w[id event_id agent model],
       }.freeze
 
       REPLY = Serializers::MemoryEvent.reference

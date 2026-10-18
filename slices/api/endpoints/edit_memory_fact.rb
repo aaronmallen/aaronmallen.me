@@ -12,7 +12,7 @@ module API
           text: Memory::FACT_TEXT,
           **Memory::AUTHOR,
         },
-        required: %w[id fact_id],
+        required: %w[id fact_id agent model],
       }.freeze
 
       REPLY = Serializers::MemoryFact.reference
