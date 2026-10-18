@@ -5,8 +5,9 @@ Maintenance mode takes the site down on purpose while I update Postgres, Redis o
 page, or a JSON 503 for the API and MCP. The worker holds jobs back and Honeybadger sends no reports. The site reads the
 file on each request and each job, so creating or removing it takes effect at once, with no restart.
 
-The `maintenance.flag_path` setting names the file, through `MAINTENANCE_FLAG_PATH`. A script on the Pi creates and
-removes it. The app only reads it.
+The `maintenance.flag_path` setting names the file, through `MAINTENANCE_FLAG_PATH`. The Activate maintenance mode
+button in Settings, or the same command in the palette, creates it and sets a signed cookie for my browser
+([ADR 0184][0184]). A script on the Pi creates and removes it too, and still works whichever way the mode went on.
 
 ## Set up the Pi
 
@@ -27,6 +28,37 @@ sudo systemctl restart aaronmallen-web aaronmallen-worker
 
 Without the line, the setting falls back to `tmp/maintenance` inside the live release, which the next deploy leaves
 behind.
+
+### Let the web unit write the flag
+
+The Activate button writes the flag from the web unit, so the unit's user needs write access to the shared folder.
+Ask which user it runs as:
+
+```sh
+systemctl show --property User --value aaronmallen-web
+```
+
+If it prints your own name, or nothing (root), skip to the sandbox check. Otherwise let that user write to the
+folder, and make each new file there writable by both of you, so the script can still remove or touch a flag the
+button wrote:
+
+```sh
+WEB=$(systemctl show --property User --value aaronmallen-web)
+sudo setfacl -m "u:$WEB:rwx" -m "d:u:$WEB:rw" -m "d:u:$USER:rw" /opt/aaronmallen.me/shared
+```
+
+Then check the unit's sandbox:
+
+```sh
+systemctl show --property ProtectSystem --value aaronmallen-web
+```
+
+If it prints `strict`, run `sudo systemctl edit aaronmallen-web`, add these lines, and restart the unit:
+
+```ini
+[Service]
+ReadWritePaths=/opt/aaronmallen.me/shared
+```
 
 ### Install the script
 
@@ -58,7 +90,7 @@ hand.
 
 ## Update the NAS
 
-1. On the Pi, run `aaronmallen-maintenance on`.
+1. Activate maintenance mode from Settings or the palette, or on the Pi run `aaronmallen-maintenance on`.
 2. Check that `https://aaronmallen.me` answers with the maintenance page.
 3. Update Postgres, Redis or RustFS on the NAS, and wait for each one to come back.
 4. On the Pi, run `aaronmallen-maintenance off`.
@@ -73,3 +105,4 @@ Never tag a release while maintenance is on. The deploy timer does not read the 
 units under you, and its migrations need the database you took down. Turn maintenance off, then tag.
 
 [0181]: adr/0181-hold-maintenance-mode-in-a-flag-file-on-the-pi.md
+[0184]: adr/0184-turn-maintenance-mode-off-from-a-signed-owner-cookie-and-keep-the-admin-blocked.md

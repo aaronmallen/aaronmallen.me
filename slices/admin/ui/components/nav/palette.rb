@@ -52,7 +52,8 @@ module Admin
 
             PaletteRow(
               id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
-              href: action.path, needs: action.needs&.to_s, **action.to_h.slice(:dialog, :post, :key, :click),
+              href: action.path, needs: action.needs&.to_s, confirm: confirm(action),
+              **action.to_h.slice(:dialog, :post, :key, :click),
             )
           end
 
@@ -74,6 +75,8 @@ module Admin
               end
             end
           end
+
+          def confirm(action) = (t(action.confirm_key) if action.confirm)
 
           def footer
             div(class: "pal-f", aria: { hidden: "true" }) do

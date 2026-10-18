@@ -101,7 +101,12 @@ function setupDialog(dialog) {
     const option = active();
     if (!option) return;
 
-    if (option.hasAttribute("data-palette-post")) return post(option, dialog.dataset.paletteToken);
+    unsure(options, option);
+    if (option.hasAttribute("data-palette-post")) {
+      if (option.dataset.paletteConfirm && !("sure" in option.dataset)) return sure(option, status);
+
+      return post(option, dialog.dataset.paletteToken);
+    }
 
     const control = option.dataset.paletteClick;
     if (control) {
@@ -178,6 +183,7 @@ function setupDialog(dialog) {
     if (dialog.open) return;
 
     query.value = "";
+    unsure(options);
     task = taskOnScreen();
     aim(options, task);
     if (!task) fill();
@@ -193,7 +199,10 @@ function setupDialog(dialog) {
     filter();
     search();
   });
-  query.addEventListener("keydown", (event) => steer(event, { run, select, shown, step }));
+  query.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") unsure(options);
+    steer(event, { run, select, shown, step });
+  });
 
   dialog.addEventListener("close", finder.stop);
   document.addEventListener(MORPHED, () => filled.clear());
@@ -303,6 +312,23 @@ function steer(event, { run, select, shown, step }) {
   else if (!step(event)) return;
 
   event.preventDefault();
+}
+
+function sure(option, status) {
+  const label = option.querySelector(".pal-r-label");
+
+  option.dataset.sure = label.textContent;
+  label.textContent = option.dataset.paletteConfirm;
+  status.textContent = option.dataset.paletteConfirm;
+}
+
+function unsure(options, keep = null) {
+  for (const option of options) {
+    if (option === keep || !("sure" in option.dataset)) continue;
+
+    option.querySelector(".pal-r-label").textContent = option.dataset.sure;
+    delete option.dataset.sure;
+  }
 }
 
 function taskOnScreen() {

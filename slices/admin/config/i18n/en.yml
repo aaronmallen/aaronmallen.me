@@ -332,6 +332,9 @@ en:
       taken: "That account is already connected · nothing was saved"
       unanswered: "%{name} isn't answering · %{reason}"
       work: "%{account} is a work account"
+  settings_page:
+    toasts:
+      maintenance_unwritable: "Couldn't write the maintenance flag · the site is still up"
   social:
     networks:
       bluesky: "Bluesky"
@@ -1351,6 +1354,10 @@ en:
         tags: "Tags"
       nav:
         actions:
+          activate_maintenance:
+            confirm: "Take the site down? Every request gets the maintenance page and jobs hold back."
+            label: "Activate maintenance mode"
+            text: "take the site down, maintenance on"
           complete_task:
             label: "Complete task"
             text: "finish task, mark done"
@@ -2138,6 +2145,9 @@ en:
       settings_head:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
+        maintenance:
+          activate: "Activate maintenance mode"
+          confirm: "Take the site down? Every request gets the maintenance page and jobs hold back."
         tabs:
           label: "Settings tabs"
           security: "security"

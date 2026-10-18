@@ -12,15 +12,25 @@ module Admin
 
         include Deps[task_rule_queries: "tasks.repos.task_rule_queries"]
 
-        def view_template(&)
+        def view_template
           content_for(:title, @title)
-          PageHead(title: t(".heading"), sub: t(".lede"), &)
+          PageHead(title: t(".heading"), sub: t(".lede")) do
+            yield if block_given?
+            maintenance if @tab
+          end
           tabs if @tab
         end
 
         private
 
         def counts = { tagging: task_rule_queries.count }
+
+        def maintenance
+          ButtonForm(
+            action: path(:admin_activate_maintenance), label: t(".maintenance.activate"), variant: :warn,
+            icon: "fa-solid fa-person-digging", confirm: t(".maintenance.confirm"),
+          )
+        end
 
         def tab(name, route, count)
           a(class: "screen-tab", href: path(route), aria: { current: ("page" if name == @tab) }) do

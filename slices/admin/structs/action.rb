@@ -2,10 +2,14 @@
 
 module Admin
   module Structs
-    Action = Data.define(:name, :icon, :path, :dialog, :post, :needs, :from, :key, :click) do
-      def initialize(name:, icon:, path:, dialog: nil, post: false, needs: nil, from: nil, key: nil, click: nil)
+    Action = Data.define(:name, :icon, :path, :dialog, :post, :needs, :from, :key, :click, :confirm) do
+      def initialize(
+        name:, icon:, path:, dialog: nil, post: false, needs: nil, from: nil, key: nil, click: nil, confirm: false
+      )
         super
       end
+
+      def confirm_key = "ui.components.nav.actions.#{name}.confirm"
 
       def id = "command-palette-#{name.to_s.tr('_', '-')}"
 

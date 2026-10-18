@@ -17,7 +17,7 @@ RSpec.describe "Admin palette actions", type: :request do
     it "draws one row per entry, in order" do
       names = %w[
         create-task create-decision create-journal-entry new-post new-social-post plan-tomorrow import-commits
-        sync-issues keyboard-shortcuts toggle-theme start-task complete-task pause-task
+        sync-issues keyboard-shortcuts toggle-theme activate-maintenance start-task complete-task pause-task
       ]
 
       expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
@@ -87,6 +87,14 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "flips the theme from Toggle theme" do
       expect(action("toggle-theme")["data-palette-click"]).to eq("[data-theme-choice][aria-pressed='false']")
+    end
+
+    it "posts Activate maintenance mode once I answer the confirm question", :aggregate_failures do
+      row = action("activate-maintenance")
+
+      expect(row["data-palette-post"]).not_to be_nil
+      expect(row["data-palette-href"]).to eq("/admin/maintenance")
+      expect(row["data-palette-confirm"]).to eq(admin_t("ui.components.nav.actions.activate_maintenance.confirm"))
     end
 
     it "matches each row on its label and the words for what it does" do

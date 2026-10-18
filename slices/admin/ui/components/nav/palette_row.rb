@@ -24,6 +24,7 @@ module Admin
           prop :jump, Blog::Types::String.optional, default: nil
           prop :key, Blog::Types::String.optional, default: nil
           prop :click, Blog::Types::String.optional, default: nil
+          prop :confirm, Blog::Types::String.optional, default: nil
           prop :fill, Blog::Types::String.optional, default: nil
           prop :query, Blog::Types::Bool, default: false
 
@@ -34,7 +35,7 @@ module Admin
                 palette_option: true, palette_text: @text, palette_href: @href, palette_dialog: @dialog,
                 palette_found: (true if @found), palette_typed: (true if @typed), palette_post: (true if @post),
                 palette_needs: @needs, palette_all: @all, palette_click: @click, palette_fill: @fill,
-                palette_label: (@label if @query), **key_data,
+                palette_label: (@label if @query), palette_confirm: @confirm, **key_data,
               },
             ) do
               Icon(["fa-solid", @icon, "pal-r-icon"])

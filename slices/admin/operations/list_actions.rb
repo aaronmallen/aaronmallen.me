@@ -4,10 +4,12 @@ module Admin
   module Operations
     class ListActions
       KINDS = Blog::Helpers::RecordKinds
-      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key, :click) do
+      Entry = Data.define(
+        :name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key, :click, :confirm,
+      ) do
         def initialize(
           name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, post: false, needs: nil,
-          from: nil, from_params: Blog::Constants::EMPTY_HASH, key: nil, click: nil
+          from: nil, from_params: Blog::Constants::EMPTY_HASH, key: nil, click: nil, confirm: false
         )
           super
         end
@@ -38,6 +40,10 @@ module Admin
         Entry.new(
           name: :toggle_theme, icon: "fa-circle-half-stroke", click: "[data-theme-choice][aria-pressed='false']",
         ),
+        Entry.new(
+          name: :activate_maintenance, icon: "fa-person-digging", route: :admin_activate_maintenance, post: true,
+          confirm: true,
+        ),
         Entry.new(name: :start_task, icon: "fa-play", post: true, needs: :start),
         Entry.new(name: :complete_task, icon: "fa-check", post: true, needs: :complete),
         Entry.new(name: :pause_task, icon: "fa-pause", post: true, needs: :pause),
@@ -58,7 +64,7 @@ module Admin
           Structs::Action.new(
             name: entry.name, icon: entry.icon, path: path(entry.route, entry.params), dialog: entry.dialog,
             post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params), key: entry.key,
-            click: entry.click,
+            click: entry.click, confirm: entry.confirm,
           )
         end
       end

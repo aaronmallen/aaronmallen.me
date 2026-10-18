@@ -5,6 +5,7 @@ RSpec.describe "MCP reach", type: :app do
     {
       "activity.operations.discard_dead_job" => "the owner discards a dead job from the card; spec #865 keeps it there",
       "activity.operations.retry_dead_job" => "the owner retries a dead job from the card; spec #865 keeps it there",
+      "admin.operations.activate_maintenance" => "turns maintenance on from Settings; spec #1720 keeps it in a browser",
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
       "admin.operations.build_calendar_page" => "builds the admin's calendar screen; list_calendar reads the same days",
       "admin.operations.build_commit_page" => "builds the admin's commit page; read_commit reads the same commit",
