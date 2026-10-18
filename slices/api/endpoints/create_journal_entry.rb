@@ -20,7 +20,7 @@ module API
       include Deps[save_journal_entry: "record.operations.save_journal_entry"]
 
       def handle(body:, entry_date: nil, tags: nil)
-        params = { body:, entry_date:, tags: Blog::Types::TagField[tags] }
+        params = { body:, entry_date:, tags: }
 
         case save_journal_entry.call(params)
           in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))

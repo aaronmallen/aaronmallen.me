@@ -38,7 +38,7 @@ module API
         now = Time.now
         return invalid(publish_at: [PAST]) if post.status == SCHEDULED && past?(post, given, now)
 
-        saved(save_post.call(post.form.merge(form(given)), id:, intent: INTENTS.fetch(post.status), now:), id)
+        saved(save_post.call(post.form.merge(given), id:, intent: INTENTS.fetch(post.status), now:), id)
       end
 
       private

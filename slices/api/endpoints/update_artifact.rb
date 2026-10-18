@@ -23,7 +23,7 @@ module API
         artifact = artifact_queries.by_id(id)
         return missing("artifact", id) if artifact.nil?
 
-        params = current(artifact).merge(fields).then { it.merge(tags: Blog::Types::TagField[it[:tags]]) }
+        params = current(artifact).merge(fields)
 
         settled(update_artifact.call(id, params), id) { replied(it) }
       end

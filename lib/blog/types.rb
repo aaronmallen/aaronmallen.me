@@ -55,7 +55,7 @@ module Blog
     )
     ArtifactTypeParam = ArtifactType.optional.fallback(nil)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link", "lapsing")
-    Checkbox = Types::Bool.constructor { |value| value == Blog::Constants::CHECKED }
+    Checkbox = Types::Bool.constructor { |value| [true, Blog::Constants::CHECKED].include?(value) }
     ClosedTaskSourceState = Types::String.enum("completed", "not_planned", "unassigned")
     ClosedTaskStatus = Types::String.enum("done", "canceled")
     CodeChallengeMethod = Types::String.enum("S256")
@@ -222,7 +222,8 @@ module Blog
       [*tags].map { it.respond_to?(:name) ? it.name : it.to_s }.join(", ")
     end
     TagList = Types::Array.of(Types::String).constructor do |tags|
-      tags.to_s.split(",").map { Normalizers::Tag[it] }.reject(&:empty?).uniq
+      names = tags.is_a?(::Array) ? tags.map(&:to_s) : tags.to_s.split(",")
+      names.map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end
     TagKind = Types::String.enum("posts", "projects", "tasks", "journal_entries", "decisions")
     TagKindParam = TagKind.optional.fallback(nil)

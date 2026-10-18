@@ -10,7 +10,6 @@ module API
       LINK = "enter a link that starts with http:// or https://"
       MONTH = "%Y-%m"
       PUBLIC = Blog::Types::ProjectVisibility["public"]
-      UNCHECKED = "0"
       UNSAVED = "could not save the project"
 
       CONTRACTS = [::Projects::Contracts::ProjectContract].freeze
@@ -68,15 +67,6 @@ module API
 
       def answered(id) = Success(serialized(Serializers::Project, project_queries.by_id(id)))
 
-      def form(current, fields)
-        given = kept(current).merge(fields.slice(*FIELDS))
-
-        given.merge(
-          board_published: given[:board_published] ? Blog::Constants::CHECKED : UNCHECKED,
-          tags: Blog::Types::TagField[given[:tags]],
-        )
-      end
-
       def going_public(fields)
         current = project_queries.by_id(fields[:id]) if fields.key?(:id)
         return if fields.key?(:id) && current.nil?
@@ -103,7 +93,8 @@ module API
 
       def saved(fields, current: nil)
         id = current&.id
-        result = save_project.call(form(current, fields), id:).fmap { add_repo_rule.call(it, was: current&.repo) }
+        given = kept(current).merge(fields.slice(*FIELDS))
+        result = save_project.call(given, id:).fmap { add_repo_rule.call(it, was: current&.repo) }
 
         case result
           in Success(project) then Success(serialized(Serializers::Project, project))

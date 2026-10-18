@@ -27,7 +27,7 @@ module API
       include Deps[capture_task: "tasks.operations.capture_task", project_queries: "projects.repos.project_queries"]
 
       def handle(title:, list: NEXT, note: nil, project: nil, sprint_on: nil, tags: nil, recur: nil)
-        fields = { title:, note:, project:, tags: Blog::Types::TagField[tags], recur: Tasks.recur(recur) }
+        fields = { title:, note:, project:, tags:, recur: Tasks.recur(recur) }
 
         case capture_task.call(fields, filter: list, sprint_on:)
           in Success[_, task, *] then answered(task.id)

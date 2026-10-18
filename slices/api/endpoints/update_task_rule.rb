@@ -33,7 +33,7 @@ module API
       private
 
       def form(rule, fields)
-        tags = Blog::Types::TagField[fields.fetch(:tags) { rule.tags }]
+        tags = fields.fetch(:tags) { rule.tags.map(&:name) }
         projects = fields.fetch(:projects) { rule.projects.map(&:id) }
 
         { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags:, projects: }

@@ -4,9 +4,6 @@
 module API
   module Endpoints
     class PostWriteEndpoint < Endpoint
-      FLAGS = %i[syndication_enabled webmentions_enabled].freeze
-      UNCHECKED = "0"
-
       FIELDS = {
         title: { type: "string" },
         slug: { type: "string", description: "lowercase letters, numbers and single dashes; empty takes the title" },
@@ -37,15 +34,6 @@ module API
       REPLY = Helpers::Schema.widen(Serializers::Post::SCHEMA, outcome: OUTCOME).freeze
 
       private
-
-      def form(given)
-        given.to_h do |field, value|
-          next [field, Blog::Types::TagField[value]] if field == :tags
-          next [field, value ? Blog::Constants::CHECKED : UNCHECKED] if FLAGS.include?(field)
-
-          [field, value]
-        end
-      end
 
       def saved(result, id = nil)
         case result

@@ -8,7 +8,7 @@ module API
 
       include Deps[save_post: "posts.operations.save_post"]
 
-      def handle(**given) = saved(save_post.call(form(given), intent: DRAFT))
+      def handle(**given) = saved(save_post.call(given, intent: DRAFT))
     end
   end
 end

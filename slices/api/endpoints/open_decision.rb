@@ -17,7 +17,7 @@ module API
       include Deps[open_decision: "decisions.operations.open_decision"]
 
       def handle(title:, problem:, tags: nil)
-        case open_decision.call({ title:, problem:, tags: Blog::Types::TagField[tags] })
+        case open_decision.call({ title:, problem:, tags: })
           in Success(decision) then answered(decision.id)
           in Failure[:invalid, errors] then rejected(errors, Decisions::COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)

@@ -19,7 +19,7 @@ module API
       include Deps[create_artifact: "agents.operations.create_artifact"]
 
       def handle(tags: [], **fields)
-        settled(create_artifact.call(tags: Blog::Types::TagField[tags], **fields), nil) { replied(it) }
+        settled(create_artifact.call(tags:, **fields), nil) { replied(it) }
       end
     end
   end
