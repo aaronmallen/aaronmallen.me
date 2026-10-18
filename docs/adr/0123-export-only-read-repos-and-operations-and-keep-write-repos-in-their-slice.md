@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917", "#994", "#911", "#1171", "#1604", "#1702"]
+amended: ["#917", "#994", "#911", "#1171", "#1604", "#1702", "#1797"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -65,7 +65,8 @@ The rest of ADR 0003 stands, with a read repo key wherever it named a query key:
 `slices/<name>/config/slice.rb` and leaves the rest private, no ROM association crosses a slice but the shared
 `tags` table, the three named ways across (the `admin` and `mcp` cycle, the `posts` and `social` cycle, and a job
 constant enqueued from `after_commit`) are the only cycles, and seeds follow the rule while specs set rows up out of
-the owning slice's container.
+the owning slice's container. #1797 names the constants that may cross beside these keys, and
+[ADR 0192][0192] holds the list.
 
 ## Alternatives
 
@@ -91,4 +92,5 @@ A read repo exports every read it holds. A slice that wants one read private kee
 Container keys are still strings. The cop reads the export list, but nothing checks an import or a `Deps[]` key
 until the code runs.
 
+[0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

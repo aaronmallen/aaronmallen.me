@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-672
-amended: [AA-783, AA-809, "#17", "#1041"]
+amended: [AA-783, AA-809, "#17", "#1041", "#1797"]
 tags: [phlex, components, kit, ui, slices, kernel]
 ---
 
@@ -32,7 +32,7 @@ Drawing a component is owning it. A component one slice draws lives in that slic
 
 A slice draws a component when it calls the kit method, passes it to `render`, or draws a kernel component that
 draws it. Naming a constant alone does not count, since AA-563 lets a component name a constant another slice
-owns. No spec checks the rule.
+owns, in the cases [ADR 0192][0192] lists since #1797. No spec checks the rule.
 
 A slice reaches the shared kit through its base classes: `Blog::UI::Component` and `Blog::UI::View` include
 `Blog::UI::Components`. A kit does not nest. `Phlex::Kit#const_added` gives a nested module a kit of its own and
@@ -79,4 +79,5 @@ kernel, since the MCP authorization pages draw it too. Admin's `PageHead` subcla
 Both kits then define a `PageHead` method, and the kernel one wins until admin's class loads, so
 `slices/admin/ui/components.rb` loads it up front.
 
+[0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

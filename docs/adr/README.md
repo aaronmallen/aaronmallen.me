@@ -189,6 +189,7 @@ one.
 | [0189][0189] | Name an agent by the slugs it reports on each write | ![Active][active] | 2026-10-17 |
 | [0190][0190] | Open and close agent sessions through tools, and close idle ones from a job | ![Active][active] | 2026-10-17 |
 | [0191][0191] | Cap web queries with a statement timeout set on each request | ![Active][active] | 2026-10-18 |
+| [0192][0192] | Name another slice's constant only through an import, a contract or a struct | ![Active][active] | 2026-10-18 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -374,6 +375,7 @@ one.
 [0189]: 0189-name-an-agent-by-the-slugs-it-reports-on-each-write.md
 [0190]: 0190-open-and-close-agent-sessions-through-tools-and-close-idle-ones-from-a-job.md
 [0191]: 0191-cap-web-queries-with-a-statement-timeout-set-on-each-request.md
+[0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

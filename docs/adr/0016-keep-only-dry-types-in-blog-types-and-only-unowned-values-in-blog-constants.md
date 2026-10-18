@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, posts, projects, public]
 issue: AA-665
-amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934", "#1013", "#975", "#1179"]
+amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934", "#1013", "#975", "#1179", "#1797"]
 tags: [types, constants, enums, dry-types, kernel]
 ---
 
@@ -49,6 +49,8 @@ enum, and a caller that needs a value asks for it: `PostStatus["draft"]` rather 
 `WRITING_PATH` passes since #1013, as five slices read it, and `NETWORK_ICONS` since #975, as admin, public and services
 read it. Since #1179 the `MAIL_*` limits pass, as mail and public read them, and so do `MEDIA_PATH` and
 `MEDIA_REFERENCE`, which admin, media and posts read, and the `SUGGESTION_*` limits, which mcp and suggestions read.
+Since #1797 `READ_SECONDS_MAX` passes, as analytics, public and mcp read it, and so do `REF_KEY`, which
+analytics, admin, public and mcp read, and `UNMADE_SHORT_CODE`, which social and admin read.
 `Blog::Constants` is its own module and includes `Dry::Core::Constants`, so `EMPTY_HASH` and the rest read from it
 too. A name one slice owns lives in that slice's lib: `Admin::Auth::GitHub::USER_URL` in `lib/admin`,
 `Mail::Types::MAX_REPLY_TO` in `lib/mail`.

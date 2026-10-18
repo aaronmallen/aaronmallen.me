@@ -7,7 +7,7 @@ area: [activity, analytics, contact, db, decisions, lib, links, posts, search, s
 issue: AA-686
 amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818",
   "#954", "#1013", "#957", "#911", "#1115",
-  "#1118", "#1139", "#1324", "#1749"]
+  "#1118", "#1139", "#1324", "#1749", "#1797"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -22,8 +22,8 @@ write, and no repo across a line. The former ADR 0003, which held that rule befo
 the `activities` view unions tables other slices own and imports nothing.
 
 All the slices share one Postgres database, so any SQL can name any table. The export rule binds Ruby constants and
-container keys, and SQL names neither. Four more reads now cross a slice line in SQL, and nothing says when that is
-allowed.
+container keys, and SQL names neither. Since #1797, [ADR 0192][0192] names the constants that may cross. Four more
+reads now cross a slice line in SQL, and nothing says when that is allowed.
 
 ## Decision
 
@@ -146,4 +146,5 @@ It also matches paths as text. The route and the join both build on `Blog::Const
 row under the old path unmatched, so each post's past views drop to zero with no error.
 
 [0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
+[0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
