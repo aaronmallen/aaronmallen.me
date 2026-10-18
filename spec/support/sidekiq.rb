@@ -25,9 +25,10 @@ module Spec
 
     def find_job(jid) = find { it.jid == jid }
 
+    def kill(message) = add(Time.now, Sidekiq.load_json(message))
+
     def remove_job(entry)
-      delete_by_value(name, entry.value)
-      yield entry.value
+      yield entry.value if @entries.reject! { it.value == entry.value }
     end
 
     def size = @entries.size

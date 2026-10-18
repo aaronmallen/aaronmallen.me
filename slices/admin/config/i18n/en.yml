@@ -338,8 +338,15 @@ en:
       cron_enabled: "Enabled · it runs on its next tick"
       cron_paused: "Paused · it won't run until you enable it"
       cron_queued: "Queued to run now"
-      cron_unreachable: "Nothing changed · Redis isn't answering, so try again soon"
+      job_acts:
+        delete: "Job deleted · it won't run"
+        discard: "Job discarded"
+        kill: "Sent to dead jobs · no more tries"
+        retry: "Job queued again"
+        run: "Queued to run now"
+      job_gone: "That job already left its list · nothing changed"
       maintenance_unwritable: "Couldn't write the maintenance flag · the site is still up"
+      unreachable: "Nothing changed · Redis isn't answering, so try again soon"
   social:
     networks:
       bluesky: "Bluesky"
@@ -1256,6 +1263,9 @@ en:
           title: "Running now"
           working: "working"
         set:
+          acts:
+            retry: "Retry %{name} now"
+            run: "Run %{name} now"
           all: "Show all %{formatted}"
           died: "died %{at}"
           empty:
@@ -1277,6 +1287,16 @@ en:
             dead: "Dead"
             retries: "Retries"
             scheduled: "Scheduled"
+        set_acts:
+          confirm:
+            delete: "Delete %{job}? It won't run."
+            discard: "Discard %{job}? It cannot be retried after."
+            kill: "Kill %{job}? It moves to dead with no more tries."
+          delete: "Delete"
+          discard: "Discard"
+          kill: "Kill"
+          retry: "Retry now"
+          run: "Run now"
         trend:
           bars: "Processed and failed, last 7 days: %{days}"
           day: "%{day} %{processed} processed, %{failed} failed"
@@ -3873,6 +3893,16 @@ en:
           heading: "Connected services"
           services: "Connected"
           tokens: "API tokens"
+        set_job_menu:
+          confirm:
+            delete: "Click again · it won't run"
+            discard: "Click again · gone for good"
+            kill: "Click again · moves to dead, no more tries"
+          delete: "Delete"
+          discard: "Discard"
+          kill: "Kill"
+          retry: "Retry now"
+          run: "Run now"
         socials:
           heading: "Socials"
           people: "People"

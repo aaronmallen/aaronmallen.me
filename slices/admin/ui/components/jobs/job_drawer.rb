@@ -15,12 +15,9 @@ module Admin
           def view_template
             title = t(".title", set: t(SETS.fetch(@job.set)), jid: @job.jid)
 
-            Dialog(id: ID, title:, class: "wide", hidden: false, data: QueueDrawer::SHOW) do
-              p(class: "jobs-job-name") { @job.name }
-              error if @job.error?
-              dl(class: "jobs-facts") { facts }
-              arguments
-              backtrace if @job.backtrace
+            Dialog(id: ID, title:, class: "wide", hidden: false, data: QueueDrawer::SHOW) do |dialog|
+              dialog.foot { SetActs(job: @job, return_to: request.fullpath) }
+              body
             end
           end
 
@@ -39,6 +36,14 @@ module Admin
               end
               pre(class: "jobs-pre") { @job.backtrace.join("\n") }
             end
+          end
+
+          def body
+            p(class: "jobs-job-name") { @job.name }
+            error if @job.error?
+            dl(class: "jobs-facts") { facts }
+            arguments
+            backtrace if @job.backtrace
           end
 
           def error

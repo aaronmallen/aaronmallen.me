@@ -12,7 +12,7 @@ module Activity
     import keys: %w[repos.timing_queries], from: :performance
 
     export %w[
-      operations.discard_dead_job operations.retry_dead_job operations.run_cron_entry operations.snooze_attention
+      operations.act_on_set_job operations.run_cron_entry operations.snooze_attention
       operations.switch_cron_entry repos.activity_queries repos.attention_queries repos.cron_queries repos.job_queries
       repos.review_queries
     ]

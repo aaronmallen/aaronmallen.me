@@ -6,10 +6,12 @@ module Admin
       class RetryDeadJob < Action
         RETRIED = "today_page.toasts.retried"
 
-        include Deps[retry_dead_job: "activity.operations.retry_dead_job"]
+        include Deps[act_on_set_job: "activity.operations.act_on_set_job"]
 
         def handle(request, response)
-          settle(response, retry_dead_job.call(request.params[:jid]), RETRIED, routes.path(:admin_root))
+          result = act_on_set_job.call("dead", request.params[:jid], "retry")
+
+          settle(response, result, RETRIED, routes.path(:admin_root))
         end
       end
     end

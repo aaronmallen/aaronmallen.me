@@ -8,6 +8,8 @@ module Admin
     INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
     JID = /\h+/
+    JOB_ACT = /run|retry|kill|delete|discard/
+    JOB_SET = Regexp.union(Blog::Types::JobSetName.values)
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
@@ -250,6 +252,9 @@ module Admin
     post "/settings/jobs/cron/:name/run", to: "settings.run_cron_entry", as: :run_cron_entry, name: CRON_ENTRY
     post "/settings/jobs/cron/:name/:switch", to: "settings.switch_cron_entry", as: :switch_cron_entry,
                                               name: CRON_ENTRY, switch: CRON_SWITCH
+    get "/settings/jobs/:set/:jid/menu", to: "settings.set_job_menu", as: :set_job_menu, set: JOB_SET, jid: JID
+    post "/settings/jobs/:set/:jid/:act", to: "settings.act_on_set_job", as: :act_on_set_job, set: JOB_SET, jid: JID,
+                                          act: JOB_ACT
     get "/settings/security", to: "security.show", as: :security
     get "/settings/services", to: "settings.services", as: :settings_services
     get "/settings/socials", to: "settings.socials", as: :settings_socials

@@ -3,8 +3,7 @@
 RSpec.describe "MCP reach", type: :app do
   def self.exempt
     {
-      "activity.operations.discard_dead_job" => "the owner discards a dead job from the card; spec #865 keeps it there",
-      "activity.operations.retry_dead_job" => "the owner retries a dead job from the card; spec #865 keeps it there",
+      "activity.operations.act_on_set_job" => "the owner acts on a job from the card and jobs tab; specs #865, #1721",
       "activity.operations.run_cron_entry" => "the owner runs a cron entry from the jobs tab; spec #1722 keeps it",
       "activity.operations.switch_cron_entry" => "the owner pauses a cron entry on the jobs tab; spec #1722 keeps it",
       "admin.operations.activate_maintenance" => "turns maintenance on from Settings; spec #1720 keeps it in a browser",

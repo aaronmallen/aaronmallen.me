@@ -7,7 +7,7 @@ module Admin
         CRON = UI::Components::Jobs::Cron::ID
         ENABLE = "enable"
         TOASTS = { true => "settings_page.toasts.cron_enabled", false => "settings_page.toasts.cron_paused" }.freeze
-        UNREACHABLE = "settings_page.toasts.cron_unreachable"
+        UNREACHABLE = "settings_page.toasts.unreachable"
 
         include Deps[switch_cron_entry: "activity.operations.switch_cron_entry"]
 

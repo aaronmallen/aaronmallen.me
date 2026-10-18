@@ -6,10 +6,12 @@ module Admin
       class DiscardDeadJob < Action
         DISCARDED = "today_page.toasts.discarded"
 
-        include Deps[discard_dead_job: "activity.operations.discard_dead_job"]
+        include Deps[act_on_set_job: "activity.operations.act_on_set_job"]
 
         def handle(request, response)
-          settle(response, discard_dead_job.call(request.params[:jid]), DISCARDED, routes.path(:admin_root))
+          result = act_on_set_job.call("dead", request.params[:jid], "discard")
+
+          settle(response, result, DISCARDED, routes.path(:admin_root))
         end
       end
     end

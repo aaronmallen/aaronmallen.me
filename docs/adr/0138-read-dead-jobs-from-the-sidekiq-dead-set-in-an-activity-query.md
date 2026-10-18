@@ -5,7 +5,7 @@ status: active
 created: 2026-10-09
 area: [activity, admin, api]
 issue: "#869"
-amended: ["#1731", "#1732", "#1733"]
+amended: ["#1731", "#1732", "#1733", "#1734"]
 tags: [activity, attention, sidekiq, redis, jobs, dead-set]
 ---
 
@@ -29,7 +29,13 @@ An `activity` query reads Sidekiq's dead set through `Sidekiq::DeadSet` and hand
 stalled list, so the card and `list_attention` read the same dead jobs.
 
 Sidekiq stays the only record of a dead job. Retry and discard act on the dead set itself, so a job leaves the card
-when it leaves the set.
+when it leaves the set. One `activity` operation, `act_on_set_job`, does every action on a job in a set, from the card
+and from the jobs tab: run now and delete on a scheduled job, retry now, kill and delete on a retry, and retry and
+discard on a dead job. Each finds the job by its jid and takes it out of its set through the set's own `remove_job`,
+which hands over the job only when it was still there. Then it pushes the job to its queue, moves it to the dead set
+or drops it. A job that left its set first, even between the lookup and the act, changes nothing: the card answers
+not found, and the tab says so in a toast. Each row also carries one button on hover, retry or run now, as each cron
+row does.
 
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
 as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled, and
@@ -41,11 +47,11 @@ and opens one job from any of the three sets by its jid. A second query builds t
 from `config/sidekiq.yml.erb`, the scheduler's keys and each entry's newest `performance_jobs` row. Every read
 rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
 
-Two `activity` operations act on a cron entry from the tab, as retry and discard act on a dead job. Run now enqueues
+Two `activity` operations act on a cron entry from the tab, as `act_on_set_job` acts on a job. Run now enqueues
 the entry's class with its args, as the scheduler does. Pause and enable write the entry's `enabled` flag through
 `sidekiq.schedule_state`, which calls sidekiq-scheduler's own `RedisManager.set_job_state`. The scheduler reads that
 flag on every tick and never clears it on boot, so a pause holds across restarts and deploys. With Redis down the tab
-offers neither, and a post that finds Redis down changes nothing and says so.
+offers none of these actions, and a post that finds Redis down changes nothing and says so.
 
 ## Alternatives
 

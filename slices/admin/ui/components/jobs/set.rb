@@ -8,7 +8,12 @@ module Admin
           KEYS = Blog::Types::JobSetName.values.to_h do |name|
             [name, { empty: ".empty.#{name}", hint: ".hints.#{name}", title: ".titles.#{name}" }.freeze]
           end.freeze
+          PRIMARY = { "retries" => "retry", "dead" => "retry", "scheduled" => "run" }.transform_values do |act|
+            { act:, label: ".acts.#{act}" }.freeze
+          end.freeze
           SOONEST_FIRST = %w[retries scheduled].freeze
+
+          def self.id(name) = "jobs-#{name}"
 
           prop :set, Blog::Types::Instance(Data)
 
@@ -43,11 +48,14 @@ module Admin
 
           def head = { title: t(keys[:title]), note: count(@set.size), blurb: t(keys[:hint]) }
 
-          def id = "jobs-#{name}"
+          def id = self.class.id(name)
 
           def job(found)
-            ListItem(title: found.name, href: drawer_path(found), sub: nil) do |item|
+            data = { menu: path(:admin_set_job_menu, set: name, jid: found.jid) }
+
+            ListItem(title: found.name, href: drawer_path(found), sub: nil, hover: true, data:) do |item|
               item.meta { job_meta(found) }
+              primary(found)
             end
           end
 
@@ -76,6 +84,15 @@ module Admin
           end
 
           def name = @set.name
+
+          def primary(found)
+            act, label = PRIMARY.fetch(name).values_at(:act, :label)
+
+            ButtonForm(
+              action: path(:admin_act_on_set_job, set: name, jid: found.jid, act:), label: t(label, name: found.name),
+              icon: SetActs::ICONS.fetch(act), icon_only: true, morph: true, hidden: { return_to: request.fullpath },
+            )
+          end
 
           def retries(found) = t(".retries", count: found.retries, max: found.max_retries)
 
