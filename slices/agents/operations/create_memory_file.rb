@@ -4,8 +4,9 @@ module Agents
   module Operations
     class CreateMemoryFile < Blog::Operation
       CREATE = Blog::Types::MemoryEventOp["create"]
+      TAKEN = "taken"
       REFUSALS = {
-        "memory_files_scope_path_index" => [:path, "taken"],
+        "memory_files_scope_path_index" => [:path, TAKEN],
         "memory_files_project_id_fkey" => [:project_id, Blog::Contract::MISSING],
         "memory_files_task_id_fkey" => [:task_id, Blog::Contract::MISSING],
       }.freeze

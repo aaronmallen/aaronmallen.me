@@ -2350,6 +2350,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "mark_task_seen" => { id: 1 },
         "mark_webmentions_spam" => { ids: [1] },
         "moderate_webmention" => { id: 1, verdict: "spam" },
+        "move_memory_file" => { id: 1, scope: "global" },
         "move_task" => { id: 1, list: "next" },
         "move_tasks" => { ids: [1], list: "next" },
         "open_decision" => { title: "Pick a queue", problem: "Jobs pile up" },

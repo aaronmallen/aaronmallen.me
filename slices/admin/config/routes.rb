@@ -27,6 +27,30 @@ module Admin
 
     get "/", to: "today.show", as: :root
     get "/activity", to: "activity.show", as: :activity
+    get "/agents/memories", to: "agents.memories", as: :agent_memories
+    post "/agents/memories", to: "agents.create_memory_file", as: :create_agent_memory_file
+    get "/agents/memories/:id", to: "agents.memory_file", as: :agent_memory_file, id: ID
+    post "/agents/memories/:id/delete", to: "agents.delete_memory_file", as: :delete_agent_memory_file, id: ID
+    post "/agents/memories/:id/records", to: "agents.link_memory_file_record", as: :link_memory_file_record, id: ID
+    post(
+      "/agents/memories/:id/records/:other_kind/:other_id/delete",
+      to: "agents.unlink_memory_file_record", as: :unlink_memory_file_record,
+      id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
+    post "/agents/memories/:id/scope", to: "agents.change_memory_scope", as: :change_agent_memory_scope, id: ID
+    post "/agents/memories/:id/facts", to: "agents.add_memory_fact", as: :add_agent_memory_fact, id: ID
+    post(
+      "/agents/memories/:id/facts/:fact_id",
+      to: "agents.edit_memory_fact", as: :edit_agent_memory_fact, id: ID, fact_id: ID,
+    )
+    post(
+      "/agents/memories/:id/facts/:fact_id/delete",
+      to: "agents.remove_memory_fact", as: :remove_agent_memory_fact, id: ID, fact_id: ID,
+    )
+    post(
+      "/agents/memories/:id/history/:event_id/revert",
+      to: "agents.revert_memory_event", as: :revert_agent_memory_event, id: ID, event_id: ID,
+    )
     get "/agents/sessions", to: "agents.sessions", as: :agent_sessions
     get "/analytics", to: "analytics.show", as: :analytics
     get "/attention/dead-jobs", to: "today.dead_jobs", as: :dead_jobs

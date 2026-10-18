@@ -1986,6 +1986,14 @@
 
 @utility agent-change {
   @apply flex min-w-0 flex-1 flex-col gap-0.5;
+
+  & > a.record-link-title {
+    @apply no-underline hover:text-accent-text hover:underline focus-ring;
+
+    @variant phone {
+      @apply min-h-tap content-center;
+    }
+  }
 }
 
 @utility agent-change-text {
@@ -5075,6 +5083,126 @@
   }
 }
 
+
+@utility memory-filters {
+  @apply flex min-w-0 flex-wrap items-center gap-3;
+
+  & > .seg {
+    @apply max-w-full overflow-x-auto;
+  }
+}
+
+@utility memory-hit {
+  @apply my-0 mt-1 font-serif text-li break-words text-ink-muted;
+}
+
+@utility memory-new {
+  @apply flex flex-col items-start gap-3;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &:not([open]) > form {
+    @apply hidden;
+  }
+}
+
+@utility memory-new-form {
+  @apply grid w-full grid-cols-1 items-end gap-3;
+
+  @variant wide {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  }
+}
+
+@utility memory-raw {
+  @apply m-0 font-mono text-meta whitespace-pre-wrap break-words text-ink;
+}
+
+@utility memory-type {
+  @apply mt-3 mb-1 text-meta font-semibold text-ink-muted first:mt-0;
+}
+
+@utility memory-fact-list {
+  @apply flex min-w-0 flex-col;
+}
+
+@utility memory-fact {
+  @apply flex min-w-0 flex-wrap items-start gap-3 border-b border-line py-2.5 last:border-b-0;
+
+  & > .pill {
+    @apply mt-0.5 shrink-0;
+  }
+}
+
+@utility memory-fact-body {
+  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+}
+
+@utility memory-fact-text {
+  @apply my-0 font-serif break-words text-ink;
+}
+
+@utility memory-fact-acts {
+  @apply flex items-start gap-1;
+
+  &:has(> .memory-edit[open]) {
+    @apply basis-full;
+  }
+}
+
+@utility memory-edit {
+  @apply flex flex-col items-end gap-2;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &[open] {
+    @apply flex-1;
+  }
+
+  &:not([open]) > form {
+    @apply hidden;
+  }
+
+  & > form {
+    @apply w-full;
+  }
+}
+
+@utility memory-fact-form {
+  @apply mt-4 flex flex-col items-end gap-2;
+
+  & .field {
+    @apply w-full;
+  }
+}
+
+@utility memory-event {
+  @apply flex min-w-0 flex-col gap-1 border-b border-line py-2.5 last:border-b-0;
+}
+
+@utility memory-event-what {
+  @apply my-0 break-words;
+}
+
+@utility memory-quote {
+  @apply my-0 font-serif text-li break-words text-ink-muted;
+}
+
+@utility memory-event-acts {
+  @apply flex items-center gap-3;
+}
 
 @utility wm-card {
   & > .card-body {

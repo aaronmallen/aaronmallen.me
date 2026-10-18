@@ -111,6 +111,8 @@ module Tasks
 
       def open_before(task) = tasks.beside(task).preceding(task).limit(1).one
 
+      def open_choices = tasks.open.in_order.select(:id, :title).to_a
+
       def open_counts(sprint:, planned:)
         tasks.open_counts(sprint.id, planned.map(&:id)).one.to_h.transform_keys(&:to_s)
       end

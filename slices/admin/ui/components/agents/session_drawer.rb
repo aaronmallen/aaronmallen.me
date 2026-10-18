@@ -32,7 +32,9 @@ module Admin
 
           def change(event)
             div(class: "agent-change") do
-              span(class: "record-link-title") { t(OPS.fetch(event.op), path: event.path) }
+              a(class: "record-link-title", href: memory_file(event.memory_file_id)) do
+                t(OPS.fetch(event.op), path: event.path)
+              end
               text = event.text || event.was_text
               p(class: "agent-change-text") { text } if text
             end
@@ -50,10 +52,14 @@ module Admin
 
           def lists
             list(t(".tasks"), @tasks) { task(it) } unless @tasks.empty?
-            list(t(".loaded"), @session.agent_session_loads) { |load| span(class: "record-link-title") { load.path } }
+            list(t(".loaded"), @session.agent_session_loads) { loaded(it) }
             list(t(".changed"), @memory_changes) { change(it) }
             list(t(".written"), @artifacts) { artifact(it) }
           end
+
+          def loaded(load) = a(class: "record-link-title", href: memory_file(load.memory_file_id)) { load.path }
+
+          def memory_file(id) = path(:admin_agent_memory_file, id:)
 
           def meta
             dotted(

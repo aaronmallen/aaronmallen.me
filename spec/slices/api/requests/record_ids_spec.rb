@@ -16,6 +16,7 @@ RSpec.describe "API record IDs", type: :request do
       "link_tasks" => { kind: "relates", other_id: 1 },
       "mark_mail_thread" => { status: "read" },
       "moderate_webmention" => { verdict: "approved" },
+      "move_memory_file" => { scope: "global" },
       "move_task" => { list: "next" },
       "reopen_decision" => { reason: "Back" },
       "reorder_task" => { direction: "up" },

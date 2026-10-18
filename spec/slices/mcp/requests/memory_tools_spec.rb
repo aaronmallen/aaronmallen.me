@@ -149,6 +149,33 @@ RSpec.describe "MCP memory tools", type: :request do
     expect(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("scope")).to eq("repo")
   end
 
+  describe "move_memory_file" do
+    let(:file) { create_file.fetch("id") }
+
+    def move(**) = mcp_answer("move_memory_file", id: file, scope: "repo", repo: "aaronmallen/blog", **author, **)
+
+    it "moves a file to another scope" do
+      expect(move.values_at("scope", "repo")).to eq(%w[repo aaronmallen/blog])
+    end
+
+    it "adds a scope entry to its history with the agent and model" do
+      move
+
+      expect(history(file).last.values_at("op", "agent", "model")).to eq(%w[scope claude-code claude-opus-5-5])
+    end
+
+    it "refuses a scope that already holds its path" do
+      create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
+
+      expect(mcp_text("move_memory_file", id: file, scope: "repo", repo: "aaronmallen/blog", **author))
+        .to eq("scope: a file in that scope already has this path")
+    end
+
+    it "refuses a repo file with no repo" do
+      expect(mcp_text("move_memory_file", id: file, scope: "repo", **author)).to eq("repo: a repo file needs a repo")
+    end
+  end
+
   it "deletes a file with its facts" do
     file = create_file.fetch("id")
     add_fact(file, "Gone soon")

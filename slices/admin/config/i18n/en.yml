@@ -216,6 +216,21 @@ en:
       unstar: "Unstarred"
       untitled: "Give the task a title"
       woken: "Woken"
+  memories_page:
+    scopes:
+      global: "Global"
+      project: "Project · %{name}"
+      repo: "Repo · %{name}"
+      task: "Task · %{name}"
+    toasts:
+      added: "Fact added"
+      created: "Memory file created"
+      deleted: "Memory file deleted · agents stop loading it"
+      removed: "Fact removed · revert it from the history"
+      reverted: "Reverted"
+      saved: "Fact saved"
+      scoped: "Scope changed"
+      stale: "A later change touched this fact · revert that one first"
   people_page:
     toasts:
       added: "Person added"
@@ -507,6 +522,87 @@ en:
             webmention: "Webmentions"
             workout: "Workouts"
       agents:
+        memory_facts:
+          add: "Add fact"
+          agent: "%{agent} on %{model}"
+          confirm_remove: "Remove this fact? You can revert it from the history."
+          edit: "Edit"
+          empty: "No facts yet. Agents add them as they work, or add one below."
+          fact: "Fact"
+          headings:
+            context: "Context"
+            convention: "Conventions"
+            gotcha: "Gotchas"
+            preference: "Preferences"
+          new: "New fact"
+          remove: "Remove fact"
+          save: "Save fact"
+          title: "Facts"
+          type: "Type"
+          types:
+            context: "context"
+            convention: "convention"
+            gotcha: "gotcha"
+            preference: "preference"
+          you: "you"
+        memory_field_error:
+          path:
+            blank: "Name the file, such as testing.md."
+            format: "Use letters, digits, _, ., / and - only."
+            taken: "A file in this scope already has this path."
+          scope:
+            blank: "Pick where the file loads."
+            extra: "Pick where the file loads."
+            format: "Pick where the file loads."
+            missing: "That record is gone. Pick another scope."
+            taken: "A file with this path already loads there."
+          text:
+            blank: "Write the fact first."
+            long: "Keep a fact to %{max} characters."
+            visible: "Write the fact first."
+          type:
+            blank: "Pick a type."
+            format: "Pick a type."
+        memory_history:
+          agent: "%{agent} on %{model}"
+          confirm_revert: "Undo this change?"
+          ops:
+            add: "added a fact"
+            create: "created the file"
+            edit: "changed a fact"
+            remove: "removed a fact"
+            scope: "moved the file to a new scope"
+          revert: "Revert"
+          reverted: "reverted"
+          reverts:
+            add: "reverted an addition"
+            edit: "reverted an edit"
+            remove: "reverted a removal"
+          session: "Session"
+          title: "History"
+          you: "You"
+        memory_loads:
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          files:
+            one: "%{count} file"
+            other: "%{count} files"
+          show: "Show"
+          tasks: "Task files also load when a session starts on that task."
+          title: "What a session loads"
+          working_in: "Working in"
+        memory_new_form:
+          create: "Create"
+          new: "New memory file"
+          path: "File"
+          path_hint: "testing.md"
+          scope: "Loads for"
+        memory_row:
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          updated: "updated %{at}"
         session_drawer:
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
@@ -1709,6 +1805,7 @@ en:
           journal: "journal"
           links: "links"
           mail: "mail"
+          memories: "memories"
           people: "people"
           performance: "performance"
           posts: "posts"
@@ -3297,6 +3394,49 @@ en:
           heading: "Activity"
           span: "%{from} → %{to}"
       agents:
+        memories:
+          empty: "No memory files yet."
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          filters:
+            all: "All · %{count}"
+            global: "Global · %{count}"
+            project: "Projects · %{count}"
+            repo: "Repos · %{count}"
+            task: "Tasks · %{count}"
+          heading: "Memories"
+          lede:
+            one: "%{facts} in %{count} file."
+            other: "%{facts} in %{count} files."
+          loads_for:
+            global: "loads for every session"
+            project: "loads for sessions on this project or in its repo"
+            repo: "loads for sessions in this repo"
+            task: "loads for sessions on this task"
+          no_match: "No file or fact matches “%{query}”."
+          placeholder: "Search facts"
+          scope: "Scope"
+          search: "Search memories"
+        memory_file:
+          as_loaded: "What the agent reads"
+          back: "All memories"
+          confirm_delete: "Delete %{path}? Agents stop loading it."
+          delete: "Delete file"
+          fact_count:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          facts: "facts"
+          loaded: "as loaded"
+          loads_for:
+            global: "Loads for every session"
+            project: "Loads for sessions on %{name} or in its repo"
+            repo: "Loads for sessions in %{name}"
+            task: "Loads for sessions on %{name}"
+          markdown: "markdown"
+          move: "Change scope"
+          scope: "Scope"
+          show: "Show"
         sessions:
           empty: "No agent has opened a session yet."
           heading: "Sessions"

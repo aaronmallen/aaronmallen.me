@@ -13,6 +13,8 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",
       "admin.operations.build_decision_page" => "builds the admin's decision page; read_decision reads it",
       "admin.operations.build_links_page" => "builds the admin's links screen; spec #1064 keeps MCP out of short links",
+      "admin.operations.build_memories_page" => "builds the admin's memories screen; read_memory reads the same",
+      "admin.operations.build_memory_file_page" => "builds the admin's memory file page; read_memory_file reads it",
       "admin.operations.build_navigation" => "builds the admin's menu",
       "admin.operations.build_person_editor" => "builds the admin's people editor; save_person covers a person",
       "admin.operations.build_post_analytics" => "builds the admin's post analytics page; read_analytics reads a path",

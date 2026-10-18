@@ -14,6 +14,7 @@ Hanami/UnusedDeps:
     - 'slices/admin/actions/mail/snooze.rb'
     - 'slices/admin/actions/mail/wake.rb'
     - 'slices/agents/operations/add_memory_fact.rb'
+    - 'slices/agents/operations/change_memory_scope.rb'
     - 'slices/agents/operations/create_artifact.rb'
     - 'slices/agents/operations/create_memory_file.rb'
     - 'slices/agents/operations/edit_memory_fact.rb'

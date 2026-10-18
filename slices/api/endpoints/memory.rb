@@ -39,6 +39,7 @@ module API
           Blog::Contract::FORMAT => "use letters, digits, _, ., / and - only",
           "taken" => "a file in this scope already has this path",
         },
+        scope: { "taken" => "a file in that scope already has this path" },
         project_id: {
           Blog::Contract::MISSING => "a project file needs a project that exists",
           "extra" => format(SCOPED, "project", "project_id"),

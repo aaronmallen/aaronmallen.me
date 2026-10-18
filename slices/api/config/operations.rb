@@ -90,6 +90,7 @@ module API
       ["create_memory_file", "post", "/memory_files", CREATED],
       ["read_memory_file", "get", "/memory_files/{id}", OK],
       ["delete_memory_file", "delete", "/memory_files/{id}", OK],
+      ["move_memory_file", "post", "/memory_files/{id}/move", OK],
       ["add_memory_fact", "post", "/memory_files/{id}/facts", CREATED],
       ["edit_memory_fact", "patch", "/memory_files/{id}/facts/{fact_id}", OK],
       ["remove_memory_fact", "post", "/memory_files/{id}/facts/{fact_id}/remove", OK],

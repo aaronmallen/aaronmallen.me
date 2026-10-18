@@ -22,7 +22,11 @@ module Admin
       repos.review_queries
     ], from: :activity
 
-    import keys: %w[repos.agent_session_queries], from: :agents
+    import keys: %w[
+      operations.add_memory_fact operations.change_memory_scope operations.create_memory_file
+      operations.delete_memory_file operations.edit_memory_fact operations.load_memory operations.remove_memory_fact
+      operations.revert_memory_event repos.agent_session_queries repos.memory_file_queries
+    ], from: :agents
 
     import keys: %w[
       repos.analytics_event_queries repos.analytics_page_queries repos.analytics_rollup_queries repos.country_queries

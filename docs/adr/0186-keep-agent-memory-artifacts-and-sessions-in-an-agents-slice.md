@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
-amended: ["#1745"]
+amended: ["#1745", "#1750"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 
@@ -33,6 +33,9 @@ read it through its exported read repos and operations and never write its table
   ([ADR 0093][0093]), so they link to tasks, projects, commits and each other. They stay out of global search and
   the activity feed.
 - **Nothing is public.** No public page reads the slice.
+- **I fix memory in the admin.** Since #1750 the memories screens add, edit, remove and revert facts, move a file
+  to another scope, link it to other records and delete it. Each change names me as its author. A move adds a
+  `scope` entry to the file's history, and agents move a file the same way through `move_memory_file`.
 - **Nothing expires.** History, versions and sessions stay. Caps on fact text (1,000 characters) and artifact bodies
   (100,000) keep each row small.
 - **Artifact tags sit in a `text[]` column on `artifacts`**, with a CHECK that holds each one to the tag slug format,

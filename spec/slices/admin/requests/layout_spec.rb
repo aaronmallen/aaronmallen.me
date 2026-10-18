@@ -7,8 +7,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:screens) do
     %w[
       /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
-      /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/agents/sessions
-      /admin/analytics /admin/activity /admin/health /admin/time /admin/settings/tagging#tags
+      /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/agents/memories
+      /admin/agents/sessions /admin/analytics /admin/activity /admin/health /admin/time /admin/settings/tagging#tags
       /admin/settings/socials#people /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
       /admin/settings/services#tokens /admin/settings/services#services /admin/settings/services#clients
       /admin/settings/security /admin/settings/jobs
@@ -37,7 +37,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "links each pill to its first screen" do
       expect(page.all("a.pill-nav-link").map { it["href"] })
-        .to eq(%w[/admin /admin/inbox /admin/tasks /admin/journal /admin/posts /admin/agents/sessions
+        .to eq(%w[/admin /admin/inbox /admin/tasks /admin/journal /admin/posts /admin/agents/memories
                   /admin/analytics])
     end
 
@@ -62,7 +62,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
       expect(rows).to eq(screens.grep_v(%r{\A/admin/settings/}))
       expect(page.all("#nav-switcher .switcher-heading", visible: :all).map { it.text(:all) })
-        .to eq(%w[Inbox Tasks Journal Publish Insights])
+        .to eq(%w[Inbox Tasks Journal Publish Agents Insights])
     end
 
     it "marks today current in the switcher", :aggregate_failures do

@@ -23,6 +23,13 @@ RSpec.describe "Admin screens", type: :feature do
     {
       "agent sessions" => -> { agent_session.then { visit "/admin/agents/sessions" } },
       "agent session open" => -> { visit "/admin/agents/sessions?session=#{agent_session}" },
+      "memories" => -> { agent_session.then { visit "/admin/agents/memories?query=mise" } },
+      "memory file" => -> { visit "/admin/agents/memories/#{memory_file_id}" },
+      "memory file editing" => lambda do
+        visit "/admin/agents/memories/#{memory_file_id}"
+        find(".memory-edit summary").click
+      end,
+      "memory file as loaded" => -> { visit "/admin/agents/memories/#{memory_file_id}?view=loaded" },
     }
   end
 
@@ -132,6 +139,8 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def long_link = "https://example.com/a-talk-with-a-very-long-path-on-a-conference-site"
+
+  def memory_file_id = agent_session.then { Agents::Slice["repos.memory_file_queries"].listed.first.id }
 
   def menu_switcher
     {

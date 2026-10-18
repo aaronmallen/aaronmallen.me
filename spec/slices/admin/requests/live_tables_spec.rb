@@ -4,9 +4,9 @@ RSpec.describe "Admin live tables", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/activity /admin/agents/sessions /admin/analytics /admin/calendar /admin/decisions
-      /admin/decisions/new /admin/files /admin/health /admin/inbox /admin/journal /admin/links /admin/mail
-      /admin/mail/settings /admin/people/new /admin/performance /admin/performance/requests /admin/posts
+      /admin /admin/activity /admin/agents/memories /admin/agents/sessions /admin/analytics /admin/calendar
+      /admin/decisions /admin/decisions/new /admin/files /admin/health /admin/inbox /admin/journal /admin/links
+      /admin/mail /admin/mail/settings /admin/people/new /admin/performance /admin/performance/requests /admin/posts
       /admin/posts/new /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/jobs
       /admin/settings/security /admin/settings/services /admin/settings/socials /admin/settings/tagging /admin/social
       /admin/tasks /admin/tasks/new /admin/time /admin/webmentions
@@ -25,7 +25,8 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/pull-requests/#{create(:pull_request).id}", "/admin/tags/#{create(:tag).name}",
       "/admin/people/#{create(:person).id}/edit", "/admin/files/#{upload_share.value!.id}/edit",
       "/admin/files/groups/#{file_group.id}/edit", "/admin/links/#{short_link.id}/edit",
-      "/admin/agents/sessions?session=#{agent_session}",
+      "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
+      "/admin/agents/memories/#{memory_file.id}?view=loaded",
     ]
   end
 
@@ -36,6 +37,10 @@ RSpec.describe "Admin live tables", type: :request do
 
   def file_group
     Shares::Slice["operations.upload_share_group"].call([share_upload("a", "a.txt", "text/plain")]).value!
+  end
+
+  def memory_file
+    @memory_file ||= Agents::Slice["operations.create_memory_file"].call({ path: "hanami", scope: "global" }).value!
   end
 
   def short_link = Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com" }).value!

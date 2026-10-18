@@ -11,14 +11,22 @@ module Admin
           prop :artifacts, Blog::Types::Integer
 
           def view_template
-            href = path(:admin_agent_sessions)
-
             Card(title: t(".title")) do |card|
               card.side { Pill(color: :blue) { t(".running", count: @running) } } if @running.positive?
-              TodayLine(label: t(".sessions"), href:) { t(".session_count", count: @sessions) }
-              TodayLine(label: t(".memory"), href:) { t(".memory_count", count: @memory_changes) }
-              TodayLine(label: t(".artifacts"), href:) { t(".artifact_count", count: @artifacts) }
+              lines
             end
+          end
+
+          private
+
+          def lines
+            sessions = path(:admin_agent_sessions)
+
+            TodayLine(label: t(".sessions"), href: sessions) { t(".session_count", count: @sessions) }
+            TodayLine(label: t(".memory"), href: path(:admin_agent_memories)) do
+              t(".memory_count", count: @memory_changes)
+            end
+            TodayLine(label: t(".artifacts"), href: sessions) { t(".artifact_count", count: @artifacts) }
           end
         end
       end

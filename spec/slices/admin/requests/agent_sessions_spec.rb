@@ -141,8 +141,9 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(card).to have_css(".pill", text: "1 running")
     end
 
-    it "links to the sessions screen" do
-      expect(card.all("a.today-line").map { it["href"] }.uniq).to eq(["/admin/agents/sessions"])
+    it "links its lines to the sessions and memories screens" do
+      expect(card.all("a.today-line").map { it["href"] })
+        .to eq(%w[/admin/agents/sessions /admin/agents/memories /admin/agents/sessions])
     end
   end
 end
