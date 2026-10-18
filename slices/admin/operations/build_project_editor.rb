@@ -7,7 +7,6 @@ module Admin
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       PUBLIC = Blog::Types::TagScope["public"]
-      UNCHECKED = "0"
 
       include Deps[tag_queries: "tags.repos.tag_queries"]
 
@@ -27,7 +26,7 @@ module Admin
         return blank_values unless project
 
         {
-          board_published: project.board_published ? Blog::Constants::CHECKED : UNCHECKED,
+          board_published: project.board_published ? Blog::Constants::CHECKED : Blog::Constants::UNCHECKED,
           key: project.key,
           name: project.name,
           visibility: project.visibility,

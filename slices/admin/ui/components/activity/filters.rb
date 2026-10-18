@@ -12,13 +12,12 @@ module Admin
           TYPES = Structs::ActivityEvent::KINDS
           LABELS = TYPES.to_h { [it, ".types.#{it}"] }.freeze
           RANGES = Blog::Types::RangePreset.values
-          UNCHECKED = "0"
 
           def self.query(from:, to:, types:, text:)
             {
               from: from.iso8601,
               to: to.iso8601,
-              types: TYPES.to_h { [it, types.include?(it) ? CHECKED : UNCHECKED] },
+              types: TYPES.to_h { [it, types.include?(it) ? CHECKED : Blog::Constants::UNCHECKED] },
               q: text,
             }
           end
@@ -77,7 +76,7 @@ module Admin
             type = Event::TYPES.fetch(name)
 
             label(class: "activity-type") do
-              input(type: "hidden", name: "types[#{name}]", value: UNCHECKED)
+              input(type: "hidden", name: "types[#{name}]", value: Blog::Constants::UNCHECKED)
               input(class: "sr-only", type: "checkbox", name: "types[#{name}]", value: CHECKED, checked: chosen?(name))
               Icon(["fa-solid", type.icon, "activity-icon", type.color.to_s])
               span { t(LABELS.fetch(name)) }

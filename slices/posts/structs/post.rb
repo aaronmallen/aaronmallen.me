@@ -7,7 +7,6 @@ module Posts
       DRAFT = Blog::Types::PostStatus["draft"]
       PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
-      UNCHECKED = "0"
 
       def canonical_url = written(:canonical_url)
 
@@ -25,7 +24,7 @@ module Posts
           publish_at:,
           **CARD.to_h { [it, public_send(it).to_s] },
           syndication_body:,
-          syndication_enabled: syndication_enabled ? Blog::Constants::CHECKED : UNCHECKED,
+          syndication_enabled: syndication_enabled ? Blog::Constants::CHECKED : Blog::Constants::UNCHECKED,
           syndication_targets: syndication_targets.to_a,
         }
       end

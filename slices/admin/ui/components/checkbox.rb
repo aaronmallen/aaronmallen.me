@@ -12,7 +12,7 @@ module Admin
 
         def view_template
           label(class: "choice") do
-            input(type: "hidden", name: @name, value: "0")
+            input(type: "hidden", name: @name, value: Blog::Constants::UNCHECKED)
             input(**mix(control_attributes, @attributes))
             span { @label }
           end
