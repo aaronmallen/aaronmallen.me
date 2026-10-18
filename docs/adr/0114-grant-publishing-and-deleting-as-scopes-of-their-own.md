@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
-amended: ["#941", "#1335", "#1441", "#1599", "#1761"]
+amended: ["#941", "#1335", "#1441", "#1599", "#1761", "#1762"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 
@@ -42,7 +42,10 @@ on the consent page. The owner wants to grant edits without either power.
   had left on `write`. A spam verdict on an author nobody trusts stays on `write`.
 - **`write`** keeps every other change, those a later call can undo among them: drop, archive, untag, unlink and
   cancel. A change to a draft, a private project or a task on no published board stays here, as do task tags and
-  time, which no public page shows.
+  time, which no public page shows. `drop_sprint` stays here too, though it deletes the sprint's row
+  ([ADR 0050][0050]): only a sprint dated ahead can drop, its tasks go back to Next or External,
+  `move_task` can already empty it and `plan_sprint` makes it again. #1762 corrected an earlier line that said
+  dropping kept the row.
 
 The consent page shows a line for each, and the warning that a post cannot be taken back sits on the `publish`
 line, not on `write`. The server instructions in `MCP::Protocol::Handler` name the scope that grants publishing,
@@ -61,8 +64,9 @@ Two scopes cost one more consent line.
 
 **Leave them on `write`** and trust the consent wording, as ADR 0061 did. Nothing checks wording.
 
-**Put every tool that ends something under `delete`.** Dropping a sprint or archiving a project leaves the record
-in place, and a later call brings it back, so those stay with the other edits on `write`.
+**Put every tool that ends something under `delete`.** Archiving a project leaves the record in place, and a later
+call brings it back. Dropping a sprint deletes its row, but a `write` client could already empty it and plan it
+again, as the `write` line says. Both stay with the other edits on `write`.
 
 ## Consequences
 
@@ -81,6 +85,7 @@ A new tool that removes a record or shows something in public has to name the ri
 Nothing checks that it does beyond `spec/slices/mcp/requests/scopes_spec.rb`, which lists each tool under the scope it
 expects, and `spec/slices/api/requests/publish_scope_spec.rb`, which tries each public target without `publish`.
 
+[0050]: 0050-derive-today-from-sprint-membership.md
 [0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
