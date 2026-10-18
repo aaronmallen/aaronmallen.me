@@ -1533,6 +1533,11 @@ en:
           tokens: "API tokens"
           webmention_settings: "webmentions"
           webmentions: "mentions"
+        switcher:
+          label: "Navigate. Current: %{current}"
+          menu: "Menu"
+          panel: "Admin"
+          waiting: "something waits"
         top_bar:
           label: "Admin"
           palette: "Open the command palette"

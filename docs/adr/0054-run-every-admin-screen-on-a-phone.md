@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, admin, public, mcp]
 issue: AA-346
-amended: [AA-539, AA-765, AA-835, "#17", "#745", "#923"]
+amended: [AA-539, AA-765, AA-835, "#17", "#745", "#923", "#1746"]
 tags: [admin, layout, responsive, accessibility, design]
 ---
 
@@ -62,7 +62,7 @@ The layouts below 860px are derived, not ported. They come from the tokens and r
 carries, and they add no second visual language.
 
 Since #745 the admin folds at 700px and 860px alone, as [ADR 0128][0128] records. Two-column layouts start at
-860px, and the pill nav drops onto its own row below it.
+860px, and below it one switcher button takes the pill nav's place (#1746, [ADR 0187][0187]).
 
 ## Alternatives
 
@@ -110,3 +110,4 @@ count. Public controls answer to axe's 24px rule rather than to the 44px square.
 
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[0187]: 0187-fold-the-admin-pill-nav-into-a-popover-switcher-below-860px.md

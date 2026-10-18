@@ -50,6 +50,25 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css("button.avatar[popovertarget='avatar-menu'] + #avatar-menu[popover]", visible: :all)
     end
 
+    it "opens the switcher panel from its button" do
+      expect(page).to have_css(".switcher[popovertarget='nav-switcher'] + #nav-switcher[popover]", visible: :all)
+    end
+
+    it "lists every screen but settings in the switcher, grouped", :aggregate_failures do
+      settings = page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] }
+      rows = page.all("#nav-switcher a.switcher-row", visible: :all).map { it["href"] }
+
+      expect(rows).to eq(screens - settings)
+      expect(page.all("#nav-switcher .switcher-heading", visible: :all).map { it.text(:all) })
+        .to eq(%w[Tasks Journal Publish Inbox Insights])
+    end
+
+    it "marks today current in the switcher", :aggregate_failures do
+      expect(page).to have_css("#nav-switcher a.switcher-row[aria-current='page']", count: 1, text: "today",
+                                                                                    visible: :all)
+      expect(page).to have_css("button.switcher[aria-label='Navigate. Current: Today']")
+    end
+
     it "links the site and every settings tab from the avatar menu" do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
         .to eq(%w[/writing /about /projects /contact /admin/settings/tagging#tags /admin/settings/socials#people

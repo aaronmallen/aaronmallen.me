@@ -16,6 +16,7 @@ module Admin
               a(class: "top-bar-skip", href: "#main") { t(".skip_link") }
               Wordmark()
               pills
+              Switcher(navigation: @navigation)
               search
               AvatarMenu(settings: @navigation.settings)
             end

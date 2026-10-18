@@ -1791,10 +1791,6 @@
   @apply sticky top-0 z-40 flex h-top-bar items-center gap-3 px-admin-gutter py-3;
   background-color: color-mix(in oklab, var(--color-ground) 88%, transparent);
   backdrop-filter: blur(10px);
-
-  @variant not-wide {
-    @apply flex-wrap content-center gap-y-2;
-  }
 }
 
 @utility top-bar-skip {
@@ -1832,7 +1828,7 @@
   scrollbar-width: none;
 
   @variant not-wide {
-    @apply order-3 w-full;
+    @apply hidden;
   }
 }
 
@@ -1853,12 +1849,76 @@
   @apply size-1.5 shrink-0 rounded-full bg-mk-orange;
 }
 
+@utility switcher {
+  @apply inline-flex min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-full border border-line;
+  @apply bg-ground-sunk px-3.5 py-2 font-display text-pill font-semibold text-ink hover:border-ink-muted admin-focus;
+
+  &:has(+ :popover-open) {
+    @apply border-ink-muted;
+  }
+
+  @variant wide {
+    @apply hidden;
+  }
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility switcher-group {
+  @apply shrink-0 whitespace-nowrap;
+}
+
+@utility switcher-screen {
+  @apply min-w-0 truncate font-mono text-badge font-normal text-ink-muted;
+}
+
+@utility switcher-chevron {
+  @apply shrink-0 text-icon-sm text-ink-muted;
+}
+
+@utility switcher-panel {
+  @apply fixed inset-x-admin-gutter top-top-bar bottom-auto m-0 max-h-[calc(100dvh-var(--spacing-top-bar)-1rem)];
+  @apply w-auto grid-cols-[repeat(auto-fill,minmax(136px,1fr))] gap-x-2.5 gap-y-1 overflow-auto p-3 menu-surface;
+  @apply text-ink;
+
+  &:popover-open {
+    @apply grid wide:hidden;
+  }
+}
+
+@utility switcher-column {
+  @apply flex flex-col gap-px pb-2;
+}
+
+@utility switcher-heading {
+  @apply m-0 flex items-center gap-2 px-2.5 pt-2 pb-1 font-mono text-badge text-ink-muted;
+}
+
+@utility switcher-row {
+  @apply flex w-full items-center gap-2.5 rounded-icon px-2.5 py-2 font-display text-pill font-semibold;
+  @apply text-ink-muted no-underline hover:bg-wash hover:text-ink admin-focus;
+
+  &[aria-current="page"] {
+    @apply bg-ink text-ground hover:bg-ink hover:text-ground;
+  }
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility switcher-icon {
+  @apply w-4 text-center text-icon-sm;
+}
+
 @utility top-bar-search {
   @apply ml-auto inline-flex w-search min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-full border;
   @apply border-line px-3 py-2 font-mono text-badge leading-none whitespace-nowrap text-ink-muted hover:text-ink admin-focus;
 
   @variant phone {
-    @apply min-h-tap justify-center;
+    @apply min-h-tap min-w-tap shrink-0 justify-center;
   }
 }
 
@@ -8478,14 +8538,6 @@
 @layer base {
   @media (width < 48rem) {
     :root { --spacing-gutter: 1rem; }
-  }
-
-  @variant not-wide {
-    :root { --spacing-top-bar: 7.25rem; }
-  }
-
-  @variant phone {
-    :root { --spacing-top-bar: 8.25rem; }
   }
 
   :root {

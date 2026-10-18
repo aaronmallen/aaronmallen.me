@@ -73,7 +73,7 @@ RSpec.describe "Admin screens", type: :feature do
       "snooze drawer" => -> { open_snooze },
       "task editor" => -> { open_editor },
       "task panel" => -> { open_panel },
-    }
+    }.merge(menu_switcher)
   end
 
   def files
@@ -123,6 +123,15 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def long_link = "https://example.com/a-talk-with-a-very-long-path-on-a-conference-site"
+
+  def menu_switcher
+    {
+      "menu switcher" => lambda do
+        visit "/admin/inbox"
+        find(".switcher").click if page.current_window.size.first < 860
+      end,
+    }
+  end
 
   def open_confirm
     journal_entry

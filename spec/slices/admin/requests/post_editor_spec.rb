@@ -250,7 +250,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "offers neither Save draft nor Publish" do
-        expect(page).to have_no_button("Save draft").and have_no_button("Publish", visible: :all)
+        expect(page).to have_no_button("Save draft").and have_no_button("Publish", exact: true, visible: :all)
       end
 
       it "shows no publishing hint" do
