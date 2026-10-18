@@ -11,7 +11,7 @@ module Social
 
       include Deps[
         contract: "contracts.person_contract",
-        networks: "networks.all",
+        networks: "social_networks.all",
         person_mutations: "repos.person_mutations",
         person_queries: "repos.person_queries",
       ]

@@ -7,7 +7,7 @@ module Social
 
       include Deps[
         announcement: "posts.operations.compose_announcement",
-        networks: "networks.all",
+        networks: "social_networks.all",
         save_social_post: "operations.save_social_post",
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",

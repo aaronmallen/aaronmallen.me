@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [db, lib, social, admin]
 superseded-by: "0132"
 issue: AA-577
-amended: [AA-814, "#793", "#922", "#1243"]
+amended: [AA-814, "#793", "#922", "#1243", "#1702"]
 tags: [social, sidekiq, jobs, retry, mastodon, bluesky, idempotency]
 ---
 
@@ -42,8 +42,8 @@ failed (AA-621). A post with any delivery row refuses edits and removal (AA-606)
 A post settles once each target's delivery has sent every part or has failed. `settle` then sets it `posted` and
 writes the time it settled into `posted_at`, over the time it was due.
 
-A network is a client in `networks.all` (`Social::Providers::NetworksProvider`) and a value of the `network` enum.
-Its client answers `post`, `within_limit?`, `engagement` and `configured?`.
+A network is a client in `social_networks.all` (`config/providers/social_networks.rb`) and a value of the `network`
+enum. Its client answers `post`, `within_limit?`, `engagement` and `configured?`.
 
 Since #793 a network can hold several accounts, so a post targets the connected accounts the owner ticks and each
 account gets its own delivery row, keyed on the connection in place of the network. [ADR 0132][0132] records it.
@@ -72,7 +72,7 @@ claim takes it again and queues a job that sends nothing.
 Once the send job claims a network, the operator can no longer edit or remove the post, not even to fix a typo
 before a retry goes out.
 
-A new network needs a client that answers the four methods, an entry in `networks.all`, and a value added to the
+A new network needs a client that answers the four methods, an entry in `social_networks.all`, and a value added to the
 `network` enum and to `Blog::Types::NetworkName`.
 
 [0132]: 0132-send-a-social-post-to-each-connected-account-the-owner-ticks.md

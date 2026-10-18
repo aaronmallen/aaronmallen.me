@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, analytics, config, lib, projects, record, social]
 issue: AA-674
-amended: [AA-822, "#791"]
+amended: [AA-822, "#791", "#1702"]
 tags: [providers, clients, settings, credentials, github, maxmind, bluesky, mastodon]
 ---
 
@@ -36,9 +36,10 @@ client answers `configured?` false and returns `nil` from every call.
 - `Admin::Providers::GitHubAuthProvider` hands `Admin::Auth::GitHub` no OAuth2 client unless both `client_id` and
   `client_secret` are set.
 - `Analytics::Providers::GeoProvider` builds the GeoLite2 client on `nil` unless both MaxMind values are set.
-- `Social::Providers::NetworksProvider` builds Mastodon on `nil` when the URL or the token is missing, or the URL
-  will not parse. Bluesky builds its connections either way and answers `configured?` from its handle and
-  password.
+- `Mastodon::Providers::ClientProvider`, which `config/providers/social_networks.rb` calls for
+  `social_networks.all` (#1702), builds Mastodon with no credentials at all. It answers `configured?` from the
+  connected account, which holds the host and token. Bluesky answers `configured?` true once any account is
+  connected.
 
 A caller asks `configured?` before it calls out. An operation answers `Failure(:not_configured)`, as
 `Record::Operations::ImportCommits` and `Analytics::Operations::RefreshCountryDatabase` do. An action or a view

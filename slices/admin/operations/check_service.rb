@@ -5,7 +5,7 @@ module Admin
     class CheckService < Blog::Operation
       include Deps[
         github: "github.client", google: "google.client", linear: "linear.client",
-        networks: "networks.all",
+        networks: "social_networks.all",
       ]
 
       def call(provider, credentials)

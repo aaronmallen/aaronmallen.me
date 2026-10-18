@@ -6,7 +6,7 @@ module Social
       LIMIT = 8
       MINIMUM = 2
 
-      include Deps[networks: "networks.all"]
+      include Deps[networks: "social_networks.all"]
 
       def call(network:, query:)
         client = step find_client(network)

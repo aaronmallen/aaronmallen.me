@@ -14,7 +14,7 @@ module Social
 
       include Deps[
         check_network_fit: "operations.check_network_fit",
-        networks: "networks.all",
+        networks: "social_networks.all",
         resolve_mentions: "operations.resolve_mentions",
       ]
 

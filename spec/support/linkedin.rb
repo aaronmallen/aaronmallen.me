@@ -28,9 +28,9 @@ module Spec
     def set_up_linkedin_client(credentials = { client_id: "li-id", client_secret: "li-secret" })
       allow(Hanami.app.settings).to receive(:linkedin).and_return(credentials)
       replace_component("linkedin.auth", LinkedIn::Providers::ClientProvider.auth(Hanami.app.settings))
-      networks = Hanami.app["networks.all"]
+      networks = Hanami.app["social_networks.all"]
       client = LinkedIn::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"])
-      replace_component("networks.all", networks.merge(Blog::Types::NetworkName["linkedin"] => client).freeze)
+      replace_component("social_networks.all", networks.merge(Blog::Types::NetworkName["linkedin"] => client).freeze)
     end
 
     def stub_linkedin(*ids)

@@ -12,7 +12,7 @@ module Social
       include Deps[
         expand_for_network: "operations.expand_for_network",
         list_target_accounts: "operations.list_target_accounts",
-        networks: "networks.all",
+        networks: "social_networks.all",
         read_photo: "media.operations.read_photo",
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",

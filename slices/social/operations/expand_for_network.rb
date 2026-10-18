@@ -4,7 +4,7 @@ module Social
   module Operations
     class ExpandForNetwork
       include Deps[
-        networks: "networks.all",
+        networks: "social_networks.all",
         resolve_mentions: "operations.resolve_mentions",
         shorten_links: "operations.shorten_links",
         tag_links: "operations.tag_links",

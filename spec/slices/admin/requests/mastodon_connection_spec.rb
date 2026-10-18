@@ -140,7 +140,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
       token = { "Authorization" => "Bearer masto-token" }
       statuses = stub_request(:post, SocialNetworks::MASTODON_STATUSES)
       posted = statuses.with(headers: token).to_return(**json_response(id: "1"))
-      Social::Slice["networks.all"].fetch("mastodon").post("Hello", idempotency_key: "key")
+      Social::Slice["social_networks.all"].fetch("mastodon").post("Hello", idempotency_key: "key")
 
       expect(posted).to have_been_made
     end
@@ -148,7 +148,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     it "does not follow a post the server redirects", :aggregate_failures do
       stub_request(:post, SocialNetworks::MASTODON_STATUSES)
         .to_return(status: 307, headers: { "Location" => "http://10.0.0.5/api/v1/statuses" })
-      mastodon = Social::Slice["networks.all"].fetch("mastodon")
+      mastodon = Social::Slice["social_networks.all"].fetch("mastodon")
 
       expect { mastodon.post("Hello", idempotency_key: "key") }.to raise_error(Mastodon::Error)
       expect(a_request(:any, /10\.0\.0\.5/)).not_to have_been_made

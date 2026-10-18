@@ -242,7 +242,7 @@ RSpec.describe "Admin people", type: :request do
         resolves("ada.bsky.social", "did:plc:ada")
         add(name: "Ada", key: "ada", bluesky_handle: "ada.bsky.social")
 
-        expect(Social::Slice["networks.all"].fetch("bluesky")).not_to be_configured
+        expect(Social::Slice["social_networks.all"].fetch("bluesky")).not_to be_configured
       end
 
       it "stores both handles for someone on both networks" do

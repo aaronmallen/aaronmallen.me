@@ -19,7 +19,7 @@ module API
 
       include Deps[
         calendar_day_queries: "calendar.repos.calendar_day_queries",
-        networks: "networks.all",
+        networks: "social_networks.all",
         target_accounts: "social.operations.list_target_accounts",
       ]
 

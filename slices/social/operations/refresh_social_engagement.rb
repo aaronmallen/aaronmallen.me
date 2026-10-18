@@ -7,7 +7,7 @@ module Social
 
       include Deps[
         "services.repos.connection_queries",
-        networks: "networks.all",
+        networks: "social_networks.all",
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",
       ]

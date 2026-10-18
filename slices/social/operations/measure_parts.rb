@@ -3,7 +3,7 @@
 module Social
   module Operations
     class MeasureParts
-      include Deps[expand_for_network: "operations.expand_for_network", networks: "networks.all"]
+      include Deps[expand_for_network: "operations.expand_for_network", networks: "social_networks.all"]
 
       def call(bodies, targets)
         sent = targets.to_h { [it, expand_for_network.call(bodies, it).map(&:text)] }

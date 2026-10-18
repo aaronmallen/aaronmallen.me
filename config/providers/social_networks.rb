@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-Hanami.app.register_provider :networks, namespace: true do
+Hanami.app.register_provider :social_networks, namespace: true do
   start do
     http = target["http"]
     pages = target["page_fetcher.link_preview"]

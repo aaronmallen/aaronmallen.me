@@ -100,7 +100,7 @@ RSpec.describe "Admin Bluesky connection", type: :request do
   end
 
   describe "the networks" do
-    let(:bluesky) { Social::Slice["networks.all"].fetch(Blog::Types::NetworkName["bluesky"]) }
+    let(:bluesky) { Social::Slice["social_networks.all"].fetch(Blog::Types::NetworkName["bluesky"]) }
 
     it "reads a newly connected account with no restart", :aggregate_failures do
       expect(bluesky).not_to be_configured

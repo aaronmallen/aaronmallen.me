@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin social composer", type: :feature do
-  let(:bluesky) { Social::Slice["networks.all"].fetch("bluesky") }
+  let(:bluesky) { Social::Slice["social_networks.all"].fetch("bluesky") }
   let(:families) { "👨‍👩‍👧‍👦" * 121 }
   let(:link) { "Read https://aaronmallen.me/writing/hello and tell me" }
-  let(:mastodon) { Social::Slice["networks.all"].fetch("mastodon") }
+  let(:mastodon) { Social::Slice["social_networks.all"].fetch("mastodon") }
 
   def add_part = click_button("Add to thread")
 

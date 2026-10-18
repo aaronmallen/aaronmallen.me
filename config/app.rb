@@ -47,8 +47,8 @@ module Blog
     config.no_auto_register_paths += %w[helpers]
     config.shared_app_component_keys += %w[
       contracts.contributor_terms_contract contracts.review_range_contract contracts.search_query_contract
-      github.client google.client linear.client media_store.client networks.all operations.check_link
-      operations.read_visitor_address
+      github.client google.client linear.client media_store.client operations.check_link
+      operations.read_visitor_address social_networks.all
     ]
 
     config.middleware.use RequestTimer, ->(**row) { Performance::Slice["operations.record_timing"].call(:request, **row) }

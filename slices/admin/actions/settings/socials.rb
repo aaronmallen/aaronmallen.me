@@ -6,7 +6,7 @@ module Admin
       class Socials < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
-          networks: "networks.all",
+          networks: "social_networks.all",
           person_queries: "social.repos.person_queries",
           post_queries: "posts.repos.post_queries",
           webmention_queries: "social.repos.webmention_queries",

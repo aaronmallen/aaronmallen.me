@@ -7,7 +7,7 @@ area: [app, config, lib, activity, admin, analytics, api, backups, contact, deci
   projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 issue: AA-587
 amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957",
-  "#1171"]
+  "#1171", "#1702"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -54,7 +54,8 @@ Privacy rides on those exports, not on where a file sits. `record` exports its j
 `activity` exports its feed to `admin` and `mcp`, and `public` imports from neither.
 
 **Each client is a provider in the slice that owns it.** `record` registers `github.client` and `linear.client`,
-`social` registers `networks.all` and `webmentions.client`, `analytics` registers `geo.countries` and
+`social` registered `networks.all`, now the app's `social_networks.all` (#1702), and `webmentions.client`,
+`analytics` registers `geo.countries` and
 `geo.geo_lite2.client`, `media` registers `store.client` (#137), `backups` registers `backup_store.client` and
 `dumper`, and `admin` registers `github.auth`, `mastodon.auth` and `live.hub` (#957), each under its own
 `config/providers`. A slice
@@ -99,9 +100,9 @@ refuses to do.
 A feature grows in one directory, and its dependencies are lines in its `slice.rb` rather than a trace through call
 sites. That holds for clients too: a reader of `github.client` shows as an import from `record`.
 
-A client with readers in four slices, as `networks.all` has, adds an import edge to each. An edge that carries only
-provider keys does not count toward a cycle, so `posts` can import `networks.all` from `social` while `social`
-imports from `posts`.
+A client with readers in four slices, as `networks.all` had, added an import edge to each until #1171 made it a
+shared key, `social_networks.all` since #1702. An edge that carries only provider keys does not count toward a
+cycle, so `posts` could import `networks.all` from `social` while `social` imported from `posts`.
 
 Twenty-two slices mean twenty-two containers to boot and twenty `db` providers, one for each slice that owns
 rows (#957). A new

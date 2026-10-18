@@ -19,9 +19,9 @@ RSpec.describe "Admin post editor", type: :feature do
   end
 
   describe "the syndication card" do
-    let(:bluesky) { Social::Slice["networks.all"].fetch("bluesky") }
+    let(:bluesky) { Social::Slice["social_networks.all"].fetch("bluesky") }
     let(:link) { "Read https://aaronmallen.me/writing/hello and tell me" }
-    let(:mastodon) { Social::Slice["networks.all"].fetch("mastodon") }
+    let(:mastodon) { Social::Slice["social_networks.all"].fetch("mastodon") }
 
     def counts = details.all("[data-social-count-text]").map(&:text)
 
