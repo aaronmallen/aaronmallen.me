@@ -98,10 +98,14 @@ module Analytics
       end
 
       def store(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
+        return view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:) if view?(visit)
+
+        visitor_hashes = view_hashes(hashes, address:, user_agent:)
+
         case visit[:kind]
-          in Contracts::VisitContract::VIEW then view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
-          in Contracts::VisitContract::READ | Contracts::VisitContract::SCROLL | Contracts::VisitContract::CLICK => kind
-            send(kind, visit, view_hashes(hashes, address:, user_agent:))
+          in Contracts::VisitContract::READ then read(visit, visitor_hashes)
+          in Contracts::VisitContract::SCROLL then scroll(visit, visitor_hashes)
+          in Contracts::VisitContract::CLICK then click(visit, visitor_hashes)
         end
       end
 

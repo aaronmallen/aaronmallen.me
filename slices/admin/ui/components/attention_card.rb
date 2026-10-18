@@ -6,6 +6,15 @@ module Admin
       class AttentionCard < Component
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
+        KINDS = {
+          "broken_link" => :broken_link,
+          "carried" => :carried,
+          "draft" => :draft,
+          "journal" => :journal,
+          "lapsing" => :lapsing,
+          "new_device" => :new_device,
+          "someday" => :someday,
+        }.freeze
         JOURNAL_ICON = "fa-solid #{Blog::Helpers::RecordKinds.icon('journal_entry')}".freeze
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
@@ -104,7 +113,7 @@ module Admin
           end
         end
 
-        def row(row) = send(row.kind, row)
+        def row(row) = send(KINDS.fetch(row.kind), row)
 
         def snooze(row)
           Form(action: path(:admin_snooze_attention)) do

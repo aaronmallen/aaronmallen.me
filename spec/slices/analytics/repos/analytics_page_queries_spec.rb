@@ -16,4 +16,10 @@ RSpec.describe Analytics::Repos::AnalyticsPageQueries do
 
     expect(clicks(from: today - 91)).to eq([["docs.example", "/guide", 1]])
   end
+
+  it "ranks each page list from a rollup and the summary field the roll up fills it from" do
+    ranked = described_class::RANKED.values.to_h { [it.fetch(:rollup), it.fetch(:summary)] }
+
+    expect(Analytics::Repos::AnalyticsRollupMutations::ROWS).to include(ranked)
+  end
 end

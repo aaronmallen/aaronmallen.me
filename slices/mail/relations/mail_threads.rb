@@ -3,7 +3,17 @@
 module Mail
   module Relations
     class MailThreads < Blog::DB::Relation
-      FOLDERS = Blog::Types::MailFolder.values.to_h { [it, :"#{it}_folder"] }.freeze
+      FOLDERS = {
+        "all" => :all_folder,
+        "drafts" => :drafts_folder,
+        "inbox" => :inbox_folder,
+        "sent" => :sent_folder,
+        "snoozed" => :snoozed_folder,
+        "spam" => :spam_folder,
+        "starred" => :starred_folder,
+        "trash" => :trash_folder,
+        "updates" => :updates_folder,
+      }.freeze
       NEEDS_REPLY = "needs-reply"
       NOTIFICATION = /(@(github\.com|linear\.app|docs\.google\.com)|^drive-shares-(dm-)?noreply@google\.com)$/i
       PREVIEW = 500

@@ -8,7 +8,10 @@ module Analytics
       FIRST_DAYS = 30
       LINK = %i[link_host link_path].freeze
       NAMED = { countries: :country_name }.freeze
-      RANKED = { countries: :country_code, referrers: :host }.freeze
+      RANKED = {
+        countries: { key: :country_code, rollup: :analytics_rollup_page_countries, summary: :page_countries },
+        referrers: { key: :host, rollup: :analytics_rollup_page_referrers, summary: :page_referrers },
+      }.freeze
       ZERO_DAY = COUNTED.to_h { [it, 0] }.freeze
 
       include Deps[
@@ -47,7 +50,7 @@ module Analytics
           bounces: days.sum { it.fetch(:bounces) },
           days: days.map { it.except(:bounces) },
           totals: FIGURES.to_h { |key| [key, days.sum { it.fetch(key) }] },
-          **RANKED.to_h { |name, key| [name, page_ranked(name, key, window, live)] },
+          **RANKED.to_h { |name, ranked| [name, page_ranked(name, **ranked, window:, live:)] },
         }
       end
 
@@ -123,9 +126,9 @@ module Analytics
         (window.fetch(:from)..window.fetch(:to)).map { { day: it, **found.fetch(it, ZERO_DAY) } }
       end
 
-      def page_ranked(name, key, window, live)
-        rolled = page_rows(public_send(:"analytics_rollup_page_#{name}"), window).top_by_visitors.to_a.map(&:to_h)
-        rows = rolled + live.flat_map { it.public_send(:"page_#{name}") }.select { it.fetch(:path) == window[:path] }
+      def page_ranked(name, key:, rollup:, summary:, window:, live:)
+        rolled = page_rows(public_send(rollup), window).top_by_visitors.to_a.map(&:to_h)
+        rows = rolled + live.flat_map(&summary).select { it.fetch(:path) == window[:path] }
 
         rank_rows.call(rows, key:, named: NAMED[name])
       end
