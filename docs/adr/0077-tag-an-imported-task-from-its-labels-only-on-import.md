@@ -24,15 +24,15 @@ provider's fields in its client.
 
 ## Decision
 
-Tags come from labels once, when `Tasks::Operations::SyncIssues#import` creates the task, in the same transaction.
+Tags come from labels once, when `Tasks::Operations::SyncIssues#create_task` creates the task, in the same transaction.
 `follow` never reads labels and never touches tags, so no later sync adds or removes one.
 
 Each client hands the operation an issue's labels. A Linear label in a group counts by its child name alone. A label
 adds an existing private tag whose name it turns into. It never creates a tag, and it never adds a public one.
 
-Repo rules, added by #389, put their tags beside label tags in the same `import` ([ADR 0103][0103]). Rule tags differ
-from label tags in two ways: saving a rule creates any tag it names, and creating one tags once every task already
-imported from a matching repo.
+Repo rules, added by #389, put their tags beside label tags in the same `create_task` ([ADR 0103][0103]). Rule tags
+differ from label tags in two ways: saving a rule creates any tag it names, and creating one tags once every task
+already imported from a matching repo.
 
 ## Alternatives
 

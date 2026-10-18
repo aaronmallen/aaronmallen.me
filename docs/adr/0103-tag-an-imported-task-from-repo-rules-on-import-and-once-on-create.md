@@ -18,7 +18,7 @@ tags: [tasks, tags, rules, imports, sync, github, linear, providers, repos]
 Spec #388 gives each repo the private tags its issues should carry, such as `ruby` and `projects`. Today the sync
 tags a task only from its labels, so the owner tags every new issue by hand. On 2026-10-03, 19 tasks needed it.
 
-[ADR 0077][0077] tags a task from its labels once, in `Tasks::Operations::SyncIssues#import`, and never creates a
+[ADR 0077][0077] tags a task from its labels once, in `Tasks::Operations::SyncIssues#create_task`, and never creates a
 tag, so a tag the owner removes stays gone. [ADR 0070][0070] keeps every field that belongs to one provider in that
 provider's client. [ADR 0066][0066] keeps an imported task's origin, URL included, in `task_sources`.
 
@@ -34,8 +34,9 @@ every rule it matches.
 Linear client set none, so Linear issues matched no rule, until #506 gave the Linear client an `origin` of
 `workspace/team`. `SyncIssues` reads `origin` without knowing which provider filled it.
 
-**Rule tags join label tags at import.** `import` adds the tags of every matching rule beside the label tags, in the
-same transaction. `follow` reads no rule, so a tag the owner removes stays off, as [ADR 0077][0077] holds for labels.
+**Rule tags join label tags at import.** `create_task` adds the tags of every matching rule beside the label tags, in
+the same transaction. `follow` reads no rule, so a tag the owner removes stays off, as [ADR 0077][0077] holds for
+labels.
 
 **Saving a rule creates its tags, and creating one tags existing tasks once.** Every save creates any tag the rule
 names that does not exist, as a private tag. Creating a rule also adds its tags to every task already imported from a

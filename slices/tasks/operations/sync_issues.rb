@@ -31,17 +31,31 @@ module Tasks
       def call(provider:, client:, now: Time.now)
         run = Structs::IssueSyncRun.new(provider:, client:, now:, known: task_source_queries.for_provider(provider))
         listing, checked, history = step fetch(run)
-        count = settle(run, listing.items, checked, history)
+        count = sync_all(run, listing.items, checked, history)
 
         listing.cut_short? ? step(Failure(:page_limit)) : count
       end
 
       private
 
+      def close_or_reopen(run, source, task, state, changes)
+        settle_task.call(task, from: source.remote_state, to: state, at: run.now, history: changes).value!
+      end
+
       def copy(issue)
         title, note = issue.values_at(:title, :body).map { it&.delete("\0") }
 
         { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
+      end
+
+      def create_task(run, issue, reached: false)
+        transaction do
+          task = task_mutations.append(**copy(issue), list: EXTERNAL)
+          label(task, run.provider, issue, run.now)
+          fields = { task_id: task.id, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
+          sync_comments.hold(run, [task.id], [issue])
+          task_source_mutations.create(**fields, provider: run.provider).tap { refresh(run, it, task, issue, reached:) }
+        end
       end
 
       def fetch(run)
@@ -54,28 +68,14 @@ module Tasks
         end
       end
 
-      def follow(run, source, task, issue, history: EMPTY_HASH, reached: false)
-        state = observed(run, task, source, issue, reached)
-        changes = history[issue[:id]]
-        stamp = source.restamp(state, issue, changes, run.now)
-        return run.check(source, stamp) if source.quiet?(stamp) && still?(run, source, task, issue, changes)
-
-        transaction do
-          task = settled(run, source, task, state, changes)
-          rewrite(task, issue)
-          stamp && task_source_mutations.update(source.id, **stamp)
-          sync_comments.call(source, task, issue, run)
-        end
-      end
-
-      def follow_all(run, issues, history)
+      def follow(run, issues, history)
         sources = issues.map { run.known.fetch(it[:id]) }
         task_ids = sources.map(&:task_id)
         tasks = task_source_queries.followed_tasks(task_ids)
         run.linked.concat(task_link_queries.synced_ids(task_ids))
         sync_comments.hold(run, task_ids, issues)
 
-        issues.zip(sources, tasks) { |issue, source, task| task && follow(run, source, task, issue, history:) }
+        issues.zip(sources, tasks) { |issue, source, task| task && refresh(run, source, task, issue, history:) }
       end
 
       def history(run, issues)
@@ -84,18 +84,8 @@ module Tasks
         run.client.transitions(issues, run.known.transform_values(&:history_cursor).compact)
       end
 
-      def import(run, issue, reached: false)
-        transaction do
-          task = task_mutations.append(**copy(issue), list: EXTERNAL)
-          label(task, run.provider, issue, run.now)
-          fields = { task_id: task.id, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
-          sync_comments.hold(run, [task.id], [issue])
-          task_source_mutations.create(**fields, provider: run.provider).tap { follow(run, it, task, issue, reached:) }
-        end
-      end
-
-      def import_all(run, issues, reached: false)
-        issues.each { run.track(import(run, it, reached:)) }
+      def import(run, issues, reached: false)
+        issues.each { run.track(create_task(run, it, reached:)) }
       end
 
       def label(task, provider, issue, now)
@@ -105,20 +95,26 @@ module Tasks
         task_rule_mutations.fill_project([task.id], project_ids.first)
       end
 
-      def observed(run, task, source, issue, reached)
-        state = issue.fetch(:remote_state)
-        return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.valid?(state)
-        return state unless state == UNASSIGNED && !task.closed?
-
-        reached || run.linked.include?(task.id) ? OPEN : state
-      end
-
       def reach(run, assigned)
         remote(run.client, run.provider) { Success(reach_issues.call(run.client, assigned, run.known)) }
       end
 
+      def refresh(run, source, task, issue, history: EMPTY_HASH, reached: false)
+        state = state_to_store(run, task, source, issue, reached)
+        changes = history[issue[:id]]
+        stamp = source.restamp(state, issue, changes, run.now)
+        return run.check(source, stamp) if source.quiet?(stamp) && unchanged?(run, source, task, issue, changes)
+
+        transaction do
+          task = close_or_reopen(run, source, task, state, changes)
+          rewrite(task, issue)
+          task_source_mutations.update(source.id, **stamp) if stamp
+          sync_comments.call(source, task, issue, run)
+        end
+      end
+
       def relate(run, assigned:, checked:)
-        reached = reach(run, assigned).fmap { import_all(run, it, reached: true) }
+        reached = reach(run, assigned).fmap { import(run, it, reached: true) }
         sync_links.call(run.known, [*assigned, *checked, *reached.value_or(EMPTY_ARRAY)])
         reached
       end
@@ -127,21 +123,25 @@ module Tasks
 
       def rewrite(task, issue) = retitled?(task, issue) && task_mutations.update(task.id, **copy(issue))
 
-      def settle(run, assigned, checked, history)
+      def state_to_store(run, task, source, issue, reached)
+        state = issue.fetch(:remote_state)
+        return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.valid?(state)
+        return state if state != UNASSIGNED || task.closed?
+
+        reached || run.linked.include?(task.id) ? OPEN : state
+      end
+
+      def sync_all(run, assigned, checked, history)
         held, fresh = assigned.partition { run.known.key?(it[:id]) }
 
-        follow_all(run, [*held, *checked], history)
-        import_all(run, fresh)
+        follow(run, [*held, *checked], history)
+        import(run, fresh)
         task_source_mutations.check(run.checked, run.now)
 
         fresh.size + step(relate(run, assigned:, checked:)).size
       end
 
-      def settled(run, source, task, state, changes)
-        settle_task.call(task, from: source.remote_state, to: state, at: run.now, history: changes).value!
-      end
-
-      def still?(run, source, task, issue, changes)
+      def unchanged?(run, source, task, issue, changes)
         changes.to_a.empty? && !retitled?(task, issue) && sync_comments.quiet?(source, task, issue, run)
       end
     end
