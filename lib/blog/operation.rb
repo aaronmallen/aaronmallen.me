@@ -68,6 +68,13 @@ module Blog
       day >= TimeZone.local_date(now) ? Success(day) : Failure(:past)
     end
 
+    def upcoming_time(text, now)
+      at = TimeZone.parse_time(text)
+      return Failure(:invalid) unless at
+
+      at > now ? Success(at) : Failure(:past)
+    end
+
     def validate(params) = validated(contract.call(every_field(params)))
 
     def validated(result) = result.to_monad.fmap(&:to_h).alt_map { [:invalid, it.errors.to_h] }

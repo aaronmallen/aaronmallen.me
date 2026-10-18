@@ -6,7 +6,7 @@ module API
       CONTRACTS = [Contracts::ClearInboxContract].freeze
       EMPTY = "name at least one row to clear"
       IDS = Helpers::Schema.list(Helpers::Schema::ID).freeze
-      NOUNS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze
+      NOUNS = Structs::InboxRow::KINDS
       SCOPED = true
       UNCHANGED = "could not clear %s %s"
 

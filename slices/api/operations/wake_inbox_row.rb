@@ -3,8 +3,6 @@
 module API
   module Operations
     class WakeInboxRow < Blog::Operation
-      WAKES = { "message" => :wake_message, "task" => :wake_task, "webmention" => :wake_webmention }.freeze
-
       include Deps[
         wake_message: "mail.operations.wake_message",
         wake_task: "tasks.operations.wake_task",
@@ -12,8 +10,8 @@ module API
       ]
 
       def call(kind, id, now: Time.now)
-        wake = step found(WAKES[kind])
-        record = step __send__(wake).call(id, now:)
+        step found(Structs::InboxRow::KINDS.key(kind))
+        record = step __send__(:"wake_#{kind}").call(id, now:)
 
         Structs::InboxRow.new(kind: kind.to_sym, at: now, record:)
       end

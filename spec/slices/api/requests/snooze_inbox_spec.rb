@@ -37,6 +37,12 @@ RSpec.describe "API snooze inbox", type: :request do
     expect(inbox_ids).to contain_exactly(task.id, message.id, webmention.id)
   end
 
+  it "names a gone task under tasks" do
+    answer = snooze(**everything, tasks: [task.id, 999_999], snoozed_until: ends_at.iso8601)
+
+    expect([answer.fetch("errors"), status]).to eq([{ "tasks" => ["no task has the ID 999999"] }, 422])
+  end
+
   it "refuses a time in the past" do
     answer = snooze(**everything, snoozed_until: (Time.now - 60).iso8601)
 

@@ -3,27 +3,31 @@
 module API
   module Operations
     class SnoozeInbox < Blog::Operation
-      KINDS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze
+      KINDS = Structs::InboxRow::KINDS.keys.freeze
 
-      include Deps[contract: "contracts.clear_inbox_contract", snooze_inbox_row: "operations.snooze_inbox_row"]
+      include Deps[
+        contract: "contracts.clear_inbox_contract",
+        snooze_messages: "mail.operations.snooze_messages",
+        snooze_tasks: "tasks.operations.snooze_tasks",
+        snooze_webmentions: "social.operations.snooze_webmentions",
+      ]
 
       def call(params, now: Time.now)
         fields = step validate(params)
+        ends_at = step upcoming_time(params[:snoozed_until], now)
+        snoozed = transaction { KINDS.to_h { [it, step(snoozed(it, fields.fetch(it, []), ends_at))] } }
 
-        transaction do
-          KINDS.to_h do |kind, row|
-            [kind, fields.fetch(kind, []).map { step snoozed(kind, row, it, params[:snoozed_until], now) }]
-          end
-        end
+        { **snoozed, snoozed_until: ends_at }
       end
 
       private
 
-      def snoozed(kind, row, id, ends_at, now)
-        snooze_inbox_row.call(row, id, ends_at, now:).alt_map { it == :not_found ? [:record, kind, id, it] : it }
+      def snoozed(kind, ids, ends_at)
+        found = __send__(:"snooze_#{kind}").call(ids, ends_at)
+        found.fmap { ids }.alt_map { |(_, id, reason)| [:record, kind, id, reason] }
       end
 
-      def validate(params) = validated(contract.call(KINDS.keys.to_h { [it, params[it]] }.compact))
+      def validate(params) = validated(contract.call(KINDS.to_h { [it, params[it]] }.compact))
     end
   end
 end

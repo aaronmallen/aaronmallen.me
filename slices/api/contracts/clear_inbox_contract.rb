@@ -3,7 +3,7 @@
 module API
   module Contracts
     class ClearInboxContract < Blog::Contract
-      KINDS = %i[tasks messages webmentions].freeze
+      KINDS = Structs::InboxRow::KINDS.keys.freeze
 
       params do
         KINDS.each { optional(it).value(Blog::Types::IdList) }

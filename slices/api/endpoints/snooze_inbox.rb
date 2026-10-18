@@ -35,15 +35,9 @@ module API
 
       private
 
-      def reply(snoozed)
-        ends_at = snoozed.values.flatten.first.snoozed_until
-
-        { **snoozed.transform_values { it.map(&:id) }, snoozed_until: ends_at.utc.iso8601 }
-      end
-
       def snoozed(snoozed_until, ids)
         case snooze_inbox.call({ **ids, snoozed_until: })
-          in Success(snoozed) then Success(reply(snoozed))
+          in Success(snoozed) then Success({ **snoozed, snoozed_until: snoozed[:snoozed_until].utc.iso8601 })
           in Failure[:record, kind, id, _] then invalid(kind => [Helpers::Wording.missing(NOUNS.fetch(kind), id)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
           in Failure(:invalid | :past => code) then invalid(snoozed_until: [Helpers::Wording::SNOOZE_REFUSALS[code]])

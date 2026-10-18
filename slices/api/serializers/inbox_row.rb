@@ -3,7 +3,7 @@
 module API
   module Serializers
     class InboxRow < Serializer
-      KINDS = %w[message webmention task].freeze
+      KINDS = Structs::InboxRow::KINDS.values.freeze
 
       SOURCE = Helpers::Schema.object(
         {
