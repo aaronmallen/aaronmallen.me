@@ -19,7 +19,9 @@ module Analytics
 
       include Deps[event_queries: "repos.analytics_event_queries", rank_rows: "operations.rank_rows"]
 
-      def days(from:, to:) = analytics_rollups.between(from, to).oldest_first.to_a
+      def days(from:, to:)
+        event_queries.memo([:rolled_days, from, to]) { analytics_rollups.between(from, to).oldest_first.to_a }
+      end
 
       def newest_day = analytics_rollups.newest_day
 
@@ -55,6 +57,12 @@ module Analytics
       def totals(from:, to:) = analytics_rollups.between(from, to).totals.one
 
       def unrolled_summaries(from:, to:) = unrolled_days(from:, to:).map { event_queries.summary_for(it) }
+
+      def views_between(from:, to:)
+        rolled = analytics_rollups.between(from, to).unordered.dataset.select(:day)
+
+        totals(from:, to:).views + event_queries.view_count(from:, to:, skipping: rolled)
+      end
 
       def views_by_post(post_ids, to: Blog::TimeZone.today)
         from = to - (VIEW_DAYS - 1)
@@ -124,10 +132,9 @@ module Analytics
         oldest = event_queries.oldest_day
         return Blog::Constants::EMPTY_ARRAY unless oldest
 
-        days = [from, oldest].max..[to, Blog::TimeZone.today].min
-        rolled = days(from: days.first, to: days.last).map(&:day)
+        rolled = days(from:, to:).map(&:day)
 
-        days.reject { rolled.include?(it) }
+        ([from, oldest].max..[to, Blog::TimeZone.today].min).reject { rolled.include?(it) }
       end
 
       def whole_month?(days) = days.first.mday == 1 && days.last.next_day.mday == 1

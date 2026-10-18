@@ -20,7 +20,7 @@ module API
       def change(views, from, to)
         before_to = from - 1
         before_from = before_to - (to - from).to_i
-        before = rollup_queries.summary_between(from: before_from, to: before_to).fetch(:totals).fetch(:views)
+        before = rollup_queries.views_between(from: before_from, to: before_to)
         percent = Blog::Helpers::Figures.share(views - before, before) if before.positive?
 
         { from: before_from, to: before_to, views: before, percent: }

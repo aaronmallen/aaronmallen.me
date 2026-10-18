@@ -27,6 +27,11 @@ module Analytics
 
       def live_reach(from:, to:, path: nil) = scoped(analytics_events.between_days(from, to), path).reach
 
+      def memo(key)
+        found = Fiber[MEMO]
+        found ? found.fetch(key) { found[key] = yield } : yield
+      end
+
       def memoizing
         was = Fiber[MEMO]
         Fiber[MEMO] = was || {}
@@ -62,6 +67,8 @@ module Analytics
       def retention_start(to = Blog::TimeZone.today) = to - (RETENTION_DAYS - 1)
 
       def summary_for(day) = memo([:summary, day]) { summarize(day) }
+
+      def view_count(from:, to:, skipping:) = analytics_events.between_days(from, to).off_days(skipping).count
 
       def view_id(visitor_hashes:, view_token:, path:)
         analytics_events.for_visitor(visitor_hashes).for_view(view_token).for_path(path).newest_id
@@ -100,11 +107,6 @@ module Analytics
       end
 
       def kept?(from) = from >= Blog::TimeZone.day_start(complete_from)
-
-      def memo(key)
-        found = Fiber[MEMO]
-        found ? found.fetch(key) { found[key] = yield } : yield
-      end
 
       def page_only(window)
         {

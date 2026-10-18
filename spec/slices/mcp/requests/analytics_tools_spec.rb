@@ -864,6 +864,28 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       expect(change).to include("views" => 0, "percent" => nil)
     end
 
+    it "adds the live views of days before the range not yet rolled up" do
+      roll_up(today - 1, views: 15, visitors: 4)
+      roll_up(today - 13, views: 10, visitors: 4)
+      2.times { create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 8) + 3_600) }
+
+      expect(change).to include("views" => 12, "percent" => 25)
+    end
+
+    it "reads the range before from its totals, not its paths, referrers, countries or days" do
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 13) + 3_600)
+      statements = counting { change }
+
+      expect(statements.grep(/analytics_rollup(_paths|_referrers|_countries|s"\."day").*'#{today - 13}'/)).to be_empty
+    end
+
+    it "reads the range's rolled days once" do
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 6) + 3_600)
+      statements = counting { change }
+
+      expect(statements.grep(/FROM "analytics_rollups" WHERE \(\("day" >= '#{today - 6}'\).*ORDER BY/).size).to eq(1)
+    end
+
     it "leaves the change out of a page's answer" do
       expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/about"))
         .not_to have_key("change")

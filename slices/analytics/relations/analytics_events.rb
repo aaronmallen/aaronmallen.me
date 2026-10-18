@@ -86,6 +86,8 @@ module Analytics
 
       def occurred_before(time) = where { occurred_at < time }
 
+      def off_days(days) = exclude(DAY => days)
+
       def oldest_occurred_at = unordered.dataset.min(:occurred_at)
 
       def on_day(day) = between_days(day, day)
