@@ -5,6 +5,20 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.24] - 2026-10-18
+
+### Changed
+
+- Admin controls whose screen reader name left out the text they show now start with it, so voice control finds them
+  by what you see: the top bar's search button reads "Find or do anything ⌘K", the editor's heading button "H2
+  heading", the review screen's links "Posts 2, open all", and its activity grid's days their full date.
+
+### Fixed
+
+- `start_session` and `read_memory` sent every loaded fact twice, so a repo with a lot of memory overran an agent's tool
+  reply and the session could not start. Each fact now comes once, in the markdown, which names each file's and each
+  fact's ID; `files` lists each file without its facts.
+
 ## [26.10.23] - 2026-10-18
 
 ### Added
@@ -1461,7 +1475,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...HEAD
+[26.10.24]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...26.10.24
 [26.10.23]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...26.10.23
 [26.10.22]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...26.10.22
 [26.10.21]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.20...26.10.21
