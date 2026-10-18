@@ -93,12 +93,33 @@ RSpec.describe "MCP session tools", type: :request do
     expect(Time.iso8601(sessions.first.fetch("last_seen_at"))).to be_within(5).of(Time.now)
   end
 
-  it "refuses a write into a session that ended" do
-    session_id = start.fetch("session_id")
-    mcp_answer("end_session", id: session_id)
-    mcp_call("create_memory_file", path: "hanami", scope: "global", session_id:, **author)
+  describe "a write into a session that ended" do
+    def entry = mcp_answer("read_memory_file", id: file).fetch("history").first.fetch("id")
 
-    expect(mcp_message).to include("that session is not open")
+    let(:file) { create_file("hanami").fetch("id") }
+    let!(:fact) do
+      mcp_answer("add_memory_fact", id: file, type: "gotcha", text: "Mind the cache", **author).fetch("id")
+    end
+    let(:artifact) { mcp_answer("create_artifact", title: "Plan", type: "plan", body: "Steps", **author).fetch("id") }
+    let(:session_id) { start.fetch("session_id").tap { mcp_answer("end_session", id: it) } }
+
+    {
+      "create_memory_file" => -> { { path: "other", scope: "global" } },
+      "move_memory_file" => -> { { id: file, scope: "repo", repo: "aaronmallen/blog" } },
+      "add_memory_fact" => -> { { id: file, type: "gotcha", text: "Mind the queue" } },
+      "edit_memory_fact" => -> { { id: file, fact_id: fact, text: "Mind the queue" } },
+      "remove_memory_fact" => -> { { id: file, fact_id: fact } },
+      "revert_memory_event" => -> { { id: file, event_id: entry } },
+      "create_artifact" => -> { { title: "Spec", type: "plan", body: "Steps" } },
+      "update_artifact" => -> { { id: artifact, body: "More steps" } },
+      "restore_artifact_version" => -> { { id: artifact, version: 1 } },
+    }.each do |tool, arguments|
+      it "refuses #{tool}" do
+        mcp_call(tool, **instance_exec(&arguments), session_id:, **author)
+
+        expect(mcp_message).to include("that session is not open")
+      end
+    end
   end
 
   describe "end_session" do

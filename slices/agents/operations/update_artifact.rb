@@ -8,10 +8,12 @@ module Agents
         artifact_mutations: "repos.artifact_mutations",
         artifact_queries: "repos.artifact_queries",
         contract: "contracts.artifact_contract",
+        touch_session: "operations.touch_session",
       ]
 
       def call(id, params)
         fields = step validate(params)
+        step touch(fields)
 
         transaction do
           artifact = step found(artifact_mutations.by_id_for_update(id))

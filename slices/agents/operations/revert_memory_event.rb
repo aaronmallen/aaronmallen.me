@@ -14,16 +14,18 @@ module Agents
         memory_fact_mutations: "repos.memory_fact_mutations",
         memory_file_mutations: "repos.memory_file_mutations",
         memory_file_queries: "repos.memory_file_queries",
+        touch_session: "operations.touch_session",
       ]
 
       def call(memory_file_id, id, params, at: Time.now)
-        author = step validate(params)
+        fields = step validate(params)
+        step touch(fields)
 
         transaction do
           event = step revertible(memory_file_queries.event(memory_file_id, id))
           fact = memory_fact_mutations.for_update(memory_file_id, event.memory_fact_id)
           step unchanged(event)
-          restore(event, fact, author, at)
+          restore(event, fact, author(fields), at)
         end
       end
 
@@ -33,14 +35,14 @@ module Agents
 
       def earlier_author(event) = { agent: event.was_agent, model: event.was_model }
 
-      def restore(event, fact, author, at)
+      def restore(event, fact, by, at)
         changes, after = restored(event, fact, at)
         before = fact.removed? ? {} : fact.was
 
         memory_fact_mutations.update(fact.id, changes)
         memory_file_mutations.record(
           fact.memory_file_id, REVERT,
-          memory_fact_id: fact.id, reverted_event_id: event.id, **after, **before, **author,
+          memory_fact_id: fact.id, reverted_event_id: event.id, **after, **before, **by,
         )
       end
 

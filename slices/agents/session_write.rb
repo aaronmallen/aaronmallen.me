@@ -3,10 +3,12 @@
 
 module Agents
   module SessionWrite
-    def self.included(operation) = operation.include(Deps[touch_session: "operations.touch_session"])
+    AUTHOR = %i[agent model session_id].freeze
 
     private
 
-    def validate(params) = super.bind { |fields| touch_session.call(fields[:session_id]).fmap { fields } }
+    def author(fields) = fields.slice(*AUTHOR)
+
+    def touch(fields) = touch_session.call(fields[:session_id])
   end
 end

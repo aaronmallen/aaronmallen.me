@@ -14,24 +14,26 @@ module Agents
         contract: "contracts.memory_scope_contract",
         memory_file_mutations: "repos.memory_file_mutations",
         memory_file_queries: "repos.memory_file_queries",
+        touch_session: "operations.touch_session",
       ]
 
       def call(id, params)
         fields = step validate(params)
-        step constrained(memory_file_mutations, REFUSALS) { Success(transaction { move(id, **fields) }) }
+        step touch(fields)
+        step constrained(memory_file_mutations, REFUSALS) { Success(transaction { move(id, fields) }) }
 
         memory_file_queries.by_id(id)
       end
 
       private
 
-      def move(id, scope:, agent: nil, model: nil, session_id: nil, **target)
+      def move(id, fields)
         file = step found(memory_file_mutations.by_id_for_update(id))
-        place = { scope:, **TARGETS, **target }
+        place = { **TARGETS, **fields.except(*AUTHOR) }
         return if place.all? { |field, value| file[field] == value }
 
         memory_file_mutations.update(id, place)
-        memory_file_mutations.record(id, SCOPE, agent:, model:, session_id:)
+        memory_file_mutations.record(id, SCOPE, **author(fields))
       end
     end
   end

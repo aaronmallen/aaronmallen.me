@@ -16,20 +16,22 @@ module Agents
         contract: "contracts.memory_file_contract",
         memory_file_mutations: "repos.memory_file_mutations",
         memory_file_queries: "repos.memory_file_queries",
+        touch_session: "operations.touch_session",
       ]
 
       def call(params)
         fields = step validate(params)
-        id = step constrained(memory_file_mutations, REFUSALS) { Success(transaction { create(**fields) }) }
+        step touch(fields)
+        id = step constrained(memory_file_mutations, REFUSALS) { Success(transaction { create(fields) }) }
 
         memory_file_queries.by_id(id)
       end
 
       private
 
-      def create(agent: nil, model: nil, session_id: nil, **fields)
-        file = memory_file_mutations.create(**fields)
-        memory_file_mutations.record(file.id, CREATE, agent:, model:, session_id:)
+      def create(fields)
+        file = memory_file_mutations.create(**fields.except(*AUTHOR))
+        memory_file_mutations.record(file.id, CREATE, **author(fields))
         file.id
       end
     end
