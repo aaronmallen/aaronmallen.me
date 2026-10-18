@@ -15,6 +15,8 @@ module Spec
       Time.at([start + clock, Blog::TimeZone.day_start(today + days + 1) - 1].min)
     end
 
+    def pin_today = today
+
     def today = @today ||= Blog::TimeZone.today
   end
 end

@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+module Spec
+  module AccessibleScreens
+    EXTRA_TABS = 6
+
+    Walk = Data.define(:stops, :walked, :unringed)
+  end
+end
+
 RSpec.shared_examples "accessible screens" do
   def breaches(screen)
     show(screen)
@@ -45,14 +53,24 @@ RSpec.shared_examples "accessible screens" do
   end
 
   def tab_past(stop)
-    (1..6).reduce(tab) { |step, _| step["stop"] == stop ? tab : step }
+    step = tab
+    Spec::AccessibleScreens::EXTRA_TABS.times do
+      break unless step["stop"] == stop
+
+      step = tab
+    end
+    step
   end
 
   def walk(screen)
     stops = mark_stops(screen)
     walked = stops.each_with_object([]) { |_, steps| steps << tab_past(steps.last&.fetch("stop") || :top) }
 
-    [stops, walked.map { it["stop"] }, walked.reject { it["ring"] }.map { it["stop"] }]
+    Spec::AccessibleScreens::Walk.new(
+      stops:,
+      walked: walked.map { it["stop"] },
+      unringed: walked.reject { it["ring"] }.map { it["stop"] },
+    )
   end
 
   %w[light dark].each do |scheme|
@@ -68,9 +86,9 @@ RSpec.shared_examples "accessible screens" do
 
   it "reaches every control on every screen with the Tab key, in order, behind a ring", :aggregate_failures do
     screens.each do |name, screen|
-      stops, walked, bare = walk(screen)
-      expect(walked).to eq(stops), "#{name}: Tab went out of order"
-      expect(bare).to be_empty, "#{name}: no focus ring on #{bare.join(', ')}"
+      steps = walk(screen)
+      expect(steps.walked).to eq(steps.stops), "#{name}: Tab went out of order"
+      expect(steps.unringed).to be_empty, "#{name}: no focus ring on #{steps.unringed.join(', ')}"
     end
   end
 end

@@ -1,10 +1,24 @@
 # frozen_string_literal: true
 
+module Spec
+  module ReadableScreens
+    PHONE_BELOW = 700
+    SMALLEST_TAP = 44
+    SMALLEST_TEXT = 12
+  end
+end
+
 RSpec.shared_examples "readable screens" do |tap: false|
   def faults(screen, taps:)
     show(screen)
 
-    page.evaluate_script(format(readable_script, phone: 700, readable: 12, tap: taps ? 44 : 0)) + idle_preloads
+    limits = {
+      phoneBelow: Spec::ReadableScreens::PHONE_BELOW,
+      smallestTap: taps && Spec::ReadableScreens::SMALLEST_TAP,
+      smallestText: Spec::ReadableScreens::SMALLEST_TEXT,
+    }
+
+    page.evaluate_script(readable_script, limits) + idle_preloads
   end
 
   def idle_preloads
@@ -35,6 +49,7 @@ RSpec.shared_examples "readable screens" do |tap: false|
   def readable_script
     <<~JS
       (() => {
+        const { phoneBelow, smallestTap, smallestText } = arguments[0];
         const width = window.innerWidth;
         const named = (el) => el.tagName.toLowerCase() + (el.classList.length ? '.' + [...el.classList].join('.') : '');
         const shown = (el) => el.getClientRects().length > 0;
@@ -57,24 +72,22 @@ RSpec.shared_examples "readable screens" do |tap: false|
           return !el.closest('label');
         };
 
-        const phone = width < %<phone>d;
+        const phone = width < phoneBelow;
 
         const page = phone && document.documentElement.scrollWidth > width
-          ? ['the page is ' + document.documentElement.scrollWidth + 'px wide']
+          ? ['the page is ' + document.documentElement.scrollWidth + 'px wide on a ' + width + 'px phone']
           : [];
 
-        const overflow = [...document.querySelectorAll(phone ? 'body *' : ':not(*)')]
+        const overflow = !phone ? [] : [...document.querySelectorAll('body *')]
           .filter((el) => shown(el) && !hidden(el) && !scrolled(el))
           .filter((el) => el.getBoundingClientRect().right > width + 1)
-          .map((el) => named(el) + ' reaches ' + Math.round(el.getBoundingClientRect().right) + 'px');
+          .map((el) => named(el) + ' reaches ' + Math.round(el.getBoundingClientRect().right) + 'px on a ' + width + 'px phone');
 
-        const tapped = phone && %<tap>d > 0 ? 'a[href],button,input,select,textarea,summary,label[for]' : ':not(*)';
-
-        const controls = [...document.querySelectorAll(tapped)]
+        const controls = !(phone && smallestTap) ? [] : [...document.querySelectorAll('a[href],button,input,select,textarea,summary,label[for]')]
           .filter((el) => shown(el) && el.type !== 'hidden' && !hidden(el) && !el.closest('.site-header') && target(el))
           .map((el) => ({ name: named(el), box: el.getBoundingClientRect() }))
-          .filter((el) => el.box.height < %<tap>d || el.box.width < %<tap>d)
-          .map((el) => el.name + ' is ' + Math.round(el.box.width) + 'x' + Math.round(el.box.height));
+          .filter((el) => el.box.height < smallestTap || el.box.width < smallestTap)
+          .map((el) => el.name + ' is ' + Math.round(el.box.width) + 'x' + Math.round(el.box.height) + ', under the ' + smallestTap + 'px tap target');
 
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         const nodes = [];
@@ -85,8 +98,8 @@ RSpec.shared_examples "readable screens" do |tap: false|
           .map((node) => node.parentElement)
           .filter((el) => seen(el) && !hidden(el))
           .map((el) => ({ name: named(el), size: parseFloat(getComputedStyle(el).fontSize) }))
-          .filter((el) => el.size < %<readable>d)
-          .map((el) => el.name + ' reads at ' + el.size + 'px');
+          .filter((el) => el.size < smallestText)
+          .map((el) => el.name + ' reads at ' + el.size + 'px, under ' + smallestText + 'px');
 
         return [...new Set([...page, ...overflow, ...controls, ...text])];
       })()

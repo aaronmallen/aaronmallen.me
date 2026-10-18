@@ -229,7 +229,7 @@ RSpec.configure do |config|
 
   config.before(:each, :browser) do
     Analytics::Slice.start(:geo)
-    today
+    pin_today
   end
 
   config.after(:each, :browser) { request_gate.reset }
