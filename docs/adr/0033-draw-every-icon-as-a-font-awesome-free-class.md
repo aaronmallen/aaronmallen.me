@@ -44,12 +44,12 @@ Every icon is an `<i>` with a Font Awesome Free class from the solid, regular or
   removed the column, `TypeTag`, the type, the list and the task with them.
 - **Hiding goes through `--fa-display`.** Font Awesome's CSS sits outside Tailwind's layers, so its
   `display: var(--fa-display, inline-block)` beats any utility. A utility that hides an icon sets
-  `--fa-display: none`, as the main nav's toggle icons and `settings-menu-check` do in `config/tailwind.css`.
+  `--fa-display: none`, as the main nav's toggle icons and `settings-menu-check` do in `config/tailwind/shared.css`.
 
-An inline SVG is allowed only where the browser gives us no element to hold an `<i>`. The date field's calendar
-button is the one case today. WebKit and Blink draw it as `::-webkit-calendar-picker-indicator`, a part of the
-native date input, so `config/tailwind.css` holds Font Awesome's regular calendar as `--glyph-calendar` and paints
-the button through it as a mask, which lets it take a theme colour.
+An inline SVG is allowed only where the browser gives us no element to hold an `<i>`. The date field's calendar button
+is the one case today. WebKit and Blink draw it as `::-webkit-calendar-picker-indicator`, a part of the native date
+input, so `config/tailwind/shared.css` holds Font Awesome's regular calendar as `--glyph-calendar` and paints the button
+through it as a mask, which lets it take a theme colour.
 
 ## Alternatives
 

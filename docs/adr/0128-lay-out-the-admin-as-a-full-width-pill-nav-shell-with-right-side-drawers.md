@@ -28,8 +28,8 @@ looks, never what it does: where it differs from the app on function, the app wi
 
 **The admin fills the window.** No admin screen has a max-width container. `--container-admin` goes, and the gutter
 grows with the window, `clamp(20px, 2.2vw, 56px)`. Prose keeps its own measure: a post body, a lede and a settings aside
-cap at `--container-measure`, 44em, in `config/tailwind.css`. #919 moved that rule here from [ADR 0034][0034], which ADR
-0136 superseded.
+cap at `--container-measure`, 44em, in `config/tailwind/shared.css`. #919 moved that rule here from [ADR 0034][0034],
+which ADR 0136 superseded.
 
 **A sticky top bar replaces the context bar and the slash button.** It holds, in order, the wordmark, the pills, a
 search button that opens the palette, and an avatar menu. The pills are Today, Inbox, Tasks, Journal, Publish and

@@ -27,9 +27,9 @@ the thing is rather than how it looks".
 
 ## Decision
 
-Every class a view writes names a thing, and `config/tailwind.css` defines it once as an `@utility`, 350 of them. A
-utility builds on the theme tokens in the one `@theme` block and on other utilities through `@apply`: `page-column`
-is `mx-auto max-w-page pt-12`, and `form` is `form-stack max-w-measure`.
+Every class a view writes names a thing, and `config/tailwind/shared.css` defines it once as an `@utility`, 350 of them.
+A utility builds on the theme tokens in the one `@theme` block and on other utilities through `@apply`: `page-column` is
+`mx-auto max-w-page pt-12`, and `form` is `form-stack max-w-measure`.
 
 - A class takes its name from the handoff where the handoff has one, and a variant is a second class the utility
   styles: `Admin::UI::Components::Button` writes `["btn", @variant&.to_s, ("sm" if @small)]`.
@@ -52,17 +52,16 @@ A change to a look is one edit, in one place, and a view reads as a list of thin
 lets a class be checked against its source: AA-343 audited the type by laying each design class beside its
 counterpart, and its notes are how AA-407 found the eyebrow missing.
 
-Every slice builds its sheet from the same `config/tailwind.css`. `config/tailwind/public.css` scans only the public
-sources, and `config/tailwind/admin.css` scans only the admin, MCP and shared sources. Each layout links its own sheet.
-A utility reaches a sheet only when one of its sources names it, but a rule no class guards reaches every
-slice, so the site cannot do what the design does and cap every `p` at a measure. Each run of prose names its own cap
-instead, and a rule meant for one side has to hang off a class that side owns, as the admin's phone type steps hang off
-`.adm`.
+Every slice builds its sheet from the same `config/tailwind/shared.css`. `config/tailwind/public.css` scans only the
+public sources, and `config/tailwind/admin.css` scans only the admin, MCP and shared sources. Each layout links its own
+sheet. A utility reaches a sheet only when one of its sources names it, but a rule no class guards reaches every slice,
+so the site cannot do what the design does and cap every `p` at a measure. Each run of prose names its own cap instead,
+and a rule meant for one side has to hang off a class that side owns, as the admin's phone type steps hang off `.adm`.
 
-Most phone rules live inside the utility they change, each in its own `@variant phone` block, and the rest sit in
-the base layer. `config/tailwind.css` defines `phone` (below `43.75rem`) and `wide` (from `53.75rem`) beside `light` and
-`dark`, so moving a breakpoint takes one edit, and a search for `phone` or `wide` finds every rule that uses it. Rules
-for the wider side use `not-phone` or `not-wide`.
+Most phone rules live inside the utility they change, each in its own `@variant phone` block, and the rest sit in the
+base layer. `config/tailwind/shared.css` defines `phone` (below `43.75rem`) and `wide` (from `53.75rem`) beside `light`
+and `dark`, so moving a breakpoint takes one edit, and a search for `phone` or `wide` finds every rule that uses it.
+Rules for the wider side use `not-phone` or `not-wide`.
 
 Nothing checks a class name. Tailwind emits a utility only when it finds the name in the source, and a misspelt
 class matches nothing and renders unstyled with every request spec passing. Only a browser spec that reads the

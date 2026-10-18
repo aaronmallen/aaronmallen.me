@@ -54,7 +54,8 @@ RSpec.describe "SEO tags", type: :request do
     end
 
     it "colors the browser bar with the page ground in each theme" do
-      ground = Hanami.app.root.join("config/tailwind.css").read.match(/--color-ground: light-dark\((#\h+), (#\h+)\)/)
+      sheet = Hanami.app.root.join("config/tailwind/shared.css").read
+      ground = sheet.match(/--color-ground: light-dark\((#\h+), (#\h+)\)/)
 
       expect(named("theme-color")).to eq(ground.captures)
     end

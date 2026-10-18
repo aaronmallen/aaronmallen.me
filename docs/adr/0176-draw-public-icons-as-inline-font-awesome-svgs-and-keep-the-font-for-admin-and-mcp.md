@@ -33,7 +33,7 @@ Public pages draw each icon as an inline SVG from Font Awesome Free. Admin and M
   SVG inside its `<i>`; when it is not, it renders the empty `<i>` the font fills. A public icon with no file raises,
   so the page's spec fails.
 - **The markup.** The `<i>` keeps its Font Awesome class names, which now only name the icon. Rules in
-  `config/tailwind.css` such as `i.fa-retweet` keep matching.
+  `config/tailwind/shared.css` such as `i.fa-retweet` keep matching.
 - **Action names.** Since #1215, `Icon` also takes a common action's name, such as `:trash`, and swaps in its class
   names from `Icon::ACTIONS`, so delete, edit, ban, close, copy and outbound links each show one icon. Any other name
   passes through as class names, and a public page finds the SVG through the swapped names.
@@ -41,17 +41,17 @@ Public pages draw each icon as an inline SVG from Font Awesome Free. Admin and M
   `public/app.css` carries no Font Awesome CSS and links no Font Awesome font.
 - **Code captions.** `Markdown::Document` draws `file-code` as an SVG in an `<i>` with no class, on public pages and
   in the admin preview alike, so the admin's font draws no second glyph over it.
-- **Sizing and hiding.** One rule in `config/tailwind.css`, outside Tailwind's layers as Font Awesome's CSS is, gives
-  an `<i>` that holds an SVG Font Awesome's box: `display: var(--fa-display, inline-block)`, a `1.25em` width and a
-  `1em` glyph. Hiding still goes through `--fa-display`.
+- **Sizing and hiding.** One rule in `config/tailwind/shared.css`, outside Tailwind's layers as Font Awesome's CSS is,
+  gives an `<i>` that holds an SVG Font Awesome's box: `display: var(--fa-display, inline-block)`, a `1.25em` width and
+  a `1em` glyph. Hiding still goes through `--fa-display`.
 
 ADR 0033's other rules stand: an icon beside text is `aria-hidden`, one that stands alone takes `role: "img"` and an
 `aria-label`, no icon comes from stored data, and the date field's calendar stays a mask.
 
 A brand mark that Font Awesome Free lacks is a second mask, since #1282. Linear is the one case.
-`config/tailwind.css` holds Linear's own SVG in the `linear-mark` utility and paints `bg-current` through it, so the
-mark takes the text colour in both themes. The utility gives the `<i>` Font Awesome's box, `1.25em` by `1em`, and its
-display goes through `--fa-display`. `Icon` draws it from the class name like any other icon, so the label rules
+`config/tailwind/shared.css` holds Linear's own SVG in the `linear-mark` utility and paints `bg-current` through it, so
+the mark takes the text colour in both themes. The utility gives the `<i>` Font Awesome's box, `1.25em` by `1em`, and
+its display goes through `--fa-display`. `Icon` draws it from the class name like any other icon, so the label rules
 hold. Every other brand keeps its Font Awesome class.
 
 ## Alternatives

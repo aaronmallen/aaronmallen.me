@@ -1,5 +1,5 @@
 @import "tailwindcss" source(none);
-@import "../tailwind.css";
+@import "./shared.css";
 
 @source "../../app/assets/js/*.js";
 @source "../../app/assets/js/public";

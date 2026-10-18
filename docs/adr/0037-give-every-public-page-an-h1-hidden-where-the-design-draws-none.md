@@ -64,7 +64,7 @@ The two `h1` elements are the only `sr-only` markup in the public views. The adm
 the shared nav composes it into `skip-link`, so the pattern is not new to the app.
 
 The request and browser specs for home and writing pin one hidden `h1` on each page, and the comments on the
-`home` and `writing` utilities in `config/tailwind.css` note it. No guard checks every page. Each page's request
+`home` and `writing` utilities in `config/tailwind/shared.css` note it. No guard checks every page. Each page's request
 spec pins its own `h1`, so a new page follows the rule only if its spec does.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

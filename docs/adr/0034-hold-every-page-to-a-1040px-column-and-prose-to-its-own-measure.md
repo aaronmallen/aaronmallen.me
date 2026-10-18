@@ -16,7 +16,7 @@ tags: [layout, design, css, tailwind, public]
 
 ## Context
 
-Every public page centred itself in a 720px column. Seven utilities in `config/tailwind.css` carried it: `home`,
+Every public page centred itself in a 720px column. Seven utilities in `config/tailwind/shared.css` carried it: `home`,
 `writing`, `tagged`, `projects`, `about`, `contact` and `post`. The 720px sat in `--container-page`.
 
 The design names one column width, and it is 1040px. Its `site.css` caps the kicker, the archive list, the

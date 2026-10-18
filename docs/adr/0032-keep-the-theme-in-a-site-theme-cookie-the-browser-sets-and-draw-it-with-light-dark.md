@@ -38,7 +38,7 @@ the visitor's own click sets in their browser, holding one of a fixed set of val
 tracking and falls outside it. A new preference cookie may join it on the same terms: set by the browser, a
 closed set of values the server checks, and nothing unique to the visitor.
 
-`config/tailwind.css` writes each colour once, as a `light-dark()` pair on a token. The base layer sets
+`config/tailwind/shared.css` writes each colour once, as a `light-dark()` pair on a token. The base layer sets
 `color-scheme` from the system setting, or from `data-site-theme` when a visitor picked one, and the browser picks
 a side of every pair from it. The file redefines the `light:` and `dark:` variants so that a forced theme beats the
 system one wherever a token cannot cover a rule.

@@ -61,7 +61,7 @@ Each page's layout has to change, since every page leaned on `page-column`. The 
 one at a time, and pages look mixed until the last one lands.
 
 The design's measures live in `tmp/design/`, which the repository does not keep. Once the pages land, the widths
-survive only as tokens in `config/tailwind.css`.
+survive only as tokens in `config/tailwind/shared.css`.
 
 [0034]: 0034-hold-every-page-to-a-1040px-column-and-prose-to-its-own-measure.md
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md

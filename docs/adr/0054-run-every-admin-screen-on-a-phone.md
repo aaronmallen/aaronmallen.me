@@ -45,10 +45,10 @@ Three rules hold:
 
 - **Nothing scrolls the page sideways.** A box wider than a phone scrolls inside itself, the way the handoff's
   tab strip does, with `scrollbar-width: none`. The top pages table and the context bar both work this way.
-- **Every control keeps a 44px square.** `--spacing-tap` in `config/tailwind.css` holds that number and every
+- **Every control keeps a 44px square.** `--spacing-tap` in `config/tailwind/shared.css` holds that number and every
   phone rule reads it from there. A control and the label around it count as one target, so a switch stays 34x19
   inside a label that is 44 tall.
-- **No text drops under 12px,** on any slice at any width. Every type token for words in `config/tailwind.css` is
+- **No text drops under 12px,** on any slice at any width. Every type token for words in `config/tailwind/shared.css` is
   12px or more, so no rule has to step a face up. Since #923 icon glyphs sit outside this rule: `--text-pu-icon`
   and the rules that size Font Awesome icons may go under 12px, as an icon holds no words.
 
