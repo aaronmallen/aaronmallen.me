@@ -266,6 +266,21 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
         expect(page).to have_css(".screen-tabs", count: 1)
       end
     end
+
+    {
+      "/admin/settings/tagging" => ["tags", "/admin/settings/tagging#tags"],
+      "/admin/settings/socials" => ["people", "/admin/settings/socials#people"],
+      "/admin/settings/services" => ["API tokens", "/admin/settings/services#tokens"],
+      "/admin/settings/jobs" => ["jobs", "/admin/settings/jobs"],
+    }.each do |route, (screen, href)|
+      it "names Settings and #{screen} in the switcher on #{route}", :aggregate_failures do
+        get route
+
+        expect(page).to have_css("button.switcher .switcher-group", exact_text: "Settings")
+        expect(page).to have_css("button.switcher .switcher-screen", exact_text: screen)
+        expect(page).to have_css("[data-palette-href='#{href}']", visible: :all)
+      end
+    end
   end
 
   describe "an address nothing lives at" do

@@ -45,7 +45,7 @@ module Admin
 
       def call(current_path:, inbox:)
         found = located
-        current = found.select { |(name, _, _, path)| covers?(name, path, current_path) }.map(&:last).max_by(&:length)
+        current = current(found, current_path)
 
         found.map do |(name, group, icon, path)|
           count = name == :inbox ? inbox : 0
@@ -67,9 +67,16 @@ module Admin
         end
       end
 
+      def current(found, current_path)
+        paths = found.filter_map { |(name, _, _, path)| path if covers?(name, page(path), current_path) }
+        paths.max_by { page(it).length }
+      end
+
       def located
         ALL.map { |(name, group, icon, route, id)| [name, group, icon, [routes.path(route), id].compact.join("#")] }
       end
+
+      def page(path) = path.split("#").first
     end
   end
 end
