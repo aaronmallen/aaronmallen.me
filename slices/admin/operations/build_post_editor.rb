@@ -92,7 +92,7 @@ module Admin
         return Blog::Constants::EMPTY_ARRAY unless post
 
         checks = post.status == PUBLISHED ? post_queries.link_checks(post.id) : Blog::Constants::EMPTY_HASH
-        check_post_links.links(post.body).map { |url, text| { url:, text:, check: checks[url] } }
+        check_post_links.links(post.body_html).map { |url, text| { url:, text:, check: checks[url] } }
       end
 
       def suggestions(post, review)

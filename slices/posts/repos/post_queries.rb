@@ -6,7 +6,7 @@ module Posts
       ALL = Blog::Types::PostFilter["all"]
       BROKEN = Blog::Types::PostFilter["broken"]
       FEED_VERSION = %i[id published_at updated_at].freeze
-      LINKS = %i[id body].freeze
+      LINKS = %i[id body_html].freeze
       LIST = %i[id title slug published_at read_time summary first_paragraph].freeze
       PAGER = %i[title slug published_at].freeze
       PUBLIC_TAG = Blog::Types::TagScope["public"]
@@ -18,7 +18,7 @@ module Posts
 
       def all = with_tags.newest_first.to_a
 
-      def bodies(ids) = posts.select(*LINKS).with_ids(ids).to_a.to_h { [it.id, it.body] }
+      def bodies(ids) = posts.select(*LINKS).with_ids(ids).to_a.to_h { [it.id, it.body_html] }
 
       def by_filter(filter, page) = page.fill(filtered(filter).newest_first.paged(page).to_a)
 

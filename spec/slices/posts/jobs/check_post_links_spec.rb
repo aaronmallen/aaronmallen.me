@@ -219,6 +219,41 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
     expect(a_request(:get, live)).to have_been_made.once
   end
 
+  it "fetches a link once when several posts name it and records it for each", :aggregate_failures do
+    posts = [post_with(dead), post_with(dead, live)]
+    check
+
+    expect(a_request(:get, dead)).to have_been_made.once
+    expect(Posts::Slice["relations.post_link_checks"].where(url: dead).to_a.map { it[:post_id] })
+      .to match_array(posts.map(&:id))
+  end
+
+  it "finds links in the stored HTML without rendering the Markdown again" do
+    post_with(live)
+    allow(Markdown::Document).to receive(:new).and_call_original
+    check
+
+    expect(Markdown::Document).not_to have_received(:new)
+  end
+
+  describe "a page that answers with more body than the old limit, slowly" do
+    around do |example|
+      WebMock.disable!
+      example.run
+    ensure
+      WebMock.enable!
+    end
+
+    it "reads the status without waiting for the body" do
+      shorten_webmention_budget(0.5)
+      slow = trickle("HTTP/1.1 404 Not Found\r\nContent-Length: 5000000\r\n\r\n", every: 0.05)
+      post_with(slow)
+      check
+
+      expect(checks[slow]).to include(failures: 1, reason: "404 Not Found")
+    end
+  end
+
   describe "each run" do
     def run = runs.one!
 
@@ -233,6 +268,14 @@ RSpec.describe Posts::Jobs::CheckPostLinks do
       check
 
       expect(run).to include(links_checked: 3, links_due: 3, stopped_early: false)
+    end
+
+    it "counts a link named in several posts once" do
+      post_with(live, dead)
+      post_with(live)
+      check
+
+      expect(run).to include(links_checked: 2, links_due: 2)
     end
 
     it "records when it started and finished" do

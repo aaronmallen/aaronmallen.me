@@ -5,7 +5,7 @@ status: active
 created: 2026-10-15
 area: [config, lib, posts, shares, social]
 issue: "#1455"
-amended: ["#1470"]
+amended: ["#1470", "#1784"]
 tags: [http, fetch, security, webmentions, short-links, providers, clients]
 ---
 
@@ -37,7 +37,8 @@ fetches such a page through `http` or a Faraday connection of its own.
 - **The fetcher moves to its own folder under `lib/`**, out of `lib/social`, as [ADR 0159][0159] lays out for a job
   more than one slice does. The folder holds the client, its errors and its provider builder.
 - **It registers in `config/providers`**, and a slice takes it through `shared_app_component_keys`. Each caller may
-  set its own user agent; the checks and limits stay the same for all of them.
+  set its own user agent and body limit; the checks and the time limit stay the same for all of them.
+  #1784 set the link check's body limit to `HEADERS_ONLY`, so it stops at the status and headers.
 - **`social` uses it** for webmention sending and verifying. **`shares` uses it** to fetch short link titles.
 - **The link check rule lives at app level too.** #1470 moved `CheckLink` out of `social` into `app/operations`, shared
   as `operations.check_link`, so `posts` checks post links and `shares` checks short link destinations with one rule.
@@ -56,7 +57,7 @@ and the limits, or go without them and let a redirect reach the home network.
 
 A slice that fetches a page has one client to find, and a fix to the guards reaches every caller at once.
 
-A change to the limits reaches every caller too. A title fetch needs only a page's `<head>` but waits up to 15
+A change to the time limit reaches every caller too. A title fetch needs only a page's `<head>` but waits up to 15
 seconds and reads up to 1 MB, as a webmention source does.
 
 Nothing enforces the rule. `http` stays app-level, so a slice can still build a connection around the fetcher, and

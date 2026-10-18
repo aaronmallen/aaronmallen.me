@@ -24,6 +24,7 @@ module PageFetcher
 
     BUDGET = 15
     ENOUGH = :enough
+    HEADERS_ONLY = 0
     MAX_BODY = 1_000_000
     MAX_REDIRECTS = 3
     OK_STATUSES = (200..299)
@@ -109,6 +110,7 @@ module PageFetcher
 
     def reader(url, held)
       lambda do |chunk, _size, env|
+        throw ENOUGH, env if max_body == HEADERS_ONLY
         raise Error, "#{url} declares a body over #{max_body} bytes" if declared_over?(env)
 
         room = max_body - held.bytesize

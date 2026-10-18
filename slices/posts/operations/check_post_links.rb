@@ -17,18 +17,27 @@ module Posts
 
       def again(post_id, url: nil, at: Time.now)
         post = post_queries.published_body(post_id)
-        check(post, at, only: url) if post
+        return unless post
+
+        urls = links(post.body_html).keys
+        link_check_mutations.forget_unlinked(post.id, urls)
+        (url ? urls & [url] : urls).each { record([post.id], it, at) }
       end
 
       def call(at: Time.now, &checked)
         link_check_mutations.forget_unpublished
-        post_queries.published_bodies.each { check(it, at, &checked) }
+        linked = urls_by_post
+        linked.each { link_check_mutations.forget_unlinked(*it) }
+        posts_by_url(linked).each do |url, post_ids|
+          record(post_ids, url, at)
+          checked&.call
+        end
       end
 
-      def due = post_queries.published_bodies.sum { links(it.body).size }
+      def due = urls_by_post.values.reduce([], :|).size
 
-      def links(body)
-        anchors(body).each_with_object({}) do |anchor, found|
+      def links(html)
+        anchors(html).each_with_object({}) do |anchor, found|
           url = outbound(anchor["href"])
           found[url] ||= anchor.text.strip if url
         end
@@ -36,16 +45,7 @@ module Posts
 
       private
 
-      def anchors(body) = Nokogiri::HTML5.parse(Markdown.to_html(body)).css(LINK_SELECTOR)
-
-      def check(post, at, only: nil, &checked)
-        urls = links(post.body).keys
-        link_check_mutations.forget_unlinked(post.id, urls)
-        (only ? urls & [only] : urls).each do |url|
-          record(post, url, at)
-          checked&.call
-        end
-      end
+      def anchors(html) = Nokogiri::HTML5.parse(html).css(LINK_SELECTOR)
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
 
@@ -60,9 +60,18 @@ module Posts
         nil
       end
 
-      def record(post, url, at) = link_check_mutations.record(post_id: post.id, url:, reason: check_link.call(url), at:)
+      def posts_by_url(linked)
+        linked.each_with_object({}) { |(id, urls), found| urls.each { (found[it] ||= []) << id } }
+      end
+
+      def record(post_ids, url, at)
+        reason = check_link.call(url)
+        post_ids.each { link_check_mutations.record(post_id: it, url:, reason:, at:) }
+      end
 
       def site = settings.site[:url].to_s
+
+      def urls_by_post = post_queries.published_bodies.to_h { [it.id, links(it.body_html).keys] }
     end
   end
 end
