@@ -41,6 +41,12 @@ and opens one job from any of the three sets by its jid. A second query builds t
 from `config/sidekiq.yml.erb`, the scheduler's keys and each entry's newest `performance_jobs` row. Every read
 rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
 
+Two `activity` operations act on a cron entry from the tab, as retry and discard act on a dead job. Run now enqueues
+the entry's class with its args, as the scheduler does. Pause and enable write the entry's `enabled` flag through
+`sidekiq.schedule_state`, which calls sidekiq-scheduler's own `RedisManager.set_job_state`. The scheduler reads that
+flag on every tick and never clears it on boot, so a pause holds across restarts and deploys. With Redis down the tab
+offers neither, and a post that finds Redis down changes nothing and says so.
+
 ## Alternatives
 
 **Copy each dead job into Postgres from a death handler.** A table the `attention` view joins would keep

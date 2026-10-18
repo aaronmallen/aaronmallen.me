@@ -6930,6 +6930,10 @@
   background-color: color-mix(in oklab, var(--color-mk-pink) 7%, transparent);
 }
 
+@utility jobs-cron-acts {
+  @apply flex shrink-0 items-center gap-1;
+}
+
 @utility jobs-cron-body {
   @apply flex min-w-0 flex-1 flex-col gap-1.5;
 }

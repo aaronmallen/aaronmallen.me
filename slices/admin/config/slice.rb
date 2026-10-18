@@ -17,8 +17,9 @@ module Admin
     config.actions.sessions = Blog::SessionCookie.store
 
     import keys: %w[
-      operations.discard_dead_job operations.retry_dead_job operations.snooze_attention repos.activity_queries
-      repos.attention_queries repos.cron_queries repos.job_queries repos.review_queries
+      operations.discard_dead_job operations.retry_dead_job operations.run_cron_entry operations.snooze_attention
+      operations.switch_cron_entry repos.activity_queries repos.attention_queries repos.cron_queries repos.job_queries
+      repos.review_queries
     ], from: :activity
 
     import keys: %w[

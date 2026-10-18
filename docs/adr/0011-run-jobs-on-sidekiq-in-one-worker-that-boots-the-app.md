@@ -37,7 +37,8 @@ We run every job on Sidekiq, in one worker that boots the whole app.
   (`lib/blog/job.rb`), which mixes in `Sidekiq::Job` and `Dry::Monads[:result]`.
 - **Its schedule lives in `config/sidekiq.yml.erb`**, under `:scheduler:`, where sidekiq-scheduler reads it. Each
   cron runs in `Blog::TimeZone::NAME` (ADR 0018), and each entry has a `description` that says when it runs in
-  words, for the jobs tab on Settings.
+  words, for the jobs tab on Settings. The tab can run an entry now and pause or enable it, which leaves the file
+  alone (ADR 0138).
 - **One worker runs them all.** `scripts/dev/worker` starts Sidekiq with `config/sidekiq.rb`, which requires
   `hanami/boot`. Booting loads every slice and starts every provider: `:sidekiq` for the server's Redis options,
   and `:honeybadger` for the error handler (ADR 0010).

@@ -2,6 +2,8 @@
 
 module Admin
   class Routes < Hanami::Routes
+    CRON_ENTRY = /[a-z0-9_]+/
+    CRON_SWITCH = /pause|enable/
     ID = /\d+/
     INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
@@ -243,6 +245,10 @@ module Admin
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
     redirect_temporary "/settings", to: "/settings/socials", as: :settings
     get "/settings/jobs", to: "settings.jobs", as: :settings_jobs
+    get "/settings/jobs/cron/:name/menu", to: "settings.cron_entry_menu", as: :cron_entry_menu, name: CRON_ENTRY
+    post "/settings/jobs/cron/:name/run", to: "settings.run_cron_entry", as: :run_cron_entry, name: CRON_ENTRY
+    post "/settings/jobs/cron/:name/:switch", to: "settings.switch_cron_entry", as: :switch_cron_entry,
+                                              name: CRON_ENTRY, switch: CRON_SWITCH
     get "/settings/security", to: "security.show", as: :security
     get "/settings/services", to: "settings.services", as: :settings_services
     get "/settings/socials", to: "settings.socials", as: :settings_socials

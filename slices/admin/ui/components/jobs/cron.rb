@@ -10,7 +10,6 @@ module Admin
           ID = "jobs-cron"
           HEADING = "#{ID}-heading".freeze
           MILLISECONDS = 1000
-          RANGES = Blog::Types::AnalyticsRange.values.sort.freeze
 
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(Data))
           prop :filter, Blog::Types::CronFilter
@@ -42,14 +41,17 @@ module Admin
           end
 
           def entry(entry)
-            div(id: "#{ID}-#{entry.name}", class: ["jobs-cron-entry", ("jobs-cron-failed" if entry.failed?)]) do
+            div(
+              id: "#{ID}-#{entry.name}", class: ["jobs-cron-entry", ("jobs-cron-failed" if entry.failed?)],
+              data: { menu: path(:admin_cron_entry_menu, name: entry.name) },
+            ) do
               div(class: "jobs-cron-body") do
                 title(entry)
                 p(class: "jobs-cron-meta") { schedule(entry) }
                 error(entry) if entry.failed?
                 p(class: "jobs-cron-meta") { runs(entry) }
               end
-              performance_link(entry)
+              CronActs(entry:, return_to: filtered(@filter))
             end
           end
 
@@ -63,13 +65,14 @@ module Admin
           def filter_link(filter)
             name = t(FILTERS.fetch(filter))
             found = count(filter)
-            query = filter == "all" ? {} : { cron: filter }
 
             {
               text: found ? t(".filters.counted", name:, count: found) : name,
-              href: "#{path(:admin_settings_jobs, **query)}##{ID}", current: filter == @filter,
+              href: "#{filtered(filter)}##{ID}", current: filter == @filter,
             }
           end
+
+          def filtered(filter) = path(:admin_settings_jobs, **(filter == "all" ? {} : { cron: filter }))
 
           def kept?(entry, filter = @filter)
             case filter
@@ -94,20 +97,6 @@ module Admin
             return span { t(".paused_note") } if entry.paused?
 
             span { Stamped(text: t(".next", at: Stamped::MARK), at: entry.next_at, format: :short) }
-          end
-
-          def performance_link(entry)
-            return unless entry.last
-
-            href = "#{path(:admin_performance, range: range(entry))}##{Performance::TimingTable.anchor(entry.job)}"
-
-            Button(href:, small: true, icon: "fa-solid fa-gauge-high", label: t(".performance", name: entry.name))
-          end
-
-          def range(entry)
-            days = Blog::TimeZone.today - Blog::TimeZone.today(entry.last[:occurred_at]) + 1
-
-            RANGES.find { it >= days } || RANGES.last
           end
 
           def runs(entry)

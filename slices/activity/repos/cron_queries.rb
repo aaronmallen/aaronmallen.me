@@ -18,6 +18,15 @@ module Activity
                 .sort_by(&:order)
       end
 
+      def entry(name)
+        found = schedule[name]
+        return unless found
+
+        last = timing_queries.last_scheduled_runs([key(found)])[key(found)]
+
+        Structs::CronEntry.from(name, found, last:, **scheduler)
+      end
+
       def failed
         last = last_runs
 
