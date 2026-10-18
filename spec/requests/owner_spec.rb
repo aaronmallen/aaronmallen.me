@@ -18,14 +18,15 @@ RSpec.describe "The owner", type: :request do
   it "splits the name across the brand mark" do
     get "/"
 
-    expect(last_response.body).to include("<span>Ada</span>").and include("<span>Lovelace</span>")
+    expect(last_response.body).to include('<span>A<span class="wordmark-rest">da</span></span>')
+      .and include('<span>L<span class="wordmark-rest">ovelace</span></span>')
   end
 
   it "leaves a one word name whole", :aggregate_failures do
     allow(Hanami.app.settings).to receive(:owner).and_return({ name: "Ada" })
     get "/"
 
-    expect(last_response.body).to include("<span>Ada</span>")
+    expect(last_response.body).to include('<span>A<span class="wordmark-rest">da</span></span>')
     expect(last_response.body).not_to include("wordmark-slash")
   end
 

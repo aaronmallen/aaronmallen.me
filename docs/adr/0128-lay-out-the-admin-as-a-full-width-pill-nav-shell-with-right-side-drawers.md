@@ -57,7 +57,8 @@ stops the submit only on No, and with scripts off the form posts without asking.
 **Two breakpoints.** The admin folds at 700px and 860px alone. Two-column layouts start at 860px, and the pill nav
 drops onto its own row below it. Between them the pills and the search button shrink with `clamp` rather than at
 another breakpoint. Below 700px every tap target keeps [ADR 0054][0054]'s 44px square. #1742 folded the pill row
-below 860px into a popover switcher and moved Inbox second in the menu, as [ADR 0187][0187] records.
+below 860px into a popover switcher, moved Inbox second in the menu, and #1748 tightened the top bar at 480px and
+400px, as [ADR 0187][0187] records.
 
 **Keys stay, and three join.** Every key [ADR 0101][0101] binds works as it does today. `⌘K` opens the palette
 beside `/` and `⌘/`, `w` opens a journal entry, and `e` opens a highlighted row on lists where no row key claims

@@ -61,8 +61,9 @@ the page ends far enough above the palette button that no row sits under it.
 The layouts below 860px are derived, not ported. They come from the tokens and rules the stylesheet already
 carries, and they add no second visual language.
 
-Since #745 the admin folds at 700px and 860px alone, as [ADR 0128][0128] records. Two-column layouts start at
-860px, and below it one switcher button takes the pill nav's place (#1746, [ADR 0187][0187]).
+Since #745 the admin folds at 700px and 860px alone, as [ADR 0128][0128] records, and only the top bar tightens
+again at 480px and 400px. Two-column layouts start at 860px, and below it one switcher button takes the pill nav's
+place (#1746, [ADR 0187][0187]).
 
 ## Alternatives
 

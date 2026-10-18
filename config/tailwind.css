@@ -28,6 +28,18 @@
   }
 }
 
+@custom-variant small-phone {
+  @media (width <= 30rem) {
+    @slot;
+  }
+}
+
+@custom-variant tiny-phone {
+  @media (width <= 25rem) {
+    @slot;
+  }
+}
+
 @custom-variant wide {
   @media (width >= 53.75rem) {
     @slot;
@@ -1791,6 +1803,10 @@
   @apply sticky top-0 z-40 flex h-top-bar items-center gap-3 px-admin-gutter py-3;
   background-color: color-mix(in oklab, var(--color-ground) 88%, transparent);
   backdrop-filter: blur(10px);
+
+  @variant small-phone {
+    @apply gap-2;
+  }
 }
 
 @utility top-bar-skip {
@@ -1811,6 +1827,24 @@
 
   @variant phone {
     @apply min-h-tap;
+  }
+
+  .top-bar > & {
+    @variant small-phone {
+      @apply mr-0 text-[15px];
+    }
+
+    @variant tiny-phone {
+      @apply min-w-tap justify-center;
+    }
+  }
+}
+
+@utility wordmark-rest {
+  .top-bar & {
+    @variant tiny-phone {
+      @apply hidden;
+    }
   }
 }
 
@@ -1872,6 +1906,10 @@
 
 @utility switcher-screen {
   @apply min-w-0 truncate font-mono text-badge font-normal text-ink-muted;
+
+  @variant small-phone {
+    @apply hidden;
+  }
 }
 
 @utility switcher-chevron {
@@ -1919,6 +1957,10 @@
 
   @variant phone {
     @apply min-h-tap min-w-tap shrink-0 justify-center;
+  }
+
+  @variant small-phone {
+    @apply w-tap px-0;
   }
 }
 

@@ -35,7 +35,10 @@ Settings, grouped as the palette groups them, with the current one marked. Setti
 and on a click outside, with scripts off. Its rows are links, as the pills are, so every screen they name opens
 without scripts.
 
-The 700px and 860px breakpoints stay the only two. Every other part of ADR 0128 stands.
+**On small phones the top bar tightens to keep its one row.** At 480px and below the wordmark drops to 15px, the
+switcher hides its screen label, and search becomes a 44px icon button. At 400px and below the wordmark reads "A/A",
+its name still spoken in full. These two steps touch the top bar alone. Every layout still folds at 700px and 860px
+only, and every other part of ADR 0128 stands.
 
 ## Alternatives
 
@@ -48,7 +51,7 @@ and the switcher would need a script to appear at all.
 A phone gets back the row the pills took, and every screen shows in the panel, none hidden past an edge.
 
 Above 860px a cramped window still squeezes the pills with `clamp` and does not collapse them. A bar that gains an
-item, such as a new pill, has to fit at 860px or move the breakpoint.
+item, such as a new pill, has to fit at 860px or move the breakpoint, and has to fit beside the switcher at 390px.
 
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

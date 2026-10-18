@@ -14,6 +14,8 @@ RSpec.describe "Admin menu switcher", type: :feature do
 
   def top_bar_height = evaluate_script("document.querySelector('.top-bar').getBoundingClientRect().height")
 
+  def wordmark = find("a.wordmark").text.split.join
+
   before do
     create(:message)
     sign_in_to_admin
@@ -85,6 +87,42 @@ RSpec.describe "Admin menu switcher", type: :feature do
       within("#nav-switcher") { click_link "mail" }
 
       expect(page).to have_css(".switcher-screen", text: "mail")
+    end
+  end
+
+  describe "at 480px" do
+    def width(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().width")
+
+    before do
+      page.current_window.resize_to(480, 844)
+      visit "/admin/inbox"
+    end
+
+    it "folds search into a 44px icon button", :aggregate_failures do
+      expect(width(".top-bar-search")).to eq(44)
+      expect(page).to have_no_css(".top-bar-search-label")
+      expect(page).to have_no_css(".top-bar-search-key")
+    end
+
+    it "hides the screen label on the switcher", :aggregate_failures do
+      expect(page).to have_css(".switcher", text: "Inbox")
+      expect(page).to have_no_css(".switcher-screen")
+    end
+
+    it "shrinks the wordmark and spells the whole name", :aggregate_failures do
+      expect(evaluate_script("getComputedStyle(document.querySelector('a.wordmark')).fontSize")).to eq("15px")
+      expect(wordmark).to eq("AARON/ALLEN")
+    end
+  end
+
+  describe "at 400px" do
+    before do
+      page.current_window.resize_to(400, 844)
+      visit "/admin"
+    end
+
+    it "cuts the wordmark to its initials" do
+      expect(wordmark).to eq("A/A")
     end
   end
 

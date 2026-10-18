@@ -24,11 +24,18 @@ module Blog
 
         def name(owner)
           first, rest = owner.split(SPLIT, 2)
-          span { first }
+          word(first)
           return unless rest
 
           span(class: "wordmark-slash", aria: { hidden: "true" }) { SLASH }
-          span { rest }
+          word(rest)
+        end
+
+        def word(text)
+          span do
+            plain text[0]
+            span(class: "wordmark-rest") { text[1..] }
+          end
         end
       end
     end
