@@ -5,6 +5,7 @@ status: active
 created: 2026-10-18
 area: [config, lib]
 issue: "#1795"
+amended: ["#1787"]
 tags: [postgres, statement-timeout, puma, sidekiq, migrations, backups, connections, request-connection]
 ---
 
@@ -49,6 +50,8 @@ busy until it ends.
 
 Each request makes one more round trip to Postgres before the app runs. The limit stays on the connection after the
 request, which is harmless: in the web process only requests and their after-reply writes use the pool.
+Since #1787 the timing row runs on the request's own connection ([ADR 0193][0193]), so it runs under the limit too.
+The limit applies to each statement, so the request's queries do not use up the insert's.
 
 A query the request runs on another thread checks out its own connection and runs without the limit.
 
@@ -58,4 +61,5 @@ A report or export that grows past 15 seconds fails where it used to finish slow
 until the query gets faster.
 
 [0172]: 0172-run-puma-as-two-preloaded-workers-with-yjit-and-two-malloc-arenas.md
+[0193]: 0193-hold-the-request-connection-until-puma-finishes-the-response.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

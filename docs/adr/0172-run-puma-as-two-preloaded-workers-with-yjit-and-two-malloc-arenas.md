@@ -5,7 +5,7 @@ status: active
 created: 2026-10-14
 area: [config]
 issue: "#1314"
-amended: ["#1577"]
+amended: ["#1577", "#1787"]
 tags: [puma, cluster, preload, fork, yjit, malloc, sidekiq, postgres, connections, raspberry-pi, systemd]
 ---
 
@@ -25,7 +25,8 @@ when it runs more than one worker. Its `before_fork` hook called `Hanami.shutdow
 start one.
 
 Each process holds its own Postgres connections. `RequestConnection` holds one for each request and `RequestTimer`
-writes its row on `rack.after_reply`, both through the pool `DBProvider` sizes at threads plus one.
+writes its row on `rack.after_reply`, both through the pool `DBProvider` sizes at threads plus one. Since #1787 the
+row reuses the request's connection ([ADR 0193][0193]).
 
 ## Decision
 
@@ -88,4 +89,5 @@ more than one worker in development there needs `PGGSSENCMODE=disable`. Linux do
 
 [0006]: 0006-run-the-site-on-a-raspberry-pi-behind-a-cloudflare-tunnel-with-its-data-on-the-nas.md
 [0118]: 0118-keep-admin-pages-live-through-postgres-notify-a-hijacked-event-stream-and-a-morph.md
+[0193]: 0193-hold-the-request-connection-until-puma-finishes-the-response.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
