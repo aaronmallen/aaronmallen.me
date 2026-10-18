@@ -5,10 +5,11 @@ module Admin
     module Components
       module Agents
         class MemoryFacts < Component
+          FACT_TYPES = Blog::Types::MemoryFactType.values.freeze
           COLORS = { "preference" => :violet, "convention" => :blue, "gotcha" => :orange, "context" => :green }.freeze
           CONTEXT = Blog::Types::MemoryFactType["context"]
-          HEADINGS = COLORS.keys.to_h { [it, ".headings.#{it}"] }.freeze
-          TYPES = COLORS.keys.to_h { [it, ".types.#{it}"] }.freeze
+          HEADINGS = FACT_TYPES.to_h { [it, ".headings.#{it}"] }.freeze
+          TYPES = FACT_TYPES.to_h { [it, ".types.#{it}"] }.freeze
           ROWS = "3"
 
           prop :file, Blog::Types::Instance(ROM::Struct)
@@ -17,7 +18,7 @@ module Admin
           def view_template
             Card(title: t(".title"), count: @file.facts.size) do
               Empty { t(".empty") } if @file.facts.empty?
-              COLORS.each_key { typed(it) }
+              FACT_TYPES.each { typed(it) }
               add_form
             end
           end
@@ -45,13 +46,13 @@ module Admin
           end
 
           def edit_form(fact)
-            scope = "memory-fact-#{fact.id}"
+            id_prefix = "memory-fact-#{fact.id}"
             saved = values(:edit, fact.id, type: fact.type, text: fact.text)
 
             details(class: "memory-edit", open: mine?(:edit, fact.id)) do
               Button(summary: true, small: true, variant: :gh, icon: :edit) { t(".edit") }
               Form(action: path(:admin_edit_agent_memory_fact, id: @file.id, fact_id: fact.id), class: "stack-form") do
-                fields(errors(:edit, fact.id), scope, saved, t(".fact"))
+                fields(errors(:edit, fact.id), id_prefix, saved, t(".fact"))
                 Button(type: "submit", variant: :pri, small: true) { t(".save") }
               end
             end
@@ -70,12 +71,14 @@ module Admin
             end
           end
 
-          def fields(found, scope, values, label)
-            Field(label: t(".type"), name: :type, errors: found, error: MemoryFieldError, scope:) do |control|
-              Select(**control, name: "fact[type]", options: types, selected: values[:type])
+          def fields(field_errors, id_prefix, shown, label)
+            field = { errors: field_errors, error: MemoryFieldError, scope: id_prefix }
+
+            Field(label: t(".type"), name: :type, **field) do |control|
+              Select(**control, name: "fact[type]", options: types, selected: shown[:type])
             end
-            Field(label:, name: :text, errors: found, error: MemoryFieldError, scope:) do |control|
-              Textarea(**control, name: "fact[text]", value: values[:text], rows: ROWS)
+            Field(label:, name: :text, **field) do |control|
+              Textarea(**control, name: "fact[text]", value: shown[:text], rows: ROWS)
             end
           end
 

@@ -11,7 +11,7 @@ module API
       private
 
       def replied(artifact, number = artifact.version)
-        shown = artifact_queries.version(artifact.id, number)
+        shown = artifact_queries.version_row(artifact.id, number)
 
         serialized(Serializers::Artifact, artifact).merge(
           body: shown.agent? ? untrusted(shown.body) : shown.body,

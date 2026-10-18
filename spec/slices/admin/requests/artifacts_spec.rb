@@ -151,6 +151,13 @@ RSpec.describe "Admin artifacts", type: :request do
         .to match([/\Av2you · .+ · currentTidied\z/, /\Av1Anthropic claude-opus-5-5 · .+\z/])
     end
 
+    it "dates it from its first version" do
+      agents(:update_artifact, found.id, { title: found.title, type: "plan", tags: "", body: "Next" })
+      get "/admin/agents/artifacts/#{found.id}"
+
+      expect(page.find(".read-meta")).to have_text(/\ACreated .+ by Anthropic claude-opus-5-5/)
+    end
+
     it "shows no banner on the latest version" do
       get "/admin/agents/artifacts/#{found.id}"
 
@@ -186,7 +193,7 @@ RSpec.describe "Admin artifacts", type: :request do
 
       expect(last_response.location).to end_with("/admin/agents/artifacts/#{found.id}")
       expect(versions(found.id).map(&:number)).to eq([1, 2, 3])
-      expect(Agents::Slice["repos.artifact_queries"].version(found.id, 3).body).to eq("First body")
+      expect(Agents::Slice["repos.artifact_queries"].version_row(found.id, 3).body).to eq("First body")
     end
   end
 

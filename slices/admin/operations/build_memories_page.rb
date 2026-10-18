@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildMemoriesPage
-      Scope = Data.define(:key, :scope, :name)
+      ScopeChoice = Data.define(:key, :kind, :name)
 
       GLOBAL = Blog::Types::MemoryScope["global"]
       NAME_LIMIT = 48
@@ -20,38 +20,38 @@ module Admin
         scope = Blog::Types::MemoryScope.optional.fallback(nil)[scope]
         query = Blog::Types::OptionalText[query]
         files = memory_file_queries.listed(scope:, query:)
-        repos = repos()
-        repo = repos.first unless repos.include?(repo)
+        live = project_queries.live_by_name
+        repos = known_repos(live)
+        shown_repo = shown(repo, repos)
 
         {
-          files:, scope:, query:, repo:, repos:, errors:,
+          files:, scope:, query:, repos:, errors:,
           counts: memory_file_queries.scope_counts,
-          loads: load_memory.call(repo:),
-          scopes: scopes(files),
+          loads: load_memory.call(repo: shown_repo),
+          repo: shown_repo,
+          scopes: scopes(files, live:, repos:),
           values: { path: "", scope: GLOBAL, **values.to_h },
         }
       end
 
-      def scopes(files)
+      def scopes(files, live: project_queries.live_by_name, repos: known_repos(live))
         [
-          Scope.new(key: GLOBAL, scope: GLOBAL, name: nil),
-          *repos.map { scoped("repo", it, it) },
-          *projects(files).map { scoped("project", it.id, it.name) },
-          *tasks(files).map { scoped("task", it.id, Blog::Helpers::Truncation.fit(it.title, limit: NAME_LIMIT)) },
+          choice(GLOBAL, nil, nil),
+          *repos.map { choice("repo", it, it) },
+          *projects(files, live).map { choice("project", it.id, it.name) },
+          *tasks(files).map { choice("task", it.id, Blog::Helpers::Truncation.fit(it.title, limit: NAME_LIMIT)) },
         ]
       end
 
       private
 
-      def projects(files)
-        (project_queries.live_by_name + project_queries.by_ids(targets(files, :project_id))).uniq(&:id)
-      end
+      def choice(kind, target, name) = ScopeChoice.new(key: Helpers::MemoryScope.key_for(kind, target), kind:, name:)
 
-      def repos = (memory_file_queries.repos + project_queries.live_by_name.filter_map(&:repo)).uniq.sort
+      def known_repos(live) = (memory_file_queries.repos + live.filter_map(&:repo)).uniq.sort
 
-      def scoped(scope, target, name)
-        Scope.new(key: "#{scope}#{Helpers::MemoryScope::SEPARATOR}#{target}", scope:, name:)
-      end
+      def projects(files, live) = (live + project_queries.by_ids(targets(files, :project_id))).uniq(&:id)
+
+      def shown(repo, repos) = repos.include?(repo) ? repo : repos.first
 
       def targets(files, field) = files.filter_map { it[field] }.uniq
 

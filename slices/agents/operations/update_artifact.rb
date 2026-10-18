@@ -30,7 +30,7 @@ module Agents
       end
 
       def revise(artifact, body:, **)
-        return if artifact_mutations.version(artifact.id, artifact.version).body == body
+        return if artifact_queries.version_row(artifact.id, artifact.version).body == body
 
         artifact_mutations.add_version(artifact.id, body:, **)
       end

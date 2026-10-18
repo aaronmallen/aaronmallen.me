@@ -32,7 +32,7 @@ module API
 
       def current(artifact)
         { title: artifact.title, type: artifact.type, tags: artifact.tags,
-          body: artifact_queries.version(artifact.id, artifact.version).body }
+          body: artifact_queries.version_row(artifact.id, artifact.version).body }
       end
     end
   end

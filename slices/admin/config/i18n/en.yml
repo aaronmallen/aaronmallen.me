@@ -223,6 +223,17 @@ en:
       untitled: "Give the task a title"
       woken: "Woken"
   memories_page:
+    loads_for:
+      named:
+        global: "Loads for every session"
+        project: "Loads for sessions on %{name} or in its repo"
+        repo: "Loads for sessions in %{name}"
+        task: "Loads for sessions on %{name}"
+      unnamed:
+        global: "loads for every session"
+        project: "loads for sessions on this project or in its repo"
+        repo: "loads for sessions in this repo"
+        task: "loads for sessions on this task"
     scopes:
       global: "Global"
       project: "Project · %{name}"
@@ -3507,11 +3518,6 @@ en:
           lede:
             one: "%{facts} in %{count} file."
             other: "%{facts} in %{count} files."
-          loads_for:
-            global: "loads for every session"
-            project: "loads for sessions on this project or in its repo"
-            repo: "loads for sessions in this repo"
-            task: "loads for sessions on this task"
           no_match: "No file or fact matches “%{query}”."
           placeholder: "Search facts"
           scope: "Scope"
@@ -3526,11 +3532,6 @@ en:
             other: "%{count} facts"
           facts: "facts"
           loaded: "as loaded"
-          loads_for:
-            global: "Loads for every session"
-            project: "Loads for sessions on %{name} or in its repo"
-            repo: "Loads for sessions in %{name}"
-            task: "Loads for sessions on %{name}"
           markdown: "markdown"
           move: "Change scope"
           scope: "Scope"

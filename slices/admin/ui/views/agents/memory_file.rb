@@ -8,7 +8,6 @@ module Admin
           include Components::Agents
 
           LIVE_TABLES = %w[agent_sessions memory_events memory_facts memory_files projects record_links tasks].freeze
-          LOADS_FOR = Blog::Types::MemoryScope.values.to_h { [it, ".loads_for.#{it}"] }.freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
           prop :history, Blog::Types::Instance(Blog::Structs::Paged)
@@ -49,7 +48,7 @@ module Admin
           def lede
             facts = t(".fact_count", count: @file.facts.size)
 
-            "#{facts}. #{t(LOADS_FOR.fetch(@file.scope), name: current.name.to_s)}."
+            "#{facts}. #{t(Helpers::MemoryScope.loads_for(@file.scope, named: true), name: current.name.to_s)}."
           end
 
           def linked

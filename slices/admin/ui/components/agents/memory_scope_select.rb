@@ -13,7 +13,7 @@ module Admin
 
           private
 
-          def options = @scopes.to_h { [it.key, t(Helpers::MemoryScope.label(it.scope), name: it.name.to_s)] }
+          def options = @scopes.to_h { [it.key, t(Helpers::MemoryScope.label(it.kind), name: it.name.to_s)] }
         end
       end
     end

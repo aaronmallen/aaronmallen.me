@@ -3,6 +3,8 @@
 module Agents
   module Relations
     class MemoryFiles < Blog::DB::Relation
+      SCOPE = Blog::Types::MemoryScope
+
       schema :memory_files, infer: true do
         associations do
           has_many :memory_facts, view: :live_in_order
@@ -16,8 +18,8 @@ module Agents
       def loading(repo:, project_ids:, task_ids:)
         where(
           Sequel.|(
-            { scope: "global" }, { scope: "repo", repo: }, { scope: "project", project_id: project_ids },
-            { scope: "task", task_id: task_ids },
+            { scope: SCOPE["global"] }, { scope: SCOPE["repo"], repo: },
+            { scope: SCOPE["project"], project_id: project_ids }, { scope: SCOPE["task"], task_id: task_ids },
           ),
         )
       end

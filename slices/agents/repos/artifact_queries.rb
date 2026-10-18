@@ -15,7 +15,7 @@ module Agents
 
       def updated_since(time) = artifacts.where(artifacts[:updated_at] >= time).count
 
-      def version(artifact_id, number) = artifact_versions.where(artifact_id:, number:).one
+      def version_row(artifact_id, number) = artifact_versions.where(artifact_id:, number:).one
 
       def versions(artifact_id) = artifact_versions.where(artifact_id:).listed.to_a
 

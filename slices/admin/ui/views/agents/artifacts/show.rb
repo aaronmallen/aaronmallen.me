@@ -14,6 +14,7 @@ module Admin
 
             prop :artifact, Blog::Types::Instance(ROM::Struct)
             prop :shown, Blog::Types::Instance(ROM::Struct)
+            prop :first_version, Blog::Types::Instance(ROM::Struct)
             prop :versions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
             prop :records, Blog::Types::Hash
 
@@ -62,7 +63,7 @@ module Admin
             def meta
               Card do
                 p(class: "read-meta") do
-                  span { t(".created", when: written(@versions.last)) }
+                  span { t(".created", when: written(@first_version)) }
                   @artifact.tags.each { |tag| span(class: "tag") { "##{tag}" } }
                 end
               end

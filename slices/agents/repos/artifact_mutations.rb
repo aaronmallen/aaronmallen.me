@@ -11,8 +11,6 @@ module Agents
       def add_version(artifact_id, **) = artifact_versions.command(:create).call(artifact_id:, **)
 
       def by_id_for_update(id) = artifacts.by_pk(id).lock.one
-
-      def version(artifact_id, number) = artifact_versions.where(artifact_id:, number:).one
     end
   end
 end

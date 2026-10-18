@@ -9,7 +9,6 @@ module Admin
 
           LIVE_TABLES = %w[memory_events memory_facts memory_files projects tasks].freeze
           FILTERS = ["all", *Blog::Types::MemoryScope.values].to_h { [it, ".filters.#{it}"] }.freeze
-          LOADS_FOR = Blog::Types::MemoryScope.values.to_h { [it, ".loads_for.#{it}"] }.freeze
           SEARCH_ID = "memories-search"
 
           prop :files, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -60,9 +59,9 @@ module Admin
           end
 
           def group(key, files)
-            scope = scoped(key)
+            choice = scoped(key)
 
-            Card(title: scope_text(scope), note: t(LOADS_FOR.fetch(scope.scope))) do
+            Card(title: scope_text(choice), note: t(Helpers::MemoryScope.loads_for(choice.kind))) do
               files.each { MemoryRow(file: it, query: @query) }
             end
           end
@@ -80,7 +79,7 @@ module Admin
             groups
           end
 
-          def scope_text(scope) = t(Helpers::MemoryScope.label(scope.scope), name: scope.name.to_s)
+          def scope_text(choice) = t(Helpers::MemoryScope.label(choice.kind), name: choice.name.to_s)
 
           def scoped(key) = @scopes.find { it.key == key }
         end

@@ -16,9 +16,12 @@ module Admin
         artifact = artifact_queries.by_id(id)
         return unless artifact
 
-        shown = (artifact_queries.version(id, number) if number) || artifact_queries.version(id, artifact.version)
+        latest = artifact.version
+        shown = (artifact_queries.version_row(id, number) if number) || artifact_queries.version_row(id, latest)
 
-        { artifact:, shown:, versions: artifact_queries.versions(id).reverse,
+        versions = artifact_queries.versions(id)
+
+        { artifact:, shown:, first_version: versions.first, versions: versions.reverse,
           records: list_record_links.call(KIND, id, **records) }
       end
     end

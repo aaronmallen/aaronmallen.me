@@ -94,10 +94,35 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_no_css("option", text: "Task · Drop the old feed", visible: :all)
     end
 
+    it "notes what each group loads for" do
+      get "/admin/agents/memories"
+
+      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_text("loads for sessions in this repo")
+    end
+
     it "picks the first repo when none is chosen" do
       get "/admin/agents/memories"
 
       expect(page).to have_select("Working in", selected: "aaronmallen/blog")
+    end
+  end
+
+  describe "its queries" do
+    let(:files) { Agents::Slice["repos.memory_file_queries"] }
+    let(:projects) { Projects::Slice["repos.project_queries"] }
+
+    before do
+      allow(files).to receive(:repos).and_call_original
+      allow(projects).to receive(:live_by_name).and_call_original
+      %w[repos.memory_file_queries agents.repos.memory_file_queries].each { replace_component(it, files) }
+      %w[repos.project_queries projects.repos.project_queries].each { replace_component(it, projects) }
+    end
+
+    it "reads the repos and live projects once a load", :aggregate_failures do
+      get "/admin/agents/memories"
+
+      expect(files).to have_received(:repos).once
+      expect(projects).to have_received(:live_by_name).once
     end
   end
 
@@ -143,6 +168,20 @@ RSpec.describe "Admin agent memories", type: :request do
 
       expect(page).to have_css("h3.memory-type", text: "Gotchas")
       expect(page.find("#memory-fact-#{fact.id}")).to have_text("claude-code on Anthropic claude-opus-5-5")
+    end
+
+    it "lists its facts in fact type order" do
+      %w[context gotcha preference].each { agents(:add_memory_fact, file.id, { type: it, text: "A #{it}", **author }) }
+      get file_path(file)
+
+      expect(page.all("h3.memory-type").map(&:text)).to eq(%w[Preferences Gotchas Context])
+    end
+
+    it "names what loads it in the lede" do
+      moved = agents(:create_memory_file, { path: "hanami", scope: "repo", repo: "aaronmallen/blog" })
+      get file_path(moved)
+
+      expect(page).to have_text(t("memories_page.loads_for.named.repo", name: "aaronmallen/blog"))
     end
 
     it "shows the markdown start_session hands an agent" do

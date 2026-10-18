@@ -20,7 +20,7 @@ module Admin
         return { **FIELDS.to_h { [it, EMPTY_STRING] }, type: PLAN } unless artifact
 
         { title: artifact.title, type: artifact.type, tags: Blog::Types::TagField[artifact.tags],
-          body: artifact_queries.version(artifact.id, artifact.version).body, note: EMPTY_STRING }
+          body: artifact_queries.version_row(artifact.id, artifact.version).body, note: EMPTY_STRING }
       end
 
       def from_params(params) = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }

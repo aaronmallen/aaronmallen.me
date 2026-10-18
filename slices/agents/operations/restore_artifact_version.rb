@@ -19,7 +19,7 @@ module Agents
 
         transaction do
           step found(artifact_mutations.by_id_for_update(id))
-          copy(step(found(artifact_mutations.version(id, number))), **fields)
+          copy(step(found(artifact_queries.version_row(id, number))), **fields)
           artifact_queries.by_id(id)
         end
       end
