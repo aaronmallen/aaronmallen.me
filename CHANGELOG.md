@@ -5,6 +5,15 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.25] - 2026-10-18
+
+### Fixed
+
+- Each issue the sync brought in from GitHub or Linear used up a number among tasks with no project before it moved
+  into its rule's project, so those tasks skipped from 35 to 472 in three days. A synced issue now takes one number,
+  in its project, and the tasks with no project count up from 1 again with no gaps, in the order they had. Links
+  between tasks show the new numbers.
+
 ## [26.10.24] - 2026-10-18
 
 ### Changed
@@ -1475,7 +1484,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...HEAD
+[26.10.25]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...26.10.25
 [26.10.24]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...26.10.24
 [26.10.23]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...26.10.23
 [26.10.22]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.21...26.10.22
