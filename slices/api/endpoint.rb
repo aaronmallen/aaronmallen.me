@@ -7,13 +7,9 @@ require "json_schemer"
 
 module API
   class Endpoint
-    DELETE = Blog::Types::OAuthScope["delete"]
     FINDS = false
-    HEALTH = Blog::Types::OAuthScope["health"]
-    MAIL = Blog::Types::OAuthScope["mail"]
     MAIL_ROW = "message"
     MAIL_ROWS = "message rows need the mail scope"
-    PUBLISH = Blog::Types::OAuthScope["publish"]
     PUBLIC_TASK = "a task on a published board"
     ROOT = :input
     SCOPED = false
@@ -22,8 +18,11 @@ module API
     UNDELETED = "this change removes %s for good, so it needs the delete scope"
     UNPUBLISHED = "%s shows in public, so this change needs the publish scope"
     WORKOUT = Blog::Types::ActivityKind["workout"]
-    GUARDED = { Blog::Types::OAuthScope["agents"] => Serializers::Link::AGENT_KINDS, HEALTH => [WORKOUT],
-                MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD] }.freeze
+    GUARDED = {
+      OperationTable::AGENTS => Serializers::Link::AGENT_KINDS,
+      OperationTable::HEALTH => [WORKOUT],
+      OperationTable::MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD],
+    }.freeze
 
     include Dry::Monads[:result]
     include Deps["settings", honeybadger: "honeybadger.agent", task_queries: "tasks.repos.task_queries"]
@@ -48,7 +47,7 @@ module API
 
     def activity_kinds(scopes)
       kinds = Blog::Types::ActivityKind.values
-      scopes.include?(HEALTH) ? kinds : kinds - [WORKOUT]
+      scopes.include?(OperationTable::HEALTH) ? kinds : kinds - [WORKOUT]
     end
 
     def bad_window(message) = invalid(from: [message], to: [message])
@@ -87,7 +86,7 @@ module API
       name == :id ? not_found(message) : invalid(name => [message])
     end
 
-    def mail?(scopes) = scopes.include?(MAIL)
+    def mail?(scopes) = scopes.include?(OperationTable::MAIL)
 
     def missing(noun, id, by: "ID") = not_found(Helpers::Wording.missing(noun, id, by:))
 
@@ -123,7 +122,7 @@ module API
     def unhandled(value, text) = failed(text).tap { honeybadger.notify(NoMatchingPatternError.new(value.inspect)) }
 
     def unpublished(fields, scopes)
-      shown = public_in(fields) unless scopes.include?(PUBLISH)
+      shown = public_in(fields) unless scopes.include?(OperationTable::PUBLISH)
       Failure(Structs::Refusal.unpublished(format(UNPUBLISHED, shown))) if shown
     end
 

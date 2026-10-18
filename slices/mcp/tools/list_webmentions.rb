@@ -11,7 +11,7 @@ module MCP
                   "#{API::Helpers::DayWindow::OPEN_NOTE}. " \
                   "Leave both out to list every webmention. #{API::Helpers::Paging::USAGE}. " \
                   "#{Untrusted::WEBMENTIONS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

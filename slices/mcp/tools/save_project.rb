@@ -16,7 +16,7 @@ module MCP
                   "a name and a visibility, and starts active with its board unpublished. Archive and restore " \
                   "it with archive_project and restore_project"
       input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["write"]
+      operations :create_project, :update_project
 
       class << self
         def call(server_context:, **input)

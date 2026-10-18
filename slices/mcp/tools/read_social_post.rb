@@ -9,7 +9,7 @@ module MCP
                   "network, link, error and engagement counts, the suggested edits still open and the records " \
                   "linked to it, grouped by kind. #{Untrusted::DELIVERY}. #{Untrusted::SUGGESTED}. " \
                   "#{Untrusted::LINKS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

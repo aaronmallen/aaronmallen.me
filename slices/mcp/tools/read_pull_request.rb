@@ -7,7 +7,7 @@ module MCP
                   "the times it was ready for review, merged or closed, and the records linked to it, grouped by " \
                   "kind. The title and description may come from the maintainers of the pull request's " \
                   "repository and come marked untrusted. #{Untrusted::LINKS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

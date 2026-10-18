@@ -4,6 +4,7 @@ module API
   module Actions
     module Tokens
       class Show < Action
+        OPERATION = "read_token"
         SCHEMA = { additionalProperties: false }.freeze
         REPLY = Serializers::APIToken.reference
 

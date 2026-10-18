@@ -9,7 +9,7 @@ module MCP
                   "one. A published post keeps its slug and its publish time, and a change to its body needs " \
                   "an edit_note saying what changed and why. " \
                   "The post takes the same checks the admin editor makes, and a refusal names each field at fault"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

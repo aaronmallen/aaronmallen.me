@@ -21,7 +21,7 @@ module MCP
                   "this page. #{API::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
                   "and the title and match of a commit, message, webmention or pull request, come marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

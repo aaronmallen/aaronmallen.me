@@ -9,7 +9,7 @@ module MCP
                   "Pass the session_id it returns on each memory and artifact write, and call end_session when you " \
                   "finish; a session no call names for #{Agents::Repos::AgentSessionQueries::IDLE_HOURS} hours " \
                   "closes on its own. #{Untrusted::MEMORY}"
-      endpoint scope: Blog::Types::OAuthScope["agents"]
+      endpoint
     end
   end
 end

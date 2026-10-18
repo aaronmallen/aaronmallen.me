@@ -5,7 +5,7 @@ module MCP
     class MarkWebmentionsSpam < Base
       description "Mark up to #{Blog::Contract::MAX_IDS} webmentions spam and stop auto-approving the authors. One " \
                   "that is missing marks none. #{Untrusted::WEBMENTIONS}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

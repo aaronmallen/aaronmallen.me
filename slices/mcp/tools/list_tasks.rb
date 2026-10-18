@@ -13,7 +13,7 @@ module MCP
                   "tasks planned into that day's sprint. count gives the tasks on this page and total the tasks " \
                   "that match across every page. #{API::Helpers::Paging::USAGE}. " \
                   "#{Untrusted::TASKS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

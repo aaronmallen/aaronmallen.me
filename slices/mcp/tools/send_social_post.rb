@@ -8,7 +8,7 @@ module MCP
                   "The post is refused if a part runs over a network's limit, naming each such part and network, " \
                   "or if a network has no credentials. " \
                   "#{Untrusted::DELIVERIES}"
-      endpoint scope: Blog::Types::OAuthScope["publish"]
+      endpoint
     end
   end
 end

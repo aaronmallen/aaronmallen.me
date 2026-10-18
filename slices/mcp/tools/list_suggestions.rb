@@ -10,7 +10,7 @@ module MCP
                   "accept_suggestion_edits and reject_suggestion_edits. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{API::Helpers::Paging::USAGE}. " \
                   "#{Untrusted::SUGGESTIONS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

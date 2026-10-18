@@ -7,7 +7,7 @@ module MCP
                   "shows them. A role runs by year, from from_year through to_year, and a role with no to_year " \
                   "is one still held. Give from and to as YYYY-MM-DD; a role counts when any year it covers " \
                   "falls inside the range"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

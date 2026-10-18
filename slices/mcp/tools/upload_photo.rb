@@ -7,7 +7,7 @@ module MCP
                   "Send its bytes in base64. Put the URL in a post, journal entry, task or comment to use it; " \
                   "the site sweeps a photo no record names. It takes a GIF, HEIC, JPEG, PNG or WebP up to " \
                   "#{Media::Operations::UploadPhoto::LIMITS[:size]}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

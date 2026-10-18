@@ -5,7 +5,7 @@ module MCP
     class UntagMailThreads < Base
       description "Take one private tag off up to #{Blog::Contract::MAX_IDS} mail threads at once. One " \
                   "that is missing changes none. #{Untrusted::MAIL_THREADS}"
-      endpoint scope: Blog::Types::OAuthScope["mail"]
+      endpoint
     end
   end
 end

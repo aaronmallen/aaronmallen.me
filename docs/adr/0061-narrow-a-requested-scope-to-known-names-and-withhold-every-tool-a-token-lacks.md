@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, lib]
 issue: AA-677
-amended: [AA-811, "#551", "#941"]
+amended: [AA-811, "#551", "#941", "#1823"]
 tags: [mcp, oauth, scopes, tools, consent, sdk]
 ---
 
@@ -34,14 +34,16 @@ authorization code stores the granted set, both tokens copy it, a refresh copies
 `config/db/structure.sql` default to `{read}`.
 
 **Each tool names one scope, and `MCP::Protocol::ScopedServer` is the only check.** `MCP::Tools::Base` gives
-every tool a `scope` line. `MCP::Protocol::Handler` builds a `ScopedServer` per request from the token's scopes,
+every tool a `scope` line. Since #1823 that scope sits once on the operation's row in
+`slices/api/config/operations.rb`: a tool reads the row of the endpoint it calls, and `API::Actions::Forward` reads
+the same row. `MCP::Protocol::Handler` builds a `ScopedServer` per request from the token's scopes,
 and it leaves every tool the token lacks out of `tools/list`. A call to one of them gets an MCP error that names the
 tool and the missing permission and says to connect again, where the SDK would say `Tool not found`. To do that,
 `ScopedServer` overrides the SDK's private `MCP::Server#call_tool`.
 
 A new scope needs three things: a value in `Blog::Types::OAuthScope`, a consent line under `scopes` in
-`slices/mcp/config/i18n/en.yml`, and a tool that names it. `scopes_supported` in the metadata reads `OAuthScope`
-on its own.
+`slices/mcp/config/i18n/en.yml`, and an operation row that names it (#1823). `scopes_supported` in the metadata
+reads `OAuthScope` on its own.
 
 Since #551 split `publish` and `delete` out of `write`, `OAuthScope` holds five names. ADR 0114 says which tools each
 one guards.

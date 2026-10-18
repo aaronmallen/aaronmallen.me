@@ -5,7 +5,7 @@ module MCP
     class ListShareGroups < Base
       description "List the share groups, several files under one link, newest first, each with its ID, code, " \
                   "name, link, page views, zip downloads and files, every file with its own link and downloads"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

@@ -4,38 +4,10 @@
 module API
   module Actions
     class Forward < Action
-      AGENTS = Blog::Types::OAuthScope["agents"]
-      AGENTS_ENDPOINTS = %w[
-        add_memory_fact create_artifact create_memory_file edit_memory_fact end_session list_artifacts list_sessions
-        move_memory_file read_artifact read_memory read_memory_file remove_memory_fact restore_artifact_version
-        revert_memory_event start_session update_artifact
-      ].freeze
-      DELETE = Blog::Types::OAuthScope["delete"]
-      HEALTH = Blog::Types::OAuthScope["health"]
-      MAIL = Blog::Types::OAuthScope["mail"]
-      MAIL_ENDPOINTS = %w[
-        delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread
-        read_mail_thread snooze_mail_threads tag_mail_threads untag_mail_threads
-      ].freeze
       PARAMS = {
         "array" => Blog::Types::ListParam,
         "integer" => Blog::Types::IntegerParam,
         Helpers::Schema::TASK[:type] => Blog::Types::IntegerParam,
-      }.freeze
-      PUBLISH = Blog::Types::OAuthScope["publish"]
-      SUGGEST = Blog::Types::OAuthScope["suggest"]
-      SCOPES = {
-        "add_shares_to_group" => PUBLISH, "add_work_entry" => PUBLISH, "approve_webmentions" => PUBLISH,
-        "delete_posts" => DELETE, "delete_tasks" => DELETE, "drop_sprint" => WRITE, "group_shares" => PUBLISH,
-        "publish_post" => PUBLISH, "read_health_days" => HEALTH, "remove_trusted_author" => DELETE,
-        "send_social_post" => PUBLISH, "suggest_edits" => SUGGEST, "ungroup_share_file" => PUBLISH,
-        "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
-        "update_post_edit_note" => PUBLISH, "update_share" => PUBLISH, "update_share_group" => PUBLISH,
-        "update_share_group_file" => PUBLISH, "update_webmention_settings" => PUBLISH, "upload_share" => PUBLISH,
-        "upload_share_group" => PUBLISH,
-        **MAIL_ENDPOINTS.to_h { [it, MAIL] },
-        **AGENTS_ENDPOINTS.to_h { [it, AGENTS] },
-        "delete_artifact" => [AGENTS, DELETE], "delete_memory_file" => [AGENTS, DELETE],
       }.freeze
 
       include Deps[build_document: "operations.build_document"]
@@ -52,8 +24,10 @@ module API
         case endpoint.call(input(request, response), scopes: response[:token].scopes)
           in Success(payload) then render_json(response, payload, status: descriptor.status)
           in Failure(Structs::Refusal[error: :unscoped, errors: { scope: }]) then insufficient(response, scope)
-          in Failure(Structs::Refusal[error: :undeleted, message:]) then insufficient(response, DELETE, message)
-          in Failure(Structs::Refusal[error: :unpublished, message:]) then insufficient(response, PUBLISH, message)
+          in Failure(Structs::Refusal[error: :undeleted, message:])
+            insufficient(response, OperationTable::DELETE, message)
+          in Failure(Structs::Refusal[error: :unpublished, message:])
+            insufficient(response, OperationTable::PUBLISH, message)
           in Failure(Structs::Refusal => refusal)
             render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
         end
@@ -82,7 +56,7 @@ module API
 
       def param(name, value) = PARAMS.fetch(descriptor.properties.fetch(name)[:type], Blog::Types::Any)[value]
 
-      def required_scope(request) = SCOPES.fetch(descriptor.id) { super }
+      def required_scope = OperationTable::SCOPES.fetch(descriptor.id)
     end
   end
 end

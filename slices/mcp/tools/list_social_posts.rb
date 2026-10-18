@@ -13,7 +13,7 @@ module MCP
                   "#{API::Helpers::DayWindow::OPEN_NOTE}. " \
                   "Leave both out to list every social post. #{API::Helpers::Paging::USAGE}. " \
                   "#{Untrusted::DELIVERIES}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

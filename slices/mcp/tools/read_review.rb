@@ -13,7 +13,7 @@ module MCP
                   "and model keep only the done tasks that match; the other sections stay whole. " \
                   "The title of each done or carried task that syncs from an issue may come from an issue " \
                   "tracker and comes marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

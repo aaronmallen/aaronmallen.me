@@ -7,7 +7,7 @@ module MCP
                   "each, and that count split by kind. #{TAG_KINDS}. A tag nothing carries counts zero. Give query " \
                   "to keep only the tags whose name holds it; count holds how many tags match. " \
                   "#{API::Helpers::Paging::USAGE}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

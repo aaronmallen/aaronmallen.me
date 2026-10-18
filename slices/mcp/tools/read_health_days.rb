@@ -11,7 +11,7 @@ module MCP
                   "journal entries and the first and last activity. The range's workouts come after the days, " \
                   "then 30 day baselines up to to, then four fixed patterns as group averages, each null when a " \
                   "group has under 3 days. They state averages, not causes"
-      endpoint scope: Blog::Types::OAuthScope["health"]
+      endpoint
     end
   end
 end

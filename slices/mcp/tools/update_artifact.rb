@@ -7,7 +7,7 @@ module MCP
                   "model slugs and an optional note of at most " \
                   "#{Agents::Contracts::ArtifactVersionContract::NOTE_LIMIT} characters; a title, type or tag " \
                   "change adds none. #{Untrusted::ARTIFACT}"
-      endpoint scope: Blog::Types::OAuthScope["agents"]
+      endpoint
     end
   end
 end

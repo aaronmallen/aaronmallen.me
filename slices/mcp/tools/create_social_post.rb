@@ -7,7 +7,7 @@ module MCP
                   "queues it. The answer gives each part's length and limit on each network, so a long part " \
                   "shows before you send. " \
                   "#{Untrusted::DELIVERIES}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

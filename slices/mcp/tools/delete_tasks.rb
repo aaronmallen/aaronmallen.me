@@ -5,7 +5,7 @@ module MCP
     class DeleteTasks < Base
       description "Delete up to #{Blog::Contract::MAX_IDS} tasks and every link to or from them. One that is missing " \
                   "deletes none. No undo"
-      endpoint scope: Blog::Types::OAuthScope["delete"]
+      endpoint
     end
   end
 end

@@ -4,6 +4,7 @@ module API
   module Actions
     module Documents
       class Show < Action
+        OPERATION = "read_document"
         SCHEMA = { additionalProperties: false }.freeze
         REPLY = { type: "object", description: "this OpenAPI document" }.freeze
 

@@ -10,7 +10,7 @@ module MCP
       description "See a photo the site keeps, whatever record names it or none: the picture itself, and its key, " \
                   "width, height and size in bytes. Pass the URL from a post, journal entry, task or comment, or " \
                   "the key at its end. Alt text lives in the Markdown that names the photo"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
 
       class << self
         private

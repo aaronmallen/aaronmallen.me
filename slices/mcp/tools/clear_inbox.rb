@@ -6,7 +6,7 @@ module MCP
       description "Clear inbox rows by the ids list_inbox gives them, as the admin's Mark All As Seen button does: " \
                   "it marks issues seen, messages read, and webmentions seen but still pending. One that fails " \
                   "clears none"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

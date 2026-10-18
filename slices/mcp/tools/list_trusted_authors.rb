@@ -9,7 +9,7 @@ module MCP
                   "auto_approve_known_authors is on, their replies and mentions approve on receipt. No tool adds " \
                   "an author. The author URL, taken from the sender's page, comes marked untrusted. " \
                   "#{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

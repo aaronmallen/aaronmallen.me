@@ -8,7 +8,7 @@ module MCP
                   "closes, done or canceled, the next one appears on the next cadence day after today, or after " \
                   "the closed copy's sprint day when that day is still ahead. save_task and capture_task set a " \
                   "cadence with recur"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

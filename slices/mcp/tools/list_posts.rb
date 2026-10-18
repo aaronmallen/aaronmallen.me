@@ -15,7 +15,7 @@ module MCP
                   "drops out. " \
                   "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
                   "page of each. #{API::Helpers::Paging::USAGE}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

@@ -9,7 +9,7 @@ module MCP
                   "for a draft, the day it was imported. #{API::Helpers::DayWindow::PAGING_NOTE}. Each " \
                   "title and description may come from the maintainers of the pull request's repository and " \
                   "comes marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

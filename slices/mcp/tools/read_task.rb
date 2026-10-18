@@ -9,7 +9,7 @@ module MCP
                   "records linked to it, grouped by kind, and its timeline: comments, work sessions with their IDs, " \
                   "moves, tag changes, status changes and, for a recurring copy, when its series made it, oldest " \
                   "first. #{Untrusted::TASK}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

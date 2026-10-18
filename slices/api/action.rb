@@ -19,9 +19,6 @@ module API
       not_found: :not_found,
       unavailable: :service_unavailable,
     }.freeze
-    VERB_SCOPES = { "DELETE" => Blog::Types::OAuthScope["delete"], "GET" => Blog::Types::OAuthScope["read"],
-                    "HEAD" => Blog::Types::OAuthScope["read"] }.freeze
-    WRITE = Blog::Types::OAuthScope["write"]
 
     include Deps[
       authenticate: "operations.authenticate",
@@ -57,8 +54,8 @@ module API
       response.body = JSON.generate(payload)
     end
 
-    def require_scope(request, response, token)
-      scope = Array(required_scope(request)).find { !token.scopes.include?(it) }
+    def require_scope(response, token)
+      scope = required_scope.find { !token.scopes.include?(it) }
       insufficient(response, scope) if scope
     end
 
@@ -66,13 +63,13 @@ module API
       case authenticate.call(request.env[AUTHORIZATION])
         in Success(token)
           refuse_token(response, GONE_TOKEN) unless record_sighting.call(request, api_token_id: token.id)
-          require_scope(request, response, token)
+          require_scope(response, token)
           response[:token] = token
         in Failure(error)
           refuse_token(response, error)
       end
     end
 
-    def required_scope(request) = VERB_SCOPES.fetch(request.request_method, WRITE)
+    def required_scope = OperationTable::SCOPES.fetch(self.class::OPERATION)
   end
 end

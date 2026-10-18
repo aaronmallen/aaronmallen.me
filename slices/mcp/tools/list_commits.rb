@@ -6,7 +6,7 @@ module MCP
       description "List the commits in a date range, each with its sha, repository, branch, whole message, " \
                   "date, time and lines added and deleted. #{API::Helpers::DayWindow::PAGING_NOTE}. Each message may " \
                   "come from someone else and comes marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

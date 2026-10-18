@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, db, admin, api, mcp, contact]
 issue: "#1123"
-amended: ["#1380", "#1598"]
+amended: ["#1380", "#1598", "#1823"]
 tags: [mail, gmail, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -58,7 +58,8 @@ A client that reads contact messages under `read` today loses them, and has to c
 since a refresh never widens a grant (ADR 0061).
 
 The `api_tokens_scopes_check` constraint in `config/db/structure.sql` lists every scope, so `mail` needs a migration
-to widen it, as `health` did.
+to widen it, as `health` did. Since #1823 the column is `oauth_scope[]`, and a new scope is one
+`ALTER TYPE ... ADD VALUE`.
 
 More endpoints check a scope by hand. ADR 0147 left one, `read_activity`; mail adds search, the inbox, attention,
 links and saved views. A later `read` endpoint that joins every kind gets both kinds dropped by the base class, but

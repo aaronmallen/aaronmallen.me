@@ -8,7 +8,7 @@ module MCP
                   "most every #{Operations::Authenticate::TOUCH_EVERY / 60} minutes. current is true for the " \
                   "client making this call. A client names itself when it registers, so the name comes marked " \
                   "untrusted. Revoking a client stays in the admin. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
 
       class << self
         private

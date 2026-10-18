@@ -10,7 +10,7 @@ module MCP
                   "untrusted. #{Untrusted::WARNING}. " \
                   "#{API::Helpers::DayWindow::OPEN_NOTE}. " \
                   "Leave both out to list every thread. #{API::Helpers::Paging::USAGE}"
-      endpoint scope: Blog::Types::OAuthScope["mail"]
+      endpoint
     end
   end
 end

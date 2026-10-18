@@ -13,20 +13,22 @@ module MCP
       extend Dry::Monads[:result]
 
       class << self
-        attr_reader :endpoint_key, :scope_value
+        attr_reader :endpoint_key
 
         def described(values) = format(description_value, values)
 
-        def endpoint(scope:)
+        def endpoint
           @endpoint_key = name_value.to_sym
           input_schema(API::Endpoints.const_get(name.split("::").last, false)::SCHEMA)
-          scope(scope)
+          operations(endpoint_key)
           define_singleton_method(:call) do |server_context:, **input|
             hand_over(endpoint_key, input, server_context)
           end
         end
 
-        def scope(value) = @scope_value = value
+        def operations(*ids) = @operations = ids
+
+        def scope_value = @operations.flat_map { API::OperationTable::SCOPES.fetch(it.to_s) }.uniq
 
         private
 

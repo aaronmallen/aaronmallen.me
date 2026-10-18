@@ -8,7 +8,7 @@ module MCP
                   "appears once goes stale, and one that would push a social post past a network's limit is " \
                   "refused; both stay out of the text. Edits that would leave a social post part empty change " \
                   "nothing"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

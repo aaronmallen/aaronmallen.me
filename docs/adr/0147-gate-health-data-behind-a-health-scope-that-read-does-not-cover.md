@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, admin, api, mcp]
 issue: "#1112"
-amended: ["#1118", "#1123"]
+amended: ["#1118", "#1123", "#1823"]
 tags: [health, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -31,8 +31,9 @@ the same kind of reason, and ADR 0074 split private tags from public ones.
 it at consent, and the owner ticks it on an API token in the admin, as with every other name in `OAuthScope`. It
 takes a consent line, as ADR 0061 asks of every scope.
 
-- **The health days endpoint and its MCP tool** name `health`. In the API slice, `API::Actions::Forward::SCOPES`
-  maps the endpoint to it, since a `GET` would otherwise need only `read`. `MCP::Protocol::ScopedServer` withholds
+- **The health days endpoint and its MCP tool** name `health`. In the API slice, the endpoint's row in
+  `slices/api/config/operations.rb` names it (`API::Actions::Forward::SCOPES` until #1823), since a `GET` would
+  otherwise need only `read`. `MCP::Protocol::ScopedServer` withholds
   the tool from a token without it, as ADR 0061 says.
 - **The `read_activity` endpoint and tool stay on `read`**, and the endpoint leaves out workout rows unless the
   token also holds `health`. The rest of the feed reads as it does now. As #1118 records, `summarize_activity`

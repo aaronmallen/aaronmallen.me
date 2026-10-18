@@ -12,7 +12,7 @@ module MCP
                   "add up to more than its seconds. Tasks with no project or tag sit last, with a null key and " \
                   "name. The title of each task that syncs from an issue may come from an issue tracker and comes " \
                   "marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

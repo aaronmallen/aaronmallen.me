@@ -19,7 +19,7 @@ module MCP
                   "it touches no task already imported. On an edit, a field you leave out keeps what it has, and " \
                   "tags or projects replace the whole set"
       input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["write"]
+      operations :create_task_rule, :update_task_rule
 
       class << self
         def call(server_context:, **input)

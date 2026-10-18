@@ -6,7 +6,7 @@ module MCP
       description "Queue an import of new commits from GitHub, as the import button on the admin's today page " \
                   "does. It runs in the background, so the commits land a little later; read_sync_state says " \
                   "when the last sync finished and whether one is failing"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

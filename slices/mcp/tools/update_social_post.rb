@@ -8,7 +8,7 @@ module MCP
                   "the admin does, so a queued post waits until send_social_post queues it again. The answer " \
                   "gives each part's length and limit on each network. " \
                   "#{Untrusted::DELIVERIES}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

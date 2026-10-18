@@ -7,7 +7,7 @@ module MCP
                   "the agent and model that made each, or null for the owner. Facts come whole; history comes a " \
                   "page at a time. When more remains, partial comes back true and next_page holds the page to " \
                   "send for older changes. #{Untrusted::MEMORY}"
-      endpoint scope: Blog::Types::OAuthScope["agents"]
+      endpoint
     end
   end
 end

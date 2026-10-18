@@ -5,7 +5,7 @@ module MCP
     class TagTasks < Base
       description "Add one private tag to up to #{Blog::Contract::MAX_IDS} tasks at once. One that is missing tags " \
                   "none. #{Untrusted::TASKS}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [lib, db, api, mcp]
 issue: "#1741"
-amended: ["#1743", "#1749"]
+amended: ["#1743", "#1749", "#1823"]
 tags: [agents, oauth, scopes, consent, api-tokens, mcp, untrusted]
 ---
 
@@ -52,7 +52,8 @@ A client connected before this change sees none of the tools until it connects a
 refresh never widens a grant ([ADR 0061][0061]).
 
 The `api_tokens_scopes_check` constraint in `config/db/structure.sql` lists every scope, so `agents` takes a
-migration to widen it, as `health` and `mail` did.
+migration to widen it, as `health` and `mail` did. Since #1823 the column is `oauth_scope[]`, and a new scope is
+one `ALTER TYPE ... ADD VALUE`.
 
 A removal tool names two scopes. Since #1743 `ScopedServer` withholds a tool that lacks any scope it names, and its
 refusal names each one missing. The API asks a token for both the same way.

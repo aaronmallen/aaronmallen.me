@@ -5,7 +5,7 @@ module MCP
     class LinkTasks < Base
       description "Link one task to another. A pair takes one link, whichever way it runs. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: Blog::Types::OAuthScope["write"]
+      endpoint
     end
   end
 end

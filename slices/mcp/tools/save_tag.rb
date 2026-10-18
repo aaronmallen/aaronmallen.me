@@ -20,7 +20,7 @@ module MCP
                   "a change, a field you leave out keeps what it has, and a rename follows the tag onto every " \
                   "record that carries it"
       input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["write"]
+      operations :create_tag, :update_tag
 
       class << self
         def call(server_context:, **input)

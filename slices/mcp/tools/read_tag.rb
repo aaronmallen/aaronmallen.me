@@ -8,7 +8,7 @@ module MCP
                   "entries and decisions with the private one, grouped by kind, each with its status, drafts, " \
                   "archived projects and closed tasks among them. A name neither scope holds is refused. " \
                   "#{Untrusted::TASKS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

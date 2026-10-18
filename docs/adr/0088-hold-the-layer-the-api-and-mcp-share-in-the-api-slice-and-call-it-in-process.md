@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [api, mcp]
 issue: "#154"
-amended: ["#927", "#1001", "#1188"]
+amended: ["#927", "#1001", "#1188", "#1823"]
 tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
 ---
 
@@ -39,8 +39,9 @@ Both doors call the same class, in process:
   success, 404 for a missing record, 422 for a contract's errors. Since #1001 one action, `API::Actions::Forward`,
   serves every endpoint, and the operation table in `BuildDocument` draws the routes as well as the document.
 - `api` exports each endpoint. `mcp` imports them in `slices/mcp/config/slice.rb` and puts them in the tool's server
-  context. A tool keeps its name, description and scope, takes its input schema from the endpoint, hands the work
-  over and wraps the payload as its answer, or the failure as its refusal.
+  context. A tool keeps its name and description, takes its input schema from the endpoint, hands the work
+  over and wraps the payload as its answer, or the failure as its refusal. #1823 took the scope off the tool and
+  onto the operation's row, which the tool and `Forward` both read.
 
 `api` builds `/api/v1/openapi.json` by walking its endpoints: each one's schema gives the request, and its
 serializer gives the response. No schema is written twice, so the document, the tools and the endpoints cannot
@@ -50,7 +51,7 @@ The edge runs one way. `mcp` imports from `api`, and `api` never imports from `m
 [ADR 0003][0003] names. Journal entries and tasks joined the layer first.
 
 From #927 on, a resource moved one tool at a time, because moving a tool changes what it returns. Since #1188 every tool
-sits on the layer: each hands its work to an endpoint through `endpoint scope:` or `hand_over`, and no tool calls an
+sits on the layer: each hands its work to an endpoint through `endpoint` or `hand_over`, and no tool calls an
 operation or a repo itself. `MCP::Protocol::Handler` keeps no table of operations and repos for its tools, only their
 endpoints and the repo that marks synced task titles untrusted. `list_clients` reads the MCP clients through
 relations the `api` slice keeps on the same tables, since `api` cannot import from `mcp`.

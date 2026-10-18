@@ -105,7 +105,7 @@ module MCP
                   "later of from and since falls before them, the answer leaves them out and says why in " \
                   "refused, and the daily counts still come back. With a path, hours, since and read_spread " \
                   "count that page alone. #{DEFINITIONS}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

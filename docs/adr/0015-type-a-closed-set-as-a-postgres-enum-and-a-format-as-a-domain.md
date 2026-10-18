@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib]
 issue: AA-609
-amended: [AA-758, AA-801, AA-819, "#17", "#791", "#931"]
+amended: [AA-758, AA-801, AA-819, "#17", "#791", "#931", "#1823"]
 tags: [postgres, schema, enums, domains, constraints, types]
 ---
 
@@ -30,7 +30,8 @@ once. #931 moved the last four format `CHECK`s onto domains: `feed_subscribers.a
 `people.key` takes `tag_name`, and `mastodon_handle` and `photo_key` are new.
 
 An array of a closed set is an array of its enum, so `posts.syndication_targets` and `social_posts.targets` are
-`network[]` and need no `<@ ARRAY[...]` check.
+`network[]` and need no `<@ ARRAY[...]` check. #1823 moved the `scopes` of `api_tokens`, `oauth_codes` and
+`oauth_tokens` from `text[]` onto `oauth_scope[]` the same way, so a new scope is one `ALTER TYPE ... ADD VALUE`.
 
 An enum sorts in the order it was declared, so we declare it in the order it must sort. `network` is alphabetical
 because `social_post_deliveries` orders by it (`in_network_order`), and a comment in

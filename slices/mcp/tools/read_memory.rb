@@ -7,7 +7,7 @@ module MCP
                   "and its projects, a project and a task, as one markdown text, with each file and its facts and " \
                   "their IDs. Give repo as owner/name, project_id and task_id as you know them, or none for the " \
                   "global files alone. #{Untrusted::MEMORY}"
-      endpoint scope: Blog::Types::OAuthScope["agents"]
+      endpoint
     end
   end
 end

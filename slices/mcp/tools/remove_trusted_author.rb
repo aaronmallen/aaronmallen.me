@@ -6,7 +6,7 @@ module MCP
       description "Remove one author from the trusted webmention authors, by the author URL list_trusted_authors " \
                   "gives. Their approved webmentions stay approved. Their next reply or mention waits for review, " \
                   "and approving one by hand puts them back"
-      endpoint scope: Blog::Types::OAuthScope["delete"]
+      endpoint
     end
   end
 end

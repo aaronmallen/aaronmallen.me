@@ -6,7 +6,7 @@ module MCP
       description "Suggest grammar and spelling edits for one draft or scheduled blog post or unsent social " \
                   "post; they wait for the author to accept or reject and change nothing on their own, " \
                   "and a new set replaces the edits still waiting on that post"
-      endpoint scope: Blog::Types::OAuthScope["suggest"]
+      endpoint
     end
   end
 end

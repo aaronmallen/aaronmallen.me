@@ -19,7 +19,7 @@ module MCP
                   "as the bare key when nobody holds it, so adding or editing a person whose key one mentions " \
                   "needs the publish scope"
       input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["write"]
+      operations :create_person, :update_person
 
       class << self
         def call(server_context:, **input)

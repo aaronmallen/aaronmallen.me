@@ -7,7 +7,7 @@ module MCP
                   "was last used, null if never. Last use updates at most every " \
                   "#{Operations::Authenticate::TOUCH_EVERY / 60} minutes. The token itself never comes back. " \
                   "Minting and revoking stay in the admin"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

@@ -27,7 +27,8 @@ module API
       def answered(mentions) = serialized(Serializers::Webmention, mentions)
 
       def distrusts?(ids, scopes)
-        self.class::ACT == SPAM && !scopes.include?(DELETE) && webmention_queries.trusted_author_among?(ids)
+        self.class::ACT == SPAM && !scopes.include?(OperationTable::DELETE) &&
+          webmention_queries.trusted_author_among?(ids)
       end
     end
   end

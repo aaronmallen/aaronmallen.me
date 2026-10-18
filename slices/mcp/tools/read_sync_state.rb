@@ -7,7 +7,7 @@ module MCP
                   "with its repository, reason, message, how many times in a row it failed, when it began " \
                   "failing and when it last failed. Each message may quote what a remote service answered, so it " \
                   "comes marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

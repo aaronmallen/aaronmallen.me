@@ -1,24 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API token scopes", type: :request do
-  def self.tools
-    {
-      "create_person" => "save_person", "update_person" => "save_person",
-      "create_project" => "save_project", "update_project" => "save_project",
-      "create_tag" => "save_tag", "update_tag" => "save_tag",
-      "create_task_rule" => "save_task_rule", "update_task_rule" => "save_task_rule",
-    }
-  end
-
-  def self.unscoped = %w[read_document read_token]
-
   def all_scopes = Blog::Types::OAuthScope.values
-
-  def needed(id)
-    return [Blog::Types::OAuthScope["read"]] if self.class.unscoped.include?(id)
-
-    Array(MCP::Tools.const_get(Hanami.app["inflector"].camelize(self.class.tools.fetch(id, id)), false).scope_value)
-  end
 
   def operations
     OpenAPI.document.fetch("paths").flat_map do |path, verbs|
@@ -37,9 +20,11 @@ RSpec.describe "API token scopes", type: :request do
 
   def stored = API::Slice["db.rom"].relations[:api_tokens]
 
-  it "asks each operation for the scope its MCP tool asks for" do
+  it "asks each operation for the scopes its row names" do
     tokens = all_scopes.to_h { [it, api_token(all_scopes - [it])] }
-    wrong = operations.reject { |verb, path, id| needed(id).all? { refused?(verb, path, it, tokens) } }
+    wrong = operations.reject do |verb, path, id|
+      API::OperationTable::SCOPES.fetch(id).all? { refused?(verb, path, it, tokens) }
+    end
 
     expect(wrong).to be_empty, wrong.map { |verb, path, id| "#{verb.upcase} #{path} (#{id})" }.join("\n")
   end

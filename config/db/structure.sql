@@ -258,6 +258,22 @@ CREATE DOMAIN public.non_blank_text AS text
 
 
 --
+-- Name: oauth_scope; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.oauth_scope AS ENUM (
+    'read',
+    'suggest',
+    'write',
+    'publish',
+    'delete',
+    'health',
+    'mail',
+    'agents'
+);
+
+
+--
 -- Name: oauth_token_type; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -2215,10 +2231,10 @@ CREATE TABLE public.api_tokens (
     revoked_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    scopes text[] DEFAULT '{read,suggest,write,publish,delete}'::text[] NOT NULL,
+    scopes public.oauth_scope[] DEFAULT '{read,suggest,write,publish,delete}'::public.oauth_scope[] NOT NULL,
     expires_at timestamp with time zone,
     CONSTRAINT api_tokens_name_length_check CHECK ((char_length((name)::text) <= 100)),
-    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete,health,mail,agents}'::text[])))
+    CONSTRAINT api_tokens_scopes_check CHECK ((cardinality(scopes) > 0))
 );
 
 
@@ -3275,7 +3291,7 @@ CREATE TABLE public.oauth_codes (
     code_challenge text NOT NULL,
     code_challenge_method public.code_challenge_method DEFAULT 'S256'::public.code_challenge_method NOT NULL,
     resource text,
-    scopes text[] DEFAULT '{read}'::text[] NOT NULL,
+    scopes public.oauth_scope[] DEFAULT '{read}'::public.oauth_scope[] NOT NULL,
     expires_at timestamp with time zone NOT NULL,
     used_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -3308,7 +3324,7 @@ CREATE TABLE public.oauth_tokens (
     type public.oauth_token_type NOT NULL,
     token_digest text NOT NULL,
     resource text,
-    scopes text[] DEFAULT '{read}'::text[] NOT NULL,
+    scopes public.oauth_scope[] DEFAULT '{read}'::public.oauth_scope[] NOT NULL,
     expires_at timestamp with time zone NOT NULL,
     revoked_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -9568,4 +9584,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018100006_index_agent_events_by_created_at_and_revert.rb'),
 ('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb'),
 ('20261018110004_index_performance_requests_by_route.rb'),
-('20261018140004_add_draft_to_mail_messages.rb');
+('20261018140004_add_draft_to_mail_messages.rb'),
+('20261018150007_type_token_scopes_as_oauth_scope.rb');

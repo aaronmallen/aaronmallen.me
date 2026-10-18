@@ -19,7 +19,7 @@ module MCP
                   "so p50 and p95 over a range of more than one day weigh each day's figure by its count. Give from " \
                   "and to as YYYY-MM-DD; both days count, days run on #{Blog::TimeZone::NAME} time, and the range " \
                   "runs at most #{API::Helpers::DayWindow::LONGEST} days"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end

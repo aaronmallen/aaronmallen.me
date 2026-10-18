@@ -7,7 +7,7 @@ module MCP
                   "when it came in and when a snooze ends, then each message oldest first with its reply address, " \
                   "subject, body and when it came in. Every subject, body and reply address comes marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["mail"]
+      endpoint
     end
   end
 end

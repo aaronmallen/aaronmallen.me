@@ -6,7 +6,7 @@ module MCP
       description "Move up to #{Blog::Contract::MAX_IDS} mail threads to the trash at once, Gmail's Trash for a " \
                   "Gmail thread, so the owner can restore them. One that is missing moves none. Each trashed " \
                   "thread's subject comes marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["mail"]
+      endpoint
     end
   end
 end

@@ -32,7 +32,7 @@ module MCP
         end
       end
 
-      def missing(tool) = Array(tool.scope_value) - @scopes
+      def missing(tool) = tool.scope_value - @scopes
     end
   end
 end

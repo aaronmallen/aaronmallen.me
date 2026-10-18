@@ -30,7 +30,7 @@ module MCP
                   "issue, the name of a task or session when its task syncs from an issue, and a webmention's " \
                   "name and excerpt, and the name of a commit or pull request, may come from someone else and " \
                   "come marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: Blog::Types::OAuthScope["read"]
+      endpoint
     end
   end
 end
