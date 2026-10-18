@@ -69,8 +69,9 @@ streams at once. Unset, it leaves two threads free, so three at the defaults. Pa
 `503` with `Retry-After` at once rather than wait for a thread. A share group's page and a short link's redirect stay
 outside the cap. Since #1775 an image's preview does too: an upload stores a copy no wider or taller than 1280px
 beside the original, and `?preview` reads that copy whole and sends it with no slot taken. It counts no download and
-carries `no-store` like the rest, so deleting the share or its group stops it at once. An image stored before #1775,
-or one libvips cannot read, has no copy, and its preview streams the original under the cap as before.
+carries `no-store` like the rest, so deleting the share or its group stops it at once. A one-time backfill (#1849)
+stores the copy for images uploaded before #1775. An image libvips cannot read has no copy, and its preview streams
+the original under the cap as before.
 
 `.config/config.ru` holds routing for the first time. A spec has to build the app from that file to reach the share
 host, as the strict transport spec does under [ADR 0111][0111], and any other way to start the site has to use it or

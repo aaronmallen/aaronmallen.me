@@ -161,6 +161,7 @@ RSpec.describe "MCP reach", type: :app do
       "services.operations.remove_connection" => "deletes a connection the admin disconnects; no tool does",
       "services.operations.reseal_credentials" => "the db:reseal mise task runs it; no tool handles credentials",
       "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
+      "shares.operations.backfill_previews" => "the owner runs it once after a deploy to store older images' previews",
       "shares.operations.change_code" => "spec #1053 and spec #1064 keep MCP tools out of shares and short links",
       "shares.operations.check_short_links" => "the nightly link check job checks every short link's destination",
       "shares.operations.delete_share" => "spec #1053 keeps MCP tools out of shares",

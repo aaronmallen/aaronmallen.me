@@ -141,7 +141,17 @@ alike, so no cache keeps one ([ADR 0142][0142]). Each download reaches the app a
 
 An uploaded image gets a small copy beside it in the bucket, which the group page and the admin load with
 `?preview`. The app reads that copy whole and sends it outside the `SHARE_TRANSFERS` cap, so a page full of images
-never answers `503`. Images uploaded before #1775 have no copy and stream the original under the cap.
+never answers `503`. An image libvips cannot read has no copy and streams the original under the cap.
+
+Images uploaded before #1775 have no copy until you store them once, on the Pi from the app's directory with the
+production environment loaded:
+
+```sh
+bundle exec hanami run 'puts Shares::Slice["operations.backfill_previews"].call'
+```
+
+It prints how many images it filled in. An image the store fails to return stays as it was, so run it again until
+it prints `0`. Then it is done.
 
 The cache rules of [ADR 0090][0090] do not reach `aa.cool`. Cloudflare keeps cache rules per zone, and both rules
 live on the blog's zone. The first matches only the blog's host, and the second, which skips the cache for the

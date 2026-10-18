@@ -31,6 +31,8 @@ module Shares
         found.combine(:share_group_files).node(:share_group_files) { it.order(:id) }.to_a
       end
 
+      def missing_previews = share_group_files.images.where(preview_key: nil).to_a
+
       def options = share_groups.with_code.newest_first.to_a.to_h { [it.id.to_s, it.name || it.code] }
 
       def page(page) = page.fill(share_groups.with_code.newest_first.paged(page).combine(:share_group_files).to_a)
