@@ -37,11 +37,11 @@ This writes code and commits it, for hours, without checking back. Do not start 
 
 ## 4. Run a wave
 
-Before the first wave, start Postgres and Redis, so no agent's test run starts or stops them:
+Before the first wave, start Postgres, so no agent's test run starts or stops it. The suite refuses Redis, so leave
+it off:
 
 ```sh
 mise run db:start
-mise run redis:start
 ```
 
 Give each issue in the wave a workspace of its own, off the current tip, with `mise run dev:create-workspace`, as

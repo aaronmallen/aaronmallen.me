@@ -10,7 +10,6 @@ RSpec.describe "Redis dropping under the worker", type: :app do
   let(:sidekiq) do
     Sidekiq::Config.new.tap do |config|
       config.logger = Logger.new(File::NULL)
-      config.redis = { url: "redis://127.0.0.1:1", connect_timeout: 0.1, reconnect_attempts: 0 }
       config.error_handlers.replace([->(error, context, _config) { agent.notify(error, parameters: context) }])
     end
   end
@@ -25,7 +24,10 @@ RSpec.describe "Redis dropping under the worker", type: :app do
   after { poller.terminate }
 
   context "when the scheduler cannot reach Redis" do
-    before { run_on("scheduler") { poller.enqueue } }
+    before do
+      allow(sidekiq).to receive(:redis).and_raise(RedisClient::CannotConnectError, "refused")
+      run_on("scheduler") { poller.enqueue }
+    end
 
     it "builds the notice" do
       expect(notices.map(&:exception)).to contain_exactly(an_instance_of(RedisClient::CannotConnectError))

@@ -7,6 +7,18 @@ Hanami.app.start(:sidekiq)
 Sidekiq.default_configuration.logger.level = Logger::WARN
 
 module Spec
+  class RedisRefused < RedisClient::CannotConnectError; end
+
+  module RefuseRedis
+    def connect(_config)
+      example = RSpec.current_example&.location || "a spec outside an example"
+      raise RedisRefused, "#{example} opened a Redis connection, which fails in CI: " \
+                          "stub the Sidekiq call or replace the sidekiq.* component"
+    end
+  end
+
+  RedisClient.register(RefuseRedis)
+
   class FakeJobSet
     include Enumerable
 
