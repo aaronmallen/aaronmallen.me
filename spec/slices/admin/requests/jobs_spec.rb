@@ -86,7 +86,8 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
       visit
     end
 
-    it "shows processed and failed today", :aggregate_failures do
+    it "shows processed and failed today, said to be in UTC", :aggregate_failures do
+      expect(page.find(".jobs-today")).to have_text("today (UTC)")
       expect(page.find(".jobs-big:not(.jobs-big-small)")).to have_text("1,240 processed")
       expect(page.find(".jobs-big.jobs-failed")).to have_text("3 failed")
     end
@@ -99,8 +100,11 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
       expect(bars.last).to have_css("i.jobs-bar-failed")
     end
 
-    it "names each day's figures for a screen reader" do
-      expect(page.find(".jobs-bars")["aria-label"]).to include("1,240 processed, 3 failed")
+    it "names each day's figures in UTC for a screen reader", :aggregate_failures do
+      label = page.find(".jobs-bars")["aria-label"]
+
+      expect(label).to start_with("Processed and failed, last 7 days in UTC:")
+      expect(label).to include("1,240 processed, 3 failed")
     end
   end
 

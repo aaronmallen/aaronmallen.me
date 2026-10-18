@@ -48,7 +48,7 @@ module Admin
           def today
             found = @days.last
 
-            p(class: "jobs-today") { t(".today") }
+            p(class: "jobs-today") { t(".heading") }
             p(class: "jobs-big") { tally(found[:processed], t(".processed")) }
             p(class: ["jobs-big jobs-big-small", ("jobs-failed" if found[:failed].positive?)]) do
               tally(found[:failed], t(".failed"))

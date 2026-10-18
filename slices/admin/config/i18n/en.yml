@@ -1448,9 +1448,10 @@ en:
             discard: "Discard %{job}? It cannot be retried after."
             kill: "Kill %{job}? It moves to dead with no more tries."
         trend:
-          bars: "Processed and failed, last 7 days: %{days}"
+          bars: "Processed and failed, last 7 days in UTC: %{days}"
           day: "%{day} %{processed} processed, %{failed} failed"
           failed: "failed"
+          heading: "today (UTC)"
           processed: "processed"
           today: "today"
         warnings:
