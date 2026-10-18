@@ -9526,4 +9526,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018010004_add_memory_files_and_artifacts_to_record_links.rb'),
 ('20261018080001_add_earlier_author_to_memory_events.rb'),
 ('20261018080004_add_visitor_hash_to_sign_ins.rb'),
-('20261018080007_add_series_id_to_tasks.rb');
+('20261018080007_add_series_id_to_tasks.rb'),
+('20261018090001_store_plain_line_breaks.rb');

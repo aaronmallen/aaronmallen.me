@@ -17,7 +17,7 @@ module Posts
         required(:slug).maybe(Blog::Types::Nullable::Slug)
         required(:tags).value(Blog::Types::TagList)
         required(:summary).value(Blog::Types::TrimmedText)
-        required(:body).value(Blog::Types::Text)
+        required(:body).value(Blog::Types::Normalized::Breaks)
         required(:publish_at).value(Blog::Types::LocalTime)
         optional(:syndication_body).value(Blog::Types::TrimmedText)
         optional(:syndication_enabled).value(Blog::Types::Checkbox)

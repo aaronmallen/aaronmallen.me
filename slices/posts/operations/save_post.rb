@@ -51,7 +51,7 @@ module Posts
         Success([:drafted, create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["draft"]))])
       end
 
-      def edited?(post, attributes) = lines(post.body) != lines(attributes[:body])
+      def edited?(post, attributes) = post.body != attributes[:body]
 
       def find(id)
         return Success(nil) unless id
@@ -79,8 +79,6 @@ module Posts
 
         same ? attributes.merge(published_at: saved) : attributes
       end
-
-      def lines(text) = text.encode(universal_newline: true)
 
       def persist(id, attributes, intent, now)
         constrained(post_mutations, SLUG_CONSTRAINTS) do

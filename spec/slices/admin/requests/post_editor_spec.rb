@@ -965,6 +965,18 @@ RSpec.describe "Admin post editor", type: :request do
         expect(post_queries.by_id(draft.id)).to have_attributes(title: "Changed", slug: "changed", body: "new")
       end
 
+      it "stores Windows line endings as plain line breaks" do
+        save(title: "Hello", body: "one\r\ntwo\rthree")
+
+        expect(post_queries.all.first.body).to eq("one\ntwo\nthree")
+      end
+
+      it "keeps the space around the body" do
+        save(title: "Hello", body: "    code\r\n")
+
+        expect(post_queries.all.first.body).to eq("    code\n")
+      end
+
       it "creates a draft for an intent it doesn't know" do
         save(intent: "launch", title: "Hello")
 

@@ -445,6 +445,12 @@ RSpec.describe "Admin social", type: :request do
         expect(bodies).to eq(%w[hello])
       end
 
+      it "stores Windows line endings as plain line breaks" do
+        compose(intent: "draft", parts: ["one\r\ntwo", "three\rfour"])
+
+        expect(bodies).to eq(%W[one\ntwo three\nfour])
+      end
+
       it "says the draft was saved" do
         compose(intent: "draft", parts: ["hello"])
         follow_redirect!

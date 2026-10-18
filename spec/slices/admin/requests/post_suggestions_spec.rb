@@ -366,6 +366,22 @@ RSpec.describe "Admin post suggestions", type: :request do
       end
     end
 
+    describe "an edit across a line break on a post saved from the admin" do
+      let(:article) { create(:post, :draft, slug: "lines", body: "teh") }
+
+      before do
+        fields = { title: "Lines", slug: "lines", body: "line one\r\nline two" }
+        post "/admin/posts/#{article.id}", _csrf_token: admin_csrf_token, intent: "draft", post: fields
+        suggest(article, typo("one\nline", "one\nthe line"))
+      end
+
+      it "applies it" do
+        accept(article, edit_id: first_edit_id(article))
+
+        expect(post_queries.by_id(article.id).body).to eq("line one\nthe line two")
+      end
+    end
+
     describe "accepting every edit" do
       let(:article) { create(:post, :draft, body: "teh cat sat") }
 

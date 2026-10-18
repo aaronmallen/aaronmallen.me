@@ -255,7 +255,7 @@ module Blog
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)
     Text = Types::String.constructor { |value| value.is_a?(::String) ? value : Blog::Constants::EMPTY_STRING }
     TextList = Types::Array.of(Types::String).constructor do |values|
-      [*values].map { TrimmedText[it] }.reject(&:empty?)
+      [*values].map { Normalized::Lines[it] }.reject(&:empty?)
     end
     TimeGrouping = Types::String.enum("tag", "project", "day")
     TimeGroupingParam = TimeGrouping.fallback(TimeGrouping.values.first)
@@ -299,7 +299,8 @@ module Blog
       LabelTag = Types::Tag.constructor do |label|
         Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end
-      Lines = Types::String.constructor { |text| TrimmedText[text].gsub(/\r\n?/, "\n") }
+      Breaks = Types::String.constructor { |text| Text[text].gsub(/\r\n?/, "\n") }
+      Lines = Breaks.constructor { |text| TrimmedText[text] }
       MediaType = Types::String.constructor { |value| value.to_s.strip.downcase }.constrained(
         format: %r{\A[a-z0-9][\w!$&#^.+-]{0,126}/[a-z0-9][\w!$&#^.+-]{0,126}\z},
       )
