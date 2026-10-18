@@ -32,6 +32,13 @@ module Admin
 
     def back_here(request) = auth_session(request).admin_return_path(request.params[:return_to])
 
+    def back_to_section(request, route, section)
+      back = back_here(request)
+      return back if back.nil? || back.include?("#") || back.split("?").first != routes.path(route)
+
+      "#{back}##{section}"
+    end
+
     def end_session(request, response, return_to: nil)
       path = auth_session(request).sign_out(return_to)
       response.delete_cookie(Blog::SessionCookie::KEY, path: Blog::SessionCookie::PATH)

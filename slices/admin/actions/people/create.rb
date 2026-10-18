@@ -32,7 +32,7 @@ module Admin
           return mention(response, person) if request.params[:reply] == MENTION
 
           toast(response, ADDED)
-          response.redirect_to(routes.path(:admin_people))
+          response.redirect_to(Helpers::Socials.people(routes))
         end
 
         def mention(response, person)

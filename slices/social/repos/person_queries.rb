@@ -10,6 +10,8 @@ module Social
       def by_keys(keys) = people.where(key: keys).to_a
 
       def by_name(name) = people.where(Sequel.function(:lower, :name) => name.downcase).first
+
+      def count = people.count
     end
   end
 end

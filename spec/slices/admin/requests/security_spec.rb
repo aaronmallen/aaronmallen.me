@@ -10,6 +10,8 @@ RSpec.describe "Admin security", type: :request do
 
   def credential(name) = page.find(".security-cred", text: name)
 
+  def settings_tabs = page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { it["href"] }
+
   def sight(**row)
     database[:sightings].insert(
       browser: "Firefox", os: "Linux", city: "London", country: "GB", calls: 3, last_address: "81.2.69.160",
@@ -33,15 +35,19 @@ RSpec.describe "Admin security", type: :request do
       get "/admin/settings/security"
 
       expect(page).to have_css(".page-head h1", exact_text: "Settings")
-      expect(page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { [it.text, it["href"]] })
-        .to eq([["tagging 0", "/admin/settings/tagging"], ["security", "/admin/settings/security"]])
       expect(page).to have_css("nav[aria-label='Settings tabs'] a[aria-current='page']", exact_text: "security")
+    end
+
+    it "lists every Settings tab in order" do
+      get "/admin/settings/security"
+
+      expect(settings_tabs).to eq(%w[socials tagging security].map { "/admin/settings/#{it}" })
     end
 
     it "lands Settings on its first tab" do
       get "/admin/settings"
 
-      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/tagging"])
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/socials"])
     end
 
     it "sends the old security address to the tab" do

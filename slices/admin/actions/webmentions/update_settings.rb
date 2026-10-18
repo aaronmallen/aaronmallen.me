@@ -11,7 +11,7 @@ module Admin
 
         def handle(request, response)
           toast(response, "#{TOASTS}.#{save(request)}")
-          response.redirect_to(routes.path(:admin_webmention_settings))
+          response.redirect_to(Helpers::Socials.webmentions(routes))
         end
 
         private

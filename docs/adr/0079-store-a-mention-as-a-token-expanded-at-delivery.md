@@ -38,11 +38,11 @@ check before delivery and the preview measure and show the expanded text for eac
 A token that names nobody in the directory is refused when the post is saved. The contract checks it in Ruby, which
 [ADR 0017][0017] lists as an exception since #913.
 
-The directory is a table in the social slice. The operator fills it in from the admin, with whichever handles a
-person has, through one people form that the people page and the composer's `@` list both show. Each handle field
-can search its network for accounts, and picking one fills the handle, and the name when the operator has not typed
-one. A pick only fills the form, and nothing joins the directory until the operator saves. We store each person's
-Bluesky DID, resolved from their handle when the person is saved, and never look it up at send time.
+The directory is a table in the social slice. The operator fills it in from the admin, with whichever handles a person
+has, through one people form that the socials tab of Settings and the composer's `@` list both show. Each handle field
+can search its network for accounts, and picking one fills the handle, and the name when the operator has not typed one.
+A pick only fills the form, and nothing joins the directory until the operator saves. We store each person's Bluesky
+DID, resolved from their handle when the person is saved, and never look it up at send time.
 
 ## Alternatives
 
@@ -62,7 +62,7 @@ edit still names text in one body (ADR 0063). The `@` dropdown inserts the token
 **Add New** row. The row opens the people form in a dialog over the composer, with the name taken from what follows
 the `@`. A good save adds the person to the dropdown and puts their token in place of what the operator typed, and
 the post stays as it was whether the operator saves or cancels. With scripts off a plain **Add New** link under the
-post leads to the people page, and the post is lost on the way there.
+post leads to the new person form, and the post is lost on the way there.
 
 Since #226, search asks Bluesky's public actor search and the Mastodon instance the site posts from, which resolves
 accounts on other instances. A network with no credentials shows no search box, and one that fails or rate limits

@@ -25,7 +25,7 @@ module Admin
 
           def act(route) = path(route, id: @person.id)
 
-          def mention = t("ui.views.people.index.token", key: @person.key)
+          def mention = t("ui.components.people.list.token", key: @person.key)
         end
       end
     end

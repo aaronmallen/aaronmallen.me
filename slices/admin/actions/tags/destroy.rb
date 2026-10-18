@@ -14,7 +14,7 @@ module Admin
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
           result = remove_tag.call(record_id(request), scope:)
-          path = back_here(request) || list_path(request, scope)
+          path = back_to_section(request, :admin_settings_tagging, Helpers::TagList::TAGS) || list_path(request, scope)
 
           case result
             in Failure[:last_tag_of_rules, patterns]

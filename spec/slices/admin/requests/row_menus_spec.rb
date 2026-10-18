@@ -222,7 +222,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
 
       it "carry the menu on people" do
         person = create(:person)
-        get "/admin/people"
+        get "/admin/settings/socials"
 
         expect(page).to have_css(".person-row[data-menu='/admin/people/#{person.id}/menu']")
       end
@@ -251,10 +251,16 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
         expect(last_response.location).to eq("/admin/x?y=1")
       end
 
+      it "removes a person from the socials tab and lands on its section" do
+        act("/admin/people/#{create(:person).id}/delete", return_to: "/admin/settings/socials")
+
+        expect(last_response.location).to eq("/admin/settings/socials#people")
+      end
+
       it "ignores a return path outside the admin" do
         act("/admin/people/#{create(:person).id}/delete", return_to: "https://example.com/")
 
-        expect(last_response.location).to eq("/admin/people")
+        expect(last_response.location).to eq("/admin/settings/socials#people")
       end
     end
   end

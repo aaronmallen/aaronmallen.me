@@ -472,8 +472,8 @@ RSpec.describe "Admin webmentions", type: :request do
     describe "the inbox page head" do
       before { get "/admin/webmentions" }
 
-      it "links to the settings screen" do
-        expect(page).to have_link("Settings", href: "/admin/webmentions/settings")
+      it "links to the webmentions on the socials tab" do
+        expect(page).to have_link("Settings", href: "/admin/settings/socials#webmentions")
       end
 
       it "leaves the settings and per post cards to the settings screen", :aggregate_failures do
@@ -482,12 +482,28 @@ RSpec.describe "Admin webmentions", type: :request do
       end
     end
 
-    describe "the settings screen" do
-      before { get "/admin/webmentions/settings" }
+    it "sends the old settings address to its section of the socials tab" do
+      get "/admin/webmentions/settings"
 
-      it "heads the page as Settings with the webmentions tab current", :aggregate_failures do
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/socials#webmentions"])
+    end
+
+    it "opens its section of the socials tab from the command palette" do
+      get "/admin"
+
+      expect(page).to have_css("[data-palette-href='/admin/settings/socials#webmentions']", visible: :all)
+    end
+
+    describe "the settings screen" do
+      before { get "/admin/settings/socials" }
+
+      it "heads the page as Settings with the socials tab current", :aggregate_failures do
         expect(page).to have_css(".page-head h1", exact_text: "Settings")
-        expect(page).to have_css("a.screen-tab[aria-current='page']", exact_text: "webmentions")
+        expect(page).to have_css("a.screen-tab[aria-current='page']", text: "socials")
+      end
+
+      it "sits below the people on the socials tab" do
+        expect(page).to have_css("#people ~ #webmentions #webmention-settings")
       end
 
       it "shows the settings and per post cards", :aggregate_failures do
@@ -498,7 +514,6 @@ RSpec.describe "Admin webmentions", type: :request do
       it "marks no inbox section current", :aggregate_failures do
         expect(page).to have_no_css("a.pill-nav-link[aria-current]")
         expect(page).to have_no_css("#command-palette-webmentions .pal-r-sub", visible: :all)
-        expect(page).to have_css("#command-palette-webmention_settings .pal-r-sub", visible: :all)
       end
     end
 
@@ -524,14 +539,14 @@ RSpec.describe "Admin webmentions", type: :request do
 
         it "shows #{name} turned off on the next request" do
           webmention_mutations.update_settings(name => false)
-          get "/admin/webmentions/settings"
+          get "/admin/settings/socials"
 
           expect(page).to have_css("input.toggle[name='settings[#{name}]']:not([checked])", visible: :all)
         end
       end
 
       it "draws a setting as a switch" do
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_css("input.toggle[role='switch'][name='settings[receive]']", visible: :all)
       end
@@ -542,10 +557,10 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(webmention_queries.settings).to have_attributes(receive: false, send_on_publish: true)
       end
 
-      it "returns to the settings screen" do
+      it "returns to its section of the socials tab" do
         post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: toggles.merge(receive: "0")
 
-        expect(last_response.location).to end_with("/admin/webmentions/settings")
+        expect(last_response.location).to end_with("/admin/settings/socials#webmentions")
       end
 
       it "shows the saved toast" do
@@ -597,7 +612,7 @@ RSpec.describe "Admin webmentions", type: :request do
 
       it "shows the stored hosts, one per line" do
         webmention_mutations.update_settings(single_author_hosts: %w[ada.example grace.example])
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page.find("textarea[name='settings[single_author_hosts]']").value)
           .to eq("ada.example\ngrace.example")
@@ -630,7 +645,7 @@ RSpec.describe "Admin webmentions", type: :request do
         end
 
         it "says so beside the hosts" do
-          get "/admin/webmentions/settings"
+          get "/admin/settings/socials"
 
           expect(page.find("#webmention-settings .hint").text)
             .to eq(i18n.t("ui.components.webmentions.settings_card.hosts_hint"))
@@ -638,7 +653,7 @@ RSpec.describe "Admin webmentions", type: :request do
       end
 
       it "names the endpoint" do
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_css("#webmention-settings .card-side", exact_text: "Endpoint: POST /webmention")
       end
@@ -647,27 +662,27 @@ RSpec.describe "Admin webmentions", type: :request do
     describe "the per post card" do
       it "shows a post with webmentions on" do
         create(:post, title: "On")
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_css(".li", text: "On").and have_css(".li-side .pill.green", text: "on")
       end
 
       it "shows a post with webmentions off" do
         create(:post, title: "Off", webmentions_enabled: false)
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_css(".li-side .pill.sand", text: "off")
       end
 
       it "links each post to its editor" do
         record = create(:post, title: "Linked")
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_link("Linked", href: "/admin/posts/#{record.id}/edit")
       end
 
       it "shows an empty state without posts" do
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.webmentions.posts_card.empty"))
       end
@@ -675,7 +690,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "lists the newest post first" do
         create(:post, :published, title: "Older", published_at: Time.utc(2026, 9, 1))
         create(:post, :published, title: "Newer", published_at: Time.utc(2026, 9, 2))
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page.all(".li-title").map(&:text)).to eq(%w[Newer Older])
       end
@@ -692,13 +707,13 @@ RSpec.describe "Admin webmentions", type: :request do
         trust(ada)
         Social::Slice["relations.trusted_authors"].by_pk(ada).update(created_at: Time.now - 60)
         trust("https://grace.example/")
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page.all("#trusted-authors .li-title").map(&:text)).to eq(["https://grace.example/", ada])
       end
 
       it "shows an empty state without trusted authors" do
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         empty = i18n.t("ui.components.webmentions.trusted_authors_card.empty")
 
@@ -707,7 +722,7 @@ RSpec.describe "Admin webmentions", type: :request do
 
       it "offers no field to add an author" do
         trust(ada)
-        get "/admin/webmentions/settings"
+        get "/admin/settings/socials"
 
         expect(page).to have_no_css("#trusted-authors input:not([type='hidden'])")
       end
@@ -719,11 +734,11 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(webmention_queries.trusted_author?(ada)).to be(false)
       end
 
-      it "returns to the settings screen with a toast", :aggregate_failures do
+      it "returns to its section of the socials tab with a toast", :aggregate_failures do
         trust(ada)
         remove(ada)
 
-        expect(last_response.location).to end_with("/admin/webmentions/settings")
+        expect(last_response.location).to end_with("/admin/settings/socials#webmentions")
         expect(toast).to eq(i18n.t("webmentions_page.toasts.distrusted"))
       end
 

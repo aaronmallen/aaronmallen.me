@@ -4,13 +4,15 @@ module Admin
   module UI
     module Components
       class SettingsHead < Component
-        TABS = { tagging: :admin_settings_tagging, security: :admin_security }.freeze
+        TABS = {
+          socials: :admin_settings_socials, tagging: :admin_settings_tagging, security: :admin_security,
+        }.freeze
         LABELS = TABS.keys.to_h { [it, ".tabs.#{it}"] }.freeze
 
         prop :tab, Blog::Types::Symbol.enum(*TABS.keys).optional, default: nil
         prop :title, Blog::Types::String
 
-        include Deps[task_rule_queries: "tasks.repos.task_rule_queries"]
+        include Deps[person_queries: "social.repos.person_queries", task_rule_queries: "tasks.repos.task_rule_queries"]
 
         def view_template
           content_for(:title, @title)
@@ -23,7 +25,7 @@ module Admin
 
         private
 
-        def counts = { tagging: task_rule_queries.count }
+        def counts = { socials: person_queries.count, tagging: task_rule_queries.count }
 
         def maintenance
           ButtonForm(

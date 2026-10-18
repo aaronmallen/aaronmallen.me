@@ -1541,6 +1541,14 @@ en:
           placeholder: "Search %{network} by name or handle"
           search: "Search"
           title: "Find an account"
+        list:
+          edit: "Edit %{name}"
+          empty: "Nobody yet. Add the people you mention."
+          new_person: "New person"
+          sub:
+            one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
+            other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
+          token: "@{%{key}}"
         person_dialog:
           title: "New person"
         person_form:
@@ -2151,6 +2159,7 @@ en:
         tabs:
           label: "Settings tabs"
           security: "security"
+          socials: "socials"
           tagging: "tagging"
       share_drawer:
         file: "Shared file"
@@ -3348,15 +3357,6 @@ en:
         status: "404"
         today: "Go to today"
       people:
-        index:
-          edit: "Edit %{name}"
-          empty: "Nobody yet. Add the people you mention."
-          heading: "People"
-          new_person: "New person"
-          sub:
-            one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
-            other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
-          token: "@{%{key}}"
         menu:
           copied_mention: "Mention copied"
           copy_mention: "Copy mention"
@@ -3629,6 +3629,10 @@ en:
           heading: "Sign in"
           sub: "Sign in with an account whose verified email is on the owner list."
       settings:
+        socials:
+          heading: "Socials"
+          people: "People"
+          webmentions: "Webmentions"
         tagging:
           heading: "Tagging"
           rules: "Task rules"
@@ -3840,8 +3844,6 @@ en:
           ignore: "Ignore"
           open_source: "Open source"
           spam: "Mark spam"
-        settings:
-          heading: "Webmentions"
   webmentions_page:
     toasts:
       approved: "Approved · now visible on the post"

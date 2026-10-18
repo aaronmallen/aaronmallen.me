@@ -6605,6 +6605,10 @@
   @apply mb-4 max-w-measure font-serif text-li text-ink;
 }
 
+@utility people-bar {
+  @apply mb-3.5 flex flex-wrap items-center justify-between gap-3;
+}
+
 @utility settings-section {
   @apply min-w-0 scroll-mt-[calc(var(--spacing-top-bar)+1rem)];
 }

@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module People
-        class Index < View
-          include Components::People
-
+        class List < Component
           LIVE_TABLES = %w[service_connections].freeze
 
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -14,8 +12,10 @@ module Admin
           prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            PageHead(title: t(".heading"), sub: t(".sub", count: @people.size)) { new_person }
+            div(class: "people-bar") do
+              Hint { t(".sub", count: @people.size) }
+              new_person
+            end
             div(class: ("g-main" if @searchable.any?)) do
               div(class: "settings-main") { list }
               Finder(networks: @searchable) if @searchable.any?

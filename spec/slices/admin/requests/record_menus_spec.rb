@@ -249,20 +249,26 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
         expect(last_response.status).to eq(404)
       end
 
-      it "lands a new colour back on the page it opened on", :aggregate_failures do
+      it "lands a new colour back on its section of the page it opened on", :aggregate_failures do
         back = "/admin/settings/tagging?scope=private&q=ho"
         admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "home", color: "mk-pink" }, return_to: back)
 
-        expect(last_response.location).to eq(back)
+        expect(last_response.location).to eq("#{back}#tags")
         follow_redirect!
         expect(toast).to eq(admin_t("tags_page.toasts.recoloured"))
       end
 
-      it "lands a delete back on the page it opened on" do
+      it "lands a delete back on its section of the page it opened on" do
         back = "/admin/settings/tagging?scope=private&q=ho"
         admin_post("/admin/tags/#{tag.id}/delete", scope: "private", return_to: back)
 
-        expect(last_response.location).to eq(back)
+        expect(last_response.location).to eq("#{back}#tags")
+      end
+
+      it "lands a delete from elsewhere back where it opened" do
+        admin_post("/admin/tags/#{tag.id}/delete", scope: "private", return_to: "/admin/tasks?filter=next")
+
+        expect(last_response.location).to eq("/admin/tasks?filter=next")
       end
     end
 

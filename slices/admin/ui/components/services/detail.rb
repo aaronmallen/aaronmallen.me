@@ -86,7 +86,7 @@ module Admin
             Hint do
               plain(t(".no_credentials"))
               whitespace
-              a(class: "settings-link", href: path(:admin_webmention_settings)) { t(".bridgy") }
+              a(class: "settings-link", href: webmentions_path) { t(".bridgy") }
             end
           end
 
@@ -121,6 +121,8 @@ module Admin
           end
 
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }
+
+          def webmentions_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::WEBMENTIONS}"
 
           def work
             AutoForm(

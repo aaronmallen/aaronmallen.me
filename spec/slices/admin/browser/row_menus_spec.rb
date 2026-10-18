@@ -95,7 +95,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :featur
   describe "a person" do
     before do
       create(:person, key: "matz")
-      visit "/admin/people"
+      visit "/admin/settings/socials"
       watch_clipboard
       open_menu(".person-row")
     end

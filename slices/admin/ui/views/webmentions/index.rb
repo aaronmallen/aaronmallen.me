@@ -22,7 +22,7 @@ module Admin
             content_for(:live_tables, LIVE_TABLES)
             PageHead(title: t(".heading"), sub:) do
               filter_form
-              Button(href: path(:admin_webmention_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
+              Button(href: settings_path, variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
             end
 
             inbox
@@ -58,6 +58,8 @@ module Admin
             Bulk(filter: @filter, page: mentions.number)
             div(class: "cols", data: { key_list: true }) { mentions.rows.each { |mention| row(mention) } }
           end
+
+          def settings_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::WEBMENTIONS}"
 
           def sub
             dotted(

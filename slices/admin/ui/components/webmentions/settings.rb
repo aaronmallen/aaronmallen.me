@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module Webmentions
-        class Settings < View
-          include Components::Webmentions
-
+        class Settings < Component
           LIVE_TABLES = %w[posts trusted_authors webmention_settings].freeze
 
           prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -14,8 +12,6 @@ module Admin
           prop :trusted, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               div(class: "stack") do
                 SettingsCard(settings: @settings)

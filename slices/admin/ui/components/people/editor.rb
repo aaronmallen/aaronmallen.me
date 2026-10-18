@@ -10,11 +10,15 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            BackLink(href: path(:admin_people), variant: :gh, small: true, class: "editor-back") { t(".all_people") }
+            BackLink(href: people_path, variant: :gh, small: true, class: "editor-back") { t(".all_people") }
 
             PageHead(title: @person ? @person.name : t(".new_person"), sub: t(".sub"))
             Card(data: { person_editor: true }) { PersonForm(person: @person, values: @values, errors: @errors) }
           end
+
+          private
+
+          def people_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::PEOPLE}"
         end
       end
     end

@@ -29,7 +29,9 @@ module Admin
 
         private
 
-        def back(request, scope, query) = back_here(request) || list_path(request, scope, query)
+        def back(request, scope, query)
+          back_to_section(request, :admin_settings_tagging, Helpers::TagList::TAGS) || list_path(request, scope, query)
+        end
 
         def editing(id, params, errors)
           { errors:, id:, name: Blog::Types::Text[params[:name]], **params.slice(:description) }
