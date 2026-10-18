@@ -63,7 +63,8 @@ module Performance
       end
 
       def raw(source, range, value)
-        from, to = Blog::TimeZone.day_bounds(range.first, range.last)
+        first = [range.first, performance_rollups.dataset.max(:day)&.next_day].compact.max
+        from, to = Blog::TimeZone.day_bounds(first, range.last)
         rolled_days = performance_rollups.dataset.where(day: range).select(:day)
 
         source.dataset.unordered.where(occurred_at: from...to).exclude(value => nil).exclude(DAY => rolled_days)

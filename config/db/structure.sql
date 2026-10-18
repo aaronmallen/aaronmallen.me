@@ -7063,6 +7063,13 @@ CREATE INDEX performance_requests_occurred_at_index ON public.performance_reques
 
 
 --
+-- Name: performance_requests_route_verb_occurred_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX performance_requests_route_verb_occurred_at_index ON public.performance_requests USING btree (route, verb, occurred_at);
+
+
+--
 -- Name: performance_rollup_jobs_day_job_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9558,4 +9565,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018090001_store_plain_line_breaks.rb'),
 ('20261018090002_add_preview_key_to_share_group_files.rb'),
 ('20261018100006_index_agent_events_by_created_at_and_revert.rb'),
-('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb');
+('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb'),
+('20261018110004_index_performance_requests_by_route.rb');

@@ -268,6 +268,22 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       end
     end
 
+    it "counts a rolled day once while its raw rows remain" do
+      mixed_rows
+      get "/admin/performance", range: "7"
+
+      expect(cells(rows("Routes")[1]).first(5)).to eq(["GET /writing/:slug", "", "400 ms", "508 ms", "5"])
+    end
+
+    it "leaves out raw rows from days before the newest rollup" do
+      request_row(10.0, on: today - 1)
+      roll_up
+      request_row(5_000.0, route: "/admin/tasks", on: today - 3)
+      get "/admin/performance", range: "7"
+
+      expect(rows("Routes").map { cells(it).first }).to eq(["GET /writing/:slug"])
+    end
+
     it "shows the figures read_performance gives for the same range" do
       mixed_rows
       get "/admin/performance", range: "7"
