@@ -19,6 +19,13 @@ module Spec
       )
     end
 
+    def connection_reads
+      Services::Slice["repos.connection_queries"].tap do |queries|
+        allow(queries).to receive(:for).and_call_original
+        replace_component("repos.connection_queries", queries)
+      end
+    end
+
     def gmail_history(ids, threads)
       added = ids.flat_map do |id|
         threads.fetch(id, []).map { |message| { message: { **message.slice(:id, :labelIds), threadId: id } } }

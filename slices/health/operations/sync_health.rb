@@ -16,7 +16,7 @@ module Health
 
       include Deps[google: "google.client", health_mutations: "repos.health_mutations"]
 
-      def call(first, last) = step synced(first, last)
+      def call(first, last, client = google.loaded) = step synced(client, first, last)
 
       private
 
@@ -65,7 +65,7 @@ module Health
 
       def points(account, type, filter)
         url = "#{DATA_TYPES}/#{type}/dataPoints"
-        found = google.pages(url, rows: "dataPoints", account:, narrow: SCOPE, token_param: :page_token, filter:)
+        found = account.pages(url, rows: "dataPoints", narrow: SCOPE, token_param: :page_token, filter:)
         found.fetch("dataPoints")
       end
 
@@ -77,7 +77,7 @@ module Health
 
       def rollup(account, type, first, last)
         body = { range: { start: civil(first), end: civil(last + 1) }, windowSizeDays: 1 }
-        page = google.post("#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp", body, account:, narrow: SCOPE)
+        page = account.post("#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp", body, narrow: SCOPE)
         rows = page.fetch("rollupDataPoints", [])
 
         rows.to_h { [date(it.dig("civilStartTime", "date")), yield(it)] }
@@ -99,8 +99,8 @@ module Health
         )
       end
 
-      def synced(first, last)
-        account = google.holding(SCOPE)
+      def synced(client, first, last)
+        account = client.holding(SCOPE)&.then { Google::Account.new(client, it) }
         return Success(0) if account.nil?
 
         Success(first.step(last, CHUNK_DAYS).sum { sync(account, it, [it + CHUNK_DAYS - 1, last].min) })

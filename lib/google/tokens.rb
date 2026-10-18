@@ -7,11 +7,11 @@ module Google
     INVALID_GRANT = "invalid_grant"
     LATENCY = 60
 
-    def initialize(oauth:, change_connection:, current: nil)
+    def initialize(oauth:, change_connection:, current: nil, narrowed: {})
       @oauth = oauth
       @change_connection = change_connection
       @current = current
-      @narrowed = {}
+      @narrowed = narrowed
     end
 
     def build(credentials)
@@ -37,7 +37,9 @@ module Google
       end
     end
 
-    def remembering = self.class.new(oauth: @oauth, change_connection: @change_connection, current: {})
+    def remembering
+      self.class.new(oauth: @oauth, change_connection: @change_connection, current: {}, narrowed: @narrowed)
+    end
 
     def renew(connection, token)
       refreshed(connection) { token.refresh }.tap do |fresh|

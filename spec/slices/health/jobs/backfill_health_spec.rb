@@ -47,6 +47,14 @@ RSpec.describe Health::Jobs::BackfillHealth do
       expect(queued).to eq([[(today - 90).iso8601]])
     end
 
+    it "reads the stored connections once a run" do
+      stub_google_health
+      reads = connection_reads
+      backfill
+
+      expect(reads).to have_received(:for).once
+    end
+
     it "asks Google only for data older than the empty chunk" do
       stub_google_health
       backfill

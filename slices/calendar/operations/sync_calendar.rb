@@ -35,8 +35,8 @@ module Calendar
       end
 
       def calendars(account, from, to)
-        listed = google.pages("#{API}/users/me/calendarList", rows: "items", account:).fetch("items")
-        tokens = calendar_queries.sync_tokens(account, from)
+        listed = account.pages("#{API}/users/me/calendarList", rows: "items").fetch("items")
+        tokens = calendar_queries.sync_tokens(account.id, from)
 
         listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, tokens[it["id"]], from, to) }
       end
@@ -55,8 +55,8 @@ module Calendar
 
       def events(account, id, token, from, to)
         url = "#{API}/calendars/#{ERB::Util.url_encode(id)}/events"
-        found = google.pages(
-          url, rows: "items", account:, singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to),
+        found = account.pages(
+          url, rows: "items", singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to),
         )
         cancelled, kept = found.fetch("items").partition { it["status"] == CANCELLED }
 
@@ -83,7 +83,7 @@ module Calendar
       end
 
       def sync(account, from, to)
-        Success(calendar_mutations.store(account, calendars(account, from, to), to:))
+        Success(calendar_mutations.store(account.id, calendars(account, from, to), to:))
       rescue Google::Error => e
         Failure([:google_calendar_failed, e.message])
       end
@@ -91,8 +91,9 @@ module Calendar
       def synced(from, to)
         return Success(0) unless google.configured?
 
-        calendar_mutations.forget_accounts_but(google.holders(*SCOPES, lapsed: true))
-        results = google.holders(*SCOPES).map { sync(it, from, to) }
+        client = google.loaded
+        calendar_mutations.forget_accounts_but(client.holders(*SCOPES, lapsed: true))
+        results = client.holders(*SCOPES).map { sync(Google::Account.new(client, it), from, to) }
         results.find(&:failure?) || Success(results.sum(&:value!))
       end
 
@@ -112,7 +113,7 @@ module Calendar
       end
 
       def writable?(account, item)
-        WRITERS.include?(item["accessRole"]) && !google.work?(account)
+        WRITERS.include?(item["accessRole"]) && !account.work?
       end
     end
   end

@@ -90,6 +90,14 @@ RSpec.describe Health::Jobs::SyncHealth do
 
     it_behaves_like "a sync that steps aside while it runs"
 
+    it "reads the stored connections once a run" do
+      stub_google_health(**full_day)
+      reads = connection_reads
+      run
+
+      expect(reads).to have_received(:for).once
+    end
+
     describe "a day Google holds" do
       before do
         stub_google_health(**full_day)
@@ -251,6 +259,12 @@ RSpec.describe Health::Jobs::SyncHealth do
       run
 
       expect(stored_token).to eq("ya29.token")
+    end
+
+    it "keeps the narrowed token for the next run while it lasts" do
+      2.times { run }
+
+      expect(narrowed).to have_been_made.once
     end
 
     it "narrows again once when Google turns the narrowed token away", :aggregate_failures do

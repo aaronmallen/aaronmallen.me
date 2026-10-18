@@ -103,6 +103,35 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
       expect(calendars.to_h { [it.account, it.writable] }).to eq("me@example.com" => true, "work@example.com" => false)
     end
 
+    it "reads the stored connections once a run" do
+      reads = connection_reads
+      run
+
+      expect(reads).to have_received(:for).once
+    end
+
+    describe "when Google turns a token away mid-run" do
+      def stored_token
+        Services::Slice["repos.connection_queries"].for(:google).find { it.account_id == "me@example.com" }
+      end
+
+      before do
+        stub_request(:get, "#{api}/users/me/calendarList").with(headers: { "Authorization" => "Bearer ya29.me" })
+                                                          .to_return(status: 401)
+        stub_calendars("ya29.fresh", { id: "me@example.com", summary: "Aaron", accessRole: "owner" })
+        stub_request(:post, Spec::GoogleAccounts::TOKEN_URL)
+          .to_return(google_json(access_token: "ya29.fresh", expires_in: 3600, scope: scopes.join(" ")))
+        run
+      end
+
+      it("saves the renewed token") { expect(stored_token.credentials[:access_token]).to eq("ya29.fresh") }
+
+      it "uses it for the rest of the run" do
+        expect(a_request(:get, %r{/me@example\.com/events}).with(headers: { "Authorization" => "Bearer ya29.fresh" }))
+          .to have_been_made
+      end
+    end
+
     it "asks Google for each instance of a recurring event across the window" do
       run
 

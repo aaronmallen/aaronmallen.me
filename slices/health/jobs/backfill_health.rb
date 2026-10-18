@@ -15,9 +15,10 @@ module Health
       def perform(last)
         last = Date.iso8601(last)
         first = last - Operations::SyncHealth::CHUNK_DAYS + 1
+        client = google.loaded
 
-        case sync_health.call(first, last)
-          in Success(0) then walk_on(first) if older?(first)
+        case sync_health.call(first, last, client)
+          in Success(0) then walk_on(first) if older?(client, first)
           in Success then walk_on(first)
           in Failure(_, message) then raise Error, message
         end
@@ -25,8 +26,8 @@ module Health
 
       private
 
-      def older?(first)
-        account = google.holding(Operations::SyncHealth::SCOPE)
+      def older?(client, first)
+        account = client.holding(Operations::SyncHealth::SCOPE)&.then { Google::Account.new(client, it) }
         bounds = { day: %("#{first.iso8601}"), start: %("#{Blog::TimeZone.day_start(first).utc.iso8601}") }
 
         account && OLDER.any? { |type, filter| older_points?(account, type, format(filter, bounds)) }
@@ -37,8 +38,7 @@ module Health
       def older_points?(account, type, filter)
         url = "#{Operations::SyncHealth::DATA_TYPES}/#{type}/dataPoints"
 
-        google.get(url, account:, narrow: Operations::SyncHealth::SCOPE, filter:, page_size: 1)
-              .fetch("dataPoints", []).any?
+        account.get(url, narrow: Operations::SyncHealth::SCOPE, filter:, page_size: 1).fetch("dataPoints", []).any?
       end
 
       def walk_on(first) = self.class.perform_async((first - 1).iso8601)
