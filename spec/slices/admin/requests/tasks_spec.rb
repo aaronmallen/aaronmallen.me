@@ -2269,6 +2269,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(next_titles).to eq(%w[third first second fourth])
       end
 
+      it "reads only ids and positions and writes every move in one update", :aggregate_failures do
+        statements = counting { place("fourth", "first") }
+
+        expect(statements.grep(/UPDATE "tasks"/).size).to eq(1)
+        expect(statements.grep(/SELECT "tasks"."id", "tasks"."position" FROM "tasks"/).size).to eq(1)
+        expect(next_titles).to eq(%w[first fourth second third])
+      end
+
       it "answers 204 with no page" do
         place("first", "third")
 

@@ -49,8 +49,9 @@ module Tasks
       def place(task, after_id)
         transaction do
           tasks.lock_until_commit
-          moves = order_positions.call(tasks.beside(task).in_order.to_a, task.id, after_id)
-          moves&.each { |id, position| update(id, position:) }
+          moves = order_positions.call(tasks.beside(task).in_order.select(:id, :position).to_a, task.id, after_id)
+          reposition(moves) if moves&.any?
+          moves
         end
       end
 
@@ -61,6 +62,15 @@ module Tasks
       def source_from_decision(id, decision_id) = record_links.source_from_decision(id, decision_id)
 
       def unlink(id, other_id) = task_links.between(id, other_id).delete
+
+      private
+
+      def reposition(moves)
+        moved = Sequel.as(tasks.dataset.db.values(moves), :moves, %i[id position])
+        found = tasks.dataset.unordered.from(:tasks, moved).where(Sequel[:tasks][:id] => Sequel[:moves][:id])
+
+        found.update(position: Sequel[:moves][:position], updated_at: Time.now)
+      end
     end
   end
 end
