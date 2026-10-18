@@ -54,6 +54,13 @@ RSpec.describe "API reading a post", type: :request do
       )
     end
 
+    it "gives the word count stored with the post" do
+      article = create(:post, :draft, body: "one two three")
+      Posts::Slice["relations.posts"].by_pk(article.id).update(word_count: 9)
+
+      expect(read(article.id).fetch("word_count")).to eq(9)
+    end
+
     it "counts the webmentions the post has received" do
       article = create(:post, :published)
       2.times { create(:webmention, post_id: article.id) }

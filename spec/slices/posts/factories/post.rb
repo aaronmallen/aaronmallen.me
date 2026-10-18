@@ -6,8 +6,8 @@ Spec::DB::Factories.define(:post) do |f|
   f.body { Faker::Lorem.paragraphs.join("\n\n") }
   f.body_html { |body| Markdown.to_html(body) }
   f.first_paragraph { |body| Markdown::Document.new(body).first_paragraph }
-  f.read_time { |body| Markdown.read_time(body) }
-  f.word_count { |body| Markdown.word_count(body) }
+  f.read_time { |body| Markdown::Document.new(body).read_time }
+  f.word_count { |body| Markdown::Document.new(body).word_count }
   f.status "draft"
   f.published_at nil
 

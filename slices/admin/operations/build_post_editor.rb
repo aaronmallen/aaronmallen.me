@@ -29,12 +29,13 @@ module Admin
       )
         form = params ? form_from_params(params) : form_from_post(post)
         values = form.slice(*FIELDS)
-        preview = build_post_preview.call(values:, now:)
+        document = ::Markdown::Document.new(values[:body])
+        preview = build_post_preview.call(values:, now:, document:)
 
         {
           post:,
           values:,
-          counts: counts(values, preview),
+          counts: { read_time: preview[:read_time], words: document.word_count },
           errors:,
           links: { items: links_in(post), open: links },
           notes: { edits: edits(post), noting: },
@@ -49,10 +50,6 @@ module Admin
       end
 
       private
-
-      def counts(values, preview)
-        { read_time: preview[:read_time], words: ::Markdown.word_count(values[:body]) }
-      end
 
       def edits(post)
         return Blog::Constants::EMPTY_ARRAY unless post&.status == PUBLISHED

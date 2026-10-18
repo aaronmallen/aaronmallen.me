@@ -3,12 +3,10 @@
 module Admin
   module Operations
     class BuildPostPreview
-      def call(values:, now: Time.now)
-        body = Blog::Types::Text[values[:body]]
-
+      def call(values:, now: Time.now, document: ::Markdown::Document.new(Blog::Types::Text[values[:body]]))
         {
-          body_html: ::Markdown.to_html(body),
-          read_time: ::Markdown.read_time(body),
+          body_html: document.html,
+          read_time: document.read_time,
           tags: Blog::Types::TagList[Blog::Types::Text[values[:tags]]],
           time: publish_at(values) || now,
           title: Blog::Types::Text[values[:title]].strip,

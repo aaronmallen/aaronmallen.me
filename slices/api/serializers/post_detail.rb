@@ -40,8 +40,6 @@ module API
       def summary(post) = post.written_summary.to_s
 
       def syndication_targets(post) = post.syndication_targets.to_a
-
-      def word_count(post) = ::Markdown.word_count(post.body)
     end
   end
 end
