@@ -335,12 +335,19 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
     describe "with Redis down" do
       before do
         replace_component("sidekiq.schedule_times", -> { raise RedisClient::CannotConnectError, "refused" })
-        visit
       end
 
       it "reads next run and paused as unknown", :aggregate_failures do
+        visit
+
         expect(entry("sync_gmail")).to have_text(admin_t("ui.components.jobs.cron.unknown"))
         expect(cron.all(".seg-option").map(&:text).last).to eq("paused")
+      end
+
+      it "says the paused entries are unknown" do
+        get "/admin/settings/jobs?cron=paused"
+
+        expect(cron.find(".empty")).to have_text(admin_t("ui.components.jobs.cron.empty.unknown"))
       end
     end
   end

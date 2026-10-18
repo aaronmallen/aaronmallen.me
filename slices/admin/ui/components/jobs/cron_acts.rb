@@ -25,7 +25,7 @@ module Admin
 
           def view_template
             div(class: "jobs-cron-acts") do
-              switches unless @entry.enabled.nil?
+              switches unless @entry.unknown?
               performance_link if @entry.last
             end
           end

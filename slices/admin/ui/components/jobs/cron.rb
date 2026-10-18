@@ -18,7 +18,7 @@ module Admin
             Card(title: t(".heading"), title_id: HEADING, id: ID, aria: { labelledby: HEADING }) do |card|
               card.side { SegmentedLinks(label: t(".filter"), items: FILTERS.keys.map { filter_link(it) }) }
               Hint(class: "jobs-cron-hint") { t(".hint") }
-              entries
+              entry_list
             end
           end
 
@@ -26,18 +26,16 @@ module Admin
 
           def args(entry) = entry.args ? "#{entry.job} #{entry.args.to_json}" : entry.job
 
-          def count(filter) = (@entries.count { kept?(it, filter) } unless filter == "paused" && unknown?)
+          def count(filter)
+            return if paused_unknown?(filter)
 
-          def empty_key
-            return ".empty.unknown" if @filter == "paused" && unknown?
-
-            EMPTY.fetch(@filter)
+            @entries.count { kept?(it, filter) }
           end
 
-          def entries
-            shown = @entries.select { kept?(it) }
+          def empty_key
+            return ".empty.unknown" if paused_unknown?
 
-            shown.empty? ? Empty { t(empty_key) } : shown.each { entry(it) }
+            EMPTY.fetch(@filter)
           end
 
           def entry(entry)
@@ -53,6 +51,12 @@ module Admin
               end
               CronActs(entry:, return_to: filtered(@filter))
             end
+          end
+
+          def entry_list
+            shown = @entries.select { kept?(it) }
+
+            shown.empty? ? Empty { t(empty_key) } : shown.each { entry(it) }
           end
 
           def error(entry)
@@ -93,11 +97,13 @@ module Admin
           end
 
           def next_run(entry)
-            return span { t(".unknown") } if entry.enabled.nil? || (entry.next_at.nil? && !entry.paused?)
+            return span { t(".unknown") } if entry.unknown? || (entry.next_at.nil? && !entry.paused?)
             return span { t(".paused_note") } if entry.paused?
 
             span { Stamped(text: t(".next", at: Stamped::MARK), at: entry.next_at, format: :short) }
           end
+
+          def paused_unknown?(filter = @filter) = filter == "paused" && @entries.any?(&:unknown?)
 
           def runs(entry)
             last_run(entry)
@@ -124,8 +130,6 @@ module Admin
 
             t(".seconds", count: format("%.1f", milliseconds / MILLISECONDS))
           end
-
-          def unknown? = @entries.any? { it.enabled.nil? }
         end
       end
     end

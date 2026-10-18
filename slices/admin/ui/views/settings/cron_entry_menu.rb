@@ -31,7 +31,7 @@ module Admin
           def switches(menu)
             name = @entry.name
             switch = ACTS.switch(@entry)
-            disabled = @entry.enabled.nil?
+            disabled = @entry.unknown?
 
             menu.post(t(".run"), action: path(:admin_run_cron_entry, name:), icon: ACTS::RUN_ICON, disabled:)
             action = path(:admin_switch_cron_entry, name:, switch:)
