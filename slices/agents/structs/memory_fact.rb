@@ -6,6 +6,8 @@ module Agents
       def agent? = !agent.nil?
 
       def removed? = !removed_at.nil?
+
+      def was = { was_type: type, was_text: text, was_agent: agent, was_model: model }
     end
   end
 end

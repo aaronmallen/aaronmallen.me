@@ -46,6 +46,10 @@ client runs many agents and models, though, and the client's name says neither.
 An agent can name itself anything. Two agents that report the same slugs read as one, and a client could write under
 another agent's name. Only the scopes on its token limit what it can do.
 
+Since #1764 each history entry that replaces or removes a fact's text keeps who wrote that text, in `was_agent` and
+`was_model`. A revert of an edit hands the old text back to its author, so an agent's fact I edit and then revert
+loads marked untrusted again. The revert entry still names whoever reverted.
+
 [0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

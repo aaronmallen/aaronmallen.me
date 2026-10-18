@@ -95,8 +95,6 @@ RSpec.describe "MCP memory tools", type: :request do
     let(:file) { create_file.fetch("id") }
     let(:fact) { add_fact(file, "Use jj").fetch("id") }
 
-    def entry(change) = history(file).rfind { it.fetch("op") == change }.fetch("id")
-
     it "takes back an add" do
       fact
       revert(file, entry("add"))
@@ -110,6 +108,36 @@ RSpec.describe "MCP memory tools", type: :request do
 
       expect(trusted(mcp_answer("read_memory_file", id: file).fetch("facts")).map { it.values_at("type", "text") })
         .to eq([["convention", "Use jj"]])
+    end
+
+    def authors(file)
+      read = mcp_answer("read_memory_file", id: file)
+      facts = read.fetch("facts").map { it.values_at("text", "agent", "model") }
+      [facts, read.fetch("history").last.values_at("op", "agent", "model")]
+    end
+
+    def entry(change) = history(file).rfind { it.fetch("op") == change }.fetch("id")
+
+    def owned(name, *, **)
+      Agents::Slice["operations.#{name}"].call(*, { **, agent: nil, model: nil, session_id: nil })
+    end
+
+    it "gives an agent's fact back to the agent when the owner's edit is reverted" do
+      owned(:edit_memory_fact, file, fact, type: "convention", text: "Use git")
+      owned(:revert_memory_event, file, entry("edit"))
+
+      expect(authors(file))
+        .to eq([[[{ "untrusted" => true, "text" => "Use jj" }, "claude-code", "claude-opus-5-5"]],
+                ["revert", nil, nil]])
+    end
+
+    it "gives the owner's fact back to the owner when an agent's edit is reverted" do
+      owned_fact = owned(:add_memory_fact, file, type: "convention", text: "Use jj").value!.id
+      mcp_answer("edit_memory_fact", id: file, fact_id: owned_fact, text: "Use git", **author)
+      revert(file, entry("edit"))
+
+      expect(authors(file))
+        .to eq([[["Use jj", nil, nil]], ["revert", "claude-code", "claude-opus-5-5"]])
     end
 
     it "takes back a remove" do

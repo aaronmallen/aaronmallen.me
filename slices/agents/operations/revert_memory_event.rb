@@ -31,9 +31,11 @@ module Agents
 
       def earlier(event) = { type: event.was_type, text: event.was_text }
 
+      def earlier_author(event) = { agent: event.was_agent, model: event.was_model }
+
       def restore(event, fact, author, at)
-        changes, after = restored(event, fact, author, at)
-        before = fact.removed? ? {} : { was_type: fact.type, was_text: fact.text }
+        changes, after = restored(event, fact, at)
+        before = fact.removed? ? {} : fact.was
 
         memory_fact_mutations.update(fact.id, changes)
         memory_file_mutations.record(
@@ -42,10 +44,10 @@ module Agents
         )
       end
 
-      def restored(event, fact, author, at)
+      def restored(event, fact, at)
         case event.op
           when ADD then [{ removed_at: at }, {}]
-          when EDIT then [{ **earlier(event), **author.except(:session_id) }, earlier(event)]
+          when EDIT then [{ **earlier(event), **earlier_author(event) }, earlier(event)]
           else [{ removed_at: nil }, { type: fact.type, text: fact.text }]
         end
       end

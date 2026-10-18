@@ -3146,6 +3146,8 @@ CREATE TABLE public.memory_events (
     model public.contributor_slug,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     session_id integer,
+    was_agent public.contributor_slug,
+    was_model public.contributor_slug,
     CONSTRAINT memory_events_author_check CHECK ((num_nonnulls(agent, model) = ANY (ARRAY[0, 2]))),
     CONSTRAINT memory_events_op_check CHECK (
 CASE op
@@ -3157,7 +3159,8 @@ CASE op
     WHEN 'revert'::public.memory_event_op THEN ((num_nonnulls(memory_fact_id, reverted_event_id) = 2) AND (num_nonnulls(text, was_text) > 0))
     ELSE false
 END),
-    CONSTRAINT memory_events_state_check CHECK ((((type IS NULL) = (text IS NULL)) AND ((was_type IS NULL) = (was_text IS NULL))))
+    CONSTRAINT memory_events_state_check CHECK ((((type IS NULL) = (text IS NULL)) AND ((was_type IS NULL) = (was_text IS NULL)))),
+    CONSTRAINT memory_events_was_author_check CHECK (((num_nonnulls(was_agent, was_model) = ANY (ARRAY[0, 2])) AND ((was_agent IS NULL) OR (was_text IS NOT NULL))))
 );
 
 
@@ -9496,4 +9499,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261017210004_create_artifacts.rb'),
 ('20261017230003_add_schedule_key_to_performance_jobs.rb'),
 ('20261017230004_create_agent_sessions.rb'),
-('20261018010004_add_memory_files_and_artifacts_to_record_links.rb');
+('20261018010004_add_memory_files_and_artifacts_to_record_links.rb'),
+('20261018080001_add_earlier_author_to_memory_events.rb');

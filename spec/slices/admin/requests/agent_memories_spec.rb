@@ -195,11 +195,13 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(facts(file).map(&:text)).to eq(["Run specs through mise"])
     end
 
-    it "reverts an edit back to the old text" do
+    it "reverts an edit back to the old text and the agent that wrote it", :aggregate_failures do
       admin_post("#{file_path(file)}/facts/#{fact.id}", fact: { type: "gotcha", text: "Run specs with rspec" })
       admin_post("#{file_path(file)}/history/#{events(file).last[:id]}/revert")
 
-      expect(facts(file).map { [it.text, it.agent] }).to eq([["Run specs through mise", nil]])
+      expect(facts(file).map { [it.text, it.agent, it.model] })
+        .to eq([["Run specs through mise", "claude-code", "claude-opus-5-5"]])
+      expect(events(file).last.values_at(:op, :agent, :model)).to eq(["revert", nil, nil])
     end
 
     it "reverts an add, and the next session no longer loads it" do

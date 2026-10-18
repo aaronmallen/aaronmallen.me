@@ -20,7 +20,7 @@ module Agents
           fact = step find_memory_fact.call(memory_file_id, id)
           memory_fact_mutations.update(fact.id, removed_at: at)
           memory_file_mutations.record(
-            memory_file_id, REMOVE, memory_fact_id: fact.id, was_type: fact.type, was_text: fact.text, **author,
+            memory_file_id, REMOVE, memory_fact_id: fact.id, **fact.was, **author,
           )
         end
       end

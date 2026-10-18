@@ -30,7 +30,7 @@ module Agents
         saved = memory_fact_mutations.update(fact.id, type:, text:, agent:, model:)
         memory_file_mutations.record(
           fact.memory_file_id, EDIT,
-          memory_fact_id: fact.id, type:, text:, was_type: fact.type, was_text: fact.text, agent:, model:, session_id:,
+          memory_fact_id: fact.id, type:, text:, **fact.was, agent:, model:, session_id:,
         )
         Success(saved)
       end
