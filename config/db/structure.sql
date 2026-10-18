@@ -9585,4 +9585,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb'),
 ('20261018110004_index_performance_requests_by_route.rb'),
 ('20261018140004_add_draft_to_mail_messages.rb'),
-('20261018150007_type_token_scopes_as_oauth_scope.rb');
+('20261018150007_type_token_scopes_as_oauth_scope.rb'),
+('20261018200001_renumber_tasks_with_no_project.rb');

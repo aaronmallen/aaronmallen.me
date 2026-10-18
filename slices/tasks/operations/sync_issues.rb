@@ -24,7 +24,6 @@ module Tasks
         task_mutations: "repos.task_mutations",
         task_source_mutations: "repos.task_source_mutations",
         task_source_queries: "repos.task_source_queries",
-        task_rule_mutations: "repos.task_rule_mutations",
         task_rule_queries: "repos.task_rule_queries",
       ]
 
@@ -50,8 +49,7 @@ module Tasks
 
       def create_task(run, issue, reached: false)
         transaction do
-          task = task_mutations.append(**copy(issue), list: EXTERNAL)
-          label(task, run.provider, issue, run.now)
+          task = file(run, issue)
           fields = { task_id: task.id, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
           sync_comments.hold(run, [task.id], [issue])
           task_source_mutations.create(**fields, provider: run.provider).tap { refresh(run, it, task, issue, reached:) }
@@ -66,6 +64,13 @@ module Tasks
 
           Success([listing.with(items: assigned), checked, history(run, [*assigned, *checked])])
         end
+      end
+
+      def file(run, issue)
+        names, project_ids = task_rule_queries.targets(run.provider, issue[:origin])
+        task = task_mutations.append(**copy(issue), list: EXTERNAL, project_id: project_ids.first)
+        task_event_mutations.track(task.id, run.now) { task_mutations.add_tags(task.id, [*labels(issue), *names].uniq) }
+        task
       end
 
       def follow(run, issues, history)
@@ -88,12 +93,7 @@ module Tasks
         issues.each { run.track(create_task(run, it, reached:)) }
       end
 
-      def label(task, provider, issue, now)
-        names, project_ids = task_rule_queries.targets(provider, issue[:origin])
-        labeled = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
-        task_event_mutations.track(task.id, now) { task_mutations.add_tags(task.id, [*labeled, *names].uniq) }
-        task_rule_mutations.fill_project([task.id], project_ids.first)
-      end
+      def labels(issue) = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
 
       def reach(run, assigned)
         remote(run.client, run.provider) { Success(reach_issues.call(run.client, assigned, run.known)) }

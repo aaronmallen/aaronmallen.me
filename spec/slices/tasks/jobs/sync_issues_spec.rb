@@ -265,6 +265,13 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(project_ids).to eq([site.id])
     end
 
+    it "takes no number from the tasks with no project" do
+      stub_assigned(issue)
+      sync
+
+      expect(create(:task).number).to eq(1)
+    end
+
     it "takes no project from a project's repo alone" do
       create(:project, repo: "octocat/pod")
       stub_assigned(issue(repo: "octocat/pod"))
