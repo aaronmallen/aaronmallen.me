@@ -14,6 +14,8 @@ module Tasks
 
       def by_pattern(provider, pattern) = with_projects(with_targets(task_rules.where(provider:, pattern:)).to_a).first
 
+      def count = task_rules.count
+
       def matching_task_ids(rule) = task_ids_from(rule.provider) { rule.matches?(it) }
 
       def project_choices = project_queries.by_name

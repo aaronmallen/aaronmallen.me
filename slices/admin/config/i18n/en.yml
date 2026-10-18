@@ -2141,6 +2141,7 @@ en:
         tabs:
           label: "Settings tabs"
           security: "security"
+          tagging: "tagging"
       share_drawer:
         file: "Shared file"
         group: "Shared group"
@@ -2381,6 +2382,27 @@ en:
           remove: "Remove"
           rename: "Rename"
           save: "Save"
+        list:
+          aside: "Click a tag to rename it, recolour it or take it away."
+          count:
+            private:
+              one: "%{count} tag · only you see these, on tasks and the journal"
+              other: "%{count} tags · only you see these, on tasks and the journal"
+            public:
+              one: "%{count} tag · renaming one changes its /writing/tags link and everything that carries it"
+              other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
+          empty: "No tags yet. Name one above."
+          no_match: "Nothing matches %{query}."
+          note: "Removing a tag takes it off everything that carries it. A task rule's only tag can't be removed."
+          scope: "Tag scope"
+          scopes:
+            private: "Private"
+            public: "Public"
+          search: "Search tags"
+          search_placeholder: "filter tags…"
+          title:
+            private: "Task and journal tags"
+            public: "Post and project tags"
         row:
           edit: "Edit"
           unused: "unused · the colour is kept"
@@ -2433,6 +2455,15 @@ en:
             linear: "Linear"
           tags: "Tags"
           tags_placeholder: "ruby, projects"
+        list:
+          add: "Add rule"
+          count:
+            one: "%{count} rule"
+            other: "%{count} rules"
+          empty: "No rules yet."
+          note: "Editing or deleting a rule changes only new imports. Tasks keep the tags and projects they have."
+          sub: "Each rule gives the issues it matches private tags as they sync, and a project when they have none."
+          title: "Tags and projects by repo or team"
         project_pick:
           archived: "archived"
           chosen: "Chosen projects"
@@ -3586,6 +3617,11 @@ en:
           google: "Sign in with Google"
           heading: "Sign in"
           sub: "Sign in with an account whose verified email is on the owner list."
+      settings:
+        tagging:
+          heading: "Tagging"
+          rules: "Task rules"
+          tags: "Tags"
       social:
         index:
           cross_posting: "Cross-posting to %{accounts}"
@@ -3606,28 +3642,6 @@ en:
           drop: "Drop sprint"
           label: "Sprint · %{date}"
       tags:
-        index:
-          aside: "Click a tag to rename it, recolour it or take it away."
-          count:
-            private:
-              one: "%{count} tag · only you see these, on tasks and the journal"
-              other: "%{count} tags · only you see these, on tasks and the journal"
-            public:
-              one: "%{count} tag · renaming one changes its /writing/tags link and everything that carries it"
-              other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
-          empty: "No tags yet. Name one above."
-          heading: "Tags"
-          no_match: "Nothing matches %{query}."
-          note: "Removing a tag takes it off everything that carries it. A task rule's only tag can't be removed."
-          scope: "Tag scope"
-          scopes:
-            private: "Private"
-            public: "Public"
-          search: "Search tags"
-          search_placeholder: "filter tags…"
-          title:
-            private: "Task and journal tags"
-            public: "Post and project tags"
         menu:
           color: "Colour"
           confirm_delete: "Click again · comes off everything"
@@ -3654,16 +3668,6 @@ en:
             private: "Private"
             public: "Public"
       task_rules:
-        index:
-          add: "Add rule"
-          count:
-            one: "%{count} rule"
-            other: "%{count} rules"
-          empty: "No rules yet."
-          heading: "Task rules"
-          note: "Editing or deleting a rule changes only new imports. Tasks keep the tags and projects they have."
-          sub: "Each rule gives the issues it matches private tags as they sync, and a project when they have none."
-          title: "Tags and projects by repo or team"
         menu:
           delete: "Delete rule"
           edit: "Edit"

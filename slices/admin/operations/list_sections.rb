@@ -23,9 +23,9 @@ module Admin
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[health insights fa-heart-pulse admin_health].freeze,
         %i[time insights fa-clock admin_time].freeze,
-        %i[tags settings fa-tag admin_tags].freeze,
+        [:tags, :settings, :"fa-tag", :admin_settings_tagging, Helpers::TagList::TAGS].freeze,
         %i[people settings fa-address-book admin_people].freeze,
-        %i[task_rules settings fa-wand-magic-sparkles admin_task_rules].freeze,
+        [:task_rules, :settings, :"fa-wand-magic-sparkles", :admin_settings_tagging, Helpers::TagList::RULES].freeze,
         %i[webmention_settings settings fa-at admin_webmention_settings].freeze,
         %i[tokens settings fa-key admin_tokens].freeze,
         %i[services settings fa-link admin_services].freeze,
@@ -63,7 +63,9 @@ module Admin
         end
       end
 
-      def located = ALL.map { |(name, group, icon, route)| [name, group, icon, routes.path(route)] }
+      def located
+        ALL.map { |(name, group, icon, route, id)| [name, group, icon, [routes.path(route), id].compact.join("#")] }
+      end
     end
   end
 end

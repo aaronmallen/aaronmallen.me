@@ -232,7 +232,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
     describe "a tag" do
       let(:tag) { create(:tag, :private, name: "home", color: "mk-blue") }
 
-      before { get "/admin/tags/#{tag.id}/menu", scope: "private", return_to: "/admin/tags?scope=private" }
+      before { get "/admin/tags/#{tag.id}/menu", scope: "private", return_to: "/admin/settings/tagging?scope=private" }
 
       it "holds every action a tag takes", :aggregate_failures do
         expect(menu_items).to eq(%w[Rename… Colour Pink Green Blue Violet Sand Orange Copy] + ["Delete tag"])
@@ -250,7 +250,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "lands a new colour back on the page it opened on", :aggregate_failures do
-        back = "/admin/tags?scope=private&q=ho"
+        back = "/admin/settings/tagging?scope=private&q=ho"
         admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "home", color: "mk-pink" }, return_to: back)
 
         expect(last_response.location).to eq(back)
@@ -259,9 +259,10 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
       end
 
       it "lands a delete back on the page it opened on" do
-        admin_post("/admin/tags/#{tag.id}/delete", scope: "private", return_to: "/admin/tags?scope=private&q=ho")
+        back = "/admin/settings/tagging?scope=private&q=ho"
+        admin_post("/admin/tags/#{tag.id}/delete", scope: "private", return_to: back)
 
-        expect(last_response.location).to eq("/admin/tags?scope=private&q=ho")
+        expect(last_response.location).to eq(back)
       end
     end
 
@@ -298,7 +299,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
       it "carry the menu on tags" do
         tag = create(:tag, :private)
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page).to have_css(".tag-row[data-menu='/admin/tags/#{tag.id}/menu?scope=private']")
       end

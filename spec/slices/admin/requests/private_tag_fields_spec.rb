@@ -78,7 +78,7 @@ RSpec.describe "Admin private tag fields", type: :request do
 
     it "suggests private tags on the task rule forms" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "chores" }).value!
-      get "/admin/tasks/rules"
+      get "/admin/settings/tagging"
 
       expect(names("input[name='rule[tags]']")).to eq([%w[chores health]] * 2)
     end

@@ -13,7 +13,7 @@ RSpec.describe "Admin tags", type: :feature do
     create(:tag, name: "ruby", color: "mk-blue")
     create(:tag, name: "hanami", color: "mk-green")
     sign_in_to_admin
-    visit "/admin/tags"
+    visit "/admin/settings/tagging"
   end
 
   it "keeps the editor shut until the edit button is clicked", :aggregate_failures do

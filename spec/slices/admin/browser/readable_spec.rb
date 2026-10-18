@@ -176,7 +176,7 @@ RSpec.describe "Admin screens", type: :feature do
       "clients" => "/admin/clients",
       "commit" => "/admin/commits/#{commit.id}",
       "form expired" => lambda do
-        visit "/admin/tags"
+        visit "/admin/settings/tagging"
         forge_form "/admin/tags"
       end,
       "health" => "/admin/health",
@@ -206,10 +206,9 @@ RSpec.describe "Admin screens", type: :feature do
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
-      "tags" => "/admin/tags",
       "tag summary" => "/admin/tags/site",
+      "tagging" => "/admin/settings/tagging",
       "task" => "/admin/tasks/#{task.id}",
-      "task rules" => "/admin/tasks/rules",
       "task link search" => "/admin/tasks/#{task.id}?link_q=finished",
       "task editor" => "/admin/tasks/#{task.id}/edit",
       "tasks" => "/admin/tasks",
@@ -323,7 +322,7 @@ RSpec.describe "Admin screens", type: :feature do
       "task rule project search" => lambda do
         create(:project, :archived, name: "Atlas")
         create(:project, name: "Bloom")
-        visit "/admin/tasks/rules"
+        visit "/admin/settings/tagging"
         find(".rule-capture [data-project-pick-input]").send_keys("atlas", :down, :enter, "b")
         find(".rule-capture [data-project-pick-results]", visible: :visible)
       end,
@@ -548,7 +547,7 @@ RSpec.describe "Admin screens", type: :feature do
         find("dialog#task-create[open] [data-tag-field-results]", visible: :visible)
       end,
       "task rule tag suggestions" => lambda do
-        visit "/admin/tasks/rules"
+        visit "/admin/settings/tagging"
         find_by_id("rule-tags-search").send_keys("s", :enter, "s")
         find(".rule-capture [data-tag-field-results]", visible: :visible)
       end,

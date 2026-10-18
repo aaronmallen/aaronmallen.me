@@ -8,7 +8,7 @@ module Admin
           LAST_SEPARATOR = " and "
           LIST_SEPARATOR = ", "
           PANEL_ID = "tag-panel"
-          SCOPES = Blog::Types::TagScope.values.to_h { [it, "ui.views.tags.index.scopes.#{it}"] }.freeze
+          SCOPES = Blog::Types::TagScope.values.to_h { [it, "ui.components.tags.list.scopes.#{it}"] }.freeze
 
           prop :tag, Blog::Types::Instance(ROM::Struct)
           prop :uses, Blog::Types::Hash

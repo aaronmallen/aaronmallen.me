@@ -7,8 +7,8 @@ RSpec.describe "Admin live tables", type: :request do
       /admin /admin/activity /admin/analytics /admin/calendar /admin/clients /admin/decisions /admin/decisions/new
       /admin/files /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings
       /admin/people /admin/people/new /admin/performance /admin/performance/requests /admin/posts /admin/posts/new
-      /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/security /admin/services
-      /admin/social /admin/tags /admin/tasks /admin/tasks/new /admin/tasks/rules /admin/time /admin/tokens
+      /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/security
+      /admin/settings/tagging /admin/services /admin/social /admin/tasks /admin/tasks/new /admin/time /admin/tokens
       /admin/webmentions /admin/webmentions/settings
     ]
   end
@@ -61,6 +61,12 @@ RSpec.describe "Admin live tables", type: :request do
     get "/admin/calendar"
 
     expect(tables).to include("calendar_events", "task_tags", "tasks")
+  end
+
+  it "lists the tables of both the tags and the task rules on the tagging tab" do
+    get "/admin/settings/tagging"
+
+    expect(tables).to include("post_tags", "task_tags", "task_rules", "task_rule_projects", "projects")
   end
 
   it "leaves out the tables a page does not draw" do

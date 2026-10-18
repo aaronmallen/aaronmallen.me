@@ -129,7 +129,7 @@ RSpec.describe "Admin row actions", type: :feature do
   end
 
   describe "a task rule" do
-    let(:screen) { "/admin/tasks/rules" }
+    let(:screen) { "/admin/settings/tagging" }
     let(:row) { ".rule-row" }
 
     before { Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "projects" }) }

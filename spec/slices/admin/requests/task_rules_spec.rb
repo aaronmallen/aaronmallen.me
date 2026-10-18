@@ -18,7 +18,8 @@ RSpec.describe "Admin task rules", type: :request do
   def stored(id) = rules.find { it.id == id }
 
   def ticked(id)
-    page.find("form[action='/admin/tasks/rules/#{id}']").all("input[name='rule[projects][]'][checked]").map(&:value)
+    form = page.find("form[action='/admin/tasks/rules/#{id}#task-rules']")
+    form.all("input[name='rule[projects][]'][checked]").map(&:value)
   end
 
   describe "signed in" do
@@ -31,19 +32,19 @@ RSpec.describe "Admin task rules", type: :request do
       end
 
       it "shows each rule's pattern in order" do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.all(".rule-pattern").map(&:text)).to eq(%w[aaronmallen/* aaronmallen/aaronmallen.me])
       end
 
       it "shows each rule's tags" do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.all(".rule-tags").map { it.all(".tag").map(&:text) }).to eq([%w[#projects], %w[#hanami #ruby]])
       end
 
       it "links each rule's tags to their summaries" do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.all(".rule-tags a.tag").map { it[:href] })
           .to eq(%w[/admin/tags/projects /admin/tags/hanami /admin/tags/ruby])
@@ -51,21 +52,21 @@ RSpec.describe "Admin task rules", type: :request do
 
       it "shows each rule's provider" do
         rule("acme/ENG", "work", provider: "linear")
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.all(".rule-row").map { it.find(".rule-provider").text })
           .to eq(%w[GitHub GitHub Linear])
       end
 
       it "counts them" do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".card-side", exact_text: "2 rules")
       end
 
       it "fills each editor with the rule it edits", :aggregate_failures do
-        get "/admin/tasks/rules"
-        form = page.find("form[action='/admin/tasks/rules/#{rules.last.id}']")
+        get "/admin/settings/tagging"
+        form = page.find("form[action='/admin/tasks/rules/#{rules.last.id}#task-rules']")
 
         expect(form.find("input[name='rule[pattern]']").value).to eq("aaronmallen/aaronmallen.me")
         expect(form.find("input[name='rule[tags]']").value).to eq("hanami, ruby")
@@ -73,15 +74,15 @@ RSpec.describe "Admin task rules", type: :request do
 
       it "fills each editor with the rule's provider" do
         linear = rule("acme/*", "work", provider: "linear")
-        get "/admin/tasks/rules"
-        form = page.find("form[action='/admin/tasks/rules/#{linear.id}']")
+        get "/admin/settings/tagging"
+        form = page.find("form[action='/admin/tasks/rules/#{linear.id}#task-rules']")
 
         expect(form.find("select[name='rule[provider]'] option[selected]").value).to eq("linear")
       end
 
       it "shows each rule's project by name" do
         rule("octocat/*", "", projects: [create(:project, name: "Blog").id])
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.find(".rule-row", text: "octocat/*").all(".rule-project").map(&:text)).to eq(%w[Blog])
       end
@@ -89,20 +90,42 @@ RSpec.describe "Admin task rules", type: :request do
       it "ticks each rule's projects in its editor" do
         blog = %w[Blog Atlas].map { create(:project, name: it) }.first
         linked = rule("octocat/*", "", projects: [blog.id])
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(ticked(linked.id)).to eq([blog.id.to_s])
       end
 
-      it "sits under the settings tabs" do
-        get "/admin/tasks/rules"
+      it "sits on the tagging tab, below the tags, and counts the rules on the tab", :aggregate_failures do
+        get "/admin/settings/tagging"
 
-        expect(page).to have_css(".screen-tab[aria-current='page']", text: "task rules")
+        expect(page.all(".settings-section").map { it[:id] }).to eq(%w[tags task-rules])
+        expect(page).to have_css("#task-rules .rule-row", count: 2)
+        expect(page.find("nav[aria-label='Settings tabs'] a[aria-current='page']"))
+          .to have_text("tagging").and have_css(".settings-tab-count", exact_text: "2")
+      end
+
+      it "counts the rules on the tagging tab from another tab" do
+        get "/admin/settings/security"
+
+        expect(page.find("nav[aria-label='Settings tabs'] a", text: "tagging"))
+          .to have_css(".settings-tab-count", exact_text: "2")
       end
     end
 
-    it "says something useful when there is no rule yet" do
+    it "sends the old address to its section of the tagging tab" do
       get "/admin/tasks/rules"
+
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/tagging#task-rules"])
+    end
+
+    it "opens its section of the tagging tab from the command palette" do
+      get "/admin"
+
+      expect(page).to have_css("[data-palette-href='/admin/settings/tagging#task-rules']", visible: :all)
+    end
+
+    it "says something useful when there is no rule yet" do
+      get "/admin/settings/tagging"
 
       expect(page).to have_css(".empty")
     end
@@ -110,7 +133,7 @@ RSpec.describe "Admin task rules", type: :request do
     it "is linked from the external tab" do
       get "/admin/tasks", filter: "external"
 
-      expect(page).to have_link("Task rules", href: "/admin/tasks/rules")
+      expect(page).to have_link("Task rules", href: "/admin/settings/tagging#task-rules")
     end
 
     describe "the blurb" do
@@ -127,12 +150,12 @@ RSpec.describe "Admin task rules", type: :request do
         stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search(github_issue("I_seven", number: 7)))
         stub_github(GitHubGraphQL::ISSUES_QUERY, github_issue_nodes)
         Tasks::Jobs::SyncIssues.new.perform("github")
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
       end
 
       it "says a rule tags the issues it matches as they sync and gives them a project", :aggregate_failures do
         expect(synced).to eq([%w[ruby], blog.id])
-        expect(page).to have_css(".card-blurb", exact_text: i18n.t("ui.views.task_rules.index.sub"))
+        expect(page).to have_css(".card-blurb", exact_text: i18n.t("ui.components.task_rules.list.sub"))
       end
     end
 
@@ -161,20 +184,26 @@ RSpec.describe "Admin task rules", type: :request do
         follow_redirect!
 
         expect(held).to eq([%w[projects], blog.id])
-        expect(page).to have_css("p.hint", exact_text: i18n.t("ui.views.task_rules.index.note"))
+        expect(page).to have_css("p.hint", exact_text: i18n.t("ui.components.task_rules.list.note"))
       end
 
       it "states the edit note once, under the list and not in each editor" do
         rule("aaronmallen/*", "projects")
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
-        expect(page).to have_css(".hint", exact_text: i18n.t("ui.views.task_rules.index.note"), count: 1)
+        expect(page).to have_css(".hint", exact_text: i18n.t("ui.components.task_rules.list.note"), count: 1)
       end
     end
 
     describe "adding a rule" do
+      it "posts to its section, so a refusal opens on the rules" do
+        get "/admin/settings/tagging"
+
+        expect(page).to have_css("form.rule-capture[action='/admin/tasks/rules#task-rules']")
+      end
+
       it "offers GitHub or Linear, with GitHub chosen", :aggregate_failures do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
         select = page.find(".rule-capture select[name='rule[provider]']")
 
         expect(select.all("option").map { [it.value, it.text] }).to eq([%w[github GitHub], %w[linear Linear]])
@@ -184,7 +213,7 @@ RSpec.describe "Admin task rules", type: :request do
       it "offers every project, private or archived among them, by name" do
         create(:project, :private, name: "Blog")
         create(:project, :archived, name: "Atlas")
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.find(".rule-capture").all(".rule-projects .choice").map(&:text)).to eq(["Atlas archived", "Blog"])
       end
@@ -217,8 +246,9 @@ RSpec.describe "Admin task rules", type: :request do
         expect(rules.map { [it.pattern, it.tags.map(&:name)] }).to eq([["aaronmallen/*", %w[projects ruby]]])
       end
 
-      it "says so" do
+      it "says so, back on its section of the tagging tab", :aggregate_failures do
         add("aaronmallen/*", "projects")
+        expect(last_response.location).to eq("/admin/settings/tagging#task-rules")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule added")
@@ -326,8 +356,9 @@ RSpec.describe "Admin task rules", type: :request do
         expect(stored(existing.id).provider).to eq("linear")
       end
 
-      it "says so" do
+      it "says so, back on its section of the tagging tab", :aggregate_failures do
         admin_post("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/*", tags: "ruby" })
+        expect(last_response.location).to eq("/admin/settings/tagging#task-rules")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule saved")
@@ -365,15 +396,16 @@ RSpec.describe "Admin task rules", type: :request do
         expect(rules).to be_empty
       end
 
-      it "says so" do
+      it "says so, back on its section of the tagging tab", :aggregate_failures do
         admin_post("/admin/tasks/rules/#{existing.id}/delete")
+        expect(last_response.location).to eq("/admin/settings/tagging#task-rules")
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule deleted")
       end
 
       it "asks first, naming the rule" do
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(page.find("form[action='/admin/tasks/rules/#{existing.id}/delete']")["data-confirm"])
           .to include("aaronmallen/*")
@@ -406,7 +438,7 @@ RSpec.describe "Admin task rules", type: :request do
     before { rule("aaronmallen/*", "projects") }
 
     it "redirects the list to sign in", :aggregate_failures do
-      get "/admin/tasks/rules"
+      get "/admin/settings/tagging"
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
       expect(last_response.body).not_to include("aaronmallen/*")

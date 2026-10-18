@@ -540,7 +540,7 @@ RSpec.describe "Admin keys", type: :feature do
   describe "typing in a field" do
     before do
       create(:tag, name: "ruby")
-      visit "/admin/tags"
+      visit "/admin/settings/tagging"
       find_by_id("tags-q").send_keys("j", "k", "?")
     end
 

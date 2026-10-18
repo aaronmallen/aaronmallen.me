@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module Tags
-        class Index < View
-          include Components::Tags
-
+        class List < Component
           LIVE_TABLES = %w[decision_tags journal_entry_tags post_tags project_tags task_rule_tags task_tags].freeze
           PRIVATE = Blog::Types::TagScope["private"]
           PUBLIC = Blog::Types::TagScope["public"]
@@ -26,12 +24,10 @@ module Admin
           prop :usage, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               div(class: "settings-main") do
                 card
-                Pager(page: @tags, route: :admin_tags, params: scope_params(@scope))
+                Pager(page: @tags, href: ->(query) { list_path(**scope_params(@scope), **query) })
               end
               side_panel
             end
@@ -57,7 +53,7 @@ module Admin
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
           def filter_form
-            AutoForm(action: path(:admin_tags), role: "search") do
+            AutoForm(action: path(:admin_settings_tagging), role: "search") do
               input(type: "hidden", name: "scope", value: @scope)
               SearchField(
                 id: SEARCH_ID, label: t(".search"), name: "q", value: @query,
@@ -65,6 +61,8 @@ module Admin
               )
             end
           end
+
+          def list_path(**) = "#{path(:admin_settings_tagging, **)}##{Helpers::TagList::TAGS}"
 
           def rows
             return empty if @tags.rows.empty?
@@ -78,7 +76,7 @@ module Admin
 
           def scope_params(scope) = @query.empty? ? { scope: } : { scope:, q: @query }
 
-          def scope_path(scope) = path(:admin_tags, **scope_params(scope))
+          def scope_path(scope) = list_path(**scope_params(scope))
 
           def side_panel
             Card(as: :aside, class: "settings-side tag-panel", id: Editor::PANEL_ID) do

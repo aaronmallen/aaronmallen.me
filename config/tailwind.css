@@ -6605,6 +6605,22 @@
   @apply mb-4 max-w-measure font-serif text-li text-ink;
 }
 
+@utility settings-section {
+  @apply min-w-0 scroll-mt-[calc(var(--spacing-top-bar)+1rem)];
+}
+
+@utility settings-section-heading {
+  @apply mb-3.5 border-b border-line pb-2.5 font-mono text-kicker tracking-[.12em] text-ink-muted uppercase;
+}
+
+@utility settings-stack {
+  @apply flex min-w-0 flex-col gap-[clamp(28px,3vw,48px)];
+}
+
+@utility settings-tab-count {
+  @apply meta-badge;
+}
+
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 

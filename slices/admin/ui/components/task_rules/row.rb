@@ -51,7 +51,7 @@ module Admin
 
           def editor
             div(class: "rule-editor") do
-              Form(action: path(:admin_update_task_rule, id: @rule.id), id: form_id) do
+              Form(action: "#{path(:admin_update_task_rule, id: @rule.id)}##{Helpers::TagList::RULES}", id: form_id) do
                 Fields(**values, choices: @choices, tag_choices: @tag_choices, scope:)
               end
               foot

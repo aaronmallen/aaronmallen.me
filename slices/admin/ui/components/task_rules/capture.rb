@@ -14,7 +14,7 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Form(action: path(:admin_create_task_rule), class: "rule-capture") do
+            Form(action: "#{path(:admin_create_task_rule)}##{Helpers::TagList::RULES}", class: "rule-capture") do
               Fields(
                 pattern: @pattern, provider: @provider, tags: @tags, projects: @projects, choices: @choices,
                 tag_choices: @tag_choices, errors: @errors,

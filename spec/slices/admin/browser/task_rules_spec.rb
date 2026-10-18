@@ -11,7 +11,7 @@ RSpec.describe "Admin task rules", type: :feature do
     Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "projects" })
     create(:project, name: "Blog")
     sign_in_to_admin
-    visit "/admin/tasks/rules"
+    visit "/admin/settings/tagging"
   end
 
   it "adds a rule" do
@@ -34,7 +34,7 @@ RSpec.describe "Admin task rules", type: :feature do
     before do
       create(:project, :archived, name: "Atlas")
       create(:project, name: "Bloom")
-      visit "/admin/tasks/rules"
+      visit "/admin/settings/tagging"
     end
 
     it "shows a search box in place of the checkboxes", :aggregate_failures do

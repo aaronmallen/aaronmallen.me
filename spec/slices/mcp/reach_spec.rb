@@ -23,6 +23,7 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.build_review_page" => "builds the admin's review screen; read_review reads the same review",
       "admin.operations.build_search_page" => "builds the admin's search screen; the search tool runs the same search",
       "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",
+      "admin.operations.build_tagging_page" => "builds the admin's tagging tab; list_tags and list_task_rules read it",
       "admin.operations.build_tags_page" => "builds the admin's tags screen; list_tags reads the same tags",
       "admin.operations.build_task_page" => "builds the admin's task page; read_task reads the same task",
       "admin.operations.build_time_page" => "builds the admin's time screen; read_time_report reads the same",

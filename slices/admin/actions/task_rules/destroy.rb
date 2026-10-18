@@ -10,7 +10,7 @@ module Admin
 
         def handle(request, response)
           result = delete_task_rule.call(record_id(request))
-          settle(response, result, DELETED, routes.path(:admin_task_rules))
+          settle(response, result, DELETED, Helpers::TagList.rules(routes))
         end
       end
     end

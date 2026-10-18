@@ -8,8 +8,8 @@ module Admin
         RENAMED = "tags_page.toasts.renamed"
 
         include Deps[
-          build_tags_page: "operations.build_tags_page",
-          index_view: "ui.views.tags.index",
+          "operations.build_tagging_page",
+          tagging_view: "ui.views.settings.tagging",
           save_tag: "tags.operations.save_tag",
           tag_queries: "tags.repos.tag_queries",
         ]
@@ -37,7 +37,7 @@ module Admin
 
         def invalid(request, response, scope, query, editing)
           page = requested_page(request, response)
-          unprocessable(response, index_view, **build_tags_page.call(scope:, page:, editing:, query:))
+          unprocessable(response, tagging_view, **build_tagging_page.call(tags: { scope:, page:, editing:, query: }))
         end
 
         def list_path(request, scope, query)

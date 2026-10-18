@@ -13,7 +13,7 @@ module Admin
             id = @rule.id
 
             ContextMenu(label: @rule.pattern) do |menu|
-              menu.link(t(".edit"), href: path(:admin_task_rules), icon: :edit,
+              menu.link(t(".edit"), href: "#{path(:admin_settings_tagging)}##{Helpers::TagList::RULES}", icon: :edit,
                                     dialog: Components::TaskRules::Row.toggle_id(id))
               menu.separator
               menu.post(t(".delete"), action: path(:admin_delete_task_rule, id:), icon: :trash,

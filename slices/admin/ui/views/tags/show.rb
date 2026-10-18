@@ -46,7 +46,7 @@ module Admin
           end
 
           def back
-            return BackLink(href: path(:admin_tags)) { t(".back") } unless @kind
+            return BackLink(href: tags_path) { t(".back") } unless @kind
 
             BackLink(href: path(:admin_tag, name:)) { heading }
           end
@@ -104,6 +104,8 @@ module Admin
               StatusPill(status: project.archived? ? :archived : :active)
             end
           end
+
+          def tags_path = "#{path(:admin_settings_tagging)}##{Helpers::TagList::TAGS}"
 
           def task(task)
             ListItem(title: task.title, href: path(:admin_task, id: task.id)) do |item|

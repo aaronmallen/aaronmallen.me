@@ -38,7 +38,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", type: :feature
 
   it "opens a task rule's editor from Edit" do
     rule = Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", tags: "ruby" }).value!
-    visit "/admin/tasks/rules"
+    visit "/admin/settings/tagging"
     open_menu(find(".rule-row .rule-provider"))
     item("Edit").click
 

@@ -63,9 +63,9 @@ RSpec.describe "Text holding a NUL byte", type: :request do
       end
     end
 
-    it "answers the admin tags screen with 200 and no tags", :aggregate_failures do
+    it "answers the admin tagging tab with 200 and no tags", :aggregate_failures do
       create(:tag, name: "deploy")
-      get "/admin/tags", q: nul
+      get "/admin/settings/tagging", q: nul
 
       expect(status).to eq(200)
       expect(page).to have_no_text("deploy")

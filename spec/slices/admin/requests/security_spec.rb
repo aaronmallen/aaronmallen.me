@@ -34,14 +34,14 @@ RSpec.describe "Admin security", type: :request do
 
       expect(page).to have_css(".page-head h1", exact_text: "Settings")
       expect(page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { [it.text, it["href"]] })
-        .to eq([["security", "/admin/settings/security"]])
+        .to eq([["tagging 0", "/admin/settings/tagging"], ["security", "/admin/settings/security"]])
       expect(page).to have_css("nav[aria-label='Settings tabs'] a[aria-current='page']", exact_text: "security")
     end
 
     it "lands Settings on its first tab" do
       get "/admin/settings"
 
-      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/security"])
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/tagging"])
     end
 
     it "sends the old security address to the tab" do

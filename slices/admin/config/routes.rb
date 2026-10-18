@@ -240,8 +240,9 @@ module Admin
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
-    redirect_temporary "/settings", to: "/settings/security"
+    redirect_temporary "/settings", to: "/settings/tagging"
     get "/settings/security", to: "security.show", as: :security
+    get "/settings/tagging", to: "settings.tagging", as: :settings_tagging
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     get "/social/:id/menu", to: "social.menu", as: :social_post_menu, id: ID
@@ -267,7 +268,7 @@ module Admin
     get "/tasks/bulk/menu", to: "tasks.bulk_menu", as: :tasks_bulk_menu
     get "/tasks/in-progress", to: "tasks.in_progress", as: :tasks_in_progress
     get "/tasks/new", to: "tasks.new", as: :new_task
-    get "/tasks/rules", to: "task_rules.index", as: :task_rules
+    redirect_temporary "/tasks/rules", to: "/settings/tagging#task-rules"
     post "/tasks/rules", to: "task_rules.create", as: :create_task_rule
     post "/tasks/rules/:id", to: "task_rules.update", as: :update_task_rule, id: ID
     get "/tasks/rules/:id/menu", to: "task_rules.menu", as: :task_rule_menu, id: ID

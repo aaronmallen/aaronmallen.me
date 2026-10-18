@@ -22,7 +22,7 @@ RSpec.describe "Admin tags", type: :request do
   def stored(id) = every_tag.find { it.id == id }
 
   def uses_of(name, scope)
-    get("/admin/tags", scope:)
+    get("/admin/settings/tagging", scope:)
     Capybara.string(last_response.body).find(".tag-row", text: "##{name}").find(".tag-uses").text
   end
 
@@ -37,21 +37,23 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "shows the first page and links to the next", :aggregate_failures do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(names).to eq(%w[#elixir #go])
-        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/tags?scope=public&page=2']", text: "Older")
+        older = "/admin/settings/tagging?scope=public&page=2#tags"
+        expect(page).to have_css("nav.pager a[rel='next'][href='#{older}']", text: "Older")
       end
 
       it "keeps the scope and the search on a later page", :aggregate_failures do
-        get "/admin/tags", q: "r", page: "2"
+        get "/admin/settings/tagging", q: "r", page: "2"
 
         expect(names).to eq(%w[#ruby #rust])
-        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/tags?scope=public&q=r']", text: "Newer")
+        newer = "/admin/settings/tagging?scope=public&q=r#tags"
+        expect(page).to have_css("nav.pager a[rel='prev'][href='#{newer}']", text: "Newer")
       end
 
       it "sends the page it is on with a rename" do
-        get "/admin/tags", page: "2"
+        get "/admin/settings/tagging", page: "2"
 
         expect(page).to have_css("#tag-#{named('ruby').id}-form input[name='page'][value='2']", visible: :all)
       end
@@ -63,7 +65,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "sends the search it is under with a rename and a colour", :aggregate_failures do
-        get "/admin/tags", q: "r"
+        get "/admin/settings/tagging", q: "r"
 
         expect(page).to have_css("#tag-#{named('rails').id}-form input[name='q'][value='r']", visible: :all)
         editor = "#tag-#{named('rails').id}-editor"
@@ -82,30 +84,30 @@ RSpec.describe "Admin tags", type: :request do
       it "returns to the search after a rename" do
         admin_post("/admin/tags/#{named('rust').id}", tag: { name: "crab" }, scope: "public", q: "r")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r#tags")
       end
 
       it "returns to the page and search after a rename" do
         admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "rubyist" }, scope: "public", q: "r", page: "2")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r&page=2#tags")
       end
 
       it "returns to the page and search after a colour" do
         admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "ruby", color: "mk-pink" }, q: "r", page: "2")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r&page=2#tags")
       end
 
       it "returns to the last page when a rename empties the one it was on" do
         admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
         admin_post("/admin/tags/#{named('ruby').id}", tag: { name: "gem" }, q: "r", page: "2")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r#tags")
       end
 
       it "sends the page and search it is under with a removal", :aggregate_failures do
-        get "/admin/tags", q: "r", page: "2"
+        get "/admin/settings/tagging", q: "r", page: "2"
 
         remove = "#tag-#{named('ruby').id}-editor form[action$='/delete']"
         expect(page).to have_css("#{remove} input[name='q'][value='r']", visible: :all)
@@ -115,71 +117,84 @@ RSpec.describe "Admin tags", type: :request do
       it "returns to the page and search after a removal" do
         admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r&page=2")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r&page=2#tags")
       end
 
       it "returns to the last page when a removal empties the one it was on" do
         admin_post("/admin/tags/#{named('rust').id}/delete", q: "r", page: "2")
         admin_post("/admin/tags/#{named('ruby').id}/delete", q: "r", page: "2")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=public&q=r")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=public&q=r#tags")
       end
 
       it "counts every tag that matches, not the page" do
-        get "/admin/tags", q: "r"
+        get "/admin/settings/tagging", q: "r"
 
         expect(page).to have_css(".card-blurb", text: "4 tags")
       end
 
       it "draws no pager when one page holds every tag" do
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page).to have_no_css("nav.pager")
       end
 
       it "returns 404 for a page past the end" do
-        get "/admin/tags", page: "4"
+        get "/admin/settings/tagging", page: "4"
 
         expect(last_response).to be_not_found
       end
     end
 
-    it "is a section of the command palette" do
+    it "opens its section of the tagging tab from the command palette" do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/tags']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/tagging#tags']", visible: :all)
+    end
+
+    it "sends the old address to its section of the tagging tab, keeping the scope, search and page" do
+      get "/admin/tags", scope: "private", q: "ho", page: "2"
+
+      expect([last_response.status, last_response.location])
+        .to eq([302, "/admin/settings/tagging?scope=private&q=ho&page=2#tags"])
+    end
+
+    it "sends the bare old address to the public tags on the tagging tab" do
+      get "/admin/tags"
+
+      expect(last_response.location).to eq("/admin/settings/tagging?scope=public#tags")
     end
 
     describe "the list" do
       before { create(:post, tags: %w[ruby hanami]) }
 
       it "shows every tag in name order" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(names).to eq(%w[#hanami #ruby])
       end
 
       it "counts them" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".card-blurb", text: "2 tags")
       end
 
       it "draws a tag in the colour it carries" do
         hue = Blog::UI::Components::Pill.for_tag_color(named("ruby").color)
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".tag-name .tag.#{hue}", text: "#ruby")
       end
 
       it "links each tag to its summary" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page.find(".tag-row", text: "#ruby")).to have_link("#ruby", href: "/admin/tags/ruby")
       end
 
       it "offers an edit button that opens the tag's form in the side panel", :aggregate_failures do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
         editor = "tag-#{named('ruby').id}-editor"
 
         pen = "a.bt.tag-pen[href='##{editor}'][title='Edit'][aria-label='Edit']"
@@ -189,19 +204,19 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "keeps the forms out of the list" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_no_css(".tag-row form", visible: :all)
       end
 
       it "opens no editor until one is asked for" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_no_css(".tag-editor-open", visible: :all)
       end
 
       it "says what carries a tag" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".tag-uses", text: "1 post", count: 2)
       end
@@ -209,7 +224,7 @@ RSpec.describe "Admin tags", type: :request do
       it "counts each public kind a public tag is on" do
         create(:project, tags: %w[ruby])
         create(:task, tags: %w[ruby])
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page.find(".tag-row", text: "#ruby").find(".tag-uses").text).to eq("1 post · 1 project")
       end
@@ -218,33 +233,33 @@ RSpec.describe "Admin tags", type: :request do
         create(:task, tags: %w[ruby])
         create(:journal_entry, tags: %w[ruby])
         Decisions::Slice["repos.decision_mutations"].replace_tags(create(:decision).id, %w[ruby])
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("1 journal entry · 1 task · 1 decision")
       end
 
       it "counts the messages a private tag is on" do
         2.times { Mail::Slice["repos.message_tag_mutations"].add(create(:message).id, "ruby") }
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("2 messages")
       end
 
       it "says a tag nothing carries is unused" do
         create(:tag, name: "elixir")
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".tag-uses", text: "unused")
       end
 
       it "narrows the list to what the filter matches" do
-        get "/admin/tags", q: "ru"
+        get "/admin/settings/tagging", q: "ru"
 
         expect(names).to eq(%w[#ruby])
       end
 
       it "says so when the filter matches nothing" do
-        get "/admin/tags", q: "elixir"
+        get "/admin/settings/tagging", q: "elixir"
 
         expect(page).to have_css(".empty", text: "elixir")
       end
@@ -257,62 +272,62 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "opens on the public tags" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(names).to eq(%w[#ruby])
       end
 
       it "lists only private tags on the private tab" do
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(names).to eq(%w[#chores])
       end
 
       it "falls back to the public tags for a scope it does not know" do
-        get "/admin/tags", scope: "secret"
+        get "/admin/settings/tagging", scope: "secret"
 
         expect(names).to eq(%w[#ruby])
       end
 
       it "links to each tab, so it works with scripts off", :aggregate_failures do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
-        expect(page).to have_link("Public", href: "/admin/tags?scope=public")
-        expect(page).to have_link("Private", href: "/admin/tags?scope=private")
+        expect(page).to have_link("Public", href: "/admin/settings/tagging?scope=public#tags")
+        expect(page).to have_link("Private", href: "/admin/settings/tagging?scope=private#tags")
       end
 
       it "marks the tab it is on" do
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page).to have_css("a.seg-option.current[aria-current='page']", text: "Private")
       end
 
       it "keeps the search when it switches" do
-        get "/admin/tags", q: "ch"
+        get "/admin/settings/tagging", q: "ch"
 
-        expect(page).to have_link("Private", href: "/admin/tags?scope=private&q=ch")
+        expect(page).to have_link("Private", href: "/admin/settings/tagging?scope=private&q=ch#tags")
       end
 
       it "searches inside the chosen scope" do
-        get "/admin/tags", scope: "private", q: "r"
+        get "/admin/settings/tagging", scope: "private", q: "r"
 
         expect(names).to eq(%w[#chores])
       end
 
       it "keeps the scope in the search form" do
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page).to have_css("form[role='search'] input[name='scope'][value='private']", visible: :all)
       end
 
       it "submits the search as a get on change" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
-        expect(page).to have_css("form[method='get'][action='/admin/tags'][role='search'][data-autosubmit]")
+        expect(page).to have_css("form[method='get'][action='/admin/settings/tagging'][role='search'][data-autosubmit]")
       end
 
       it "counts only the tags on the tab" do
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page).to have_css(".card-blurb", text: "1 tag")
       end
@@ -326,17 +341,17 @@ RSpec.describe "Admin tags", type: :request do
     end
 
     it "says something useful when there is no tag yet" do
-      get "/admin/tags"
+      get "/admin/settings/tagging"
 
       expect(page).to have_css(".empty")
     end
 
     it "says the private tab has no tags yet", :aggregate_failures do
       create(:post, :published, tags: %w[ruby])
-      get "/admin/tags", scope: "private"
+      get "/admin/settings/tagging", scope: "private"
 
       expect(page).to have_css(".card-blurb", exact_text: "0 tags · only you see these, on tasks and the journal")
-      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tags.index.empty"))
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.tags.list.empty"))
     end
 
     describe "adding a tag" do
@@ -434,7 +449,7 @@ RSpec.describe "Admin tags", type: :request do
       it "goes back to the tab it added from" do
         add("ruby", scope: "private")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=private")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=private#tags")
       end
 
       it "takes a name the other scope holds", :aggregate_failures do
@@ -518,7 +533,7 @@ RSpec.describe "Admin tags", type: :request do
         tag = create(:tag, :private, name: "chores")
         admin_post("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
 
-        expect(last_response.location).to end_with("/admin/tags?scope=private")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=private#tags")
       end
 
       it "takes a name the other scope holds" do
@@ -549,7 +564,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "fills the field in the rename form with the description" do
         tag
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(field.text).to eq("the language")
       end
@@ -619,7 +634,7 @@ RSpec.describe "Admin tags", type: :request do
       it "offers a swatch for each colour in the editor" do
         tag
 
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page.all(".tag-editor button[name='tag[color]']").map { it["value"] })
           .to eq(Blog::Types::TagColor.values)
@@ -628,7 +643,7 @@ RSpec.describe "Admin tags", type: :request do
       it "marks the colour the tag already holds" do
         tag
 
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css(".tag-editor button[name='tag[color]'][value='mk-blue'][aria-pressed='true']")
       end
@@ -642,7 +657,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "carries the scope on every form in the editor" do
         create(:tag, :private, name: "chores")
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page.all(".tag-editor form input[name='scope']", visible: :all).map(&:value).uniq).to eq(%w[private])
       end
@@ -672,14 +687,14 @@ RSpec.describe "Admin tags", type: :request do
 
       it "asks first" do
         tag
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page).to have_css("form[action$='/delete'][data-confirm]")
       end
 
       it "names the tag it is about to take away" do
         tag
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page.find("form[action$='/delete']")["data-confirm"]).to include("ruby")
       end
@@ -740,7 +755,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "leaves the button on while a record carries the tag", :aggregate_failures do
         create(:post, tags: %w[ruby])
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(page.find("form[action$='/delete'] button")).not_to be_disabled
         expect(page.find("form[action$='/delete']")["title"]).to be_nil
@@ -748,7 +763,7 @@ RSpec.describe "Admin tags", type: :request do
 
       it "warns that nothing else loses a tag nothing carries" do
         tag
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 0))
       end
@@ -756,14 +771,14 @@ RSpec.describe "Admin tags", type: :request do
       it "counts each kind that loses the tag" do
         4.times { create(:post, tags: %w[ruby]) }
         create(:project, tags: %w[ruby])
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 5, uses: "4 posts and 1 project"))
       end
 
       it "counts one record that loses the tag" do
         create(:project, tags: %w[ruby])
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 1, uses: "1 project"))
       end
@@ -771,14 +786,14 @@ RSpec.describe "Admin tags", type: :request do
       it "counts the task rules that hold the tag" do
         create(:task, tags: %w[ruby])
         %w[rails/* hanami/*].each { Tasks::Slice["operations.save_task_rule"].call({ pattern: it, tags: "ruby" }) }
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("1 task · 2 rules")
       end
 
       it "lists three kinds of private record that lose the tag" do
         %i[journal_entry task task decision].each { create(it, tags: %w[chores]) }
-        get "/admin/tags", scope: "private"
+        get "/admin/settings/tagging", scope: "private"
 
         expect(confirm_prompt).to eq(confirm(tag: "chores", count: 4, uses: "1 journal entry, 2 tasks and 1 decision"))
       end
@@ -794,7 +809,7 @@ RSpec.describe "Admin tags", type: :request do
         chores = create(:tag, :private, name: "chores")
         admin_post("/admin/tags/#{chores.id}/delete", scope: "private")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=private")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=private#tags")
       end
 
       it "answers 404 for a tag from the other scope" do
@@ -823,10 +838,10 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "takes it off the post but keeps a task rule's only tag, as the note says" do
-        get "/admin/tags"
+        get "/admin/settings/tagging"
 
         expect([post_queries.by_id(article.id).tags, named("rules")&.name, page.find(".tag-panel-intro .hint").text])
-          .to eq([[], "rules", i18n.t("ui.views.tags.index.note")])
+          .to eq([[], "rules", i18n.t("ui.components.tags.list.note")])
       end
     end
 
@@ -867,7 +882,7 @@ RSpec.describe "Admin tags", type: :request do
       it "goes back to the private tab" do
         remove("ruby")
 
-        expect(last_response.location).to end_with("/admin/tags?scope=private")
+        expect(last_response.location).to end_with("/admin/settings/tagging?scope=private#tags")
       end
 
       it "takes away a tag a rule holds beside another", :aggregate_failures do
@@ -920,7 +935,7 @@ RSpec.describe "Admin tags", type: :request do
 
     it "shows no tag to anybody who has not signed in" do
       tag
-      get "/admin/tags"
+      get "/admin/settings/tagging"
 
       expect(last_response.body).not_to include("ruby")
     end

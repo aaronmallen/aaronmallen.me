@@ -342,7 +342,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", :frozen_clock,
 
       it "carry a menu on a task rule" do
         id = rule.id
-        get "/admin/tasks/rules"
+        get "/admin/settings/tagging"
 
         expect(menus).to include("/admin/tasks/rules/#{id}/menu")
       end

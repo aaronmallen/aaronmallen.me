@@ -2,11 +2,9 @@
 
 module Admin
   module UI
-    module Views
+    module Components
       module TaskRules
-        class Index < View
-          include Components::TaskRules
-
+        class List < Component
           BLANK = {
             errors: Blog::Constants::EMPTY_HASH,
             pattern: Blog::Constants::EMPTY_STRING,
@@ -28,8 +26,6 @@ module Admin
           end
 
           def view_template
-            content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list
               Card(title: t(".add"), class: "settings-side") do

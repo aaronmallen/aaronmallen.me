@@ -4,15 +4,11 @@ module Admin
   module Actions
     module Tags
       class Index < Action
-        include Deps[build_tags_page: "operations.build_tags_page"]
-
         def handle(request, response)
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
-          page = requested_page(request, response)
-          exposures = build_tags_page.call(scope:, page:, query: request.params[:q])
-          not_found(response) if exposures[:tags].past_end?
+          query = Blog::Types::TrimmedText[request.params[:q]]
 
-          response.render(view, **exposures)
+          response.redirect_to(Helpers::TagList.back(routes, scope, query, page_number(request)))
         end
       end
     end

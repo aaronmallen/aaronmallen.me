@@ -55,6 +55,10 @@ RSpec.describe "Admin tag summary", type: :request do
       it "counts what carries the name" do
         expect(page).to have_css(".page-head-sub", text: says("count", count: 5))
       end
+
+      it "leads back to the tags on the tagging tab" do
+        expect(page).to have_link(says("back"), href: "/admin/settings/tagging#tags")
+      end
     end
 
     describe "finished and hidden items" do

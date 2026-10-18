@@ -137,6 +137,15 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css(".li-title", text: "Firefox · Linux")
   end
 
+  it "shows a new tag and a new task rule on the open tagging tab", :aggregate_failures do
+    live "/admin/settings/tagging"
+    create(:post, tags: %w[elixir])
+    Tasks::Slice["operations.save_task_rule"].call({ pattern: "octocat/*", tags: "chores" })
+
+    expect(page).to have_css("#tags .tag-row", text: "#elixir")
+    expect(page).to have_css("#task-rules .rule-pattern", text: "octocat/*")
+  end
+
   it "shows a new connection on the open services page" do
     live "/admin/services"
     Services::Slice["repos.connection_mutations"]

@@ -7,8 +7,8 @@ module Admin
         ADDED = "tags_page.toasts.added"
 
         include Deps[
-          build_tags_page: "operations.build_tags_page",
-          index_view: "ui.views.tags.index",
+          "operations.build_tagging_page",
+          tagging_view: "ui.views.settings.tagging",
           save_tag: "tags.operations.save_tag",
         ]
 
@@ -16,8 +16,10 @@ module Admin
           params = Blog::Types::Fields[request.params[:tag]]
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
-          settle(response, save_tag.call(params, scope:), ADDED, routes.path(:admin_tags, scope:)) do |errors|
-            unprocessable(response, index_view, **build_tags_page.call(scope:, errors:, params:))
+          back = Helpers::TagList.back(routes, scope, "", 1)
+
+          settle(response, save_tag.call(params, scope:), ADDED, back) do |errors|
+            unprocessable(response, tagging_view, **build_tagging_page.call(tags: { scope:, errors:, params: }))
           end
         end
       end

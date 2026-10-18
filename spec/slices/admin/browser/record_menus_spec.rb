@@ -167,7 +167,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
   describe "a tag" do
     before do
       create(:tag, :private, name: "home", color: "mk-blue")
-      visit "/admin/tags?scope=private"
+      visit "/admin/settings/tagging?scope=private"
       open_menu(find(".tag-uses"))
       item("Colour").hover
       item("Pink").click
