@@ -38,7 +38,7 @@ module API
         "delete_artifact" => [AGENTS, DELETE], "delete_memory_file" => [AGENTS, DELETE],
       }.freeze
 
-      include Deps[build_document: "operations.build_document"] # rubocop:disable Blog/UnusedDeps
+      include Deps[build_document: "operations.build_document"]
 
       def self.route(operation) = ->(env) { new(operation:).call(env) }
 

@@ -6,8 +6,7 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
 
-require:
-  - ./rubocop/unused_deps.rb
+inherit_from: rubocop_todo.yml
 
 inherit_mode:
   merge:
@@ -18,26 +17,8 @@ AllCops:
     - .config/Guardfile
     - .config/config.ru
     - .config/i18n/*.rb
-    - .config/rubocop/*.rb
   NewCops: enable
   TargetRubyVersion: 4
-
-Blog/UnusedDeps:
-  Enabled: true
-  AllowedNames:
-    - act_on
-    - comment_mutations
-    - comment_owners
-    - comment_photos
-    - comment_queries
-    - contract
-    - queries
-    - record_link_queries
-    - resolve_mentions
-    - thread_queries
-  Include:
-    - app/**/*.rb
-    - slices/**/*.rb
 
 Hanami/AppReferenceInSlice:
   Enabled: true
@@ -59,7 +40,10 @@ Hanami/SliceNamespace:
     mcp: MCP
 
 Hanami/UnusedDeps:
-  Enabled: false
+  Enabled: true
+  Include:
+    - app/**/*.rb
+    - slices/**/*.rb
 
 Hanami/UnvalidatedParams:
   Enabled: false
