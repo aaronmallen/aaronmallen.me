@@ -43,29 +43,29 @@ module Admin
       "/agents/artifacts/:id/versions/:number/restore",
       to: "agents.artifacts.restore", as: :restore_artifact_version, id: ID, number: ID,
     )
-    get "/agents/memories", to: "agents.memories", as: :agent_memories
-    post "/agents/memories", to: "agents.create_memory_file", as: :create_agent_memory_file
-    get "/agents/memories/:id", to: "agents.memory_file", as: :agent_memory_file, id: ID
-    post "/agents/memories/:id/delete", to: "agents.delete_memory_file", as: :delete_agent_memory_file, id: ID
-    post "/agents/memories/:id/records", to: "agents.link_memory_file_record", as: :link_memory_file_record, id: ID
+    get "/agents/memories", to: "agents.memories.index", as: :memory_files
+    post "/agents/memories", to: "agents.memories.create", as: :create_memory_file
+    get "/agents/memories/:id", to: "agents.memories.show", as: :memory_file, id: ID
+    post "/agents/memories/:id/delete", to: "agents.memories.destroy", as: :delete_memory_file, id: ID
+    post "/agents/memories/:id/records", to: "agents.memories.link_record", as: :link_memory_file_record, id: ID
     post(
       "/agents/memories/:id/records/:other_kind/:other_id/delete",
-      to: "agents.unlink_memory_file_record", as: :unlink_memory_file_record,
+      to: "agents.memories.unlink_record", as: :unlink_memory_file_record,
       id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
-    post "/agents/memories/:id/scope", to: "agents.change_memory_scope", as: :change_agent_memory_scope, id: ID
-    post "/agents/memories/:id/facts", to: "agents.add_memory_fact", as: :add_agent_memory_fact, id: ID
+    post "/agents/memories/:id/scope", to: "agents.memories.change_scope", as: :change_memory_file_scope, id: ID
+    post "/agents/memories/:id/facts", to: "agents.memories.add_fact", as: :add_memory_file_fact, id: ID
     post(
       "/agents/memories/:id/facts/:fact_id",
-      to: "agents.edit_memory_fact", as: :edit_agent_memory_fact, id: ID, fact_id: ID,
+      to: "agents.memories.edit_fact", as: :edit_memory_file_fact, id: ID, fact_id: ID,
     )
     post(
       "/agents/memories/:id/facts/:fact_id/delete",
-      to: "agents.remove_memory_fact", as: :remove_agent_memory_fact, id: ID, fact_id: ID,
+      to: "agents.memories.remove_fact", as: :remove_memory_file_fact, id: ID, fact_id: ID,
     )
     post(
       "/agents/memories/:id/history/:event_id/revert",
-      to: "agents.revert_memory_event", as: :revert_agent_memory_event, id: ID, event_id: ID,
+      to: "agents.memories.revert_event", as: :revert_memory_file_event, id: ID, event_id: ID,
     )
     get "/agents/sessions", to: "agents.sessions", as: :agent_sessions
     get "/analytics", to: "analytics.show", as: :analytics

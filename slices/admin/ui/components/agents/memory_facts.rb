@@ -26,7 +26,7 @@ module Admin
           private
 
           def add_form
-            Form(action: path(:admin_add_agent_memory_fact, id: @file.id), class: "memory-fact-form") do
+            Form(action: path(:admin_add_memory_file_fact, id: @file.id), class: "memory-fact-form") do
               fields(errors(:add), "memory-new-fact", values(:add, type: CONTEXT, text: ""), t(".new"))
               Button(type: "submit", icon: "fa-solid fa-plus") { t(".add") }
             end
@@ -51,7 +51,7 @@ module Admin
 
             details(class: "memory-edit", open: mine?(:edit, fact.id)) do
               Button(summary: true, small: true, variant: :gh, icon: :edit) { t(".edit") }
-              Form(action: path(:admin_edit_agent_memory_fact, id: @file.id, fact_id: fact.id), class: "stack-form") do
+              Form(action: path(:admin_edit_memory_file_fact, id: @file.id, fact_id: fact.id), class: "stack-form") do
                 fields(errors(:edit, fact.id), id_prefix, saved, t(".fact"))
                 Button(type: "submit", variant: :pri, small: true) { t(".save") }
               end
@@ -86,7 +86,7 @@ module Admin
 
           def remove_form(fact)
             ButtonForm(
-              action: path(:admin_remove_agent_memory_fact, id: @file.id, fact_id: fact.id), label: t(".remove"),
+              action: path(:admin_remove_memory_file_fact, id: @file.id, fact_id: fact.id), label: t(".remove"),
               variant: :gh, icon: :trash, icon_only: true, confirm: t(".confirm_remove"),
             )
           end

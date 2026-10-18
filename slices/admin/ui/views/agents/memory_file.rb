@@ -33,14 +33,14 @@ module Admin
 
           def delete_form
             DeleteForm(
-              action: path(:admin_delete_agent_memory_file, id: @file.id), label: t(".delete"),
+              action: path(:admin_delete_memory_file, id: @file.id), label: t(".delete"),
               confirm: t(".confirm_delete", path: @file.path),
             )
           end
 
           def head
             PageHead(title: @file.path, sub: lede) do
-              BackLink(href: path(:admin_agent_memories)) { t(".back") }
+              BackLink(href: path(:admin_memory_files)) { t(".back") }
               SegmentedLinks(label: t(".show"), items: [mode(".facts", false), mode(".loaded", true)])
             end
           end
@@ -52,7 +52,7 @@ module Admin
           end
 
           def linked
-            find_path = path(:admin_agent_memory_file, id: @file.id)
+            find_path = path(:admin_memory_file, id: @file.id)
 
             RecordLinks::Section(records: @records, kind: "memory_file", id: @file.id, find_path:)
           end
@@ -64,14 +64,14 @@ module Admin
           def mode(text, loaded)
             query = loaded ? { view: Operations::BuildMemoryFilePage::LOADED } : Blog::Constants::EMPTY_HASH
 
-            { text: t(text), current: @loaded == loaded, href: path(:admin_agent_memory_file, id: @file.id, **query) }
+            { text: t(text), current: @loaded == loaded, href: path(:admin_memory_file, id: @file.id, **query) }
           end
 
           def scope_form
             errors = @form[:name] == :scope ? @form[:errors] : Blog::Constants::EMPTY_HASH
             selected = @form.dig(:values, :scope) || current.key
 
-            Form(action: path(:admin_change_agent_memory_scope, id: @file.id), class: "stack-form") do
+            Form(action: path(:admin_change_memory_file_scope, id: @file.id), class: "stack-form") do
               Field(label: t(".scope"), name: :scope, errors:, error: MemoryFieldError) do |control|
                 MemoryScopeSelect(**control, scopes: @scopes, selected:)
               end

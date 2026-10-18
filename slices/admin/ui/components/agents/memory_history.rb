@@ -21,7 +21,7 @@ module Admin
           def view_template
             Card(title: t(".title"), count: @count) do
               ol(class: "timeline") { @events.rows.each { entry(it) } }
-              Pager(page: @events, route: :admin_agent_memory_file, params: { id: @file.id, **@params })
+              Pager(page: @events, route: :admin_memory_file, params: { id: @file.id, **@params })
             end
           end
 
@@ -60,7 +60,7 @@ module Admin
             return unless REVERTIBLE.include?(event.op) && @latest[event.memory_fact_id] == event.id
 
             ButtonForm(
-              action: path(:admin_revert_agent_memory_event, id: @file.id, event_id: event.id), label: t(".revert"),
+              action: path(:admin_revert_memory_file_event, id: @file.id, event_id: event.id), label: t(".revert"),
               variant: :gh, confirm: t(".confirm_revert"),
             )
           end

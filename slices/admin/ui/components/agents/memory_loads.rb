@@ -22,14 +22,14 @@ module Admin
           private
 
           def link(file)
-            a(class: "record-link-title", href: path(:admin_agent_memory_file, id: file.id)) do
+            a(class: "record-link-title", href: path(:admin_memory_file, id: file.id)) do
               span(class: "meta") { "#{file.scope} " }
               plain file.path
             end
           end
 
           def repo_form
-            AutoForm(action: path(:admin_agent_memories)) do
+            AutoForm(action: path(:admin_memory_files)) do
               HiddenFields(values: @keep)
               Field(label: t(".working_in"), id: "memory-loads-repo") do |control|
                 Select(**control, name: "repo", options: @repos.to_h { [it, it] }, selected: @repo)

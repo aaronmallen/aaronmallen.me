@@ -61,7 +61,7 @@ module Admin
 
           def loaded(load) = a(class: "record-link-title", href: memory_file(load.memory_file_id)) { load.path }
 
-          def memory_file(id) = path(:admin_agent_memory_file, id:)
+          def memory_file(id) = path(:admin_memory_file, id:)
 
           def meta
             dotted(

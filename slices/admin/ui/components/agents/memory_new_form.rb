@@ -12,7 +12,7 @@ module Admin
           def view_template
             details(class: "memory-new", open: @errors.any?) do
               Button(summary: true, variant: :pri, icon: "fa-solid fa-plus") { t(".new") }
-              Form(action: path(:admin_create_agent_memory_file), class: "memory-new-form card") do
+              Form(action: path(:admin_create_memory_file), class: "memory-new-form card") do
                 path_field
                 scope_field
                 Button(type: "submit", variant: :pri) { t(".create") }

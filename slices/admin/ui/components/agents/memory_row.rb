@@ -11,7 +11,7 @@ module Admin
           prop :query, Blog::Types::String.optional
 
           def view_template
-            ListItem(title: @file.path, href: path(:admin_agent_memory_file, id: @file.id), sub:) do |item|
+            ListItem(title: @file.path, href: path(:admin_memory_file, id: @file.id), sub:) do |item|
               item.meta { hits.each { |fact| p(class: "memory-hit") { fact.text } } }
             end
           end

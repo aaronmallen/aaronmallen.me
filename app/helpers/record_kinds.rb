@@ -12,7 +12,7 @@ module Blog
         "decision" => ["fa-scale-balanced", :admin_decision, "decision"],
         "journal_entry" => ["fa-feather", :admin_journal, "journal"],
         "mail_thread" => ["fa-envelope", :admin_mail, "message"],
-        "memory_file" => ["fa-brain", :admin_agent_memory_file, nil],
+        "memory_file" => ["fa-brain", :admin_memory_file, nil],
         "post" => ["fa-file-lines", :admin_edit_post, "post"],
         "project" => ["fa-cube", :admin_edit_project, "project"],
         "pull_request" => ["fa-code-pull-request", :admin_pull_request, "pull_request"],

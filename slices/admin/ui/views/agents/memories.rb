@@ -42,14 +42,14 @@ module Admin
 
             {
               text: t(FILTERS.fetch(filter), count:), current: scope == @scope,
-              href: path(:admin_agent_memories, **{ scope:, query: @query }.compact),
+              href: path(:admin_memory_files, **{ scope:, query: @query }.compact),
             }
           end
 
           def filters
             div(class: "memory-filters") do
               SegmentedLinks(label: t(".scope"), items: FILTERS.keys.map { filter_link(it) })
-              AutoForm(action: path(:admin_agent_memories), role: "search") do
+              AutoForm(action: path(:admin_memory_files), role: "search") do
                 input(type: "hidden", name: "scope", value: @scope) if @scope
                 SearchField(
                   id: SEARCH_ID, label: t(".search"), name: "query", value: @query, placeholder: t(".placeholder"),
