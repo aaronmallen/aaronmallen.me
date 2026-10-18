@@ -7,7 +7,10 @@ file on each request and each job, so creating or removing it takes effect at on
 
 The `maintenance.flag_path` setting names the file, through `MAINTENANCE_FLAG_PATH`. The Activate maintenance mode
 button in Settings, or the same command in the palette, creates it and sets a signed cookie for my browser
-([ADR 0184][0184]). A script on the Pi creates and removes it too, and still works whichever way the mode went on.
+([ADR 0184][0184]). While the cookie holds, the maintenance page in that browser shows a Deactivate maintenance mode
+button, which removes the file and lands on Settings. The cookie only works for the file it came with, so a mode the
+script turned on, or a cleared browser, needs the script. A script on the Pi creates and removes the file too, and
+still works whichever way the mode went on.
 
 ## Set up the Pi
 
@@ -93,7 +96,7 @@ hand.
 1. Activate maintenance mode from Settings or the palette, or on the Pi run `aaronmallen-maintenance on`.
 2. Check that `https://aaronmallen.me` answers with the maintenance page.
 3. Update Postgres, Redis or RustFS on the NAS, and wait for each one to come back.
-4. On the Pi, run `aaronmallen-maintenance off`.
+4. Press Deactivate maintenance mode on the maintenance page, or on the Pi run `aaronmallen-maintenance off`.
 5. Check that the site loads.
 
 The worker skips each scheduled job it picks up while maintenance is on, since it runs again on its next tick. It puts

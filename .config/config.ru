@@ -6,7 +6,7 @@ require "blog/strict_transport"
 require "honeybadger/rack/error_notifier"
 
 use Blog::StrictTransport if Hanami.env?(:production)
-use Blog::Maintenance, Hanami.app.settings.maintenance[:flag_path]
+use Blog::Maintenance, Hanami.app.settings.maintenance[:flag_path], Hanami.app.settings.app_secret
 use Shares::Host, URI(Hanami.app.settings.share_site[:url]).host, Honeybadger::Rack::ErrorNotifier.new(Shares::Slice["server"])
 
 run Hanami.app

@@ -55,6 +55,25 @@ RSpec.describe "Admin maintenance mode", type: :request do
     end
   end
 
+  describe "turning it off from the cookie it set" do
+    before do
+      activate
+      post "/maintenance/deactivate"
+    end
+
+    it "removes the flag file and the cookie", :aggregate_failures do
+      expect(File).not_to exist(flag)
+      expect(rack_mock_session.cookie_jar[Blog::Maintenance::COOKIE].to_s).to be_empty
+    end
+
+    it "lands on Settings, back up", :aggregate_failures do
+      follow_redirect!
+
+      expect(last_request.path).to eq("/admin/settings/security")
+      expect(last_response.status).to eq(200)
+    end
+  end
+
   describe "when the flag cannot be written" do
     let(:flag) { File.join(Dir.tmpdir, "missing-#{SecureRandom.hex}", "maintenance") }
 
