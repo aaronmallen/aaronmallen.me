@@ -30,18 +30,21 @@ module Bluesky
     def self.fit(body, type)
       return [body, type] if body.bytesize <= MAX_BYTES
 
-      image = flat(Vips::Image.new_from_buffer(body, ""))
-      scale = Math.sqrt(MAX_BYTES.fdiv(body.bytesize))
+      header = Vips::Image.new_from_buffer(body, "")
+      edge = [header.width, header.height].max * Math.sqrt(MAX_BYTES.fdiv(body.bytesize))
 
       loop do
-        shrunk = image.resize(scale).write_to_buffer(".jpg", Q: QUALITY, strip: true)
+        shrunk = flat(thumbnail(body, edge.floor)).write_to_buffer(".jpg", Q: QUALITY, strip: true)
         return [shrunk, JPEG] if shrunk.bytesize <= MAX_BYTES
 
-        scale *= SHRINK
+        edge *= SHRINK
       end
     end
 
     def self.flat(image) = image.has_alpha? ? image.flatten(background: WHITE) : image
     private_class_method :flat
+
+    def self.thumbnail(body, edge) = Vips::Image.thumbnail_buffer(body, edge, height: edge, size: :down)
+    private_class_method :thumbnail
   end
 end

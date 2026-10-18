@@ -737,6 +737,8 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     def card = bluesky_writes.first.dig("record", "embed")
 
+    def expired_token = json_response(status: 400, error: "ExpiredToken", message: "Token has expired")
+
     def html(head)
       { body: "<html><head>#{head}</head><body>hi</body></html>", headers: { "Content-Type" => "text/html" } }
     end
@@ -759,6 +761,8 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       stub_request(:get, picture).to_return(body:, headers: { "Content-Type" => type })
     end
 
+    def small_png = Vips::Image.black(8, 8).write_to_buffer(".png")
+
     def stored_photo
       connect_media_store
       jpeg = { body: "photo", headers: { "Content-Type" => "image/jpeg" } }
@@ -766,6 +770,10 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     def thumb = { "$type" => "blob", "ref" => { "$link" => "thumb" }, "mimeType" => "image/png" }
+
+    def upload_returns(*responses)
+      stub_request(:post, bluesky_url("com.atproto.repo.uploadBlob")).to_return(*responses)
+    end
 
     before do
       stub_bluesky
@@ -786,6 +794,13 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(card).to eq("$type" => "app.bsky.embed.external", "external" => external)
     end
 
+    it "prefers the og:description to a plain description before it" do
+      serve(html(%(<meta name="description" content="Plain"><meta property="og:description" content="Open">)))
+      deliver(link_post, "bluesky")
+
+      expect(card.dig("external", "description")).to eq("Open")
+    end
+
     it "takes the og:description and falls back to the title" do
       serve(html(%(<title>Plain</title><meta property="og:description" content="Open">)))
       deliver(link_post, "bluesky")
@@ -795,10 +810,10 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "uploads the og:image as the card's thumbnail", :aggregate_failures do
       serve(html(%(<meta property="og:image" content="/card.png">)))
-      serve_picture("png-bytes")
+      serve_picture(small_png)
       deliver(link_post, "bluesky")
 
-      expect(uploads.first).to have_attributes(body: "png-bytes", headers: include("Content-Type" => "image/png"))
+      expect(uploads.first).to have_attributes(body: small_png, headers: include("Content-Type" => "image/png"))
       expect(card.dig("external", "thumb")).to eq(thumb)
     end
 
@@ -817,6 +832,46 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
       expect(uploads).to be_empty
       expect(card["external"]).not_to have_key("thumb")
+    end
+
+    it "sends the card without a thumbnail when the og:image is over 100 megapixels", :aggregate_failures do
+      offer_picture(Vips::Image.black(20_000, 6_000).write_to_buffer(".png"))
+      deliver(link_post, "bluesky")
+
+      expect(uploads).to be_empty
+      expect(card).to include("$type" => "app.bsky.embed.external")
+      expect(card["external"]).not_to have_key("thumb")
+    end
+
+    it "sends the card without a thumbnail when the og:image is not a JPEG, PNG, GIF or WebP", :aggregate_failures do
+      offer_picture(Vips::Image.black(8, 8).write_to_buffer(".tif"))
+      deliver(link_post, "bluesky")
+
+      expect(uploads).to be_empty
+      expect(card["external"]).not_to have_key("thumb")
+    end
+
+    {
+      "refuses" => { status: 400, error: "InvalidBlob", message: "Too big" },
+      "fails" => { status: 502 },
+    }.each do |what, response|
+      it "sends the card without a thumbnail when Bluesky #{what} the og:image upload", :aggregate_failures do
+        offer_picture(small_png)
+        upload_returns(json_response(**response))
+        deliver(link_post, "bluesky")
+
+        expect(card).to include("$type" => "app.bsky.embed.external")
+        expect(card["external"]).not_to have_key("thumb")
+      end
+    end
+
+    it "signs in again and uploads the thumbnail when the session expires during the upload", :aggregate_failures do
+      offer_picture(small_png)
+      upload_returns(expired_token, json_response(blob: thumb))
+      deliver(link_post, "bluesky")
+
+      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).to have_been_made.twice
+      expect(card.dig("external", "thumb")).to eq(thumb)
     end
 
     {
