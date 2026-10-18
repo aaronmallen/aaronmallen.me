@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class RecurTask < Blog::Operation
+    class RecurTask
       PHOTO_OWNER = Blog::Types::PhotoOwner["task"]
 
       include Deps[
@@ -16,7 +16,7 @@ module Tasks
       ]
 
       def call(id, at: Time.now)
-        transaction do
+        task_series_mutations.transaction do
           series = task_series_mutations.current(id)
           make(series, id, at) if series && !series.paused
         end

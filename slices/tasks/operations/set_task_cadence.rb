@@ -20,7 +20,7 @@ module Tasks
         transaction do
           task_series_mutations.set(id, cadence(fields), now)
           series = task_series_queries.by_task(id)
-          step recur_task.call(id, at: now)
+          recur_task.call(id, at: now)
           task_series_queries.by_id(series.id)
         end
       end

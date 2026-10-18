@@ -19,7 +19,7 @@ module Tasks
             work_session_mutations.close(id, at)
             task_mutations.cancel(id, at:)
           end
-          step recur_task.call(id, at:)
+          recur_task.call(id, at:)
           closed
         end
       end

@@ -18,7 +18,7 @@ module Tasks
 
         transaction do
           closed = close(id, at, total)
-          step recur_task.call(id, at:)
+          recur_task.call(id, at:)
           closed
         end
       end

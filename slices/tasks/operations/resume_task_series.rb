@@ -13,7 +13,7 @@ module Tasks
         transaction do
           step affected(task_series_mutations.switch(id, false, at))
 
-          step recur_task.call(task_series_queries.by_id(id).task_id, at:)
+          recur_task.call(task_series_queries.by_id(id).task_id, at:)
         end
       end
     end
