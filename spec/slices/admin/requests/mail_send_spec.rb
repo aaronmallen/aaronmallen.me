@@ -278,6 +278,13 @@ RSpec.describe "Admin mail sending", type: :request do
       expect(last_response.location).to end_with("thread=#{thread.id}#read-#{thread.id}")
     end
 
+    it "answers the last message received, not a newer Gmail draft" do
+      create(:mail_message, mail_thread_id: thread.id, gmail_id: "m2", draft: true, received_at: Time.now + 60)
+      reply
+
+      expect(header("In-Reply-To")).to eq("<m1@mail.example>")
+    end
+
     it "archives the thread in Gmail on Send & archive", :aggregate_failures do
       modify = stub_request(:post, "#{gmail}/threads/t1/modify").with(body: { removeLabelIds: ["INBOX"] }.to_json)
       reply(archive: "1")

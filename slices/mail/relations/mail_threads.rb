@@ -117,7 +117,7 @@ module Mail
 
       def kept = exclude(status: SPAM).where(trashed: false)
 
-      def last_message = own_messages.reverse(:received_at, :id).limit(1)
+      def last_message = own_messages.order(:draft, Sequel.desc(:received_at), Sequel.desc(:id)).limit(1)
 
       def notification
         Sequel.like(Sequel.function(:coalesce, first_message.select(:reply_to), ""), NOTIFICATION)

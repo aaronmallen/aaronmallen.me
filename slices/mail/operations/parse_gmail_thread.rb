@@ -89,6 +89,7 @@ module Mail
           gmail_id: json.fetch("id"), subject: present(header(payload, "Subject")) || NO_SUBJECT,
           **sender(header(payload, "From").to_s), **body(payload),
           received_at: Time.at(json.fetch("internalDate").to_i/1000r),
+          draft: json.fetch("labelIds", []).include?(EVERY[:draft]),
         }
       end
 

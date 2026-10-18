@@ -303,6 +303,13 @@ RSpec.describe "Admin mail", type: :request do
           expect(row).to have_css(".mail-row-preview", exact_text: "b" * 500)
         end
 
+        it "previews the latest message that is not a draft" do
+          create(:mail_message, mail_thread_id: thread.id, body: "Unsent", draft: true, received_at: Time.now + 60)
+          get "/admin/mail", folder: "snoozed"
+
+          expect(row).to have_css(".mail-row-preview", text: "Latest word")
+        end
+
         it "dims it and says when it wakes", :aggregate_failures do
           expect(row[:class]).to include("snoozed")
           expect(row).to have_css(".mail-row-meta", text: "wakes")

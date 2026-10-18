@@ -3028,7 +3028,8 @@ CREATE TABLE public.mail_messages (
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((subject)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE((body)::text, ''::text) || ' '::text) || COALESCE((reply_to)::text, ''::text))), 'B'::"char"))) STORED,
     gmail_id text,
     from_name text,
-    html_body text
+    html_body text,
+    draft boolean DEFAULT false NOT NULL
 );
 
 
@@ -9566,4 +9567,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018090002_add_preview_key_to_share_group_files.rb'),
 ('20261018100006_index_agent_events_by_created_at_and_revert.rb'),
 ('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb'),
-('20261018110004_index_performance_requests_by_route.rb');
+('20261018110004_index_performance_requests_by_route.rb'),
+('20261018140004_add_draft_to_mail_messages.rb');

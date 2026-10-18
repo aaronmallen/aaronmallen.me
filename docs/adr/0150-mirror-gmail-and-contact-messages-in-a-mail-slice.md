@@ -43,7 +43,8 @@ it, reports it to Honeybadger and goes on to the next thread and account. The th
 changes it (#1766). The plain text body stops at 100,000
 characters, well under the 1 MB Postgres allows its search vector. A thread whose history holds only label changes
 costs a minimal fetch: the sync takes its read, starred, archived, spam, trash and label state from that, and fetches
-the thread in full only when its messages differ from the ones stored (#1779).
+the thread in full only when its messages differ from the ones stored (#1779). Each message keeps its own draft
+flag, so a reply from the admin answers, and the list previews, the newest message that is not a draft (#1770).
 
 **The backfill reaches back as far as the `mail.backfill_days` setting allows**, and skips trash. With no value set,
 it takes every thread in each account but the trash. A lost history id starts the backfill over inside the same

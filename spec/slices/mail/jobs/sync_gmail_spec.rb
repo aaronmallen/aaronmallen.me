@@ -253,6 +253,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
 
         expect(threads_in("inbox")).to eq(%w[t1])
         expect(thread.draft).to be(false)
+        expect(rows("mail_messages").to_a.to_h { [it.gmail_id, it.draft] }).to eq("m1" => false, "m2" => true)
       end
 
       it "keeps a thread out of spam while one of its messages is not" do

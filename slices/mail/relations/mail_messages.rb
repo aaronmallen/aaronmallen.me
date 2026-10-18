@@ -3,7 +3,7 @@
 module Mail
   module Relations
     class MailMessages < Blog::DB::Relation
-      SYNCED = %i[subject reply_to from_name body html_body received_at].freeze
+      SYNCED = %i[subject reply_to from_name body html_body received_at draft].freeze
       LETTER = Sequel.join(%i[reply_to body from_name].map { Sequel.function(:coalesce, it, "") }, " ")
 
       schema :mail_messages, infer: true do

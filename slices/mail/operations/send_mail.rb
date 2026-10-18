@@ -75,7 +75,7 @@ module Mail
       def mailbox(account) = Mailbox.new(google, account.address)
 
       def message_id(account, thread)
-        last = thread.mail_messages.rfind(&:gmail_id)
+        last = thread.mail_messages.rfind { it.gmail_id && !it.draft }
         return unless last
 
         found = mailbox(account).get("messages/#{last.gmail_id}", format: "metadata", metadataHeaders: MESSAGE_ID)
