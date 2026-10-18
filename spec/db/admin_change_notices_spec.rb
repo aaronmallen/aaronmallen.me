@@ -61,6 +61,57 @@ RSpec.describe "Admin change notices", :commits, type: :app do
     expect(admin_notice { db[:mail_accounts].where(id:).update(history_id: "2") }).to be_nil
   end
 
+  it "sends none for a Gmail settings sync" do
+    id = db[:mail_accounts].insert(provider: "gmail", name: "me")
+
+    expect(admin_notice { db[:mail_accounts].where(id:).update(settings_synced_at: Sequel::CURRENT_TIMESTAMP) })
+      .to be_nil
+  end
+
+  it "sends one for a new signature" do
+    id = db[:mail_accounts].insert(provider: "gmail", name: "me")
+
+    expect(admin_notice { db[:mail_accounts].where(id:).update(signature: "Aaron") }).to eq("mail_accounts")
+  end
+
+  describe "a calendar" do
+    let!(:id) { db[:calendars].insert(account: "me@example.com", google_id: "primary", name: "Me") }
+
+    it "sends none for a new sync token and start" do
+      expect(admin_notice { db[:calendars].where(id:).update(sync_token: "next", synced_from: Date.today) }).to be_nil
+    end
+
+    it "sends one for a new name" do
+      expect(admin_notice { db[:calendars].where(id:).update(name: "Work") }).to eq("calendars")
+    end
+  end
+
+  describe "a service connection" do
+    let!(:id) do
+      db[:service_connections].insert(provider: "google", account_id: "me", label: "Me", credentials: "sealed")
+    end
+
+    def change(**) = admin_notice { db[:service_connections].where(id:).update(**) }
+
+    it "sends none for renewed credentials" do
+      expect(change(credentials: "renewed")).to be_nil
+    end
+
+    it "sends one when revoked" do
+      expect(change(revoked_at: Time.now)).to eq("service_connections")
+    end
+
+    it "sends one for a new lapse date" do
+      expect(change(lapses_at: Time.now)).to eq("service_connections")
+    end
+
+    it "sends one for a reconnect" do
+      db[:service_connections].where(id:).update(revoked_at: Time.now)
+
+      expect(change(credentials: "renewed", revoked_at: nil)).to eq("service_connections")
+    end
+  end
+
   it "sends none for a commit walk that starts and ends" do
     expect(admin_notice { db[:sync_states].where(id: sync_state("backfill")).delete }).to be_nil
   end

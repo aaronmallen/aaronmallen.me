@@ -731,10 +731,7 @@ CREATE FUNCTION public.notify_admin_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-  bookkeeping text[] := ARRAY[
-    'click_count', 'download_count', 'history_id', 'last_clicked_at', 'last_used_at', 'updated_at',
-    'view_count', 'zip_download_count'
-  ];
+  bookkeeping text[] := ARRAY['click_count', 'download_count', 'history_id', 'last_clicked_at', 'last_used_at', 'updated_at', 'view_count', 'zip_download_count', 'credentials', 'settings_synced_at', 'sync_token', 'synced_from'];
 BEGIN
   IF TG_OP <> 'UPDATE' OR to_jsonb(OLD) - bookkeeping IS DISTINCT FROM to_jsonb(NEW) - bookkeeping THEN
     PERFORM pg_notify('admin_changes', TG_TABLE_NAME);
@@ -9560,4 +9557,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018080007_add_series_id_to_tasks.rb'),
 ('20261018090001_store_plain_line_breaks.rb'),
 ('20261018090002_add_preview_key_to_share_group_files.rb'),
-('20261018100006_index_agent_events_by_created_at_and_revert.rb');
+('20261018100006_index_agent_events_by_created_at_and_revert.rb'),
+('20261018110003_ignore_sync_bookkeeping_in_notify_admin_change.rb');

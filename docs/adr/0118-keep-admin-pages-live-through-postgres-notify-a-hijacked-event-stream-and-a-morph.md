@@ -43,7 +43,8 @@ when a key is pressed, and moves focus to mark the current row ([ADR 0101][0101]
 trigger `FOR EACH ROW` that calls it. As #911 records, the function itself skips an update that changes nothing, rather
 than a `WHEN` clause on the trigger. Since #1284 it compares the rows as `jsonb` with the bookkeeping columns taken out
 (`updated_at`, `last_used_at`, `last_clicked_at`, `history_id` and the click, download and view counts), so a sync
-that finds nothing new and a click on a short link wake no page. `sync_states` keeps three triggers instead, one per
+that finds nothing new and a click on a short link wake no page. #1785 added the columns syncs write and no page draws:
+`credentials`, `settings_synced_at`, `sync_token` and `synced_from`. `sync_states` keeps three triggers instead, one per
 event, each with a `WHEN` clause that passes only `failure` rows, since the admin draws no other kind and a commit walk
 writes them on every run. A write that changes nothing sends nothing, so an insert that loses a race wakes no page.
 Postgres sends a notice only on commit and folds duplicates within one transaction, so a sync of 50 issues sends one
