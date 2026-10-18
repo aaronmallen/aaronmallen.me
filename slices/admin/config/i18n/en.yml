@@ -2994,6 +2994,7 @@ en:
           cadence:
             blank: "Pick how often it repeats."
             format: "Pick how often it repeats from the list."
+            moved: "Its series has moved on to a newer copy. Set the cadence there."
           contributors:
             format: "Give an agent and its model, each in lowercase letters, numbers, dots and dashes."
           day:

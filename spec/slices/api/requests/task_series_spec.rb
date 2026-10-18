@@ -78,6 +78,15 @@ RSpec.describe "API task recurrence", :frozen_clock, type: :request do
       .to eq([422, { "recur" => ["an imported task cannot recur"] }, 0, "Fix the feed"])
   end
 
+  it "refuses a cadence on a copy its series has moved past and keeps one series" do
+    task = create(:task, :done)
+    recur(task.id, { cadence: "days", every: 1 })
+    answer = call_api(:patch, "/tasks/#{task.id}", { recur: { cadence: "days", every: 2 } })
+
+    expect([status, answer.fetch("errors"), series.count, tasks.where(status: "open").count])
+      .to eq([422, { "cadence" => ["its series has moved on to a newer copy; set the cadence there"] }, 1, 1])
+  end
+
   it "shows a task's cadence when it reads and lists tasks" do
     task = create(:task)
     recur(task.id, { cadence: "month_weekday", week: 1, weekday: 1 })

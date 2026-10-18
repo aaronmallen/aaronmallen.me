@@ -67,13 +67,17 @@ module API
         description: [
           "repeats the task: when it closes, done or canceled, a copy appears on the next cadence day after today,",
           "or after the closed copy's sprint day when that day is still ahead;",
-          "a field the cadence does not use is dropped; an imported task cannot recur",
+          "a field the cadence does not use is dropped; an imported task cannot recur, and a copy its series has moved",
+          "past takes no cadence of its own",
         ].join(" "),
       }.freeze
 
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
-        cadence: { "blank" => "pick a cadence" },
+        cadence: {
+          "blank" => "pick a cadence",
+          "moved" => "its series has moved on to a newer copy; set the cadence there",
+        },
         contributors: {
           Blog::Contract::FORMAT => "a contributor is the owner alone, or an agent with its model, as lowercase slugs",
         },

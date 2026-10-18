@@ -165,6 +165,26 @@ RSpec.describe "Admin task cadence", :frozen_clock, type: :request do
       expect(stored(task)).to eq(cadence: "days", every: 3)
     end
 
+    context "with a copy its series has moved past" do
+      let!(:series) { cadence(task, cadence: "days", every: 1) }
+
+      before do
+        Tasks::Slice["operations.complete_task"].call(task.id)
+        save(task, recur: { cadence: "days", every: "2" })
+      end
+
+      it "says why it refuses the cadence", :aggregate_failures do
+        moved = i18n.t("ui.components.tasks.field_error.cadence.moved")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css("##{form_id} .field-error", text: moved)
+      end
+
+      it "leaves the one series" do
+        expect(Tasks::Slice["relations.task_series"].pluck(:id)).to eq([series.id])
+      end
+    end
+
     it "keeps the title as it was when the cadence is refused", :aggregate_failures do
       save(task, title: "Water the ferns", recur: { cadence: "month_day", day: "" })
 

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-14
 area: [db, tasks, admin, api, mcp]
 issue: "#1275"
+amended: ["#1768"]
 tags: [tasks, recurrence, series, cadence, schema, sprints, jobs]
 ---
 
@@ -37,6 +38,9 @@ so every path that closes a task makes it too. The copy clones the task that jus
 current copy to the new one. A paused series makes no copy. Resuming a series whose current copy has closed makes
 the next one at once, and so does setting a cadence on a task that has already closed. The task timeline records
 each copy as coming from its series.
+
+Since #1768, each copy keeps its series' id in `tasks.series_id`, which clears when the series goes. A copy the
+series has moved past refuses a cadence of its own, so it cannot start a second series beside the live one.
 
 No job makes copies, so [ADR 0012][0012]'s catch-up rule never applies to them.
 

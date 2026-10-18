@@ -3,6 +3,8 @@
 module Tasks
   module Operations
     class SetTaskCadence < Blog::Operation
+      MOVED = "moved"
+
       include Deps[
         contract: "contracts.task_cadence_contract",
         recur_task: "operations.recur_task",
@@ -27,7 +29,16 @@ module Tasks
 
       def cadence(fields) = fields.slice(:cadence, *Contracts::TaskCadenceContract::FIELDS.fetch(fields[:cadence]))
 
-      def find(id) = found(task_queries.by_id(id)).bind { it.source ? Failure(:imported) : Success(it) }
+      def find(id) = found(task_queries.by_id(id)).bind { refused(it) }
+
+      def moved?(task) = !task.series_id.nil? && task_series_queries.by_task(task.id).nil?
+
+      def refused(task)
+        return Failure(:imported) if task.source
+        return invalid(:cadence, MOVED) if moved?(task)
+
+        Success(task)
+      end
 
       def validate(params, now)
         fields = every_field(params)

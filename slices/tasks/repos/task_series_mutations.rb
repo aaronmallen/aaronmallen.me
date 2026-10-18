@@ -9,7 +9,10 @@ module Tasks
 
       def current(task_id) = task_series.where(task_id:).lock.one
 
-      def set(task_id, fields, at) = task_series.set(task_id, fields, at)
+      def set(task_id, fields, at)
+        task_series.set(task_id, fields, at)
+        tasks.by_pk(task_id).update(series_id: task_series.where(task_id:).select(:id).dataset)
+      end
 
       def switch(id, paused, at) = task_series.by_pk(id).update(paused:, updated_at: at)
     end

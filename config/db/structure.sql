@@ -1291,6 +1291,7 @@ CREATE TABLE public.tasks (
     stage public.task_stage DEFAULT 'backlog'::public.task_stage NOT NULL,
     project_id integer,
     number integer NOT NULL,
+    series_id integer,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
@@ -7587,6 +7588,13 @@ CREATE INDEX tasks_search_vector_index ON public.tasks USING gin (search_vector)
 
 
 --
+-- Name: tasks_series_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tasks_series_id_index ON public.tasks USING btree (series_id);
+
+
+--
 -- Name: tasks_sprint_id_position_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9246,6 +9254,14 @@ ALTER TABLE ONLY public.tasks
 
 
 --
+-- Name: tasks tasks_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_series_id_fkey FOREIGN KEY (series_id) REFERENCES public.task_series(id) ON DELETE SET NULL;
+
+
+--
 -- Name: tasks tasks_sprint_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9509,4 +9525,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261017230004_create_agent_sessions.rb'),
 ('20261018010004_add_memory_files_and_artifacts_to_record_links.rb'),
 ('20261018080001_add_earlier_author_to_memory_events.rb'),
-('20261018080004_add_visitor_hash_to_sign_ins.rb');
+('20261018080004_add_visitor_hash_to_sign_ins.rb'),
+('20261018080007_add_series_id_to_tasks.rb');

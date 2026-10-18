@@ -59,6 +59,34 @@ RSpec.describe Tasks::Operations::SetTaskCadence, :frozen_clock do
     expect([copy.title, copy.status, sprint_on(copy)]).to eq(["Water the plants", "open", Blog::TimeZone.today + 1])
   end
 
+  context "with a copy its series has moved past" do
+    let(:done) { create(:task, :done, title: "Water the plants") }
+    let!(:series) { set_cadence.call(done.id, { cadence: "days", every: 1 }).value! }
+
+    def open_ids = Tasks::Slice["relations.tasks"].where(status: "open").pluck(:id)
+
+    it "refuses a cadence and leaves one series and one open copy", :aggregate_failures do
+      result = set_cadence.call(done.id, { cadence: "days", every: 2 })
+
+      expect(result.failure).to eq([:invalid, { cadence: ["moved"] }])
+      expect([series_ids, open_ids]).to eq([[series.id], [series.task_id]])
+    end
+
+    it "refuses a cadence on a later copy the series has moved past" do
+      copy = series.task_id
+      Tasks::Slice["operations.complete_task"].call(copy)
+
+      expect(set_cadence.call(copy, { cadence: "days", every: 2 }).failure).to eq([:invalid, { cadence: ["moved"] }])
+    end
+
+    it "takes a cadence once the series is cleared", :aggregate_failures do
+      Tasks::Slice["operations.clear_task_cadence"].call(series.task_id)
+
+      expect(set_cadence.call(done.id, { cadence: "days", every: 2 })).to be_success
+      expect(series_ids.size).to eq(1)
+    end
+  end
+
   it "makes no copy for an open task", :aggregate_failures do
     series = set_cadence.call(task.id, { cadence: "days", every: 1 }).value!
 
