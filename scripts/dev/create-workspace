@@ -19,6 +19,8 @@ grep -v '^WORKSPACE_ID=' .env >"$dir/.env" || true
 echo "WORKSPACE_ID=${id}" >>"$dir/.env"
 mkdir -p "$dir/tmp"
 cp -R tmp/. "$dir/tmp/"
+mkdir -p "$dir/log"
+cp log/parallel_runtime_rspec.log "$dir/log/" 2>/dev/null || true
 
 cd "$dir"
 mise trust --quiet .config/mise.toml

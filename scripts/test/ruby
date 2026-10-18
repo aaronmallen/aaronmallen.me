@@ -18,7 +18,7 @@ done
 
 log=""
 if [ $# -eq 0 ]; then
-  log="--format ParallelTests::RSpec::RuntimeLogger --out tmp/parallel_runtime_rspec.log"
+  log="--format ParallelTests::RSpec::RuntimeLogger --out log/parallel_runtime_rspec.log"
 fi
 
 files=""
@@ -32,4 +32,4 @@ for arg; do
 done
 
 # shellcheck disable=SC2086
-exec scripts/util/ensure_postgres bundle exec parallel_rspec -- --require spec_helper --format progress $log "$@" -- ${files:-spec}
+exec scripts/util/ensure_postgres bundle exec parallel_rspec --runtime-log log/parallel_runtime_rspec.log -- --require spec_helper --format progress $log "$@" -- ${files:-spec}
