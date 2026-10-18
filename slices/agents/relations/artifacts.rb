@@ -7,6 +7,13 @@ module Agents
 
       schema :artifacts, infer: true
 
+      def latest_version_first
+        current = { artifact_id: self[:id].qualified, number: self[:version].qualified }
+        latest = artifact_versions.dataset.unordered.where(current).select(:created_at)
+
+        order(Sequel.desc(latest), self[:id].desc)
+      end
+
       def linkable = linkables(title: :title, day: self.class.site_day(:created_at))
 
       def matching(text)

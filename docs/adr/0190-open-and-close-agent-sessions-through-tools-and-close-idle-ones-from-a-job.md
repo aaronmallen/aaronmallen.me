@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
-amended: ["#1747", "#1752", "#1750"]
+amended: ["#1747", "#1752", "#1750", "#1751"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -38,7 +38,8 @@ An agent opens a session with `start_session` and closes it with `end_session`.
 Sessions stay for good. Since #1752 the admin lists them by day under Agents, read only, and a drawer shows each
 one's tasks, the memory it loaded and changed and the artifacts it wrote. Today counts the day's sessions, the
 memory changes agents made and the artifacts they wrote. Since #1750 the drawer links each memory file to its page,
-and Today's memory line opens the memories screen.
+and Today's memory line opens the memories screen. Since #1751 each artifact in the drawer opens the version the session
+wrote, and the card's Artifacts line opens the Artifacts screen.
 
 ## Alternatives
 

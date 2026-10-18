@@ -8,6 +8,8 @@ RSpec.describe "MCP reach", type: :app do
       "activity.operations.switch_cron_entry" => "the owner pauses a cron entry on the jobs tab; spec #1722 keeps it",
       "admin.operations.activate_maintenance" => "turns maintenance on from Settings; spec #1720 keeps it in a browser",
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
+      "admin.operations.build_artifact_editor" => "builds the admin's artifact editor; update_artifact covers one",
+      "admin.operations.build_artifact_page" => "builds the admin's artifact page; read_artifact reads it",
       "admin.operations.build_calendar_page" => "builds the admin's calendar screen; list_calendar reads the same days",
       "admin.operations.build_commit_page" => "builds the admin's commit page; read_commit reads the same commit",
       "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",

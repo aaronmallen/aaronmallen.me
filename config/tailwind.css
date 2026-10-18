@@ -1980,6 +1980,38 @@
   }
 }
 
+@utility artifact-acts {
+  @apply flex flex-wrap gap-2;
+}
+
+@utility artifact-meta {
+  @apply grid grid-cols-2 gap-4;
+
+  @variant phone {
+    @apply grid-cols-1;
+  }
+}
+
+@utility artifact-version {
+  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+
+  & > a.record-link-title {
+    @apply no-underline hover:text-accent-text hover:underline focus-ring;
+
+    @variant phone {
+      @apply min-h-tap content-center;
+    }
+  }
+}
+
+@utility artifact-side {
+  @apply stack;
+
+  & > .card {
+    @apply bg-transparent;
+  }
+}
+
 @utility agent-days {
   @apply flex min-w-0 flex-col gap-4;
 }
@@ -3510,6 +3542,30 @@
 
 @utility edit {
   @apply flex flex-col overflow-hidden rounded-card border border-line bg-ground-sunk;
+}
+
+@utility edit-split {
+  @apply grid grid-cols-2 overflow-hidden rounded-card border border-line bg-ground-sunk;
+
+  & > .edit-pane-head {
+    @apply col-span-2;
+  }
+
+  & > .edit-pane + .edit-pane {
+    @apply border-l border-line;
+  }
+
+  @variant phone {
+    @apply grid-cols-1;
+
+    & > .edit-pane-head {
+      @apply col-span-1;
+    }
+
+    & > .edit-pane + .edit-pane {
+      @apply border-t border-l-0;
+    }
+  }
 }
 
 @utility edit-pane {

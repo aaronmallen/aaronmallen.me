@@ -5,7 +5,7 @@ status: active
 created: 2026-10-04
 area: [admin, lib, tasks]
 issue: "#466"
-amended: ["#911"]
+amended: ["#911", "#1751"]
 tags: [tasks, commits, markdown, images, privacy, csp]
 ---
 
@@ -40,9 +40,9 @@ We turn remote images into links in the renderers, not in the CSP. `Tasks::Remot
 - its alt text alone, when the `src` is not such a URL.
 
 `Tasks::Markdown` runs the swap after sanitize cleans the HTML, in the pass that labels task-list checkboxes, so notes,
-comments, decisions and the markdown preview all get it. The admin commit page runs `Posts::Markdown` and then
-`Tasks::RemoteImages.to_links`, and as #911 records, the pull request page does the same. `Posts::Markdown` itself does
-not change, so posts, journal entries and the feeds keep their images.
+comments, decisions, artifacts (#1751) and the markdown preview all get it. The admin commit page runs `Posts::Markdown`
+and then `Tasks::RemoteImages.to_links`, and as #911 records, the pull request page does the same. `Posts::Markdown`
+itself does not change, so posts, journal entries and the feeds keep their images.
 
 We check against an allowlist of one path, not a list of remote hosts, so no spelling of a host gets past it.
 

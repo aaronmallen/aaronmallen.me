@@ -27,6 +27,22 @@ module Admin
 
     get "/", to: "today.show", as: :root
     get "/activity", to: "activity.show", as: :activity
+    get "/agents/artifacts", to: "agents.artifacts.index", as: :artifacts
+    post "/agents/artifacts", to: "agents.artifacts.create", as: :create_artifact
+    get "/agents/artifacts/new", to: "agents.artifacts.new", as: :new_artifact
+    get "/agents/artifacts/:id", to: "agents.artifacts.show", as: :artifact, id: ID
+    get "/agents/artifacts/:id/edit", to: "agents.artifacts.edit", as: :edit_artifact, id: ID
+    post "/agents/artifacts/:id", to: "agents.artifacts.update", as: :update_artifact, id: ID
+    post "/agents/artifacts/:id/delete", to: "agents.artifacts.destroy", as: :delete_artifact, id: ID
+    post "/agents/artifacts/:id/records", to: "agents.artifacts.link_record", as: :link_artifact_record, id: ID
+    post(
+      "/agents/artifacts/:id/records/:other_kind/:other_id/delete",
+      to: "agents.artifacts.unlink_record", as: :unlink_artifact_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
+    post(
+      "/agents/artifacts/:id/versions/:number/restore",
+      to: "agents.artifacts.restore", as: :restore_artifact_version, id: ID, number: ID,
+    )
     get "/agents/memories", to: "agents.memories", as: :agent_memories
     post "/agents/memories", to: "agents.create_memory_file", as: :create_agent_memory_file
     get "/agents/memories/:id", to: "agents.memory_file", as: :agent_memory_file, id: ID

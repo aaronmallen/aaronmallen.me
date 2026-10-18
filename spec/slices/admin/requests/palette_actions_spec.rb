@@ -12,14 +12,17 @@ RSpec.describe "Admin palette actions", type: :request do
   before { sign_in_to_admin }
 
   describe "the list as it ships" do
+    let(:names) do
+      %w[
+        create-task create-decision create-journal-entry new-post new-social-post new-artifact plan-tomorrow
+        import-commits sync-issues keyboard-shortcuts toggle-theme activate-maintenance start-task complete-task
+        pause-task
+      ]
+    end
+
     before { get "/admin" }
 
     it "draws one row per entry, in order" do
-      names = %w[
-        create-task create-decision create-journal-entry new-post new-social-post plan-tomorrow import-commits
-        sync-issues keyboard-shortcuts toggle-theme activate-maintenance start-task complete-task pause-task
-      ]
-
       expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
     end
 
@@ -58,6 +61,10 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "sends New social post to the composer, ready to write" do
       expect(action("new-social-post")["data-palette-href"]).to eq("/admin/social?write=1")
+    end
+
+    it "sends New artifact to the new artifact form" do
+      expect(action("new-artifact")["data-palette-href"]).to eq("/admin/agents/artifacts/new")
     end
 
     it "sends Plan tomorrow to the upcoming tasks" do

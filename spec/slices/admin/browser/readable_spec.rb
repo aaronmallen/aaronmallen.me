@@ -33,6 +33,18 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def artifact = @artifact ||= seed_artifact
+
+  def artifacts
+    {
+      "artifacts" => -> { artifact.then { visit "/admin/agents/artifacts" } },
+      "artifact" => -> { visit "/admin/agents/artifacts/#{artifact.id}" },
+      "artifact old version" => -> { visit "/admin/agents/artifacts/#{artifact.id}?version=1" },
+      "new artifact" => -> { visit "/admin/agents/artifacts/new" },
+      "artifact editor" => -> { visit "/admin/agents/artifacts/#{artifact.id}/edit" },
+    }
+  end
+
   def calendars
     { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{today.iso8601}" }
   end
@@ -50,7 +62,7 @@ RSpec.describe "Admin screens", type: :feature do
         find(".compose-accounts summary").click
         find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
-    }.merge(files, short_links, recurring_screens, tag_fields, agent_sessions)
+    }.merge(files, short_links, recurring_screens, tag_fields, agent_sessions, artifacts)
   end
 
   def decision(title, close: nil)
@@ -416,6 +428,22 @@ RSpec.describe "Admin screens", type: :feature do
     create(:analytics_rollup_referrer, day: today, host: "news.ycombinator.com", views: 60)
     create(:analytics_rollup_country, day: today, country_code: "US", views: 90)
     seed_performance
+  end
+
+  def seed_artifact
+    run = ->(name, *args) { Agents::Slice["operations.#{name}"].call(*args).value! }
+    body = "## Steps\n\n- Add the index\n- Check the plan with `EXPLAIN`"
+    found = run.call(
+      :create_artifact,
+      { title: "Index the activities table for date-range search", type: "plan", tags: "db, perf", body:,
+        agent: "claude-code", model: "claude-opus-5-5" },
+    )
+    run.call(
+      :update_artifact, found.id,
+      { title: found.title, type: "plan", tags: "db, perf", body: "#{body}\n- Ship it", note: "Added the last step" },
+    )
+    Links::Slice["operations.link_records"].call("artifact", found.id, { other_kind: "task", other_id: task.id })
+    found
   end
 
   def seed_calendar

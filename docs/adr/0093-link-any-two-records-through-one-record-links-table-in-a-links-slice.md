@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
-amended: ["#966", "#911", "#1139", "#1315", "#1324", "#1749", "#1750"]
+amended: ["#966", "#911", "#1139", "#1315", "#1324", "#1749", "#1750", "#1751"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -69,11 +69,10 @@ site opens for a decision, as [ADR 0167][0167] decides.
 
 **Titles and searches cross through exports** ([ADR 0123][0123]). Each owning slice exports one query per kind, which
 names its records by id and finds them by text, and `links` imports all of them, twelve as #1749 counts. Since #1750 a
-memory file's link opens its admin page, and the page links and unlinks records. Artifacts have no admin page yet, so
-their links carry no URL. The list query builds each admin URL from the kind and id through the app's routes helper
-(ADR 0004), so the pages and the tools share one map from kind to route.
-Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each kind's icon, label key and search kind, and
-admin search hits read their routes from it too.
+memory file's link opens its admin page, and since #1751 an artifact's does too. Both pages link and unlink records.
+The list query builds each admin URL from the kind and id through the app's routes helper (ADR 0004), so the pages and
+the tools share one map from kind to route. Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each
+kind's icon, label key and search kind, and admin search hits read their routes from it too.
 
 ## Alternatives
 

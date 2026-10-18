@@ -30,12 +30,13 @@ module Admin
         prop :preview_path, Blog::Types::String.optional, default: nil
         prop :view, Blog::Types::String.optional, default: nil
         prop :view_name, Blog::Types::String.optional, default: nil
+        prop :split, Blog::Types::Bool, default: false
         prop :attributes, Blog::Types::Hash, :**
 
         include Deps[media_store: "media_store.client"]
 
         def view_template(&)
-          div(class: "edit", style: "--edit-height: #{@height}", data: editor_data) do
+          div(class: @split ? "edit-split" : "edit", style: "--edit-height: #{@height}", data: editor_data) do
             pane_head
             write_pane
             preview_pane(&)
@@ -59,15 +60,18 @@ module Admin
         def control_id = @field ? @error.id_for(@field, scope) : @id
 
         def editor_data
-          return { markdown_editor: "" } unless uploads?
+          own = { markdown_editor: "", editor_split: ("" if @split) }
+          return own unless uploads?
 
-          { markdown_editor: "", editor_upload: path(:admin_create_photo), editor_upload_failed: t(".upload.failed"),
-            editor_uploading: t(".upload.uploading") }
+          own.merge(
+            editor_upload: path(:admin_create_photo), editor_upload_failed: t(".upload.failed"),
+            editor_uploading: t(".upload.uploading"),
+          )
         end
 
         def pane_head
           div(class: "edit-pane-head") do
-            SegmentedControl(label: t(".view"), name: view_name, options: view_options, selected:)
+            SegmentedControl(label: t(".view"), name: view_name, options: view_options, selected:) unless @split
             toolbar
           end
         end
@@ -84,7 +88,7 @@ module Admin
         end
 
         def preview_pane(&)
-          div(class: "edit-pane", data: { editor_view: PREVIEW }, hidden: selected != PREVIEW) do
+          div(class: "edit-pane", data: { editor_view: PREVIEW }, hidden: !shown?(PREVIEW)) do
             div(class: "preview", data: preview_data, &)
           end
         end
@@ -92,6 +96,8 @@ module Admin
         def scope = @scope || @error::SCOPE
 
         def selected = VIEWS.include?(@view) ? @view : WRITE
+
+        def shown?(view) = @split || selected == view
 
         def toolbar
           div(**toolbar_attributes) do
@@ -106,7 +112,7 @@ module Admin
 
         def toolbar_attributes
           { class: "toolbar", role: "toolbar", aria: { label: t(".toolbar") },
-            data: { editor_view: WRITE }, hidden: selected != WRITE }
+            data: { editor_view: WRITE }, hidden: !shown?(WRITE) }
         end
 
         def upload_button
@@ -121,7 +127,7 @@ module Admin
         def view_options = { WRITE => t(".write"), PREVIEW => t(".preview") }
 
         def write_pane
-          div(class: "edit-pane", data: { editor_view: WRITE }, hidden: selected != WRITE) do
+          div(class: "edit-pane", data: { editor_view: WRITE }, hidden: !shown?(WRITE)) do
             label(class: "sr-only", for: control_id) { @label }
             textarea(**body_attributes) { @value }
             p(class: "edit-alert", role: "alert", data: { editor_alert: "" }) if uploads?

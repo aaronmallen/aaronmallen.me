@@ -30,6 +30,7 @@ module Admin
           name: :new_social_post, icon: KINDS.icon("social_post"), route: :admin_social,
           params: { write: Blog::Constants::CHECKED },
         ),
+        Entry.new(name: :new_artifact, icon: KINDS.icon("artifact"), route: :admin_new_artifact),
         Entry.new(
           name: :plan_tomorrow, icon: "fa-calendar", route: :admin_tasks,
           params: { filter: Blog::Types::TaskTab["upcoming"] },

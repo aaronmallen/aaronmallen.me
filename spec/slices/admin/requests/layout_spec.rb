@@ -8,7 +8,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     %w[
       /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
       /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/agents/memories
-      /admin/agents/sessions /admin/analytics /admin/activity /admin/health /admin/time /admin/settings/tagging#tags
+      /admin/agents/artifacts /admin/agents/sessions /admin/analytics /admin/activity /admin/health /admin/time
+      /admin/settings/tagging#tags
       /admin/settings/socials#people /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
       /admin/settings/services#tokens /admin/settings/services#services /admin/settings/services#clients
       /admin/settings/security /admin/settings/jobs

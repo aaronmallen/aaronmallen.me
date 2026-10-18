@@ -7,7 +7,7 @@ module Blog
 
       LABELS = "ui.components.record_links.kinds"
       ROWS = {
-        "artifact" => ["fa-file-code", nil, nil],
+        "artifact" => ["fa-file-code", :admin_artifact, nil],
         "commit" => ["fa-code-commit", :admin_commit, "commit"],
         "decision" => ["fa-scale-balanced", :admin_decision, "decision"],
         "journal_entry" => ["fa-feather", :admin_journal, "journal"],

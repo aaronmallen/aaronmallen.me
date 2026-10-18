@@ -4,12 +4,13 @@ RSpec.describe "Admin live tables", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/activity /admin/agents/memories /admin/agents/sessions /admin/analytics /admin/calendar
-      /admin/decisions /admin/decisions/new /admin/files /admin/health /admin/inbox /admin/journal /admin/links
-      /admin/mail /admin/mail/settings /admin/people/new /admin/performance /admin/performance/requests /admin/posts
-      /admin/posts/new /admin/projects /admin/projects/new /admin/review /admin/search /admin/settings/jobs
-      /admin/settings/security /admin/settings/services /admin/settings/socials /admin/settings/tagging /admin/social
-      /admin/tasks /admin/tasks/new /admin/time /admin/webmentions
+      /admin /admin/activity /admin/agents/artifacts /admin/agents/artifacts/new /admin/agents/memories
+      /admin/agents/sessions /admin/analytics /admin/calendar /admin/decisions /admin/decisions/new /admin/files
+      /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings /admin/people/new
+      /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
+      /admin/projects/new /admin/review /admin/search /admin/settings/jobs /admin/settings/security
+      /admin/settings/services /admin/settings/socials /admin/settings/tagging /admin/social /admin/tasks
+      /admin/tasks/new /admin/time /admin/webmentions
     ]
   end
   let(:records) do
@@ -26,13 +27,18 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/people/#{create(:person).id}/edit", "/admin/files/#{upload_share.value!.id}/edit",
       "/admin/files/groups/#{file_group.id}/edit", "/admin/links/#{short_link.id}/edit",
       "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
-      "/admin/agents/memories/#{memory_file.id}?view=loaded",
+      "/admin/agents/memories/#{memory_file.id}?view=loaded", "/admin/agents/artifacts/#{artifact.id}",
+      "/admin/agents/artifacts/#{artifact.id}/edit",
     ]
   end
 
   def agent_session
     params = { title: "Spike", agent: "claude-code", model: "claude-opus-5-5", task_ids: [] }
     Agents::Slice["operations.start_session"].call(params).value!.first
+  end
+
+  def artifact
+    Agents::Slice["operations.create_artifact"].call({ title: "Plan", type: "plan", tags: "", body: "Do it" }).value!
   end
 
   def file_group

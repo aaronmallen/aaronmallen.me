@@ -25,7 +25,9 @@ module Admin
           private
 
           def artifact(version)
-            span(class: "record-link-title") do
+            href = path(:admin_artifact, id: version.artifact_id, version: version.number)
+
+            a(class: "record-link-title", href:) do
               t(".version", id: version.artifact_id, number: version.number, title: version.title)
             end
           end

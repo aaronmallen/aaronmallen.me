@@ -18,6 +18,7 @@ function setupMarkdownEditor(editor) {
   const panels = editor.querySelectorAll("[data-editor-view]");
   const radios = [...editor.querySelectorAll("input[type='radio']")];
   const whole = preview.hasAttribute("data-editor-preview-form");
+  const split = editor.hasAttribute("data-editor-split");
   let stale = !preview.hasChildNodes();
 
   const payload = () => {
@@ -36,7 +37,7 @@ function setupMarkdownEditor(editor) {
 
   const view = () => radios.find((radio) => radio.checked)?.value;
 
-  const showing = () => view() === pane.dataset.editorView;
+  const showing = () => split || view() === pane.dataset.editorView;
 
   const renderView = () => {
     const current = view();

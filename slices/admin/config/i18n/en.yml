@@ -30,6 +30,12 @@ en:
     views:
       one: "%{count} view"
       other: "%{count} views"
+  artifacts_page:
+    toasts:
+      created: "Artifact created"
+      deleted: "Artifact deleted"
+      restored: "Version restored"
+      saved: "Artifact saved"
   bulk_refusals:
     format: "Nothing changed · pick an action from the bar"
     tag_blank: "Type a tag first"
@@ -522,6 +528,43 @@ en:
             webmention: "Webmentions"
             workout: "Workouts"
       agents:
+        artifact_editor:
+          body: "Body"
+          body_placeholder: "Write it in markdown."
+          cancel: "Cancel"
+          create: "Create artifact"
+          note: "What changed"
+          note_placeholder: "Optional. Shows in the version list."
+          save: "Save"
+          tags: "Tags"
+          tags_placeholder: "site, perf"
+          title: "Title"
+          title_placeholder: "Plan the Hanami 2.3 upgrade"
+          type: "Type"
+        artifact_field_error:
+          body:
+            blank: "Write the body first."
+            long: "Keep the body to %{max} characters or fewer."
+          note:
+            long: "Keep the note to %{max} characters or fewer."
+          title:
+            blank: "Give it a title."
+            long: "Keep the title to %{max} characters or fewer."
+          type:
+            blank: "Pick a type."
+            format: "Pick one of the listed types."
+        artifact_row:
+          links:
+            one: "%{count} link"
+            other: "%{count} links"
+          version: "v%{number}"
+          written: "%{date} by %{who}"
+          you: "you"
+        artifact_versions:
+          current: "current"
+          title: "Versions"
+          version: "v%{number}"
+          you: "you"
         memory_facts:
           add: "Add fact"
           agent: "%{agent} on %{model}"
@@ -1702,6 +1745,9 @@ en:
           keyboard_shortcuts:
             label: "Keyboard shortcuts"
             text: "show the keys, key help, hotkeys"
+          new_artifact:
+            label: "New artifact"
+            text: "write an artifact, agent plan, agent notes, handoff"
           new_post:
             label: "New post"
             text: "write a post, draft a post"
@@ -1795,6 +1841,7 @@ en:
         sections:
           activity: "activity"
           analytics: "analytics"
+          artifacts: "artifacts"
           calendar: "calendar"
           clients: "MCP clients"
           decisions: "decisions"
@@ -3394,6 +3441,41 @@ en:
           heading: "Activity"
           span: "%{from} → %{to}"
       agents:
+        artifacts:
+          edit:
+            back: "Back to the artifact"
+            heading: "Edit artifact"
+          index:
+            all: "All"
+            empty: "No artifacts yet."
+            find: "Find"
+            heading: "Artifacts"
+            lede:
+              one: "%{count} artifact, %{week} updated this week."
+              other: "%{count} artifacts, %{week} updated this week."
+              zero: "No artifacts yet."
+            new_artifact: "New artifact"
+            no_match: "Nothing matches."
+            placeholder: "search artifacts…"
+            search: "Search artifacts"
+            type: "Type"
+          new:
+            back: "All artifacts"
+            heading: "New artifact"
+          show:
+            back: "All artifacts"
+            body: "Body"
+            confirm:
+              one: "Delete %{key} and its one version?"
+              other: "Delete %{key} and all %{count} versions?"
+            created: "Created %{when}"
+            delete: "Delete artifact"
+            edit: "Edit"
+            latest: "Back to latest"
+            old: "You are reading v%{number} of %{current}, from %{when}."
+            restore: "Restore this version"
+            written: "%{date} by %{who}"
+            you: "you"
         memories:
           empty: "No memory files yet."
           facts:

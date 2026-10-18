@@ -13,6 +13,8 @@ module Admin
 
       module_function
 
+      def author(record) = (model(record.model) if record.agent)
+
       def model(model) = [of(model), model].compact.join(SPACE)
 
       def of(model) = BRANDS.find { |pattern, _| pattern.match?(model) }&.last

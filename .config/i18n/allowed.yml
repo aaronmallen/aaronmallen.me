@@ -1,6 +1,5 @@
 - ui.components.*.field_error.*
-- ui.components.agents.memory_field_error.*
-- ui.components.contact_field_error.*
+- ui.components.*_field_error.*
 - ui.components.nav.avatar_menu.themes.*
 - ui.components.security.unknown_*
 - ui.components.social.composer.now

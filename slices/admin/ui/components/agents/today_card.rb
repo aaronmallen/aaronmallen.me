@@ -20,13 +20,13 @@ module Admin
           private
 
           def lines
-            sessions = path(:admin_agent_sessions)
-
-            TodayLine(label: t(".sessions"), href: sessions) { t(".session_count", count: @sessions) }
+            TodayLine(label: t(".sessions"), href: path(:admin_agent_sessions)) do
+              t(".session_count", count: @sessions)
+            end
             TodayLine(label: t(".memory"), href: path(:admin_agent_memories)) do
               t(".memory_count", count: @memory_changes)
             end
-            TodayLine(label: t(".artifacts"), href: sessions) { t(".artifact_count", count: @artifacts) }
+            TodayLine(label: t(".artifacts"), href: path(:admin_artifacts)) { t(".artifact_count", count: @artifacts) }
           end
         end
       end
