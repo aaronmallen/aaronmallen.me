@@ -135,16 +135,6 @@ RSpec.describe "Accepting suggested edits", type: :request do
 
     def delete_post(id) = Thread.new { post_mutations.posts.by_pk(id).delete }.join
 
-    def nowait(table, id)
-      Thread.new do
-        Thread.current.report_on_exception = false
-        database[table].where(id:).for_update.nowait.to_a
-      end.join
-      :free
-    rescue Sequel::DatabaseError
-      :held
-    end
-
     def probing(key, &)
       inner = Suggestions::Slice[key]
       replace_component(key, ->(id) { inner.call(id).tap { held << yield(id) } })
@@ -152,10 +142,10 @@ RSpec.describe "Accepting suggested edits", type: :request do
 
     def rival_update(table, id, **changes)
       rival = Sequel.connect(database.opts.merge(max_connections: 1))
-      rival.get(Sequel.function(:set_config, "statement_timeout", "1s", false))
+      rival.get(Sequel.function(:set_config, "lock_timeout", "1s", false))
       rival[table].where(id:).update(**changes)
       :free
-    rescue Sequel::DatabaseError
+    rescue Sequel::DatabaseLockTimeout
       :held
     ensure
       rival&.disconnect
@@ -164,7 +154,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "holds the post before it reads the body" do
       article = create(:post, :draft, body: "teh cat sat")
       suggest(article, typo)
-      probing("posts.operations.lock_unpublished_post") { nowait(:posts, it) }
+      probing("posts.operations.lock_unpublished_post") { Spec::DB::Locks.nowait(database, :posts, it) }
       accept(article)
 
       expect(held).to eq([:held])
@@ -173,7 +163,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "holds the social post before it reads the parts" do
       social_post = compose("teh first")
       suggest_social(social_post, { **typo, part: 1 })
-      probing("social.operations.lock_editable_social_post") { nowait(:social_posts, it) }
+      probing("social.operations.lock_editable_social_post") { Spec::DB::Locks.nowait(database, :social_posts, it) }
       accept_social(social_post)
 
       expect(held).to eq([:held])

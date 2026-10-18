@@ -18,6 +18,16 @@ module Spec
           raise "another test run holds #{db.opts[:database]}; let it finish or stop it, then run the suite again"
         end
 
+        def nowait(db, table, id)
+          Thread.new do
+            Thread.current.report_on_exception = false
+            db[table].where(id:).for_update.nowait.to_a
+          end.join
+          :free
+        rescue Sequel::DatabaseLockTimeout
+          :held
+        end
+
         def wait_for_waiters(db, count = 1)
           Timeout.timeout(5) { sleep(0.01) until waiters(db) >= count }
         end

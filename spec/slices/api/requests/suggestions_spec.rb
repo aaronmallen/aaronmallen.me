@@ -81,14 +81,7 @@ RSpec.describe "API suggestions", type: :request do
       end
 
       def nowait(id)
-        database = Suggestions::Slice["db.rom"].gateways[:default].connection
-        Thread.new do
-          Thread.current.report_on_exception = false
-          database[:social_posts].where(id:).for_update.nowait.to_a
-        end.join
-        :free
-      rescue Sequel::DatabaseError
-        :held
+        Spec::DB::Locks.nowait(Suggestions::Slice["db.rom"].gateways[:default].connection, :social_posts, id)
       end
 
       def social_post_mutations = Social::Slice["repos.social_post_mutations"]
