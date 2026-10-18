@@ -1346,6 +1346,7 @@ en:
           unknown: "next run unknown"
         cron_acts:
           enable: "Enable %{name}"
+          more: "More actions for %{name}"
           pause: "Pause %{name}"
           performance: "Open %{name} in Performance"
           run: "Run %{name} now"
@@ -1439,6 +1440,7 @@ en:
             retries: "Failed jobs waiting to try again, soonest first. Sidekiq waits longer after each failure, and a job out of tries moves to dead."
             scheduled: "Jobs set to run later, soonest first."
           later: "later"
+          more: "More actions for %{name}"
           next: "next %{at}"
           retries: "retries %{count} of %{max}"
           runs: "runs %{at}"

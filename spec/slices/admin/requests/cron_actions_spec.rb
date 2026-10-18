@@ -108,11 +108,11 @@ RSpec.describe "Admin cron entry actions", :frozen_clock, type: :request do
         .to eq(["/admin/settings/jobs"])
     end
 
-    it "drops the buttons when Redis is down" do
+    it "drops the buttons to run and pause when Redis is down, keeping the More button" do
       redis_down
       get "/admin/settings/jobs"
 
-      expect(entry("sync_gmail")).to have_no_button
+      expect(entry("sync_gmail").all("button").map { it["aria-label"] }).to eq(["More actions for sync_gmail"])
     end
   end
 

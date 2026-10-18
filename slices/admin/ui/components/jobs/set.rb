@@ -56,6 +56,7 @@ module Admin
             ListItem(title: found.name, href: drawer_path(found), sub: nil, hover: true, data:) do |item|
               item.meta { job_meta(found) }
               primary(found)
+              MoreButton(label: t(".more", name: found.name))
             end
           end
 

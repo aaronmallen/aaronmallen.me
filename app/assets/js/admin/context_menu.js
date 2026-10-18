@@ -14,6 +14,7 @@ const CONTROL = "a, input, textarea, select";
 const EDGE = 8;
 const ITEM = "[data-context-item]";
 const LIST = "[role=menu]";
+const MORE = "[data-menu-more]";
 const OPEN = "[data-key-open]";
 const PICK = "input[name='ids[]'][form]";
 const ROW = "[data-menu], [data-key-row]";
@@ -22,6 +23,7 @@ const SUB = "[aria-haspopup=menu]";
 let shown = null;
 
 export function bootContextMenus() {
+  document.addEventListener("click", more);
   document.addEventListener("contextmenu", pointed);
   document.addEventListener("keydown", keyed);
   document.addEventListener("pointerdown", outside, true);
@@ -64,13 +66,14 @@ function clicked(event) {
 function close(refocus = false) {
   if (!shown) return;
 
-  const { row, menu } = shown;
+  const { row, from, menu } = shown;
   shown = null;
   row.classList.remove("ctx-on");
+  if (from !== row) from.ariaExpanded = "false";
   if (!menu) return;
 
   menu.remove();
-  if (refocus && row.isConnected) home(row);
+  if (refocus && from.isConnected) home(from);
   release();
 }
 
@@ -150,6 +153,17 @@ function keyed(event) {
   open(row, url, box.left + BESIDE.x, box.top + Math.min(box.height, BESIDE.y), true);
 }
 
+function more(event) {
+  const button = event.target.closest?.(MORE);
+  const row = button?.closest(ROW);
+  const url = row && source(row);
+  if (!url) return;
+
+  const box = button.getBoundingClientRect();
+  event.preventDefault();
+  open(row, url, box.left, box.bottom + 4, event.detail === 0, { from: button, flip: box.right });
+}
+
 function onControl({ target, clientX: x, clientY: y }, row) {
   const control = target.closest(CONTROL);
   if (!control || control === row) return false;
@@ -159,10 +173,10 @@ function onControl({ target, clientX: x, clientY: y }, row) {
   );
 }
 
-async function open(row, url, x, y, keys) {
+async function open(row, url, x, y, keys, { from = row, flip = x } = {}) {
   close();
 
-  const mine = { row, keys, menu: null };
+  const mine = { row, from, keys, menu: null };
   url.searchParams.set("return_to", window.location.pathname + window.location.search);
   shown = mine;
 
@@ -178,7 +192,8 @@ async function open(row, url, x, y, keys) {
   setupMenuSuggest(menu, fit);
   (row.closest("dialog[open]") ?? document.body).append(menu);
   row.classList.add("ctx-on");
-  place(menu, x, y);
+  if (from !== row) from.ariaExpanded = "true";
+  place(menu, x, y, flip);
   focus(keys ? items(menu)[0] : menu);
 }
 

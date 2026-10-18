@@ -27,6 +27,7 @@ module Admin
             div(class: "jobs-cron-acts") do
               switches unless @entry.unknown?
               performance_link if @entry.last
+              MoreButton(label: t(".more", name: @entry.name))
             end
           end
 

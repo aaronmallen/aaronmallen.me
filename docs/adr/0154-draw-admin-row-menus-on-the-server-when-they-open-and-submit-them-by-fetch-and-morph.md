@@ -43,6 +43,10 @@ Menu key and Shift+F10 on a focused row open it beside the row. Shift+right-clic
 row, show the browser's own menu. Arrow keys move through items and into submenus, Enter and Space run an item, and
 Escape closes the menu and hands focus back to the row.
 
+**A More button opens it too.** A row may carry a quiet "…" button marked `data-menu-more`, as each jobs tab row does
+(#1848). A click opens the row's menu below the button, and Enter or Space opens it with focus on its first item.
+Escape hands focus back to the button.
+
 **An open menu counts as a modal dialog.** While it is open, `keys.js` runs no plain key and `live.js` keeps the
 newest answer and morphs when the menu closes, as each does for a modal `dialog`.
 
