@@ -84,6 +84,45 @@ RSpec.describe "API bulk mail thread actions", type: :request do
     end
   end
 
+  describe "on Gmail threads" do
+    let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
+    let(:picked) do
+      work = create(:mail_account, address: "aaron@work.example")
+      connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+      %w[t1 t2].map { create(:message, mail_account_id: work.id, gmail_id: it) }
+    end
+
+    def opened
+      db = Mail::Slice["db.rom"].gateways[:default].connection
+      [].tap do |open|
+        stub_request(:post, %r{\A#{threads}/}o).to_return { open << db.in_transaction? and google_health_json({}) }
+      end
+    end
+
+    it "tells Gmail of every thread with no transaction open", :commits do
+      open = opened
+      act("read", ids(picked))
+
+      expect([status, open]).to eq([200, [false, false]])
+    end
+
+    it "loads the Google connections once for the whole batch" do
+      opened
+      queries = counting { act("read", ids(picked)) }
+
+      expect(queries.grep(/FROM "service_connections"/).size).to eq(1)
+    end
+
+    it "changes no row when Gmail refuses one thread" do
+      stub_request(:post, "#{threads}/t1/modify").to_return(google_health_json({}))
+      stub_request(:post, "#{threads}/t2/modify").to_return(status: 500)
+
+      act("read", ids(picked))
+
+      expect([status, picked.map { status_of(it) }]).to eq([500, %w[unread unread]])
+    end
+  end
+
   describe "POST /api/v1/mail/threads/bulk/delete" do
     let!(:picked) { [create(:message, subject: "One"), create(:message, subject: "Two")] }
     let!(:left) { create(:message) }

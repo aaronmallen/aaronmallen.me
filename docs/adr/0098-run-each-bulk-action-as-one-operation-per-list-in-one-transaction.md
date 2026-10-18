@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, api, assets, contact, mcp, posts, social, tasks]
 issue: "#329"
-amended: ["#1273"]
+amended: ["#1273", "#1780"]
 tags: [bulk, transactions, savepoint, after-commit, forms, routes, api, mcp, paging, tasks, posts, messages]
 ---
 
@@ -35,9 +35,11 @@ set and that action's input, such as the target list for a move or the tag for a
 `Social::Operations::ActOnWebmentions`. It opens one transaction and calls the single-record operation for each id in
 turn. The first failure stops the loop and steps out as `Failure[:record, id, reason]`, where `reason` is what the
 single operation failed with, such as `:not_found` or a contract's errors. The step rolls back every record the loop
-had changed. Where no single operation exists yet, such as adding one tag to a task (#332) or deleting a message
-(#336), the slice adds one first. A check that holds only for a batch, such as deleting drafts alone (#334), lives in
-the bulk operation.
+had changed. A mail action that changes a Gmail thread's state, such as archive, read or trash, tells Gmail of
+every thread first, through one Google client that loads its connections once, and opens the transaction after, so
+no Gmail call holds it open (#1780). Where no single operation exists yet, such as adding one tag to a task (#332) or
+deleting a message (#336), the slice adds one first. A check that holds only for a batch, such as deleting drafts
+alone (#334), lives in the bulk operation.
 
 **Queued work goes through `after_commit`.** [ADR 0019][0019] ties a hook to its savepoint, so a photo purge queued
 for a draft whose batch rolls back never runs. A single operation a bulk one calls must queue jobs only through
@@ -99,6 +101,9 @@ and the database sits across the network on the NAS ([ADR 0006][0006]). A batch 
 and holds its row locks until the last one.
 
 The first failure stops the batch, so three bad records take three tries to find.
+
+A mail batch that fails after Gmail heard of some threads leaves those changed in Gmail and not here, until the next
+sync brings them in.
 
 The admin route takes its action from a field and the API from its path, so the two doors map the same set of
 actions in two places.

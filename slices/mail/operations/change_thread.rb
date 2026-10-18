@@ -32,11 +32,11 @@ module Mail
         message_tag_mutations: "repos.message_tag_mutations",
       ]
 
-      def call(id, act, label: nil, local: true, remote: true)
+      def call(id, act, client: google, label: nil, local: true, remote: true)
         thread = step found(message_queries.by_id(id))
         return labeled(thread, *label.split(":", 2)) if act == ACT["label"]
 
-        step gmail(thread) { write(it, thread, act) } if remote
+        step gmail(thread, client) { write(it, thread, act) } if remote
         return thread unless local
 
         change(thread, act)
@@ -57,9 +57,9 @@ module Mail
         end
       end
 
-      def gmail(thread)
+      def gmail(thread, client = google)
         address = thread.gmail_id && gmail_queries.address(thread.mail_account_id)
-        yield(address) if address
+        yield Mailbox.new(client, address) if address
         Success(thread)
       rescue Google::Error
         Failure(:gmail_failed)
@@ -85,9 +85,7 @@ module Mail
         labels.merge(UNSPAM) { |_key, mine, theirs| mine + theirs }
       end
 
-      def post(address, thread, verb, body = {})
-        Mailbox.new(google, address).post("threads/#{thread.gmail_id}/#{verb}", body)
-      end
+      def post(mailbox, thread, verb, body = {}) = mailbox.post("threads/#{thread.gmail_id}/#{verb}", body)
 
       def status(thread, act)
         return act if STATUS.valid?(act)
@@ -95,11 +93,11 @@ module Mail
         act == ACT["inbox"] && thread.status == STATUS["spam"] ? STATUS["read"] : thread.status
       end
 
-      def write(address, thread, act)
-        return post(address, thread, "trash") if act == ACT["trash"]
+      def write(mailbox, thread, act)
+        return post(mailbox, thread, "trash") if act == ACT["trash"]
 
-        post(address, thread, "untrash") if act == ACT["inbox"] && thread.trashed
-        post(address, thread, "modify", labels(thread, act))
+        post(mailbox, thread, "untrash") if act == ACT["inbox"] && thread.trashed
+        post(mailbox, thread, "modify", labels(thread, act))
       end
     end
   end
