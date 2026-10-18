@@ -7,7 +7,7 @@ RSpec.describe "Admin social", type: :request do
 
   def accounts(networks) = ["", *networks.filter_map { social_account(it)&.id&.to_s }]
 
-  def bodies = social_post_queries.drafts.first.parts.map(&:body)
+  def bodies = social_posts_in("drafts").first.parts.map(&:body)
 
   def cadence = Fugit::Cron.parse(sidekiq_config.dig(:scheduler, :schedule, "send_due_social_posts", "cron"))
 
@@ -213,7 +213,7 @@ RSpec.describe "Admin social", type: :request do
       it "queues the post for delivery" do
         compose(parts: ["hello"], mode: "now")
 
-        expect(social_post_queries.queued.first).to have_attributes(status: "scheduled", targets: %w[mastodon])
+        expect(social_posts_in("queued").first).to have_attributes(status: "scheduled", targets: %w[mastodon])
       end
 
       it "makes the post due right away" do
@@ -235,25 +235,25 @@ RSpec.describe "Admin social", type: :request do
         create(:person, key: "ada-lovelace")
         compose(parts: ["hi @{ada-lovelace}"], mode: "now")
 
-        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+        expect(social_posts_in("queued").first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
       end
 
       it "keeps the parts in order" do
         compose(parts: %w[one two], mode: "now")
 
-        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(%w[one two])
+        expect(social_posts_in("queued").first.parts.map(&:body)).to eq(%w[one two])
       end
 
       it "drops a blank part" do
         compose(parts: ["one", "  "], mode: "now")
 
-        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(%w[one])
+        expect(social_posts_in("queued").first.parts.map(&:body)).to eq(%w[one])
       end
 
       it "orders the targets the way the networks are listed" do
         compose(parts: ["hello"], targets: %w[bluesky mastodon])
 
-        expect(social_post_queries.queued.first.targets.to_a).to eq(%w[mastodon bluesky])
+        expect(social_posts_in("queued").first.targets.to_a).to eq(%w[mastodon bluesky])
       end
 
       it "says the post is queued for its networks" do
@@ -268,7 +268,7 @@ RSpec.describe "Admin social", type: :request do
         post "/admin/social", _csrf_token: admin_csrf_token, intent: "send",
                               social: { accounts: ["", other.id.to_s], parts: ["hello"], mode: "now" }
 
-        expect(social_post_queries.queued.first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
+        expect(social_posts_in("queued").first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
       end
     end
 
@@ -345,7 +345,7 @@ RSpec.describe "Admin social", type: :request do
       it "sends to the accounts ticked in the menu with scripts off" do
         send_with_scripts_off(untick: [social_account("mastodon"), social_account("bluesky")])
 
-        expect(social_post_queries.queued.first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
+        expect(social_posts_in("queued").first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
       end
 
       it "ticks only the accounts a draft picked when it opens" do
@@ -385,7 +385,7 @@ RSpec.describe "Admin social", type: :request do
       it "saves the post for its Chicago time" do
         compose(parts: ["hello"], mode: "schedule", schedule_at: "2027-03-01T09:30")
 
-        expect(social_post_queries.queued.first.posted_at).to eq(Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
+        expect(social_posts_in("queued").first.posted_at).to eq(Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
       end
 
       it "says when the post goes out" do
@@ -416,7 +416,7 @@ RSpec.describe "Admin social", type: :request do
       it "ignores the schedule time while posting now" do
         compose(parts: ["hello"], mode: "now", schedule_at: "soon")
 
-        expect(social_post_queries.queued).to have(1).item
+        expect(social_posts_in("queued")).to have(1).item
       end
 
       it "rejects a mode it does not know" do
@@ -428,7 +428,7 @@ RSpec.describe "Admin social", type: :request do
       it "queues nothing for a mode it does not know" do
         compose(parts: ["hello"], mode: "later")
 
-        expect(social_post_queries.queued).to be_empty
+        expect(social_posts_in("queued")).to be_empty
       end
     end
 
@@ -436,7 +436,7 @@ RSpec.describe "Admin social", type: :request do
       it "saves the post as a draft" do
         compose(intent: "draft", parts: ["hello"])
 
-        expect(social_post_queries.drafts.first).to have_attributes(status: "draft", posted_at: nil)
+        expect(social_posts_in("drafts").first).to have_attributes(status: "draft", posted_at: nil)
       end
 
       it "keeps the text" do
@@ -461,13 +461,13 @@ RSpec.describe "Admin social", type: :request do
       it "saves a draft that is over a limit" do
         compose(intent: "draft", parts: ["a" * 501])
 
-        expect(social_post_queries.drafts).to have(1).item
+        expect(social_posts_in("drafts")).to have(1).item
       end
 
       it "saves a draft for an intent it doesn't know" do
         compose(intent: "launch", parts: ["hello"])
 
-        expect(social_post_queries.drafts.first).to have_attributes(status: "draft", posted_at: nil)
+        expect(social_posts_in("drafts").first).to have_attributes(status: "draft", posted_at: nil)
       end
     end
 
@@ -518,7 +518,7 @@ RSpec.describe "Admin social", type: :request do
       it "takes a part under every selected limit" do
         compose(parts: ["a" * 301], targets: %w[mastodon])
 
-        expect(social_post_queries.queued).to have(1).item
+        expect(social_posts_in("queued")).to have(1).item
       end
 
       it "rejects a LinkedIn thread whose joined text runs over LinkedIn's limit", :aggregate_failures do
@@ -547,7 +547,7 @@ RSpec.describe "Admin social", type: :request do
         create(:person, :bluesky, key: "ada", bluesky_handle: "ada-lovelace.bsky.social")
         compose(parts: ["@{ada} #{'a' * 274}"], targets: %w[bluesky])
 
-        expect(social_post_queries.queued).to have(1).item
+        expect(social_posts_in("queued")).to have(1).item
       end
 
       it "rejects a part that fits Bluesky only before its link to the site is tagged" do
@@ -559,7 +559,7 @@ RSpec.describe "Admin social", type: :request do
       it "takes a part that still fits Bluesky once its link to the site is tagged" do
         compose(parts: ["#{'a' * 251} https://aaronmallen.me/writing/hello"], targets: %w[bluesky])
 
-        expect(social_post_queries.queued).to have(1).item
+        expect(social_posts_in("queued")).to have(1).item
       end
 
       it "rejects a mention of nobody in the directory" do
@@ -572,20 +572,20 @@ RSpec.describe "Admin social", type: :request do
         Social::Slice["repos.person_mutations"].delete(create(:person, key: "ada-lovelace").id)
         compose(parts: ["hi @{ada-lovelace}"])
 
-        expect(social_post_queries.queued).to be_empty
+        expect(social_posts_in("queued")).to be_empty
       end
 
       it "takes a mention of someone in the directory" do
         create(:person, key: "ada-lovelace")
         compose(parts: ["hi @{ada-lovelace}"])
 
-        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+        expect(social_posts_in("queued").first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
       end
 
       it "saves nothing when it refuses" do
         compose(parts: ["a" * 501])
 
-        expect(social_post_queries.queued).to be_empty
+        expect(social_posts_in("queued")).to be_empty
       end
 
       it "keeps the text that was typed" do
@@ -874,7 +874,7 @@ RSpec.describe "Admin social", type: :request do
 
       it "loads parts and deliveries for the posts on the page only", :aggregate_failures do
         fill_queue
-        on_page = social_post_queries.queued.first(2).map(&:id)
+        on_page = social_posts_in("queued").first(2).map(&:id)
 
         expect(loaded_ids("social_post_parts") { get "/admin/social" }).to match_array(on_page)
         expect(loaded_ids("social_post_deliveries") { get "/admin/social" }).to match_array(on_page)
@@ -1086,7 +1086,7 @@ RSpec.describe "Admin social", type: :request do
       it "adds no second item" do
         save_edit(parts: %w[second], mode: "now")
 
-        expect(social_post_queries.queued + social_post_queries.drafts).to have(1).item
+        expect(social_posts_in("queued") + social_posts_in("drafts")).to have(1).item
       end
 
       it "keeps a draft a draft for an intent it doesn't know" do

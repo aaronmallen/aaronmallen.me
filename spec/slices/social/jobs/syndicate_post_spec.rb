@@ -4,11 +4,10 @@ RSpec.describe Social::Jobs::SyndicatePost do
   subject(:job) { described_class.new }
 
   let(:now) { Time.now.round }
-  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
   before { connect_social_networks }
 
-  def queued = social_post_queries.queued
+  def queued = social_posts_in("queued")
 
   def syndicated(**attributes)
     create(:post, :published, title: "Hello", slug: "hello", syndication_enabled: true,

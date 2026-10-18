@@ -64,12 +64,6 @@ module Social
         expand_for_network.call(social_post.parts.map(&:body), network, make_links: true)
       end
 
-      def held_photos(parts)
-        held = social_post_queries.photos_by_part(parts.map(&:id))
-
-        parts.map { held.fetch(it.id, Blog::Constants::EMPTY_ARRAY) }
-      end
-
       def photos(held)
         held.map do |row|
           read = read_photo.call(row.photo_key).value_or { raise Social::Error, "Photo #{row.photo_key} is unavailable" }
@@ -116,7 +110,7 @@ module Social
       end
 
       def sendings(social_post, bodies)
-        held = held_photos(social_post.parts)
+        held = social_post.parts.map(&:photos)
         return social_post.parts.zip(bodies, held) if bodies.size == social_post.parts.size
 
         [[social_post.parts.first, bodies.first, held.flatten]]

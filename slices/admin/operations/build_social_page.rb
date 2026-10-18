@@ -88,6 +88,12 @@ module Admin
         found.group_by { it[:part] }
       end
 
+      def photos_by_position(parts)
+        parts.to_h do |part|
+          [part.position, part.photos.map { { part: part.position, key: it.photo_key, alt: it.alt_text.to_s } }]
+        end
+      end
+
       def picked(params, editing)
         return Array(params[:accounts]).map(&:to_i) if params
 
@@ -107,7 +113,7 @@ module Admin
         {
           mode: scheduled ? Blog::Types::SocialMode["schedule"] : Blog::Types::SocialMode["now"],
           parts: parts(social_post.parts.map(&:body)),
-          photos: social_post_queries.part_photos(social_post.id).group_by { it[:part] },
+          photos: photos_by_position(social_post.parts),
           schedule_at: scheduled ? Blog::TimeZone.input_value(social_post.posted_at) : EMPTY_STRING,
         }
       end

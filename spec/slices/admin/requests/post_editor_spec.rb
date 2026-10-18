@@ -667,7 +667,7 @@ RSpec.describe "Admin post editor", type: :request do
 
       def queued
         Social::Jobs::SyndicatePost.drain
-        Social::Slice["repos.social_post_queries"].queued
+        social_posts_in("queued")
       end
 
       def text_field = page.find_field("Cross-post text")
@@ -1389,7 +1389,7 @@ RSpec.describe "Admin post editor", type: :request do
                                 syndication_targets: %w[mastodon bluesky])
         end
 
-        def queued_at = Social::Slice["repos.social_post_queries"].queued.map(&:posted_at)
+        def queued_at = social_posts_in("queued").map(&:posted_at)
 
         before do
           connect_social_networks

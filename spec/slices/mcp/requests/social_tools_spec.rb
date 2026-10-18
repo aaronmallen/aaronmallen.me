@@ -278,7 +278,7 @@ RSpec.describe "MCP social tools", type: :request do
     it "saves nothing when it refuses" do
       mcp_call("create_social_post", parts: ["  "], targets: %w[mastodon])
 
-      expect(social_post_queries.drafts).to be_empty
+      expect(social_posts_in("drafts")).to be_empty
     end
   end
 

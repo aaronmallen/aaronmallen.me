@@ -58,14 +58,14 @@ RSpec.describe "Admin social post photos", type: :request do
 
     it "puts each photo on the part that holds it, past a blank part" do
       compose(parts: ["one", "", "three"], photos: [photo(0, part: 3)])
-      part = Social::Slice["repos.social_post_queries"].drafts.first.parts.last
+      part = social_posts_in("drafts").first.parts.last
 
       expect(Social::Slice["relations.social_post_photos"].first[:social_post_part_id]).to eq(part.id)
     end
 
     it "drops every photo the form no longer lists" do
       compose(photos: [photo(0)])
-      update(Social::Slice["repos.social_post_queries"].drafts.first, photos: [])
+      update(social_posts_in("drafts").first, photos: [])
 
       expect(held).to eq([])
     end
@@ -102,7 +102,7 @@ RSpec.describe "Admin social post photos", type: :request do
   describe "editing" do
     let(:social_post) do
       compose(photos: [photo(0, alt: "A cat"), photo(1)])
-      Social::Slice["repos.social_post_queries"].drafts.first
+      social_posts_in("drafts").first
     end
 
     before do
@@ -122,6 +122,17 @@ RSpec.describe "Admin social post photos", type: :request do
 
     it "counts the photos on the part" do
       expect(page).to have_css("[data-social-photo-count]", text: "Photos 2/4")
+    end
+  end
+
+  describe "editing a thread" do
+    it "shows a photo on the part that holds it" do
+      compose(parts: %w[one two], photos: [photo(2, part: 2)])
+      connect_media_store
+      get "/admin/social", edit: social_posts_in("drafts").first.id
+
+      expect(page.all("[data-social-part]").map { it.all("[data-social-photo-key]", visible: :all).map(&:value) })
+        .to eq([[], [photos[2].key]])
     end
   end
 

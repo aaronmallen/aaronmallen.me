@@ -193,6 +193,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         .to have_been_made
     end
 
+    it "attaches the photos in their saved order, not the order they were made" do
+      deliver(with_photos({ part: 1, key: photos[1].key }, { part: 1, key: photos[0].key }), "mastodon")
+
+      expect(uploads.map { uploaded_file(it) }).to eq(["jpeg #{photos[1].key}", "jpeg #{photos[0].key}"])
+    end
+
     it "sends each photo's alt text as its description", :aggregate_failures do
       deliver(with_photos({ part: 1, key: photos[0].key, alt: "A cat on a mat" }), "mastodon")
 

@@ -10,7 +10,7 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
 
   def cross_posts
     Social::Jobs::SyndicatePost.drain
-    Social::Slice["repos.social_post_queries"].queued
+    social_posts_in("queued")
   end
 
   def follow_up_jobs = [Social::Jobs::SyndicatePost, Social::Jobs::SendWebmentions]

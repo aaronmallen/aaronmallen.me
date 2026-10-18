@@ -9,6 +9,10 @@ module Spec
     def posts_by_status(status)
       Posts::Slice["repos.post_queries"].posts.combine(:tags).with_status(status).newest_first.to_a
     end
+
+    def social_posts_in(queue)
+      Social::Slice["repos.social_post_queries"].by_filter(queue, Blog::Structs::Page.new(number: 1, size: 100)).rows
+    end
   end
 end
 

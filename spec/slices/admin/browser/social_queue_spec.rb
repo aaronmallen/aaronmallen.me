@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin social queue", type: :feature do
   let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
-  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
   def draft = social_post_mutations.create_with_parts(parts: %w[a-draft], targets: %w[mastodon], status: "draft")
 
@@ -41,7 +40,7 @@ RSpec.describe "Admin social queue", type: :feature do
       click_button "Post now"
 
       expect(page).to have_css("[data-toast]", text: "Queued for Mastodon")
-      expect(social_post_queries.queued.map { it.parts.map(&:body) }).to eq([%w[rewritten], %w[waiting]])
+      expect(social_posts_in("queued").map { it.parts.map(&:body) }).to eq([%w[rewritten], %w[waiting]])
     end
   end
 end

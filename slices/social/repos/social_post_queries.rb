@@ -3,25 +3,20 @@
 module Social
   module Repos
     class SocialPostQueries < Blog::DB::Repo
-      DRAFT = Blog::Types::SocialPostStatus["draft"]
-      DRAFTS = Blog::Types::SocialQueue["drafts"]
-      POSTED = Blog::Types::SocialPostStatus["posted"]
-      POSTED_QUEUE = Blog::Types::SocialQueue["posted"]
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
       QUEUES = {
         Blog::Types::SocialQueue["queued"] => SCHEDULED,
-        POSTED_QUEUE => POSTED,
-        DRAFTS => DRAFT,
+        Blog::Types::SocialQueue["posted"] => Blog::Types::SocialPostStatus["posted"],
+        Blog::Types::SocialQueue["drafts"] => Blog::Types::SocialPostStatus["draft"],
       }.freeze
 
       def any_for_post?(post_id) = social_posts.for_post(post_id).exist?
 
       def by_filter(filter, page)
-        case Blog::Types::SocialQueue[filter]
-          when DRAFTS then drafts_page(page)
-          when POSTED_QUEUE then posted_page(page)
-          else queued_page(page)
-        end
+        status = QUEUES.fetch(Blog::Types::SocialQueue[filter])
+        listed = social_posts.with_status(status)
+
+        page_of(status == SCHEDULED ? listed.oldest_first : listed.newest_first, page)
       end
 
       def by_id(id) = with_children.by_pk(id).one
@@ -49,10 +44,6 @@ module Social
         page_of(days.newest_dated_first, page)
       end
 
-      def drafts = with_children.with_status(DRAFT).newest_first.to_a
-
-      def drafts_page(page) = page_of(social_posts.with_status(DRAFT).newest_first, page)
-
       def due_scheduled(time) = with_children.due_at(time).oldest_first.to_a
 
       def editable(id) = with_children.unposted.unclaimed.by_pk(id).one
@@ -68,29 +59,13 @@ module Social
         part_ids.to_h { [it, held.fetch(it, Blog::Constants::EMPTY_ARRAY).map(&:photo_key)] }
       end
 
-      def part_photos(social_post_id)
-        numbers = social_post_parts.for_social_post(social_post_id).to_a.to_h { [it.id, it.position] }
-
-        social_post_photos.for_parts(numbers.keys).in_order.to_a.map { photo_values(it, numbers) }
-      end
-
-      def photos_by_part(part_ids)
-        social_post_photos.for_parts(part_ids).in_order.to_a.group_by(&:social_post_part_id)
-      end
-
       def photos_by_post(social_post_ids)
         parts = social_post_parts.where(social_post_id: social_post_ids).in_order.combine(:photos)
 
         parts.to_a.group_by(&:social_post_id).transform_values { it.flat_map(&:photos) }
       end
 
-      def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
-
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a
-
-      def queued = with_children.with_status(SCHEDULED).oldest_first.to_a
-
-      def queued_page(page) = page_of(social_posts.with_status(SCHEDULED).oldest_first, page)
 
       def scheduled_mentioning(key)
         social_posts.with_status(SCHEDULED).matching("@{#{key}}").oldest_first.limit(1).pluck(:id).first
@@ -108,10 +83,6 @@ module Social
         ids = page.fill(listed.paged(page).pluck(:id))
 
         ids.with(rows: listed.where(id: ids.rows).combine(:deliveries, parts: :photos).to_a)
-      end
-
-      def photo_values(photo, numbers)
-        { part: numbers.fetch(photo.social_post_part_id), key: photo.photo_key, alt: photo.alt_text.to_s }
       end
 
       def with_children = social_posts.combine(:deliveries, parts: :photos)

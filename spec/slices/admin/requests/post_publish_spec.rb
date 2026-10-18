@@ -79,7 +79,7 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
 
       Social::Jobs::SyndicatePost.drain
 
-      expect(Social::Slice["repos.social_post_queries"].queued).to contain_exactly(have_attributes(post_id: draft.id))
+      expect(social_posts_in("queued")).to contain_exactly(have_attributes(post_id: draft.id))
     end
 
     describe "a draft with a publish time still to come" do
