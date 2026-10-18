@@ -8,9 +8,11 @@ module Admin
 
         def handle(request, response)
           page = build_memory_file_page.call(
-            record_id(request), view: request.params[:view], records: { query: request.params[:record_q] },
+            record_id(request),
+            page: requested_page(request, response), view: request.params[:view],
+            records: { query: request.params[:record_q] },
           )
-          not_found(response) unless page
+          not_found(response) if page.nil? || page[:history].past_end?
 
           response.render(view, **page)
         end

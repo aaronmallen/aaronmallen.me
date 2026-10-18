@@ -9,6 +9,11 @@ module Agents
         end
       end
 
+      def latest_by_fact(memory_fact_ids)
+        where(memory_fact_id: memory_fact_ids).dataset.unordered.group(:memory_fact_id)
+                                              .select_hash(:memory_fact_id, Sequel.function(:max, :id).as(:id))
+      end
+
       def session_changes
         join(:memory_files, id: self[:memory_file_id].qualified)
           .select_append(memory_files[:path].qualified)

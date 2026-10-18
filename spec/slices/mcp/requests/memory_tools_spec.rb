@@ -32,8 +32,25 @@ RSpec.describe "MCP memory tools", type: :request do
       mcp_answer("remove_memory_fact", id: file, fact_id: fact, agent: "codex", model: "gpt-5")
     end
 
-    it "records each change in the file's history with its agent and model" do
-      expect(trusted(history(file)).map { it.values_at("op", "text", "was_text", "agent", "model") }).to eq(changes)
+    it "records each change in the file's history, newest first, with its agent and model" do
+      expect(trusted(history(file)).map { it.values_at("op", "text", "was_text", "agent", "model") })
+        .to eq(changes.reverse)
+    end
+
+    describe "history a page at a time" do
+      before { lower_page_size(:mcp, to: 3) }
+
+      def read(page) = mcp_answer("read_memory_file", id: file, page:)
+
+      it "returns the newest page and points to the next", :aggregate_failures do
+        expect(read(1).fetch("history").map { it.fetch("op") }).to eq(%w[remove edit add])
+        expect(read(1).slice("partial", "next_page")).to eq("partial" => true, "next_page" => 2)
+      end
+
+      it "reaches the oldest change on a later page", :aggregate_failures do
+        expect(read(2).fetch("history").map { it.fetch("op") }).to eq(%w[create])
+        expect(read(2).slice("partial", "next_page")).to eq("partial" => false)
+      end
     end
   end
 
@@ -113,10 +130,10 @@ RSpec.describe "MCP memory tools", type: :request do
     def authors(file)
       read = mcp_answer("read_memory_file", id: file)
       facts = read.fetch("facts").map { it.values_at("text", "agent", "model") }
-      [facts, read.fetch("history").last.values_at("op", "agent", "model")]
+      [facts, read.fetch("history").first.values_at("op", "agent", "model")]
     end
 
-    def entry(change) = history(file).rfind { it.fetch("op") == change }.fetch("id")
+    def entry(change) = history(file).find { it.fetch("op") == change }.fetch("id")
 
     def owned(name, *, **)
       Agents::Slice["operations.#{name}"].call(*, { **, agent: nil, model: nil, session_id: nil })
@@ -189,7 +206,7 @@ RSpec.describe "MCP memory tools", type: :request do
     it "adds a scope entry to its history with the agent and model" do
       move
 
-      expect(history(file).last.values_at("op", "agent", "model")).to eq(%w[scope claude-code claude-opus-5-5])
+      expect(history(file).first.values_at("op", "agent", "model")).to eq(%w[scope claude-code claude-opus-5-5])
     end
 
     it "refuses a scope that already holds its path" do

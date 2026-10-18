@@ -11,11 +11,17 @@ module Admin
           REVERTS = REVERTIBLE.to_h { [it, ".reverts.#{it}"] }.freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
-          prop :events, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :events, Blog::Types::Instance(Blog::Structs::Paged)
+          prop :count, Blog::Types::Integer
+          prop :latest, Blog::Types::Hash
+          prop :reverted, Blog::Types::Instance(Set)
+          prop :undone, Blog::Types::Hash
+          prop :params, Blog::Types::Hash, default: -> { {} }
 
           def view_template
-            Card(title: t(".title"), count: @events.size) do
-              ol(class: "timeline") { @events.reverse_each { entry(it) } }
+            Card(title: t(".title"), count: @count) do
+              ol(class: "timeline") { @events.rows.each { entry(it) } }
+              Pager(page: @events, route: :admin_agent_memory_file, params: { id: @file.id, **@params })
             end
           end
 
@@ -47,23 +53,17 @@ module Admin
             end
           end
 
-          def latest
-            @latest ||= @events.select(&:memory_fact_id).group_by(&:memory_fact_id).transform_values { it.last.id }
-          end
-
           def quote(text) = (p(class: "memory-quote") { text } if text)
 
           def revert(event)
-            return span(class: "meta") { t(".reverted") } if reverted.include?(event.id)
-            return unless REVERTIBLE.include?(event.op) && latest[event.memory_fact_id] == event.id
+            return span(class: "meta") { t(".reverted") } if @reverted.include?(event.id)
+            return unless REVERTIBLE.include?(event.op) && @latest[event.memory_fact_id] == event.id
 
             ButtonForm(
               action: path(:admin_revert_agent_memory_event, id: @file.id, event_id: event.id), label: t(".revert"),
               variant: :gh, confirm: t(".confirm_revert"),
             )
           end
-
-          def reverted = @reverted ||= @events.filter_map(&:reverted_event_id)
 
           def session(id)
             Button(href: path(:admin_agent_sessions, session: id), small: true, variant: :gh) { t(".session") }
@@ -72,8 +72,7 @@ module Admin
           def what(event)
             return t(OPS.fetch(event.op)) unless event.reverted_event_id
 
-            undone = @events.find { it.id == event.reverted_event_id }
-            t(REVERTS.fetch(undone.op))
+            t(REVERTS.fetch(@undone.fetch(event.reverted_event_id)))
           end
         end
       end

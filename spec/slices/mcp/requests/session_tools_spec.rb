@@ -72,7 +72,7 @@ RSpec.describe "MCP session tools", type: :request do
     end
 
     it "names the session on the history entry and the version" do
-      entry = mcp_answer("read_memory_file", id: file).fetch("history").last
+      entry = mcp_answer("read_memory_file", id: file).fetch("history").first
       version = mcp_answer("read_artifact", id: sessions.first.dig("artifact_versions", 0, "artifact_id"))
 
       expect([entry, version.fetch("versions").last].map { it.fetch("session_id") }).to eq([session_id, session_id])

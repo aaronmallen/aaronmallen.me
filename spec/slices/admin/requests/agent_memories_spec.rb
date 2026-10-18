@@ -300,6 +300,62 @@ RSpec.describe "Admin agent memories", type: :request do
     end
   end
 
+  describe "its history" do
+    let(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
+
+    def add(text) = agents(:add_memory_fact, file.id, { type: "gotcha", text:, **author })
+
+    def entry(event) = history.find("#memory-event-#{event[:id]}")
+
+    def shown = history.all(".memory-event").map { it[:id] }
+
+    before do
+      lower_page_size(:admin, to: 2)
+      add("Run specs through mise")
+      add("Use jj")
+      admin_post("#{file_path(file)}/history/#{events(file)[1][:id]}/revert")
+    end
+
+    it "shows the newest page, counts every entry and links to older ones", :aggregate_failures do
+      get file_path(file)
+
+      expect(shown).to eq(events(file).last(2).reverse.map { "memory-event-#{it[:id]}" })
+      expect(history.find(".card-title")).to have_text("4")
+      expect(history).to have_css("a[rel='next'][href='#{file_path(file)}?page=2']")
+    end
+
+    it "keeps the loaded view when it links to older entries" do
+      get file_path(file), { view: "loaded" }
+
+      expect(history).to have_css("a[rel='next'][href='#{file_path(file)}?view=loaded&page=2']")
+    end
+
+    it "reaches the oldest entry on a later page" do
+      get file_path(file), { page: 2 }
+
+      expect(shown).to eq(events(file).first(2).reverse.map { "memory-event-#{it[:id]}" })
+    end
+
+    it "names what a revert undid when that entry sits on another page" do
+      get file_path(file)
+
+      expect(entry(events(file).last)).to have_text("reverted an addition")
+    end
+
+    it "marks an entry reverted from a newer page and offers no revert on it", :aggregate_failures do
+      get file_path(file), { page: 2 }
+
+      expect(entry(events(file)[1])).to have_css(".meta", text: "reverted")
+      expect(entry(events(file)[1])).to have_no_css("form")
+    end
+
+    it "answers 404 past the last page" do
+      get file_path(file), { page: 3 }
+
+      expect(last_response.status).to eq(404)
+    end
+  end
+
   describe "its records" do
     let(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
     let(:task) { create(:task, title: "Index the activities table") }

@@ -10,7 +10,7 @@ RSpec.describe "API memory", type: :request do
   it "walks a file through every change and answers each as documented" do
     call_api(:patch, "/memory_files/#{file}/facts/#{fact}", { text: "Mind the query cache", **author })
     call_api(:post, "/memory_files/#{file}/facts/#{fact}/remove", author)
-    removed = call_api(:get, "/memory_files/#{file}").fetch("history").last.fetch("id")
+    removed = call_api(:get, "/memory_files/#{file}").fetch("history").first.fetch("id")
     call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", author)
 
     expect(call_api(:get, "/memory").fetch("markdown")).to eq(<<~MARKDOWN)

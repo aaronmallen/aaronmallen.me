@@ -11,7 +11,9 @@ module Admin
           LOADS_FOR = Blog::Types::MemoryScope.values.to_h { [it, ".loads_for.#{it}"] }.freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
-          prop :history, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :history, Blog::Types::Instance(Blog::Structs::Paged)
+          prop :history_count, Blog::Types::Integer
+          prop :history_marks, Blog::Types::Hash
           prop :loaded, Blog::Types::Bool, default: false
           prop :scopes, Blog::Types::Array
           prop :form, Blog::Types::Hash
@@ -81,7 +83,9 @@ module Admin
           def side
             Card { scope_form }
             linked
-            MemoryHistory(file: @file, events: @history)
+            params = @loaded ? { view: Operations::BuildMemoryFilePage::LOADED } : Blog::Constants::EMPTY_HASH
+
+            MemoryHistory(file: @file, events: @history, count: @history_count, params:, **@history_marks)
             div { delete_form }
           end
         end

@@ -37,7 +37,8 @@ read it through its exported read repos and operations and never write its table
   to another scope, link it to other records and delete it. Each change names me as its author. A move adds a
   `scope` entry to the file's history, and agents move a file the same way through `move_memory_file`.
 - **Nothing expires.** History, versions and sessions stay. Caps on fact text (1,000 characters) and artifact bodies
-  (100,000) keep each row small.
+  (100,000) keep each row small. Since #1790 `read_memory_file` and the admin memory file page read history a
+  page at a time, newest first, so a busy file does not send every change it ever had.
 - **Artifact tags sit in a `text[]` column on `artifacts`**, with a CHECK that holds each one to the tag slug format,
   not in the shared `tags` table. A join to `tags` would put artifacts on the tag screens and in the tag counts,
   which the slice stays out of, as it stays out of search. A `tag_name[]` column would carry the domain, but

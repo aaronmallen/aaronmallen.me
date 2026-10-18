@@ -7,7 +7,19 @@ module Agents
 
       def event(memory_file_id, id) = memory_events.where(memory_file_id:).by_pk(id).one
 
-      def history(memory_file_id) = memory_events.where(memory_file_id:).oldest_first.to_a
+      def history(memory_file_id, page) = page.fill(memory_events.where(memory_file_id:).newest_first.paged(page).to_a)
+
+      def history_count(memory_file_id) = memory_events.where(memory_file_id:).count
+
+      def history_marks(events)
+        ids = events.map(&:id)
+
+        {
+          latest: memory_events.latest_by_fact(events.filter_map(&:memory_fact_id).uniq),
+          reverted: memory_events.where(reverted_event_id: ids).pluck(:reverted_event_id).to_set,
+          undone: memory_events.where(id: events.filter_map(&:reverted_event_id)).pluck(:id, :op).to_h,
+        }
+      end
 
       def listed(scope: nil, query: nil)
         found = memory_files.combine(:memory_facts)
