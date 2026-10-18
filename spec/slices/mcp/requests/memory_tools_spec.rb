@@ -103,8 +103,21 @@ RSpec.describe "MCP memory tools", type: :request do
       MARKDOWN
     end
 
+    it "loads a repo named in mixed case or with spaces around it as its lower case name" do
+      expect(mcp_answer("read_memory", repo: " AaronMallen/Blog ").fetch("files"))
+        .to eq(mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("files"))
+    end
+
+    it "refuses a repo that is not owner/name" do
+      expect(mcp_text("read_memory", repo: "aaronmallen")).to eq("repo: name the repository as owner/name")
+    end
+
     it "loads only the global files when given nothing" do
       expect(mcp_answer("read_memory").fetch("files").map { it.fetch("path") }).to eq(%w[preferences.md])
+    end
+
+    it "loads only the global files when the repo is blank" do
+      expect(mcp_answer("read_memory", repo: " ").fetch("files").map { it.fetch("path") }).to eq(%w[preferences.md])
     end
   end
 

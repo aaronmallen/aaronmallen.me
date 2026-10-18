@@ -14,9 +14,16 @@ module API
 
       REPLY = Helpers::Schema.object(Memory::LOADED).freeze
 
+      MALFORMED = { repo: [Blog::Contract::FORMAT] }.freeze
+
       include Deps[load_memory: "agents.operations.load_memory"]
 
-      def handle(task_id: nil, **where) = Success(Memory.loaded(load_memory.call(task_ids: [task_id].compact, **where)))
+      def handle(task_id: nil, repo: nil, **where)
+        repo = Blog::Types::OptionalText[repo]
+        repo &&= Blog::Types::Normalized::Repo.call(repo) { return rejected(MALFORMED, Memory::COMPLAINTS) }
+
+        Success(Memory.loaded(load_memory.call(repo:, task_ids: [task_id].compact, **where)))
+      end
     end
   end
 end

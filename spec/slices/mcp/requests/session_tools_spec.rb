@@ -34,6 +34,18 @@ RSpec.describe "MCP session tools", type: :request do
       expect(started.fetch("markdown")).to start_with("<!-- global · 0 facts -->\n\n# preferences\n")
     end
 
+    it "loads and records a repo named in mixed case or with spaces around it as its lower case name" do
+      paths = start(repo: " AaronMallen/Blog ").fetch("files").map { it.fetch("path") }
+
+      expect([paths, sessions.first.fetch("repo")]).to eq([%w[preferences.md hanami.md release.md], "aaronmallen/blog"])
+    end
+
+    it "refuses a repo that is not owner/name" do
+      mcp_call("start_session", title: "Spike", **author, repo: "aaronmallen")
+
+      expect(mcp_message).to eq("repo: name the repository as owner/name")
+    end
+
     it "lists the session with its tasks and the files it loaded" do
       id = started.fetch("session_id")
       loaded = %w[hanami.md preferences.md release.md task-notes.md].map { include("path" => it) }

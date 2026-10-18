@@ -39,8 +39,8 @@ module API
 
       include Deps[start_session: "agents.operations.start_session"]
 
-      def handle(tasks: [], **fields)
-        case start_session.call({ **fields, task_ids: tasks })
+      def handle(tasks: [], repo: nil, **fields)
+        case start_session.call({ **fields, repo: Blog::Types::OptionalText[repo]&.downcase, task_ids: tasks })
           in Success[id, files] then Success(session_id: id, **Memory.loaded(files))
           in Failure[:invalid, errors] then rejected(errors.transform_keys(task_ids: :tasks), COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
