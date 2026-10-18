@@ -162,6 +162,32 @@ RSpec.describe "Admin mail compose", type: :feature do
     expect(find("#mail-compose input[name='mail[draft]']", visible: :all).value).to eq("r1")
   end
 
+  describe "when the draft route answers a 500" do
+    before do
+      request_gate.refuse("/admin/mail/draft", 500)
+      address
+    end
+
+    it "says the draft did not save" do
+      expect(page).to have_css(".mail-compose-hint", text: "draft not saved")
+    end
+
+    it "shows the saved time again once a save goes through" do
+      find(".mail-compose-hint", text: "draft not saved")
+      request_gate.admit("/admin/mail/draft")
+      fill_in "subject", with: "Engines, again"
+
+      expect(page).to have_css(".mail-compose-hint", text: /draft saved \d/)
+    end
+  end
+
+  it "says the draft did not save when the request gets no answer" do
+    execute_script("window.fetch = () => Promise.reject(new TypeError('offline'))")
+    address
+
+    expect(page).to have_css(".mail-compose-hint", text: "draft not saved")
+  end
+
   it "names the files I attach" do
     attach_file "mail-compose-files", __FILE__, make_visible: true
 

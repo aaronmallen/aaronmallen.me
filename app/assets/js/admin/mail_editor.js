@@ -229,25 +229,26 @@ function setupDraft(form) {
     body.delete("mail[files][]");
     if (!["mail[to]", "mail[subject]", "mail[body]"].some((name) => body.get(name)?.trim())) return;
 
-    const response = await whilePosting(
-      fetch(form.dataset.mailDraftUrl, { method: "POST", body, headers: { Accept: "application/json" } }),
-    );
-    if (!response.ok) return;
+    try {
+      const response = await whilePosting(
+        fetch(form.dataset.mailDraftUrl, { method: "POST", body, headers: { Accept: "application/json" } }),
+      );
+      if (!response.ok) throw new Error(response.statusText);
 
-    draft.value = (await response.json()).draft;
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    status.textContent = status.dataset.mailSaved.replace("{time}", time);
+      draft.value = (await response.json()).draft;
+      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      status.textContent = status.dataset.mailSaved.replace("{time}", time);
+    } catch {
+      status.textContent = status.dataset.mailUnsaved;
+    }
   };
 
   const queue = () => {
     timer = null;
     pending += 1;
-    saving = saving
-      .then(save)
-      .catch(() => {})
-      .finally(() => {
-        pending -= 1;
-      });
+    saving = saving.then(save).finally(() => {
+      pending -= 1;
+    });
   };
 
   form.addEventListener("input", (event) => {

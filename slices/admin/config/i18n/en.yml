@@ -1570,6 +1570,7 @@ en:
           subject: "subject"
           title: "New mail"
           to: "to"
+          unsaved: "draft not saved"
         editor:
           add_link: "Add link"
           cancel: "Cancel"

@@ -30,12 +30,16 @@ module Spec
         reset
       end
 
+      def admit(path) = @refusals.delete(path)
+
       def answered(path) = @answered[path]
 
       def call(env)
         env.delete(Blog::RequestTimer::AFTER_REPLY)
         path = env[Rack::PATH_INFO]
         @counts[path] += 1
+        return [@refusals[path], {}, []] if @refusals[path]
+
         hold = @holds.delete(path)
         hold.pass if hold && !hold.after
         @app.call(env).tap do
@@ -50,10 +54,13 @@ module Spec
         @holds[path] = Hold.new(after:, arrived: Thread::Queue.new, released: Thread::Queue.new)
       end
 
+      def refuse(path, status) = @refusals[path] = status
+
       def reset
         @answered = Hash.new(0)
         @counts = Hash.new(0)
         @holds = {}
+        @refusals = {}
       end
     end
 

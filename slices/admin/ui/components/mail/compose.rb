@@ -62,7 +62,7 @@ module Admin
             div(class: "mail-compose-foot") do
               SendButton()
               Attach(scope: SCOPE)
-              span(class: "mail-compose-hint", data: { mail_saved: t(".saved", time: TIME) }) { t(".hint") }
+              span(class: "mail-compose-hint", data: hint_data) { t(".hint") }
               Button(variant: :gh, small: true, data: { dialog_close: true }) { t(".discard") }
             end
           end
@@ -86,6 +86,8 @@ module Admin
               subject
             end
           end
+
+          def hint_data = { mail_saved: t(".saved", time: TIME), mail_unsaved: t(".unsaved") }
 
           def kept = (@draft unless @draft&.dig(:values, :thread))
 
