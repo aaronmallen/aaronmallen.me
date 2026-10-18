@@ -181,10 +181,12 @@ RSpec.describe "Changes that show in public", type: :request do
       expect(response_to(:patch, "/tags/public/#{tag.id}", { name: "rails" }).status).to eq(200)
     end
 
-    it "cannot capture a task numbered on a published board" do
+    it "cannot capture a task numbered on a published board, however the key is spelled" do
       create(:project, name: "Keyed", key: "PUB", board_published: true)
 
-      expect(response_to(:post, "/tasks", { title: "Loud", project: "PUB" })).to be_refused
+      ["PUB", "pub", " PUB "].each do |key|
+        expect(response_to(:post, "/tasks", { title: "Loud", project: key })).to be_refused
+      end
     end
 
     it "still captures a task numbered in a private project" do
@@ -379,7 +381,7 @@ RSpec.describe "Changes that show in public", type: :request do
     it "captures a task numbered on a published board" do
       create(:project, name: "Keyed", key: "PUB", board_published: true)
 
-      expect(response_to(:post, "/tasks", { title: "Loud", project: "PUB" }, scopes: %w[write publish]).status)
+      expect(response_to(:post, "/tasks", { title: "Loud", project: " pub " }, scopes: %w[write publish]).status)
         .to eq(201)
     end
 

@@ -41,7 +41,8 @@ module API
       private
 
       def public_in(fields)
-        id = fields[:project] && project_queries.live_id_by_key(fields[:project])
+        key = Blog::Types::OptionalText[fields[:project]]&.upcase
+        id = key && project_queries.live_id_by_key(key)
         PUBLIC_TASK if id && project_queries.public_boards([id]).any?
       end
     end
