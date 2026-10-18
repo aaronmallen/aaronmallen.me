@@ -32,17 +32,6 @@ require "page_fetcher"
 
 module Blog
   class App < Hanami::App
-    autoloader.push_dir(root.join("lib/bluesky"), namespace: Bluesky)
-    autoloader.push_dir(root.join("lib/github"), namespace: GitHub)
-    autoloader.push_dir(root.join("lib/google"), namespace: Google)
-    autoloader.push_dir(root.join("lib/issues"), namespace: Issues)
-    autoloader.push_dir(root.join("lib/linear"), namespace: Linear)
-    autoloader.push_dir(root.join("lib/linkedin"), namespace: LinkedIn)
-    autoloader.push_dir(root.join("lib/markdown"), namespace: Markdown)
-    autoloader.push_dir(root.join("lib/mastodon"), namespace: Mastodon)
-    autoloader.push_dir(root.join("lib/object_store"), namespace: ObjectStore)
-    autoloader.push_dir(root.join("lib/page_fetcher"), namespace: PageFetcher)
-
     config.inflections do |inflections|
       inflections.acronym "CLI", "GitHub", "LinkedIn", "MCP", "OAuth", "PKCE", "UI", "URI"
     end

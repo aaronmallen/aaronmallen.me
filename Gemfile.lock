@@ -635,6 +635,7 @@ DEPENDENCIES
   tzinfo (~> 2)
   tzinfo-data
   webmock
+  zeitwerk (~> 2.8)
   zip_kit (~> 6)
 
 CHECKSUMS

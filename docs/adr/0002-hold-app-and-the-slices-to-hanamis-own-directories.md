@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809, "#665", "#718", "#952", "#950", "#1171"]
+amended: [AA-809, "#665", "#718", "#952", "#950", "#1171", "#1701"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -61,7 +61,9 @@ Code lives with what owns it (AA-421, AA-563).
   which loads the code without registering it in the slice's container. A provider moves into the slice that owns
   its concept, and its key crosses by export and import.
 - **`lib/<service>/`** holds what several slices share about one outside service or one job, such as `lib/google`
-  or `lib/markdown`, and the app loads it, since #1171 ([ADR 0159][0159]).
+  or `lib/markdown`, and the app loads it, since #1171 ([ADR 0159][0159]). Since #1701 each service sets up its
+  own Zeitwerk loader in `lib/<service>.rb`, and `config/app.rb` only requires that file. The app's autoloader no
+  longer lists the directory.
 - **An export** carries what another slice reaches on purpose: a read repo for a read, an operation for a write
   (#665).
 - **`lib/blog`** keeps only what no slice owns: the base classes every slice inherits, the shared providers and

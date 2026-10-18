@@ -42,6 +42,7 @@ gem "sidekiq", "~> 8"
 gem "sidekiq-scheduler", "~> 6"
 gem "tzinfo", "~> 2"
 gem "tzinfo-data"
+gem "zeitwerk", "~> 2.8"
 gem "zip_kit", "~> 6"
 
 group :cli, :development do
