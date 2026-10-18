@@ -61,7 +61,7 @@ export function text(response) {
 }
 
 function checked(response) {
-  if (!response.ok) throw new Error(`${response.url} answered ${response.status}`);
+  if (!response.ok) throw new Error(`${response.url} answered ${response.status}`, { cause: response });
 
   return response;
 }

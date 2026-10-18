@@ -45,6 +45,7 @@ module Admin
           {
             live: (path(:admin_events) if navigation),
             live_at: request.env[Live::Clock::KEY],
+            live_failed: t(".live_failed"),
             live_tables:,
             morph_failed: t(".morph_failed"),
           }

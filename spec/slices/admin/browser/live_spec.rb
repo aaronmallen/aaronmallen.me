@@ -62,6 +62,46 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css(".mail-reader h2", text: "Answered")
   end
 
+  describe "when a refetch fails" do
+    before { live "/admin/inbox" }
+
+    it "reloads into sign-in once the session ends" do
+      page.driver.remove_cookie(Blog::SessionCookie::KEY)
+      create(:message, subject: "Hello there")
+
+      expect(page).to have_current_path("/admin/sign-in")
+    end
+
+    describe "any other way" do
+      def toasts = evaluate_script("window.failedToasts")
+
+      before do
+        execute_script(<<~JS)
+          window.failedToasts = 0;
+          new MutationObserver((changes) => {
+            for (const { addedNodes } of changes)
+              for (const node of addedNodes) if (node.querySelector?.(".toast-failed")) window.failedToasts += 1;
+          }).observe(document.body, { childList: true });
+        JS
+        request_gate.refuse("/admin/inbox", 500)
+        create(:message, subject: "Hello there")
+      end
+
+      it "shows the failed toast" do
+        expect(page).to have_css(".toast-failed", text: admin_t("ui.layouts.application.live_failed"))
+      end
+
+      it "shows it once while refetches keep failing" do
+        find(".toast-failed")
+        create(:message, subject: "Hello again")
+        Timeout.timeout(5) { sleep 0.05 until request_gate.count("/admin/inbox") >= 3 }
+        sleep 0.5
+
+        expect(toasts).to eq(1)
+      end
+    end
+  end
+
   it "keeps the mail Select button on screen after a live update" do
     live "/admin/mail"
     message = create(:message, subject: "Hello there")

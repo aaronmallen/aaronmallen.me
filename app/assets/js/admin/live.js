@@ -3,8 +3,10 @@ import { ASKING } from "./confirm.js";
 import { MENU } from "./context_menu.js";
 import { setupFetch } from "./fetching.js";
 import { parse } from "./in_place.js";
+import { showToast } from "./toast.js";
 
 const CATCH_UP = "*";
+const FAILED = "[data-live-failed]";
 const LONGEST_WAIT = 30000;
 const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
@@ -68,6 +70,7 @@ export function setupLive() {
   let asked = 0;
   let askedFor = null;
   let next = null;
+  let warned = false;
 
   const morph = () => {
     if (!next || leaving || held()) return;
@@ -85,11 +88,19 @@ export function setupLive() {
       return { url: askedFor, redirect: "manual" };
     },
     done: (html) => {
+      warned = false;
       if (askedFor !== window.location.href) return refetch.later();
 
       next = parse(html);
       if (wanted === asked) wanted = 0;
       morph();
+    },
+    failed: (error) => {
+      if (error.cause?.type === "opaqueredirect") return window.location.reload();
+      if (warned) return;
+
+      warned = true;
+      showToast(document.querySelector(FAILED)?.dataset.liveFailed ?? "", { failed: true });
     },
   });
 

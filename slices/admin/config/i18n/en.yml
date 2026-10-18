@@ -3440,6 +3440,7 @@ en:
           sub: "%{org} · %{from}–%{to}"
     layouts:
       application:
+        live_failed: "Couldn't refresh · this page may be out of date"
         morph_failed: "Nothing changed · that didn't go through"
         title: "Admin | %{owner}"
     views:

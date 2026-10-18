@@ -93,7 +93,9 @@ the page. The tab keeps one refetch in flight and one queued, and fetches once m
 answer already shows every event that came in meanwhile. It parses the answer with `parse` and morphs `<main>`, the top
 bar and the palette in place with idiomorph, which aube adds and esbuild bundles. idiomorph keeps the focused element,
 the caret and unsent text, and needs no `unsafe-eval`, so the content security policy does not change: `connect-src
-'self'` already admits the stream. The toast sits outside what the morph touches.
+'self'` already admits the stream. The toast sits outside what the morph touches. Since #1811 a refetch that answers
+with a redirect, as it does once the session ends, reloads the page, and a refetch that fails any other way shows the
+failed toast, so the page never goes stale in silence. The toast shows once and not again until a refetch succeeds.
 
 - **Dialogs hold the morph.** While any modal `dialog` is open, the palette and the task modal among them, `live.js`
   keeps the newest answer and morphs when the dialog closes. A dialog marked `data-dialog-live` holds nothing, since it
