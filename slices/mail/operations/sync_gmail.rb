@@ -6,12 +6,10 @@ module Mail
   module Operations
     class SyncGmail < Blog::Operation
       BACKFILL_STALLED_AFTER = 60 * 60
-      LABELS_ADDED = %w[messagesAdded labelsAdded].freeze
       PAGE_SIZE = 25
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
       SETTINGS_EVERY = 3600
       USER_LABEL = "user"
-      USER_LABEL_PREFIX = "Label_"
 
       include Deps[
         "settings",
@@ -40,17 +38,13 @@ module Mail
 
       private
 
-      def added_user_labels(records)
-        added = records.flat_map { |record| LABELS_ADDED.flat_map { record.fetch(it, []) } }
-        ids = added.flat_map { [*it["labelIds"], *it.dig("message", "labelIds")] }
-        ids.select { it.start_with?(USER_LABEL_PREFIX) }
-      end
-
       def catch_up(mailbox, account)
         records, history_id = changes(mailbox, account.history_id)
-        refresh(mailbox, account.id) if stale?(account, records)
-        ids = records.flat_map { it.fetch("messages", []) }.map { it.fetch("threadId") }.uniq
-        ids.each { store(mailbox, account.id, it) }
+        history = Structs::GmailHistory.new(records)
+        refresh(mailbox, account.id) if stale?(account, history)
+        ids = history.thread_ids
+        labeled = history.label_only_thread_ids
+        ids.each { store(mailbox, account.id, it, labels_only: labeled.include?(it)) }
         gmail_mutations.follow(account.id, history_id) unless history_id == account.history_id
         ids.size
       rescue Google::NotFound
@@ -69,14 +63,18 @@ module Mail
         store_signature(mailbox, account_id)
       end
 
+      def relabeled?(mailbox, account_id, gmail_id)
+        gmail_mutations.relabel(account_id, parse_gmail_thread.call(mailbox.thread(gmail_id, format: "minimal")))
+      end
+
       def resume_stalled_backfills(addresses)
         gmail_backfills.resume(Time.now - BACKFILL_STALLED_AFTER, addresses).each { Jobs::BackfillGmail.perform_async(*it) }
       end
 
-      def stale?(account, records)
+      def stale?(account, history)
         return true if account.settings_synced_at.nil? || account.settings_synced_at < Time.now - SETTINGS_EVERY
 
-        labels = added_user_labels(records)
+        labels = history.added_user_labels
         labels.any? && (labels - gmail_queries.label_ids(account.id)).any?
       end
 
@@ -88,7 +86,9 @@ module Mail
         0
       end
 
-      def store(mailbox, account_id, gmail_id)
+      def store(mailbox, account_id, gmail_id, labels_only: false)
+        return if labels_only && relabeled?(mailbox, account_id, gmail_id)
+
         thread = parse_gmail_thread.call(mailbox.thread(gmail_id))
         gmail_mutations.store_thread(account_id, thread)
       rescue Google::NotFound

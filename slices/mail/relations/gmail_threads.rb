@@ -4,9 +4,18 @@ module Mail
   module Relations
     class GmailThreads < Blog::DB::Relation
       SPAM = Blog::Types::MessageStatus["spam"]
-      SYNCED = %i[subject status starred archived trashed sent draft important category received_at].freeze
+      LABELED = %i[status starred archived trashed sent draft important category].freeze
+      SYNCED = [:subject, *LABELED, :received_at].freeze
 
       schema :mail_threads, as: :gmail_threads, infer: true
+
+      def relabel(row, now)
+        row = row.slice(*LABELED)
+        marked_spam_at = Sequel.function(:coalesce, :marked_spam_at, now) if row[:status] == SPAM
+        changed = Sequel.is_distinct_from(row.keys.map { self[it].qualified }, row.values)
+
+        where(changed).update(**row, marked_spam_at:, updated_at: now)
+      end
 
       def restate(message, now)
         received_at = Sequel.function(:greatest, :received_at, message[:received_at])

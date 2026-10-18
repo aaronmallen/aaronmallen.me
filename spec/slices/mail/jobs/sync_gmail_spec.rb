@@ -286,6 +286,90 @@ RSpec.describe Mail::Jobs::SyncGmail do
       end
     end
 
+    describe "a change to labels alone" do
+      def fetched(format) = a_request(:get, %r{/threads/t1\?format=#{format}})
+
+      def history(change, labels)
+        changed = [{ message: { id: "m1", threadId: "t1" }, labelIds: labels }]
+        record = { messages: [{ threadId: "t1" }], change => changed }
+        stub_request(:get, %r{/history\?}).to_return(google_health_json({ history: [record], historyId: "300" }))
+      end
+
+      def minimal(ids, labels)
+        messages = ids.zip(labels).map do |id, labels_of|
+          { id:, threadId: "t1", labelIds: labels_of, internalDate: "0" }
+        end
+        stub_request(:get, %r{/threads/t1\?format=minimal}).to_return(google_health_json({ id: "t1", messages: }))
+      end
+
+      def relabel(*labels, change: "labelsAdded", ids: %w[m1 m2])
+        stub_gmail(labels: receipts, threads: { "t1" => [gmail_message("m1"), gmail_message("m2")] })
+        history(change, labels.flatten)
+        minimal(ids, labels)
+        run
+      end
+
+      before do
+        stub_gmail(history: %w[t1], threads: { "t1" => [gmail_message("m1"), gmail_message("m2")] })
+        run
+        WebMock::RequestRegistry.instance.reset!
+      end
+
+      it "takes the thread's state from Gmail without fetching it in full", :aggregate_failures do
+        relabel(%w[STARRED Label_1], %w[IMPORTANT])
+
+        expect(fetched("full")).not_to have_been_made
+        expect(thread).to have_attributes(status: "read", starred: true, archived: true, important: true)
+      end
+
+      it "puts the thread under the labels Gmail added" do
+        relabel(%w[STARRED Label_1], %w[IMPORTANT])
+
+        expect(label_names(thread)).to eq(%w[Receipts])
+      end
+
+      it "keeps the stored subject and bodies", :aggregate_failures do
+        relabel(%w[STARRED], %w[INBOX])
+
+        expect(thread.subject).to eq("Engines")
+        expect(messages(thread).map(&:body)).to eq(["Hello there"] * 2)
+      end
+
+      it "moves the thread to spam or the trash", :aggregate_failures do
+        relabel(%w[SPAM TRASH], %w[SPAM TRASH])
+
+        expect(fetched("full")).not_to have_been_made
+        expect(thread).to have_attributes(status: "spam", trashed: true, marked_spam_at: be_within(5).of(Time.now))
+      end
+
+      it "fetches the thread in full when its messages differ from the ones stored" do
+        relabel(%w[INBOX], ids: %w[m1])
+
+        expect(fetched("full")).to have_been_made.once
+      end
+
+      it "fetches a thread it has not stored in full" do
+        rows("mail_threads").where(gmail_id: "t1").delete
+        relabel(%w[INBOX], %w[INBOX])
+
+        expect([fetched("minimal"), fetched("full")]).to all(have_been_made.once)
+      end
+
+      it "fetches the thread in full when a message left it", :aggregate_failures do
+        relabel(%w[INBOX], %w[INBOX], change: "messagesDeleted")
+
+        expect(fetched("minimal")).not_to have_been_made
+        expect(fetched("full")).to have_been_made.once
+      end
+
+      it "takes the thread's labels off when Gmail removes them" do
+        relabel(%w[STARRED Label_1], %w[INBOX])
+        relabel(%w[INBOX], %w[INBOX], change: "labelsRemoved")
+
+        expect([thread.starred, label_names(thread)]).to eq([false, []])
+      end
+    end
+
     it "strips script from a stored HTML body", :aggregate_failures do
       html = %(<p onclick="steal()">Hi</p><script>steal()</script><a href="javascript:steal()">x</a><style>*{}</style>)
       sync_message(parts: [gmail_part("text/html", html)])

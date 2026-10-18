@@ -41,7 +41,9 @@ within five minutes. It never retries and catches up on its next run ([ADR 0012]
 `sync_states` ([ADR 0047][0047]). A thread the database refuses would fail every later run too, so the sync skips
 it, reports it to Honeybadger and goes on to the next thread and account. The thread comes back when Gmail next
 changes it (#1766). The plain text body stops at 100,000
-characters, well under the 1 MB Postgres allows its search vector.
+characters, well under the 1 MB Postgres allows its search vector. A thread whose history holds only label changes
+costs a minimal fetch: the sync takes its read, starred, archived, spam, trash and label state from that, and fetches
+the thread in full only when its messages differ from the ones stored (#1779).
 
 **The backfill reaches back as far as the `mail.backfill_days` setting allows**, and skips trash. With no value set,
 it takes every thread in each account but the trash. A lost history id starts the backfill over inside the same

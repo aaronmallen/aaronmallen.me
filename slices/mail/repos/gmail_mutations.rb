@@ -20,6 +20,17 @@ module Mail
         mail_accounts.where(id: account_id).update(history_id:, updated_at: Time.now)
       end
 
+      def relabel(account_id, thread, now: Time.now)
+        id = thread_id(account_id, thread.gmail_id)
+        return unless id && same_messages?(id, thread.messages)
+
+        transaction do
+          gmail_threads.where(id:).relabel(thread.row, now)
+          label(id, account_id, thread.label_ids)
+          id
+        end
+      end
+
       def sign(account_id, signature, now: Time.now)
         signature = nil if signature.empty?
         mail_accounts.where(id: account_id).update(signature:, settings_synced_at: now)
@@ -73,6 +84,10 @@ module Mail
         mail_thread_labels.where(mail_thread_id: id).exclude(mail_label_id: label_ids).delete
         rows = label_ids.map { |label_id| { mail_thread_id: id, mail_label_id: label_id } }
         mail_thread_labels.add(rows)
+      end
+
+      def same_messages?(id, messages)
+        mail_messages.where(mail_thread_id: id).pluck(:gmail_id).sort == messages.map { it[:gmail_id] }.sort
       end
 
       def store_attachments(thread_id, attachments)
