@@ -2,6 +2,7 @@
 
 module Links
   class Slice < Hanami::Slice
+    import keys: %w[repos.artifact_queries repos.memory_file_queries], from: :agents
     import keys: %w[repos.decision_queries], from: :decisions
     import keys: %w[repos.thread_queries], from: :mail
     import keys: %w[repos.post_queries], from: :posts

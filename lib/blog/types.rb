@@ -160,7 +160,7 @@ module Blog
     PullRequestState = Types::String.enum("draft", "open", "merged", "closed")
     RangePreset = Types::Integer.enum(7, 30, 90)
     RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision
-                                        pull_request mail_thread])
+                                        pull_request mail_thread memory_file artifact])
     RecordLinkRelation = Types::String.enum("related", "sourced_from")
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)

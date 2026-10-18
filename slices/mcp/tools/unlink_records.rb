@@ -3,7 +3,8 @@
 module MCP
   module Tools
     class UnlinkRecords < Base
-      description "Remove the link between two records, whichever side it was made from. #{Untrusted::LINKS}"
+      description "Remove the link between two records, whichever side it was made from. A memory file stays linked " \
+                  "to the task or project it is scoped to until its scope changes. #{Untrusted::LINKS}"
       endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end

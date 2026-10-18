@@ -15,9 +15,11 @@ module API
 
       def self.undeleted(noun) = new(error: :undeleted, message: format(Endpoint::UNDELETED, noun), errors: {})
 
-      def self.unmailed = new(error: :unmailed, message: format(Action::MISSING_SCOPE, Endpoint::MAIL), errors: {})
-
       def self.unpublished(message) = new(error: :unpublished, message:, errors: {})
+
+      def self.unscoped(scope)
+        new(error: :unscoped, message: format(Action::MISSING_SCOPE, scope), errors: { scope: })
+      end
 
       def to_h = { error: error.to_s, message:, errors: }.reject { |_, value| value == {} }
     end

@@ -69,6 +69,32 @@ RSpec.describe "Admin task record links", type: :request do
       expect(group("post")).to have_link("On hosting the site", href: "/admin/posts/#{post_record.id}/edit")
     end
 
+    it "shows a memory file scoped to the task and an artifact linked to it" do
+      create(:memory_file, path: "hanami.md", scope: "task", task_id: task.id)
+      link_records("artifact", create(:artifact, title: "Server plan").id)
+      get "/admin/tasks/#{task.id}"
+
+      expect(%w[memory_file artifact].map { group(it).find(".record-link-title").text })
+        .to eq(["hanami.md", "Server plan"])
+    end
+
+    it "draws no remove control on the link to a memory file scoped to the task" do
+      create(:memory_file, path: "hanami.md", scope: "task", task_id: task.id)
+      link_records("artifact", create(:artifact).id)
+      get "/admin/tasks/#{task.id}"
+
+      expect(%w[memory_file artifact].map { group(it).all(".record-link-row form").size }).to eq([0, 1])
+    end
+
+    it "keeps the link to a memory file scoped to the task and says to change its scope" do
+      file = create(:memory_file, scope: "task", task_id: task.id)
+      unlink("memory_file", file.id)
+      follow_redirect!
+
+      expect([page.find("[data-toast]").text, linked("task", task.id, "memory_file")])
+        .to eq([i18n.t("record_links.toasts.scoped"), [file.id]])
+    end
+
     it "links a project to its editor" do
       project = create(:project, name: "aaronmallen.me")
       link_records("project", project.id)

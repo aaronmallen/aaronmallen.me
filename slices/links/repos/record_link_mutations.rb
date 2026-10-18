@@ -10,6 +10,8 @@ module Links
 
       commands :create
 
+      def implied?(*sides) = record_links.implied.between(*sorted(*sides).flatten).exist?
+
       def link(*sides)
         (left_kind, left_id), (right_kind, right_id) = sorted(*sides)
 

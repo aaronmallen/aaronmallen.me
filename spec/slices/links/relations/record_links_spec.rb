@@ -24,7 +24,8 @@ RSpec.describe Links::Relations::RecordLinks do
       {
         "task" => :tasks, "post" => :posts, "social_post" => :social_posts, "journal_entry" => :journal_entries,
         "commit" => :commits, "project" => :projects, "work_entry" => :work_entries, "decision" => :decisions,
-        "pull_request" => :pull_requests, "mail_thread" => :mail_threads,
+        "pull_request" => :pull_requests, "mail_thread" => :mail_threads, "memory_file" => :memory_files,
+        "artifact" => :artifacts,
       }
     end
 

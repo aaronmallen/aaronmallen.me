@@ -7,6 +7,8 @@ module Agents
 
       schema :artifacts, infer: true
 
+      def linkable = linkables(title: :title, day: self.class.site_day(:created_at))
+
       def matching(text)
         return none if unmatchable?(text)
 

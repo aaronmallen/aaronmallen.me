@@ -11,6 +11,7 @@ module API
         other_id: {
           Blog::Contract::FORMAT => "pick a record by its ID",
           "missing" => "that record is gone, so find another",
+          "scoped" => "this memory file is scoped to that record, so change its scope instead",
           "self" => "a record cannot link to itself",
           "taken" => "these two records are already linked",
           "task_pair" => "two tasks take link_tasks, which gives the link a type",

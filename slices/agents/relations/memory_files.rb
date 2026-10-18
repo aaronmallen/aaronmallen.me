@@ -11,6 +11,8 @@ module Agents
 
       def in_load_order = order(self[:scope].asc, self[:path].asc, self[:id].asc)
 
+      def linkable = linkables(title: :path, day: self.class.site_day(:created_at))
+
       def loading(repo:, project_ids:, task_ids:)
         where(
           Sequel.|(
@@ -19,6 +21,8 @@ module Agents
           ),
         )
       end
+
+      def matching(text) = containing(text, :path)
     end
   end
 end

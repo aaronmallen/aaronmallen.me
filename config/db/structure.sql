@@ -367,7 +367,9 @@ CREATE TYPE public.record_kind AS ENUM (
     'work_entry',
     'decision',
     'pull_request',
-    'mail_thread'
+    'mail_thread',
+    'memory_file',
+    'artifact'
 );
 
 
@@ -903,6 +905,8 @@ BEGIN
     WHEN 'decision' THEN PERFORM 1 FROM decisions WHERE id = record_id FOR KEY SHARE;
     WHEN 'pull_request' THEN PERFORM 1 FROM pull_requests WHERE id = record_id FOR KEY SHARE;
     WHEN 'mail_thread' THEN PERFORM 1 FROM mail_threads WHERE id = record_id FOR KEY SHARE;
+    WHEN 'memory_file' THEN PERFORM 1 FROM memory_files WHERE id = record_id FOR KEY SHARE;
+    WHEN 'artifact' THEN PERFORM 1 FROM artifacts WHERE id = record_id FOR KEY SHARE;
   END CASE;
 
   RETURN FOUND;
@@ -7803,6 +7807,13 @@ CREATE TRIGGER artifact_versions_notify_admin_change AFTER INSERT OR DELETE OR U
 
 
 --
+-- Name: artifacts artifacts_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER artifacts_drop_record_links AFTER DELETE ON public.artifacts FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('artifact');
+
+
+--
 -- Name: artifacts artifacts_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7996,6 +8007,13 @@ CREATE TRIGGER memory_events_notify_admin_change AFTER INSERT OR DELETE OR UPDAT
 --
 
 CREATE TRIGGER memory_facts_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.memory_facts FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: memory_files memory_files_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER memory_files_drop_record_links AFTER DELETE ON public.memory_files FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('memory_file');
 
 
 --
@@ -9477,4 +9495,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261017190110_create_memory_files.rb'),
 ('20261017210004_create_artifacts.rb'),
 ('20261017230003_add_schedule_key_to_performance_jobs.rb'),
-('20261017230004_create_agent_sessions.rb');
+('20261017230004_create_agent_sessions.rb'),
+('20261018010004_add_memory_files_and_artifacts_to_record_links.rb');

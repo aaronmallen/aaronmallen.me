@@ -11,7 +11,7 @@ module Links
       def call(kind, id, other_kind, other_id)
         sides = step sides([kind, id], [other_kind, other_id])
 
-        step(record_link_mutations.task_project?(*sides) ? clear(*sides) : unlink(*sides))
+        step unlinked(*sides)
       end
 
       private
@@ -35,6 +35,13 @@ module Links
       end
 
       def unlink(*sides) = affected(record_link_mutations.unlink(*sides))
+
+      def unlinked(*sides)
+        return clear(*sides) if record_link_mutations.task_project?(*sides)
+        return invalid(:other_id, "scoped") if record_link_mutations.implied?(*sides)
+
+        unlink(*sides)
+      end
     end
   end
 end

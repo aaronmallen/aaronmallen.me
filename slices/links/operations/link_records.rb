@@ -22,7 +22,7 @@ module Links
         fields = step validate(params)
         other = fields.values_at(:other_kind, :other_id)
 
-        step(record_link_mutations.task_project?(side, other) ? place(side, other) : persist(side, other))
+        step linked(side, other)
       end
 
       private
@@ -32,6 +32,13 @@ module Links
         known = id && Blog::Types::RecordKind.valid?(kind) && records.named(kind, [id]).any?
 
         found(known && [kind, id])
+      end
+
+      def linked(side, other)
+        return place(side, other) if record_link_mutations.task_project?(side, other)
+        return invalid(:other_id, "taken") if record_link_mutations.implied?(side, other)
+
+        persist(side, other)
       end
 
       def persist(side, other)

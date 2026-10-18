@@ -36,7 +36,7 @@ module Admin
             li(class: "record-link-row") do
               title(link)
               Moment(at: link.day, class: "record-link-day")
-              unlink_form(link)
+              unlink_form(link) unless link.scoped
             end
           end
 

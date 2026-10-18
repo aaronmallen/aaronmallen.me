@@ -4,11 +4,14 @@ module Links
   module Repos
     class RecordLinkQueries < Blog::DB::Repo
       FOUND_LIMIT = 5
+      MEMORY_FILE = Blog::Types::RecordKind["memory_file"]
       RELATIONS = {
+        "artifact" => :artifacts,
         "commit" => :commits,
         "decision" => :decisions,
         "journal_entry" => :journal_entries,
         "mail_thread" => :mail_threads,
+        "memory_file" => :memory_files,
         "post" => :posts,
         "project" => :projects,
         "pull_request" => :pull_requests,
@@ -30,10 +33,12 @@ module Links
         pull_request: "record.repos.pull_request_queries",
         task: "tasks.repos.task_label_queries",
         mail_thread: "mail.repos.thread_queries",
+        memory_file: "agents.repos.memory_file_queries",
+        artifact: "agents.repos.artifact_queries",
       ]
 
       def counts(kind, ids)
-        record_links.touching(kind, ids).to_a.flat_map do |link|
+        touching(kind, ids).flat_map do |link|
           [(link.left_id if link.left_kind == kind), (link.right_id if link.right_kind == kind)].compact
         end.tally
       end
@@ -51,15 +56,17 @@ module Links
         id = Blog::Types::IdParam[id]
         return Blog::Constants::EMPTY_HASH unless id
 
-        ids = partners(kind, id).group_by(&:first).transform_values { it.map(&:last) }
+        links = partnered(kind, id)
+        scoped = links.filter_map { |pair, fixed| pair if fixed }
+        ids = grouped(links.map(&:first).uniq)
 
-        Blog::Types::RecordKind.values.filter_map { [it, named(it, ids[it])] if ids.key?(it) }.to_h
+        Blog::Types::RecordKind.values.filter_map { [it, named(it, ids[it], scoped:)] if ids.key?(it) }.to_h
       end
 
-      def named(kind, ids) = linked(kind, rows(kind, ids:))
+      def named(kind, ids, scoped: Blog::Constants::EMPTY_ARRAY) = linked(kind, rows(kind, ids:), scoped)
 
       def partner_ids(kind, ids, other_kind)
-        record_links.touching(kind, ids).to_a.filter_map do |link|
+        touching(kind, ids).filter_map do |link|
           sides = [[link.left_kind, link.left_id], [link.right_kind, link.right_id]]
           own, partner = sides.first.first == kind ? sides : sides.reverse
 
@@ -67,13 +74,7 @@ module Links
         end.to_h
       end
 
-      def partners(kind, id)
-        record_links.touching(kind, id).to_a.map do |link|
-          left = [link.left_kind, link.left_id]
-
-          left == [kind, id] ? [link.right_kind, link.right_id] : left
-        end
-      end
+      def partners(kind, id) = touching(kind, id).map { partner(it, kind, id) }
 
       private
 
@@ -84,14 +85,25 @@ module Links
         found.from_self.select_append(Sequel.as(kind, :kind), place.as(:place))
       end
 
-      def linked(kind, rows)
+      def grouped(pairs) = pairs.group_by(&:first).transform_values { it.map(&:last) }
+
+      def linked(kind, rows, scoped = Blog::Constants::EMPTY_ARRAY)
         rows.map do |row|
           row => { id:, title:, day: }
           url = Blog::Helpers::RecordKinds.path(routes, kind, id:, day:)
+          title = Blog::Helpers::Truncation.fit(title, limit: TITLE_LIMIT)
 
-          Structs::Link.new(kind:, id:, title: Blog::Helpers::Truncation.fit(title, limit: TITLE_LIMIT), day:, url:)
+          Structs::Link.new(kind:, id:, title:, day:, url:, scoped: scoped.include?([kind, id]))
         end
       end
+
+      def partner(link, kind, id)
+        left = [link.left_kind, link.left_id]
+
+        left == [kind, id] ? [link.right_kind, link.right_id] : left
+      end
+
+      def partnered(kind, id) = record_links.touching(kind, id).to_a.map { [partner(it, kind, id), scoped?(it)] }
 
       def picked(text, limit)
         branches = Blog::Types::RecordKind.values.map { branch(it, text, limit) }
@@ -100,6 +112,12 @@ module Links
       end
 
       def rows(kind, **) = public_send(kind).linkable(RELATIONS.fetch(kind), **)
+
+      def scoped?(link) = link.id.nil? && link.right_kind == MEMORY_FILE
+
+      def touching(kind, ids)
+        record_links.touching(kind, ids).to_a.uniq { [it.left_kind, it.left_id, it.right_kind, it.right_id] }
+      end
     end
   end
 end

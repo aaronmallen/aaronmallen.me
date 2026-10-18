@@ -22,7 +22,8 @@ module API
     UNDELETED = "this change removes %s for good, so it needs the delete scope"
     UNPUBLISHED = "%s shows in public, so this change needs the publish scope"
     WORKOUT = Blog::Types::ActivityKind["workout"]
-    GUARDED = { HEALTH => [WORKOUT], MAIL => [MAIL_ROW, Blog::Types::RecordKind["mail_thread"]] }.freeze
+    GUARDED = { Blog::Types::OAuthScope["agents"] => Serializers::Link::AGENT_KINDS, HEALTH => [WORKOUT],
+                MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD] }.freeze
 
     include Dry::Monads[:result]
     include Deps["settings", task_queries: "tasks.repos.task_queries"]
@@ -138,7 +139,7 @@ module API
 
     def without(value, kinds)
       case value
-        when Hash then value.transform_values { without(it, kinds) }
+        when Hash then value.except(*kinds & Blog::Types::RecordKind.values).transform_values { without(it, kinds) }
         when Array then value.reject { guarded?(it, kinds) }.map { without(it, kinds) }
         else value
       end

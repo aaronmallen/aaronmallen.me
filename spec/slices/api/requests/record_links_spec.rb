@@ -124,7 +124,8 @@ RSpec.describe "API record links", type: :request do
       message = link("post", post_record.id, other_kind: "person", other_id: 1).fetch("message")
 
       expect(message.scan(/"(\w+)"/).flatten)
-        .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request mail_thread])
+        .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request mail_thread
+                  memory_file artifact])
     end
 
     it "answers an unknown record with a 404" do

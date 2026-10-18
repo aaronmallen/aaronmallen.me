@@ -292,6 +292,7 @@ en:
   record_links:
     toasts:
       linked: "Record linked"
+      scoped: "Link kept · this memory file belongs to that record, so change its scope instead"
       unlinked: "Link removed"
   record_tags:
     toasts:
@@ -2066,16 +2067,19 @@ en:
           other_id:
             format: "Pick a record from the list."
             missing: "That record is gone. Find another."
+            scoped: "This memory file belongs to that record. Change its scope instead."
             self: "A record cannot link to itself."
             task_pair: "Link two tasks from the Links section."
             taken: "These two are already linked."
           other_kind:
             format: "Pick a record from the list."
         kinds:
+          artifact: "Artifacts"
           commit: "Commits"
           decision: "Decisions"
           journal_entry: "Journal entries"
           mail_thread: "Mail threads"
+          memory_file: "Memory files"
           post: "Posts"
           project: "Projects"
           pull_request: "Pull requests"

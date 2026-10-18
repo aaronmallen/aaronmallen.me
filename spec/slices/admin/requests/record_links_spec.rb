@@ -228,11 +228,12 @@ RSpec.describe "Admin record links", type: :request do
       expect(found).to eq(kinds.map { kind_name(it) })
     end
 
-    it "finds a record of every kind by text beyond its title" do
+    it "finds a record of every kind but a memory file, which has only its path, by text beyond its title" do
       create_past_titles
+      Agents::Slice["relations.artifact_versions"].insert(artifact_id: create(:artifact).id, body: "Moor the zeppelin")
       show(record_q: "zeppelin")
 
-      expect(found).to eq(kinds.map { kind_name(it) })
+      expect(found).to eq((kinds - %w[memory_file]).map { kind_name(it) })
     end
 
     it "keeps to a few of each kind, newest first" do

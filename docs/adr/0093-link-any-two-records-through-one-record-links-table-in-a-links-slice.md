@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
-amended: ["#966", "#911", "#1139", "#1315", "#1324"]
+amended: ["#966", "#911", "#1139", "#1315", "#1324", "#1749"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -29,18 +29,20 @@ no foreign key can hold a column whose table depends on the row.
 ## Decision
 
 **A new `links` feature slice owns `record_links`.** The table spans kinds six slices own, so no one of them owns it,
-the way `activity` owns its view (ADR 0052). It exports operations to link and unlink two records, a query that lists
-a record's links, and a search across kinds. `admin` and `api` import them. As #911 records, `mcp` reaches them
-through the `api` endpoints ([ADR 0088][0088]). Since #1444 the `api` links and lists every kind, `mail_thread`
-among them, but a mail thread stays behind the `mail` scope ([ADR 0151][0151]). Without it, a link, unlink or list
-that names a mail thread on either side gets a 403 naming `mail`, and a record's links leave mail threads out. A mail
-thread's subject comes marked untrusted, as a commit's title does.
+the way `activity` owns its view (ADR 0052). It exports operations to link and unlink two records, a query that lists a
+record's links, and a search across kinds. `admin` and `api` import them. As #911 records, `mcp` reaches them through
+the `api` endpoints ([ADR 0088][0088]). Since #1444 the `api` links and lists every kind, `mail_thread` among them, but
+a mail thread stays behind the `mail` scope ([ADR 0151][0151]). Without it, a link, unlink or list that names a mail
+thread on either side gets a 403 naming `mail`, and a record's links leave mail threads out. A mail thread's subject
+comes marked untrusted, as a commit's title does. #1749 gates `memory_file` and `artifact` the same way behind the
+`agents` scope ([ADR 0188][0188]), and marks their titles untrusted too.
 
 **Each side is a kind and an id.** A `record_kind` enum (ADR 0015) holds the eight kinds, declared in the order above,
-since the Linked section groups by kind in that order. It now holds ten: #911 declared `pull_request` ninth, and
-`mail_thread` came last in #1139. A row holds `left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The
-operation sorts the two sides, kind first and then id, so a pair has one spelling. #1324 gives each link a
-`relation`: `related`, or `sourced_from` for the task the site opens for a decision, as [ADR 0167][0167] decides.
+since the Linked section groups by kind in that order. It now holds twelve: #911 declared `pull_request` ninth,
+`mail_thread` came tenth in #1139, and #1749 added `memory_file` and `artifact` last ([ADR 0186][0186]). A row holds
+`left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The operation sorts the two sides, kind first and
+then id, so a pair has one spelling. #1324 gives each link a `relation`: `related`, or `sourced_from` for the task the
+site opens for a decision, as [ADR 0167][0167] decides.
 
 **Postgres holds the rules.**
 
@@ -51,21 +53,26 @@ operation sorts the two sides, kind first and then id, so a pair has one spellin
 - `record_links_task_pair_check` refuses a task on both sides. Task to task links stay in `task_links`, with their
   types (ADR 0051). Since #1315 a task's project lives in `tasks.project_id` ([ADR 0166][0166]), so no task
   to project pair lands here.
+- A memory file scoped to a task or project shows a link to it with no row here, since #1749. The list query reads
+  the scope from `memory_files`, as it reads a task's project from `tasks`. `LinkRecords` refuses a row for that pair
+  as `taken`, and `UnlinkRecords` refuses to remove it as `scoped`: changing the file's scope is the way to move it.
+  The admin draws that link with no remove button.
 - A trigger before insert finds the row each side names in its kind's table, and locks it `FOR KEY SHARE` as a
   foreign key would. A missing row raises with `ERRCODE = 'foreign_key_violation'` and `CONSTRAINT =
   'record_links_record_missing'`.
-- An `AFTER DELETE` trigger on each of the kinds' tables, ten since `mail_thread` (#1139), runs one function, which
-  takes its kind as the trigger's argument and deletes every link on either side that names the old row. A cascade from
-  another table fires it too.
+- An `AFTER DELETE` trigger on each of the kinds' tables, twelve since `memory_file` and `artifact` (#1749), runs
+  one function, which takes its kind as the trigger's argument and deletes every link on either side that names the
+  old row. A cascade from another table fires it too.
 
 `Links::Operations::LinkRecords` maps the four names to field errors as ADR 0017 lays out: `taken`, `self`,
-`task_pair` and `missing`.
+`task_pair` and `missing`. `UnlinkRecords` adds `scoped` for a memory file's link to its scope.
 
 **Titles and searches cross through exports** ([ADR 0123][0123]). Each owning slice exports one query per kind, which
-names its records by id and finds them by text, and `links` imports all of them, ten as #1139 counts. The list query
-builds each admin URL from the kind and id through the app's routes helper (ADR 0004), so the pages and the tools share
-one map from kind to route. Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each kind's icon,
-label key and search kind, and admin search hits read their routes from it too.
+names its records by id and finds them by text, and `links` imports all of them, twelve as #1749 counts. Memory files
+and artifacts have no admin page yet, so their links carry no URL. The list query builds each admin URL from the kind
+and id through the app's routes helper (ADR 0004), so the pages and the tools share one map from kind to route.
+Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each kind's icon, label key and search kind, and
+admin search hits read their routes from it too.
 
 ## Alternatives
 
@@ -98,7 +105,7 @@ The operation sorts in Ruby by the enum's order, which Postgres compares on. ADR
 drift out of order, but here a twin out of order sends some pairs unsorted, and `record_links_order_check` refuses
 them as a self link.
 
-A search runs one query per kind, ten as #1139 counts, and merges them in Ruby, so results rank within a kind, not
+A search runs one query per kind, twelve as #1749 counts, and merges them in Ruby, so results rank within a kind, not
 across kinds.
 
 The list query names admin routes from a feature slice. Renaming one breaks the Linked section when it runs, not at
@@ -113,4 +120,6 @@ ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 upd
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
 [0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
+[0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
+[0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

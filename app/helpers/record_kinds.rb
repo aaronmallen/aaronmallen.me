@@ -7,10 +7,12 @@ module Blog
 
       LABELS = "ui.components.record_links.kinds"
       ROWS = {
+        "artifact" => ["fa-file-code", nil, nil],
         "commit" => ["fa-code-commit", :admin_commit, "commit"],
         "decision" => ["fa-scale-balanced", :admin_decision, "decision"],
         "journal_entry" => ["fa-feather", :admin_journal, "journal"],
         "mail_thread" => ["fa-envelope", :admin_mail, "message"],
+        "memory_file" => ["fa-brain", nil, nil],
         "post" => ["fa-file-lines", :admin_edit_post, "post"],
         "project" => ["fa-cube", :admin_edit_project, "project"],
         "pull_request" => ["fa-code-pull-request", :admin_pull_request, "pull_request"],
@@ -27,11 +29,12 @@ module Blog
       private_constant :LABELS, :ROWS, :JOURNAL_ENTRY, :MAIL_FOLDER, :MAIL_THREAD, :SOCIAL_POST, :WORK, :WORK_ENTRY
 
       ALL = Types::RecordKind.values.to_h do |kind|
-        icon, route, search_kind = ROWS.fetch(kind)
+        icon, route, search = ROWS.fetch(kind)
+        search_kind = search && Types::SearchKind[search]
 
-        [kind, Row.new(kind:, icon:, route:, label: "#{LABELS}.#{kind}", search_kind: Types::SearchKind[search_kind])]
+        [kind, Row.new(kind:, icon:, route:, label: "#{LABELS}.#{kind}", search_kind:)]
       end.freeze
-      SEARCHED = ALL.values.to_h { [it.search_kind, it] }.freeze
+      SEARCHED = ALL.values.select(&:search_kind).to_h { [it.search_kind, it] }.freeze
       private_constant :SEARCHED
 
       module_function
@@ -46,6 +49,7 @@ module Blog
 
       def path(routes, kind, id:, day:)
         route = fetch(kind).route
+        return unless route
 
         case kind
           when SOCIAL_POST then routes.path(route, edit: id)

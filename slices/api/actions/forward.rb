@@ -51,7 +51,7 @@ module API
       def handle(request, response)
         case endpoint.call(input(request, response), scopes: response[:token].scopes)
           in Success(payload) then render_json(response, payload, status: descriptor.status)
-          in Failure(Structs::Refusal[error: :unmailed]) then insufficient(response, MAIL)
+          in Failure(Structs::Refusal[error: :unscoped, errors: { scope: }]) then insufficient(response, scope)
           in Failure(Structs::Refusal[error: :undeleted, message:]) then insufficient(response, DELETE, message)
           in Failure(Structs::Refusal[error: :unpublished, message:]) then insufficient(response, PUBLISH, message)
           in Failure(Structs::Refusal => refusal)

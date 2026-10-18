@@ -7,7 +7,7 @@ module Admin
         class PaletteRecords < Component
           ID = "command-palette-group-records"
           KINDS = {
-            **Blog::Helpers::RecordKinds::ALL.values.to_h { [it.search_kind, it.icon] },
+            **Blog::Helpers::RecordKinds::ALL.values.select(&:search_kind).to_h { [it.search_kind, it.icon] },
             Blog::Types::SearchKind["person"] => "fa-address-book",
             Blog::Types::SearchKind["webmention"] => "fa-at",
           }.freeze

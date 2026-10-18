@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [lib, db, api, mcp]
 issue: "#1741"
-amended: ["#1743"]
+amended: ["#1743", "#1749"]
 tags: [agents, oauth, scopes, consent, api-tokens, mcp, untrusted]
 ---
 
@@ -33,6 +33,9 @@ it at consent and the owner ticks it on an API token, and it takes a consent lin
 - **Removal tools also need `delete`**, as every tool that removes a record for good does ([ADR 0114][0114]).
 - **Text an agent wrote comes back marked** `{ untrusted: true, text }`, so the agent that loads a fact knows another
   agent wrote it.
+- **Record links follow the scope** (#1749). Without `agents`, `link_records`, `unlink_records` and `list_links`
+  refuse a memory file or artifact on either side, naming `agents`, and every record's links leave them out, as mail
+  threads stay behind `mail` ([ADR 0093][0093]).
 
 ## Alternatives
 
@@ -58,6 +61,7 @@ Facts load at once and only the untrusted marker warns of them. I catch a bad fa
 it.
 
 [0061]: 0061-narrow-a-requested-scope-to-known-names-and-withhold-every-tool-a-token-lacks.md
+[0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
 [0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
 [0147]: 0147-gate-health-data-behind-a-health-scope-that-read-does-not-cover.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md

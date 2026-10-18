@@ -5,7 +5,6 @@ module API
   module Endpoints
     class RecordLinkEndpoint < Endpoint
       PLACED = %w[project task].freeze
-      SCOPED = true
       PAIR = {
         additionalProperties: false,
         properties: {
@@ -28,16 +27,15 @@ module API
 
       private
 
-      def answered(kind, id, scopes)
-        kinds = mail?(scopes) ? Serializers::Link::KINDS : Serializers::Link::UNMAILED
-
-        Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id), kinds))
+      def answered(kind, id)
+        Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id), Serializers::Link::KINDS))
       end
 
       def handled(fields, scopes)
-        return super if mail?(scopes) || !fields.values_at(:kind, :other_kind).include?(Serializers::Link::MAIL_THREAD)
+        sides = fields.values_at(:kind, :other_kind)
+        scope, = GUARDED.except(*scopes).find { |_, kinds| kinds.intersect?(sides) }
 
-        Failure(Structs::Refusal.unmailed)
+        scope ? Failure(Structs::Refusal.unscoped(scope)) : super
       end
 
       def public_in(fields)

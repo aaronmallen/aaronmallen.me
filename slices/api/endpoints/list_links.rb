@@ -9,10 +9,10 @@ module API
         required: %w[kind id],
       }.freeze
 
-      def handle(kind:, id:, scopes:)
+      def handle(kind:, id:)
         return missing(RecordLinks.name(kind), id) if record_link_queries.named(kind, [id]).empty?
 
-        answered(kind, id, scopes)
+        answered(kind, id)
       end
     end
   end

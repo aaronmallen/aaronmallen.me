@@ -3,6 +3,7 @@
 module API
   module Serializers
     class Link < Serializer
+      AGENT_KINDS = %w[memory_file artifact].map { Blog::Types::RecordKind[it] }.freeze
       COMMIT = Blog::Types::RecordKind["commit"]
       PULL_REQUEST = Blog::Types::RecordKind["pull_request"]
       TASK = Blog::Types::RecordKind["task"]
@@ -31,7 +32,7 @@ module API
       def title(link)
         case link.kind
           when TASK then synced(link.id, link.title)
-          when COMMIT, PULL_REQUEST, MAIL_THREAD then untrusted(link.title)
+          when COMMIT, PULL_REQUEST, MAIL_THREAD, *AGENT_KINDS then untrusted(link.title)
           else link.title
         end
       end

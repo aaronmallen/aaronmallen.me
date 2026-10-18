@@ -12,10 +12,12 @@ module Spec
       "decision" => %i[decision title],
       "pull_request" => %i[pull_request title],
       "mail_thread" => %i[message subject],
+      "artifact" => %i[artifact title],
     }.freeze
 
     def linkable_record(kind, text = Faker::Lorem.sentence)
       return linkable_social_post(text) if kind == "social_post"
+      return create(:memory_file, path: "#{text.downcase.gsub(/[^a-z0-9]+/, '-')}.md") if kind == "memory_file"
 
       factory, field = FACTORIES.fetch(kind)
       create(factory, field => text)
