@@ -2,6 +2,8 @@
 
 module Mail
   class Slice < Hanami::Slice
+    config.shared_app_component_keys += %w[honeybadger.agent]
+
     autoloader.push_dir(Hanami.app.root.join("lib/mail"), namespace: Mail)
 
     export %w[

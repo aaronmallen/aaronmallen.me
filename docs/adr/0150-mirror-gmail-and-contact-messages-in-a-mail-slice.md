@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [db, admin, api, contact]
 issue: "#1122"
-amended: ["#1159", "#1381"]
+amended: ["#1159", "#1381", "#1766"]
 tags: [mail, gmail, google, contact, messages, slices, sync, polling, inbox, snooze]
 ---
 
@@ -38,7 +38,10 @@ A migration moves every row of `messages` into a thread, with its tags, snooze a
 
 **A job polls Gmail's history every few minutes**, the way [ADR 0146][0146] polls Google Health, so new mail lands
 within five minutes. It never retries and catches up on its next run ([ADR 0012][0012]), and its outcome goes to
-`sync_states` ([ADR 0047][0047]).
+`sync_states` ([ADR 0047][0047]). A thread the database refuses would fail every later run too, so the sync skips
+it, reports it to Honeybadger and goes on to the next thread and account. The thread comes back when Gmail next
+changes it (#1766). The plain text body stops at 100,000
+characters, well under the 1 MB Postgres allows its search vector.
 
 **The backfill reaches back as far as the `mail.backfill_days` setting allows**, and skips trash. With no value set,
 it takes every thread in each account but the trash. A lost history id starts the backfill over inside the same

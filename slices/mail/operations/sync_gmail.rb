@@ -19,6 +19,7 @@ module Mail
         gmail_backfills: "repos.gmail_backfills",
         gmail_mutations: "repos.gmail_mutations",
         gmail_queries: "repos.gmail_queries",
+        honeybadger: "honeybadger.agent",
         parse_gmail_thread: "operations.parse_gmail_thread",
       ]
 
@@ -92,6 +93,8 @@ module Mail
         gmail_mutations.store_thread(account_id, thread)
       rescue Google::NotFound
         gmail_mutations.delete_thread(account_id, gmail_id)
+      rescue ArgumentError, Sequel::DatabaseError => e
+        honeybadger.notify(e, context: { mail_account_id: account_id, gmail_thread_id: gmail_id })
       end
 
       def store_labels(mailbox, account_id)

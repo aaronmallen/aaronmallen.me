@@ -342,6 +342,50 @@ RSpec.describe Mail::Jobs::SyncGmail do
       expect(failure).to be_nil
     end
 
+    it "drops NUL from an attachment's name and type", :aggregate_failures do
+      pdf = { **gmail_part("application/\0pdf", "%PDF", filename: "a\0b.pdf"), partId: "2" }
+      sync_message(parts: [gmail_part("text/plain", "Report"), pdf])
+
+      expect(rows("mail_attachments").one).to have_attributes(filename: "ab.pdf", mime_type: "application/pdf")
+      expect(failure).to be_nil
+    end
+
+    it "cuts a body too long to search at a fixed length", :aggregate_failures do
+      sync_message(parts: [gmail_part("text/plain", Array.new(150_000) { "word#{it}" }.join(" "))])
+
+      expect(message.body.length).to eq(Mail::Operations::ParseGmailThread::BODY_LIMIT)
+      expect(failure).to be_nil
+    end
+
+    describe "threads the database refuses" do
+      let(:agent) { Hanami.app["honeybadger.agent"] }
+
+      def refused(id) = { mail_account_id: account.id, gmail_thread_id: id }
+
+      before do
+        allow(agent).to receive(:notify)
+        parser = Mail::Slice["operations.parse_gmail_thread"]
+        replace_component("operations.parse_gmail_thread", lambda { |json|
+          thread = parser.call(json)
+          subject = { "t1" => " ", "t2" => "a\0b" }[thread.gmail_id]
+          subject ? thread.with(row: { **thread.row, subject: }) : thread
+        })
+        threads = %w[t1 t2 t3].to_h { [it, [gmail_message("m#{it}")]] }
+        stub_gmail(history: threads.keys, history_id: "250", threads:)
+        run
+      end
+
+      it "tells Honeybadger about each", :aggregate_failures do
+        expect(agent).to have_received(:notify).with(Sequel::CheckConstraintViolation, context: refused("t1"))
+        expect(agent).to have_received(:notify).with(ArgumentError, context: refused("t2"))
+      end
+
+      it "stores the other threads and moves on", :aggregate_failures do
+        expect(rows("mail_threads").pluck(:gmail_id)).to eq(%w[t3])
+        expect([account.history_id, failure]).to eq(["250", nil])
+      end
+    end
+
     it "treats a subject, sender name and body of only Unicode whitespace as blank", :aggregate_failures do
       sync_message(parts: [gmail_part("text/plain", "  \n")], Subject: "　 ", From: "  <ada@example.com>")
 

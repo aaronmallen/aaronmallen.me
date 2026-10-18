@@ -7,6 +7,7 @@ module Mail
   module Operations
     class ParseGmailThread
       BLANK = /\A[[:space:]]*\z/
+      BODY_LIMIT = 100_000
       CATEGORY = "CATEGORY_"
       CHARSET = /charset="?([^";\s]+)/i
       EVERY = { trashed: "TRASH", draft: "DRAFT" }.freeze
@@ -42,13 +43,13 @@ module Mail
 
       private
 
-      def attachment?(part) = !BLANK.match?(part["filename"].to_s)
+      def attachment?(part) = !BLANK.match?(clean(part["filename"]))
 
       def body(payload)
         plain = text(payload, PLAIN)
         html = text(payload, HTML)
 
-        { body: present(plain || (html && html_text(html))),
+        { body: present(plain || (html && html_text(html)))&.slice(0, BODY_LIMIT),
           html_body: html && Sanitize.fragment(html, SANITIZE) }
       end
 
@@ -57,6 +58,8 @@ module Mail
 
         found if Blog::Types::MailCategory.valid?(found)
       end
+
+      def clean(value) = value.to_s.delete(NUL)
 
       def decode(part)
         charset = header(part, "Content-Type")&.[](CHARSET, 1) || Encoding::UTF_8.name
@@ -69,7 +72,7 @@ module Mail
       def files(payload)
         parts(payload).select { attachment?(it) && !it["partId"].to_s.empty? }.map do |part|
           {
-            part_id: part["partId"], filename: part["filename"], mime_type: part["mimeType"].to_s,
+            part_id: part["partId"], filename: clean(part["filename"]), mime_type: clean(part["mimeType"]),
             size: part.dig("body", "size").to_i,
           }
         end
