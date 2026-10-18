@@ -121,6 +121,7 @@ share_store:
 sign_ins:
   throttle_limit: <%= ENV["SIGN_IN_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["SIGN_IN_THROTTLE_WINDOW_MINUTES"].to_json %>
+web_statement_timeout: <%= ENV["WEB_STATEMENT_TIMEOUT"].to_json %>
 web_threads: <%= ENV["HANAMI_MAX_THREADS"].to_json %>
 webmentions:
   throttle_limit: <%= ENV["WEBMENTIONS_THROTTLE_LIMIT"].to_json %>

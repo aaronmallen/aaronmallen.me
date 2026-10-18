@@ -56,6 +56,7 @@ module Blog
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
+    DEFAULT_WEB_STATEMENT_TIMEOUT = 15
     DEFAULT_WEB_THREADS = 5
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
     SECRETS = %i[reader_salt analytics_salt app_secret data_key].freeze
@@ -82,6 +83,7 @@ module Blog
     Secret = Types::String.constrained(min_size: 64)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
     StampExpiryHours = Types::Coercible::Integer.constrained(gteq: 1)
+    StatementTimeout = Types::Coercible::Float.constrained(gt: 0)
     Threads = Types::Coercible::Integer.constrained(gt: 0)
     ThrottleLimit = Types::Coercible::Integer.constrained(gteq: 1)
     ThrottleWindow = Types::Coercible::Integer.constrained(gteq: 1, lt: MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES)
@@ -241,6 +243,10 @@ module Blog
       auth_callback_path: Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}),
       url: SiteUrl,
     )
+
+    setting :web_statement_timeout,
+            default: DEFAULT_WEB_STATEMENT_TIMEOUT,
+            constructor: unless_set(StatementTimeout, DEFAULT_WEB_STATEMENT_TIMEOUT)
 
     setting :web_threads, default: DEFAULT_WEB_THREADS, constructor: unless_set(Threads, DEFAULT_WEB_THREADS)
 

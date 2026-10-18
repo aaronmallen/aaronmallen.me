@@ -73,6 +73,20 @@ RSpec.describe "The error pages in production", type: :request do
     it_behaves_like "a page of the site", 500
   end
 
+  describe "a query that runs past the statement timeout" do
+    before do
+      allow(Hanami.app["settings"]).to receive(:web_statement_timeout).and_return(0.05)
+      post_queries = instance_double(Posts::Repos::PostQueries)
+      allow(post_queries).to receive(:published_page) do
+        Hanami.app["db.rom"].gateways[:default].connection.get(Sequel.function(:pg_sleep, 1))
+      end
+      replace_component("posts.repos.post_queries", post_queries)
+      get "/writing"
+    end
+
+    it_behaves_like "a page of the site", 500
+  end
+
   it "builds the pages in public/ from config/error_page.html", :aggregate_failures do
     Dir.mktmpdir do |dir|
       system("scripts/assets/error-pages", dir, exception: true)

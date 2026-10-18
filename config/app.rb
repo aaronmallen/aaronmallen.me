@@ -57,7 +57,9 @@ module Blog
                           ->(request) { Admin::Slice["auth.session_reader"].call(request) },
                           ->(token) { API::Slice["repos.api_token_queries"].live_by_token(token) }
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
-    config.middleware.use RequestConnection, -> { Hanami.app["db.rom"].gateways[:default].connection }
+    config.middleware.use RequestConnection,
+                          -> { Hanami.app["db.rom"].gateways[:default].connection },
+                          -> { Hanami.app["settings"].web_statement_timeout }
 
     config.settings_store = Hanami::Settings::CompositeStore.new(
       Hanami::Settings::FileStore.new(config.root.join("config/settings/#{Hanami.env}.yml")),
