@@ -116,6 +116,11 @@ RSpec.describe "Admin screens", type: :feature do
         share = visit_files
         visit "/admin/files/#{share.id}/edit"
       end,
+      "file group editor" => lambda do
+        shared_image
+        group = Shares::Slice["operations.upload_share_group"].call([share_upload("png", "beach.png", "image/png")])
+        visit "/admin/files/groups/#{group.value!.id}/edit"
+      end,
     }
   end
 
@@ -222,6 +227,7 @@ RSpec.describe "Admin screens", type: :feature do
       "jobs" => "/admin/settings/jobs",
       "journal" => "/admin/journal",
       "mail" => "/admin/mail",
+      "mail settings" => "/admin/mail/settings",
       "mail open" => "/admin/mail?thread=#{Mail::Slice['repos.message_queries'].unread.first.id}",
       "mastodon refused" => "/admin/auth/mastodon/callback",
       "new post" => "/admin/posts/new",
@@ -242,6 +248,7 @@ RSpec.describe "Admin screens", type: :feature do
       "search by kind" => "/admin/search?q=quarterly&kind=task",
       "security" => "/admin/settings/security",
       "services" => "/admin/settings/services",
+      "sign-in" => "/admin/sign-in",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",

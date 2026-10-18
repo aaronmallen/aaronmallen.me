@@ -5798,6 +5798,10 @@
 
   & a {
     @apply text-inherit admin-focus;
+
+    @variant phone {
+      @apply block truncate leading-(--spacing-tap);
+    }
   }
 }
 
