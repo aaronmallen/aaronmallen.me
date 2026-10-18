@@ -145,6 +145,186 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
     end
   end
 
+  describe "the cron schedule" do
+    let(:schedule) { Hanami.app["sidekiq.schedule"] }
+
+    def cron = page.find_by_id("jobs-cron")
+
+    def entry(name) = cron.find("#jobs-cron-#{name}")
+
+    def names = cron.all(".jobs-cron-name").map(&:text)
+
+    def next_times(**times) = replace_component("sidekiq.schedule_times", -> { times.transform_keys(&:to_s) })
+
+    def ran(name, outcome: "succeeded", at: Time.now - 60, duration: 1_500.0, **)
+      job = schedule.fetch(name).fetch("class")
+      schedule_key = Object.const_get(job).check_in_name(*schedule.fetch(name)["args"])
+
+      Performance::Slice["db.rom"].relations[:performance_jobs].insert(
+        job:, schedule_key:, outcome:, duration:, query_count: 0, query_time: 0.0, occurred_at: at, **,
+      )
+    end
+
+    def states(**states)
+      replace_component("sidekiq.schedule_states", -> { states.to_h { |name, state| [name.to_s, state.to_json] } })
+    end
+
+    before do
+      next_times(publish_due_posts: (Time.now + 60).to_s)
+      states
+    end
+
+    it "shows every entry with its description, cron string, class and args", :aggregate_failures do
+      visit
+
+      expect(names).to match_array(schedule.keys)
+      expect(entry("sync_issues")).to have_text("every 15 minutes, from :06")
+        .and have_css(".jobs-cron-code", exact_text: "6-59/15 * * * *")
+        .and have_css(".jobs-cron-class", exact_text: 'Tasks::Jobs::SyncIssues ["github"]')
+    end
+
+    describe "with runs on record" do
+      before do
+        ran("publish_due_posts", at: Time.now - 60)
+        ran("publish_due_posts", at: Time.now - 120, duration: 9_000.0)
+        visit
+      end
+
+      it "shows the newest run's duration" do
+        expect(entry("publish_due_posts")).to have_text("1.5 s")
+      end
+
+      it "shows the last and next run in Chicago time" do
+        expect(entry("publish_due_posts").all("time").map { it["datetime"] })
+          .to eq([Time.now - 60, Time.now + 60].map { Blog::TimeZone.local(it).iso8601 })
+      end
+    end
+
+    it "says an entry with no run on record has none" do
+      visit
+
+      expect(entry("back_up_database")).to have_text(admin_t("ui.components.jobs.cron.never"))
+    end
+
+    it "shows a failed last run with its error, sorted first", :aggregate_failures do
+      ran("back_up_database", outcome: "failed", error_class: "PG::Error", error_message: "disk full")
+      visit
+
+      expect(names.first).to eq("back_up_database")
+      expect(entry("back_up_database")).to have_css(".pill", text: "failed")
+        .and have_css(".jobs-cron-error", exact_text: "PG::Error disk full")
+    end
+
+    it "sorts the rest by next run" do
+      next_times(sync_gmail: (Time.now + 30).to_s, publish_due_posts: (Time.now + 60).to_s)
+      visit
+
+      expect(names.first(2)).to eq(%w[sync_gmail publish_due_posts])
+    end
+
+    it "marks an entry more than five minutes overdue as missed", :aggregate_failures do
+      next_times(sync_gmail: (Time.now - 301).to_s, publish_due_posts: (Time.now - 299).to_s)
+      visit
+
+      expect(entry("sync_gmail")).to have_css(".pill", text: "missed")
+      expect(entry("publish_due_posts")).to have_no_css(".pill")
+    end
+
+    it "marks a paused entry" do
+      states(sync_gmail: { enabled: false })
+      visit
+
+      expect(entry("sync_gmail")).to have_css(".pill", text: "paused")
+        .and have_text(admin_t("ui.components.jobs.cron.paused_note"))
+    end
+
+    describe "with two entries of one class, one failed" do
+      before do
+        ran("sync_issues", outcome: "failed", error_class: "GitHub::Error", error_message: "rate limited")
+        ran("sync_linear_issues")
+        visit
+      end
+
+      it "reads each entry's own last run", :aggregate_failures do
+        expect(entry("sync_issues")).to have_css(".pill", text: "failed")
+        expect(entry("sync_linear_issues").all(".pill")).to be_empty
+      end
+
+      it "counts only the failed one on the jobs tab" do
+        expect(jobs_tab).to eq("jobs 1")
+      end
+    end
+
+    it "links an entry to its job's row in Performance, over a range that holds its last run" do
+      ran("sync_gmail", at: Time.now - (10 * 86_400))
+      visit
+
+      expect(entry("sync_gmail")).to have_link(href: "/admin/performance?range=14#job-mail-jobs-syncgmail")
+    end
+
+    it "links an entry that never ran to no row" do
+      visit
+
+      expect(entry("sync_gmail").all("a")).to be_empty
+    end
+
+    describe "the filter" do
+      it "counts every entry, the failed ones and the paused ones" do
+        ran("back_up_database", outcome: "failed")
+        states(sync_gmail: { enabled: false })
+        visit
+
+        expect(cron.all(".seg-option").map(&:text)).to eq(["all #{schedule.size}", "failed 1", "paused 1"])
+      end
+
+      it "narrows to failed entries" do
+        ran("back_up_database", outcome: "failed")
+        get "/admin/settings/jobs?cron=failed"
+
+        expect(names).to eq(["back_up_database"])
+      end
+
+      it "narrows to paused entries" do
+        states(sync_gmail: { enabled: false })
+        get "/admin/settings/jobs?cron=paused"
+
+        expect(names).to eq(["sync_gmail"])
+      end
+
+      it "says so when nothing failed" do
+        get "/admin/settings/jobs?cron=failed"
+
+        expect(cron.find(".empty")).to have_text(admin_t("ui.components.jobs.cron.empty.failed"))
+      end
+
+      it "says so when nothing is paused" do
+        get "/admin/settings/jobs?cron=paused"
+
+        expect(cron.find(".empty")).to have_text(admin_t("ui.components.jobs.cron.empty.paused"))
+      end
+    end
+
+    it "adds failed cron entries to the jobs tab count" do
+      stats(retry_size: 1, dead_size: 1)
+      ran("back_up_database", outcome: "failed")
+      visit
+
+      expect(jobs_tab).to eq("jobs 3")
+    end
+
+    describe "with Redis down" do
+      before do
+        replace_component("sidekiq.schedule_times", -> { raise RedisClient::CannotConnectError, "refused" })
+        visit
+      end
+
+      it "reads next run and paused as unknown", :aggregate_failures do
+        expect(entry("sync_gmail")).to have_text(admin_t("ui.components.jobs.cron.unknown"))
+        expect(cron.all(".seg-option").map(&:text).last).to eq("paused")
+      end
+    end
+  end
+
   it "says the worker is quiet when nothing runs" do
     processes(process)
     visit

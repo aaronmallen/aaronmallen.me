@@ -7,91 +7,120 @@ production:
 :scheduler:
   :schedule:
     back_up_database:
+      description: "daily at 00:30"
       cron: "30 0 * * * <%= Blog::TimeZone::NAME %>"
       class: Backups::Jobs::BackUpDatabase
     check_post_links:
+      description: "daily at 03:00"
       cron: "0 3 * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::CheckPostLinks
     import_commits:
+      description: "every 15 minutes, from :01"
       cron: "1-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportCommits
     import_pull_requests:
+      description: "every 15 minutes, from :03"
       cron: "3-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportPullRequests
     prune_access_records:
+      description: "daily at 04:15"
       cron: "15 4 * * * <%= Blog::TimeZone::NAME %>"
       class: Security::Jobs::PruneAccessRecords
     publish_due_posts:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::PublishDuePosts
     queue_held_backfills:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Health::Jobs::QueueHeldBackfills
     queue_held_follow_ups:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::QueueHeldFollowUps
     queue_held_title_fetches:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Shares::Jobs::QueueHeldTitleFetches
     queue_held_webmentions:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::QueueHeldWebmentions
     reap_expired_credentials:
+      description: "daily at 05:00"
       cron: "0 5 * * * <%= Blog::TimeZone::NAME %>"
       class: MCP::Jobs::ReapExpiredCredentials
     reap_spam_messages:
+      description: "daily at 05:45"
       cron: "45 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Mail::Jobs::ReapSpamMessages
     reap_search_attempts:
+      description: "every hour at :20"
       cron: "20 * * * * <%= Blog::TimeZone::NAME %>"
       class: Search::Jobs::ReapSearchAttempts
     reap_sync_states:
+      description: "daily at 04:00"
       cron: "0 4 * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ReapSyncStates
     reap_webmention_receipts:
+      description: "daily at 05:15"
       cron: "15 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::ReapWebmentionReceipts
     refresh_country_database:
+      description: "Wednesdays at 03:00"
       cron: "0 3 * * 3 <%= Blog::TimeZone::NAME %>"
       class: Analytics::Jobs::RefreshCountryDatabase
     refresh_projects:
+      description: "daily at 02:00"
       cron: "0 2 * * * <%= Blog::TimeZone::NAME %>"
       class: Projects::Jobs::RefreshProjects
     refresh_social_engagement:
+      description: "every 4 hours"
       cron: "0 */4 * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::RefreshSocialEngagement
     rerender_posts:
+      description: "daily at 03:30"
       cron: "30 3 * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::RerenderPosts
     roll_over_sprint:
+      description: "daily at midnight"
       cron: "0 0 * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::RollOverSprint
     roll_up_analytics:
+      description: "daily at 01:00"
       cron: "0 1 * * * <%= Blog::TimeZone::NAME %>"
       class: Analytics::Jobs::RollUpAnalytics
     roll_up_timing:
+      description: "daily at 01:15"
       cron: "15 1 * * * <%= Blog::TimeZone::NAME %>"
       class: Performance::Jobs::RollUpTiming
     send_due_social_posts:
+      description: "every minute"
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::SendDueSocialPosts
     sweep_photos:
+      description: "daily at 05:30"
       cron: "30 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Media::Jobs::SweepPhotos
     sync_calendar:
+      description: "every 15 minutes, from :11"
       cron: "11-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Calendar::Jobs::SyncCalendar
     sync_health:
+      description: "every 15 minutes, from :13"
       cron: "13-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Health::Jobs::SyncHealth
     sync_gmail:
+      description: "every 5 minutes"
       cron: "*/5 * * * * <%= Blog::TimeZone::NAME %>"
       class: Mail::Jobs::SyncGmail
     sync_issues:
+      description: "every 15 minutes, from :06"
       cron: "6-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
       args: ["github"]
     sync_linear_issues:
+      description: "every 15 minutes, from :08"
       cron: "8-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
       args: ["linear"]

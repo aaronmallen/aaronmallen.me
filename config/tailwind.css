@@ -6876,6 +6876,50 @@
   @apply mt-0 mb-2 font-display text-2xl leading-tight font-bold tracking-[-.02em];
 }
 
+@utility jobs-cron-hint {
+  @apply mt-0 mb-2;
+}
+
+@utility jobs-cron-entry {
+  @apply flex items-start gap-3 border-t border-line py-3.5 first-of-type:border-t-0;
+}
+
+@utility jobs-cron-failed {
+  background-color: color-mix(in oklab, var(--color-mk-pink) 7%, transparent);
+}
+
+@utility jobs-cron-body {
+  @apply flex min-w-0 flex-1 flex-col gap-1.5;
+}
+
+@utility jobs-cron-title {
+  @apply m-0 flex flex-wrap items-center gap-2;
+}
+
+@utility jobs-cron-name {
+  @apply font-mono font-medium;
+}
+
+@utility jobs-cron-meta {
+  @apply m-0 flex flex-wrap items-center gap-x-3 gap-y-1 meta;
+}
+
+@utility jobs-cron-code {
+  @apply rounded-md border border-line bg-ground px-1.5 font-mono whitespace-nowrap text-ink;
+}
+
+@utility jobs-cron-class {
+  @apply wrap-anywhere;
+}
+
+@utility jobs-cron-error {
+  @apply m-0 line-clamp-2 font-mono text-meta wrap-anywhere text-ink;
+
+  & b {
+    @apply font-medium text-mk-pink-text;
+  }
+}
+
 @utility settings-link {
   @apply text-ink-muted underline hover:text-accent-text focus-ring;
 

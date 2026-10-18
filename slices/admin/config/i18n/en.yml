@@ -1094,6 +1094,30 @@ en:
           wake: "Wake now"
           wakes: "wakes %{at}"
       jobs:
+        cron:
+          empty:
+            failed: "Every entry succeeded its last run."
+            paused: "Nothing is paused."
+            unknown: "Redis isn't answering, so what is paused is unknown."
+          failed: "failed"
+          filter: "Show cron entries"
+          filters:
+            all: "all"
+            counted: "%{name} %{count}"
+            failed: "failed"
+            paused: "paused"
+          heading: "Cron schedule"
+          hint: "Times are Chicago. Some of these never retry, so a failure shows only here, as a failed last run."
+          last: "last %{at} · %{took}"
+          milliseconds: "%{count} ms"
+          missed: "missed"
+          never: "no run on record"
+          next: "next %{at}"
+          paused: "paused"
+          paused_note: "won't run while paused"
+          performance: "Open %{name} in Performance"
+          seconds: "%{count} s"
+          unknown: "next run unknown"
         health:
           beat: "heartbeat %{at}"
           counts:

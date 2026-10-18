@@ -15,8 +15,9 @@ module Admin
         prop :title, Blog::Types::String
 
         include Deps[
-          job_queries: "activity.repos.job_queries", list_services: "operations.list_services",
-          person_queries: "social.repos.person_queries", task_rule_queries: "tasks.repos.task_rule_queries",
+          cron_queries: "activity.repos.cron_queries", job_queries: "activity.repos.job_queries",
+          list_services: "operations.list_services", person_queries: "social.repos.person_queries",
+          task_rule_queries: "tasks.repos.task_rule_queries",
         ]
 
         def view_template
@@ -32,9 +33,13 @@ module Admin
 
         def counts
           {
-            socials: person_queries.count, tagging: task_rule_queries.count, services: list_services.count,
-            jobs: job_queries.flagged || UNKNOWN,
+            socials: person_queries.count, tagging: task_rule_queries.count, services: list_services.count, jobs:,
           }
+        end
+
+        def jobs
+          flagged = job_queries.flagged
+          flagged ? flagged + cron_queries.failed : UNKNOWN
         end
 
         def maintenance

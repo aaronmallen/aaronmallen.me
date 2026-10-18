@@ -64,6 +64,8 @@ module Blog
       { kind: Types::String.constrained(eql: "agent"), agent: ContributorSlug, model: ContributorSlug },
     ].map { Types::Hash.schema(it).strict.with_key_transform(&:to_sym) }.reduce(:|)
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
+    CronFilter = Types::String.enum("all", "failed", "paused")
+    CronFilterParam = CronFilter.fallback(CronFilter.values.first)
     DateParam = Types::Params::Date.constrained(
       gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),
     ).optional.fallback(nil)

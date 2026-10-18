@@ -10,6 +10,8 @@ module Performance
 
       def last_job_at = performance_jobs.dataset.unordered.max(:occurred_at)
 
+      def last_scheduled_runs(keys) = performance_jobs.newest_by_schedule_key(keys).to_h { [it[:schedule_key], it] }
+
       def route_days_between(route:, verb:, from:, to:)
         daily(within(performance_requests, from, to).where(route:, verb:), from, to)
       end

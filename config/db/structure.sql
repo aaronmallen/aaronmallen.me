@@ -3342,6 +3342,7 @@ CREATE TABLE public.performance_jobs (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     error_class public.non_blank_text,
     error_message text,
+    schedule_key public.non_blank_text,
     CONSTRAINT performance_jobs_duration_check CHECK ((duration >= (0)::double precision)),
     CONSTRAINT performance_jobs_query_count_check CHECK ((query_count >= 0)),
     CONSTRAINT performance_jobs_query_time_check CHECK ((query_time >= (0)::double precision))
@@ -6881,6 +6882,13 @@ CREATE INDEX performance_jobs_occurred_at_index ON public.performance_jobs USING
 
 
 --
+-- Name: performance_jobs_schedule_key_occurred_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX performance_jobs_schedule_key_occurred_at_index ON public.performance_jobs USING btree (schedule_key, occurred_at);
+
+
+--
 -- Name: performance_pages_occurred_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9289,4 +9297,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261017190000_add_error_to_performance_jobs.rb'),
 ('20261017190100_add_agents_to_api_token_scopes.rb'),
 ('20261017190110_create_memory_files.rb'),
-('20261017210004_create_artifacts.rb');
+('20261017210004_create_artifacts.rb'),
+('20261017230003_add_schedule_key_to_performance_jobs.rb');

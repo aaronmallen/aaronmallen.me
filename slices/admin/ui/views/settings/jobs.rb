@@ -5,6 +5,8 @@ module Admin
     module Views
       module Settings
         class Jobs < View
+          prop :cron, Blog::Types::Array.of(Blog::Types::Instance(Data))
+          prop :cron_filter, Blog::Types::CronFilter
           prop :health, Blog::Types::Instance(Data)
           prop :running, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
           prop :queues, Blog::Types::Array.of(Blog::Types::Instance(Data)), default: -> { [] }
@@ -16,6 +18,7 @@ module Admin
               Components::Jobs::Warnings(health: @health)
               Components::Jobs::Health(health: @health)
               work unless @health.down?
+              Components::Jobs::Cron(entries: @cron, filter: @cron_filter)
             end
           end
 

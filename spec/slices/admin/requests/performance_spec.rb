@@ -144,6 +144,13 @@ RSpec.describe "Admin performance", :frozen_clock, type: :request do
       expect(rows("Jobs").map { cells(it) }).to eq([slow_job, quick_job])
     end
 
+    it "anchors each job's row so the cron schedule can link to it" do
+      job_row(100.0, job: "Backups::Jobs::BackUpDatabase")
+      get "/admin/performance"
+
+      expect(rows("Jobs").first[:id]).to eq("job-backups-jobs-backupdatabase")
+    end
+
     it "heads the jobs card with the count of classes" do
       job_row(50.0, job: "Quick::Job")
       job_row(100.0)

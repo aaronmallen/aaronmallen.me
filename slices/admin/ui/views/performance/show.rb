@@ -30,7 +30,11 @@ module Admin
 
           def jobs_card
             Card(title: t(".jobs"), note: t(".job_count", count: @jobs.size), empty: (t(".no_jobs") if @jobs.empty?)) do
-              TimingTable(heading: t(".job"), rows: @jobs) { |row| span(class: "perf-path") { row[:job] } }
+              TimingTable(heading: t(".job"), rows: @jobs, anchors: true) do |row|
+                span(class: "perf-path") do
+                  row[:job]
+                end
+              end
             end
           end
 

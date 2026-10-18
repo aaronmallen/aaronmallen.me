@@ -32,10 +32,12 @@ Sidekiq stays the only record of a dead job. Retry and discard act on the dead s
 when it leaves the set.
 
 `activity` reads every other Sidekiq set the same way. The `:sidekiq` provider registers each read from `sidekiq/api`
-as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled.
-`sidekiq.queue_jobs` reads one page of a queue's jobs, oldest first, through `Sidekiq::Paginator`. An `activity`
-query builds the jobs tab on Settings from them, with the time the last job finished, which it reads through the
-`performance` slice. Every read rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
+as a `sidekiq.*` key: stats and their daily history, processes, work, queues, retries and scheduled, and
+sidekiq-scheduler's next run times and paused states. `sidekiq.queue_jobs` reads one page of a queue's jobs, oldest
+first, through `Sidekiq::Paginator`. An `activity` query builds the jobs tab on Settings from them, with the time the
+last job finished, which it reads through the `performance` slice. A second query builds the tab's cron schedule
+from `config/sidekiq.yml.erb`, the scheduler's keys and each entry's newest `performance_jobs` row. Every read
+rescues `RedisClient::Error`, so a Redis outage shows as unknown, never as zero.
 
 ## Alternatives
 
@@ -47,7 +49,8 @@ Sidekiq whenever a job leaves the set some other way: Sidekiq prunes it, or some
 
 The attention list and the jobs tab now read Redis as well as Postgres, through the client the `:sidekiq` provider
 configures. The card and `list_attention` need Redis up, and a spec that covers dead jobs has to put them in the dead
-set. CI runs no Redis, so specs stub each read with the fakes in `spec/support/sidekiq.rb`.
+set. CI runs no Redis, so specs stub each read with the fakes in `spec/support/sidekiq.rb`, or replace the
+scheduler's keys where they read them.
 
 Dead jobs stay out of the `attention` view, so `listed?` never finds them and they cannot be snoozed. Retry and
 discard take that place.

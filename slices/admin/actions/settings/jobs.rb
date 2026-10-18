@@ -4,15 +4,16 @@ module Admin
   module Actions
     module Settings
       class Jobs < Action
-        include Deps[job_queries: "activity.repos.job_queries"]
+        include Deps[cron_queries: "activity.repos.cron_queries", job_queries: "activity.repos.job_queries"]
 
         def handle(request, response)
           health = job_queries.health
-          return response.render(view, health:) if health.down?
+          cron = { cron: cron_queries.entries, cron_filter: Blog::Types::CronFilterParam[request.params[:cron]] }
+          return response.render(view, health:, **cron) if health.down?
 
           response.render(
             view,
-            health:, running: job_queries.running, queues: job_queries.queue_list, queue: queue(request),
+            health:, **cron, running: job_queries.running, queues: job_queries.queue_list, queue: queue(request),
           )
         end
 

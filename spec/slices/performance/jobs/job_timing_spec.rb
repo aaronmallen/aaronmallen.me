@@ -48,6 +48,20 @@ RSpec.describe "Timing a Sidekiq job", type: :app do
     expect(rows.first).to include(error_class: nil, error_message: nil)
   end
 
+  it "stores no schedule key for a job the schedule does not run" do
+    run
+
+    expect(rows.first).to include(schedule_key: nil)
+  end
+
+  it "stores a scheduled job's schedule key, which tells entries of one class apart" do
+    scheduled = stub_const("Spec::SyncThings", Class.new(Blog::ScheduledJob) { def perform(_provider) = nil })
+    scheduled.perform_async("github")
+    scheduled.drain
+
+    expect(rows.first).to include(job: "Spec::SyncThings", schedule_key: "sync_things_github")
+  end
+
   context "when the job fails" do
     it "lets the error through" do
       expect { run(fail: true) }.to raise_error(ArgumentError)

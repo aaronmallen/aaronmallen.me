@@ -13,6 +13,9 @@ module Admin
           prop :heading, Blog::Types::String
           prop :rows, Blog::Types::Array.of(Blog::Types::Hash)
           prop :browser, Blog::Types::Bool, default: false
+          prop :anchors, Blog::Types::Bool, default: false
+
+          def self.anchor(job) = "job-#{job.downcase.gsub('::', '-')}"
 
           def view_template(&)
             div(class: "tbl-scroll") do
@@ -72,7 +75,7 @@ module Admin
           end
 
           def row(entry, &)
-            tr do
+            tr(id: (self.class.anchor(entry[:job]) if @anchors)) do
               td(class: "tbl-c") { yield(entry) }
               td(class: "tbl-c") { spread(entry) }
               SERVER.each { |column| td(class: ["tbl-c num", column_class(column)]) { figure(column, entry[column]) } }
