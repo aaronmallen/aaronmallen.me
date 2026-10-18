@@ -2,6 +2,7 @@ import { focusField, showDialog } from "./dialog.js";
 import { load, parse, setupPost } from "./in_place.js";
 import { fillField } from "./person_field.js";
 import { setupPersonForms } from "./person_form.js";
+import { showToast } from "./toast.js";
 
 const FORM = "form[data-person-form]";
 const NAME = "[data-person-field='name']";
@@ -11,14 +12,16 @@ export function askForPerson(href, name) {
   const dialog = document.querySelector("[data-person-dialog]");
   if (dialog?.open) return Promise.resolve(null);
 
-  return new Promise((resolve) => {
-    const leave = () => {
-      window.location.assign(href);
-      resolve(null);
-    };
+  if (!dialog) {
+    window.location.assign(href);
+    return Promise.resolve(null);
+  }
 
-    if (dialog) ask(dialog, href, name, resolve).catch(leave);
-    else leave();
+  return new Promise((resolve) => {
+    ask(dialog, href, name, resolve).catch(() => {
+      showToast(dialog.dataset.personDialogFailed, { failed: true });
+      resolve(null);
+    });
   });
 }
 

@@ -1928,6 +1928,7 @@ en:
             other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
           token: "@{%{key}}"
         person_dialog:
+          failed: "The new person form didn't load · try again"
           title: "New person"
         person_form:
           add: "Add person"

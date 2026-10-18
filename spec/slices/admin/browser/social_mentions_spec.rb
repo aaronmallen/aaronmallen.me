@@ -380,6 +380,37 @@ RSpec.describe "Admin social mentions", type: :feature do
       end
     end
 
+    describe "when the new person form fails to load" do
+      before do
+        request_gate.refuse("/admin/people/new", 502)
+        type "hi @zed", :enter
+      end
+
+      it "stays in the composer with the post text", :aggregate_failures do
+        expect(page).to have_css(".toast-failed", text: admin_t("ui.components.people.person_dialog.failed"))
+        expect(page).to have_current_path("/admin/social")
+        expect(body).to match_selector(:field, with: "hi @zed")
+      end
+
+      it "gives the focus back to the text box" do
+        expect(page).to have_css("[data-social-body]:focus")
+      end
+
+      it "opens no dialog" do
+        find(".toast-failed")
+
+        expect(page).to have_no_css("dialog#person-dialog[open]")
+      end
+    end
+
+    it "stays in the composer when the request gets no answer", :aggregate_failures do
+      execute_script("window.fetch = () => Promise.reject(new TypeError('offline'))")
+      type "hi @zed", :enter
+
+      expect(page).to have_css(".toast-failed", text: admin_t("ui.components.people.person_dialog.failed"))
+      expect(body).to match_selector(:field, with: "hi @zed")
+    end
+
     it "keeps the post text after a cancel", :aggregate_failures do
       type "hi @zed", :enter
       dialog.find("[data-dialog-close]").click

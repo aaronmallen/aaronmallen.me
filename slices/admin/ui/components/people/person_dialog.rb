@@ -8,7 +8,9 @@ module Admin
           ID = "person-dialog"
 
           def view_template
-            Dialog(id: ID, title: t(".title"), static: true, data: { person_dialog: true }) do
+            data = { person_dialog: true, person_dialog_failed: t(".failed") }
+
+            Dialog(id: ID, title: t(".title"), static: true, data:) do
               div(data: { person_dialog_body: true })
             end
           end

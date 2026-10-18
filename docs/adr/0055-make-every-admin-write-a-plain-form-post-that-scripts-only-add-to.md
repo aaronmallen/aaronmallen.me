@@ -63,7 +63,8 @@ move form, and in mail drag, where #1136 lets a script send the mail bulk form.
   composer's `@` list loads the people form from `/admin/people/new` into a dialog and sends it through `fetch`
   the way the task modal does. The request adds `reply=mention`, and a good save answers 201 with the new
   person's row for the list, not a redirect and a toast. A 422 swaps the form back in with its errors, and any
-  other answer, or a failed request, posts the form. With scripts off a plain **Add New** link under the post
+  other answer, or a failed request, posts the form. Since #1774 a form that fails to load leaves the composer as
+  it was, with a failed toast, so the post survives. With scripts off a plain **Add New** link under the post
   leads to the new person form, and the form posts there as before.
   #360 added a fifth, which #941 brought into this list: `calendar_drag.js` fills a calendar item's move form in
   the day panel with the day the item lands on, sends it through `fetch`, and swaps in the month and the panel from
