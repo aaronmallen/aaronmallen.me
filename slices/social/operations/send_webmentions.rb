@@ -81,7 +81,7 @@ module Social
       end
 
       def endpoint_in(page)
-        return nil unless PageFetcher::Client::OK_STATUSES.cover?(page.status)
+        return nil unless page.success?
 
         endpoint_in_headers(page) || endpoint_in_markup(page)
       end
@@ -107,17 +107,17 @@ module Social
       def mention(endpoint, source, target)
         return SKIPPED unless endpoint
 
-        outcome(client.post(endpoint, source:, target:).status)
+        outcome(client.post(endpoint, source:, target:))
       rescue PageFetcher::Client::Refused
         REJECTED
       rescue PageFetcher::Client::Error
         FAILED
       end
 
-      def outcome(status)
-        return SENT if PageFetcher::Client::OK_STATUSES.cover?(status)
+      def outcome(response)
+        return SENT if response.success?
 
-        PageFetcher::Client::RETRY_STATUSES.include?(status) ? FAILED : REJECTED
+        PageFetcher::Client::RETRY_STATUSES.include?(response.status) ? FAILED : REJECTED
       end
 
       def resolve(response, href)

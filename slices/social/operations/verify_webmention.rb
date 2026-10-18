@@ -64,7 +64,7 @@ module Social
       def read(response)
         return Failure(:source_unreachable) if PageFetcher::Client::RETRY_STATUSES.include?(response.status)
 
-        PageFetcher::Client::OK_STATUSES.cover?(response.status) ? Success(response) : Failure(:fetch_failed)
+        response.success? ? Success(response) : Failure(:fetch_failed)
       end
 
       def refusal(post, source, settings)

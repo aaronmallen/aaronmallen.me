@@ -19,6 +19,10 @@ module PageFetcher
 
     Response = Data.define(:body, :bytes, :headers, :status, :url) do
       def initialize(body:, headers:, status:, url:, bytes: body) = super
+
+      def media_type = headers["content-type"].to_s.split(";").first.to_s.strip.downcase
+
+      def success? = OK_STATUSES.cover?(status)
     end
     Target = Data.define(:address, :uri)
 

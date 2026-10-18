@@ -808,6 +808,14 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(card["external"]).to include("description" => "Open", "title" => "Plain")
     end
 
+    it "turns control characters in the page's title and description into spaces", :aggregate_failures do
+      head = %(<meta property="og:title" content="bad\u001btitle\u0001">)
+      serve(html(%(#{head}<meta name="description" content="a\u0007b">)))
+      deliver(link_post, "bluesky")
+
+      expect(card["external"]).to include("title" => "bad title", "description" => "a b")
+    end
+
     it "uploads the og:image as the card's thumbnail", :aggregate_failures do
       serve(html(%(<meta property="og:image" content="/card.png">)))
       serve_picture(small_png)

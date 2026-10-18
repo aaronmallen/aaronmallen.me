@@ -38,6 +38,12 @@ RSpec.describe Shares::Jobs::FetchShortLinkTitle do
     expect(title.length).to be <= 200
   end
 
+  it "reads a page whose content type names HTML in capitals with a charset" do
+    page = { body: "<title>Loud</title>", headers: { "Content-Type" => "TEXT/HTML; charset=utf-8" } }
+
+    expect(title_after(page)).to eq("Loud")
+  end
+
   {
     "an error status" => { status: 500, body: "<title>Oops</title>", headers: { "Content-Type" => "text/html" } },
     "a page that is not HTML" => { body: "<title>Not a page</title>", headers: { "Content-Type" => "text/plain" } },
