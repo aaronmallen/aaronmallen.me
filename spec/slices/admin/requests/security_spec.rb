@@ -87,6 +87,37 @@ RSpec.describe "Admin security", type: :request do
       expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Firefox · macOS", "Safari · macOS"])
     end
 
+    describe "paging sign-ins" do
+      def browsers = card("Sign-ins").all(".li-title").map { it.text.split(" · ").first }
+
+      before do
+        lower_page_size(:admin, to: 2)
+        %w[Safari Edge Firefox].each_with_index do |browser, index|
+          sign_in_row(browser:, created_at: Time.now - (60 * (3 - index)))
+        end
+      end
+
+      it "shows the newest page and links to older sign-ins", :aggregate_failures do
+        get "/admin/settings/security"
+
+        expect(browsers).to eq(%w[Firefox Edge])
+        expect(card("Sign-ins")).to have_css("nav.pager a[rel='next'][href='/admin/settings/security?page=2']")
+      end
+
+      it "shows older sign-ins on a later page", :aggregate_failures do
+        get "/admin/settings/security", page: "2"
+
+        expect(browsers).to eq(%w[Safari])
+        expect(card("Sign-ins")).to have_css("nav.pager a[rel='prev'][href='/admin/settings/security']")
+      end
+
+      it "returns 404 for a page past the end" do
+        get "/admin/settings/security", page: "3"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
     it "shows each sign-in's outcome, place, address and time" do
       sign_in_row(outcome: "wrong_account", address: "203.0.113.9", city: "Paris", country: "FR")
       get "/admin/settings/security"

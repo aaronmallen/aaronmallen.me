@@ -4587,6 +4587,7 @@ CREATE TABLE public.sign_ins (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     country_name text,
     provider public.sign_in_provider NOT NULL,
+    visitor_hash public.visitor_hash,
     CONSTRAINT sign_ins_user_agent_length CHECK ((length(user_agent) <= 1024))
 );
 
@@ -7285,6 +7286,13 @@ CREATE INDEX sign_ins_created_at_index ON public.sign_ins USING btree (created_a
 
 
 --
+-- Name: sign_ins_visitor_hash_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sign_ins_visitor_hash_created_at_index ON public.sign_ins USING btree (visitor_hash, created_at);
+
+
+--
 -- Name: social_post_deliveries_connection_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9500,4 +9508,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261017230003_add_schedule_key_to_performance_jobs.rb'),
 ('20261017230004_create_agent_sessions.rb'),
 ('20261018010004_add_memory_files_and_artifacts_to_record_links.rb'),
-('20261018080001_add_earlier_author_to_memory_events.rb');
+('20261018080001_add_earlier_author_to_memory_events.rb'),
+('20261018080004_add_visitor_hash_to_sign_ins.rb');

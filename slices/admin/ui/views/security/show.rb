@@ -13,7 +13,7 @@ module Admin
           prop :clients, ROWS
           prop :honeybadger_url, Blog::Types::String.optional
           prop :sightings, ROWS
-          prop :sign_ins, ROWS
+          prop :sign_ins, Blog::Types::Instance(Blog::Structs::Paged)
           prop :tokens, ROWS
 
           def view_template
@@ -57,8 +57,9 @@ module Admin
           def sighted = @sighted ||= @sightings.group_by { [it.api_token_id, it.oauth_client_id] }
 
           def sign_ins
-            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if @sign_ins.empty?)) do
-              @sign_ins.each { SignInRow(sign_in: it) }
+            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if @sign_ins.rows.empty?)) do
+              @sign_ins.rows.each { SignInRow(sign_in: it) }
+              Pager(page: @sign_ins, route: :admin_security)
             end
           end
         end

@@ -12,13 +12,16 @@ module Admin
           sign_in_queries: "security.repos.sign_in_queries",
         ]
 
-        def handle(_request, response)
+        def handle(request, response)
+          sign_ins = sign_in_queries.page(requested_page(request, response))
+          not_found(response) if sign_ins.past_end?
+
           response.render(
             view,
             clients: client_queries.connected,
             honeybadger_url: settings.honeybadger[:project_url],
             sightings: sighting_queries.newest_first,
-            sign_ins: sign_in_queries.newest_first,
+            sign_ins:,
             tokens: api_token_queries.live,
           )
         end

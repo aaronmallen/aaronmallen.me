@@ -3,7 +3,7 @@
 module Security
   module Repos
     class SignInQueries < Blog::DB::Repo
-      def newest_first = sign_ins.newest_first.to_a
+      def page(page) = page.fill(sign_ins.newest_first.paged(page).to_a)
     end
   end
 end

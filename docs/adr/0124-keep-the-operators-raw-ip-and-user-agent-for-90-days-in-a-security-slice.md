@@ -5,7 +5,7 @@ status: active
 created: 2026-10-07
 area: [admin, api, mcp, config, db]
 issue: "#701"
-amended: ["#911"]
+amended: ["#911", "#1759"]
 tags: [security, privacy, ip, user-agent, retention, geoip, slices, sign-in, api-tokens, mcp]
 ---
 
@@ -41,6 +41,12 @@ ADR 0010 has them. The address comes from `Blog::Operations::ReadVisitorAddress`
 it is the list of known devices and cities, so an old device does not alert as new. That list holds the browser, OS,
 city and country, and no IP or raw user agent.
 
+**Failed sign-ins stop at a throttle.** The callback is public, so a script can fail it as often as it likes. A
+failed sign-in records a row only while its sender has fewer than `sign_ins.throttle_limit` failures in the window,
+10 an hour unless set (#1759). Each row keeps the sender's `HashVisitor` throttle hash beside the address, and
+`Security::Relations::SignIns#claim_failure` counts and writes under one lock, as [ADR 0020][0020] has it. A sign-in
+that goes through always records. The settings tab shows the rows a page at a time, newest first.
+
 **A new `security` slice owns the tables.** It is a feature slice in the sense of ADR 0001: it owns the tables and the
 writes, and answers no route. `admin`, `api` and `mcp` record an access by calling an operation
 it exports, as [ADR 0123][0123] allows, and `admin` reads the page through its read repos. [ADR 0021][0021] holds
@@ -71,6 +77,7 @@ which cities I have been in, for good.
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0010]: 0010-configure-honeybadger-from-settings-in-a-provider-not-from-honeybadger-yml.md
 [0013]: 0013-read-the-visitor-address-from-one-proxy-header-and-only-from-a-trusted-peer.md
+[0020]: 0020-keep-locks-throttles-and-claims-in-postgres-not-redis.md
 [0021]: 0021-let-sql-read-another-slices-tables-never-write-them.md
 [0045]: 0045-count-visitors-with-a-daily-hash-and-no-cookies.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md

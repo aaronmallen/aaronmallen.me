@@ -7,6 +7,8 @@ module Security
 
       commands :create
 
+      def claim_failure(...) = sign_ins.claim_failure(...)
+
       def delete_before(time) = sign_ins.created_before(time).delete
     end
   end

@@ -150,6 +150,50 @@ RSpec.describe "Admin sign-in log", type: :request do
     end
   end
 
+  describe "a flood of failed callbacks" do
+    before { lower_throttle_limit(:sign_ins, to: 2) }
+
+    def fail_callbacks(count = 3) = count.times { callback(code: "code", state: "never-started") }
+
+    it "stops recording failures from one visitor past the limit", :aggregate_failures do
+      fail_callbacks
+
+      expect(last_response.status).to eq(401)
+      expect(sign_ins.select_map(:outcome)).to eq(%w[denied denied])
+    end
+
+    it "counts failures from one IPv6 /64 as one visitor" do
+      %w[2001:db8::1 2001:db8::2 2001:db8::3].each do |ipv6|
+        get "/admin/auth/github/callback", { state: "never-started" },
+            headers(agent).merge("HTTP_CF_CONNECTING_IP" => ipv6)
+      end
+
+      expect(sign_ins.count).to eq(2)
+    end
+
+    it "still records failures from another visitor" do
+      fail_callbacks
+      get "/admin/auth/github/callback", {}, headers(agent).merge("HTTP_CF_CONNECTING_IP" => "203.0.113.9")
+
+      expect(sign_ins.where(address: "203.0.113.9").count).to eq(1)
+    end
+
+    it "forgets failures older than the window" do
+      fail_callbacks
+      sign_ins.update(created_at: Time.now - (2 * 60 * 60))
+      callback
+
+      expect(sign_ins.count).to eq(3)
+    end
+
+    it "always records a sign-in that goes through" do
+      fail_callbacks
+      sign_in
+
+      expect(sign_ins.select_map(:outcome)).to contain_exactly("denied", "denied", "signed_in")
+    end
+  end
+
   describe "a public visit" do
     it "records nothing", :aggregate_failures do
       get "/", {}, headers(agent)

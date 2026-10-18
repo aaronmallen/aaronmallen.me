@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918", "#1122"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918", "#1122", "#1759"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
@@ -66,7 +66,7 @@ came before it (#898). `ThrottleWindow` refuses a window of a day or more, since
 **An IPv6 sender is its /64.** One home or phone holds a whole /64, so a hash of the full address hands a script
 2^64 senders. `Blog::ThrottleKey` masks an IPv6 address to its /64 and reads a mapped IPv4 address as IPv4 before
 `Messages::Create` hashes it (#200). Since #463 client registration, `/webmention` and the beacon's throttle hash
-the same key, so every public throttle counts a /64 as one sender.
+the same key, so every public throttle counts a /64 as one sender. Failed sign-ins hash it too (#1759).
 
 **A total cap covers every sender together.** `total_throttle_limit`, 20 an hour unless set, stops a script spread
 over many addresses or networks, as `/webmention` already does. Messages filed as spam count toward it: they are

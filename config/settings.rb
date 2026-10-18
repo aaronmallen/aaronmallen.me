@@ -51,6 +51,7 @@ module Blog
     DEFAULT_MEDIA_STORE_READ_TIMEOUT = 30
     DEFAULT_SEARCH_THROTTLE_LIMIT = 20
     DEFAULT_SHARE_STORE_READ_TIMEOUT = 300
+    DEFAULT_SIGN_IN_THROTTLE_LIMIT = 10
     DEFAULT_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
@@ -233,6 +234,8 @@ module Blog
     setting :share_site, default: {}, constructor: Schema.schema(transfers?: unless_blank(Threads), url: SiteUrl)
 
     setting :share_store, default: {}, constructor: object_store(DEFAULT_SHARE_STORE_READ_TIMEOUT)
+
+    setting :sign_ins, default: {}, constructor: throttle(DEFAULT_SIGN_IN_THROTTLE_LIMIT)
 
     setting :site, default: {}, constructor: Schema.schema(
       auth_callback_path: Types::String.constrained(format: %r{\A/admin/\S*:provider\S*\z}),

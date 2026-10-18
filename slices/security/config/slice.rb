@@ -2,7 +2,7 @@
 
 module Security
   class Slice < Hanami::Slice
-    import keys: %w[operations.find_place], from: :analytics
+    import keys: %w[operations.find_place operations.hash_visitor], from: :analytics
 
     export %w[
       operations.record_sighting
