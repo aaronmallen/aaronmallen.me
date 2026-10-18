@@ -4,6 +4,7 @@ module Health
   module Operations
     class SyncHealth < Blog::Operation
       CHUNK_DAYS = 90
+      CIVIL_DATE_OFF_CHICAGO_DAYS = 1
       DATA_TYPES = "https://health.googleapis.com/v4/users/me/dataTypes"
       EMPTY_DAY = {
         minutes_asleep: nil, bed_at: nil, woke_at: nil, resting_heart_rate: nil, hrv: nil, steps: nil,
@@ -126,7 +127,9 @@ module Health
 
       def workouts(account, first, last)
         field = "exercise.interval.civil_start_time"
-        filter = %(#{field} >= "#{(first - 1).iso8601}" AND #{field} < "#{(last + 2).iso8601}")
+        from = first - CIVIL_DATE_OFF_CHICAGO_DAYS
+        before = last + 1 + CIVIL_DATE_OFF_CHICAGO_DAYS
+        filter = %(#{field} >= "#{from.iso8601}" AND #{field} < "#{before.iso8601}")
 
         points(account, "exercise", filter).map { workout(it) }
       end
