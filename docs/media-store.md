@@ -30,15 +30,7 @@ start.
 ## Smaller widths
 
 Each upload also stores copies 640, 1280 and 1920 px wide, under `<width>/<key>`, for each width narrower than the
-photo. Post pages list them in `srcset`. Photos uploaded before the copies have none until you store them once, on
-the Pi from the app's directory with the production environment loaded:
-
-```sh
-bundle exec hanami run 'puts Media::Slice["operations.backfill_photo_widths"].call'
-```
-
-It prints how many photos it filled in. A photo the store fails to return stays as it was, so run it again until it
-prints `0`.
+photo. Post pages list them in `srcset`.
 
 ## Development
 

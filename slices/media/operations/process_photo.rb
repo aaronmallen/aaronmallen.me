@@ -56,12 +56,6 @@ module Media
         nil
       end
 
-      def variants(bytes, type)
-        resize(Vips::Image.new_from_buffer(bytes, load_options(type)).copy_memory, type)
-      rescue Vips::Error
-        nil
-      end
-
       private
 
       def frame_height(image)

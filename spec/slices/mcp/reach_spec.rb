@@ -109,7 +109,6 @@ RSpec.describe "MCP reach", type: :app do
       "mail.operations.update_mail_settings" => "the owner picks the accounts and Waiting rules in the admin",
       "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",
       "health.operations.sync_health" => "background jobs sync health days and workouts from Google",
-      "media.operations.backfill_photo_widths" => "the owner runs it once after a deploy to store older photos' widths",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",
       "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",

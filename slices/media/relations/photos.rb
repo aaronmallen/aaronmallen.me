@@ -11,8 +11,6 @@ module Media
 
       schema :photos, infer: true
 
-      def missing_widths(min) = where(Sequel.function(:cardinality, :widths) => 0).where(Sequel[:width] > min)
-
       def published
         posts = table(:posts).where(status: PUBLISHED).select(:id)
         tasks = board_tasks

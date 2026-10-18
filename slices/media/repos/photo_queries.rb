@@ -7,8 +7,6 @@ module Media
 
       def keyed(keys) = photos.with_keys(keys).to_a.to_h { [it.key, it] }
 
-      def missing_widths = photos.missing_widths(Operations::ProcessPhoto::WIDTHS.min).to_a
-
       def published(key) = photos.published.with_keys(key).one
 
       def sizes(keys) = photos.with_keys(keys).to_a.to_h { [it.key, [it.width, it.height]] }
