@@ -23,7 +23,9 @@ module Activity
       end
 
       def self.max_retries(retry_option)
-        retry_option.is_a?(Integer) ? retry_option : Sidekiq::JobRetry::DEFAULT_MAX_RETRY_ATTEMPTS
+        return retry_option if retry_option.is_a?(Integer)
+
+        Sidekiq.default_configuration[:max_retries] || Sidekiq::JobRetry::DEFAULT_MAX_RETRY_ATTEMPTS
       end
 
       def self.stamps(entry)

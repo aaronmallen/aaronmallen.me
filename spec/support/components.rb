@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "dry/system/stubs"
 
 module Components
   class ShadowedStub < StandardError; end
+
+  Blog::Extensions.pin(
+    self,
+    gem: "rspec-mocks",
+    version: "3.13.8",
+    reason: "the stub guard reads the private RSpec::Mocks::Space#proxies and RootSpace",
+    upstream: nil,
+  )
 
   DEPTH = :component_resolve_depth
   private_constant :DEPTH
@@ -43,8 +52,10 @@ module Components
 
   def self.shadowed_stub?(component)
     space = RSpec::Mocks.space
-    return false unless space.respond_to?(:proxies)
-    return false if component.is_a?(Module) || space.registered?(component)
+    return false if space.is_a?(RSpec::Mocks::RootSpace) || component.is_a?(Module) || space.registered?(component)
+    unless space.respond_to?(:proxies)
+      raise "RSpec::Mocks.space has no proxies, so the stub guard cannot look for a shadowed stub"
+    end
 
     space.proxies.each_value.any? { it.object.instance_of?(component.class) }
   end

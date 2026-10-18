@@ -3,6 +3,15 @@
 module Activity
   module Operations
     class ActOnSetJob < Blog::Operation
+      Blog::Extensions.pin(
+        self,
+        gem: "sidekiq",
+        version: "8.1.7",
+        reason: "it calls JobSet#remove_job, which SortedEntry keeps private, and repeats the retry_count step of " \
+                "SortedEntry#retry",
+        upstream: nil,
+      )
+
       SETS = Repos::JobQueries::SETS
 
       include Deps[**Repos::JobQueries.set_deps]

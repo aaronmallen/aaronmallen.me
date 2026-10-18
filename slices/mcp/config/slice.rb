@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "mcp"
+
+Blog::Extensions.pin(
+  MCP::Server,
+  gem: "mcp",
+  version: "1.7.0",
+  reason: "MCP::Protocol::ScopedServer overrides MCP::Server's private call_tool and list_tools",
+  upstream: nil,
+)
 
 module MCP
   class Slice < Hanami::Slice

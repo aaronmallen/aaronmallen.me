@@ -636,6 +636,15 @@ RSpec.describe "Admin jobs", :frozen_clock, type: :request do
         expect(facts.keys).to include("created", "enqueued", "failed", "next try")
       end
 
+      it "counts retries against Sidekiq's configured most for a job with no retry count of its own" do
+        allow(Sidekiq.default_configuration).to receive(:[]).and_call_original
+        allow(Sidekiq.default_configuration).to receive(:[]).with(:max_retries).and_return(5)
+
+        get "/admin/settings/jobs?open=retries&jid=#{job['jid']}"
+
+        expect(drawer.find(".jobs-facts")).to have_text("2 of 5")
+      end
+
       it "shows the error, the arguments in full and the backtrace", :aggregate_failures do
         get "/admin/settings/jobs?open=retries&jid=#{job['jid']}"
 

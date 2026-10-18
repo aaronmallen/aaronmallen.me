@@ -8,7 +8,7 @@ source "https://gem.coop/@aaron" do
 end
 
 source "https://gem.coop/@dry" do
-  gem "dry-operation", ">= 1.0.1"
+  gem "dry-operation", "~> 1.1"
   gem "dry-types", "~> 1"
   gem "dry-validation", "~> 1"
 end
@@ -34,8 +34,8 @@ gem "maxmind-db", "~> 1"
 gem "mcp", "~> 1.7"
 gem "nokogiri", "~> 1"
 gem "oauth2", "~> 2"
-gem "pg"
-gem "puma", ">= 7.1"
+gem "pg", "~> 1.7"
+gem "puma", "~> 8.0"
 gem "ruby-vips", "~> 2"
 gem "sanitize", "~> 7"
 gem "sidekiq", "~> 8"

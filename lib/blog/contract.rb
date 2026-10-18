@@ -1,11 +1,20 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "dry/validation"
 
 Dry::Validation.load_extensions(:monads)
 
 module Blog
   class Contract < Dry::Validation::Contract
+    Extensions.pin(
+      self,
+      gem: "dry-validation",
+      version: "1.11.1",
+      reason: "the :moment macro calls the contract's own predicates through the private _contract",
+      upstream: nil,
+    )
+
     BLANK = "blank"
     CLOSED = "closed"
     CONTROL = "control"

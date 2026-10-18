@@ -5,6 +5,14 @@ Hanami.app.register_provider :sidekiq do
     require "sidekiq"
     require "sidekiq/api"
     require "sidekiq-scheduler"
+
+    Blog::Extensions.pin(
+      SidekiqScheduler,
+      gem: "sidekiq-scheduler",
+      version: "6.0.2",
+      reason: "this provider reads and sets RedisManager's job states and next times, and CronEntry parses the states",
+      upstream: nil,
+    )
   end
 
   start do
@@ -16,10 +24,10 @@ Hanami.app.register_provider :sidekiq do
 
     register("sidekiq.dead_set") { -> { Sidekiq::DeadSet.new } }
     register("sidekiq.processes") { -> { Sidekiq::ProcessSet.new } }
-    register("sidekiq.queue_jobs") { Blog::SidekiqQueuePage }
+    register("sidekiq.queue_jobs", Blog::SidekiqQueuePage)
     register("sidekiq.retry_set") { -> { Sidekiq::RetrySet.new } }
     register("sidekiq.scheduled_set") { -> { Sidekiq::ScheduledSet.new } }
-    register("sidekiq.set_jobs") { Blog::SidekiqSetPage }
+    register("sidekiq.set_jobs", Blog::SidekiqSetPage)
     register("sidekiq.schedule", Blog::SidekiqConfig.load.dig(:scheduler, :schedule).freeze)
     register("sidekiq.schedule_state") { ->(name, state) { SidekiqScheduler::RedisManager.set_job_state(name, state) } }
     register("sidekiq.schedule_states") { -> { hash.call(SidekiqScheduler::RedisManager.schedules_state_key) } }

@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
+require "blog/extensions"
 require "prism"
 require "yaml"
 
 class ContractCodes
+  Blog::Extensions.pin(
+    self,
+    gem: "dry-validation",
+    version: "1.11.1",
+    reason: "it reads a contract's private rules, macros and each rule's block to list the codes it can return",
+    upstream: nil,
+  )
+
   ERRORS = YAML.load_file(Hanami.app.root.join("config/errors.yml")).dig("en", "dry_validation", "errors")
 
   def self.call(contract) = new(contract).call

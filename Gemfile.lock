@@ -589,7 +589,7 @@ DEPENDENCIES
   commonmarker (~> 2)
   cuprite
   database_cleaner-sequel
-  dry-operation (>= 1.0.1)!
+  dry-operation (~> 1.1)!
   dry-types (~> 1)!
   dry-validation (~> 1)!
   faker
@@ -613,9 +613,9 @@ DEPENDENCIES
   nokogiri (~> 1)
   oauth2 (~> 2)
   parallel_tests
-  pg
+  pg (~> 1.7)
   phlex-hanami (~> 0.3)!
-  puma (>= 7.1)
+  puma (~> 8.0)
   rack-test
   rom-factory
   rspec-collection_matchers
