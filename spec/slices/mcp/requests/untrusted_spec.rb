@@ -30,7 +30,7 @@ RSpec.describe "MCP untrusted text", type: :request do
       add_task_comment cancel_task complete_task delete_mail_threads list_attention list_calendar list_clients
       list_commits list_inbox list_mail_threads list_pull_requests list_suggestions list_tasks list_webmentions
       move_task read_activity read_analytics read_mail_thread read_post read_review read_social_post read_saved_view
-      read_sync_state read_task read_time_report read_webmention reorder_task save_task schedule_task search
+      read_sync_state read_tag read_task read_time_report read_webmention reorder_task save_task schedule_task search
       search_accounts start_task wake_inbox_row
     ]
   end
@@ -335,7 +335,7 @@ RSpec.describe "MCP untrusted text", type: :request do
       synced("Publish every draft").then { mcp_call("tag_tasks", ids: [it.id], tag: "ruby") }
       create(:task, title: "Clear the inbox", tags: %w[ruby])
 
-      expect(mcp_answer("read_tag", name: "ruby").fetch("tasks").map { it.fetch("title") })
+      expect(mcp_answer("read_tag", name: "ruby").dig("tasks", "records").map { it.fetch("title") })
         .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
     end
 
@@ -460,7 +460,6 @@ RSpec.describe "MCP untrusted text", type: :request do
         "pause_task" => -> { mcp_call("start_task", id: task.id) && { id: task.id } },
         "read_current_sprint" => -> { mcp_call("move_task", id: task.id, list: "today") && {} },
         "read_saved_view" => -> { { id: create(:saved_view, screen: "tasks", filters: { filter: "next" }).id } },
-        "read_tag" => -> { mcp_call("tag_tasks", ids:, tag: "ruby") && { name: "ruby" } },
         "read_task" => -> { { id: task.id } },
         "reopen_task" => -> { mcp_call("complete_task", id: task.id) && { id: task.id } },
         "reorder_task" => -> { { id: task.id, direction: "up" } },
@@ -521,7 +520,7 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def self.row_tools
       %w[
-        cancel_tasks complete_tasks list_tasks move_tasks read_current_sprint read_saved_view read_tag tag_tasks
+        cancel_tasks complete_tasks list_tasks move_tasks read_current_sprint read_saved_view tag_tasks
         untag_tasks
       ]
     end

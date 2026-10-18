@@ -7,8 +7,6 @@ module Decisions
 
       def by_id(id) = decisions.combine(:options, :tags).by_pk(id).one
 
-      def by_tag(tag) = decisions.combine(:options, :tags).tagged(tag).newest_first.to_a
-
       def comments(decision_id) = decision_comments.for_decision(decision_id).oldest_first.to_a
 
       def count_by_status = decisions.tally(:status)

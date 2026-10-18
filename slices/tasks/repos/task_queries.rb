@@ -32,8 +32,6 @@ module Tasks
 
       def by_ids(ids) = tasks.where(id: ids).combine(:tags).to_a
 
-      def by_tag(tag) = listed.combine(:sprint).tagged([tag]).open_first.to_a
-
       def detailed(id) = with_details.combine(:sprint).by_pk(id).one
 
       def detailed_in_order(ids)

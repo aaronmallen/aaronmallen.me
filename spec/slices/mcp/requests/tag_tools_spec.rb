@@ -319,7 +319,7 @@ RSpec.describe "MCP tag tools", type: :request do
     def statuses(kind)
       mcp_call("read_tag", name: "ruby")
 
-      mcp_content.fetch(kind).map { it.values_at(kind == "projects" ? "name" : "title", "status") }
+      mcp_content.dig(kind, "records").map { it.values_at(kind == "projects" ? "name" : "title", "status") }
     end
 
     it "groups everything with the name by kind, each with its status" do
@@ -335,7 +335,7 @@ RSpec.describe "MCP tag tools", type: :request do
       create(:task, :done, title: "Shipped ruby", tags: %w[ruby])
       create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
 
-      expect([statuses("tasks"), mcp_content.fetch("journal_entries").map { it.fetch("body") }])
+      expect([statuses("tasks"), mcp_content.dig("journal_entries", "records").map { it.fetch("opening") }])
         .to eq([[["Shipped ruby", "done"]], ["Wrote some ruby"]])
     end
 

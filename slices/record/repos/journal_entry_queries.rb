@@ -15,8 +15,6 @@ module Record
 
       def by_id(id) = with_tags.by_pk(id).one
 
-      def by_tag(tag) = with_tags.tagged([tag]).newest_first.to_a
-
       def count = journal_entries.count
 
       def days(size:, to: nil, **search)

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [admin, api, mcp, decisions, posts, projects, record, tags, tasks]
 issue: "#626"
+amended: ["#1612", "#1846"]
 tags: [tags, summary, scope, slices, exports, activity, view, admin, mcp]
 ---
 
@@ -29,16 +30,19 @@ none of the five imports from `tags`.
 ## Decision
 
 **One query in the `tags` slice builds the summary.** It finds the tag rows that carry the name in either scope, and
-answers nothing when there are none, so the page and the tool can refuse an unknown name. It then asks each kind for
-its records and groups them by kind.
+answers nothing when there are none, so the page and the tool can refuse an unknown name. It then counts each kind's
+records and asks each kind for one page of them, or one kind alone when the caller names it.
 
 **Each kind answers through a query its own slice exports.** `posts`, `projects`, `tasks`, `record` (for journal
-entries) and `decisions` each export a query over their relation's `tagged` that keeps every status. `tags` imports
-those five. The query holds no SQL over another slice's tables.
+entries) and `decisions` each export `page_by_tag`, a paged query over their relation's `tagged` that keeps every
+status. `tags` imports those five. The counts read the tag join tables, such as `post_tags`, through the `tags`
+relation. Past those joins, the query holds no SQL over another slice's tables.
 
 **`admin` and `api` import the summary query**, the way they import the review query under [ADR 0100][0100]. The
-admin page calls it, and the `read_tag` tool reaches it through an `api` endpoint ([ADR 0088][0088]). `admin`
-already imports from `tags`, and `api` gains its first import from it.
+admin page calls it, and the `read_tag` tool reaches it through an `api` endpoint ([ADR 0088][0088]). Both page each
+kind: the admin page shows ten of each and pages one kind at a time, and `read_tag` answers each kind's count and
+first page, and takes a kind and a page for the rest. `admin` already imports from `tags`, and `api` gains its first
+import from it.
 
 A new tagged kind joins the summary by exporting a tagged query from its slice and adding it to the summary.
 
@@ -60,8 +64,8 @@ The summary needs no schema change, and each kind keeps the rule for what counts
 `tags` turns from a leaf into a slice that depends on five others. None of them may import from `tags` now without
 closing a cycle, which [ADR 0003][0003] bars.
 
-A summary costs a query per kind, plus the tag lookup, and the grouping runs in Ruby. That stays cheap while one tag
-holds few records.
+A summary costs a count and a page query per kind, plus the tag lookup. Paging keeps it cheap however many records
+carry a tag, and every record stays in reach a page at a time.
 
 Each tagged slice exports one more query that reads every status, so a caller other than the summary could list
 drafts or private records through it. Only `tags` imports them.
