@@ -118,10 +118,11 @@ RSpec.describe Links::Relations::RecordLinks do
 
     it "lists the pair from either side" do
       link("task", task.id, "project", project.id)
-      queries = Links::Slice["repos.record_link_queries"]
+      ids = [%w[task project], %w[project task]].map do |kind, other|
+        Links::Slice["repos.record_link_queries"].for_record(kind, kind == "task" ? task.id : project.id).fetch(other)
+      end
 
-      expect([queries.partners("task", task.id), queries.partners("project", project.id)])
-        .to eq([[["project", project.id]], [["task", task.id]]])
+      expect(ids.map { it.map(&:id) }).to eq([[project.id], [task.id]])
     end
 
     it "refuses a project that is gone" do

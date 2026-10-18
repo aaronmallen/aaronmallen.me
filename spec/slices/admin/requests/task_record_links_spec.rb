@@ -34,7 +34,7 @@ RSpec.describe "Admin task record links", type: :request do
   def section = page.find(".record-links")
 
   def unlink(kind = "post", id = post_record.id)
-    admin_post("/admin/tasks/#{task.id}/records/#{kind}/#{id}/delete", filter: "next")
+    admin_post("/admin/records/task/#{task.id}/links/#{kind}/#{id}/delete", filter: "next")
   end
 
   describe "the Linked section" do
@@ -130,7 +130,7 @@ RSpec.describe "Admin task record links", type: :request do
     it "offers a remove on each link that keeps the tab" do
       link_records("post", post_record.id)
       get "/admin/tasks/#{task.id}", filter: "upcoming"
-      form = section.find("form[action='/admin/tasks/#{task.id}/records/post/#{post_record.id}/delete']")
+      form = section.find("form[action='/admin/records/task/#{task.id}/links/post/#{post_record.id}/delete']")
 
       expect(form.find("input[name='filter']", visible: :all).value).to eq("upcoming")
     end

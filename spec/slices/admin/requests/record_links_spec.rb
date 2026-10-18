@@ -23,7 +23,7 @@ RSpec.describe "Admin record links", type: :request do
     Links::Slice["repos.record_link_queries"].for_record(kind, record.id).fetch(other_kind, []).map(&:id)
   end
 
-  def links = Links::Slice["repos.record_link_queries"].partners(kind, record.id)
+  def links = Links::Slice["relations.record_links"].touching(kind, record.id).to_a
 
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
 
@@ -31,8 +31,10 @@ RSpec.describe "Admin record links", type: :request do
   def show(**query) = get(page_path, **fields, **query)
 
   def unlink(other_kind = "task", other_id = task.id)
-    admin_post("#{records_path}/#{other_kind}/#{other_id}/delete", **fields)
+    admin_post(unlink_path(other_kind, other_id), **fields)
   end
+
+  def unlink_path(other_kind, other_id) = "/admin/records/#{kind}/#{record.id}/links/#{other_kind}/#{other_id}/delete"
 
   shared_examples "a page with a Linked section" do
     def scope = "#{kind.tr('_', '-')}-#{record.id}-record"
@@ -59,7 +61,7 @@ RSpec.describe "Admin record links", type: :request do
         link_records("task", task.id)
         show
 
-        expect(section).to have_css("form[action='#{records_path}/task/#{task.id}/delete']")
+        expect(section).to have_css("form[action='#{unlink_path('task', task.id)}']")
       end
     end
 
@@ -189,6 +191,22 @@ RSpec.describe "Admin record links", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+    end
+  end
+
+  describe "removing a link from a mail thread, which has no Linked section" do
+    let(:thread) { create(:message) }
+
+    before do
+      sign_in_to_admin
+      Links::Slice["operations.link_records"].call("mail_thread", thread.id, { other_kind: "task", other_id: task.id })
+    end
+
+    it "answers 404 and keeps the link", :aggregate_failures do
+      admin_post("/admin/records/mail_thread/#{thread.id}/links/task/#{task.id}/delete")
+
+      expect(last_response.status).to eq(404)
+      expect(Links::Slice["relations.record_links"].touching("mail_thread", thread.id).to_a.size).to eq(1)
     end
   end
 

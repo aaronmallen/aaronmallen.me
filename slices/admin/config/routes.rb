@@ -36,10 +36,6 @@ module Admin
     post "/agents/artifacts/:id/delete", to: "agents.artifacts.destroy", as: :delete_artifact, id: ID
     post "/agents/artifacts/:id/records", to: "agents.artifacts.link_record", as: :link_artifact_record, id: ID
     post(
-      "/agents/artifacts/:id/records/:other_kind/:other_id/delete",
-      to: "agents.artifacts.unlink_record", as: :unlink_artifact_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
-    post(
       "/agents/artifacts/:id/versions/:number/restore",
       to: "agents.artifacts.restore", as: :restore_artifact_version, id: ID, number: ID,
     )
@@ -48,11 +44,6 @@ module Admin
     get "/agents/memories/:id", to: "agents.memories.show", as: :memory_file, id: ID
     post "/agents/memories/:id/delete", to: "agents.memories.destroy", as: :delete_memory_file, id: ID
     post "/agents/memories/:id/records", to: "agents.memories.link_record", as: :link_memory_file_record, id: ID
-    post(
-      "/agents/memories/:id/records/:other_kind/:other_id/delete",
-      to: "agents.memories.unlink_record", as: :unlink_memory_file_record,
-      id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/agents/memories/:id/scope", to: "agents.memories.change_scope", as: :change_memory_file_scope, id: ID
     post "/agents/memories/:id/facts", to: "agents.memories.add_fact", as: :add_memory_file_fact, id: ID
     post(
@@ -88,10 +79,6 @@ module Admin
     get "/commits/:id/menu", to: "commits.menu", as: :commit_menu, id: ID
     post "/commits/import", to: "commits.import", as: :import_commits
     post "/commits/:id/records", to: "commits.link_record", as: :link_commit_record, id: ID
-    post(
-      "/commits/:id/records/:other_kind/:other_id/delete",
-      to: "commits.unlink_record", as: :unlink_commit_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     get "/decisions", to: "decisions.index", as: :decisions
     post "/decisions", to: "decisions.create", as: :create_decision
     get "/decisions/new", to: "decisions.new", as: :new_decision
@@ -119,10 +106,6 @@ module Admin
       to: "decisions.update_option", as: :update_decision_option, id: ID, option_id: ID,
     )
     post "/decisions/:id/records", to: "decisions.link_record", as: :link_decision_record, id: ID
-    post(
-      "/decisions/:id/records/:other_kind/:other_id/delete",
-      to: "decisions.unlink_record", as: :unlink_decision_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
     post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
     post "/decisions/:id/tags", to: "decisions.tag", as: :tag_decision, id: ID
@@ -168,10 +151,6 @@ module Admin
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID
     post "/journal/:id/delete", to: "journal.destroy", as: :delete_journal_entry, id: ID
     post "/journal/:id/records", to: "journal.link_record", as: :link_journal_entry_record, id: ID
-    post(
-      "/journal/:id/records/:other_kind/:other_id/delete",
-      to: "journal.unlink_record", as: :unlink_journal_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/journal/:id/tags", to: "journal.tag", as: :tag_journal_entry, id: ID
     post "/journal/:id/tags/delete", to: "journal.untag", as: :untag_journal_entry, id: ID
     get "/links", to: "links.index", as: :links
@@ -225,10 +204,6 @@ module Admin
     post "/posts/:id/links/check", to: "posts.check_links", as: :check_post_links, id: ID
     post "/posts/:id/edits/:edit_id", to: "posts.update_edit", as: :update_post_edit, id: ID, edit_id: ID
     post "/posts/:id/records", to: "posts.link_record", as: :link_post_record, id: ID
-    post(
-      "/posts/:id/records/:other_kind/:other_id/delete",
-      to: "posts.unlink_record", as: :unlink_post_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/posts/preview", to: "posts.preview", as: :preview_post
     post "/posts/preview/syndication", to: "posts.preview_syndication", as: :preview_post_syndication
     post "/posts/:id/suggestions/accept", to: "posts.accept_suggestions", as: :accept_post_suggestions, id: ID
@@ -243,10 +218,6 @@ module Admin
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
     post "/projects/:id/archive", to: "projects.archive", as: :archive_project, id: ID
     post "/projects/:id/records", to: "projects.link_record", as: :link_project_record, id: ID
-    post(
-      "/projects/:id/records/:other_kind/:other_id/delete",
-      to: "projects.unlink_record", as: :unlink_project_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID
     post "/projects/:id/tags/delete", to: "projects.untag", as: :untag_project, id: ID
@@ -255,15 +226,11 @@ module Admin
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
     post "/projects/work/:id/records", to: "projects.link_work_record", as: :link_work_entry_record, id: ID
-    post(
-      "/projects/work/:id/records/:other_kind/:other_id/delete",
-      to: "projects.unlink_work_record", as: :unlink_work_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     get "/pull-requests/:id", to: "pull_requests.show", as: :pull_request, id: ID
     post "/pull-requests/:id/records", to: "pull_requests.link_record", as: :link_pull_request_record, id: ID
     post(
-      "/pull-requests/:id/records/:other_kind/:other_id/delete",
-      to: "pull_requests.unlink_record", as: :unlink_pull_request_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+      "/records/:kind/:id/links/:other_kind/:other_id/delete",
+      to: "record_links.unlink", as: :unlink_record, kind: RECORD_KIND, id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
     get "/review", to: "review.show", as: :review
     post "/review/note", to: "review.save_note", as: :save_review_note
@@ -301,10 +268,6 @@ module Admin
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID
     post "/social/:id/delete", to: "social.destroy", as: :delete_social_post, id: ID
     post "/social/:id/records", to: "social.link_record", as: :link_social_post_record, id: ID
-    post(
-      "/social/:id/records/:other_kind/:other_id/delete",
-      to: "social.unlink_record", as: :unlink_social_post_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/social/:id/suggestions/accept", to: "social.accept_suggestions", as: :accept_social_suggestions, id: ID
     post "/social/:id/suggestions/reject", to: "social.reject_suggestions", as: :reject_social_suggestions, id: ID
     get "/tags", to: "tags.index", as: :tags
@@ -351,10 +314,6 @@ module Admin
     post "/tasks/:id/move/:filter", to: "tasks.move", as: :move_task, id: ID, filter: TASK_FILTER
     post "/tasks/:id/place", to: "tasks.place", as: :place_task, id: ID
     post "/tasks/:id/records", to: "tasks.link_record", as: :link_task_record, id: ID
-    post(
-      "/tasks/:id/records/:other_kind/:other_id/delete",
-      to: "tasks.unlink_record", as: :unlink_task_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
-    )
     post "/tasks/:id/reopen", to: "tasks.reopen", as: :reopen_task, id: ID
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID

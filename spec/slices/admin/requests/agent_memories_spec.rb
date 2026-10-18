@@ -426,7 +426,7 @@ RSpec.describe "Admin agent memories", type: :request do
 
     it "unlinks a task" do
       link_task
-      admin_post("#{file_path(file)}/records/task/#{task.id}/delete")
+      admin_post("/admin/records/memory_file/#{file.id}/links/task/#{task.id}/delete")
 
       expect(linked).to be_empty
     end
@@ -437,6 +437,15 @@ RSpec.describe "Admin agent memories", type: :request do
 
       expect(section).to have_link("Index the activities table")
       expect(section).to have_no_css(".record-link-row form")
+    end
+
+    it "keeps the task its scope names and comes back to the file", :aggregate_failures do
+      scoped = agents(:create_memory_file, { path: "index", scope: "task", task_id: task.id })
+      admin_post("/admin/records/memory_file/#{scoped.id}/links/task/#{task.id}/delete")
+
+      expect(last_response).to be_redirect.and have_attributes(location: end_with(file_path(scoped)))
+      follow_redirect!
+      expect(page.find("[data-toast]").text).to eq(Admin::Slice["i18n"].t("record_links.toasts.scoped"))
     end
   end
 

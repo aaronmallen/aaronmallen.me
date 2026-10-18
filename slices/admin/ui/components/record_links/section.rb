@@ -52,8 +52,8 @@ module Admin
             label = t(".remove", title: link.title)
 
             ButtonForm(
-              action: path(:"admin_unlink_#{@kind}_record", id: @id, other_kind: link.kind, other_id: link.id), label:,
-              variant: :gh, icon: :close, icon_only: true, hidden: @fields,
+              action: path(:admin_unlink_record, kind: @kind, id: @id, other_kind: link.kind, other_id: link.id),
+              label:, variant: :gh, icon: :close, icon_only: true, hidden: @fields,
             )
           end
         end

@@ -30,7 +30,10 @@ RSpec.describe "Admin decision record links", type: :request do
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
 
   def section = page.find(".record-links")
-  def unlink(kind = "task", id = task.id) = admin_post("/admin/decisions/#{decision.id}/records/#{kind}/#{id}/delete")
+
+  def unlink(kind = "task", id = task.id)
+    admin_post("/admin/records/decision/#{decision.id}/links/#{kind}/#{id}/delete")
+  end
 
   describe "the Linked section" do
     before { sign_in_to_admin }
@@ -61,7 +64,7 @@ RSpec.describe "Admin decision record links", type: :request do
       link_records("task", task.id)
       get "/admin/decisions/#{decision.id}"
 
-      expect(section).to have_css("form[action='/admin/decisions/#{decision.id}/records/task/#{task.id}/delete']")
+      expect(section).to have_css("form[action='/admin/records/decision/#{decision.id}/links/task/#{task.id}/delete']")
     end
   end
 

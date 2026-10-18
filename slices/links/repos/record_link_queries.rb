@@ -74,8 +74,6 @@ module Links
         end.to_h
       end
 
-      def partners(kind, id) = touching(kind, id).map { partner(it, kind, id) }
-
       private
 
       def branch(kind, text, limit)

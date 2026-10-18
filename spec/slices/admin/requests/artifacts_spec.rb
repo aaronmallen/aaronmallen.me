@@ -256,7 +256,7 @@ RSpec.describe "Admin artifacts", type: :request do
       admin_post "/admin/agents/artifacts/#{found.id}/records", record: { other_kind: "task", other_id: task.id.to_s }
       expect(Links::Slice["repos.record_link_queries"].for_record("artifact", found.id).keys).to eq(%w[task])
 
-      admin_post "/admin/agents/artifacts/#{found.id}/records/task/#{task.id}/delete"
+      admin_post "/admin/records/artifact/#{found.id}/links/task/#{task.id}/delete"
       expect(Links::Slice["repos.record_link_queries"].for_record("artifact", found.id)).to be_empty
     end
 
