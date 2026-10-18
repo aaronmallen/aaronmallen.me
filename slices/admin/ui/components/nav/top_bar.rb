@@ -40,7 +40,7 @@ module Admin
           end
 
           def search
-            label = t(".search")
+            label = t(".search", shortcut: SHORTCUT)
 
             button(
               type: "button", class: "top-bar-search", aria: { label: },

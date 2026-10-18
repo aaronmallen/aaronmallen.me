@@ -2,6 +2,7 @@ en:
   date:
     formats:
       day_name: "%a"
+      day_named: "%a %-d %B %Y"
       full: "%A, %B %-d, %Y"
       long: "%B %-d, %Y"
       medium: "%b %-d, %Y"

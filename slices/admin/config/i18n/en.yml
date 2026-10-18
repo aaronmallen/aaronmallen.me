@@ -1729,7 +1729,7 @@ en:
           code: "code"
           code_label: "Code block"
           h2: "H2"
-          h2_label: "Heading"
+          h2_label: "H2 heading"
           italic: "I"
           italic_label: "Italic"
           quote: "quote"
@@ -1904,7 +1904,7 @@ en:
         top_bar:
           label: "Admin"
           palette: "Open the command palette"
-          search: "Find or do anything"
+          search: "Find or do anything %{shortcut}"
           search_hint: "Find or do anything…"
           skip_link: "Skip to content"
           waiting: "something waits"
@@ -2380,7 +2380,7 @@ en:
           title: "On this day"
         group:
           more: "+%{count} more"
-          open: "Open all %{count} in %{name}"
+          open: "%{name} %{count}, open all"
         heat:
           amounts:
             commits:

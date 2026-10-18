@@ -141,7 +141,7 @@ RSpec.describe "Admin post editor", type: :feature do
   end
 
   {
-    "Heading" => "\n\n## ",
+    "H2 heading" => "\n\n## ",
     "Bold" => "**bold**",
     "Italic" => "*italic*",
     "Code block" => "\n\n```ruby\n\n```",

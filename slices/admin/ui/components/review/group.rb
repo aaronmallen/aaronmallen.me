@@ -37,10 +37,12 @@ module Admin
           def counts = @counts ||= @items.map { it.public_send(@dated) }.tally
 
           def head
-            a(class: "review-group-head", href: @href, aria: { label: t(".open", count: @items.size, name: @name) }) do
+            count = Blog::Helpers::Figures.count(@items.size)
+            a(class: "review-group-head", href: @href, aria: { label: t(".open", count:, name: @name) }) do
               span(class: "review-group-name") { @name }
+              whitespace
               spark unless @days.empty?
-              span(class: "review-group-count") { Blog::Helpers::Figures.count(@items.size) }
+              span(class: "review-group-count") { count }
             end
           end
 

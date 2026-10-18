@@ -51,7 +51,7 @@ module Admin
 
           def head(day)
             pick(day, class: ["review-heat-day", ("on" if day == @focus), ("today" if day == @today)],
-                      aria: { label: l(day, format: :full) }) do
+                      aria: { label: l(day, format: :day_named) }) do
               plain "#{l(day, format: :day_name)} " if @period == WEEK
               b { day.day.to_s }
             end
