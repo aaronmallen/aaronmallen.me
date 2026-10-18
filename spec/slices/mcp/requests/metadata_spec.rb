@@ -11,7 +11,7 @@ RSpec.describe "OAuth discovery metadata", type: :request do
       "grant_types_supported" => %w[authorization_code refresh_token],
       "issuer" => issuer,
       "registration_endpoint" => "#{issuer}/oauth/register",
-      "scopes_supported" => %w[read suggest write publish delete health mail],
+      "scopes_supported" => %w[read suggest write publish delete health mail agents],
       "token_endpoint" => "#{issuer}/oauth/token",
       "token_endpoint_auth_methods_supported" => %w[none],
     }

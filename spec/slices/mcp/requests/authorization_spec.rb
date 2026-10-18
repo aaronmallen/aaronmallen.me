@@ -288,7 +288,22 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "says read leaves mail out" do
-      expect(page).to have_css("li", text: "Read everything the site keeps but your health data and mail")
+      expect(page).to have_css("li", text: "Read everything the site keeps but your health data, mail")
+    end
+  end
+
+  describe "when the client asks for agents" do
+    before do
+      sign_in_to_admin
+      authorize(scope: "read agents")
+    end
+
+    it "shows a line for agents" do
+      expect(page).to have_css("li", text: copy(:"scopes.agents"))
+    end
+
+    it "says read leaves agent memory out" do
+      expect(page).to have_css("li", text: "Read everything the site keeps but your health data, mail and agent memory")
     end
   end
 
@@ -508,9 +523,9 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "grants every scope a client asks for by name" do
-      approve_authorization(authorize_path(scope: "read suggest write publish delete health mail"))
+      approve_authorization(authorize_path(scope: "read suggest write publish delete health mail agents"))
 
-      expect(code[:scopes]).to eq(%w[read suggest write publish delete health mail])
+      expect(code[:scopes]).to eq(%w[read suggest write publish delete health mail agents])
     end
 
     it "drops a scope it does not know" do

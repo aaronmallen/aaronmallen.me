@@ -3,9 +3,9 @@ id: "0017"
 title: Enforce rules over stored state in Postgres, not in contracts
 status: active
 created: 2026-09-28
-area: [db, lib, admin, decisions, links, posts, projects, record, services, social, tags, tasks]
+area: [db, lib, admin, agents, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957", "#1056"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957", "#1056", "#1743"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -62,6 +62,9 @@ raises again.
 | --- | --- | --- | --- |
 | `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::DeleteDecisionOption` | `id: chosen` |
 | `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::ResolveDecision` | `option_id: missing` |
+| `memory_files_project_id_fkey` | foreign key | `Agents::Operations::CreateMemoryFile` | `project_id: missing` |
+| `memory_files_scope_path_index` | unique index | `Agents::Operations::CreateMemoryFile` | `path: taken` |
+| `memory_files_task_id_fkey` | foreign key | `Agents::Operations::CreateMemoryFile` | `task_id: missing` |
 | `people_key_index` | unique index | `Social::Operations::SavePerson` | `key: taken` |
 | `posts_slug_key` | unique | `Posts::Operations::SavePost` | `slug: taken` |
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |

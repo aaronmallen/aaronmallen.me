@@ -15,9 +15,9 @@ RSpec.describe "API token scopes", type: :request do
   def all_scopes = Blog::Types::OAuthScope.values
 
   def needed(id)
-    return Blog::Types::OAuthScope["read"] if self.class.unscoped.include?(id)
+    return [Blog::Types::OAuthScope["read"]] if self.class.unscoped.include?(id)
 
-    MCP::Tools.const_get(Hanami.app["inflector"].camelize(self.class.tools.fetch(id, id)), false).scope_value
+    Array(MCP::Tools.const_get(Hanami.app["inflector"].camelize(self.class.tools.fetch(id, id)), false).scope_value)
   end
 
   def operations
@@ -39,7 +39,7 @@ RSpec.describe "API token scopes", type: :request do
 
   it "asks each operation for the scope its MCP tool asks for" do
     tokens = all_scopes.to_h { [it, api_token(all_scopes - [it])] }
-    wrong = operations.reject { |verb, path, id| refused?(verb, path, needed(id), tokens) }
+    wrong = operations.reject { |verb, path, id| needed(id).all? { refused?(verb, path, it, tokens) } }
 
     expect(wrong).to be_empty, wrong.map { |verb, path, id| "#{verb.upcase} #{path} (#{id})" }.join("\n")
   end

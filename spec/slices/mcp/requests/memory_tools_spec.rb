@@ -1,0 +1,184 @@
+# frozen_string_literal: true
+
+RSpec.describe "MCP memory tools", type: :request do
+  let(:author) { { agent: "claude-code", model: "claude-opus-5-5" } }
+
+  def add_fact(file, text, type: "convention", **) = mcp_answer("add_memory_fact", id: file, type:, text:, **author, **)
+
+  def create_file(path = "hanami", scope: "global", **) = mcp_answer("create_memory_file", path:, scope:, **author, **)
+
+  def history(file) = mcp_answer("read_memory_file", id: file).fetch("history")
+
+  def live_texts(file) = trusted(mcp_answer("read_memory_file", id: file).fetch("facts")).map { it.fetch("text") }
+
+  def mcp_scopes = %w[read agents delete]
+
+  def revert(file, entry) = mcp_text("revert_memory_event", id: file, event_id: entry, **author)
+
+  describe "a file an agent changes" do
+    let(:file) { create_file.fetch("id") }
+    let(:changes) do
+      [
+        ["create", nil, nil, "claude-code", "claude-opus-5-5"],
+        ["add", "Run tests through mise", nil, "claude-code", "claude-opus-5-5"],
+        ["edit", "Run every check through mise", "Run tests through mise", "claude-code", "claude-opus-5-5"],
+        ["remove", nil, "Run every check through mise", "codex", "gpt-5"],
+      ]
+    end
+
+    before do
+      fact = add_fact(file, "Run tests through mise").fetch("id")
+      mcp_answer("edit_memory_fact", id: file, fact_id: fact, text: "Run every check through mise", **author)
+      mcp_answer("remove_memory_fact", id: file, fact_id: fact, agent: "codex", model: "gpt-5")
+    end
+
+    it "records each change in the file's history with its agent and model" do
+      expect(trusted(history(file)).map { it.values_at("op", "text", "was_text", "agent", "model") }).to eq(changes)
+    end
+  end
+
+  it "adds .md to a path" do
+    expect(create_file("rails/testing").fetch("path")).to eq("rails/testing.md")
+  end
+
+  it "marks the text an agent wrote untrusted and leaves the owner's alone" do
+    file = create_file.fetch("id")
+    add_fact(file, "Prefer Sequel")
+    Agents::Slice["operations.add_memory_fact"].call(file, { type: "preference", text: "No emdash" })
+
+    expect(mcp_answer("read_memory_file", id: file).fetch("facts").map { it.fetch("text") })
+      .to eq([marked("Prefer Sequel"), "No emdash"])
+  end
+
+  describe "read_memory" do
+    let(:project) { create(:project, repo: "aaronmallen/blog") }
+    let(:task) { create(:task) }
+
+    before do
+      add_fact(create_file("task-notes", scope: "task", task_id: task.id).fetch("id"), "Mind the index")
+      add_fact(create_file("release", scope: "project", project_id: project.id).fetch("id"), "Tag with CalVer")
+      add_fact(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id"), "Slices own tables")
+      add_fact(create_file("preferences").fetch("id"), "No emdash", type: "preference")
+      create_file("elsewhere", scope: "repo", repo: "aaronmallen/other")
+    end
+
+    it "loads global, repo, project and task files in that order, with a project's files for its repo" do
+      loaded = mcp_answer("read_memory", repo: "aaronmallen/blog", task_id: task.id)
+
+      expect(loaded.fetch("files").map { it.values_at("scope", "path") }).to eq(
+        [%w[global preferences.md], %w[repo hanami.md], %w[project release.md], %w[task task-notes.md]],
+      )
+    end
+
+    it "returns the memory as markdown, marked untrusted" do
+      markdown = mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("markdown")
+
+      expect(markdown).to include("untrusted" => true, "text" => start_with(<<~MARKDOWN))
+        <!-- global · 1 fact -->
+
+        # preferences
+
+        ## Preferences
+
+        - No emdash
+
+        <!-- repo aaronmallen/blog · 1 fact -->
+      MARKDOWN
+    end
+
+    it "loads only the global files when given nothing" do
+      expect(mcp_answer("read_memory").fetch("files").map { it.fetch("path") }).to eq(%w[preferences.md])
+    end
+  end
+
+  describe "reverting" do
+    let(:file) { create_file.fetch("id") }
+    let(:fact) { add_fact(file, "Use jj").fetch("id") }
+
+    def entry(change) = history(file).rfind { it.fetch("op") == change }.fetch("id")
+
+    it "takes back an add" do
+      fact
+      revert(file, entry("add"))
+
+      expect(live_texts(file)).to be_empty
+    end
+
+    it "takes back an edit" do
+      mcp_answer("edit_memory_fact", id: file, fact_id: fact, type: "gotcha", text: "Use git", **author)
+      revert(file, entry("edit"))
+
+      expect(trusted(mcp_answer("read_memory_file", id: file).fetch("facts")).map { it.values_at("type", "text") })
+        .to eq([["convention", "Use jj"]])
+    end
+
+    it "takes back a remove" do
+      mcp_answer("remove_memory_fact", id: file, fact_id: fact, **author)
+      revert(file, entry("remove"))
+
+      expect(live_texts(file)).to eq(["Use jj"])
+    end
+
+    it "refuses a fact that changed since, naming the later entry" do
+      added = fact && entry("add")
+      mcp_answer("edit_memory_fact", id: file, fact_id: fact, text: "Use jj, not git", **author)
+
+      expect([revert(file, added), live_texts(file)])
+        .to eq(["the fact changed since, in history entry #{entry('edit')}; revert that entry first",
+                ["Use jj, not git"]])
+    end
+  end
+
+  it "refuses fact text over 1,000 characters" do
+    file = create_file.fetch("id")
+
+    expect(mcp_text("add_memory_fact", id: file, type: "context", text: "a" * 1001, **author))
+      .to eq("text: keep a fact to 1000 characters")
+  end
+
+  it "refuses a second file with one path in one scope" do
+    create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
+
+    expect(mcp_text("create_memory_file", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog", **author))
+      .to eq("path: a file in this scope already has this path")
+  end
+
+  it "keeps one path in two scopes" do
+    create_file("hanami")
+
+    expect(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("scope")).to eq("repo")
+  end
+
+  it "deletes a file with its facts" do
+    file = create_file.fetch("id")
+    add_fact(file, "Gone soon")
+
+    expect([mcp_answer("delete_memory_file", id: file), mcp_text("read_memory_file", id: file)])
+      .to eq([{ "id" => file, "deleted" => true }, "no memory file has the ID #{file}"])
+  end
+
+  it "deletes the files of a deleted task" do
+    task = create(:task)
+    file = create_file("notes", scope: "task", task_id: task.id).fetch("id")
+    Tasks::Slice["operations.delete_task"].call(task.id)
+
+    expect(mcp_text("read_memory_file", id: file)).to eq("no memory file has the ID #{file}")
+  end
+
+  describe "the database" do
+    let(:files) { Agents::Slice["db.rom"].relations[:memory_files].dataset }
+
+    it "refuses two files with one path in one scope" do
+      files.insert(path: "hanami.md", scope: "repo", repo: "aaronmallen/blog")
+
+      expect { files.insert(path: "hanami.md", scope: "repo", repo: "aaronmallen/blog") }
+        .to raise_error(Sequel::UniqueConstraintViolation, /memory_files_scope_path_index/)
+    end
+
+    it "refuses two global files with one path" do
+      files.insert(path: "hanami.md", scope: "global")
+
+      expect { files.insert(path: "hanami.md", scope: "global") }.to raise_error(Sequel::UniqueConstraintViolation)
+    end
+  end
+end

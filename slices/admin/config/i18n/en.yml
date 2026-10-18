@@ -2904,11 +2904,12 @@ en:
           mint: "Mint token"
           placeholder: "Name the client that will use it…"
           scope:
+            agents: "Read and change agent memory"
             delete: "Delete records for good"
             health: "Read health data"
             mail: "Read and sort mail"
             publish: "Publish, send and change what the public sees"
-            read: "Read every record but health data and mail"
+            read: "Read every record but health data, mail and agent memory"
             suggest: "Suggest edits"
             write: "Make changes short of publishing and deleting"
           scopes: "Permissions"

@@ -11,6 +11,12 @@ module API
     ], from: :activity
 
     import keys: %w[
+      operations.add_memory_fact operations.create_memory_file operations.delete_memory_file
+      operations.edit_memory_fact operations.load_memory operations.remove_memory_fact
+      operations.revert_memory_event repos.memory_file_queries
+    ], from: :agents
+
+    import keys: %w[
       repos.analytics_event_queries repos.analytics_hour_queries repos.analytics_page_queries
       repos.analytics_rollup_queries repos.feed_fetch_queries repos.post_reader_queries
     ], from: :analytics

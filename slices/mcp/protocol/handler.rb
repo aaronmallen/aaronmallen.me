@@ -30,8 +30,10 @@ module MCP
         "removes a record for good. A published",
         "post or a sent social post cannot be called back. Only the health permission grants the owner's health days,",
         "workouts and their patterns. Only the mail permission grants mail from every account, contact form messages",
-        "included: it reads, marks, tags, snoozes and deletes threads, and lets search and the inbox show them. The",
-        "tool list holds only what this connection was granted.",
+        "included: it reads, marks, tags, snoozes and deletes threads, and lets search and the inbox show them. Only",
+        "the agents permission grants agent memory: files of facts that load into each agent's work, their history",
+        "and reverts; deleting a memory file needs delete as well. The tool list holds only what this connection was",
+        "granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       BATCH_OPENING = /\A[ \t\r\n]*\[/

@@ -9,7 +9,8 @@ module MCP
 
       def initialize(scopes:, descriptions: {}, tools: [], **)
         @descriptions = descriptions
-        @withheld = tools.reject { scopes.include?(it.scope_value) }.to_h { [it.name_value, it] }
+        @scopes = scopes
+        @withheld = tools.select { missing(it).any? }.to_h { [it.name_value, it] }
 
         super(tools: tools - @withheld.values, **)
       end
@@ -21,7 +22,7 @@ module MCP
         return super unless withheld
 
         raise RequestHandlerError.new(
-          format(RECONNECT, withheld.name_value, withheld.scope_value), request, error_type: :invalid_params,
+          format(RECONNECT, withheld.name_value, missing(withheld).join(" and ")), request, error_type: :invalid_params,
         )
       end
 
@@ -30,6 +31,8 @@ module MCP
           listed[:tools].each { |tool| tool[:description] = @descriptions.fetch(tool[:name], tool[:description]) }
         end
       end
+
+      def missing(tool) = Array(tool.scope_value) - @scopes
     end
   end
 end

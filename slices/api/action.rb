@@ -58,8 +58,8 @@ module API
     end
 
     def require_scope(request, response, token)
-      scope = required_scope(request)
-      insufficient(response, scope) unless token.scopes.include?(scope)
+      scope = Array(required_scope(request)).find { !token.scopes.include?(it) }
+      insufficient(response, scope) if scope
     end
 
     def require_token(request, response)

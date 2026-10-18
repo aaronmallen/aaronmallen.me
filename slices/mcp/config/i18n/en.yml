@@ -16,11 +16,12 @@ en:
           publish_warning: "You cannot take back a published post or a sent social post."
           returns: "It goes back to %{uri} either way."
           scopes:
+            agents: "Read and change agent memory: the facts that load into every agent's work, their history and reverts"
             delete: "Delete posts, social posts and any other record for good"
             health: "Read your health data: sleep, heart rate, HRV, steps and workouts, day by day beside your work"
             mail: "Read, mark, tag, snooze and delete your mail from every account, contact form messages included"
             publish: "Publish posts, send social posts and make any change that shows in public: shares, public projects and their boards, published and scheduled posts, work history, approved webmentions and webmention settings"
-            read: "Read everything the site keeps but your health data and mail: posts, drafts and all, social posts, your journal, tasks, projects, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
+            read: "Read everything the site keeps but your health data, mail and agent memory: posts, drafts and all, social posts, your journal, tasks, projects, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
             suggest: "Send you suggested edits to accept or reject"
             write: "Make any change the admin makes short of publishing, sending and deleting: write and edit drafts, and change any record the public cannot see"
           unnamed: "It gave no name."

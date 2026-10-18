@@ -100,6 +100,9 @@ module Blog
     MailShowParam = MailShow.fallback(MailShow.values.first)
     MailWaitReason = Types::String.enum("starred", "contact_form", "people", "needs_reply", "important")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
+    MemoryEventOp = Types::String.enum("create", "add", "edit", "remove", "revert", "scope")
+    MemoryFactType = Types::String.enum("preference", "convention", "gotcha", "context")
+    MemoryScope = Types::String.enum("global", "repo", "project", "task")
     MessageBulkAction = Types::String.enum(
       "read", "unread", "tag", "untag", "delete", "archive", "inbox", "star", "unstar", "spam", "trash", "move",
       "label",
@@ -110,7 +113,7 @@ module Blog
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
     OAuthGrantType = Types::String.enum("authorization_code", "refresh_token")
     OAuthResponseType = Types::String.enum("code")
-    OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete", "health", "mail")
+    OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete", "health", "mail", "agents")
     OAuthTokenAuthMethod = Types::String.enum("none")
     OAuthTokenType = Types::String.enum("access", "refresh")
     OpenTaskStatus = Types::String.enum("open", "in_progress")

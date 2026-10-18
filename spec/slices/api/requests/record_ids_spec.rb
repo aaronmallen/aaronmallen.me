@@ -5,6 +5,7 @@ RSpec.describe "API record IDs", type: :request do
     {
       "add_decision_comment" => { body: "A note" },
       "add_decision_option" => { title: "Rent" },
+      "add_memory_fact" => { type: "gotcha", text: "A note" },
       "add_shares_to_group" => { ids: [1] },
       "add_task_comment" => { body: "A note" },
       "add_work_session" => { started_at: "2026-10-01T09:00", ended_at: "2026-10-01T10:00" },
