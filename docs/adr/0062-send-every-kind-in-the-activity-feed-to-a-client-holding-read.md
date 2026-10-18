@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, activity]
 issue: AA-426
-amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123", "#1421"]
+amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123", "#1421", "#897"]
 tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
 ---
 

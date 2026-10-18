@@ -8,9 +8,9 @@ file on each request and each job, so creating or removing it takes effect at on
 The `maintenance.flag_path` setting names the file, through `MAINTENANCE_FLAG_PATH`. The Activate maintenance mode
 button in Settings, or the same command in the palette, creates it and sets a signed cookie for my browser
 ([ADR 0184][0184]). While the cookie holds, the maintenance page in that browser shows a Deactivate maintenance mode
-button, which removes the file and lands on Settings. The cookie only works for the file it came with, so a mode the
-script turned on, or a cleared browser, needs the script. A script on the Pi creates and removes the file too, and
-still works whichever way the mode went on.
+button, which removes the file and lands on Settings. A script on the Pi creates and removes the file too, and still
+works whichever way the mode went on. The cookie only works for the file it came with, so a mode the script turned on,
+or a cleared browser, needs the script.
 
 ## Set up the Pi
 

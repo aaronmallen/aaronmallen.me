@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [config]
 issue: "#383"
-amended: ["#1383"]
+amended: ["#1383", "#1799"]
 tags: [version, calver, release, git, tags, changelog, deploy, raspberry-pi]
 ---
 

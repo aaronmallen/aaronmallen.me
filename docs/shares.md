@@ -156,5 +156,5 @@ Cloudflare's free plan refuses a request body over 100 MB through the tunnel, wi
 through the admin, on the blog's host, so a share over 100 MB cannot reach the site. Nothing works around this.
 
 [0090]: adr/0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
-[0141]: adr/0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: adr/0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: adr/0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md

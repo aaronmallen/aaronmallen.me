@@ -5,7 +5,7 @@ status: active
 created: 2026-10-10
 area: [config]
 issue: "#1055"
-amended: ["#1259", "#1384", "#1775"]
+amended: ["#1259", "#1384", "#1775", "#1825"]
 tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, cache-control, puma, aa-cool]
 ---
 
@@ -17,7 +17,7 @@ tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, c
 
 The spec in #1053 hands out files by short link, such as `https://aa.cool/k7mq2`. `aa.cool` serves shares and the
 short links of #1064, and nothing else: every blog or admin path, an unknown code and a deleted share answer 404
-there. [ADR 0141][0141] keeps shares in a shares slice with their own public bucket.
+there. [ADR 0141][0141] keeps shares in a shares slice with their own bucket.
 
 Every slice mounts by path in `config/routes.rb`, and nothing routes by host. The public slice and MCP both
 mount at `/`, so a share slice mounted beside them would answer `aa.cool/posts` with a post, and the blog's host would
@@ -84,6 +84,6 @@ outside the repo, so #1061 writes them down.
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [0111]: 0111-send-strict-transport-security-from-the-app-for-the-apex-alone.md
-[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -79,6 +79,6 @@ Each new outside link a post sends adds a row to the Links tab, whether I meant 
 [0045]: 0045-count-visitors-with-a-daily-hash-and-no-cookies.md
 [0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md
 [0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
-[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

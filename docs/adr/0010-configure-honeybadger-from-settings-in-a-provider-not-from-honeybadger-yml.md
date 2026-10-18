@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, admin, api, mcp]
 issue: AA-660
-amended: [AA-819, "#237", "#467", "#1012", "#1805"]
+amended: [AA-819, "#237", "#467", "#1012", "#1805", "#1803", "#1501"]
 tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
 ---
 

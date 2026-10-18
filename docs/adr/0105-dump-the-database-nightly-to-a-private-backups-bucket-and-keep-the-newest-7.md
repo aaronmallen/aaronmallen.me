@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [config, lib, record]
 issue: "#396"
-amended: ["#1373"]
+amended: ["#1373", "#1371"]
 tags: [backups, postgres, pg-dump, s3, rustfs, nas, sidekiq, schedule, providers, sync-states, honeybadger]
 ---
 

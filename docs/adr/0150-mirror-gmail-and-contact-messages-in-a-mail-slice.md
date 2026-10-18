@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [db, admin, api, contact]
 issue: "#1122"
-amended: ["#1159", "#1381", "#1766"]
+amended: ["#1159", "#1381", "#1766", "#1779", "#1770"]
 tags: [mail, gmail, google, contact, messages, slices, sync, polling, inbox, snooze]
 ---
 

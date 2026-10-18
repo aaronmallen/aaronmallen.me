@@ -1,15 +1,15 @@
 ---
 id: "0141"
-title: Keep file shares in a shares slice with their own public bucket
+title: Keep file shares in a shares slice with their own bucket
 status: active
 created: 2026-10-10
 area: [config, db, lib, media]
 issue: "#1054"
-amended: ["#1259", "#1447", "#1775"]
+amended: ["#1259", "#1447", "#1775", "#1825"]
 tags: [shares, short-codes, uploads, s3, buckets, providers, slices, media, photos]
 ---
 
-# ADR 0141: Keep file shares in a shares slice with their own public bucket
+# ADR 0141: Keep file shares in a shares slice with their own bucket
 
 ![Active][status]
 
@@ -42,6 +42,8 @@ Shares get their own feature slice, `shares`, and their own bucket.
 - **A separate S3 bucket holds only shares.** Its own setting, shaped like `media_store`, names it, and its own
   store provider reads that setting ([ADR 0009][0009]). The client and provider live in `lib/shares` beside the
   media ones; the relations, repos, contracts and operations live in `slices/shares` ([ADR 0126][0126]).
+  #1825 took "public" out of this record's title: the bucket stays private, and the site streams each share
+  itself, as [docs/shares.md][shares] says.
 - **Nothing in the slice touches media.** Shares never pass through `upload_photo`, never sit in `photos`, and
   never meet a claim or `SweepPhotos`. The bytes go to the bucket as I uploaded them, with no size cap. #1775 borrows
   media's `detect_photo_type` and `process_photo` to store a small preview of an image beside it in the shares
@@ -78,4 +80,5 @@ An image shared on `aa.cool` and the same image in a post are two copies, stored
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
 [0177]: 0177-keep-single-shares-and-group-files-in-one-table-with-a-code-or-a-group.md
+[shares]: ../shares.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

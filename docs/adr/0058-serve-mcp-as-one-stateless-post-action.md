@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp]
 issue: AA-679
-amended: ["#463", "#573"]
+amended: ["#463", "#573", "#1343", "#1756", "#1793"]
 tags: [mcp, transport, json-rpc, sdk, cors, sessions, hanami-actions]
 ---
 

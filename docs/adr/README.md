@@ -148,7 +148,7 @@ one.
 | [0145][0145] | Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs | ![Active][active] | 2026-10-10 |
 | [0144][0144] | Claim social post photos by row, and send them as native media | ![Active][active] | 2026-10-10 |
 | [0143][0143] | Send outside links in social posts through aa.cool short links | ![Active][active] | 2026-10-10 |
-| [0141][0141] | Keep file shares in a shares slice with their own public bucket | ![Active][active] | 2026-10-10 |
+| [0141][0141] | Keep file shares in a shares slice with their own bucket | ![Active][active] | 2026-10-10 |
 | [0142][0142] | Serve shares on their own host, picked in config.ru, and let no cache keep them | ![Active][active] | 2026-10-10 |
 | [0146][0146] | Keep health data in a health slice as daily summaries and workouts polled from Google | ![Active][active] | 2026-10-11 |
 | [0147][0147] | Gate health data behind a health scope that read does not cover | ![Active][active] | 2026-10-11 |
@@ -335,7 +335,7 @@ one.
 [0145]: 0145-run-specs-in-parallel-with-parallel-tests-on-a-database-per-worker-and-split-ci-into-two-spec-jobs.md
 [0144]: 0144-claim-social-post-photos-by-row-and-send-them-as-native-media.md
 [0143]: 0143-send-outside-links-in-social-posts-through-aa-cool-short-links.md
-[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
 [0146]: 0146-keep-health-data-in-a-health-slice-as-daily-summaries-and-workouts-polled-from-google.md
 [0147]: 0147-gate-health-data-behind-a-health-scope-that-read-does-not-cover.md

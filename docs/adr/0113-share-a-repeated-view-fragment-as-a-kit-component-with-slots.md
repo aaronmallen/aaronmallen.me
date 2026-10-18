@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, admin, mcp, public]
 issue: "#552"
-amended: ["#957"]
+amended: ["#957", "#1010"]
 tags: [phlex, components, kit, ui, slots, partials]
 ---
 

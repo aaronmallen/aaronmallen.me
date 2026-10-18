@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917", "#994", "#911", "#1171", "#1604", "#1702", "#1797"]
+amended: ["#917", "#994", "#911", "#1171", "#1604", "#1702", "#1797", "#1177"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 

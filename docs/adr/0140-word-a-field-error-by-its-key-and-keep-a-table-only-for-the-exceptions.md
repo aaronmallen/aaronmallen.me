@@ -6,7 +6,7 @@ created: 2026-10-10
 area: [lib, admin, api, public, mcp]
 supersedes: ["0027"]
 issue: "#1002"
-amended: ["#1435", "#1559", "#1670", "#1817"]
+amended: ["#1435", "#1559", "#1670", "#1817", "#1390"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 

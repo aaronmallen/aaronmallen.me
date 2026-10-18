@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
-amended: ["#1745", "#1750"]
+amended: ["#1745", "#1750", "#1790"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 

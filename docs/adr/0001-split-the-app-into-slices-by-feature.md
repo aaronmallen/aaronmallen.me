@@ -7,7 +7,7 @@ area: [app, config, lib, activity, admin, analytics, api, backups, contact, deci
   projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 issue: AA-587
 amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957",
-  "#1171", "#1702", "#1805"]
+  "#1171", "#1702", "#1805", "#721", "#1803"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 

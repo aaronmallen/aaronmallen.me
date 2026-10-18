@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473"]
+amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473", "#1785", "#1418", "#1811", "#1810"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 

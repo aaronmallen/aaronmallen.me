@@ -5,6 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp]
 issue: "#1741"
+amended: ["#1764"]
 tags: [agents, identity, contributors, models, domains, history]
 ---
 

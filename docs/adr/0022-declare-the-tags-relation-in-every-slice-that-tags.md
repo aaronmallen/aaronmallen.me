@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [contact, db, decisions, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76", "#718", "#954", "#992", "#957", "#1200"]
+amended: [AA-809, "#76", "#718", "#954", "#992", "#957", "#1200", "#1693"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 

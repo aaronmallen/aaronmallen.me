@@ -5,7 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
-amended: ["#941", "#1335", "#1441", "#1599", "#1761", "#1762"]
+amended: ["#941", "#1335", "#1441", "#1599", "#1761", "#1762", "#1597"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 

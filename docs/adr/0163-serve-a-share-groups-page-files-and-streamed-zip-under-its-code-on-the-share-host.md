@@ -65,7 +65,7 @@ A file in a group has no code, so a group's file cannot turn into a single share
 single shares and group files share one table, so a file moves into or out of a group by changing one row and keeps
 its id ([ADR 0177][0177]).
 
-[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
 [0177]: 0177-keep-single-shares-and-group-files-in-one-table-with-a-code-or-a-group.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

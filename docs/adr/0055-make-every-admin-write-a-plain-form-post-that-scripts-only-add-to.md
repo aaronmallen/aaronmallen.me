@@ -6,7 +6,8 @@ created: 2026-09-28
 area: [admin, assets, lib]
 superseded-by: "0153"
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924", "#941", "#1126", "#1136"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924", "#941", "#1126", "#1136",
+  "#1774", "#1160"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 

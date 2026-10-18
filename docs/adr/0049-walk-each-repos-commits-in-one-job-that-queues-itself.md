@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, record]
 issue: AA-684
-amended: [AA-758, AA-821, AA-823, "#248", "#941", "#1629"]
+amended: [AA-758, AA-821, AA-823, "#248", "#941", "#1629", "#1235"]
 tags: [commits, github, sync, walk, sidekiq, rate-limit, sync-states]
 ---
 

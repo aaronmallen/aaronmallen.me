@@ -59,6 +59,6 @@ Code that reads a single share now filters on `short_code_id` being set, and cod
 on `share_group_id`. A query that forgets the filter mixes the two.
 
 [0017]: 0017-enforce-rules-over-stored-state-in-postgres-not-in-contracts.md
-[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

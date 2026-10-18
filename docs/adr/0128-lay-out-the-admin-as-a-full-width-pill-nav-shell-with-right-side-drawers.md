@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727", "#1752", "#1750", "#1751"]
+amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727", "#1752", "#1750", "#1751", "#1748"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, admin, api, mcp, record, tasks]
 issue: "#631"
+amended: ["#1700"]
 tags: [tasks, links, relations, sync, github, linear, providers, schema, postgres, enums, imports]
 ---
 

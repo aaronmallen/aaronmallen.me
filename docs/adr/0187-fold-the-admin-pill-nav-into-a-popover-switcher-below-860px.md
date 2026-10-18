@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [admin, assets]
 issue: "#1742"
-amended: ["#1752"]
+amended: ["#1752", "#1748", "#1825"]
 tags: [admin, layout, navigation, top-bar, popover, responsive, mobile, design]
 ---
 
@@ -36,10 +36,10 @@ Settings, grouped as the palette groups them, with the current one marked. Setti
 and on a click outside, with scripts off. Its rows are links, as the pills are, so every screen they name opens
 without scripts.
 
-**On small phones the top bar tightens to keep its one row.** At 480px and below the wordmark drops to 15px, the
-switcher hides its screen label, and search becomes a 44px icon button. At 400px and below the wordmark reads "A/A",
-its name still spoken in full. These two steps touch the top bar alone. Every layout still folds at 700px and 860px
-only, and every other part of ADR 0128 stands.
+**On small phones the top bar tightens to keep its one row.** #1748 added these steps. At 480px and below the
+wordmark drops to 15px, the switcher hides its screen label, and search becomes a 44px icon button. At 400px and below
+the wordmark reads "A/A", its name still spoken in full. These two steps touch the top bar alone. Every layout still
+folds at 700px and 860px only, and every other part of ADR 0128 stands.
 
 ## Alternatives
 

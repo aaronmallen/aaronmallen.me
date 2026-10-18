@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [posts, social, admin, db]
 issue: AA-646
-amended: ["#245", "#524", "#957", "#1631", "#1702"]
+amended: ["#245", "#524", "#957", "#1631", "#1702", "#1505", "#994"]
 tags: [posts, social, syndication, announcement, limits, mastodon, bluesky]
 ---
 

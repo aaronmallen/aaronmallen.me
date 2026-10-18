@@ -1,9 +1,9 @@
 # Backups
 
-Each night at 00:30 the worker dumps the database with `pg_dump` and uploads the dump to a private bucket in an
-S3-compatible store ([ADR 0105][0105]). It then deletes every dump past the newest 7. These notes take an empty
-RustFS to working settings. Any other S3-compatible store needs the same three things: a bucket, a key that reaches
-only that bucket, and the settings that name both.
+Each night at 00:30 Chicago time (05:30 UTC, or 06:30 in winter) the worker dumps the database with `pg_dump` and
+uploads the dump to a private bucket in an S3-compatible store ([ADR 0105][0105]). It then deletes every dump past
+the newest 7. These notes take an empty RustFS to working settings. Any other S3-compatible store needs the same three
+things: a bucket, a key that reaches only that bucket, and the settings that name both.
 
 The backups bucket has its own key and settings, apart from the photo store in [media-store.md](media-store.md).
 Never point both at one bucket, and never reuse the photo key: a dump holds OAuth tokens, API tokens and contact
@@ -124,7 +124,8 @@ rc admin user add nas <access key> <secret key>
 rc admin policy attach nas blog-backups --user <access key>
 ```
 
-Pick a long random secret, such as the output of `openssl rand -hex 32`. RustFS refuses the key every other bucket.
+Pick a long random secret, such as the output of `openssl rand -hex 32`. RustFS refuses the key access to every
+other bucket.
 
 ### Set the settings
 
