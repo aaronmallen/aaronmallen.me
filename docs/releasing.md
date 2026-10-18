@@ -2,10 +2,15 @@
 
 A new tag deploys within five minutes, so releases stay manual. Work down this list for each one.
 
-1. Run `mise run release --dry-run` for the version's name and the commit it will tag.
-2. Move `[Unreleased]` in `CHANGELOG.md` under that version, dated by the UTC day, and add its compare link.
-3. Push `main` and wait for CI to pass on that commit. `mise run release --dry-run` prints its CI state.
-4. Run `mise run release`. It checks the changelog and CI, tags the newest non-empty commit and prints the push command.
+1. Run `mise run release --dry-run` for the version's name, the commit it will tag and the new variables.
+2. Do what the release needs on the Pi before you tag it. The dry run lists each variable `.env.example` gained
+  since the last tag. Set each one you need in the shared `.env` and restart both units. A new
+  `HONEYBADGER_CHECK_IN_*` is optional, so leave it unset unless you want Honeybadger to watch that job. Then read
+  `git diff <last tag> -- docs/deploy.md` and do each new item, such as a package or a change to the deploy script.
+  [Deploy](deploy.md) lists what the Pi needs.
+3. Move `[Unreleased]` in `CHANGELOG.md` under that version, dated by the UTC day, and add its compare link.
+4. Push `main` and wait for CI to pass on that commit. `mise run release --dry-run` prints its CI state.
+5. Run `mise run release`. It checks the changelog and CI, tags the newest non-empty commit and prints the push command.
 
 In an emergency, `mise run release --skip-ci` tags without the CI check and says it skipped it.
 

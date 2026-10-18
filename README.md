@@ -43,6 +43,7 @@ mise run format
 ## Docs
 
 - [Backups](docs/backups.md): the nightly database dumps and how to restore one.
+- [Deploy](docs/deploy.md): what the Pi needs to run and build the site.
 - [Maintenance](docs/maintenance.md): taking the site down for a NAS update and bringing it back.
 - [Media store](docs/media-store.md): the photo bucket, its key and libvips.
 - [Releasing](docs/releasing.md): the steps to tag and ship a version.

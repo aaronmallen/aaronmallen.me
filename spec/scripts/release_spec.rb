@@ -241,6 +241,22 @@ RSpec.describe "mise run release", type: :script do
     end
   end
 
+  context "when .env.example changed since the last tag" do
+    before do
+      init_git
+      write_changelog("26.10.0")
+      commit("# Some\nKEPT=1\n# MOVED=\nGONE=\n", file: ".env.example")
+      git("tag", "--annotate", "26.9.4", "--message", "26.9.4")
+      commit("# MOVED=\n# Some\nKEPT=1\nADDED=\n# COMMENTED=2\n", file: ".env.example")
+    end
+
+    it "lists the variables it gained on a dry run, in file order" do
+      output, = release("--dry-run", "2026-10-14")
+
+      expect(output.lines.map(&:chomp).drop(3)).to eq(["New in .env.example since 26.9.4:", "  ADDED", "  COMMENTED"])
+    end
+  end
+
   context "with a spec that names a migration" do
     before do
       init_git
