@@ -5,6 +5,7 @@ status: active
 created: 2026-10-10
 area: [social, admin, db]
 issue: "#1066"
+amended: ["#1856"]
 tags: [social, links, short-links, redirect, aa.cool, clicks, webmentions, bluesky, delivery]
 ---
 
@@ -45,7 +46,8 @@ and a known bot does not, by the check [ADR 0045][0045] uses for page views.
 **One set of codes.** A `short_codes` table holds every code on `aa.cool`. Shares and short links each point at
 one, so `aa.cool/talk` names one thing, and Postgres keeps codes unique across both ([ADR 0017][0017]). Short
 links live in the shares slice (ADR [0141][0141]), in a `short_links` table, since `slices/links` already holds record
-links.
+links. Since #1856, a path that matches no whole code opens the oldest record whose code starts with it
+([ADR 0194][0194]), so `aa.cool/talk` can name an older code that starts with `talk`.
 
 ## Alternatives
 
@@ -67,7 +69,8 @@ Readers see `aa.cool` where they expect the link's own host, and each click take
 cost ADR 0106 named, and we take it for social posts.
 
 Every sent post now leans on `aa.cool`. Deleting a link, or `aa.cool` going down, breaks every sent post that used
-it, and the delete confirm does not say so.
+it, and the delete confirm does not say so. Since #1856, a delete hands each of the link's prefixes to the next
+oldest code under it ([ADR 0194][0194]), so a sent post's short link can open a different record.
 
 Mastodon builds a card from a post's first link, and that link now redirects. It should follow the `302` to the
 real page, but nobody has checked.
@@ -81,4 +84,5 @@ Each new outside link a post sends adds a row to the Links tab, whether I meant 
 [0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
 [0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
+[0194]: 0194-resolve-a-short-code-by-its-prefix-and-let-the-oldest-code-win.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

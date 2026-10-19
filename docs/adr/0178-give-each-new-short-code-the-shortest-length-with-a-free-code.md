@@ -1,16 +1,18 @@
 ---
 id: "0178"
 title: Give each new short code the shortest length with a free code
-status: active
+status: superseded
 created: 2026-10-15
 area: [lib, shares]
+superseded-by: "0194"
 issue: "#1448"
+amended: ["#1856"]
 tags: [shares, share-groups, short-links, short-codes, aa-cool, code-length, guessing]
 ---
 
 # ADR 0178: Give each new short code the shortest length with a free code
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -54,4 +56,4 @@ Picking a code has to find a free one at the shortest length, not draw at random
 full length makes random draws collide.
 
 [0143]: 0143-send-outside-links-in-social-posts-through-aa-cool-short-links.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0194-black?style=for-the-badge&label=Superseded&labelColor=orange

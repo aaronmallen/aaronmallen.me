@@ -5,7 +5,7 @@ status: active
 created: 2026-10-14
 area: [config, db, shares]
 issue: "#1259"
-amended: ["#1384", "#1447"]
+amended: ["#1384", "#1447", "#1856"]
 tags: [shares, share-groups, aa-cool, hosts, routing, zip, streaming, puma, cache-control, short-codes]
 ---
 
@@ -34,7 +34,8 @@ A group owns one code from `short_codes`, and its files take none. The share hos
 - `/<code>.zip` streams every file in the group as one zip, read from the share bucket as it goes out. No zip lands
   in the bucket.
 
-A single share's code still returns its raw file, and any other path still answers 404. The page, each file and the
+A single share's code still returns its raw file, and any other path still answers 404. Since #1856, `<code>` in each
+path can be any start of a code, and it names the record [ADR 0194][0194] resolves it to. The page, each file and the
 zip send `Cache-Control: private, no-store`, as [ADR 0142][0142] asks of everything on the host.
 
 The page counts views by the rules a share uses for downloads, and each file and the zip keep counts of their own.
@@ -68,4 +69,5 @@ its id ([ADR 0177][0177]).
 [0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
 [0177]: 0177-keep-single-shares-and-group-files-in-one-table-with-a-code-or-a-group.md
+[0194]: 0194-resolve-a-short-code-by-its-prefix-and-let-the-oldest-code-win.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

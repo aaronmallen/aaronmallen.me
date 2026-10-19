@@ -175,7 +175,7 @@ one.
 | [0172][0172] | Run Puma as two preloaded workers, with YJIT and two malloc arenas | ![Active][active] | 2026-10-14 |
 | [0176][0176] | Draw public icons as inline Font Awesome SVGs and keep the font for admin and MCP | ![Active][active] | 2026-10-14 |
 | [0177][0177] | Keep single shares and group files in one table, each with a code or a group | ![Active][active] | 2026-10-15 |
-| [0178][0178] | Give each new short code the shortest length with a free code | ![Active][active] | 2026-10-15 |
+| [0178][0178] | Give each new short code the shortest length with a free code | ![Superseded][superseded-0194] | 2026-10-15 |
 | [0179][0179] | Fetch every outside page through one guarded app-level client | ![Active][active] | 2026-10-15 |
 | [0180][0180] | Search the public site through a view that holds only public rows and public text | ![Active][active] | 2026-10-15 |
 | [0183][0183] | Find tasks by label through a lookup ahead of full-text search | ![Active][active] | 2026-10-16 |
@@ -191,6 +191,7 @@ one.
 | [0191][0191] | Cap web queries with a statement timeout set on each request | ![Active][active] | 2026-10-18 |
 | [0192][0192] | Name another slice's constant only through an import, a contract or a struct | ![Active][active] | 2026-10-18 |
 | [0193][0193] | Hold the request's connection until Puma finishes the response | ![Active][active] | 2026-10-18 |
+| [0194][0194] | Resolve a short code by its prefix and let the oldest code win | ![Active][active] | 2026-10-19 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -378,6 +379,7 @@ one.
 [0191]: 0191-cap-web-queries-with-a-statement-timeout-set-on-each-request.md
 [0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
 [0193]: 0193-hold-the-request-connection-until-puma-finishes-the-response.md
+[0194]: 0194-resolve-a-short-code-by-its-prefix-and-let-the-oldest-code-win.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -395,4 +397,5 @@ one.
 [superseded-0158]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0159]: https://img.shields.io/badge/0159-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0176]: https://img.shields.io/badge/0176-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0194]: https://img.shields.io/badge/0194-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
