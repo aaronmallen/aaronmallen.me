@@ -5,6 +5,19 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.26] - 2026-10-19
+
+### Changed
+
+- Short codes on aa.cool. Each new file, share group and short link gets an 8 character code, and the share host opens
+  a record from any start of its code: a path that matches a whole code opens that record, and any other path opens the
+  oldest record whose code starts with it. The admin, the API, MCP tools and sent social posts show each record at the
+  shortest path that opens it, and the social post counter counts a new link as 8 characters. A typed code shorter than
+  8 gains random characters at its end. Every code shorter than 8 gains them too, so old links keep working. When you
+  delete a record, its short paths open the next oldest record that starts with them.
+- `add_memory_fact`, `edit_memory_fact`, their API endpoints and the admin take fact text of any length, in place of
+  1,000 characters at most.
+
 ## [26.10.25] - 2026-10-18
 
 ### Fixed
@@ -1484,7 +1497,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...HEAD
+[26.10.26]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...26.10.26
 [26.10.25]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...26.10.25
 [26.10.24]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...26.10.24
 [26.10.23]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.22...26.10.23
