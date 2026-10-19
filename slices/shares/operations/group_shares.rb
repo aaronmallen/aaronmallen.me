@@ -9,7 +9,6 @@ module Shares
       include Deps[
         "operations.add_shares_to_group",
         group_mutations: "repos.share_group_mutations",
-        short_code_queries: "repos.short_code_queries",
       ]
 
       def call(ids)
@@ -21,7 +20,7 @@ module Shares
       private
 
       def create
-        Helpers::Code.retrying(group_mutations) { group_mutations.create(code: short_code_queries.free_code) }
+        Helpers::Code.retrying(group_mutations) { group_mutations.create }
       end
 
       def enough(ids) = ids.size < FEWEST ? invalid(:ids, TOO_FEW) : Success(ids)

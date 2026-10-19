@@ -482,8 +482,8 @@ RSpec.describe "Admin files", type: :request do
       end
 
       it "refuses a code a short link holds", :aggregate_failures do
-        Shares::Slice["relations.short_codes"].command(:create).call(code: "resume")
-        save(code: "resume", alt_text: "A cat")
+        Shares::Slice["relations.short_codes"].command(:create).call(code: "resume-pdf")
+        save(code: "resume-pdf", alt_text: "A cat")
 
         expect(page).to have_css("#share-#{file.id}-code[aria-invalid='true']")
         expect(stored[:alt_text]).to be_nil

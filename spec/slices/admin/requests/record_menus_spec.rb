@@ -203,7 +203,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
     end
 
     describe "a link" do
-      let(:link) { short_link("https://example.com/talk", code: "talk") }
+      let(:link) { short_link("https://example.com/talk", code: "talk-now") }
 
       before { get "/admin/links/#{link.id}/menu", return_to: "/admin/links?sort=clicks" }
 
@@ -216,9 +216,9 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
       it "copies the short link, the destination and markdown" do
         expect(copies).to eq(
-          "Copy short link" => "http://shares.localhost/talk",
+          "Copy short link" => "http://shares.localhost/talk-now",
           "Copy destination" => "https://example.com/talk",
-          "Copy as markdown" => "[example.com](http://shares.localhost/talk)",
+          "Copy as markdown" => "[example.com](http://shares.localhost/talk-now)",
         )
       end
 

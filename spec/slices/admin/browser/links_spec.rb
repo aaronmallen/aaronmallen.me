@@ -3,7 +3,7 @@
 RSpec.describe "Admin links", type: :feature do
   let(:i18n) { Admin::Slice["i18n"] }
 
-  def again_hint = i18n.t("ui.views.links.index.again", link: "shares.localhost/talk")
+  def again_hint = i18n.t("ui.views.links.index.again", link: "shares.localhost/talk-now")
 
   def code = Shares::Slice["relations.short_links"].with_code.one[:code]
 
@@ -16,7 +16,7 @@ RSpec.describe "Admin links", type: :feature do
   end
 
   def talk
-    Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk" })
+    Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk-now" })
   end
 
   def watch_clipboard_items
@@ -72,7 +72,7 @@ RSpec.describe "Admin links", type: :feature do
     find(".link-chip").click
 
     expect(page).to have_css(".toast", text: "Link copied")
-    expect(copied).to eq(["http://shares.localhost/talk"])
+    expect(copied).to eq(["http://shares.localhost/talk-now"])
   end
 
   describe "hovering a row" do
@@ -111,7 +111,7 @@ RSpec.describe "Admin links", type: :feature do
       drawer { click_button "Copy as markdown" }
 
       expect(page).to have_css(".toast", text: "Markdown copied")
-      expect(copied).to eq(["[example.com](http://shares.localhost/talk)"])
+      expect(copied).to eq(["[example.com](http://shares.localhost/talk-now)"])
     end
 
     it "keeps text I closed it on when I shorten another link" do
@@ -133,7 +133,7 @@ RSpec.describe "Admin links", type: :feature do
       before { drawer { click_button "Delete link" } }
 
       it "asks first" do
-        confirm = i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/talk")
+        confirm = i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/talk-now")
 
         expect(page).to have_css("[data-confirm-message]", text: confirm)
       end

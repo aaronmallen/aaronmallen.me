@@ -5,7 +5,7 @@ require "zip_kit"
 
 module Shares
   class Server
-    CODE_PATH = %r{\A/(?<code>[^/.]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
+    CODE_PATH = %r{\A/(?<code>[a-z0-9-]+)(?:/(?<id>[1-9][0-9]*)|(?<zip>\.zip))?\z}
     FILE_POLICY = "sandbox; default-src 'none'; style-src 'unsafe-inline'"
     FILE_HEADERS = { "content-security-policy" => FILE_POLICY, "x-content-type-options" => "nosniff" }.freeze
     PAGE_HEADERS = {
@@ -95,7 +95,7 @@ module Shares
 
     def requested_path(request)
       path = CODE_PATH.match(request.path_info)
-      path.captures if path && (request.get? || request.head?) && Blog::Types::ShortCode.valid?(path[:code])
+      path.captures if path && (request.get? || request.head?)
     end
 
     def serve(request, share, &)

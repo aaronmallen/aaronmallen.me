@@ -7,7 +7,7 @@ module Shares
       OTHER = Blog::Types::ShareFilter["other"]
 
       def by_code(code)
-        share_groups.with_code.where(Sequel[:short_codes][:code] => code)
+        share_groups.with_code.where(Sequel[:short_codes][:id] => short_codes.resolved_id(code))
                     .combine(:share_group_files).node(:share_group_files) { it.order(:id) }.one
       end
 
@@ -19,7 +19,8 @@ module Shares
 
       def file_by_code(code, id)
         joined = share_group_files.join(:share_groups, id: :share_group_id).join(:short_codes, id: :short_code_id)
-        joined.where(Sequel[:share_group_files][:id] => id, Sequel[:short_codes][:code] => code).one
+        resolved = short_codes.resolved_id(code)
+        joined.where(Sequel[:share_group_files][:id] => id, Sequel[:short_codes][:id] => resolved).one
       end
 
       def find(id)

@@ -10,9 +10,7 @@ RSpec.describe Shares::Operations::BackfillPreviews do
   def preview_key(file) = Shares::Slice["relations.share_group_files"].by_pk(file[:id]).one[:preview_key]
 
   def share(filename, content_type, key: SecureRandom.hex(16))
-    Shares::Slice["repos.share_mutations"].create(
-      code: Shares::Slice["repos.short_code_queries"].free_code, key:, filename:, content_type:, byte_size: 1,
-    )
+    Shares::Slice["repos.share_mutations"].create(key:, filename:, content_type:, byte_size: 1)
     Shares::Slice["relations.share_group_files"].where(key:).one
   end
 

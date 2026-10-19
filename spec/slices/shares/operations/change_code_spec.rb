@@ -15,16 +15,33 @@ RSpec.describe Shares::Operations::ChangeCode do
   it "changes the code and frees the old one", :aggregate_failures do
     old = share.code
 
-    expect(change(" Resume ").value!).to eq("resume")
-    expect(codes).to eq(["resume"])
+    code = change(" Resume-Me ").value!
+
+    expect(code).to eq("resume-me")
+    expect(codes).to eq(["resume-me"])
     expect(codes).not_to include(old)
+  end
+
+  it "pads a code shorter than 8 and keeps what I typed as its start", :aggregate_failures do
+    code = change("resume").value!
+
+    expect(code).to match(/\Aresume[abcdefghjkmnpqrstuvwxyz23456789]{2}\z/)
+    expect(codes).to eq([code])
+  end
+
+  it "pads again when the first padding is taken" do
+    share
+    Shares::Slice["relations.short_codes"].insert(code: "resumeaa")
+    allow(Shares::Helpers::Code).to receive(:pad).and_return("resumeaa", "resumebb")
+
+    expect(change("resume").value!).to eq("resumebb")
   end
 
   it "changes a short link's code" do
     link = Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/talk").value!
-    change("talk", link)
+    change("talk-now", link)
 
-    expect(Shares::Slice["repos.short_link_queries"].find(link.id).code).to eq("talk")
+    expect(Shares::Slice["repos.short_link_queries"].find(link.id).code).to eq("talk-now")
   end
 
   it "refuses a code that breaks the format", :aggregate_failures do

@@ -2243,7 +2243,7 @@
 }
 
 @utility page-head-title {
-  @apply font-display text-head font-extrabold text-ink;
+  @apply font-display text-head font-extrabold wrap-anywhere text-ink;
 }
 
 @utility page-head-sub {

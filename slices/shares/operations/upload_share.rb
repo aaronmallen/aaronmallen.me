@@ -11,7 +11,6 @@ module Shares
         contract: "contracts.upload_contract",
         share_mutations: "repos.share_mutations",
         share_queries: "repos.share_queries",
-        short_code_queries: "repos.short_code_queries",
       ]
 
       def call(upload)
@@ -29,7 +28,7 @@ module Shares
       def create(key, preview_key, fields)
         Helpers::Code.retrying(share_mutations) do
           share_mutations.create(
-            code: short_code_queries.free_code, key:, preview_key:,
+            key:, preview_key:,
             filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
           )
         end

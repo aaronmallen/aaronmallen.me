@@ -1343,7 +1343,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       text = mastodon_text(queued(parts: ["see https://github.com/ada and #{post_url}"]))
       code = short_code("https://github.com/ada")
 
-      expect(code).to match(/\A[a-z2-9]{3}\z/)
+      expect(code).to match(/\A[a-z2-9]{8}\z/)
       expect(text).to eq("see http://shares.localhost/#{code} and #{post_url}?ref=mastodon")
     end
 
@@ -1359,9 +1359,9 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     it "reuses the code of a link I shortened before", :aggregate_failures do
-      Shares::Slice["operations.create_short_link"].call(destination: "https://github.com/ada", code: "gh")
+      Shares::Slice["operations.create_short_link"].call(destination: "https://github.com/ada", code: "github-ada")
 
-      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/gh")
+      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/github-ada")
       expect(Shares::Slice["relations.short_links"].count).to eq(1)
     end
 
@@ -1385,7 +1385,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       facets = facets_for("see https://github.com/ada")
       code = short_code("https://github.com/ada")
 
-      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 31)])
+      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 36)])
     end
 
     {

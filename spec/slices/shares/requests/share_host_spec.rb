@@ -55,12 +55,39 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
-  it "still serves a share under a 5-letter code", :aggregate_failures do
-    stub_object(share.tap { Shares::Slice["operations.change_code"].call(it, code: "abcde") })
-    fetch("/abcde")
+  describe "a prefix" do
+    let(:files) do
+      %w[first-file secondfile third-file].map { |body| share.tap { stub_object(it, body:) } }
+    end
 
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq(bytes)
+    def opened(path) = fetch(path).then { last_response.ok? ? last_response.body : last_response.status }
+
+    def recode(*codes) = codes.each_with_index { |code, at| short_codes.by_pk(files[at].short_code_id).update(code:) }
+
+    def short_codes = Shares::Slice["relations.short_codes"]
+
+    before { recode("abcdefgh", "abcefghj", "abcfghjk") }
+
+    it "opens the oldest code that starts with it" do
+      expect(%w[/a /ab /abc /abce /abcf].map { opened(it) })
+        .to eq(%w[first-file first-file first-file secondfile third-file])
+    end
+
+    it "opens a whole code before an older code that starts with it" do
+      recode("abcdefghjk", "abcdefgh")
+
+      expect(%w[/abcdefgh /abcdefghj].map { opened(it) }).to eq(%w[secondfile first-file])
+    end
+
+    it "answers 404 when no code starts with it" do
+      expect(opened("/abd")).to eq(404)
+    end
+
+    it "opens the next oldest once the oldest is deleted" do
+      short_codes.by_pk(files.first.short_code_id).delete
+
+      expect(opened("/abc")).to eq("secondfile")
+    end
   end
 
   it "waits 300 seconds for the store to answer" do
@@ -383,6 +410,23 @@ RSpec.describe "The share host", type: :request do
         fetch("/#{group.code}")
 
         expect(page).to have_css("h1", exact_text: Shares::GroupPage::TITLE)
+      end
+    end
+
+    describe "a prefix" do
+      before do
+        Shares::Slice["relations.short_codes"].by_pk(group.short_code_id).update(code: "grpabcde")
+        group.share_group_files.each { stub_request(:get, share_store_url(it.key)).to_return(body: bytes) }
+      end
+
+      it "opens the group's page, zip and files", :aggregate_failures do
+        expect(fetch("/grp")).to be_ok
+        expect(fetch("/grp.zip").headers["Content-Type"]).to eq("application/zip")
+        expect(fetch("/grp/#{file('notes.txt').id}").body).to eq(bytes)
+      end
+
+      it "opens no file of a group the prefix does not resolve to" do
+        expect(fetch("/grpz/#{file('notes.txt').id}").status).to eq(404)
       end
     end
 
@@ -723,8 +767,8 @@ RSpec.describe "The share host", type: :request do
   end
 
   it "leaves the blog's host as it was", :aggregate_failures do
-    file = share.tap { Shares::Slice["relations.short_codes"].where(code: it.code).update(code: "zzq") }
-    get "/zzq", {}, "HTTP_HOST" => "aaronmallen.me"
+    file = share.tap { Shares::Slice["relations.short_codes"].where(code: it.code).update(code: "zzqzzqzz") }
+    get "/zzqzzqzz", {}, "HTTP_HOST" => "aaronmallen.me"
 
     expect(last_response.status).to eq(404)
     expect(last_response.headers["Cache-Control"]).not_to eq("private, no-store")

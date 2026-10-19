@@ -1,21 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.describe Shares::Helpers::Code do
-  it "never picks a taken code" do
-    taken = described_class::ALPHABET.repeated_permutation(2).map(&:join) - %w[a2 z9]
-
-    expect(Array.new(50) { described_class.pick(2, taken) }.uniq).to contain_exactly("a2", "z9")
+  it "draws a full code from the alphabet" do
+    expect(described_class.pad).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
   end
 
-  it "picks nothing once every code of the length is taken" do
-    expect(described_class.pick(1, described_class::ALPHABET)).to be_nil
+  it "pads a short code to 8 and keeps its start" do
+    expect(described_class.pad("talk")).to match(/\Atalk[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
   end
 
-  it "skips typed codes of other lengths or letters", :aggregate_failures do
-    taken = described_class::ALPHABET - ["q"] + %w[0 talk]
-
-    expect(described_class.pick(1, taken)).to eq("q")
-    expect(described_class.pick(1, %w[1 i l o])).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]\z/)
+  it "leaves a code of 8 or more alone" do
+    expect(described_class.pad("abcdefghjkmnpqrs")).to eq("abcdefghjkmnpqrs")
   end
 
   def collide(constraint, fails: Float::INFINITY)

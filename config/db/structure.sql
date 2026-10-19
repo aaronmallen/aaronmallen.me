@@ -458,7 +458,8 @@ CREATE DOMAIN public.scroll_depth AS smallint
 --
 
 CREATE DOMAIN public.short_code AS text
-	CONSTRAINT short_code_check CHECK ((VALUE ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text));
+	CONSTRAINT short_code_check CHECK ((VALUE ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text))
+	CONSTRAINT short_code_length CHECK ((char_length(VALUE) >= 8));
 
 
 --
@@ -9586,4 +9587,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018110004_index_performance_requests_by_route.rb'),
 ('20261018140004_add_draft_to_mail_messages.rb'),
 ('20261018150007_type_token_scopes_as_oauth_scope.rb'),
-('20261018200001_renumber_tasks_with_no_project.rb');
+('20261018200001_renumber_tasks_with_no_project.rb'),
+('20261019160000_pad_short_codes.rb');

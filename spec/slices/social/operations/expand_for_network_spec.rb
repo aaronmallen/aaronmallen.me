@@ -19,9 +19,9 @@ RSpec.describe Social::Operations::ExpandForNetwork do
   end
 
   it "counts a link I shortened before at its own code" do
-    Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/b", code: "my-talk")
+    Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/b", code: "my-own-talk")
 
-    expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/my-talk")
+    expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/my-own-talk")
   end
 
   it "makes a short link when asked and queues a fetch of its title", :aggregate_failures, :commits do

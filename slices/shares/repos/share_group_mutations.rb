@@ -22,9 +22,9 @@ module Shares
         end
       end
 
-      def leave(file_id, code:)
+      def leave(file_id)
         transaction do
-          short_code = short_codes.command(:create).call(code:)
+          short_code = short_codes.command(:create).call(code: Helpers::Code.pad)
           share_group_files.by_pk(file_id).update(short_code_id: short_code.id, share_group_id: nil,
                                                   updated_at: Time.now)
         end

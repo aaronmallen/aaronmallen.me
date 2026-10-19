@@ -136,7 +136,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
 
   describe "a link" do
     before do
-      Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk" })
+      Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk-now" })
       visit "/admin/links"
       open_menu(find(".link-row-meta"))
     end
@@ -153,7 +153,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :f
 
   describe "a row whose title link covers it" do
     before do
-      Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk" })
+      Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk-now" })
       visit "/admin/links"
     end
 

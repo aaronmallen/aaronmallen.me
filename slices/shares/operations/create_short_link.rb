@@ -4,7 +4,7 @@ module Shares
   module Operations
     class CreateShortLink < Blog::Operation
       include Deps[
-        contract: "contracts.short_link_contract", short_code_queries: "repos.short_code_queries",
+        contract: "contracts.short_link_contract",
         queue_title_fetch: "operations.queue_title_fetch", short_link_mutations: "repos.short_link_mutations",
         short_link_queries: "repos.short_link_queries",
       ]
@@ -18,10 +18,8 @@ module Shares
       private
 
       def create(fields)
-        attempts = fields[:code] ? 1 : Helpers::Code::ATTEMPTS
-
         constrained(short_link_mutations, Helpers::Code::CONSTRAINTS) do
-          Helpers::Code.retrying(short_link_mutations, attempts) { insert(fields) }
+          Helpers::Code.retrying(short_link_mutations) { insert(fields) }
         end
       end
 
@@ -30,7 +28,7 @@ module Shares
       end
 
       def insert(fields)
-        id = short_link_mutations.create(code: fields[:code] || short_code_queries.free_code, **fields.except(:code))
+        id = short_link_mutations.create(**fields)
         Success(short_link_queries.find(id))
       end
 

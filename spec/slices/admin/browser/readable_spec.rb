@@ -509,7 +509,8 @@ RSpec.describe "Admin screens", type: :feature do
   def seed_short_links
     @seed_short_links ||= begin
       shorten = Shares::Slice["operations.create_short_link"]
-      made = shorten.call({ destination: long_link, code: "a-talk", title: "A talk with a fairly long title" }).value!
+      made = shorten.call({ destination: long_link, code: "a-talk-now",
+                            title: "A talk with a fairly long title" }).value!
       Shares::Slice["operations.retarget_short_link"].call(made.id, { destination: "#{long_link}/v2" })
       shorten.call({ destination: "https://github.com/aaronmallen" })
     end

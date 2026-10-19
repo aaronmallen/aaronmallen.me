@@ -47,8 +47,8 @@ RSpec.describe Shares::Operations::UploadShareGroup do
         upload(share_upload("a", "a.txt", "text/plain"), share_upload("%PDF", "b.pdf", "application/pdf")).value!
       end
 
-      it "makes one group under one three character code", :aggregate_failures do
-        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
+      it "makes one group under one eight character code", :aggregate_failures do
+        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
         expect(group).to have_attributes(view_count: 0, zip_download_count: 0)
         expect(Shares::Slice["relations.shares"].count).to eq(0)
       end
@@ -111,10 +111,10 @@ RSpec.describe Shares::Operations::UploadShareGroup do
     end
 
     it "tries a new code when the first is taken" do
-      Shares::Slice["relations.short_codes"].insert(code: "aaa")
-      allow(Shares::Helpers::Code).to receive(:pick).and_return("aaa", "bbb")
+      Shares::Slice["relations.short_codes"].insert(code: "aaaaaaaa")
+      allow(Shares::Helpers::Code).to receive(:pad).and_return("aaaaaaaa", "bbbbbbbb")
 
-      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbb")
+      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbbbbbbb")
     end
 
     it "refuses no files" do
@@ -154,7 +154,7 @@ RSpec.describe Shares::Operations::UploadShareGroup do
   end
 
   describe "in Postgres" do
-    let(:code_id) { Shares::Slice["relations.short_codes"].insert(code: "group") }
+    let(:code_id) { Shares::Slice["relations.short_codes"].insert(code: "group-of") }
 
     it "lets one code hold one group" do
       Shares::Slice["relations.share_groups"].insert(short_code_id: code_id)

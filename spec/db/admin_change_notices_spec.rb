@@ -26,7 +26,7 @@ RSpec.describe "Admin change notices", :commits, type: :app do
   end
 
   it "sends none for a short link click" do
-    id = db[:short_links].insert(short_code_id: short_code("go"), destination: "https://example.com")
+    id = db[:short_links].insert(short_code_id: short_code("go-there"), destination: "https://example.com")
     click = { click_count: Sequel[:click_count] + 1, last_clicked_at: Sequel::CURRENT_TIMESTAMP }
 
     expect(admin_notice { db[:short_links].where(id:).update(click) }).to be_nil
@@ -34,14 +34,14 @@ RSpec.describe "Admin change notices", :commits, type: :app do
 
   it "sends none for a share download" do
     file = { key: "0" * 32, filename: "a.txt", content_type: "text/plain", byte_size: 1 }
-    id = db[:share_group_files].insert(short_code_id: short_code("file"), **file)
+    id = db[:share_group_files].insert(short_code_id: short_code("one-file"), **file)
     count = { download_count: Sequel[:download_count] + 1 }
 
     expect(admin_notice { db[:share_group_files].where(id:).update(count) }).to be_nil
   end
 
   it "sends none for a share group view or zip download" do
-    id = db[:share_groups].insert(short_code_id: short_code("group"))
+    id = db[:share_groups].insert(short_code_id: short_code("a-group-of"))
     counts = { view_count: Sequel[:view_count] + 1, zip_download_count: Sequel[:zip_download_count] + 1 }
 
     expect(admin_notice { db[:share_groups].where(id:).update(counts) }).to be_nil

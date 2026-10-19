@@ -36,10 +36,18 @@ RSpec.describe "A short link on the share host", type: :request do
   end
 
   it "still sends a link made under an older, longer code" do
-    Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "ab2cd")
-    fetch("ab2cd")
+    Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "ab2cdefghjkmnpqr")
+    fetch("ab2cdefghjkmnpqr")
 
     expect(last_response.headers["Location"]).to eq("https://example.com/talk")
+  end
+
+  it "sends a prefix of the code and counts the click", :aggregate_failures do
+    Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "talkabcd")
+    fetch("talk")
+
+    expect(last_response.headers["Location"]).to eq("https://example.com/talk")
+    expect(stored[:click_count]).to eq(1)
   end
 
   describe "a changed code" do

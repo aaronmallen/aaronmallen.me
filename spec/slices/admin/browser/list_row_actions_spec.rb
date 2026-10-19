@@ -160,7 +160,7 @@ RSpec.describe "Admin list row actions", type: :feature do
   describe "the links list" do
     let(:screen) { "/admin/links" }
 
-    before { Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk" }) }
+    before { Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com/talk", code: "talk-now" }) }
 
     def act
       find(".link-row-title a").click

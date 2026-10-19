@@ -3,40 +3,30 @@
 RSpec.describe Shares::Operations::CreateShortLink do
   def create(**params) = described_class.new.call({ destination: "https://example.com/talk" }.merge(params))
 
-  it "makes a link with a random three character code", :aggregate_failures do
+  it "makes a link with a random eight character code", :aggregate_failures do
     link = create.value!
 
-    expect(link.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{3}\z/)
+    expect(link.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
     expect(link.destination).to eq("https://example.com/talk")
     expect(link.click_count).to eq(0)
-  end
-
-  it "takes the one three character code left free" do
-    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"]
-    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
-
-    expect(create.value!.code).to eq("xyz")
-  end
-
-  it "moves to four characters once every three character code is taken" do
-    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join)
-    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
-
-    expect(create.value!.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
-  end
-
-  it "counts no typed code outside the alphabet toward a full length" do
-    codes = Shares::Helpers::Code::ALPHABET.repeated_permutation(3).map(&:join) - ["xyz"] + ["abl"]
-    Shares::Slice["relations.short_codes"].dataset.import([:code], codes)
-
-    expect(create.value!.code).to eq("xyz")
   end
 
   it "makes a link with the code and title I give", :aggregate_failures do
     link = create(code: " Talk ", title: " My talk ").value!
 
-    expect(link.code).to eq("talk")
+    expect(link.code).to match(/\Atalk[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
     expect(link.title).to eq("My talk")
+  end
+
+  it "keeps a code I give of eight or more as it is" do
+    expect(create(code: "talk-at-rubyconf").value!.code).to eq("talk-at-rubyconf")
+  end
+
+  it "pads a code I give again when the first padding is taken" do
+    Shares::Slice["relations.short_codes"].insert(code: "talkaaaa")
+    allow(Shares::Helpers::Code).to receive(:pad).and_return("talkaaaa", "talkbbbb")
+
+    expect(create(code: "talk").value!.code).to eq("talkbbbb")
   end
 
   it "refuses a code a share holds" do
@@ -66,7 +56,7 @@ RSpec.describe Shares::Operations::CreateShortLink do
   end
 
   it "leaves the database to refuse a link no contract checked" do
-    code = Shares::Slice["relations.short_codes"].command(:create).call(code: "talk")
+    code = Shares::Slice["relations.short_codes"].command(:create).call(code: "talkshow")
 
     expect do
       Shares::Slice["relations.short_links"].command(:create).call(short_code_id: code[:id], destination: "ftp://x")
@@ -74,9 +64,9 @@ RSpec.describe Shares::Operations::CreateShortLink do
   end
 
   it "leaves the database to refuse a code a share or link holds" do
-    create(code: "talk")
+    create(code: "talkshow")
 
-    expect { Shares::Slice["relations.short_codes"].command(:create).call(code: "talk") }
+    expect { Shares::Slice["relations.short_codes"].command(:create).call(code: "talkshow") }
       .to raise_error(ROM::SQL::UniqueConstraintError)
   end
 end

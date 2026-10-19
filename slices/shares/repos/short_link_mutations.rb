@@ -10,7 +10,7 @@ module Shares
       stamped_commands :update
 
       def click(code)
-        clicked = short_links.where(short_code_id: short_codes.where(code:).select(:id).dataset).dataset
+        clicked = short_links.where(short_code_id: short_codes.resolved_id(code)).dataset
         counts = { click_count: Sequel[:click_count] + 1, last_clicked_at: Sequel::CURRENT_TIMESTAMP }
         clicked.returning(:destination).update(counts).first&.fetch(:destination)
       end

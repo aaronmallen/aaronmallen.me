@@ -7,7 +7,6 @@ module Shares
         group_mutations: "repos.share_group_mutations",
         group_queries: "repos.share_group_queries",
         share_queries: "repos.share_queries",
-        short_code_queries: "repos.short_code_queries",
       ]
 
       def call(id, file_id)
@@ -21,7 +20,7 @@ module Shares
       private
 
       def leave(file_id)
-        Helpers::Code.retrying(group_mutations) { group_mutations.leave(file_id, code: short_code_queries.free_code) }
+        Helpers::Code.retrying(group_mutations) { group_mutations.leave(file_id) }
       end
 
       def ungroup(group, file)

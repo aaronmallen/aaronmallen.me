@@ -39,7 +39,7 @@ module Shares
 
       def save(group, fields, files)
         constrained(group_mutations, Helpers::Code::CONSTRAINTS) do
-          transaction { write(group, fields, files) }
+          Helpers::Code.retrying(group_mutations) { transaction { write(group, fields, files) } }
           Success(group_queries.find(group.id))
         end
       end
