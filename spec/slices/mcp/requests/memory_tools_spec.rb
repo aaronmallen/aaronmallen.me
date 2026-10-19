@@ -190,11 +190,17 @@ RSpec.describe "MCP memory tools", type: :request do
     end
   end
 
-  it "refuses fact text over 1,000 characters" do
+  it "adds and edits fact text of any length" do
     file = create_file.fetch("id")
+    fact = add_fact(file, "a" * 5000).fetch("id")
+    mcp_answer("edit_memory_fact", id: file, fact_id: fact, text: "b" * 6000, **author)
 
-    expect(mcp_text("add_memory_fact", id: file, type: "context", text: "a" * 1001, **author))
-      .to eq("text: keep a fact to 1000 characters")
+    expect(live_texts(file)).to eq(["b" * 6000])
+  end
+
+  it "refuses blank fact text" do
+    expect(mcp_text("add_memory_fact", id: create_file.fetch("id"), type: "context", text: " ", **author))
+      .to eq("text: write the fact first")
   end
 
   it "refuses a second file with one path in one scope" do

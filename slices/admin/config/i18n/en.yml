@@ -610,7 +610,6 @@ en:
             taken: "A file with this path already loads there."
           text:
             blank: "Write the fact first."
-            long: "Keep a fact to %{max} characters."
             visible: "Write the fact first."
           type:
             blank: "Pick a type."

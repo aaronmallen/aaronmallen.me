@@ -260,6 +260,13 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(toast).to eq(t("memories_page.toasts.stale"))
     end
 
+    it "adds and edits fact text of any length" do
+      admin_post("#{file_path(file)}/facts", fact: { type: "gotcha", text: "a" * 5000 })
+      admin_post("#{file_path(file)}/facts/#{facts(file).last.id}", fact: { type: "gotcha", text: "b" * 6000 })
+
+      expect(facts(file).map(&:text)).to eq(["b" * 6000])
+    end
+
     it "refuses a blank fact and keeps what was typed", :aggregate_failures do
       admin_post("#{file_path(file)}/facts", fact: { type: "gotcha", text: " " })
 

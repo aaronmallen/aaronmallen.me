@@ -9,7 +9,6 @@ module Admin
             ::Agents::Contracts::MemoryFactContract, ::Agents::Contracts::MemoryFileContract,
             ::Agents::Contracts::MemoryScopeContract,
           ].freeze
-          LIMITS = { text: { max: ::Agents::Contracts::MemoryFactContract::TEXT_LIMIT } }.freeze
           SCOPE = "memory"
           UNSHOWN = %i[agent model session_id repo project_id task_id].freeze
         end

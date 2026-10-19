@@ -24,6 +24,13 @@ RSpec.describe "API memory", type: :request do
     MARKDOWN
   end
 
+  it "adds and edits fact text of any length" do
+    long = call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "a" * 5000, **author }).fetch("id")
+    call_api(:patch, "/memory_files/#{file}/facts/#{long}", { text: "b" * 6000, **author })
+
+    expect(call_api(:get, "/memory_files/#{file}").fetch("facts").map { it.fetch("text") }).to eq(["b" * 6000])
+  end
+
   it "lists the loaded files without their facts" do
     fact
 

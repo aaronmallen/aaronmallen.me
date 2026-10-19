@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
-amended: ["#1745", "#1750", "#1790"]
+amended: ["#1745", "#1750", "#1790", "#1859"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 
@@ -36,8 +36,9 @@ read it through its exported read repos and operations and never write its table
 - **I fix memory in the admin.** Since #1750 the memories screens add, edit, remove and revert facts, move a file
   to another scope, link it to other records and delete it. Each change names me as its author. A move adds a
   `scope` entry to the file's history, and agents move a file the same way through `move_memory_file`.
-- **Nothing expires.** History, versions and sessions stay. Caps on fact text (1,000 characters) and artifact bodies
-  (100,000) keep each row small. Since #1790 `read_memory_file` and the admin memory file page read history a
+- **Nothing expires.** History, versions and sessions stay. A cap on artifact bodies (100,000 characters) keeps each
+  row small. #1859 dropped the cap on fact text, so an agent can save a whole gotcha; the request body limit still
+  bounds what a client sends. Since #1790 `read_memory_file` and the admin memory file page read history a
   page at a time, newest first, so a busy file does not send every change it ever had.
 - **Artifact tags sit in a `text[]` column on `artifacts`**, with a CHECK that holds each one to the tag slug format,
   not in the shared `tags` table. A join to `tags` would put artifacts on the tag screens and in the tag counts,
@@ -58,6 +59,9 @@ Deleting a task or project deletes the memory files scoped to it, so the slice r
 through foreign keys.
 
 With no pruning, history, versions and sessions grow for good.
+
+Since #1859 fact text has no cap, and `start_session` loads every fact in scope, so a long fact grows every
+agent prompt that loads it.
 
 Leaving the slice out of search and the activity feed means I find a fact or an artifact only through the Agents
 screens, the MCP tools or a record link.

@@ -15,10 +15,7 @@ module API
         ),
       }.freeze
       FACT_TYPE = { type: "string", enum: Blog::Types::MemoryFactType.values }.freeze
-      FACT_TEXT = {
-        type: "string",
-        description: "the fact, #{::Agents::Contracts::MemoryFactContract::TEXT_LIMIT} characters at most",
-      }.freeze
+      FACT_TEXT = { type: "string", description: "the fact" }.freeze
       ID = Helpers::Schema::ID
       MARKDOWN =
         "the files as an agent loads them, each headed by file <id> and each fact led by [fact <id>]; marked " \
@@ -71,7 +68,6 @@ module API
         },
         text: {
           Blog::Contract::BLANK => "write the fact first",
-          "long" => "keep a fact to #{::Agents::Contracts::MemoryFactContract::TEXT_LIMIT} characters",
         },
       }.freeze
 

@@ -3208,8 +3208,7 @@ CREATE TABLE public.memory_facts (
     removed_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT memory_facts_author_check CHECK ((num_nonnulls(agent, model) = ANY (ARRAY[0, 2]))),
-    CONSTRAINT memory_facts_text_length_check CHECK ((char_length((text)::text) <= 1000))
+    CONSTRAINT memory_facts_author_check CHECK ((num_nonnulls(agent, model) = ANY (ARRAY[0, 2])))
 );
 
 
@@ -9588,4 +9587,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018140004_add_draft_to_mail_messages.rb'),
 ('20261018150007_type_token_scopes_as_oauth_scope.rb'),
 ('20261018200001_renumber_tasks_with_no_project.rb'),
-('20261019160000_pad_short_codes.rb');
+('20261019160000_pad_short_codes.rb'),
+('20261019160001_drop_memory_fact_text_length_check.rb');
