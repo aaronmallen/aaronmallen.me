@@ -18,7 +18,7 @@ module Admin
             content_for(:live_tables, LIVE_TABLES)
             SharePage(
               back: path(:admin_links), back_label: t(".all_links"),
-              title: Helpers::ShareLink.bare_for(@link.code),
+              title: Helpers::ShareLink.bare_for(@link.short),
               form: LinkForm, record: @link, kind: :link,
             ) { LinkForm(link: @link, check: @check, values: @values, errors: @errors) }
           end

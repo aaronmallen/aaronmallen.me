@@ -353,7 +353,7 @@ RSpec.describe "Admin social composer", type: :feature do
     end
 
     {
-      "https://example.com/hello" => "http://shares.localhost/xxxxx",
+      "https://example.com/hello" => "http://shares.localhost/xxxxxxxx",
       "http://shares.localhost/talk" => "http://shares.localhost/talk",
       "https://aaronmallen.me" => "https://aaronmallen.me/?ref=bluesky",
       "https://aaronmallen.me/a?b=c#d" => "https://aaronmallen.me/a?b=c&ref=bluesky#d",

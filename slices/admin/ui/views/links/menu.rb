@@ -52,7 +52,7 @@ module Admin
                                   outbound: true)
           end
 
-          def short = Helpers::ShareLink.for(@link.code)
+          def short = Helpers::ShareLink.for(@link.short)
         end
       end
     end

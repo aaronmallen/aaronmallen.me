@@ -11,6 +11,8 @@ RSpec.describe "API shares", type: :request do
 
   def group_files = Shares::Slice["relations.share_group_files"].to_a
 
+  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).short}"
+
   def keep_puts
     stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
       stored[File.basename(request.uri.path)] = { body: request.body.b, content_type: request.headers["Content-Type"] }
@@ -26,6 +28,8 @@ RSpec.describe "API shares", type: :request do
 
   def refused(field) = { field.to_s => [API::Helpers::Upload::COMPLAINTS.dig(field, "format")] }
 
+  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).short}"
+
   def shares = Shares::Slice["relations.shares"].to_a
 
   before do
@@ -38,7 +42,7 @@ RSpec.describe "API shares", type: :request do
 
     it "answers 201 with the share and its link" do
       expect([answered, status]).to match([include(
-        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')}",
+        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')[0]}",
         "filename" => "hello.txt", "content_type" => "text/plain", "byte_size" => 5, "download_count" => 0,
         "alt_text" => nil,
       ), 201])
@@ -114,11 +118,11 @@ RSpec.describe "API shares", type: :request do
 
     def file_id(filename) = group_files.find { it[:filename] == filename }.fetch(:id)
 
-    def link_of(filename) = "http://shares.localhost/#{answered.fetch('code')}/#{file_id(filename)}"
+    def link_of(filename) = "#{group_link(answered.fetch('id'))}/#{file_id(filename)}"
 
     it "answers 201 with one link for the group" do
       expect([answered, status]).to match([include(
-        "url" => "http://shares.localhost/#{answered.fetch('code')}", "view_count" => 0, "zip_download_count" => 0,
+        "url" => group_link(answered.fetch("id")), "view_count" => 0, "zip_download_count" => 0,
       ), 201])
     end
 
@@ -295,7 +299,7 @@ RSpec.describe "API shares", type: :request do
 
     it "renames the file and keeps its link" do
       expect(call_api(:patch, "/share_groups/#{group.id}/files/#{file.id}", { filename: "b.txt" }).fetch("files"))
-        .to contain_exactly(include("filename" => "b.txt", "url" => "http://shares.localhost/#{group.code}/#{file.id}"))
+        .to contain_exactly(include("filename" => "b.txt", "url" => "#{group_link(group.id)}/#{file.id}"))
     end
 
     it "refuses a name with a folder part and keeps the old one", :aggregate_failures do
@@ -352,7 +356,7 @@ RSpec.describe "API shares", type: :request do
       answered = call_api(:post, "/share_groups/#{group.id}/files", { ids: [share.id] })
 
       expect(answered.fetch("files").map { it.values_at("id", "url") })
-        .to include([share.id, "http://shares.localhost/#{group.code}/#{share.id}"])
+        .to include([share.id, "#{group_link(group.id)}/#{share.id}"])
     end
 
     it "answers 404 for a group that is not there", :aggregate_failures do
@@ -377,7 +381,7 @@ RSpec.describe "API shares", type: :request do
       answered = call_api(:post, "/share_groups/#{group.id}/files/#{file.id}/ungroup", {})
 
       expect(answered).to include(
-        "id" => file.id, "filename" => "a.txt", "url" => "http://shares.localhost/#{answered.fetch('code')}",
+        "id" => file.id, "filename" => "a.txt", "url" => share_link(file.id),
       )
     end
 

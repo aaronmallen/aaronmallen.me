@@ -4,7 +4,7 @@ RSpec.describe "Admin files", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
 
-  def code(name) = Shares::Slice["relations.shares"].with_code.where(filename: name).one[:code]
+  def coded(name) = Shares::Slice["relations.shares"].with_code.where(filename: name).one
 
   def file(bytes, name, type) = Rack::Test::UploadedFile.new(StringIO.new(bytes), type, original_filename: name)
 
@@ -53,7 +53,7 @@ RSpec.describe "Admin files", type: :request do
         get "/admin/files"
       end
 
-      let(:link) { "http://shares.localhost/#{code('deck.pdf')}" }
+      let(:link) { "http://shares.localhost/#{coded('deck.pdf')[:short]}" }
 
       it "shows the name, link, size, date and download count", :aggregate_failures do
         card = page.find(".file-card")
@@ -77,7 +77,7 @@ RSpec.describe "Admin files", type: :request do
         stub_request(:get, %r{\A#{share_store_url}/}).to_return(body: "x" * 2048)
 
         expect(page).to have_css(".page-head-sub", exact_text: lede(1, "2 KB"))
-        expect(Rack::MockRequest.new(Shares::Slice["server"]).get("/#{code('deck.pdf')}").status).to eq(200)
+        expect(Rack::MockRequest.new(Shares::Slice["server"]).get("/#{coded('deck.pdf')[:code]}").status).to eq(200)
       end
     end
 
@@ -100,7 +100,7 @@ RSpec.describe "Admin files", type: :request do
       found = share("shot.png", "image/png")
       get "/admin/files"
 
-      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{found.code}?preview']")
+      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{found.short}?preview']")
     end
 
     describe "search and the filter" do
@@ -124,7 +124,7 @@ RSpec.describe "Admin files", type: :request do
       end
 
       it "narrows by code" do
-        get "/admin/files", search: code("notes.txt")
+        get "/admin/files", search: coded("notes.txt")[:code]
 
         expect(names).to eq(%w[notes.txt])
       end
@@ -227,7 +227,7 @@ RSpec.describe "Admin files", type: :request do
         upload(file("a", "a.txt", "text/plain"), accept: "application/json")
 
         expect(last_response.status).to eq(201)
-        expect(json).to eq("links" => ["http://shares.localhost/#{code('a.txt')}"], "message" => "Uploaded")
+        expect(json).to eq("links" => ["http://shares.localhost/#{coded('a.txt')[:short]}"], "message" => "Uploaded")
       end
 
       describe "as one link" do
@@ -264,7 +264,7 @@ RSpec.describe "Admin files", type: :request do
           upload_group(accept: "application/json")
 
           expect(last_response.status).to eq(201)
-          expect(json["links"]).to eq(["http://shares.localhost/#{groups.first[:code]}"])
+          expect(json["links"]).to eq(["http://shares.localhost/#{groups.first[:short]}"])
         end
 
         it "refuses a post with no file" do
@@ -278,7 +278,7 @@ RSpec.describe "Admin files", type: :request do
         upload(file("a", "a.txt", "text/plain"), file("b", "b.txt", "text/plain"), accept: "application/json")
 
         expect(json["links"]).to contain_exactly(
-          "http://shares.localhost/#{code('a.txt')}", "http://shares.localhost/#{code('b.txt')}",
+          "http://shares.localhost/#{coded('a.txt')[:short]}", "http://shares.localhost/#{coded('b.txt')[:short]}",
         )
         expect(Shares::Slice["relations.share_groups"].count).to eq(0)
       end
@@ -296,7 +296,7 @@ RSpec.describe "Admin files", type: :request do
       let(:drawer) { page.find("dialog#share-#{file.id}-drawer", visible: :all) }
       let(:confirm) { i18n.t("ui.components.files.share_form.confirm_delete", name: "deck.pdf") }
 
-      def link = "http://shares.localhost/#{file.code}"
+      def link = "http://shares.localhost/#{file.short}"
 
       before { get "/admin/files" }
 
@@ -351,13 +351,13 @@ RSpec.describe "Admin files", type: :request do
       end
 
       it "copies the image as markdown with its alt text" do
-        markdown = "![A cat](http://shares.localhost/#{file.code})"
+        markdown = "![A cat](http://shares.localhost/#{file.short})"
 
         expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
       end
 
       it "says the markdown I copy uses the alt text" do
-        markdown = "![A cat](http://shares.localhost/#{file.code})"
+        markdown = "![A cat](http://shares.localhost/#{file.short})"
         hint = i18n.t("ui.components.files.share_form.alt_text_hint")
 
         expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
@@ -371,7 +371,7 @@ RSpec.describe "Admin files", type: :request do
       get "/admin/files"
       copy = page.find("dialog#share-#{file.id}-drawer button[data-record-key^='!']", visible: :all)
 
-      expect(copy["data-record-key"]).to eq("![A \\[cat\\] \\\\ dog](http://shares.localhost/#{file.code})")
+      expect(copy["data-record-key"]).to eq("![A \\[cat\\] \\\\ dog](http://shares.localhost/#{file.short})")
     end
 
     describe "the edit page" do

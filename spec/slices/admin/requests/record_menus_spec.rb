@@ -167,7 +167,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
       describe "that is not an image" do
         let(:file) { share("deck.pdf", "application/pdf") }
-        let(:link) { "http://shares.localhost/#{file.code}" }
+        let(:link) { "http://shares.localhost/#{file.short}" }
 
         before { get "/admin/files/#{file.id}/menu", return_to: "/admin/files?kind=other" }
 
@@ -190,7 +190,7 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
         file = share("shot.png", "image/png")
         get "/admin/files/#{file.id}/menu"
 
-        expect(copies["Copy as markdown"]).to eq("![](http://shares.localhost/#{file.code})")
+        expect(copies["Copy as markdown"]).to eq("![](http://shares.localhost/#{file.short})")
       end
 
       it "lands a delete back on the page it opened on" do
@@ -216,9 +216,9 @@ RSpec.describe "Admin journal, decision, file, link and tag row menus", type: :r
 
       it "copies the short link, the destination and markdown" do
         expect(copies).to eq(
-          "Copy short link" => "http://shares.localhost/talk-now",
+          "Copy short link" => "http://shares.localhost/t",
           "Copy destination" => "https://example.com/talk",
-          "Copy as markdown" => "[example.com](http://shares.localhost/talk-now)",
+          "Copy as markdown" => "[example.com](http://shares.localhost/t)",
         )
       end
 

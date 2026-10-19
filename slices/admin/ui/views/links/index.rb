@@ -35,7 +35,7 @@ module Admin
 
           def again_hint
             input(type: "hidden", name: "link[again]", value: @values[:destination])
-            Hint { t(".again", link: Helpers::ShareLink.bare_for(@again.code)) }
+            Hint { t(".again", link: Helpers::ShareLink.bare_for(@again.short)) }
           end
 
           def code_field

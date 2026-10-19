@@ -34,7 +34,7 @@ module Admin
         def answer(response, link)
           response.status = :created
           response.format = :json
-          response.body = JSON.generate({ link: Helpers::ShareLink.for(link.code), message: i18n.t!(SHORTENED) })
+          response.body = JSON.generate({ link: Helpers::ShareLink.for(link.short), message: i18n.t!(SHORTENED) })
         end
 
         def created(request, response, link)

@@ -36,7 +36,7 @@ RSpec.describe "Admin file groups", type: :request do
       get "/admin/files"
       card = page.find(".file-card", text: "2 files")
 
-      expect(card).to have_css(".file-card-link", exact_text: "shares.localhost/#{group.code}")
+      expect(card).to have_css(".file-card-link", exact_text: "shares.localhost/#{group.short}")
       expect(card.find(".file-card-meta").text).to include("0 views")
     end
 
@@ -51,7 +51,7 @@ RSpec.describe "Admin file groups", type: :request do
     it "shows its first image as the thumbnail" do
       get "/admin/files"
 
-      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{group.code}/#{image[:id]}?preview']")
+      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{group.short}/#{image[:id]}?preview']")
     end
 
     it "shows a named group by its name in the list and its drawer", :aggregate_failures do

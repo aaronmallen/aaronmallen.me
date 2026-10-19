@@ -9,9 +9,13 @@ RSpec.describe "MCP share tools", type: :request do
     { data: Base64.strict_encode64(text), filename:, content_type: }.compact
   end
 
+  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).short}"
+
   def make_group(*files) = Shares::Slice["operations.upload_share_group"].call(files).value!
 
   def refusal(name, **) = mcp_call(name, **).values_at("isError", "content")
+
+  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).short}"
 
   def shares = Shares::Slice["relations.shares"].to_a
 
@@ -25,7 +29,7 @@ RSpec.describe "MCP share tools", type: :request do
       answered = answer("upload_share", **file("hello", "hello.txt", "text/plain"))
 
       expect(answered).to include(
-        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')}",
+        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')[0]}",
         "filename" => "hello.txt", "content_type" => "text/plain", "byte_size" => 5,
       )
     end
@@ -47,7 +51,7 @@ RSpec.describe "MCP share tools", type: :request do
     let(:group) { answer("upload_share_group", files: [file("a", "a.txt", "text/plain"), file("bb", "b.txt")]) }
 
     it "shares the files under one link" do
-      expect(group.fetch("url")).to eq("http://shares.localhost/#{group.fetch('code')}")
+      expect(group.fetch("url")).to eq(group_link(group.fetch("id")))
     end
 
     it "answers each file with its own link under the group's" do
@@ -183,7 +187,7 @@ RSpec.describe "MCP share tools", type: :request do
       file = group.share_group_files.first
       answered = answer("ungroup_share_file", id: group.id, file_id: file.id)
 
-      expect(answered).to include("id" => file.id, "url" => "http://shares.localhost/#{answered.fetch('code')}")
+      expect(answered).to include("id" => file.id, "url" => share_link(file.id))
     end
   end
 end

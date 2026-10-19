@@ -59,7 +59,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     Bluesky::Tid.for(part.id, part.created_at)
   end
 
-  def short_code(url) = Shares::Slice["repos.short_link_queries"].by_destination(url).code
+  def short_link(url) = Shares::Slice["repos.short_link_queries"].by_destination(url)
 
   def statuses = SocialNetworks::MASTODON_STATUSES
 
@@ -1341,10 +1341,10 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "swaps a link to another site for its aa.cool link and keeps the site's long", :aggregate_failures do
       text = mastodon_text(queued(parts: ["see https://github.com/ada and #{post_url}"]))
-      code = short_code("https://github.com/ada")
+      link = short_link("https://github.com/ada")
 
-      expect(code).to match(/\A[a-z2-9]{8}\z/)
-      expect(text).to eq("see http://shares.localhost/#{code} and #{post_url}?ref=mastodon")
+      expect(link.code).to match(/\A[a-z2-9]{8}\z/)
+      expect(text).to eq("see http://shares.localhost/#{link.short} and #{post_url}?ref=mastodon")
     end
 
     it "leaves the new link's title to a job, so the page cannot hold up delivery", :aggregate_failures, :commits do
@@ -1361,7 +1361,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     it "reuses the code of a link I shortened before", :aggregate_failures do
       Shares::Slice["operations.create_short_link"].call(destination: "https://github.com/ada", code: "github-ada")
 
-      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/github-ada")
+      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/g")
       expect(Shares::Slice["relations.short_links"].count).to eq(1)
     end
 
@@ -1383,9 +1383,9 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "marks the aa.cool link with a Bluesky facet" do
       facets = facets_for("see https://github.com/ada")
-      code = short_code("https://github.com/ada")
+      short = short_link("https://github.com/ada").short
 
-      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 36)])
+      expect(facets).to eq([facet("http://shares.localhost/#{short}", 4, 29)])
     end
 
     {

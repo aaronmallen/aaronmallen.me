@@ -19,7 +19,7 @@ RSpec.describe "Admin files", type: :feature do
   end
 
   def link(name)
-    "http://shares.localhost/#{Shares::Slice['relations.shares'].with_code.where(filename: name).one[:code]}"
+    "http://shares.localhost/#{Shares::Slice['relations.shares'].with_code.where(filename: name).one[:short]}"
   end
 
   def watch_clipboard_items

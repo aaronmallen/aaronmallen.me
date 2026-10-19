@@ -40,7 +40,7 @@ module Admin
 
         def add(id, files)
           case add_share_group_files.call(id, files)
-            in Success(group) then [[Helpers::ShareLink.for(group.code)], nil, ADDED, files.size]
+            in Success(group) then [[Helpers::ShareLink.for(group.short)], nil, ADDED, files.size]
             in Failure(:not_found) then halt :not_found
             in Failure[reason, *] then [[], reason, TOASTS.fetch(reason), 0]
           end
@@ -68,7 +68,7 @@ module Admin
           links = []
           files.each do |file|
             case upload_share.call(file)
-              in Success(share) then links << Helpers::ShareLink.for(share.code)
+              in Success(share) then links << Helpers::ShareLink.for(share.short)
               in Failure[reason, *] then return [links, reason, TOASTS.fetch(reason), links.size]
             end
           end
@@ -77,7 +77,7 @@ module Admin
 
         def upload_group(files)
           case upload_share_group.call(files)
-            in Success(group) then [[Helpers::ShareLink.for(group.code)], nil, GROUPED, files.size]
+            in Success(group) then [[Helpers::ShareLink.for(group.short)], nil, GROUPED, files.size]
             in Failure[reason, *] then [[], reason, TOASTS.fetch(reason), 0]
           end
         end

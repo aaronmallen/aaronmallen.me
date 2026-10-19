@@ -28,7 +28,7 @@ module Blog
     SUGGESTION_TEXT_MAX = 1000
     TOUCH_EVERY = 5 * 60
     UNCHECKED = "0"
-    UNMADE_SHORT_CODE = "x" * 5
+    UNMADE_SHORT_CODE = "x" * 8
     WRITING_PATH = "/writing"
   end
 end

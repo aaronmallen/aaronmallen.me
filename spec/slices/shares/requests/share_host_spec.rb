@@ -66,6 +66,8 @@ RSpec.describe "The share host", type: :request do
 
     def short_codes = Shares::Slice["relations.short_codes"]
 
+    def shorts(shown = files) = shown.map { Shares::Slice["repos.share_queries"].find(it.id).short }
+
     before { recode("abcdefgh", "abcefghj", "abcfghjk") }
 
     it "opens the oldest code that starts with it" do
@@ -87,6 +89,23 @@ RSpec.describe "The share host", type: :request do
       short_codes.by_pk(files.first.short_code_id).delete
 
       expect(opened("/abc")).to eq("secondfile")
+    end
+
+    it "shows each record at the shortest path that opens it", :aggregate_failures do
+      expect(shorts).to eq(%w[a abce abcf])
+      expect(shorts.map { opened("/#{it}") }).to eq(%w[first-file secondfile third-file])
+    end
+
+    it "shows a whole code when an older code starts with it" do
+      recode("abcdefghjk", "abcdefgh")
+
+      expect(shorts).to eq(%w[a abcdefgh abcf])
+    end
+
+    it "shows a shorter path once an older code is deleted" do
+      short_codes.by_pk(files.first.short_code_id).delete
+
+      expect(shorts(files.drop(1))).to eq(%w[a abcf])
     end
   end
 

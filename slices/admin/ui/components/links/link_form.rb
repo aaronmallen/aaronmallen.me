@@ -81,7 +81,7 @@ module Admin
 
           def scope = self.class.scope(@link)
 
-          def short = Helpers::ShareLink.for(@link.code)
+          def short = Helpers::ShareLink.for(@link.short)
 
           def values = @values || { destination: @link.destination, code: @link.code, title: @link.title.to_s }
         end

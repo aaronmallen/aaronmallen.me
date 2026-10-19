@@ -1,8 +1,8 @@
 "hello": {mastodon: 5, bluesky: 5, linkedin: 5}
 "Read https://aaronmallen.me/writing/hello and tell me": {mastodon: 40, bluesky: 65, linkedin: 66}
-"see (https://example.com/a(b))": {mastodon: 29, bluesky: 35, linkedin: 35}
-"see (https://x.y/z))": {mastodon: 30, bluesky: 36, linkedin: 36}
-"see [https://x.y/z]": {mastodon: 29, bluesky: 35, linkedin: 35}
+"see (https://example.com/a(b))": {mastodon: 29, bluesky: 38, linkedin: 38}
+"see (https://x.y/z))": {mastodon: 30, bluesky: 39, linkedin: 39}
+"see [https://x.y/z]": {mastodon: 29, bluesky: 38, linkedin: 38}
 "write me@https://x.y/z": {mastodon: 22, bluesky: 22, linkedin: 22}
 "https://aaronmallen.me": {mastodon: 23, bluesky: 35, linkedin: 36}
 "https://aaronmallen.me/a?b=c#d": {mastodon: 23, bluesky: 42, linkedin: 43}
