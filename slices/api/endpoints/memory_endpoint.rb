@@ -9,7 +9,16 @@ module API
       UNREVERTIBLE = "only an add, an edit or a remove can be reverted"
       REFUSALS = { removed: { fact_id: [REMOVED] }, unrevertible: { event_id: [UNREVERTIBLE] } }.freeze
 
+      include Deps[record_loads: "agents.operations.record_loads"]
+
       private
+
+      def read_by(session_id, memory_file_ids)
+        case record_loads.call(session_id, memory_file_ids)
+          in Success then Success(yield)
+          in Failure[:invalid, errors] then rejected(errors, Memory::COMPLAINTS)
+        end
+      end
 
       def settled(result, id, missing: Helpers::Wording.missing("memory file", id))
         case result

@@ -12,7 +12,8 @@ module Agents
       def finish(id, at) = agent_sessions.by_pk(id).update(ended_at: at, last_seen_at: at)
 
       def record_loads(id, memory_file_ids)
-        agent_session_loads.multi_insert(memory_file_ids.map { { agent_session_id: id, memory_file_id: it } })
+        rows = memory_file_ids.map { { agent_session_id: id, memory_file_id: it } }
+        agent_session_loads.dataset.insert_conflict.multi_insert(rows) unless rows.empty?
       end
 
       def start(task_ids:, **fields)

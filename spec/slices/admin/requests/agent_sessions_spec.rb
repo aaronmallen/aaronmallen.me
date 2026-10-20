@@ -54,7 +54,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
 
     it "names the brand, repo, branch and counts on a row" do
       expect(page.find("#agent-session-#{running} .li-sub").text)
-        .to include("Anthropic claude-opus-5-5", "blog @ index", "0 memory files loaded", "2 memory changes",
+        .to include("Anthropic claude-opus-5-5", "blog @ index", "0 memory files read", "2 memory changes",
                     "1 artifact")
     end
 
@@ -76,7 +76,8 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     let(:session_id) { start("Index the activities table", task_ids: [task.id], client: "Claude Code 2.4") }
 
     before do
-      agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
+      preferences = agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
+      agents(:record_loads, session_id, [preferences.id])
       work(session_id)
       get "/admin/agents/sessions", { session: session_id }
     end
@@ -93,8 +94,8 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(field("Worked on")).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
     end
 
-    it "lists the memory it loaded" do
-      expect(field("Memory it loaded")).to have_css(".record-link-title", exact_text: "preferences.md")
+    it "lists the memory it read and leaves out what it only wrote" do
+      expect(field("Memory it read").all(".record-link-title").map(&:text)).to eq(["preferences.md"])
     end
 
     it "lists the memory it changed with the fact's text", :aggregate_failures do

@@ -21,9 +21,7 @@ module Agents
 
       def start(at:, task_ids:, **fields)
         id = agent_session_mutations.start(**fields, task_ids:, started_at: at, last_seen_at: at)
-        files = load_memory.call(repo: fields[:repo], task_ids:)
-        agent_session_mutations.record_loads(id, files.map(&:id))
-        [id, files]
+        [id, load_memory.call(repo: fields[:repo], task_ids:)]
       end
     end
   end

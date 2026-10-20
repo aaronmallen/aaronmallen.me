@@ -49,12 +49,60 @@ RSpec.describe "MCP session tools", type: :request do
       expect(mcp_message).to eq("repo: name the repository as owner/name")
     end
 
-    it "lists the session with its tasks and the files it loaded" do
+    it "lists the session with its tasks and no files loaded" do
       id = started.fetch("session_id")
-      loaded = %w[hanami.md preferences.md release.md task-notes.md].map { include("path" => it) }
 
       expect(sessions.first)
-        .to include("id" => id, "branch" => "activities-index", "task_ids" => [task.id], "loaded" => loaded)
+        .to include("id" => id, "branch" => "activities-index", "task_ids" => [task.id], "loaded" => [])
+    end
+  end
+
+  describe "reads that name a session" do
+    let(:session_id) { start.fetch("session_id") }
+    let(:hanami) { create_file("hanami").fetch("id") }
+    let(:release) { create_file("release").fetch("id") }
+
+    def loaded = sessions.first.fetch("loaded").map { it.fetch("path") }
+
+    before do
+      { hanami => "Mind the cache", release => "Cache the build", create_file("other").fetch("id") => "Tag it" }
+        .each { |id, text| mcp_answer("add_memory_fact", id:, type: "gotcha", text:, **author) }
+    end
+
+    it "records the file read_memory_file reads, once however often" do
+      2.times { mcp_answer("read_memory_file", id: hanami, session_id:) }
+
+      expect(loaded).to eq(["hanami.md"])
+    end
+
+    it "records each file search_memory hits" do
+      mcp_answer("search_memory", query: "cache", session_id:)
+
+      expect(loaded).to eq(%w[hanami.md release.md])
+    end
+
+    it "records nothing for a read or a search without one" do
+      session_id
+      mcp_answer("read_memory_file", id: hanami)
+      mcp_answer("search_memory", query: "cache")
+
+      expect(loaded).to eq([])
+    end
+
+    it "moves the session's last-seen time" do
+      session_id
+      allow(Time).to receive(:now).and_return(Time.now + 600)
+      mcp_answer("read_memory_file", id: hanami, session_id:)
+
+      expect(Time.iso8601(sessions.first.fetch("last_seen_at"))).to be_within(5).of(Time.now)
+    end
+
+    it "refuses a read or a search into a session that ended", :aggregate_failures do
+      mcp_answer("end_session", id: session_id)
+
+      expect(mcp_text("read_memory_file", id: hanami, session_id:)).to include("that session is not open")
+      expect(mcp_text("search_memory", query: "cache", session_id:)).to include("that session is not open")
+      expect(loaded).to eq([])
     end
   end
 

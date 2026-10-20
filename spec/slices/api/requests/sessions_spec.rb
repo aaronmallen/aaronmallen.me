@@ -8,6 +8,15 @@ RSpec.describe "API sessions", type: :request do
       .fetch("session_id")
   end
 
+  def loaded = call_api(:get, "/agent_sessions").fetch("sessions").first.fetch("loaded")
+
+  def noted_file
+    id = call_api(:post, "/memory_files",
+                  { path: "hanami", description: "Notes", scope: "global", **author }).fetch("id")
+    call_api(:post, "/memory_files/#{id}/facts", { type: "gotcha", text: "Mind the cache", **author })
+    id
+  end
+
   def walked(file)
     {
       "task_ids" => [task.id], "memory_changes" => [include("memory_file_id" => file, "op" => "create")],
@@ -22,6 +31,14 @@ RSpec.describe "API sessions", type: :request do
     call_api(:post, "/agent_sessions/#{session_id}/end")
 
     expect(call_api(:get, "/agent_sessions").fetch("sessions").first).to include(walked(file))
+  end
+
+  it "records the files a session reads and searches" do
+    file = noted_file
+    call_api(:get, "/memory_files/#{file}", { session_id: })
+    call_api(:get, "/memory/search", { query: "cache", session_id: })
+
+    expect(loaded).to eq([{ "memory_file_id" => file, "path" => "hanami.md" }])
   end
 
   it "refuses to end a session twice" do

@@ -2,7 +2,7 @@
 
 module API
   module Endpoints
-    class SearchMemory < Endpoint
+    class SearchMemory < MemoryEndpoint
       SCHEMA = {
         additionalProperties: false,
         properties: {
@@ -12,6 +12,7 @@ module API
           project_id: Memory::ID.merge(description: "only the global files and the project's"),
           task_id: Helpers::Schema::TASK.merge(description: "only the global files and the task's"),
           page: Helpers::Paging::PAGE,
+          session_id: Memory::LOADS,
         },
         required: %w[query],
       }.freeze
@@ -27,7 +28,7 @@ module API
 
       include Deps[search_memory: "agents.operations.search_memory"]
 
-      def handle(query:, repo: nil, page: 1, **where)
+      def handle(query:, repo: nil, page: 1, session_id: nil, **where)
         text = Blog::Types::OptionalText[query]
         return rejected(BLANK, COMPLAINTS) if text.nil?
 
@@ -35,9 +36,15 @@ module API
         repo &&= Blog::Types::Normalized::Repo.call(repo) { return rejected(MALFORMED, COMPLAINTS) }
 
         found = search_memory.call(page_of(page), text:, repo:, **where)
+        read_by(session_id, found.rows.map(&:memory_file_id)) { hits(found) }
+      end
+
+      private
+
+      def hits(found)
         facts = serialized(Serializers::MemoryFactHit, found.rows)
 
-        Success(count: facts.length, facts:, **Helpers::Paging.fields(found))
+        { count: facts.length, facts:, **Helpers::Paging.fields(found) }
       end
     end
   end

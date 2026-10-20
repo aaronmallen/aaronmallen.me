@@ -662,7 +662,7 @@ en:
         session_drawer:
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
-          loaded: "Memory it loaded"
+          loaded: "Memory it read"
           none: "Nothing."
           ops:
             add: "added to %{path}"
@@ -688,8 +688,8 @@ en:
             one: "%{count} memory change"
             other: "%{count} memory changes"
           loaded:
-            one: "%{count} memory file loaded"
-            other: "%{count} memory files loaded"
+            one: "%{count} memory file read"
+            other: "%{count} memory files read"
           now: "now"
           running: "running"
           span: "%{from}–%{to}"

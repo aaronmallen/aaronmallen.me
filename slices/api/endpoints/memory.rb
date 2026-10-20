@@ -20,6 +20,9 @@ module API
       FACT_TYPE = { type: "string", enum: Blog::Types::MemoryFactType.values }.freeze
       FACT_TEXT = { type: "string", description: "the fact" }.freeze
       ID = Helpers::Schema::ID
+      LOADS = Helpers::Schema::ID.merge(
+        description: "the open session start_session gave, to record the files read against it; leave it out for none",
+      ).freeze
       LOADED = {
         files: Helpers::Schema.list(Serializers::LoadedMemoryFile.reference).merge(
           description: "an index of the files in scope without their facts: global, then repo, project and task",
