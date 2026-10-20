@@ -126,6 +126,88 @@ RSpec.describe "MCP memory tools", type: :request do
     end
   end
 
+  describe "search_memory" do
+    let(:project) { create(:project, repo: "aaronmallen/blog") }
+    let(:task) { create(:task) }
+    let(:hanami) { create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id") }
+    let(:preferences) { create_file("preferences").fetch("id") }
+
+    def found(**) = mcp_answer("search_memory", **).fetch("facts")
+
+    def texts(**) = trusted(found(**)).map { it.fetch("text") }
+
+    before do
+      add_fact(create_file("task-notes", scope: "task", task_id: task.id).fetch("id"), "Mind the cache index")
+      add_fact(create_file("release", scope: "project", project_id: project.id).fetch("id"), "Cache the tag")
+      add_fact(hanami, "Slices cache their tables")
+      add_fact(preferences, "No emdash in the cache docs", type: "preference")
+      add_fact(create_file("elsewhere", scope: "repo", repo: "aaronmallen/other").fetch("id"), "Cache nothing")
+    end
+
+    it "returns each live fact that holds the query with its file's ID and path" do
+      fact = add_fact(hanami, "Bust the CACHE on deploy").fetch("id")
+
+      expect(found(query: "bust the cache").map { it.values_at("id", "memory_file_id", "path") })
+        .to eq([[fact, hanami, "hanami.md"]])
+    end
+
+    it "marks the text an agent wrote untrusted and leaves the owner's alone" do
+      Agents::Slice["operations.add_memory_fact"].call(preferences, { type: "preference", text: "Owner cache rule" })
+
+      expect(found(query: "cache rule").map { it.fetch("text") }).to eq(["Owner cache rule"])
+    end
+
+    it "never matches a removed fact" do
+      fact = add_fact(hanami, "Purge the cache").fetch("id")
+      mcp_answer("remove_memory_fact", id: hanami, fact_id: fact, **author)
+
+      expect(found(query: "purge")).to be_empty
+    end
+
+    it "searches every file when given no filter" do
+      expect(texts(query: "cache")).to contain_exactly(
+        "Mind the cache index", "Cache the tag", "Slices cache their tables", "No emdash in the cache docs",
+        "Cache nothing",
+      )
+    end
+
+    it "searches the files read_memory loads for a repo" do
+      expect(texts(query: "cache", repo: "AaronMallen/Blog"))
+        .to contain_exactly("Cache the tag", "Slices cache their tables", "No emdash in the cache docs")
+    end
+
+    it "searches the files read_memory loads for a project" do
+      expect(texts(query: "cache", project_id: project.id))
+        .to contain_exactly("Cache the tag", "No emdash in the cache docs")
+    end
+
+    it "searches the files read_memory loads for a task" do
+      expect(texts(query: "cache", task_id: task.id))
+        .to contain_exactly("Mind the cache index", "No emdash in the cache docs")
+    end
+
+    it "keeps one scope" do
+      expect(texts(query: "cache", scope: "repo", repo: "aaronmallen/blog")).to eq(["Slices cache their tables"])
+    end
+
+    it "pages the facts" do
+      lower_page_size(:mcp, to: 2)
+      first = mcp_answer("search_memory", query: "cache")
+
+      expect([first.values_at("count", "partial", "next_page"), found(query: "cache", page: 3).length])
+        .to eq([[2, true, 2], 1])
+    end
+
+    it "refuses a blank query" do
+      expect(mcp_text("search_memory", query: " ")).to eq("query: write the words to find")
+    end
+
+    it "refuses a repo that is not owner/name" do
+      expect(mcp_text("search_memory", query: "cache", repo: "aaronmallen"))
+        .to eq("repo: name the repository as owner/name")
+    end
+  end
+
   describe "reverting" do
     let(:file) { create_file.fetch("id") }
     let(:fact) { add_fact(file, "Use jj").fetch("id") }

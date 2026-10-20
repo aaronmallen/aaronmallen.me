@@ -141,6 +141,25 @@ RSpec.describe "API memory", type: :request do
       .to eq([403, "this endpoint needs a token with the delete scope"])
   end
 
+  it "searches the text of live facts" do
+    fact
+
+    expect(call_api(:get, "/memory/search", { query: "cache" }).fetch("facts").map { it.values_at("id", "path") })
+      .to eq([[fact, "hanami.md"]])
+  end
+
+  it "refuses a memory search to a token without agents" do
+    call_api(:get, "/memory/search", { query: "cache" }, token: api_token(%w[read write delete]))
+
+    expect(last_response.status).to eq(403)
+  end
+
+  it "keeps memory out of the global search" do
+    fact
+
+    expect(call_api(:get, "/search", { query: "cache" }).fetch("results")).to be_empty
+  end
+
   it "refuses memory to a token without agents" do
     call_api(:get, "/memory", nil, token: api_token(%w[read write delete]))
 

@@ -2411,6 +2411,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "schedule_task" => { id: 1, sprint_on: "" },
         "search" => { query: "zeppelin" },
         "search_accounts" => { network: "bluesky", query: "ada" },
+        "search_memory" => { query: "cache" },
         "send_social_post" => { id: 1 },
         "set_task_total" => { id: 1, hours: 2 },
         "snooze_attention" => { kind: "journal" },

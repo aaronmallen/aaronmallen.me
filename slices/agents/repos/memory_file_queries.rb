@@ -37,6 +37,14 @@ module Agents
 
       def scope_counts = memory_files.tally(:scope, Blog::Types::MemoryScope.values)
 
+      def searched(page, text:, scope: nil, within: nil)
+        files = within ? memory_files.loading(**within) : memory_files
+        files = files.where(scope:) if scope
+        facts = memory_facts.combine(:memory_file).where(memory_file_id: files.pluck(:id))
+
+        page.fill(facts.live_in_order.containing(text, :text).paged(page).to_a)
+      end
+
       private
 
       def holding(query) = memory_facts.live_in_order.containing(query, :text).pluck(:memory_file_id).uniq

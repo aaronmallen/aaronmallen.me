@@ -92,6 +92,7 @@ module API
       ["delete_artifact", "delete", "/artifacts/{id}", OK, [AGENTS, DELETE]],
       ["restore_artifact_version", "post", "/artifacts/{id}/versions/{version}/restore", OK, AGENTS],
       ["read_memory", "get", "/memory", OK, AGENTS],
+      ["search_memory", "get", "/memory/search", OK, AGENTS],
       ["list_sessions", "get", "/agent_sessions", OK, AGENTS],
       ["start_session", "post", "/agent_sessions", CREATED, AGENTS],
       ["end_session", "post", "/agent_sessions/{id}/end", OK, AGENTS],
