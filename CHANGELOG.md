@@ -5,6 +5,12 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.28] - 2026-10-20
+
+### Changed
+
+- Every memory file has a description, and a memory file can no longer exist without one.
+
 ## [26.10.27] - 2026-10-20
 
 ### Added
@@ -1516,7 +1522,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...HEAD
+[26.10.28]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...26.10.28
 [26.10.27]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...26.10.27
 [26.10.26]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...26.10.26
 [26.10.25]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...26.10.25
