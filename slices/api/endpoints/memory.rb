@@ -20,13 +20,9 @@ module API
       FACT_TYPE = { type: "string", enum: Blog::Types::MemoryFactType.values }.freeze
       FACT_TEXT = { type: "string", description: "the fact" }.freeze
       ID = Helpers::Schema::ID
-      MARKDOWN =
-        "the files as an agent loads them, each headed by file <id> and each fact led by [fact <id>]; marked " \
-        "untrusted when an agent wrote any of the facts"
       LOADED = {
-        markdown: { type: "string", description: MARKDOWN },
         files: Helpers::Schema.list(Serializers::LoadedMemoryFile.reference).merge(
-          description: "the files that loaded, without their facts: global, then repo, project and task",
+          description: "an index of the files in scope without their facts: global, then repo, project and task",
         ),
       }.freeze
       SCOPED = "only a %s file takes %s"
@@ -81,14 +77,7 @@ module API
 
       module_function
 
-      def loaded(files)
-        markdown = files.map(&:markdown).join("\n")
-
-        {
-          markdown: files.any?(&:agent_written?) ? Helpers::Untrusted.call(markdown) : markdown,
-          files: Serializers::LoadedMemoryFile.new(files).serializable_hash,
-        }
-      end
+      def loaded(files) = { files: Serializers::LoadedMemoryFile.new(files).serializable_hash }
 
       def missing_event(id, event_id) = "memory file #{id} has no history entry with the ID #{event_id}"
 

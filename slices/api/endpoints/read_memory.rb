@@ -6,9 +6,9 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          repo: Helpers::Schema::REPO.merge(description: "load the repo's files and those of its projects"),
-          project_id: Memory::ID.merge(description: "load the project's files"),
-          task_id: Helpers::Schema::TASK.merge(description: "load the task's files"),
+          repo: Helpers::Schema::REPO.merge(description: "list the repo's files and those of its projects"),
+          project_id: Memory::ID.merge(description: "list the project's files"),
+          task_id: Helpers::Schema::TASK.merge(description: "list the task's files"),
         },
       }.freeze
 

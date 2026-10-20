@@ -91,21 +91,19 @@ RSpec.describe "MCP memory tools", type: :request do
       )
     end
 
-    it "returns the memory as markdown, marked untrusted" do
-      markdown = mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("markdown")
-      fact = mcp_answer("read_memory_file", id: preferences).fetch("facts").first.fetch("id")
+    it "indexes each file by its ID, scope, path, description and fact count, with no facts" do
+      Agents::Slice["operations.describe_memory_file"].call(hanami, { description: "Ours" })
+      index = mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("files").first(2)
+      indexed = [preferences, "global", "preferences.md", marked("Notes"), 1], [hanami, "repo", "hanami.md", "Ours", 1]
 
-      expect(markdown).to include("untrusted" => true, "text" => start_with(<<~MARKDOWN))
-        <!-- file #{preferences} · global · 1 fact -->
+      expect(index.map { it.values_at("id", "scope", "path", "description", "fact_count") }).to eq(indexed)
+    end
 
-        # preferences
+    it "leaves removed facts out of the count" do
+      fact = add_fact(preferences, "Prefer Sequel").fetch("id")
+      mcp_answer("remove_memory_fact", id: preferences, fact_id: fact, **author)
 
-        ## Preferences
-
-        - [fact #{fact}] No emdash
-
-        <!-- file #{hanami} · repo aaronmallen/blog · 1 fact -->
-      MARKDOWN
+      expect(mcp_answer("read_memory").fetch("files").first.fetch("fact_count")).to eq(1)
     end
 
     it "loads a repo named in mixed case or with spaces around it as its lower case name" do
@@ -171,17 +169,17 @@ RSpec.describe "MCP memory tools", type: :request do
       )
     end
 
-    it "searches the files read_memory loads for a repo" do
+    it "searches the files read_memory lists for a repo" do
       expect(texts(query: "cache", repo: "AaronMallen/Blog"))
         .to contain_exactly("Cache the tag", "Slices cache their tables", "No emdash in the cache docs")
     end
 
-    it "searches the files read_memory loads for a project" do
+    it "searches the files read_memory lists for a project" do
       expect(texts(query: "cache", project_id: project.id))
         .to contain_exactly("Cache the tag", "No emdash in the cache docs")
     end
 
-    it "searches the files read_memory loads for a task" do
+    it "searches the files read_memory lists for a task" do
       expect(texts(query: "cache", task_id: task.id))
         .to contain_exactly("Mind the cache index", "No emdash in the cache docs")
     end

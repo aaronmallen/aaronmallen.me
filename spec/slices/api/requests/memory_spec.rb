@@ -14,15 +14,7 @@ RSpec.describe "API memory", type: :request do
     removed = call_api(:get, "/memory_files/#{file}").fetch("history").first.fetch("id")
     call_api(:post, "/memory_files/#{file}/history/#{removed}/revert", author)
 
-    expect(call_api(:get, "/memory").fetch("markdown")).to eq(<<~MARKDOWN)
-      <!-- file #{file} · global · 1 fact -->
-
-      # hanami
-
-      ## Gotchas
-
-      - [fact #{fact}] Mind the query cache
-    MARKDOWN
+    expect(call_api(:get, "/memory_files/#{file}").fetch("facts").map { it["text"] }).to eq(["Mind the query cache"])
   end
 
   it "adds and edits fact text of any length" do
@@ -32,12 +24,13 @@ RSpec.describe "API memory", type: :request do
     expect(call_api(:get, "/memory_files/#{file}").fetch("facts").map { it.fetch("text") }).to eq(["b" * 6000])
   end
 
-  it "lists the loaded files without their facts" do
+  it "returns an index of the files without their facts" do
     fact
+    indexed = { "id" => file, "path" => "hanami.md", "description" => "Notes", "scope" => "global", "repo" => nil }
 
-    loaded = { "id" => file, "path" => "hanami.md", "scope" => "global", "repo" => nil, "project_id" => nil }
-
-    expect(call_api(:get, "/memory").fetch("files")).to eq([loaded.merge("task_id" => nil)])
+    expect(call_api(:get, "/memory")).to eq(
+      "files" => [indexed.merge("project_id" => nil, "task_id" => nil, "fact_count" => 1)],
+    )
   end
 
   it "refuses to add a fact that names no agent" do
