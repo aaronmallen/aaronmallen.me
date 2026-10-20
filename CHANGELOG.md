@@ -5,6 +5,25 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.27] - 2026-10-20
+
+### Added
+
+- A `search_memory` MCP tool and `GET /api/v1/memory/search` find live memory facts by their text, filtered by repo,
+  project, task and scope. Each fact comes with its file's ID and path.
+- Memory files carry a one-line description. `create_memory_file`, its endpoint and the admin's new memory file form
+  require one, `describe_memory_file` and `POST /api/v1/memory_files/{id}/describe` set or change it, and the admin
+  memory file page shows it.
+
+### Changed
+
+- `start_session` and `read_memory` return an index of the memory files in scope, one entry per file with its ID,
+  path, scope, description and count of live facts, in place of every fact. Agents read a file with
+  `read_memory_file` and find facts with `search_memory`.
+- A session records the memory files its agent read. `read_memory_file` and `search_memory` take a `session_id` and
+  record the file read or each file a search hit. `start_session` records none, and the admin session drawer lists
+  them under "Memory it read".
+
 ## [26.10.26] - 2026-10-19
 
 ### Changed
@@ -1497,7 +1516,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...HEAD
+[26.10.27]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...26.10.27
 [26.10.26]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...26.10.26
 [26.10.25]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.24...26.10.25
 [26.10.24]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.23...26.10.24
