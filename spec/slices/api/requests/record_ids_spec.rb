@@ -12,6 +12,7 @@ RSpec.describe "API record IDs", type: :request do
       "add_task_comment" => { body: "A note" },
       "add_work_session" => { started_at: "2026-10-01T09:00", ended_at: "2026-10-01T10:00" },
       "drop_decision" => { reason: "Moot" },
+      "describe_memory_file" => { description: "Notes", **author },
       "edit_decision_comment" => { body: "A note" },
       "edit_memory_fact" => author,
       "edit_task_comment" => { body: "A note" },

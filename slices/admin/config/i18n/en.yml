@@ -598,6 +598,9 @@ en:
             preference: "preference"
           you: "you"
         memory_field_error:
+          description:
+            blank: "Describe the file in one line."
+            format: "Keep the description to one line."
           path:
             blank: "Name the file, such as testing.md."
             format: "Use letters, digits, _, ., / and - only."
@@ -645,6 +648,8 @@ en:
           working_in: "Working in"
         memory_new_form:
           create: "Create"
+          description: "Description"
+          description_hint: "How we test, and when to read it"
           new: "New memory file"
           path: "File"
           path_hint: "testing.md"

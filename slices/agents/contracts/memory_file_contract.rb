@@ -9,9 +9,11 @@ module Agents
       end
       PATH_FORMAT = %r{\A[\w./-]+\.md\z}
 
-      params(AUTHOR, SCOPE) do
+      params(AUTHOR, SCOPE, MemoryDescriptionContract::DESCRIPTION) do
         required(:path).filled(PATH, format?: PATH_FORMAT)
       end
+
+      rule(:description).validate(:without_controls, :visible)
     end
   end
 end

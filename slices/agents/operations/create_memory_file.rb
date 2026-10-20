@@ -30,7 +30,9 @@ module Agents
       private
 
       def create(fields)
-        file = memory_file_mutations.create(**fields.except(*AUTHOR))
+        file = memory_file_mutations.create(
+          **fields.except(*AUTHOR), description_agent: fields[:agent], description_model: fields[:model],
+        )
         memory_file_mutations.record(file.id, CREATE, **author(fields))
         file.id
       end

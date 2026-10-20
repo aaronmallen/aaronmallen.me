@@ -14,9 +14,11 @@ module Admin
           ]
 
           def handle(request, response)
-            values = Blog::Types::Fields[request.params[:memory_file]].slice(:path, :scope)
+            values = Blog::Types::Fields[request.params[:memory_file]].slice(:path, :description, :scope)
 
-            case create_memory_file.call({ path: values[:path], **Helpers::MemoryScope.fields(values[:scope]) })
+            fields = { **values.slice(:path, :description), **Helpers::MemoryScope.fields(values[:scope]) }
+
+            case create_memory_file.call(fields)
               in Success(file) then toast_back(response, CREATED, routes.path(:admin_memory_file, id: file.id))
               in Failure[:invalid, errors] then refuse(response, values, errors)
             end

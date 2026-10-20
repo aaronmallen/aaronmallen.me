@@ -48,7 +48,9 @@ module Admin
           def lede
             facts = t(".fact_count", count: @file.facts.size)
 
-            "#{facts}. #{t(Helpers::MemoryScope.loads_for(@file.scope, named: true), name: current.name.to_s)}."
+            loads = t(Helpers::MemoryScope.loads_for(@file.scope, named: true), name: current.name.to_s)
+
+            [@file.description, "#{facts}. #{loads}."].compact.join(" · ")
           end
 
           def linked

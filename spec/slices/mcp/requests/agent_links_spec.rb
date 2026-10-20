@@ -8,7 +8,9 @@ RSpec.describe "MCP agent record links", type: :request do
     mcp_answer("create_artifact", title:, type: "plan", body: "## Steps", **author)
   end
 
-  def create_file(path = "hanami", scope: "global", **) = mcp_answer("create_memory_file", path:, scope:, **author, **)
+  def create_file(path = "hanami", scope: "global", **)
+    mcp_answer("create_memory_file", path:, description: "Notes", scope:, **author, **)
+  end
 
   def link(kind, id, other_kind, other_id) = mcp_answer("link_records", kind:, id:, other_kind:, other_id:)
 

@@ -14,6 +14,9 @@ module API
           description: "the open session start_session gave, to record the change against it; leave it out for none",
         ),
       }.freeze
+      DESCRIPTION = {
+        type: "string", description: "one line on what the file covers and when to read it",
+      }.freeze
       FACT_TYPE = { type: "string", enum: Blog::Types::MemoryFactType.values }.freeze
       FACT_TEXT = { type: "string", description: "the fact" }.freeze
       ID = Helpers::Schema::ID
@@ -30,6 +33,7 @@ module API
 
       CONTRACTS = [
         ::Agents::Contracts::AuthorContract,
+        ::Agents::Contracts::MemoryDescriptionContract,
         ::Agents::Contracts::MemoryFactContract,
         ::Agents::Contracts::MemoryFileContract,
         ::Agents::Contracts::MemoryScopeContract,
@@ -44,6 +48,10 @@ module API
           Blog::Contract::FORMAT => "use a slug such as claude-opus-5-5",
           Blog::Contract::MISSING => "name the model along with its agent",
           "long" => "keep a model to #{Blog::Types::CONTRIBUTOR_SLUG_LIMIT} characters",
+        },
+        description: {
+          Blog::Contract::BLANK => "describe the file in one line",
+          Blog::Contract::FORMAT => "keep the description to one line",
         },
         path: {
           Blog::Contract::FORMAT => "use letters, digits, _, ., / and - only",

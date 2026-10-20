@@ -5,7 +5,9 @@ RSpec.describe "MCP memory tools", type: :request do
 
   def add_fact(file, text, type: "convention", **) = mcp_answer("add_memory_fact", id: file, type:, text:, **author, **)
 
-  def create_file(path = "hanami", scope: "global", **) = mcp_answer("create_memory_file", path:, scope:, **author, **)
+  def create_file(path = "hanami", scope: "global", description: "Notes", **)
+    mcp_answer("create_memory_file", path:, description:, scope:, **author, **)
+  end
 
   def history(file) = mcp_answer("read_memory_file", id: file).fetch("history")
 
@@ -206,14 +208,59 @@ RSpec.describe "MCP memory tools", type: :request do
   it "refuses a second file with one path in one scope" do
     create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
 
-    expect(mcp_text("create_memory_file", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog", **author))
-      .to eq("path: a file in this scope already has this path")
+    created = mcp_text(
+      "create_memory_file", path: "hanami.md", description: "Notes", scope: "repo", repo: "aaronmallen/blog", **author,
+    )
+
+    expect(created).to eq("path: a file in this scope already has this path")
   end
 
   it "keeps one path in two scopes" do
     create_file("hanami")
 
     expect(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("scope")).to eq("repo")
+  end
+
+  describe "descriptions" do
+    let(:file) { create_file(description: "How we test").fetch("id") }
+
+    def describe_file(text, **) = mcp_answer("describe_memory_file", id: file, description: text, **author, **)
+
+    it "refuses a file without one" do
+      expect(mcp_text("create_memory_file", path: "hanami", description: " ", scope: "global", **author))
+        .to eq("description: describe the file in one line")
+    end
+
+    it "refuses one over more than one line" do
+      expect(mcp_text("create_memory_file", path: "hanami", description: "One\nTwo", scope: "global", **author))
+        .to eq("description: keep the description to one line")
+    end
+
+    it "reads back the one an agent wrote marked untrusted" do
+      expect(mcp_answer("read_memory_file", id: file).fetch("description")).to eq(marked("How we test"))
+    end
+
+    it "changes it" do
+      describe_file("When to run which specs")
+
+      expect(mcp_answer("read_memory_file", id: file).fetch("description")).to eq(marked("When to run which specs"))
+    end
+
+    it "leaves the owner's unmarked" do
+      Agents::Slice["operations.describe_memory_file"].call(file, { description: "Owner notes" })
+
+      expect(mcp_answer("read_memory_file", id: file).fetch("description")).to eq("Owner notes")
+    end
+
+    it "refuses a blank change" do
+      expect(mcp_text("describe_memory_file", id: file, description: " ", **author))
+        .to eq("description: describe the file in one line")
+    end
+
+    it "refuses a file that does not exist" do
+      expect(mcp_text("describe_memory_file", id: 999_999, description: "Notes", **author))
+        .to eq("no memory file has the ID 999999")
+    end
   end
 
   describe "move_memory_file" do

@@ -3,7 +3,9 @@
 RSpec.describe "MCP session tools", type: :request do
   let(:author) { { agent: "claude-code", model: "claude-opus-5-5" } }
 
-  def create_file(path, scope: "global", **) = mcp_answer("create_memory_file", path:, scope:, **author, **)
+  def create_file(path, scope: "global", **)
+    mcp_answer("create_memory_file", path:, description: "Notes", scope:, **author, **)
+  end
 
   def mcp_scopes = %w[read agents]
 
@@ -129,7 +131,8 @@ RSpec.describe "MCP session tools", type: :request do
     let(:session_id) { start.fetch("session_id").tap { mcp_answer("end_session", id: it) } }
 
     {
-      "create_memory_file" => -> { { path: "other", scope: "global" } },
+      "create_memory_file" => -> { { path: "other", description: "Notes", scope: "global" } },
+      "describe_memory_file" => -> { { id: file, description: "When to read it" } },
       "move_memory_file" => -> { { id: file, scope: "repo", repo: "aaronmallen/blog" } },
       "add_memory_fact" => -> { { id: file, type: "gotcha", text: "Mind the queue" } },
       "edit_memory_fact" => -> { { id: file, fact_id: fact, text: "Mind the queue" } },

@@ -416,7 +416,8 @@ RSpec.describe "Admin screens", type: :feature do
   def seed_agent_session
     author = { agent: "claude-code", model: "claude-opus-5-5" }
     run = ->(name, *args) { Agents::Slice["operations.#{name}"].call(*args).value! }
-    global = run.call(:create_memory_file, { path: "preferences-for-every-session", scope: "global" })
+    global = run.call(:create_memory_file,
+                      { path: "preferences-for-every-session", description: "Notes", scope: "global" })
     id, = run.call(
       :start_session,
       { title: "Index the activities table for date-range search", **author, client: "Claude Code 2.4 on macOS",

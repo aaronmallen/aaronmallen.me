@@ -2,7 +2,8 @@
 
 RSpec.describe "API memory", type: :request do
   let(:author) { { agent: "claude-code", model: "claude-opus-5-5" } }
-  let(:file) { call_api(:post, "/memory_files", { path: "hanami", scope: "global", **author }).fetch("id") }
+  let(:fields) { { path: "hanami", description: "Notes", scope: "global" } }
+  let(:file) { call_api(:post, "/memory_files", { **fields, **author }).fetch("id") }
   let(:fact) do
     call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Mind the cache", **author }).fetch("id")
   end
@@ -76,26 +77,38 @@ RSpec.describe "API memory", type: :request do
     expect([last_response.status, document.fetch("errors")]).to eq([422, { "model" => ["model is missing"] }])
   end
 
+  it "sets a file's description" do
+    call_api(:post, "/memory_files/#{file}/describe", { description: "How we test", **author })
+
+    expect(call_api(:get, "/memory_files/#{file}").fetch("description")).to eq("How we test")
+  end
+
+  it "refuses a file without a description" do
+    call_api(:post, "/memory_files", { path: "hanami", scope: "global", **author })
+
+    expect(last_response.status).to eq(422)
+  end
+
   it "refuses a blank agent beside a model" do
-    call_api(:post, "/memory_files", { path: "hanami", scope: "global", agent: "", model: "claude-opus-5-5" })
+    call_api(:post, "/memory_files", { **fields, agent: "", model: "claude-opus-5-5" })
 
     expect(document.fetch("errors")).to eq("agent" => ["name the agent along with its model"])
   end
 
   it "refuses an agent over the slug limit" do
-    call_api(:post, "/memory_files", { path: "hanami", scope: "global", **author, agent: "a" * 65 })
+    call_api(:post, "/memory_files", { **fields, **author, agent: "a" * 65 })
 
     expect(document.fetch("errors")).to eq("agent" => ["keep an agent to 64 characters"])
   end
 
   it "refuses a repo file without a repo" do
-    call_api(:post, "/memory_files", { path: "hanami", scope: "repo", **author })
+    call_api(:post, "/memory_files", { path: "hanami", description: "Notes", scope: "repo", **author })
 
     expect(document.fetch("errors")).to eq("repo" => ["a repo file needs a repo"])
   end
 
   it "refuses a task file for a task that does not exist" do
-    call_api(:post, "/memory_files", { path: "notes", scope: "task", task_id: 999_999, **author })
+    call_api(:post, "/memory_files", { path: "notes", description: "Notes", scope: "task", task_id: 999_999, **author })
 
     expect([last_response.status,
             document.fetch("errors")]).to eq([422, { "task_id" => ["a task file needs a task that exists"] }])

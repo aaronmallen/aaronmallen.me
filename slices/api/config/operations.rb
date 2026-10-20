@@ -99,6 +99,7 @@ module API
       ["read_memory_file", "get", "/memory_files/{id}", OK, AGENTS],
       ["delete_memory_file", "delete", "/memory_files/{id}", OK, [AGENTS, DELETE]],
       ["move_memory_file", "post", "/memory_files/{id}/move", OK, AGENTS],
+      ["describe_memory_file", "post", "/memory_files/{id}/describe", OK, AGENTS],
       ["add_memory_fact", "post", "/memory_files/{id}/facts", CREATED, AGENTS],
       ["edit_memory_fact", "patch", "/memory_files/{id}/facts/{fact_id}", OK, AGENTS],
       ["remove_memory_fact", "post", "/memory_files/{id}/facts/{fact_id}/remove", OK, AGENTS],

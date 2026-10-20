@@ -17,7 +17,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
   end
 
   def work(session_id)
-    file = agents(:create_memory_file, { path: "hanami", scope: "global", **author, session_id: })
+    file = agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global", **author, session_id: })
     agents(:add_memory_fact, file.id, { type: "gotcha", text: "Run specs through mise", **author, session_id: })
     agents(
       :create_artifact,
@@ -76,7 +76,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     let(:session_id) { start("Index the activities table", task_ids: [task.id], client: "Claude Code 2.4") }
 
     before do
-      agents(:create_memory_file, { path: "preferences", scope: "global" })
+      agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
       work(session_id)
       get "/admin/agents/sessions", { session: session_id }
     end
@@ -127,7 +127,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     before do
       agents(:end_session, start("Yesterday's run", at: days_ago(1)), at: days_ago(1) + 60)
       work(start("Today's run"))
-      agents(:create_memory_file, { path: "owner-notes", scope: "global" })
+      agents(:create_memory_file, { path: "owner-notes", description: "Notes", scope: "global" })
       get "/admin"
     end
 

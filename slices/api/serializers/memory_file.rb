@@ -7,6 +7,10 @@ module API
         {
           id: Helpers::Schema::INTEGER,
           path: Helpers::Schema::STRING,
+          description: Helpers::Schema.nullable(
+            { type: "string",
+              description: "what it covers and when to read it; marked untrusted when an agent set it" },
+          ),
           scope: { type: "string", enum: Blog::Types::MemoryScope.values },
           repo: Helpers::Schema.nullable(Helpers::Schema::REPO.merge(description: "the repository of a repo file")),
           project_id: Helpers::Schema.nullable({ type: "integer", description: "the project of a project file" }),
@@ -19,6 +23,8 @@ module API
 
       schema_attributes
       stamps :created_at, :updated_at
+
+      def description(file) = file.description_by_agent? ? untrusted(file.description) : file.description
 
       def facts(file) = MemoryFact.new(file.facts).serializable_hash
     end

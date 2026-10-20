@@ -45,7 +45,8 @@ RSpec.describe "Admin live tables", type: :request do
   end
 
   def memory_file
-    @memory_file ||= Agents::Slice["operations.create_memory_file"].call({ path: "hanami", scope: "global" }).value!
+    fields = { path: "hanami", description: "Notes", scope: "global" }
+    @memory_file ||= Agents::Slice["operations.create_memory_file"].call(fields).value!
   end
 
   def short_link = Shares::Slice["operations.create_short_link"].call({ destination: "https://example.com" }).value!

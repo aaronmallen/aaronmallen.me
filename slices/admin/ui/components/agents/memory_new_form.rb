@@ -14,6 +14,7 @@ module Admin
               Button(summary: true, variant: :pri, icon: "fa-solid fa-plus") { t(".new") }
               Form(action: path(:admin_create_memory_file), class: "memory-new-form card") do
                 path_field
+                description_field
                 scope_field
                 Button(type: "submit", variant: :pri) { t(".create") }
               end
@@ -21,6 +22,13 @@ module Admin
           end
 
           private
+
+          def description_field
+            Field(label: t(".description"), name: :description, errors: @errors, error: MemoryFieldError) do |control|
+              hint = t(".description_hint")
+              Input(**control, name: "memory_file[description]", value: @values[:description], placeholder: hint)
+            end
+          end
 
           def path_field
             Field(label: t(".path"), name: :path, errors: @errors, error: MemoryFieldError) do |control|

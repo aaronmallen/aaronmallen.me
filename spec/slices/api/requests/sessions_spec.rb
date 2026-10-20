@@ -16,7 +16,8 @@ RSpec.describe "API sessions", type: :request do
   end
 
   it "walks a session from start to end and answers each as documented" do
-    file = call_api(:post, "/memory_files", { path: "hanami", scope: "global", session_id:, **author }).fetch("id")
+    file = call_api(:post, "/memory_files",
+                    { path: "hanami", description: "Notes", scope: "global", session_id:, **author }).fetch("id")
     call_api(:post, "/artifacts", { title: "Plan", type: "plan", body: "Steps", session_id:, **author })
     call_api(:post, "/agent_sessions/#{session_id}/end")
 
@@ -31,7 +32,8 @@ RSpec.describe "API sessions", type: :request do
   end
 
   it "refuses a write into a session that does not exist" do
-    call_api(:post, "/memory_files", { path: "hanami", scope: "global", session_id: 999, **author })
+    fields = { path: "hanami", description: "Notes", scope: "global" }
+    call_api(:post, "/memory_files", { **fields, session_id: 999, **author })
 
     expect(document.fetch("errors")).to eq({ "session_id" => ["that session is not open; start_session opens one"] })
   end

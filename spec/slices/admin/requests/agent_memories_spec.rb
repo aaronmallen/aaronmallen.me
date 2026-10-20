@@ -29,12 +29,12 @@ RSpec.describe "Admin agent memories", type: :request do
     let(:task) { create(:task, title: "Index the activities table", status: "in_progress") }
 
     before do
-      global = agents(:create_memory_file, { path: "preferences", scope: "global" })
+      global = agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
       agents(:add_memory_fact, global.id, { type: "gotcha", text: "Run specs through mise", **author })
-      agents(:create_memory_file, { path: "hanami", scope: "repo", repo: "aaronmallen/blog" })
-      agents(:create_memory_file, { path: "deploys", scope: "project", project_id: project.id })
-      agents(:create_memory_file, { path: "index", scope: "task", task_id: task.id })
-      agents(:create_memory_file, { path: "other", scope: "repo", repo: "aaronmallen/other" })
+      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" })
+      agents(:create_memory_file, { path: "deploys", description: "Notes", scope: "project", project_id: project.id })
+      agents(:create_memory_file, { path: "index", description: "Notes", scope: "task", task_id: task.id })
+      agents(:create_memory_file, { path: "other", description: "Notes", scope: "repo", repo: "aaronmallen/other" })
     end
 
     def titles = page.all(".card-title").map(&:text)
@@ -128,39 +128,53 @@ RSpec.describe "Admin agent memories", type: :request do
 
   describe "a new file" do
     it "creates it as the owner and opens it", :aggregate_failures do
-      admin_post("/admin/agents/memories", memory_file: { path: "testing", scope: "repo:aaronmallen/blog" })
+      admin_post("/admin/agents/memories", memory_file: { path: "testing", description: "Tests", scope: "global" })
       file = Agents::Slice["repos.memory_file_queries"].listed.last
 
-      expect(file).to have_attributes(path: "testing.md", scope: "repo", repo: "aaronmallen/blog")
+      expect(file).to have_attributes(path: "testing.md", description: "Tests", description_agent: nil)
       expect(last_response.location).to end_with(file_path(file))
       expect(events(file).map { [it[:op], it[:agent]] }).to eq([["create", nil]])
     end
 
     it "refuses a bad path and keeps the form open", :aggregate_failures do
-      admin_post("/admin/agents/memories", memory_file: { path: "bad path!", scope: "global" })
+      admin_post("/admin/agents/memories", memory_file: { path: "bad path!", description: "Notes", scope: "global" })
 
       expect(last_response.status).to eq(422)
       expect(page).to have_css("details.memory-new[open] .field-error", text: "Use letters, digits")
     end
 
+    it "refuses a blank description and keeps the form open" do
+      admin_post("/admin/agents/memories", memory_file: { path: "testing", description: " ", scope: "global" })
+
+      expect(page).to have_css(
+        "details.memory-new[open] .field-error", text: t("ui.components.agents.memory_field_error.description.blank"),
+      )
+    end
+
     it "refuses a path the scope already holds" do
-      agents(:create_memory_file, { path: "testing", scope: "global" })
-      admin_post("/admin/agents/memories", memory_file: { path: "testing", scope: "global" })
+      agents(:create_memory_file, { path: "testing", description: "Notes", scope: "global" })
+      admin_post("/admin/agents/memories", memory_file: { path: "testing", description: "Notes", scope: "global" })
 
       expect(page).to have_css(".field-error", text: t("ui.components.agents.memory_field_error.path.taken"))
     end
 
     it "refuses a task that is gone" do
       gone = "task:#{Blog::Constants::INTEGER_MAX}"
-      admin_post("/admin/agents/memories", memory_file: { path: "testing", scope: gone })
+      admin_post("/admin/agents/memories", memory_file: { path: "testing", description: "Notes", scope: gone })
 
       expect(page).to have_css("#memory-scope-error", text: "That record is gone")
     end
   end
 
   describe "a file" do
-    let(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
+    let(:file) { agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global" }) }
     let(:fact) { agents(:add_memory_fact, file.id, { type: "gotcha", text: "Run specs through mise", **author }) }
+
+    it "shows its description" do
+      get file_path(file)
+
+      expect(page).to have_css(".page-head", text: "Notes")
+    end
 
     it "shows its facts under their type with who wrote them", :aggregate_failures do
       fact
@@ -178,7 +192,9 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "names what loads it in the lede" do
-      moved = agents(:create_memory_file, { path: "hanami", scope: "repo", repo: "aaronmallen/blog" })
+      moved = agents(
+        :create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" },
+      )
       get file_path(moved)
 
       expect(page).to have_text(t("memories_page.loads_for.named.repo", name: "aaronmallen/blog"))
@@ -332,7 +348,7 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "refuses a scope that already holds the path" do
-      agents(:create_memory_file, { path: "hanami", scope: "repo", repo: "aaronmallen/blog" })
+      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" })
       admin_post("#{file_path(file)}/scope", memory_file: { scope: "repo:aaronmallen/blog" })
 
       expect(page).to have_css("#memory-scope-error", text: t("ui.components.agents.memory_field_error.scope.taken"))
@@ -347,7 +363,7 @@ RSpec.describe "Admin agent memories", type: :request do
   end
 
   describe "its history" do
-    let(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
+    let(:file) { agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global" }) }
 
     def add(text) = agents(:add_memory_fact, file.id, { type: "gotcha", text:, **author })
 
@@ -403,7 +419,7 @@ RSpec.describe "Admin agent memories", type: :request do
   end
 
   describe "its records" do
-    let(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
+    let(:file) { agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global" }) }
     let(:task) { create(:task, title: "Index the activities table") }
 
     def link_task = admin_post("#{file_path(file)}/records", record: { other_kind: "task", other_id: task.id.to_s })
@@ -439,7 +455,7 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "draws the task its scope names without a remove button", :aggregate_failures do
-      scoped = agents(:create_memory_file, { path: "index", scope: "task", task_id: task.id })
+      scoped = agents(:create_memory_file, { path: "index", description: "Notes", scope: "task", task_id: task.id })
       get file_path(scoped)
 
       expect(section).to have_link("Index the activities table")
@@ -447,7 +463,7 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "keeps the task its scope names and comes back to the file", :aggregate_failures do
-      scoped = agents(:create_memory_file, { path: "index", scope: "task", task_id: task.id })
+      scoped = agents(:create_memory_file, { path: "index", description: "Notes", scope: "task", task_id: task.id })
       admin_post("/admin/records/memory_file/#{scoped.id}/links/task/#{task.id}/delete")
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with(file_path(scoped)))
@@ -457,7 +473,7 @@ RSpec.describe "Admin agent memories", type: :request do
   end
 
   describe "the links into it" do
-    let!(:file) { agents(:create_memory_file, { path: "hanami", scope: "global" }) }
+    let!(:file) { agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global" }) }
 
     it "links the Today card's Memory line" do
       get "/admin"
@@ -476,7 +492,7 @@ RSpec.describe "Admin agent memories", type: :request do
 
     it "links a memory file in a task's links" do
       task = create(:task)
-      linked = agents(:create_memory_file, { path: "index", scope: "task", task_id: task.id })
+      linked = agents(:create_memory_file, { path: "index", description: "Notes", scope: "task", task_id: task.id })
       get "/admin/tasks/#{task.id}"
 
       expect(page).to have_link("index.md", href: file_path(linked))
