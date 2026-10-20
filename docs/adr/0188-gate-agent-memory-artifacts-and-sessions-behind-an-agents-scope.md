@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [lib, db, api, mcp]
 issue: "#1741"
-amended: ["#1743", "#1749", "#1823"]
+amended: ["#1743", "#1749", "#1823", "#1860"]
 tags: [agents, oauth, scopes, consent, api-tokens, mcp, untrusted]
 ---
 
@@ -58,7 +58,9 @@ one `ALTER TYPE ... ADD VALUE`.
 A removal tool names two scopes. Since #1743 `ScopedServer` withholds a tool that lacks any scope it names, and its
 refusal names each one missing. The API asks a token for both the same way.
 
-Facts load at once and only the untrusted marker warns of them. I catch a bad fact through its history and revert
+Since #1860 a session starts with an index of memory files, and a fact reaches an agent when it reads the file
+with `read_memory_file` or matches a `search_memory` query ([ADR 0195][0195]). A bad fact still reaches every agent
+that reads its file, and only the untrusted marker warns of it. I catch a bad fact through its history and revert
 it.
 
 [0061]: 0061-narrow-a-requested-scope-to-known-names-and-withhold-every-tool-a-token-lacks.md
@@ -67,4 +69,5 @@ it.
 [0147]: 0147-gate-health-data-behind-a-health-scope-that-read-does-not-cover.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
+[0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

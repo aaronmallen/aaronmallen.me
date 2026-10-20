@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
-amended: ["#1747", "#1752", "#1750", "#1751"]
+amended: ["#1747", "#1752", "#1750", "#1751", "#1860"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -30,7 +30,10 @@ An agent opens a session with `start_session` and closes it with `end_session`.
   call both opens the run and hands the agent its memory. Since #1853 the markdown carries the IDs: each file's
   header comment names `file <id>`, and each fact's bullet starts with `[fact <id>]`. The reply's `files` lists
   each file's ID, path and scope without its facts, which `read_memory_file` gives whole, so the reply holds each
-  fact once.
+  fact once. Since #1860 it returns an index in place of that memory: one line per file in scope with its ID, scope,
+  path, description and fact count, and no facts ([ADR 0195][0195]). It records no loads.
+- **Loads are reads.** Since #1860 a session records the memory files the agent read. `read_memory_file` and
+  `search_memory` take an optional session id; a read records its file, and a search records each file it hit.
 - **Writes name the session.** Memory and artifact writes take an optional session id and record the change against
   it. A write without one belongs to no session. Each call that names a session moves its last-seen time. Since
   #1747 a write that names a session that ended or never existed is refused.
@@ -42,7 +45,8 @@ Sessions stay for good. Since #1752 the admin lists them by day under Agents, re
 one's tasks, the memory it loaded and changed and the artifacts it wrote. Today counts the day's sessions, the
 memory changes agents made and the artifacts they wrote. Since #1750 the drawer links each memory file to its page,
 and Today's memory line opens the memories screen. Since #1751 each artifact in the drawer opens the version the session
-wrote, and the card's Artifacts line opens the Artifacts screen.
+wrote, and the card's Artifacts line opens the Artifacts screen. Since #1860 the drawer lists only the memory
+files the session read.
 
 ## Alternatives
 
@@ -64,4 +68,5 @@ each session that named or loaded it.
 [0058]: 0058-serve-mcp-as-one-stateless-post-action.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0189]: 0189-name-an-agent-by-the-slugs-it-reports-on-each-write.md
+[0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

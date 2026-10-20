@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
-amended: ["#1745", "#1750", "#1790", "#1859"]
+amended: ["#1745", "#1750", "#1790", "#1859", "#1860"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 
@@ -31,7 +31,8 @@ read it through its exported read repos and operations and never write its table
 - **MCP tools forward to API endpoints** in the `api` slice, as every tool does ([ADR 0088][0088]).
 - **Memory files and artifacts join `record_links`** as the `memory_file` and `artifact` kinds
   ([ADR 0093][0093]), so they link to tasks, projects, commits and each other. They stay out of global search and
-  the activity feed.
+  the activity feed. Since #1860 agents find facts through `search_memory`, which reads only memory and sits under
+  the `agents` scope ([ADR 0195][0195]).
 - **Nothing is public.** No public page reads the slice.
 - **I fix memory in the admin.** Since #1750 the memories screens add, edit, remove and revert facts, move a file
   to another scope, link it to other records and delete it. Each change names me as its author. A move adds a
@@ -60,8 +61,9 @@ through foreign keys.
 
 With no pruning, history, versions and sessions grow for good.
 
-Since #1859 fact text has no cap, and `start_session` loads every fact in scope, so a long fact grows every
-agent prompt that loads it.
+Since #1859 fact text has no cap. Since #1860 `start_session` returns an index of the files in scope and no facts
+([ADR 0195][0195]), so a long fact grows only the replies of the agents that read its file or match it in a
+search.
 
 Leaving the slice out of search and the activity feed means I find a fact or an artifact only through the Agents
 screens, the MCP tools or a record link.
@@ -72,4 +74,5 @@ screens, the MCP tools or a record link.
 [0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
+[0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
