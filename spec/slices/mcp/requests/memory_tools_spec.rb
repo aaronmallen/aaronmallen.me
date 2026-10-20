@@ -390,16 +390,16 @@ RSpec.describe "MCP memory tools", type: :request do
     let(:files) { Agents::Slice["db.rom"].relations[:memory_files].dataset }
 
     it "refuses two files with one path in one scope" do
-      files.insert(path: "hanami.md", scope: "repo", repo: "aaronmallen/blog")
+      files.insert(description: "notes", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog")
 
-      expect { files.insert(path: "hanami.md", scope: "repo", repo: "aaronmallen/blog") }
+      expect { files.insert(description: "notes", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog") }
         .to raise_error(Sequel::UniqueConstraintViolation, /memory_files_scope_path_index/)
     end
 
     it "refuses two global files with one path" do
-      files.insert(path: "hanami.md", scope: "global")
+      files.insert(description: "notes", path: "hanami.md", scope: "global")
 
-      expect { files.insert(path: "hanami.md", scope: "global") }.to raise_error(Sequel::UniqueConstraintViolation)
+      expect { files.insert(description: "notes", path: "hanami.md", scope: "global") }.to raise_error(Sequel::UniqueConstraintViolation)
     end
   end
 end

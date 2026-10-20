@@ -3239,7 +3239,7 @@ CREATE TABLE public.memory_files (
     task_id integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    description public.non_blank_text,
+    description public.non_blank_text NOT NULL,
     description_agent public.contributor_slug,
     description_model public.contributor_slug,
     CONSTRAINT memory_files_description_author_check CHECK ((num_nonnulls(description_agent, description_model) = ANY (ARRAY[0, 2]))),
@@ -9593,4 +9593,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261018200001_renumber_tasks_with_no_project.rb'),
 ('20261019160000_pad_short_codes.rb'),
 ('20261019160001_drop_memory_fact_text_length_check.rb'),
-('20261020100000_add_description_to_memory_files.rb');
+('20261020100000_add_description_to_memory_files.rb'),
+('20261020210000_require_memory_file_description.rb');
