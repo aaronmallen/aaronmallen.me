@@ -881,6 +881,175 @@
   }
 }
 
+@utility board-views {
+  & .board-list {
+    @apply hidden;
+  }
+
+  &:not([data-view]) .board-switch {
+    @apply hidden;
+  }
+
+  @media (width <= 43.75rem) {
+    & .board {
+      @apply hidden;
+    }
+
+    & .board-list {
+      @apply flex;
+    }
+  }
+
+  &[data-view="board"] .board {
+    @apply grid;
+  }
+
+  &[data-view="board"] .board-list,
+  &[data-view="list"] .board {
+    @apply hidden;
+  }
+
+  &[data-view="list"] .board-list {
+    @apply flex;
+  }
+}
+
+@utility board-bar {
+  @apply mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5;
+}
+
+@utility board-switch {
+  @apply inline-flex gap-0.5 rounded-full border border-line bg-ground p-[3px];
+
+  & button {
+    @apply inline-flex min-h-[38px] cursor-pointer appearance-none items-center gap-2 rounded-full border-0 bg-transparent px-3.5;
+    @apply font-mono text-meta text-ink-muted hover:text-ink pub-focus;
+
+    &[aria-pressed="true"] {
+      @apply bg-ground-sunk text-ink;
+      box-shadow: 0 0 0 1px var(--color-line);
+    }
+  }
+
+  & i {
+    @apply text-icon-sm;
+  }
+
+  @media (width <= 43.75rem) {
+    & button {
+      @apply min-h-tap;
+    }
+  }
+}
+
+@utility board-list {
+  @apply flex-col gap-[clamp(10px,1vw,14px)];
+}
+
+@utility board-group {
+  --tone: var(--color-ink-muted);
+  @apply rounded-panel border border-line bg-ground-sunk px-3.5 py-1.5;
+
+  &.in-progress {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.done {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.canceled {
+    --tone: var(--color-mk-pink-text);
+  }
+
+  & > summary {
+    @apply flex min-h-tap cursor-pointer list-none items-center gap-2.25 px-1 font-mono text-ps font-medium tracking-[0.1em] text-ink uppercase;
+    @apply pub-focus;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+
+    & > i {
+      @apply text-icon-sm text-ink-muted transition-transform duration-150;
+    }
+  }
+
+  &[open] > summary > i {
+    @apply rotate-90;
+  }
+
+  & .n {
+    @apply tracking-normal text-ink-muted;
+  }
+
+  & .board-dot {
+    @apply size-2 flex-none rounded-full bg-(--tone);
+  }
+
+  &:is(.backlog, .ready) .board-dot {
+    @apply bg-transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-ink-muted);
+  }
+
+  & ul {
+    @apply m-0 mb-1 list-none border-t border-line p-0;
+  }
+
+  & li {
+    @apply m-0 border-b border-line last:border-b-0;
+  }
+
+  & .board-row {
+    @apply grid min-h-tap grid-cols-[5.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3.5 gap-y-1 px-1 py-3;
+    @apply text-ink no-underline hover:no-underline accent-focus;
+  }
+
+  & .board-row-num,
+  & .board-row-meta {
+    @apply font-mono text-ps text-ink-muted;
+  }
+
+  & .board-row-title {
+    @apply font-display text-base leading-[1.3] font-semibold tracking-[-0.01em];
+    text-wrap: pretty;
+  }
+
+  & .board-row-meta {
+    @apply justify-self-end;
+  }
+
+  &:is(.done, .canceled) .board-row-title {
+    @apply text-ink-muted;
+  }
+
+  &.canceled .board-row-title {
+    @apply line-through;
+  }
+
+  & .board-empty {
+    @apply m-0 mb-2.5 grid min-h-14 place-items-center rounded-field border border-dashed border-line font-mono text-ps text-ink-muted;
+  }
+
+  & .board-more {
+    @apply mb-2 block px-1 font-mono text-ps text-ink-muted hover:text-ink;
+  }
+
+  @media (width <= 43.75rem) {
+    & .board-row {
+      @apply grid-cols-[5.5rem_minmax(0,1fr)];
+    }
+
+    & .board-row-meta {
+      @apply col-start-2 justify-self-start;
+    }
+
+    & .board-more {
+      @apply flex min-h-tap items-center;
+    }
+  }
+}
+
 @utility task-page-facts {
   @apply mt-4.5 mb-0 grid grid-cols-[max-content_1fr] gap-x-5 gap-y-1.5 meta;
 

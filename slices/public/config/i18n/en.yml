@@ -7,6 +7,16 @@ en:
       title: "Writing tagged %{tag} | %{owner}"
   ui:
     components:
+      board_bar:
+        count: "%{open} open · %{total} total"
+        label: "View"
+        views:
+          board: "board"
+          list: "list"
+      board_task:
+        closed:
+          canceled: "canceled"
+          done: "done"
       contact_field_error:
         body:
           blank: "Write a message."
@@ -297,9 +307,6 @@ en:
       projects:
         show:
           back: "projects"
-          closed:
-            canceled: "canceled"
-            done: "done"
           columns:
             backlog: "backlog"
             canceled: "canceled"

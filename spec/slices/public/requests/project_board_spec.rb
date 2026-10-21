@@ -6,6 +6,8 @@ RSpec.describe "Project board", type: :request do
 
   def column(key) = page.find(".board-col.#{key}")
 
+  def group(key) = page.find(".board-group.#{key}")
+
   def link(task, project)
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
     Tasks::Slice["repos.task_queries"].by_id(task.id)
@@ -131,6 +133,61 @@ RSpec.describe "Project board", type: :request do
       expect(page).to have_no_text("secret note")
     end
 
+    it "counts the open and all tasks in the bar" do
+      [[], [:in_progress], [:done], [:canceled]].each { link(create(:task, *it), project) }
+      get "/projects/doing-it"
+
+      expect(page).to have_css(".board-bar > .meta", exact_text: "2 open · 4 total")
+    end
+
+    it "draws a view switch with both views unpressed", :aggregate_failures do
+      project
+      get "/projects/doing-it"
+
+      expect(page.all(".board-switch button[aria-pressed='false']").map(&:text)).to eq(%w[board list])
+      expect(page).to have_css(".board-switch[role='group'][aria-label='View']")
+    end
+
+    describe "the list" do
+      it "draws a group per column in order, each with a count" do
+        [[], [:in_progress], [:done], [:done], [:canceled]].each { link(create(:task, *it), project) }
+        link(create(:task, stage: "ready"), project)
+        get "/projects/doing-it"
+
+        expect(page.all(".board-group > summary").map(&:text)).to eq(heads)
+      end
+
+      it "opens every group but canceled" do
+        project
+        get "/projects/doing-it"
+
+        expect(page.all(".board-group").map { it[:open].nil? }).to eq([false, false, false, false, true])
+      end
+
+      it "marks an empty group" do
+        project
+        get "/projects/doing-it"
+
+        expect(group("backlog")).to have_css(".board-empty", exact_text: i18n.t("ui.views.projects.show.empty"))
+      end
+
+      it "links a row to its task page with its number and title", :aggregate_failures do
+        task = link(create(:task, title: "Ship it"), project)
+        get "/projects/doing-it"
+
+        row = group("backlog").find("a.board-row[href='/projects/doing-it/tasks/#{task.number}']")
+        expect(row.all("span").map(&:text)).to eq(["DOI-1", "Ship it"])
+      end
+
+      it "leaves the tags, note and time off a row", :aggregate_failures do
+        link(create(:task, note: "secret note", tags: %w[private-tag], worked_seconds: 3600), project)
+        get "/projects/doing-it"
+
+        expect(group("backlog").find("li").all("*").map(&:tag_name)).to eq(%w[a span span])
+        expect(page).to have_no_text("private-tag")
+      end
+    end
+
     describe "on a fixed day" do
       before { allow(Time).to receive(:now).and_return(Time.utc(2026, 10, 5, 12)) }
 
@@ -141,6 +198,15 @@ RSpec.describe "Project board", type: :request do
 
         expect(column("done")).to have_css(".board-meta", exact_text: "done Oct 3, 2026")
         expect(column("canceled")).to have_css(".board-meta", exact_text: "canceled Oct 4, 2026")
+      end
+
+      it "shows the same day on a list row", :aggregate_failures do
+        link(create(:task, :done, completed_at: Time.utc(2026, 10, 3, 18)), project)
+        link(create(:task, :canceled, completed_at: Time.utc(2026, 10, 4, 18)), project)
+        get "/projects/doing-it"
+
+        expect(group("done")).to have_css(".board-row-meta", exact_text: "done Oct 3, 2026")
+        expect(group("canceled")).to have_css(".board-row-meta", exact_text: "canceled Oct 4, 2026", visible: :all)
       end
     end
 
@@ -181,7 +247,7 @@ RSpec.describe "Project board", type: :request do
 
         expect(titles("backlog").size).to eq(2)
         expect(more("backlog")).to have_text("Load more · 1 left")
-        expect(more("backlog")[:href]).to eq("/projects/doing-it?backlog=4")
+        expect(more("backlog")[:href]).to eq("/projects/doing-it?backlog=4&view=board")
       end
 
       it "grows only that column", :aggregate_failures do
@@ -189,7 +255,7 @@ RSpec.describe "Project board", type: :request do
 
         expect([titles("backlog").size, titles("ready").size]).to eq([3, 2])
         expect(column("backlog")).to have_no_css("a.board-more")
-        expect(more("ready")[:href]).to eq("/projects/doing-it?backlog=4&ready=4")
+        expect(more("ready")[:href]).to eq("/projects/doing-it?backlog=4&ready=4&view=board")
       end
 
       it "never shows fewer than the cap" do
@@ -217,6 +283,22 @@ RSpec.describe "Project board", type: :request do
 
         expect(column("done").find("h2 .n").text).to eq("2")
         expect(column("done")).to have_no_css("a.board-more")
+      end
+
+      it "caps each group and links its Load More to the list", :aggregate_failures do
+        get "/projects/doing-it", backlog: 4
+
+        expect(group("backlog").all(".board-row").size).to eq(3)
+        expect(group("backlog")).to have_no_css("a.board-more")
+        expect(group("ready").all(".board-row").size).to eq(2)
+        expect(group("ready").find("a.board-more")[:href]).to eq("/projects/doing-it?backlog=4&ready=4&view=list")
+      end
+
+      it "leaves old closed tasks out of a group" do
+        link(create(:task, :done, title: "Old", completed_at: days_ago(30)), project)
+        get "/projects/doing-it"
+
+        expect(group("done")).to have_css(".board-empty")
       end
 
       it "shows the latest closed tasks first" do

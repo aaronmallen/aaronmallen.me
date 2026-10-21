@@ -19,7 +19,8 @@ RSpec.describe "Public screens", type: :feature do
   def screens
     {
       "about" => "/about",
-      "board" => "/projects/sai",
+      "board" => "/projects/sai?view=board",
+      "board list" => "/projects/sai?view=list",
       "contact" => "/contact",
       "contact refused" => lambda do
         visit "/contact"

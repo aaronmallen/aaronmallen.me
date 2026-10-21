@@ -29,8 +29,7 @@ module Public
                         written?(@project.tagline) ? @project.tagline : t(".description", name: @project.name))
 
             board_head
-            columns = @tasks.group_by(&:board_column)
-            div(class: "board") { Blog::Types::TaskColumn.each_value { column(it, columns.fetch(it, [])) } }
+            views
           end
 
           def board_head
@@ -42,38 +41,29 @@ module Public
             end
           end
 
-          def card(task)
-            li do
-              a(class: "board-card", href: path(:project_task, slug: @project.slug, number: task.number)) do
-                span(class: "board-num") { task.label }
-                span(class: "board-title") { task.title }
-                closed_on(task) if task.completed_at
-              end
-            end
-          end
-
-          def closed_on(task)
-            span(class: "board-meta") do
-              plain t([".closed", task.status].join("."))
-              whitespace
-              Moment(at: task.completed_at, format: :day)
-            end
-          end
-
           def column(key, tasks)
             section(class: ["board-col", key.tr("_", "-")]) do
-              column_head(key, @counts.fetch(key))
-              tasks.empty? ? p(class: "board-empty") { t(".empty") } : ul { tasks.each { card(it) } }
-              more(key, tasks.size)
+              h2 { column_head(key) }
+              tasks.empty? ? p(class: "board-empty") { t(".empty") } : ul { tasks.each { task(it, :card) } }
+              more(key, tasks.size, "board")
             end
           end
 
-          def column_head(key, count)
-            h2 do
-              span(class: "board-dot", aria: { hidden: "true" })
-              plain t([".columns", key].join("."))
-              whitespace
-              span(class: "n") { count.to_s }
+          def column_head(key)
+            span(class: "board-dot", aria: { hidden: "true" })
+            plain t([".columns", key].join("."))
+            whitespace
+            span(class: "n") { @counts.fetch(key).to_s }
+          end
+
+          def group(key, tasks)
+            details(class: ["board-group", key.tr("_", "-")], open: key != "canceled") do
+              summary do
+                Icon("fa-solid fa-chevron-right")
+                column_head(key)
+              end
+              tasks.empty? ? p(class: "board-empty") { t(".empty") } : ul { tasks.each { task(it, :row) } }
+              more(key, tasks.size, "list")
             end
           end
 
@@ -99,11 +89,11 @@ module Public
             end
           end
 
-          def more(key, shown)
+          def more(key, shown, view)
             left = @board.left(@counts.fetch(key), shown)
             return unless left.positive?
 
-            a(class: "board-more", href: path(:project, slug: @project.slug, **@board.more(key))) do
+            a(class: "board-more", href: path(:project, slug: @project.slug, **@board.more(key), view:)) do
               t("ui.board.load_more", count: left)
             end
           end
@@ -114,7 +104,20 @@ module Public
             span { line } unless line.empty?
           end
 
+          def task(task, kind)
+            BoardTask(task:, kind:, href: path(:project_task, slug: @project.slug, number: task.number))
+          end
+
           def url?(repo) = written?(@project.url) && @project.url != repo
+
+          def views
+            columns = Blog::Types::TaskColumn.values.to_h { [it, []] }.merge(@tasks.group_by(&:board_column))
+            div(class: "board-views", data: { board_views: "" }) do
+              BoardBar(counts: @counts)
+              div(class: "board") { columns.each { |key, tasks| column(key, tasks) } }
+              div(class: "board-list") { columns.each { |key, tasks| group(key, tasks) } }
+            end
+          end
         end
       end
     end
