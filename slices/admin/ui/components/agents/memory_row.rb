@@ -6,13 +6,19 @@ module Admin
       module Agents
         class MemoryRow < Component
           HITS = 3
+          LINK = { class: "memory-path" }.freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
+          prop :event, Blog::Types::Instance(ROM::Struct).optional
           prop :query, Blog::Types::String.optional
 
           def view_template
-            ListItem(title: @file.path, href: path(:admin_memory_file, id: @file.id), sub:) do |item|
-              item.meta { hits.each { |fact| p(class: "memory-hit") { fact.text } } }
+            ListItem(title: @file.path, href: path(:admin_memory_file, id: @file.id), link: LINK) do |item|
+              item.meta do
+                MemoryDescription(file: @file)
+                p(class: "li-sub") { sub }
+                hits.each { |fact| p(class: "memory-hit") { fact.text } }
+              end
             end
           end
 
@@ -25,9 +31,10 @@ module Admin
           end
 
           def sub
-            updated = l(Blog::TimeZone.local(@file.updated_at), format: :medium)
+            at = l(Blog::TimeZone.local(@event&.created_at || @file.updated_at), format: :medium)
+            who = (Helpers::AgentBrand.author(@event) if @event) || t(".you")
 
-            dotted(t(".facts", count: @file.facts.size), t(".updated", at: updated))
+            dotted(t(".facts", count: @file.facts.size), t(".updated", at:, who:))
           end
         end
       end

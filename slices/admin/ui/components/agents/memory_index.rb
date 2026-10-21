@@ -13,7 +13,7 @@ module Admin
           def view_template
             Card(title: t(".title")) do
               repo_form
-              Hint { dotted(t(".files", count: @files.size), t(".facts", count: @files.sum { it.facts.size })) }
+              Hint { dotted(t(".lines", count: @files.size), t(".behind", count: @files.sum { it.facts.size })) }
               ul(class: "record-link-list") { @files.each { |file| li(class: "record-link-row") { link(file) } } }
               Hint { t(".tasks") }
             end
@@ -22,9 +22,15 @@ module Admin
           private
 
           def link(file)
-            a(class: "record-link-title", href: path(:admin_memory_file, id: file.id)) do
-              span(class: "meta") { "#{file.scope} " }
-              plain file.path
+            a(class: "record-link-title memory-line", href: path(:admin_memory_file, id: file.id)) do
+              span(class: "memory-line-head") do
+                span(class: "memory-line-path") do
+                  span(class: "meta") { "#{file.scope} " }
+                  plain file.path
+                end
+                span(class: "meta") { t(".facts", count: file.facts.size) }
+              end
+              MemoryDescription(file:, tag: :span)
             end
           end
 

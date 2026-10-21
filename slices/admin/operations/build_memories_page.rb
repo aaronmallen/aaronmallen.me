@@ -26,7 +26,7 @@ module Admin
 
         {
           files:, scope:, query:, repos:, errors:,
-          counts: memory_file_queries.scope_counts,
+          **tallies(files),
           index: load_memory.call(repo: shown_repo),
           repo: shown_repo,
           scopes: scopes(files, live:, repos:),
@@ -52,6 +52,14 @@ module Admin
       def projects(files, live) = (live + project_queries.by_ids(targets(files, :project_id))).uniq(&:id)
 
       def shown(repo, repos) = repos.include?(repo) ? repo : repos.first
+
+      def tallies(files)
+        {
+          changes: memory_file_queries.agent_changes,
+          counts: memory_file_queries.scope_counts,
+          latest: memory_file_queries.latest_events(files.map(&:id)),
+        }
+      end
 
       def targets(files, field) = files.filter_map { it[field] }.uniq
 

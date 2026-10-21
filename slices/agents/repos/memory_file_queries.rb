@@ -3,6 +3,10 @@
 module Agents
   module Repos
     class MemoryFileQueries < Blog::DB::Repo
+      def agent_changes(on: Blog::TimeZone.today)
+        memory_events.where(created_at: Range.new(*Blog::TimeZone.day_bounds(on, on), true)).exclude(agent: nil).count
+      end
+
       def by_id(id) = memory_files.combine(:memory_facts).by_pk(id).one
 
       def event(memory_file_id, id) = memory_events.where(memory_file_id:).by_pk(id).one
@@ -21,6 +25,10 @@ module Agents
           reverted: memory_events.where(reverted_event_id: ids).pluck(:reverted_event_id).to_set,
           undone: memory_events.where(id: events.filter_map(&:reverted_event_id)).pluck(:id, :op).to_h,
         }
+      end
+
+      def latest_events(memory_file_ids)
+        memory_events.latest_by_file(memory_file_ids).to_a.to_h { [it.memory_file_id, it] }
       end
 
       def listed(scope: nil, query: nil)

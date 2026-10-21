@@ -8,15 +8,17 @@ module Admin
           prop :scopes, Blog::Types::Array
           prop :values, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
+          prop :keep, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
           def view_template
             details(class: "memory-new", open: @errors.any?) do
               Button(summary: true, variant: :pri, icon: "fa-solid fa-plus") { t(".new") }
               Form(action: path(:admin_create_memory_file), class: "memory-new-form card") do
                 path_field
-                description_field
                 scope_field
+                description_field
                 Button(type: "submit", variant: :pri) { t(".create") }
+                Button(href: path(:admin_memory_files, **@keep), variant: :gh) { t(".cancel") }
               end
             end
           end

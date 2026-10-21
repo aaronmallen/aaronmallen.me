@@ -69,7 +69,7 @@ RSpec.describe "Admin agent memories", type: :request do
       get "/admin/agents/memories", { scope: "repo" }
 
       expect(page.all(".li-title").map(&:text)).to eq(%w[hanami.md other.md])
-      expect(page).to have_css(".seg a[aria-current='page']", text: "Repos · 2")
+      expect(page).to have_css(".search-kinds a.search-kind[aria-current='page']", exact_text: "Repos · 2")
     end
 
     it "searches fact text and shows the facts it found", :aggregate_failures do
@@ -88,8 +88,65 @@ RSpec.describe "Admin agent memories", type: :request do
     it "lists what the index of a session in the chosen repo lists, linked to each file" do
       get "/admin/agents/memories", { repo: "aaronmallen/blog" }
 
-      expect(page.find(".card", text: "What a session's index lists").all("a.record-link-title").map(&:text))
-        .to eq(["global preferences.md", "repo hanami.md", "project deploys.md"])
+      card = page.find(".card", text: "What a session's index lists")
+      lines = ["global preferences.md", "repo hanami.md", "project deploys.md"]
+
+      expect(card.all("a.memory-line .memory-line-path").map(&:text)).to eq(lines)
+    end
+
+    it "gives each index line its description and fact count", :aggregate_failures do
+      get "/admin/agents/memories", { repo: "aaronmallen/blog" }
+      line = page.find(".card", text: "What a session's index lists").first("a.memory-line")
+
+      expect(line).to have_css(".memory-line-head .meta", exact_text: "1 fact")
+      expect(line).to have_css(".memory-description", exact_text: "Notes")
+      expect(page).to have_text("3 lines · 1 fact behind them")
+    end
+
+    it "counts the agent changes made today in the lede" do
+      get "/admin/agents/memories"
+
+      expect(page.find(".page-head-sub")).to have_text("1 fact in 5 files. 1 change by an agent today.")
+    end
+
+    it "says when no agent changed memory today" do
+      Agents::Slice["relations.memory_events"].dataset.exclude(agent: nil).update(created_at: Time.now - 172_800)
+      get "/admin/agents/memories"
+
+      expect(page.find(".page-head-sub")).to have_text(t("ui.views.agents.memories.changes", count: 0))
+    end
+
+    it "marks each group with its scope icon", :aggregate_failures do
+      get "/admin/agents/memories"
+
+      expect(page.find(".card", text: "Global")).to have_css(".card-title i.fa-globe.memory-scope-icon")
+      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_css(".card-title i.fa-github")
+      expect(page.find(".card", text: "Project · Blog")).to have_css(".card-title i.fa-cube")
+      expect(page.find(".card", text: "Task · Index")).to have_css(".card-title i.fa-list-check")
+    end
+
+    it "shows each row's description and who changed it last", :aggregate_failures do
+      get "/admin/agents/memories", { scope: "global" }
+      row = page.find(".li", text: "preferences.md")
+
+      expect(row).to have_css(".memory-description", exact_text: "Notes")
+      expect(row).to have_css(".li-sub", text: /1 fact · updated .+ by Anthropic claude-opus-5-5\z/)
+    end
+
+    it "names you when you made the last change" do
+      get "/admin/agents/memories", { scope: "repo" }
+
+      expect(page.find(".li", text: "hanami.md")).to have_css(".li-sub", text: /by you\z/)
+    end
+
+    it "marks a description an agent wrote", :aggregate_failures do
+      agents(:create_memory_file, { path: "agent", description: "Mine", scope: "global", **author })
+      get "/admin/agents/memories"
+
+      mark = ".memory-description .agent-mark[title='Written by Anthropic claude-opus-5-5. Untrusted.'] i.fa-robot"
+
+      expect(page.find(".li", text: "agent.md")).to have_css("#{mark}[aria-label='Agent-written, untrusted']")
+      expect(page.find(".li", text: "preferences.md")).to have_no_css(".agent-mark")
     end
 
     it "offers any open task as a scope, but no closed one", :aggregate_failures do
@@ -138,6 +195,21 @@ RSpec.describe "Admin agent memories", type: :request do
       get "/admin/agents/memories"
 
       expect(page.find("details.memory-new")).to have_css("label", exact_text: "Scope", visible: :all)
+    end
+
+    it "lays its form out as File, Scope, Description, Create and Cancel", :aggregate_failures do
+      get "/admin/agents/memories"
+      form = page.find("form.memory-new-form", visible: :all)
+
+      expect(form.all("label, button, a.bt", visible: :all).map { it.text(:all).strip })
+        .to eq(%w[File Scope Description Create Cancel])
+      expect(form).to have_link("Cancel", href: "/admin/agents/memories", class: %w[bt gh], visible: :all)
+    end
+
+    it "keeps the scope and search when it cancels" do
+      get "/admin/agents/memories", { scope: "repo", query: "mise" }
+
+      expect(page).to have_link("Cancel", href: "/admin/agents/memories?scope=repo&query=mise", visible: :all)
     end
 
     it "creates it as the owner and opens it", :aggregate_failures do

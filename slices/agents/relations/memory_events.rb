@@ -14,6 +14,10 @@ module Agents
                                               .select_hash(:memory_fact_id, Sequel.function(:max, :id).as(:id))
       end
 
+      def latest_by_file(memory_file_ids)
+        where(memory_file_id: memory_file_ids).distinct(:memory_file_id).order(:memory_file_id, self[:id].desc)
+      end
+
       def session_changes
         join(:memory_files, id: self[:memory_file_id].qualified)
           .select_append(memory_files[:path].qualified)

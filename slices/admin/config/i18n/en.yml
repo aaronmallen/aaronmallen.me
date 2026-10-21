@@ -537,6 +537,9 @@ en:
             webmention: "Webmentions"
             workout: "Workouts"
       agents:
+        agent_mark:
+          label: "Agent-written, untrusted"
+          title: "Written by %{who}. Untrusted."
         artifact_editor:
           body: "Body"
           body_placeholder: "Write it in markdown."
@@ -636,20 +639,24 @@ en:
           title: "History"
           you: "You"
         memory_index:
+          behind:
+            one: "%{count} fact behind them"
+            other: "%{count} facts behind them"
           facts:
             one: "%{count} fact"
             other: "%{count} facts"
-          files:
-            one: "%{count} file"
-            other: "%{count} files"
+          lines:
+            one: "%{count} line"
+            other: "%{count} lines"
           show: "Show"
           tasks: "A session on a task also lists that task's files."
           title: "What a session's index lists"
           working_in: "Working in"
         memory_new_form:
+          cancel: "Cancel"
           create: "Create"
           description: "Description"
-          description_hint: "How we test, and when to read it"
+          description_hint: "What it covers and when to read it"
           new: "New memory file"
           path: "File"
           path_hint: "testing.md"
@@ -658,7 +665,8 @@ en:
           facts:
             one: "%{count} fact"
             other: "%{count} facts"
-          updated: "updated %{at}"
+          updated: "updated %{at} by %{who}"
+          you: "you"
         session_drawer:
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
@@ -3525,6 +3533,10 @@ en:
             written: "%{date} by %{who}"
             you: "you"
         memories:
+          changes:
+            one: "%{count} change by an agent today."
+            other: "%{count} changes by an agent today."
+            zero: "No agent changes today."
           empty: "No memory files yet."
           facts:
             one: "%{count} fact"
@@ -3540,7 +3552,7 @@ en:
             one: "%{facts} in %{count} file."
             other: "%{facts} in %{count} files."
           no_match: "No file or fact matches “%{query}”."
-          placeholder: "Search facts"
+          placeholder: "search facts…"
           scope: "Scope"
           search: "Search memories"
         memory_file:
