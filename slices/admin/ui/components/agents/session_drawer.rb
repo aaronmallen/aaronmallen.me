@@ -44,6 +44,19 @@ module Admin
 
           def clock(time) = l(Blog::TimeZone.local(time), format: :clock)
 
+          def index_line(line)
+            div(class: "agent-change") do
+              if line.memory_file_id
+                a(class: "record-link-title", href: memory_file(line.memory_file_id)) { line.path }
+              else
+                span(class: "record-link-title") { t(".deleted") }
+              end
+              p(class: "agent-change-text") do
+                dotted(line.scope, t(".facts", count: line.fact_count), line.description)
+              end
+            end
+          end
+
           def list(label, rows, &)
             Field(label:) do
               next Hint { t(".none") } if rows.empty?
@@ -54,9 +67,9 @@ module Admin
 
           def lists
             list(t(".tasks"), @tasks) { task(it) } unless @tasks.empty?
+            list(t(".index"), @session.agent_session_index_lines) { index_line(it) }
             list(t(".loaded"), @session.agent_session_loads) { loaded(it) }
-            list(t(".changed"), @memory_changes) { change(it) }
-            list(t(".written"), @artifacts) { artifact(it) }
+            writes
           end
 
           def loaded(load) = a(class: "record-link-title", href: memory_file(load.memory_file_id)) { load.path }
@@ -89,6 +102,11 @@ module Admin
           end
 
           def title = t(".title", date: l(Blog::TimeZone.local_date(@session.started_at), format: :medium))
+
+          def writes
+            list(t(".changed"), @memory_changes) { change(it) }
+            list(t(".written"), @artifacts) { artifact(it) }
+          end
         end
       end
     end

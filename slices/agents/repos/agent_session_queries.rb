@@ -9,7 +9,7 @@ module Agents
 
       def artifact_writes(session_id) = artifact_versions.where(session_id:).session_writes.to_a
 
-      def by_id(id) = agent_sessions.combine(*CHILDREN).by_pk(id).one
+      def by_id(id) = agent_sessions.combine(*CHILDREN, :agent_session_index_lines).by_pk(id).one
 
       def listed(page) = page.fill(agent_sessions.combine(*CHILDREN).latest_first.paged(page).to_a)
 

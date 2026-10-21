@@ -115,6 +115,40 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     end
   end
 
+  describe "the index it started with" do
+    let(:hanami) { agents(:create_memory_file, { path: "hanami", description: "Hanami notes", scope: "global" }) }
+
+    def index = field("Index it started with")
+
+    before do
+      gone = agents(:create_memory_file, { path: "gone", description: "Old notes", scope: "global" })
+      agents(:add_memory_fact, hanami.id, { type: "gotcha", text: "Run specs through mise" })
+      session_id = start("Index the activities table", task_ids: [task.id])
+      agents(:describe_memory_file, hanami.id, { description: "Newer notes" })
+      agents(:delete_memory_file, gone.id)
+      get "/admin/agents/sessions", { session: session_id }
+    end
+
+    it "follows Worked on" do
+      expect(drawer.all(".field > .f").map(&:text).first(2))
+        .to eq(["Worked on", "Index it started with"])
+    end
+
+    it "lists each line with its scope, fact count and the description the agent got" do
+      expect(index.all(".agent-change-text").map(&:text))
+        .to eq(["global · 0 facts · Old notes", "global · 1 fact · Hanami notes"])
+    end
+
+    it "links a live file to its page" do
+      expect(index).to have_link("hanami.md", href: "/admin/agents/memories/#{hanami.id}")
+    end
+
+    it "keeps a deleted file's line without a link", :aggregate_failures do
+      expect(index).to have_css("span.record-link-title", text: "a deleted file")
+      expect(index).to have_no_link("a deleted file")
+    end
+  end
+
   it "says so when no session exists" do
     get "/admin/agents/sessions"
 

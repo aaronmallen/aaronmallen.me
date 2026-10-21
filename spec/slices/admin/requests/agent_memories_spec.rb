@@ -490,13 +490,13 @@ RSpec.describe "Admin agent memories", type: :request do
 
     def session_links = page.find_by_id("agent-session").all("a[href='#{file_path(file)}']").map(&:text)
 
-    it "links the memory a session read and changed" do
+    it "links the memory a session listed, read and changed" do
       id, = agents(:start_session, { title: "Spike", **author, task_ids: [] })
       agents(:record_loads, id, [file.id])
       agents(:add_memory_fact, file.id, { type: "gotcha", text: "Use mise", **author, session_id: id })
       get "/admin/agents/sessions", { session: id }
 
-      expect(session_links).to eq(["hanami.md", "added to hanami.md"])
+      expect(session_links).to eq(["hanami.md", "hanami.md", "added to hanami.md"])
     end
 
     it "links a memory file in a task's links" do

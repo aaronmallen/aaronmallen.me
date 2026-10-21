@@ -662,6 +662,11 @@ en:
         session_drawer:
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
+          deleted: "a deleted file"
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          index: "Index it started with"
           loaded: "Memory it read"
           none: "Nothing."
           ops:

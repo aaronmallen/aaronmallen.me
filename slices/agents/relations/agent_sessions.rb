@@ -7,6 +7,7 @@ module Agents
         associations do
           has_many :agent_session_tasks
           has_many :agent_session_loads, view: :with_paths
+          has_many :agent_session_index_lines, view: :in_order
           has_many :memory_events, foreign_key: :session_id, view: :session_listed
           has_many :artifact_versions, foreign_key: :session_id, view: :session_listed
         end

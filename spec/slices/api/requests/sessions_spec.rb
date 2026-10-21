@@ -41,6 +41,15 @@ RSpec.describe "API sessions", type: :request do
     expect(loaded).to eq([{ "memory_file_id" => file, "path" => "hanami.md" }])
   end
 
+  it "records each index line it returns and returns the same index" do
+    file = noted_file
+    files = call_api(:post, "/agent_sessions", { title: "Spike", **author }).fetch("files")
+    lines = Agents::Slice["relations.agent_session_index_lines"].to_a
+
+    expect([files.map { it.slice("id", "path", "fact_count") }, lines.map { [it[:memory_file_id], it[:fact_count]] }])
+      .to eq([[{ "id" => file, "path" => "hanami.md", "fact_count" => 1 }], [[file, 1]]])
+  end
+
   it "refuses to end a session twice" do
     2.times { call_api(:post, "/agent_sessions/#{session_id}/end") }
 

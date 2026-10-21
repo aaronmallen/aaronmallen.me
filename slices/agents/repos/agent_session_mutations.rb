@@ -11,6 +11,17 @@ module Agents
 
       def finish(id, at) = agent_sessions.by_pk(id).update(ended_at: at, last_seen_at: at)
 
+      def record_index(id, files)
+        rows = files.map do |file|
+          {
+            agent_session_id: id, memory_file_id: file.id, path: file.path, scope: file.scope,
+            description: file.description, description_agent: file.description_agent,
+            description_model: file.description_model, fact_count: file.facts.size,
+          }
+        end
+        agent_session_index_lines.dataset.multi_insert(rows) unless rows.empty?
+      end
+
       def record_loads(id, memory_file_ids)
         rows = memory_file_ids.map { { agent_session_id: id, memory_file_id: it } }
         agent_session_loads.dataset.insert_conflict.multi_insert(rows) unless rows.empty?
