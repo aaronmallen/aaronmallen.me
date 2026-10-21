@@ -713,6 +713,8 @@ en:
             zero: "none today"
           sessions: "Sessions"
           title: "Agents"
+          version: "v%{number}"
+          you: "you"
       analytics:
         chart_card:
           peak: "peak %{views}"

@@ -34,7 +34,7 @@ module Admin
 
         {
           **counts(now),
-          agents: agent_session_queries.today_counts(now:),
+          agents: agents(now),
           attention: attention(now, inbox),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
@@ -47,6 +47,10 @@ module Admin
       end
 
       private
+
+      def agents(now)
+        { **agent_session_queries.today_counts(now:), written: agent_session_queries.today_artifacts(now:) }
+      end
 
       def attention(now, inbox)
         failures = self.failures

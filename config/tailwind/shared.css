@@ -3937,6 +3937,14 @@
   &.orange {
     @apply text-mk-orange-text;
   }
+
+  &.green {
+    @apply text-mk-green-text;
+  }
+
+  &.violet {
+    @apply text-mk-violet-text;
+  }
 }
 
 @utility task-source {

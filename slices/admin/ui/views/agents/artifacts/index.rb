@@ -8,12 +8,6 @@ module Admin
           class Index < View
             include Components::Agents
 
-            ICONS = {
-              "plan" => "fa-solid fa-route", "spec" => "fa-solid fa-ruler-combined", "research" => "fa-solid fa-flask",
-              "handoff" => "fa-solid fa-right-left", "notes" => "fa-regular fa-note-sticky",
-              "review" => "fa-solid fa-magnifying-glass", "postmortem" => "fa-solid fa-heart-crack",
-              "other" => "fa-regular fa-file",
-            }.freeze
             LIVE_TABLES = %w[artifact_versions artifacts record_links].freeze
             SEARCH_ID = "artifacts-search"
 
@@ -65,7 +59,7 @@ module Admin
                 class: "search-kind", href: path(:admin_artifacts, **{ type:, search: @list[:text] }.compact),
                 aria: { current: ("page" if type == @list[:type]) },
               ) do
-                Icon(ICONS.fetch(type)) if type
+                Icon(ArtifactType::ICONS.fetch(type)) if type
                 plain text
                 whitespace
                 span { count.to_s }

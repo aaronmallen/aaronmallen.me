@@ -152,4 +152,50 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
         .to eq(%w[/admin/agents/sessions /admin/agents/memories /admin/agents/artifacts])
     end
   end
+
+  describe "the Today card's artifacts" do
+    def age(id, seconds)
+      Agents::Slice["relations.artifact_versions"].where(artifact_id: id).dataset.update(created_at: Time.now - seconds)
+    end
+
+    def card = page.find(".card-title", exact_text: "Agents").ancestor(".card")
+
+    def write(title, type: "plan", **)
+      agents(:create_artifact, { title:, type:, tags: "", body: "Body", ** })
+    end
+
+    context "with more than three written today" do
+      before do
+        { "Oldest" => 4, "Newest" => 1, "Middle" => 2, "Older" => 3 }.each do |title, seconds|
+          age(write(title, **author).id, seconds)
+        end
+        age(write("Yesterday's plan", **author).id, 2 * 86_400)
+        write("Owner's notes")
+        get "/admin"
+      end
+
+      it "lists the three newest an agent wrote, newest first" do
+        expect(card.all(".li-title").map(&:text)).to eq(%w[Newest Middle Older])
+      end
+
+      it "links each to its artifact" do
+        expect(card.find_link("Newest")["href"]).to match(%r{\A/admin/agents/artifacts/\d+\z})
+      end
+    end
+
+    it "shows each artifact's type, version, author and time", :aggregate_failures do
+      write("Index spec", type: "spec", **author)
+      get "/admin"
+
+      meta = card.find(".task-meta")
+      expect(meta.find(".task-mark.violet", text: "spec")).to have_css("i.fa-ruler-combined")
+      expect(meta.all("span").map(&:text)).to include("v1", "Anthropic claude-opus-5-5", match(/\A\d{1,2}:\d{2}/))
+    end
+
+    it "shows no list on a day without artifacts" do
+      get "/admin"
+
+      expect(card).to have_no_css(".li")
+    end
+  end
 end
