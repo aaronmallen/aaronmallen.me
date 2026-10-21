@@ -5,23 +5,45 @@ module Admin
     module Components
       module Agents
         class ArtifactRow < Component
+          KIND = Blog::Types::RecordKind["artifact"]
+
           prop :artifact, Blog::Types::Instance(ROM::Struct)
           prop :current, Blog::Types::Instance(ROM::Struct)
           prop :links, Blog::Types::Integer
+          prop :colors, Blog::Types::Hash
 
           def view_template
-            ListItem(title: @artifact.title, href: path(:admin_artifact, id: @artifact.id), sub:) do
-              span(class: "mono") { RecordKey.key(@artifact.id) }
+            div(class: "artifact-row", data: { key_row: true }) do
+              RecordKey(kind: KIND, label: RecordKey.key(@artifact.id))
+              div(class: "artifact-row-body") do
+                a(class: "artifact-row-title", href: path(:admin_artifact, id: @artifact.id),
+                  data: { key_open: true }) do
+                  @artifact.title
+                end
+                p(class: "artifact-row-meta") { meta }
+              end
             end
           end
 
           private
 
-          def sub
-            dotted(
-              @artifact.type, t(".version", number: @current.number), written,
-              (t(".links", count: @links) if @links.positive?), *@artifact.tags.map { "##{it}" },
-            )
+          def links
+            return unless @links.positive?
+
+            span do
+              Icon("fa-solid fa-link")
+              plain @links.to_s
+              whitespace
+              span(class: "sr-only") { t(".links", count: @links) }
+            end
+          end
+
+          def meta
+            ArtifactType(type: @artifact.type)
+            span { t(".version", number: @current.number) }
+            span { written }
+            links
+            ArtifactTags(tags: @artifact.tags, colors: @colors)
           end
 
           def written

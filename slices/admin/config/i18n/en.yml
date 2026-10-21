@@ -544,7 +544,7 @@ en:
           create: "Create artifact"
           note: "What changed"
           note_placeholder: "Optional. Shows in the version list."
-          save: "Save"
+          save: "Save as v%{number}"
           tags: "Tags"
           tags_placeholder: "site, perf"
           title: "Title"
@@ -2317,9 +2317,11 @@ en:
         range: "Range"
       record_key:
         copied:
+          artifact: "Artifact %{key} copied"
           decision: "Decision %{key} copied"
           task: "Task %{key} copied"
         copy:
+          artifact: "Copy artifact %{key}"
           decision: "Copy decision %{key}"
           task: "Copy task %{key}"
       record_links:

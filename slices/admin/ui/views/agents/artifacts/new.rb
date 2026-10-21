@@ -12,11 +12,7 @@ module Admin
 
             def view_template
               content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
-              PageHead(title: t(".heading")) do
-                BackLink(href: path(:admin_artifacts)) { t(".back") }
-              end
-
-              ArtifactEditor(**@editor)
+              ArtifactEditor(**@editor, heading: t(".heading"), back: t(".back"))
             end
           end
         end

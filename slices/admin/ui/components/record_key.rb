@@ -5,10 +5,12 @@ module Admin
     module Components
       class RecordKey < Component
         COPIED = {
+          Blog::Types::RecordKind["artifact"] => ".copied.artifact",
           Blog::Types::RecordKind["decision"] => ".copied.decision",
           Blog::Types::RecordKind["task"] => ".copied.task",
         }.freeze
         COPY = {
+          Blog::Types::RecordKind["artifact"] => ".copy.artifact",
           Blog::Types::RecordKind["decision"] => ".copy.decision",
           Blog::Types::RecordKind["task"] => ".copy.task",
         }.freeze

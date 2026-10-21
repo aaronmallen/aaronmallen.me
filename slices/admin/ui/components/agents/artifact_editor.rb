@@ -5,6 +5,7 @@ module Admin
     module Components
       module Agents
         class ArtifactEditor < Component
+          FORM_ID = "artifact-form"
           HEIGHT = "480px"
           RENDERER = Blog::Types::MarkdownRenderer["tasks"]
           TYPES = Blog::Types::ArtifactType.values.to_h { [it, it] }.freeze
@@ -12,15 +13,19 @@ module Admin
           prop :artifact, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
+          prop :heading, Blog::Types::String
+          prop :back, Blog::Types::String
 
           def view_template
-            Form(action: form_action, class: "form-stack") do
+            PageHead(title: @heading, kicker: @artifact&.title) do
+              BackLink(href: cancel_path) { @back }
+              Button(href: cancel_path, variant: :gh) { t(".cancel") }
+              Button(variant: :pri, type: "submit", form: FORM_ID) { save_label }
+            end
+
+            Form(action: form_action, id: FORM_ID, class: "form-stack") do
               Card { div(class: "form-stack") { meta_fields } }
               body_field
-              div(class: "artifact-acts") do
-                Button(variant: :pri, type: "submit") { save_label }
-                Button(href: cancel_path, variant: :gh) { t(".cancel") }
-              end
             end
           end
 
@@ -58,7 +63,7 @@ module Admin
             end
           end
 
-          def save_label = t(@artifact ? ".save" : ".create")
+          def save_label = @artifact ? t(".save", number: @artifact.version + 1) : t(".create")
 
           def tags_field
             field(:tags, t(".tags")) do |control|

@@ -11,9 +11,11 @@ RSpec.describe "Admin artifacts", type: :request do
     agents(:create_artifact, { title:, type: "plan", tags: "", body:, **author, ** })
   end
 
+  def metas = page.all(".artifact-row-meta").map { it.all(:xpath, "./*").map(&:text) }
+
   def reload(id) = Agents::Slice["repos.artifact_queries"].by_id(id)
 
-  def titles = page.all(".li .li-title").map(&:text)
+  def titles = page.all(".artifact-row-title").map(&:text)
 
   def versions(id) = Agents::Slice["repos.artifact_queries"].versions(id)
 
@@ -57,8 +59,57 @@ RSpec.describe "Admin artifacts", type: :request do
     it "names each row's type, version, author and tags" do
       get "/admin/agents/artifacts"
 
-      expect(page.all(".li-sub").map(&:text))
-        .to match([/\Aplan · v2 · .+ by you · #db\z/, /\Anotes · v1 · .+ by you\z/])
+      expect(metas).to match([["plan", "v2", / by you\z/, "#db"], ["notes", "v1", / by you\z/]])
+    end
+
+    it "keys each row on its left" do
+      get "/admin/agents/artifacts"
+
+      expect(page.all(".artifact-row > .record-key:first-child").map(&:text)).to eq(["##{plan.id}", "##{notes.id}"])
+    end
+
+    it "shows each row's type as a pill in its tone with its icon", :aggregate_failures do
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".artifact-row-meta .pill.blue i.fa-route", count: 1)
+      expect(page).to have_css(".artifact-row-meta .pill.sand i.fa-note-sticky", count: 1)
+    end
+
+    it "colours each tag from the private tag of its name" do
+      create(:tag, :private, name: "db", color: "mk-green")
+      create(:tag, name: "db", color: "mk-orange")
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".artifact-row-meta .tag.green", exact_text: "#db")
+    end
+
+    it "colours a tag violet when no private tag has its name" do
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".artifact-row-meta .tag.violet", exact_text: "#db")
+    end
+
+    it "counts the links on a row" do
+      task = create(:task)
+      Links::Slice["operations.link_records"].call("artifact", plan.id, { other_kind: "task", other_id: task.id })
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".artifact-row-meta span:has(> i.fa-link)", text: "1 1 link")
+    end
+
+    it "lists all eight types with their counts, zero included" do
+      get "/admin/agents/artifacts"
+
+      expect(page.all(".search-kind").map(&:text))
+        .to eq(["All 2", "plan 1", "spec 0", "research 0", "handoff 0", "notes 1", "review 0", "postmortem 0",
+                "other 0"])
+    end
+
+    it "draws each type's icon in its tone, and other in none", :aggregate_failures do
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css(".search-kind i.fa-route.text-mk-blue-text")
+      expect(page).to have_css(".search-kind i.fa-file:not([class*='text-mk'])")
     end
 
     it "dates and credits each row from its current version" do
@@ -66,7 +117,7 @@ RSpec.describe "Admin artifacts", type: :request do
       age(notes.id, 2, Time.now - Time.utc(2026, 10, 1, 12))
       get "/admin/agents/artifacts"
 
-      expect(page).to have_css(".li-sub", exact_text: "notes · v2 · Oct 1, 2026 by Anthropic claude-opus-5-5")
+      expect(metas.last).to eq(["notes", "v2", "Oct 1, 2026 by Anthropic claude-opus-5-5"])
     end
 
     it "filters by type" do
@@ -127,6 +178,7 @@ RSpec.describe "Admin artifacts", type: :request do
       expect(page).to have_css("form[method='post'][action='/admin/agents/artifacts'] textarea[name='artifact[body]']")
       expect(page).to have_css("select[name='artifact[type]'] option[selected][value='plan']")
       expect(page).to have_css(".edit-split .preview")
+      expect(page).to have_css(".page-head-actions button[form=artifact-form]", exact_text: "Create artifact")
     end
 
     it "creates it as the owner and opens it", :aggregate_failures do
@@ -164,6 +216,20 @@ RSpec.describe "Admin artifacts", type: :request do
 
       expect(page.all(".artifact-version").map(&:text))
         .to match([/\Av2you · .+ · currentTidied\z/, /\Av1Anthropic claude-opus-5-5 · .+\z/])
+    end
+
+    it "shows its type as a pill in its tone with its icon in the head" do
+      get "/admin/agents/artifacts/#{found.id}"
+
+      expect(page).to have_css(".page-head-actions .pill.blue i.fa-route", count: 1)
+    end
+
+    it "colours its tags" do
+      create(:tag, :private, name: "db", color: "mk-pink")
+      agents(:update_artifact, found.id, { title: found.title, type: "plan", tags: "db", body: "Next" })
+      get "/admin/agents/artifacts/#{found.id}"
+
+      expect(page.find(".read-meta")).to have_css(".tag.pink", exact_text: "#db")
     end
 
     it "dates it from its first version" do
@@ -218,6 +284,15 @@ RSpec.describe "Admin artifacts", type: :request do
     def save(**fields)
       fields = { title: found.title, type: "plan", tags: "", body: "Add an index", **fields }
       admin_post "/admin/agents/artifacts/#{found.id}", artifact: fields
+    end
+
+    it "saves from the head as the next version", :aggregate_failures do
+      agents(:update_artifact, found.id, { title: found.title, type: "plan", tags: "", body: "Next" })
+      get "/admin/agents/artifacts/#{found.id}/edit"
+
+      expect(page).to have_css(".page-head-actions button[type=submit][form=artifact-form]", exact_text: "Save as v3")
+      expect(page).to have_css("form#artifact-form[action='/admin/agents/artifacts/#{found.id}']")
+      expect(page).to have_link("Cancel", href: "/admin/agents/artifacts/#{found.id}")
     end
 
     it "fills the form with the latest body" do

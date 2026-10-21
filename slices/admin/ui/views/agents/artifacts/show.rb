@@ -17,6 +17,7 @@ module Admin
             prop :first_version, Blog::Types::Instance(ROM::Struct)
             prop :versions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
             prop :records, Blog::Types::Hash
+            prop :colors, Blog::Types::Hash
 
             def view_template
               content_for(:live_tables, LIVE_TABLES)
@@ -53,7 +54,7 @@ module Admin
             def head
               PageHead(title: @artifact.title, kicker: RecordKey.key(id)) do
                 BackLink(href: path(:admin_artifacts)) { t(".back") }
-                Pill(color: nil) { @artifact.type }
+                ArtifactType(type: @artifact.type)
                 Button(href: path(:admin_edit_artifact, id:), icon: :edit) { t(".edit") }
               end
             end
@@ -64,7 +65,7 @@ module Admin
               Card do
                 p(class: "read-meta") do
                   span { t(".created", when: written(@first_version)) }
-                  @artifact.tags.each { |tag| span(class: "tag") { "##{tag}" } }
+                  ArtifactTags(tags: @artifact.tags, colors: @colors)
                 end
               end
             end

@@ -17,14 +17,17 @@ module Admin
             prop :week, Blog::Types::Integer
             prop :current, Blog::Types::Hash
             prop :linked, Blog::Types::Hash
+            prop :colors, Blog::Types::Hash
 
             def view_template
               content_for(:live_tables, LIVE_TABLES)
               PageHead(title: t(".heading"), sub: t(".lede", count: total, week: @week)) do
                 CreateLink(href: path(:admin_new_artifact), label: t(".new_artifact"))
               end
-              search_form
-              types
+              div(class: "artifact-bar") do
+                types
+                search_form
+              end
               Card { rows }
               Pager(page: @artifacts, route: :admin_artifacts, params: query)
             end
@@ -37,7 +40,10 @@ module Admin
               return Empty { t(@list.values.any? ? ".no_match" : ".empty") } if @artifacts.rows.empty?
 
               @artifacts.rows.each do |artifact|
-                ArtifactRow(artifact:, current: @current.fetch(artifact.id), links: @linked.fetch(artifact.id, 0))
+                ArtifactRow(
+                  artifact:, current: @current.fetch(artifact.id), links: @linked.fetch(artifact.id,
+                                                                                        0), colors: @colors,
+                )
               end
             end
 
@@ -54,12 +60,18 @@ module Admin
 
             def total = @counts.values.sum
 
+            def type_icon(type)
+              look = ArtifactType.look(type)
+
+              Icon([look.icon, look.text].compact)
+            end
+
             def type_link(type, text, count)
               a(
                 class: "search-kind", href: path(:admin_artifacts, **{ type:, search: @list[:text] }.compact),
                 aria: { current: ("page" if type == @list[:type]) },
               ) do
-                Icon(ArtifactType::ICONS.fetch(type)) if type
+                type_icon(type) if type
                 plain text
                 whitespace
                 span { count.to_s }

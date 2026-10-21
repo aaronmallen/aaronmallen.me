@@ -14,13 +14,7 @@ module Admin
 
             def view_template
               content_for(:live_tables, LIVE_TABLES)
-              artifact = @editor[:artifact]
-
-              PageHead(title: t(".heading"), kicker: artifact.title) do
-                BackLink(href: path(:admin_artifact, id: artifact.id)) { t(".back") }
-              end
-
-              ArtifactEditor(**@editor)
+              ArtifactEditor(**@editor, heading: t(".heading"), back: t(".back"))
             end
           end
         end

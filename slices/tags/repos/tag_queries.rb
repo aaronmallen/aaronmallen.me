@@ -21,6 +21,12 @@ module Tags
         (mail ? found : found.outside_mail).in_name_order.to_a
       end
 
+      def colors_named(scope, names)
+        return Blog::Constants::EMPTY_HASH if names.empty?
+
+        tags.in_scope(scope).by_names(names.uniq).to_a.to_h { [it.name, it.color] }
+      end
+
       def count_matching(scope, text, mail: true) = matching(scope, text, mail).count
 
       def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one

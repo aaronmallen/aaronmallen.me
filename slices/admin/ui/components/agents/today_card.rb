@@ -33,10 +33,19 @@ module Admin
 
           def meta(artifact, current)
             p(class: "task-meta") do
-              ArtifactType(type: artifact.type)
+              type_mark(artifact.type)
               span { t(".version", number: current.number) }
               span { Helpers::AgentBrand.author(current) || t(".you") }
               span { l(Blog::TimeZone.local(current.created_at), format: :clock) }
+            end
+          end
+
+          def type_mark(name)
+            look = ArtifactType.look(name)
+
+            span(class: ["task-mark", look.tone]) do
+              Icon(look.icon)
+              plain name
             end
           end
 

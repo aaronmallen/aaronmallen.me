@@ -1980,8 +1980,30 @@
   }
 }
 
-@utility artifact-acts {
-  @apply flex flex-wrap gap-2;
+@utility artifact-bar {
+  @apply mb-5 flex flex-wrap items-center gap-x-3.5 gap-y-2.5;
+
+  & > .search-kinds,
+  & > .file-search {
+    @apply mb-0;
+  }
+}
+
+@utility artifact-row {
+  @apply grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3.5 border-b border-line py-4;
+  @apply first:pt-0 last:border-b-0 last:pb-0;
+}
+
+@utility artifact-row-body {
+  @apply min-w-0;
+}
+
+@utility artifact-row-title {
+  @apply decision-row-title;
+}
+
+@utility artifact-row-meta {
+  @apply decision-meta;
 }
 
 @utility artifact-meta {
