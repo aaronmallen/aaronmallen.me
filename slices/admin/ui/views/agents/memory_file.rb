@@ -21,7 +21,10 @@ module Admin
             content_for(:live_tables, LIVE_TABLES)
             head
             div(class: "g-main") do
-              div(class: "stack") { MemoryFacts(file: @file, form: @form) }
+              div(class: "stack") do
+                MemoryIndexLine(file: @file, scope: current, form: @form)
+                MemoryFacts(file: @file, form: @form)
+              end
               aside(class: "stack") { side }
             end
           end

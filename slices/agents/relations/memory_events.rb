@@ -3,11 +3,15 @@
 module Agents
   module Relations
     class MemoryEvents < Blog::DB::Relation
+      DESCRIBED = %w[describe revert].map { Blog::Types::MemoryEventOp[it] }.freeze
+
       schema :memory_events, infer: true do
         associations do
           belongs_to :memory_file
         end
       end
+
+      def last_description_id(memory_file_id) = where(memory_file_id:, memory_fact_id: nil, op: DESCRIBED).max(:id)
 
       def latest_by_fact(memory_fact_ids)
         where(memory_fact_id: memory_fact_ids).dataset.unordered.group(:memory_fact_id)

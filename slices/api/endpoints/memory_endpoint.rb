@@ -4,9 +4,9 @@
 module API
   module Endpoints
     class MemoryEndpoint < Endpoint
-      CHANGED = "the fact changed since, in history entry %s; revert that entry first"
+      CHANGED = "it changed since, in history entry %s; revert that entry first"
       REMOVED = "the fact was removed; revert its removal first"
-      UNREVERTIBLE = "only an add, an edit or a remove can be reverted"
+      UNREVERTIBLE = "only an add, an edit, a remove or a describe can be reverted"
       REFUSALS = { removed: { fact_id: [REMOVED] }, unrevertible: { event_id: [UNREVERTIBLE] } }.freeze
 
       include Deps[record_loads: "agents.operations.record_loads"]

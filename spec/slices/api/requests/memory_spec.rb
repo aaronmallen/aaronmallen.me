@@ -111,7 +111,8 @@ RSpec.describe "API memory", type: :request do
     created = call_api(:get, "/memory_files/#{file}").fetch("history").first.fetch("id")
     call_api(:post, "/memory_files/#{file}/history/#{created}/revert", author)
 
-    expect(document.fetch("errors")).to eq("event_id" => ["only an add, an edit or a remove can be reverted"])
+    expect(document.fetch("errors"))
+      .to eq("event_id" => ["only an add, an edit, a remove or a describe can be reverted"])
   end
 
   it "refuses an edit to a removed fact" do

@@ -110,7 +110,7 @@ module Blog
     MailShowParam = MailShow.fallback(MailShow.values.first)
     MailWaitReason = Types::String.enum("starred", "contact_form", "people", "needs_reply", "important")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
-    MemoryEventOp = Types::String.enum("create", "add", "edit", "remove", "revert", "scope")
+    MemoryEventOp = Types::String.enum("create", "add", "edit", "remove", "revert", "scope", "describe")
     MemoryFactType = Types::String.enum("preference", "convention", "gotcha", "context")
     MemoryScope = Types::String.enum("global", "repo", "project", "task")
     MessageBulkAction = Types::String.enum(

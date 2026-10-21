@@ -267,7 +267,7 @@ RSpec.describe "MCP memory tools", type: :request do
       mcp_answer("edit_memory_fact", id: file, fact_id: fact, text: "Use jj, not git", **author)
 
       expect([revert(file, added), live_texts(file)])
-        .to eq(["the fact changed since, in history entry #{entry('edit')}; revert that entry first",
+        .to eq(["it changed since, in history entry #{entry('edit')}; revert that entry first",
                 ["Use jj, not git"]])
     end
   end
@@ -340,6 +340,37 @@ RSpec.describe "MCP memory tools", type: :request do
     it "refuses a file that does not exist" do
       expect(mcp_text("describe_memory_file", id: 999_999, description: "Notes", **author))
         .to eq("no memory file has the ID 999999")
+    end
+
+    it "adds a describe entry with the old and new text to its history" do
+      describe_file("When to run which specs")
+
+      expect(trusted(history(file)).first.values_at("op", "text", "was_text", "agent", "model"))
+        .to eq(["describe", "When to run which specs", "How we test", "claude-code", "claude-opus-5-5"])
+    end
+
+    it "adds no entry when the description stays the same" do
+      describe_file("How we test")
+
+      expect(history(file).map { it.fetch("op") }).to eq(%w[create])
+    end
+
+    it "takes back a describe, author and all", :aggregate_failures do
+      Agents::Slice["operations.describe_memory_file"].call(file, { description: "Owner notes" })
+      revert(file, history(file).first.fetch("id"))
+
+      expect(mcp_answer("read_memory_file", id: file).fetch("description")).to eq(marked("How we test"))
+      expect(trusted(history(file)).first.values_at("op", "text", "was_text"))
+        .to eq(["revert", "How we test", "Owner notes"])
+    end
+
+    it "refuses a describe that a later one changed" do
+      describe_file("First")
+      first = history(file).first.fetch("id")
+      describe_file("Second")
+
+      expect(revert(file, first))
+        .to eq("it changed since, in history entry #{history(file).first.fetch('id')}; revert that entry first")
     end
   end
 

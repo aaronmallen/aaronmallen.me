@@ -4,10 +4,11 @@ module Agents
   module Operations
     class RevertMemoryEvent < Blog::Operation
       ADD = Blog::Types::MemoryEventOp["add"]
+      DESCRIBE = Blog::Types::MemoryEventOp["describe"]
       EDIT = Blog::Types::MemoryEventOp["edit"]
       REMOVE = Blog::Types::MemoryEventOp["remove"]
       REVERT = Blog::Types::MemoryEventOp["revert"]
-      REVERTIBLE = [ADD, EDIT, REMOVE].freeze
+      REVERTIBLE = [ADD, EDIT, REMOVE, DESCRIBE].freeze
 
       Undo = Data.define(:fact, :history)
 
@@ -26,9 +27,7 @@ module Agents
 
         transaction do
           event = step revertible(memory_file_queries.event(memory_file_id, id))
-          fact = memory_fact_mutations.for_update(memory_file_id, event.memory_fact_id)
-          step unchanged(event)
-          reverse(event, fact, author(fields), at)
+          event.op == DESCRIBE ? redescribe(event, author(fields)) : refact(event, author(fields), at)
         end
       end
 
@@ -37,6 +36,27 @@ module Agents
       def earlier_author(event) = { agent: event.was_agent, model: event.was_model }
 
       def earlier_text(event) = { type: event.was_type, text: event.was_text }
+
+      def redescribe(event, by)
+        file = memory_file_mutations.by_id_for_update(event.memory_file_id)
+        step unchanged(event, memory_file_mutations.last_description_event_id(file.id))
+
+        memory_file_mutations.update(
+          file.id,
+          { description: event.was_text, description_agent: event.was_agent, description_model: event.was_model },
+        )
+        memory_file_mutations.record(
+          file.id, REVERT,
+          reverted_event_id: event.id, text: event.was_text, was_text: file.description,
+          was_agent: file.description_agent, was_model: file.description_model, **by,
+        )
+      end
+
+      def refact(event, by, at)
+        fact = memory_fact_mutations.for_update(event.memory_file_id, event.memory_fact_id)
+        step unchanged(event, memory_fact_mutations.last_event_id(event.memory_fact_id))
+        reverse(event, fact, by, at)
+      end
 
       def reverse(event, fact, by, at)
         undone = undo(event, fact, at)
@@ -53,8 +73,7 @@ module Agents
         found(event).bind { REVERTIBLE.include?(it.op) ? Success(it) : Failure(:unrevertible) }
       end
 
-      def unchanged(event)
-        latest = memory_fact_mutations.last_event_id(event.memory_fact_id)
+      def unchanged(event, latest)
         latest == event.id ? Success(event) : Failure([:changed, latest])
       end
 

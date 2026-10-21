@@ -27,7 +27,7 @@ RSpec.describe "Admin screens", type: :feature do
       "memory file" => -> { visit "/admin/agents/memories/#{memory_file_id}" },
       "memory file editing" => lambda do
         visit "/admin/agents/memories/#{memory_file_id}"
-        find(".memory-edit summary").click
+        first(".memory-edit summary").click
       end,
     }
   end

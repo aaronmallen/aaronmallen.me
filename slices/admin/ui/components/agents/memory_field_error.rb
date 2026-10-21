@@ -6,7 +6,8 @@ module Admin
       module Agents
         class MemoryFieldError < Blog::UI::FieldError
           CONTRACTS = [
-            ::Agents::Contracts::MemoryFactContract, ::Agents::Contracts::MemoryFileContract,
+            ::Agents::Contracts::MemoryDescriptionContract, ::Agents::Contracts::MemoryFactContract,
+            ::Agents::Contracts::MemoryFileContract,
             ::Agents::Contracts::MemoryScopeContract,
           ].freeze
           SCOPE = "memory"

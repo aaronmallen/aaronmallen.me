@@ -5,7 +5,7 @@ module Admin
     module Components
       module Agents
         class MemoryHistory < Component
-          EDIT = Blog::Types::MemoryEventOp["edit"]
+          CHANGES = %w[edit describe].map { Blog::Types::MemoryEventOp[it] }.freeze
           OPS = Blog::Types::MemoryEventOp.values.to_h { [it, ".ops.#{it}"] }.freeze
           REVERTIBLE = ::Agents::Operations::RevertMemoryEvent::REVERTIBLE
           REVERTS = REVERTIBLE.to_h { [it, ".reverts.#{it}"] }.freeze
@@ -47,7 +47,7 @@ module Admin
                 strong { author(event) }
                 plain " #{what(event)}"
               end
-              quote(event.was_text) if event.op == EDIT
+              quote(event.was_text) if CHANGES.include?(event.op)
               quote(event.text || event.was_text)
               acts(event)
             end

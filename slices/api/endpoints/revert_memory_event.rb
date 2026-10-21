@@ -7,7 +7,7 @@ module API
         additionalProperties: false,
         properties: {
           id: Memory::ID,
-          event_id: Memory::ID.merge(description: "the history entry to undo: an add, an edit or a remove"),
+          event_id: Memory::ID.merge(description: "the history entry to undo: an add, an edit, a remove or a describe"),
           **Memory::AUTHOR,
         },
         required: %w[id event_id agent model],

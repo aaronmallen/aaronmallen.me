@@ -110,6 +110,15 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(changed).to have_css(".agent-change-text", text: "Run specs through mise")
     end
 
+    it "lists a description change under the memory it changed" do
+      file = Agents::Slice["relations.memory_files"].where(path: "hanami.md").one
+      agents(:describe_memory_file, file[:id], { description: "How we test", **author, session_id: })
+      get "/admin/agents/sessions", { session: session_id }
+
+      expect(field("Memory it changed").all(".record-link-title").map(&:text).last)
+        .to eq("changed the description of hanami.md")
+    end
+
     it "lists the artifacts it wrote" do
       expect(field("Artifacts it wrote")).to have_css(".record-link-title", text: "v1 Index plan")
     end

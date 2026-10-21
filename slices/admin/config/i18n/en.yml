@@ -243,11 +243,12 @@ en:
       added: "Fact added"
       created: "Memory file created"
       deleted: "Memory file deleted · agents can no longer read it"
+      described: "Description saved"
       removed: "Fact removed · revert it from the history"
       reverted: "Reverted"
       saved: "Fact saved"
       scoped: "Scope changed"
-      stale: "A later change touched this fact · revert that one first"
+      stale: "A later change came after this one · revert that one first"
   people_page:
     toasts:
       added: "Person added"
@@ -626,6 +627,7 @@ en:
           ops:
             add: "added a fact"
             create: "created the file"
+            describe: "changed the description"
             edit: "changed a fact"
             remove: "removed a fact"
             scope: "moved the file to a new scope"
@@ -633,6 +635,7 @@ en:
           reverted: "reverted"
           reverts:
             add: "reverted an addition"
+            describe: "reverted a description change"
             edit: "reverted an edit"
             remove: "reverted a removal"
           session: "Session"
@@ -652,6 +655,15 @@ en:
           tasks: "A session on a task also lists that task's files."
           title: "What a session's index lists"
           working_in: "Working in"
+        memory_index_line:
+          description: "Description"
+          edit: "Edit"
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          note: "what a session starts with"
+          save: "Save"
+          title: "Index line"
         memory_new_form:
           cancel: "Cancel"
           create: "Create"
@@ -680,6 +692,7 @@ en:
           ops:
             add: "added to %{path}"
             create: "created %{path}"
+            describe: "changed the description of %{path}"
             edit: "changed in %{path}"
             remove: "removed from %{path}"
             revert: "reverted in %{path}"

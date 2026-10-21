@@ -3,6 +3,8 @@
 module Agents
   module Operations
     class DescribeMemoryFile < Blog::Operation
+      DESCRIBE = Blog::Types::MemoryEventOp["describe"]
+
       include SessionWrite
       include Deps[
         contract: "contracts.memory_description_contract",
@@ -24,8 +26,15 @@ module Agents
 
       private
 
-      def describe(file, description:, agent:, model:, **)
-        memory_file_mutations.update(file.id, { description:, description_agent: agent, description_model: model })
+      def describe(file, description:, **fields)
+        memory_file_mutations.update(
+          file.id, { description:, description_agent: fields[:agent], description_model: fields[:model] },
+        )
+        memory_file_mutations.record(
+          file.id, DESCRIBE,
+          text: description, was_text: file.description, was_agent: file.description_agent,
+          was_model: file.description_model, **author(fields),
+        )
       end
     end
   end

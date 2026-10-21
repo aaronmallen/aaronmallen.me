@@ -21,7 +21,10 @@ module Agents
         ids = events.map(&:id)
 
         {
-          latest: memory_events.latest_by_fact(events.filter_map(&:memory_fact_id).uniq),
+          latest: {
+            **memory_events.latest_by_fact(events.filter_map(&:memory_fact_id).uniq),
+            nil => events.first&.then { memory_events.last_description_id(it.memory_file_id) },
+          },
           reverted: memory_events.where(reverted_event_id: ids).pluck(:reverted_event_id).to_set,
           undone: memory_events.where(id: events.filter_map(&:reverted_event_id)).pluck(:id, :op).to_h,
         }

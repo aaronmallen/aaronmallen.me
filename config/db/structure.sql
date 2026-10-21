@@ -199,7 +199,8 @@ CREATE TYPE public.memory_event_op AS ENUM (
     'edit',
     'remove',
     'revert',
-    'scope'
+    'scope',
+    'describe'
 );
 
 
@@ -3198,16 +3199,17 @@ CREATE TABLE public.memory_events (
     was_model public.contributor_slug,
     CONSTRAINT memory_events_author_check CHECK ((num_nonnulls(agent, model) = ANY (ARRAY[0, 2]))),
     CONSTRAINT memory_events_op_check CHECK (
-CASE op
-    WHEN 'create'::public.memory_event_op THEN (num_nonnulls(memory_fact_id, text, was_text, reverted_event_id) = 0)
-    WHEN 'scope'::public.memory_event_op THEN (num_nonnulls(memory_fact_id, text, was_text, reverted_event_id) = 0)
-    WHEN 'add'::public.memory_event_op THEN ((memory_fact_id IS NOT NULL) AND (text IS NOT NULL) AND (num_nonnulls(was_text, reverted_event_id) = 0))
-    WHEN 'edit'::public.memory_event_op THEN ((num_nonnulls(memory_fact_id, text, was_text) = 3) AND (reverted_event_id IS NULL))
-    WHEN 'remove'::public.memory_event_op THEN ((memory_fact_id IS NOT NULL) AND (was_text IS NOT NULL) AND (num_nonnulls(text, reverted_event_id) = 0))
-    WHEN 'revert'::public.memory_event_op THEN ((num_nonnulls(memory_fact_id, reverted_event_id) = 2) AND (num_nonnulls(text, was_text) > 0))
+CASE (op)::text
+    WHEN 'create'::text THEN (num_nonnulls(memory_fact_id, text, was_text, reverted_event_id) = 0)
+    WHEN 'scope'::text THEN (num_nonnulls(memory_fact_id, text, was_text, reverted_event_id) = 0)
+    WHEN 'describe'::text THEN ((memory_fact_id IS NULL) AND (num_nonnulls(text, was_text) = 2) AND (reverted_event_id IS NULL))
+    WHEN 'add'::text THEN ((memory_fact_id IS NOT NULL) AND (text IS NOT NULL) AND (num_nonnulls(was_text, reverted_event_id) = 0))
+    WHEN 'edit'::text THEN ((num_nonnulls(memory_fact_id, text, was_text) = 3) AND (reverted_event_id IS NULL))
+    WHEN 'remove'::text THEN ((memory_fact_id IS NOT NULL) AND (was_text IS NOT NULL) AND (num_nonnulls(text, reverted_event_id) = 0))
+    WHEN 'revert'::text THEN ((reverted_event_id IS NOT NULL) AND (num_nonnulls(text, was_text) > 0))
     ELSE false
 END),
-    CONSTRAINT memory_events_state_check CHECK ((((type IS NULL) = (text IS NULL)) AND ((was_type IS NULL) = (was_text IS NULL)))),
+    CONSTRAINT memory_events_state_check CHECK (((memory_fact_id IS NULL) OR (((type IS NULL) = (text IS NULL)) AND ((was_type IS NULL) = (was_text IS NULL))))),
     CONSTRAINT memory_events_was_author_check CHECK (((num_nonnulls(was_agent, was_model) = ANY (ARRAY[0, 2])) AND ((was_agent IS NULL) OR (was_text IS NOT NULL))))
 );
 
@@ -9672,5 +9674,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261019160001_drop_memory_fact_text_length_check.rb'),
 ('20261020100000_add_description_to_memory_files.rb'),
 ('20261020210000_require_memory_file_description.rb'),
+('20261021020000_add_describe_to_memory_event_op.rb'),
 ('20261021030000_create_agent_session_index_lines.rb'),
 ('20261021110000_drop_short_code_length.rb');

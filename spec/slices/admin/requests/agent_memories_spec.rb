@@ -308,6 +308,88 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(last_response.body).to include("&lt;script&gt;alert(1)&lt;/script&gt;")
     end
 
+    describe "its index line" do
+      def describe_file(text) = admin_post("#{file_path(file)}/description", memory_file: { description: text })
+
+      def index_line = page.find(".card", text: t("ui.components.agents.memory_index_line.title"))
+
+      it "shows the path, scope, fact count and description", :aggregate_failures do
+        fact
+        get file_path(file)
+
+        expect([index_line.find("code").text, index_line.find(".pill").text, index_line.find(".meta").text])
+          .to eq(["hanami.md", "Global", "1 fact"])
+        expect(index_line).to have_css(".memory-index-description", text: "Notes")
+      end
+
+      it "changes the description" do
+        describe_file("How we test")
+
+        expect([toast, Agents::Slice["repos.memory_file_queries"].by_id(file.id).description])
+          .to eq([t("memories_page.toasts.described"), "How we test"])
+      end
+
+      it "adds a describe entry with the old and new text, by the owner" do
+        describe_file("How we test")
+
+        expect(events(file).last.values_at(:op, :text, :was_text, :agent, :model))
+          .to eq(["describe", "How we test", "Notes", nil, nil])
+      end
+
+      it "shows the entry in the history with both texts", :aggregate_failures do
+        describe_file("How we test")
+        get file_path(file)
+        entry = page.find("#memory-event-#{events(file).last[:id]}")
+
+        expect(entry).to have_text(t("ui.components.agents.memory_history.ops.describe"))
+        expect(entry.all(".memory-quote").map(&:text)).to eq(["Notes", "How we test"])
+      end
+
+      it "reverts a describe, and the description goes back", :aggregate_failures do
+        agents(:describe_memory_file, file.id, { description: "How we test", **author })
+        admin_post("#{file_path(file)}/history/#{events(file).last[:id]}/revert")
+
+        expect(Agents::Slice["repos.memory_file_queries"].by_id(file.id))
+          .to have_attributes(description: "Notes", description_agent: nil)
+        expect(events(file).last.values_at(:op, :text, :was_text)).to eq(["revert", "Notes", "How we test"])
+      end
+
+      it "offers a revert only on the latest describe", :aggregate_failures do
+        2.times { describe_file("Take #{it}") }
+        get file_path(file)
+
+        first, second = events(file).last(2)
+        expect(page).to have_no_css("#memory-event-#{first[:id]} form")
+        expect(page).to have_css("#memory-event-#{second[:id]} form button", text: "Revert")
+      end
+
+      it "names what a revert of a describe undid" do
+        describe_file("How we test")
+        admin_post("#{file_path(file)}/history/#{events(file).last[:id]}/revert")
+        get file_path(file)
+
+        expect(page.find("#memory-event-#{events(file).last[:id]}"))
+          .to have_text(t("ui.components.agents.memory_history.reverts.describe"))
+      end
+
+      it "refuses a blank description and opens the form", :aggregate_failures do
+        describe_file(" ")
+
+        error = t("ui.components.agents.memory_field_error.description.blank")
+
+        expect(last_response.status).to eq(422)
+        expect(index_line).to have_css("details.memory-edit[open] #memory-description-error", text: error)
+      end
+
+      it "refuses a description over more than one line" do
+        describe_file("One\nTwo")
+
+        expect(index_line).to have_css(
+          "#memory-description-error", text: t("ui.components.agents.memory_field_error.description.format"),
+        )
+      end
+    end
+
     it "answers 404 for a file that does not exist" do
       get "/admin/agents/memories/#{Blog::Constants::INTEGER_MAX}"
 

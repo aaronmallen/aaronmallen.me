@@ -44,6 +44,7 @@ module Admin
     get "/agents/memories/:id", to: "agents.memories.show", as: :memory_file, id: ID
     post "/agents/memories/:id/delete", to: "agents.memories.destroy", as: :delete_memory_file, id: ID
     post "/agents/memories/:id/records", to: "agents.memories.link_record", as: :link_memory_file_record, id: ID
+    post "/agents/memories/:id/description", to: "agents.memories.describe", as: :describe_memory_file, id: ID
     post "/agents/memories/:id/scope", to: "agents.memories.change_scope", as: :change_memory_file_scope, id: ID
     post "/agents/memories/:id/facts", to: "agents.memories.add_fact", as: :add_memory_file_fact, id: ID
     post(
