@@ -32,10 +32,10 @@ RSpec.describe Shares::Operations::UploadShare do
       "a zip" => ["PK\x03\x04\x14\x00\x00\x00\x00\x00".b + Random.bytes(64), "files.zip", "application/zip"],
       "an mp4" => ["\x00\x00\x00\x18ftypmp42".b + Random.bytes(64), "clip.mp4", "video/mp4"],
     }.each do |name, (bytes, filename, type)|
-      it "stores #{name} byte for byte under an eight character code", :aggregate_failures do
+      it "stores #{name} byte for byte under its short code id in base 36", :aggregate_failures do
         share = upload_share(bytes, filename, type).value!
 
-        expect(share.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
+        expect(share.code).to eq(share.short_code_id.to_s(36))
         expect(share).to have_attributes(filename:, content_type: type, byte_size: bytes.bytesize, download_count: 0)
         expect(stored.fetch(share.key)).to eq(body: bytes, content_type: type)
       end
@@ -59,11 +59,11 @@ RSpec.describe Shares::Operations::UploadShare do
       expect(upload_share("data", "blob", "").value!.content_type).to eq("application/octet-stream")
     end
 
-    it "tries a new code when the first is taken", :aggregate_failures do
-      Shares::Slice["relations.short_codes"].insert(code: "aaaaaaaa")
-      allow(Shares::Helpers::Code).to receive(:pad).and_return("aaaaaaaa", "bbbbbbbb")
+    it "skips to the next id when the generated code is taken", :aggregate_failures do
+      id = Shares::Slice["relations.short_codes"].insert(code: "first")
+      Shares::Slice["relations.short_codes"].insert(code: (id + 2).to_s(36))
 
-      expect(upload_share.value!.code).to eq("bbbbbbbb")
+      expect(upload_share.value!.code).to eq((id + 3).to_s(36))
       expect(shares.size).to eq(1)
     end
 

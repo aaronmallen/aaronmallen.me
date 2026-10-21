@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [db, lib, admin, agents, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
 amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957", "#1056",
-  "#1743", "#607"]
+  "#1743", "#607", "#1889"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -77,7 +77,7 @@ raises again.
 | `record_links_task_pair_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: task_pair` |
 | `service_connections_provider_host_account_id_index` | unique index | `Services::Operations::AddConnection` | the `taken` refusal |
 | `short_codes_code_key` | unique | `Shares::Operations::ChangeCode` | `code: taken` |
-| `short_codes_code_key` | unique | `Shares::Operations::UploadShare` | a new random code, up to five tries |
+| `short_codes_code_key` | unique | `Shares::Operations::UploadShare` | the next id as its code, up to five tries |
 | `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |

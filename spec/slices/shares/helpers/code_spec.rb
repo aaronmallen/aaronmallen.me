@@ -1,18 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Shares::Helpers::Code do
-  it "draws a full code from the alphabet" do
-    expect(described_class.pad).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
-  end
-
-  it "pads a short code to 8 and keeps its start" do
-    expect(described_class.pad("talk")).to match(/\Atalk[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
-  end
-
-  it "leaves a code of 8 or more alone" do
-    expect(described_class.pad("abcdefghjkmnpqrs")).to eq("abcdefghjkmnpqrs")
-  end
-
   def collide(constraint, fails: Float::INFINITY)
     repo = instance_double(Blog::DB::Repo, violated_constraint: constraint)
     error = ROM::SQL::UniqueConstraintError.new(StandardError.new(constraint))

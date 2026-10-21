@@ -3,10 +3,10 @@
 RSpec.describe Shares::Operations::CreateShortLink do
   def create(**params) = described_class.new.call({ destination: "https://example.com/talk" }.merge(params))
 
-  it "makes a link with a random eight character code", :aggregate_failures do
+  it "makes a link whose code is its short code id in base 36", :aggregate_failures do
     link = create.value!
 
-    expect(link.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
+    expect(link.code).to eq(link.short_code_id.to_s(36))
     expect(link.destination).to eq("https://example.com/talk")
     expect(link.click_count).to eq(0)
   end
@@ -14,19 +14,21 @@ RSpec.describe Shares::Operations::CreateShortLink do
   it "makes a link with the code and title I give", :aggregate_failures do
     link = create(code: " Talk ", title: " My talk ").value!
 
-    expect(link.code).to match(/\Atalk[abcdefghjkmnpqrstuvwxyz23456789]{4}\z/)
+    expect(link.code).to eq("talk")
     expect(link.title).to eq("My talk")
   end
 
-  it "keeps a code I give of eight or more as it is" do
-    expect(create(code: "talk-at-rubyconf").value!.code).to eq("talk-at-rubyconf")
+  it "skips to the next id when the generated code is taken" do
+    id = Shares::Slice["relations.short_codes"].insert(code: "first")
+    Shares::Slice["relations.short_codes"].insert(code: (id + 2).to_s(36))
+
+    expect(create.value!.code).to eq((id + 3).to_s(36))
   end
 
-  it "pads a code I give again when the first padding is taken" do
-    Shares::Slice["relations.short_codes"].insert(code: "talkaaaa")
-    allow(Shares::Helpers::Code).to receive(:pad).and_return("talkaaaa", "talkbbbb")
+  it "refuses a code a link holds" do
+    create(code: "talk")
 
-    expect(create(code: "talk").value!.code).to eq("talkbbbb")
+    expect(create(code: "talk").failure).to eq([:invalid, { code: ["taken"] }])
   end
 
   it "refuses a code a share holds" do

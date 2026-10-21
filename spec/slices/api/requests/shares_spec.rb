@@ -48,8 +48,10 @@ RSpec.describe "API shares", type: :request do
       ), 201])
     end
 
-    it "gives the share an eight letter code" do
-      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
+    it "gives the share its short code id in base 36" do
+      code = answered.fetch("code")
+      shares => [share]
+      expect(code).to eq(share[:short_code_id].to_s(36))
     end
 
     it "stores the file byte for byte" do
@@ -126,8 +128,10 @@ RSpec.describe "API shares", type: :request do
       ), 201])
     end
 
-    it "gives the group an eight letter code" do
-      expect(answered.fetch("code")).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
+    it "gives the group its short code id in base 36" do
+      code = answered.fetch("code")
+      Shares::Slice["relations.share_groups"].to_a => [group]
+      expect(code).to eq(group[:short_code_id].to_s(36))
     end
 
     it "answers with each file and its own link" do

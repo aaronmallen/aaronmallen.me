@@ -15,8 +15,7 @@ module Shares
 
       def change(owner, code)
         constrained(mutations, Helpers::Code::CONSTRAINTS) do
-          changed = Helpers::Code.retrying(mutations) { transaction { mutations.change_code(owner.short_code_id, code) } }
-          Success(changed)
+          Success(transaction { mutations.change_code(owner.short_code_id, code) })
         end
       end
     end

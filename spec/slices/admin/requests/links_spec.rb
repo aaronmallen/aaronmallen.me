@@ -167,11 +167,12 @@ RSpec.describe "Admin links", type: :request do
       expect(form).to have_button("Shorten")
     end
 
-    it "makes a link with a random code and says so", :aggregate_failures do
+    it "makes a link with a generated code and says so", :aggregate_failures do
       shorten(destination: " https://example.com/talk ", code: "")
       follow_redirect!
 
-      expect(links.map { [it[:destination], it[:code].length] }).to eq([["https://example.com/talk", 8]])
+      links => [link]
+      expect([link[:destination], link[:code]]).to eq(["https://example.com/talk", link[:short_code_id].to_s(36)])
       expect(page).to have_css("[data-toast]", text: "Shortened")
     end
 

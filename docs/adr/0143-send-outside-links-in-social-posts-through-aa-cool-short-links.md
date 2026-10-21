@@ -5,7 +5,7 @@ status: active
 created: 2026-10-10
 area: [social, admin, db]
 issue: "#1066"
-amended: ["#1856", "#1888"]
+amended: ["#1856", "#1888", "#1889"]
 tags: [social, links, short-links, redirect, aa.cool, clicks, webmentions, bluesky, delivery]
 ---
 
@@ -32,7 +32,7 @@ the part of ADR 0106 that turned down a redirect through the site.
 **At delivery.** `Social::Operations::ExpandForNetwork` swaps each link for its short link when a post sends, with
 the other tokens [ADR 0079][0079] expands there. The stored parts keep the long links I typed. A link whose host
 the site owns ([ADR 0014][0014]) stays long, so webmentions keep working, and a link already on `aa.cool` sends as
-typed. A link I shortened before reuses its code. Any other link gets a new random code and shows in the admin
+typed. A link I shortened before reuses its code. Any other link gets a new code and shows in the admin
 Links tab. The counter and preview count a short link's length without making one. Posts sent through MCP take the
 same path.
 

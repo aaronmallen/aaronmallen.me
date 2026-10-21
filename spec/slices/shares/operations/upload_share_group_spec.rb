@@ -47,8 +47,8 @@ RSpec.describe Shares::Operations::UploadShareGroup do
         upload(share_upload("a", "a.txt", "text/plain"), share_upload("%PDF", "b.pdf", "application/pdf")).value!
       end
 
-      it "makes one group under one eight character code", :aggregate_failures do
-        expect(group.code).to match(/\A[abcdefghjkmnpqrstuvwxyz23456789]{8}\z/)
+      it "makes one group under its short code id in base 36", :aggregate_failures do
+        expect(group.code).to eq(group.short_code_id.to_s(36))
         expect(group).to have_attributes(view_count: 0, zip_download_count: 0)
         expect(Shares::Slice["relations.shares"].count).to eq(0)
       end
@@ -110,11 +110,11 @@ RSpec.describe Shares::Operations::UploadShareGroup do
       expect(group.share_group_files.map(&:content_type)).to eq(["application/octet-stream"])
     end
 
-    it "tries a new code when the first is taken" do
-      Shares::Slice["relations.short_codes"].insert(code: "aaaaaaaa")
-      allow(Shares::Helpers::Code).to receive(:pad).and_return("aaaaaaaa", "bbbbbbbb")
+    it "skips to the next id when the generated code is taken" do
+      id = Shares::Slice["relations.short_codes"].insert(code: "first")
+      Shares::Slice["relations.short_codes"].insert(code: (id + 2).to_s(36))
 
-      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq("bbbbbbbb")
+      expect(upload(share_upload("a", "a.txt", "text/plain")).value!.code).to eq((id + 3).to_s(36))
     end
 
     it "refuses no files" do

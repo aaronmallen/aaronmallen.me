@@ -1343,7 +1343,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       text = mastodon_text(queued(parts: ["see https://github.com/ada and #{post_url}"]))
       link = short_link("https://github.com/ada")
 
-      expect(link.code).to match(/\A[a-z2-9]{8}\z/)
+      expect(link.code).to eq(link.short_code_id.to_s(36))
       expect(text).to eq("see http://shares.localhost/#{link.code} and #{post_url}?ref=mastodon")
     end
 

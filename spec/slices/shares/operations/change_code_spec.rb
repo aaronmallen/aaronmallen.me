@@ -22,19 +22,9 @@ RSpec.describe Shares::Operations::ChangeCode do
     expect(codes).not_to include(old)
   end
 
-  it "pads a code shorter than 8 and keeps what I typed as its start", :aggregate_failures do
-    code = change("resume").value!
-
-    expect(code).to match(/\Aresume[abcdefghjkmnpqrstuvwxyz23456789]{2}\z/)
-    expect(codes).to eq([code])
-  end
-
-  it "pads again when the first padding is taken" do
-    share
-    Shares::Slice["relations.short_codes"].insert(code: "resumeaa")
-    allow(Shares::Helpers::Code).to receive(:pad).and_return("resumeaa", "resumebb")
-
-    expect(change("resume").value!).to eq("resumebb")
+  it "keeps a short code as I typed it", :aggregate_failures do
+    expect(change("cv").value!).to eq("cv")
+    expect(codes).to eq(["cv"])
   end
 
   it "changes a short link's code" do

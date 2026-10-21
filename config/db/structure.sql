@@ -458,8 +458,7 @@ CREATE DOMAIN public.scroll_depth AS smallint
 --
 
 CREATE DOMAIN public.short_code AS text
-	CONSTRAINT short_code_check CHECK ((VALUE ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text))
-	CONSTRAINT short_code_length CHECK ((char_length(VALUE) >= 8));
+	CONSTRAINT short_code_check CHECK ((VALUE ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text));
 
 
 --
@@ -9673,4 +9672,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261019160001_drop_memory_fact_text_length_check.rb'),
 ('20261020100000_add_description_to_memory_files.rb'),
 ('20261020210000_require_memory_file_description.rb'),
-('20261021030000_create_agent_session_index_lines.rb');
+('20261021030000_create_agent_session_index_lines.rb'),
+('20261021110000_drop_short_code_length.rb');
