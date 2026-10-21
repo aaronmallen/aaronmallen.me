@@ -21,7 +21,7 @@ module API
       FACT_TEXT = { type: "string", description: "the fact" }.freeze
       ID = Helpers::Schema::ID
       LOADS = Helpers::Schema::ID.merge(
-        description: "the open session start_session gave, to record the files read against it; leave it out for none",
+        description: "the session start_session gave, to record the files read; an ended one answers but records none",
       ).freeze
       LOADED = {
         files: Helpers::Schema.list(Serializers::LoadedMemoryFile.reference).merge(

@@ -105,6 +105,38 @@ RSpec.describe "API sessions", type: :request do
     end
   end
 
+  describe "an ended session" do
+    let!(:file) { noted_file }
+
+    before { call_api(:post, "/agent_sessions/#{session_id}/end") }
+
+    def recorded
+      %w[loads searches reads].sum { Agents::Slice["relations.agent_session_#{it}"].count }
+    end
+
+    it "answers a read as a read with no session does" do
+      expect(call_api(:get, "/memory_files/#{file}", { session_id: })).to eq(call_api(:get, "/memory_files/#{file}"))
+    end
+
+    it "answers a search as a search with no session does" do
+      expect(call_api(:get, "/memory/search", { query: "cache", session_id: }))
+        .to eq(call_api(:get, "/memory/search", { query: "cache" }))
+    end
+
+    it "records no load, search or read" do
+      call_api(:get, "/memory_files/#{file}", { session_id: })
+      call_api(:get, "/memory/search", { query: "cache", session_id: })
+
+      expect(recorded).to eq(0)
+    end
+
+    it "refuses a write" do
+      call_api(:post, "/memory_files/#{file}/facts", { type: "gotcha", text: "Late", session_id:, **author })
+
+      expect(document.fetch("errors")).to eq({ "session_id" => ["that session is not open; start_session opens one"] })
+    end
+  end
+
   it "records each index line it returns and returns the same index" do
     file = noted_file
     files = call_api(:post, "/agent_sessions", { title: "Spike", **author }).fetch("files")

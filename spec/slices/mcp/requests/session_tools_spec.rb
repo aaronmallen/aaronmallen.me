@@ -97,11 +97,11 @@ RSpec.describe "MCP session tools", type: :request do
       expect(Time.iso8601(sessions.first.fetch("last_seen_at"))).to be_within(5).of(Time.now)
     end
 
-    it "refuses a read or a search into a session that ended", :aggregate_failures do
+    it "answers a read and a search on a session that ended and records neither", :aggregate_failures do
       mcp_answer("end_session", id: session_id)
 
-      expect(mcp_text("read_memory_file", id: hanami, session_id:)).to include("that session is not open")
-      expect(mcp_text("search_memory", query: "cache", session_id:)).to include("that session is not open")
+      expect(mcp_answer("read_memory_file", id: hanami, session_id:)).to include("path" => "hanami.md")
+      expect(mcp_answer("search_memory", query: "cache", session_id:)).to include("count" => 2)
       expect(loaded).to eq([])
     end
   end

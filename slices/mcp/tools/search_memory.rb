@@ -7,7 +7,8 @@ module MCP
                   "file that holds it; read_memory_file reads that file whole. Give repo as owner/name, " \
                   "project_id or task_id to search the files read_memory lists for them, and scope to keep one " \
                   "scope; leave them all out to search every file. count gives the facts on this page. Give " \
-                  "session_id to record the search, its facts and the files they came from against that session. " \
+                  "session_id to record the search, its facts and the files they came from against that session; " \
+                  "an ended session still allows the search but records nothing. " \
                   "#{API::Helpers::Paging::USAGE}. #{Untrusted::MEMORY}"
       endpoint
     end

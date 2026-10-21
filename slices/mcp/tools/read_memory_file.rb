@@ -7,7 +7,7 @@ module MCP
                   "first, with the agent and model that made each, or null for the owner. Facts come whole; " \
                   "history comes a page at a time. When more remains, partial comes back true and next_page holds " \
                   "the page to send for older changes. Give session_id to record the file as read by that " \
-                  "session. #{Untrusted::MEMORY}"
+                  "session; an ended session still allows the read but records nothing. #{Untrusted::MEMORY}"
       endpoint
     end
   end

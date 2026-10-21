@@ -13,6 +13,8 @@ module Agents
 
       def by_id(id) = agent_sessions.combine(*DRAWER).by_pk(id).one
 
+      def ended?(id) = agent_sessions.by_pk(id).exclude(ended_at: nil).exist?
+
       def listed(page) = page.fill(agent_sessions.combine(*LISTED).latest_first.paged(page).to_a)
 
       def memory_changes(session_id) = memory_events.where(session_id:).session_changes.to_a
