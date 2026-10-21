@@ -50,7 +50,7 @@ module Admin
 
           def image? = Shares::ContentType.image?(@file.content_type)
 
-          def link = Helpers::ShareLink.for(@group.short, @file.id)
+          def link = Helpers::ShareLink.for(@group.code, @file.id)
 
           def meta
             downloads = Blog::Helpers::Figures.count(@file.download_count)

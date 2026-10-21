@@ -47,7 +47,7 @@ module Admin
 
           def image? = Shares::ContentType.image?(@share.content_type)
 
-          def link = Helpers::ShareLink.for(@share.short)
+          def link = Helpers::ShareLink.for(@share.code)
 
           def meta
             span { Blog::Helpers::Figures.size(@share.byte_size) }
@@ -61,7 +61,7 @@ module Admin
             ) { @share.filename }
           end
 
-          def preview = Helpers::ShareLink.preview(@share.short)
+          def preview = Helpers::ShareLink.preview(@share.code)
 
           def thumb
             return img(class: "file-card-thumb", src: preview, alt: @share.alt_text.to_s, loading: "lazy") if image?

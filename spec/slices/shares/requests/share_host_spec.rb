@@ -55,10 +55,12 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
-  describe "a prefix" do
+  describe "a code that shares its start with another" do
     let(:files) do
-      %w[first-file secondfile third-file].map { |body| share.tap { stub_object(it, body:) } }
+      %w[first-file secondfile].map { |body| share.tap { stub_object(it, body:) } }
     end
+
+    def codes = files.map { Shares::Slice["repos.share_queries"].find(it.id).code }
 
     def opened(path) = fetch(path).then { last_response.ok? ? last_response.body : last_response.status }
 
@@ -66,46 +68,18 @@ RSpec.describe "The share host", type: :request do
 
     def short_codes = Shares::Slice["relations.short_codes"]
 
-    def shorts(shown = files) = shown.map { Shares::Slice["repos.share_queries"].find(it.id).short }
+    before { recode("abcdefgh", "abcdefghjk") }
 
-    before { recode("abcdefgh", "abcefghj", "abcfghjk") }
-
-    it "opens the oldest code that starts with it" do
-      expect(%w[/a /ab /abc /abce /abcf].map { opened(it) })
-        .to eq(%w[first-file first-file first-file secondfile third-file])
+    it "opens each record by its whole code only" do
+      expect(%w[/abcdefgh /abcdefghjk].map { opened(it) }).to eq(%w[first-file secondfile])
     end
 
-    it "opens a whole code before an older code that starts with it" do
-      recode("abcdefghjk", "abcdefgh")
-
-      expect(%w[/abcdefgh /abcdefghj].map { opened(it) }).to eq(%w[secondfile first-file])
+    it "answers 404 for a prefix of a code" do
+      expect(%w[/a /abcdefg /abcdefghj].map { opened(it) }).to eq([404, 404, 404])
     end
 
-    it "answers 404 when no code starts with it" do
-      expect(opened("/abd")).to eq(404)
-    end
-
-    it "opens the next oldest once the oldest is deleted" do
-      short_codes.by_pk(files.first.short_code_id).delete
-
-      expect(opened("/abc")).to eq("secondfile")
-    end
-
-    it "shows each record at the shortest path that opens it", :aggregate_failures do
-      expect(shorts).to eq(%w[a abce abcf])
-      expect(shorts.map { opened("/#{it}") }).to eq(%w[first-file secondfile third-file])
-    end
-
-    it "shows a whole code when an older code starts with it" do
-      recode("abcdefghjk", "abcdefgh")
-
-      expect(shorts).to eq(%w[a abcdefgh abcf])
-    end
-
-    it "shows a shorter path once an older code is deleted" do
-      short_codes.by_pk(files.first.short_code_id).delete
-
-      expect(shorts(files.drop(1))).to eq(%w[a abcf])
+    it "shows each record at its stored code" do
+      expect(codes).to eq(%w[abcdefgh abcdefghjk])
     end
   end
 
@@ -438,14 +412,10 @@ RSpec.describe "The share host", type: :request do
         group.share_group_files.each { stub_request(:get, share_store_url(it.key)).to_return(body: bytes) }
       end
 
-      it "opens the group's page, zip and files", :aggregate_failures do
-        expect(fetch("/grp")).to be_ok
-        expect(fetch("/grp.zip").headers["Content-Type"]).to eq("application/zip")
-        expect(fetch("/grp/#{file('notes.txt').id}").body).to eq(bytes)
-      end
-
-      it "opens no file of a group the prefix does not resolve to" do
-        expect(fetch("/grpz/#{file('notes.txt').id}").status).to eq(404)
+      it "opens neither the group's page, zip nor files", :aggregate_failures do
+        expect(fetch("/grp").status).to eq(404)
+        expect(fetch("/grp.zip").status).to eq(404)
+        expect(fetch("/grp/#{file('notes.txt').id}").status).to eq(404)
       end
     end
 

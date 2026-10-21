@@ -21,7 +21,7 @@ RSpec.describe Social::Operations::ExpandForNetwork do
   it "counts a link I shortened before at its own code" do
     Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/b", code: "my-own-talk")
 
-    expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/m")
+    expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/my-own-talk")
   end
 
   it "makes a short link when asked and queues a fetch of its title", :aggregate_failures, :commits do
@@ -29,7 +29,7 @@ RSpec.describe Social::Operations::ExpandForNetwork do
     link = Shares::Slice["repos.short_link_queries"].by_destination("https://example.com/b")
 
     expect(Shares::Jobs::FetchShortLinkTitle.jobs.map { it["args"] }).to eq([[link.id]])
-    expect(text).to eq("Read http://shares.localhost/#{link.short}")
+    expect(text).to eq("Read http://shares.localhost/#{link.code}")
   end
 
   it "reuses the short link it made before", :aggregate_failures do

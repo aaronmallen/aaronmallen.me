@@ -55,7 +55,7 @@ module Admin
 
           def image? = Shares::ContentType.image?(@share.content_type)
 
-          def link = Helpers::ShareLink.for(@share.short)
+          def link = Helpers::ShareLink.for(@share.code)
 
           def markdown = Helpers::ShareLink.file_markdown(@share, link)
 
@@ -77,7 +77,7 @@ module Admin
 
           def scope = self.class.scope(@share)
 
-          def thumb = Helpers::ShareLink.preview(@share.short)
+          def thumb = Helpers::ShareLink.preview(@share.code)
 
           def values = @values || { filename: @share.filename, code: @share.code, alt_text: @share.alt_text.to_s }
         end

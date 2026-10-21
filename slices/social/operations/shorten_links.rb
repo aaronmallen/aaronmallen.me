@@ -17,9 +17,9 @@ module Social
       private
 
       def code(url, make)
-        return shorten_link.call(url).fmap(&:short).value_or(nil) if make
+        return shorten_link.call(url).fmap(&:code).value_or(nil) if make
 
-        short_link_queries.by_destination(url)&.short || Blog::Constants::UNMADE_SHORT_CODE
+        short_link_queries.by_destination(url)&.code || Blog::Constants::UNMADE_SHORT_CODE
       end
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }

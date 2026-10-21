@@ -9,7 +9,6 @@ module Blog
         adapter :sql do
           register :crediting, Crediting, type: :relation
           register :full_text, FullText, type: :relation
-          register :short_coded, ShortCoded, type: :relation
           register :tagged, Taggings::Tagged, type: :relation
           register :taggings, Taggings, type: :relation
           register :tags, Tags, type: :relation

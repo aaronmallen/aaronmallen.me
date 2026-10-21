@@ -9,13 +9,13 @@ RSpec.describe "MCP share tools", type: :request do
     { data: Base64.strict_encode64(text), filename:, content_type: }.compact
   end
 
-  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).short}"
+  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).code}"
 
   def make_group(*files) = Shares::Slice["operations.upload_share_group"].call(files).value!
 
   def refusal(name, **) = mcp_call(name, **).values_at("isError", "content")
 
-  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).short}"
+  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).code}"
 
   def shares = Shares::Slice["relations.shares"].to_a
 
@@ -29,7 +29,7 @@ RSpec.describe "MCP share tools", type: :request do
       answered = answer("upload_share", **file("hello", "hello.txt", "text/plain"))
 
       expect(answered).to include(
-        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')[0]}",
+        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')}",
         "filename" => "hello.txt", "content_type" => "text/plain", "byte_size" => 5,
       )
     end

@@ -36,7 +36,7 @@ RSpec.describe "Admin file groups", type: :request do
       get "/admin/files"
       card = page.find(".file-card", text: "2 files")
 
-      expect(card).to have_css(".file-card-link", exact_text: "shares.localhost/#{group.short}")
+      expect(card).to have_css(".file-card-link", exact_text: "shares.localhost/#{group.code}")
       expect(card.find(".file-card-meta").text).to include("0 views")
     end
 
@@ -51,7 +51,7 @@ RSpec.describe "Admin file groups", type: :request do
     it "shows its first image as the thumbnail" do
       get "/admin/files"
 
-      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{group.short}/#{image[:id]}?preview']")
+      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{group.code}/#{image[:id]}?preview']")
     end
 
     it "shows a named group by its name in the list and its drawer", :aggregate_failures do
@@ -287,9 +287,9 @@ RSpec.describe "Admin file groups", type: :request do
 
     it "changes the code so the page moves with it", :aggregate_failures do
       old = group.code
-      save(code: "trip")
+      save(code: "beach-trip")
 
-      expect(server.get("/trip").status).to eq(200)
+      expect(server.get("/beach-trip").status).to eq(200)
       expect(server.get("/#{old}").status).to eq(404)
     end
 
@@ -308,10 +308,11 @@ RSpec.describe "Admin file groups", type: :request do
 
       it "says a new code moves the page and the old one stops working" do
         old = group.code
-        save(code: "trip")
+        save(code: "beach-trip")
         hint = i18n.t("ui.components.links.link_form.code_hint", host: "shares.localhost")
 
-        expect([server.get("/trip").status, server.get("/#{old}").status, hints]).to match([200, 404, include(hint)])
+        expect([server.get("/beach-trip").status, server.get("/#{old}").status,
+                hints]).to match([200, 404, include(hint)])
       end
 
       it "says the group's page uses the alt text for the image" do

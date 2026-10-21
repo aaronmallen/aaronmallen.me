@@ -40,7 +40,7 @@ module Admin
                                     confirm:)
           end
 
-          def link = Helpers::ShareLink.for(@share.short)
+          def link = Helpers::ShareLink.for(@share.code)
 
           def markdown = Helpers::ShareLink.file_markdown(@share, link)
 

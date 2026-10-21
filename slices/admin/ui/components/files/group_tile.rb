@@ -37,7 +37,7 @@ module Admin
 
           def image = files.find { Shares::ContentType.image?(it.content_type) }
 
-          def link = Helpers::ShareLink.for(@group.short)
+          def link = Helpers::ShareLink.for(@group.code)
 
           def meta
             span { Blog::Helpers::Figures.size(files.sum(&:byte_size)) }

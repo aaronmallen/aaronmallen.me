@@ -42,18 +42,18 @@ RSpec.describe "A short link on the share host", type: :request do
     expect(last_response.headers["Location"]).to eq("https://example.com/talk")
   end
 
-  it "sends a prefix of the code and counts the click", :aggregate_failures do
+  it "answers 404 for a prefix of the code and counts no click", :aggregate_failures do
     Shares::Slice["relations.short_codes"].where(code: link.code).update(code: "talkabcd")
     fetch("talk")
 
-    expect(last_response.headers["Location"]).to eq("https://example.com/talk")
-    expect(stored[:click_count]).to eq(1)
+    expect(last_response.status).to eq(404)
+    expect(stored[:click_count]).to eq(0)
   end
 
   describe "a changed code" do
     let!(:old) { link.code }
 
-    before { Shares::Slice["operations.change_code"].call(link, code: "talk") }
+    before { Shares::Slice["operations.change_code"].call(link, code: "talk-now") }
 
     it "answers 404 for the old code and forbids every cache to keep it", :aggregate_failures do
       fetch(old)
@@ -63,7 +63,7 @@ RSpec.describe "A short link on the share host", type: :request do
     end
 
     it "sends the new code to the destination" do
-      fetch("talk")
+      fetch("talk-now")
 
       expect(last_response.status).to eq(302)
     end

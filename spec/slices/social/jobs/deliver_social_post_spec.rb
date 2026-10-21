@@ -1344,7 +1344,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       link = short_link("https://github.com/ada")
 
       expect(link.code).to match(/\A[a-z2-9]{8}\z/)
-      expect(text).to eq("see http://shares.localhost/#{link.short} and #{post_url}?ref=mastodon")
+      expect(text).to eq("see http://shares.localhost/#{link.code} and #{post_url}?ref=mastodon")
     end
 
     it "leaves the new link's title to a job, so the page cannot hold up delivery", :aggregate_failures, :commits do
@@ -1361,7 +1361,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     it "reuses the code of a link I shortened before", :aggregate_failures do
       Shares::Slice["operations.create_short_link"].call(destination: "https://github.com/ada", code: "github-ada")
 
-      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/g")
+      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/github-ada")
       expect(Shares::Slice["relations.short_links"].count).to eq(1)
     end
 
@@ -1383,9 +1383,9 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "marks the aa.cool link with a Bluesky facet" do
       facets = facets_for("see https://github.com/ada")
-      short = short_link("https://github.com/ada").short
+      url = "http://shares.localhost/#{short_link('https://github.com/ada').code}"
 
-      expect(facets).to eq([facet("http://shares.localhost/#{short}", 4, 29)])
+      expect(facets).to eq([facet(url, 4, 4 + url.bytesize)])
     end
 
     {

@@ -11,7 +11,7 @@ RSpec.describe "API shares", type: :request do
 
   def group_files = Shares::Slice["relations.share_group_files"].to_a
 
-  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).short}"
+  def group_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_group_queries'].find(id).code}"
 
   def keep_puts
     stub_request(:put, %r{\A#{share_store_url}/}).to_return do |request|
@@ -28,7 +28,7 @@ RSpec.describe "API shares", type: :request do
 
   def refused(field) = { field.to_s => [API::Helpers::Upload::COMPLAINTS.dig(field, "format")] }
 
-  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).short}"
+  def share_link(id) = "http://shares.localhost/#{Shares::Slice['repos.share_queries'].find(id).code}"
 
   def shares = Shares::Slice["relations.shares"].to_a
 
@@ -42,7 +42,7 @@ RSpec.describe "API shares", type: :request do
 
     it "answers 201 with the share and its link" do
       expect([answered, status]).to match([include(
-        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')[0]}",
+        "id" => shares.first[:id], "url" => "http://shares.localhost/#{answered.fetch('code')}",
         "filename" => "hello.txt", "content_type" => "text/plain", "byte_size" => 5, "download_count" => 0,
         "alt_text" => nil,
       ), 201])

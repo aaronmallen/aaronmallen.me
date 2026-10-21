@@ -19,7 +19,7 @@ module API
       schema_attributes
       stamps :created_at
 
-      def url(file) = params.fetch(:settings).share_url(params.fetch(:short), file.id)
+      def url(file) = params.fetch(:settings).share_url(params.fetch(:code), file.id)
     end
   end
 end

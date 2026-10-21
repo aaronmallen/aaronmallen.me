@@ -3,7 +3,7 @@
 RSpec.describe "Admin links", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
 
-  def again_hint = i18n.t("ui.views.links.index.again", link: "shares.localhost/t")
+  def again_hint = i18n.t("ui.views.links.index.again", link: "shares.localhost/talk-now")
 
   def error(key) = i18n.t(key, scope: "ui.components.links.field_error")
 
@@ -66,8 +66,8 @@ RSpec.describe "Admin links", type: :request do
     it "copies the share host link and opens the destination", :aggregate_failures do
       get "/admin/links"
 
-      expect(row).to have_css("button.link-chip[data-record-key='http://shares.localhost/t']",
-                              text: "shares.localhost/t")
+      expect(row).to have_css("button.link-chip[data-record-key='http://shares.localhost/talk-now']",
+                              text: "shares.localhost/talk-now")
       expect(row).to have_css("a[href='https://www.example.com/talk'][target='_blank'][rel='noopener']")
     end
 
@@ -185,7 +185,7 @@ RSpec.describe "Admin links", type: :request do
       shorten(destination: "https://example.com/talk", code: "talk-now", accept: "application/json")
 
       expect(last_response.status).to eq(201)
-      expect(json).to eq("link" => "http://shares.localhost/t", "message" => "Shortened")
+      expect(json).to eq("link" => "http://shares.localhost/talk-now", "message" => "Shortened")
     end
 
     it "refuses a link that is not a web link and keeps what I typed", :aggregate_failures do
@@ -247,7 +247,7 @@ RSpec.describe "Admin links", type: :request do
   describe "a drawer" do
     let!(:made) { link("https://www.example.com/talk", code: "talk-now", at: Time.utc(2026, 9, 3, 12), clicks: 1) }
     let(:drawer) { page.find("dialog#link-#{made.id}-drawer", visible: :all) }
-    let(:confirm) { i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/t") }
+    let(:confirm) { i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/talk-now") }
 
     before { get "/admin/links" }
 
@@ -267,17 +267,17 @@ RSpec.describe "Admin links", type: :request do
     end
 
     it "copies the link and the host as markdown", :aggregate_failures do
-      expect(drawer).to have_css(".file-drawer-link", exact_text: "http://shares.localhost/t", visible: :all)
-      expect(drawer).to have_css("button[data-record-key='http://shares.localhost/t']", visible: :all)
+      expect(drawer).to have_css(".file-drawer-link", exact_text: "http://shares.localhost/talk-now", visible: :all)
+      expect(drawer).to have_css("button[data-record-key='http://shares.localhost/talk-now']", visible: :all)
       expect(drawer)
-        .to have_css("button[data-record-key='[example.com](http://shares.localhost/t)']", visible: :all)
+        .to have_css("button[data-record-key='[example.com](http://shares.localhost/talk-now)']", visible: :all)
     end
 
     it "copies the title as markdown once it has one" do
       Shares::Slice["operations.set_short_link_title"].call(made.id, { title: "My talk" })
       get "/admin/links"
 
-      expect(drawer).to have_css("button[data-record-key='[My talk](http://shares.localhost/t)']", visible: :all)
+      expect(drawer).to have_css("button[data-record-key='[My talk](http://shares.localhost/talk-now)']", visible: :all)
     end
 
     it "escapes brackets and backslashes in the title it copies as markdown" do
@@ -285,7 +285,7 @@ RSpec.describe "Admin links", type: :request do
       get "/admin/links"
       copy = drawer.find("button[data-record-key^='[']", visible: :all)
 
-      expect(copy["data-record-key"]).to eq("[My \\[talk\\] \\\\ slides](http://shares.localhost/t)")
+      expect(copy["data-record-key"]).to eq("[My \\[talk\\] \\\\ slides](http://shares.localhost/talk-now)")
     end
 
     it "edits the destination, code and title", :aggregate_failures do
@@ -545,7 +545,7 @@ RSpec.describe "Admin links", type: :request do
         save(destination: "https://example.org/talk")
 
         expect([server.get("/talk-now").headers["Location"], hints])
-          .to match(["https://example.org/talk", include(hint("destination_hint", link: "shares.localhost/t"))])
+          .to match(["https://example.org/talk", include(hint("destination_hint", link: "shares.localhost/talk-now"))])
       end
 
       it "says a new code moves the link and the old one stops working" do
@@ -560,7 +560,7 @@ RSpec.describe "Admin links", type: :request do
         shown = hints
         get "/admin/links", search: "my talk"
 
-        expect([titles, copies?("[My talk](http://shares.localhost/t)"), shown])
+        expect([titles, copies?("[My talk](http://shares.localhost/talk-now)"), shown])
           .to match([["My talk"], true, include(hint("title_hint"))])
       end
     end

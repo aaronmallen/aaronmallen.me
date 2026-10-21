@@ -53,7 +53,7 @@ RSpec.describe "Admin files", type: :request do
         get "/admin/files"
       end
 
-      let(:link) { "http://shares.localhost/#{coded('deck.pdf')[:short]}" }
+      let(:link) { "http://shares.localhost/#{coded('deck.pdf')[:code]}" }
 
       it "shows the name, link, size, date and download count", :aggregate_failures do
         card = page.find(".file-card")
@@ -100,7 +100,7 @@ RSpec.describe "Admin files", type: :request do
       found = share("shot.png", "image/png")
       get "/admin/files"
 
-      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{found.short}?preview']")
+      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{found.code}?preview']")
     end
 
     describe "search and the filter" do
@@ -227,7 +227,7 @@ RSpec.describe "Admin files", type: :request do
         upload(file("a", "a.txt", "text/plain"), accept: "application/json")
 
         expect(last_response.status).to eq(201)
-        expect(json).to eq("links" => ["http://shares.localhost/#{coded('a.txt')[:short]}"], "message" => "Uploaded")
+        expect(json).to eq("links" => ["http://shares.localhost/#{coded('a.txt')[:code]}"], "message" => "Uploaded")
       end
 
       describe "as one link" do
@@ -264,7 +264,7 @@ RSpec.describe "Admin files", type: :request do
           upload_group(accept: "application/json")
 
           expect(last_response.status).to eq(201)
-          expect(json["links"]).to eq(["http://shares.localhost/#{groups.first[:short]}"])
+          expect(json["links"]).to eq(["http://shares.localhost/#{groups.first[:code]}"])
         end
 
         it "refuses a post with no file" do
@@ -278,7 +278,7 @@ RSpec.describe "Admin files", type: :request do
         upload(file("a", "a.txt", "text/plain"), file("b", "b.txt", "text/plain"), accept: "application/json")
 
         expect(json["links"]).to contain_exactly(
-          "http://shares.localhost/#{coded('a.txt')[:short]}", "http://shares.localhost/#{coded('b.txt')[:short]}",
+          "http://shares.localhost/#{coded('a.txt')[:code]}", "http://shares.localhost/#{coded('b.txt')[:code]}",
         )
         expect(Shares::Slice["relations.share_groups"].count).to eq(0)
       end
@@ -296,7 +296,7 @@ RSpec.describe "Admin files", type: :request do
       let(:drawer) { page.find("dialog#share-#{file.id}-drawer", visible: :all) }
       let(:confirm) { i18n.t("ui.components.files.share_form.confirm_delete", name: "deck.pdf") }
 
-      def link = "http://shares.localhost/#{file.short}"
+      def link = "http://shares.localhost/#{file.code}"
 
       before { get "/admin/files" }
 
@@ -351,13 +351,13 @@ RSpec.describe "Admin files", type: :request do
       end
 
       it "copies the image as markdown with its alt text" do
-        markdown = "![A cat](http://shares.localhost/#{file.short})"
+        markdown = "![A cat](http://shares.localhost/#{file.code})"
 
         expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
       end
 
       it "says the markdown I copy uses the alt text" do
-        markdown = "![A cat](http://shares.localhost/#{file.short})"
+        markdown = "![A cat](http://shares.localhost/#{file.code})"
         hint = i18n.t("ui.components.files.share_form.alt_text_hint")
 
         expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
@@ -371,7 +371,7 @@ RSpec.describe "Admin files", type: :request do
       get "/admin/files"
       copy = page.find("dialog#share-#{file.id}-drawer button[data-record-key^='!']", visible: :all)
 
-      expect(copy["data-record-key"]).to eq("![A \\[cat\\] \\\\ dog](http://shares.localhost/#{file.short})")
+      expect(copy["data-record-key"]).to eq("![A \\[cat\\] \\\\ dog](http://shares.localhost/#{file.code})")
     end
 
     describe "the edit page" do
@@ -416,9 +416,9 @@ RSpec.describe "Admin files", type: :request do
       it "serves the file at the new code and no longer at the old one", :aggregate_failures do
         old = file.code
         stub_request(:get, share_store_url(file.key)).to_return(body: "x" * 2048)
-        save(code: "resume", alt_text: "")
+        save(code: "resume-cv", alt_text: "")
 
-        expect(server.get("/resume").status).to eq(200)
+        expect(server.get("/resume-cv").status).to eq(200)
         expect(server.get("/#{old}").status).to eq(404)
       end
 

@@ -5,8 +5,6 @@ module Shares
     class ShortLinks < Blog::DB::Relation
       CHECK = %i[reason failures checked_at first_failed_at].freeze
 
-      use :short_coded
-
       schema :short_links, infer: true do
         associations do
           belongs_to :short_code
@@ -33,6 +31,8 @@ module Shares
         joined = with_code.join(:short_link_checks, on)
         joined.select_append { |short_link_checks:| CHECK.map { short_link_checks[it] } }
       end
+
+      def with_code = qualified.join(:short_codes).select_append { |short_codes:| short_codes[:code] }
 
       private
 

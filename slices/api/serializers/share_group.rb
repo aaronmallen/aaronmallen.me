@@ -22,10 +22,10 @@ module API
       stamps :created_at
 
       def files(group)
-        ShareGroupFile.new(group.share_group_files, params: params.merge(short: group.short)).serializable_hash
+        ShareGroupFile.new(group.share_group_files, params: params.merge(code: group.code)).serializable_hash
       end
 
-      def url(group) = params.fetch(:settings).share_url(group.short)
+      def url(group) = params.fetch(:settings).share_url(group.code)
     end
   end
 end
