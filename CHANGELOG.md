@@ -5,6 +5,40 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.29] - 2026-10-21
+
+### Added
+
+- The admin session drawer shows what an agent got from memory: "Index it started with" lists each line
+  `start_session` returned, "Searches" lists each `search_memory` call with its filters and every fact it found, and
+  "Files read" lists each `read_memory_file` call with its time. Each keeps the text the agent saw after a fact
+  changes or a file goes, and a deleted file reads "a deleted file". Session rows count files read and searches.
+- Project boards in the admin and on the public site have a list view beside the board, with a board | list toggle.
+  `?view=list` or `?view=board` picks one, the browser remembers your choice, and a phone gets the list until you pick.
+  The public board also shows a bar with its open and total counts.
+- The Agents section of the Today card lists up to three artifacts agents wrote today.
+- The Memories, Artifacts and Sessions tabs show their counts.
+- The admin memory file page edits the file's description in place. A change from there or from
+  `describe_memory_file` shows in the file's history, and you can revert it.
+
+### Changed
+
+- Short codes on aa.cool. A new file, share group or short link takes its row's ID in base 36 as its code, and a typed
+  code is kept as typed, with no 8 character minimum. A path opens a record only when it matches the whole code, so a
+  shortened link sent since 26.10.26 now answers 404. The admin, the API, MCP tools and sent social posts show each
+  record's full code.
+- `read_memory_file` and `search_memory` answer on an ended session and record nothing for it. Writes still refuse
+  one.
+- The memories list, the memory file page, the artifact screens and the sessions list and drawer follow the new admin
+  design. Artifacts show their type as a coloured pill with an icon, and their tags in the colour of the tag with the
+  same name. Each memory screen marks a fact or description an agent wrote, and the three screens carry the title
+  "Agents".
+
+### Removed
+
+- The memory file page's "as loaded" view, and the admin's talk of files that "load". A new session's drawer shows
+  "Files read" in place of "Memory it read", which stays for sessions from before this release.
+
 ## [26.10.28] - 2026-10-20
 
 ### Changed
@@ -1522,7 +1556,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...HEAD
+[26.10.29]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...26.10.29
 [26.10.28]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...26.10.28
 [26.10.27]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...26.10.27
 [26.10.26]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.25...26.10.26
