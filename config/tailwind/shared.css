@@ -5735,6 +5735,112 @@
   }
 }
 
+@utility kb-view {
+  @apply ml-auto;
+
+  @variant phone {
+    @apply ml-0;
+  }
+}
+
+@utility kb-views {
+  &[data-board-view="board"] [data-board-shows="list"],
+  &[data-board-view="list"] [data-board-shows="board"] {
+    @apply hidden;
+  }
+
+  &:not([data-board-view]) {
+    @media (width <= 43.75rem) {
+      & [data-board-shows="board"] {
+        @apply hidden;
+      }
+    }
+
+    @media (width > 43.75rem) {
+      & [data-board-shows="list"] {
+        @apply hidden;
+      }
+    }
+  }
+}
+
+@utility kls3 {
+  @apply mb-4 flex flex-col gap-2.5;
+}
+
+@utility klg {
+  --tone: var(--color-ink-muted);
+  @apply rounded-panel border border-line bg-ground-sunk px-4 py-1.5;
+
+  &.k-in_progress {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.k-done {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.k-canceled {
+    --tone: var(--color-mk-pink-text);
+
+    & .task-title {
+      @apply line-through;
+    }
+  }
+}
+
+@utility klh {
+  @apply kcol-head min-h-tap cursor-pointer list-none px-0 focus-ring;
+
+  &::-webkit-details-marker {
+    @apply hidden;
+  }
+
+  & > .fa-chevron-right {
+    @apply text-badge text-ink-muted transition-transform duration-150;
+  }
+
+  details[open] > & > .fa-chevron-right {
+    rotate: 90deg;
+  }
+}
+
+@utility klb {
+  @apply border-t border-line pb-1.5;
+
+  & > .kcol-empty {
+    @apply my-2.5;
+  }
+}
+
+@utility kli {
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-line last:border-b-0;
+
+  & > .task:first-child {
+    @apply border-t-0 py-3;
+  }
+
+  @variant phone {
+    @apply grid-cols-[minmax(0,1fr)];
+  }
+}
+
+@utility kls {
+  @apply flex items-center gap-2 pt-3;
+
+  & select {
+    @apply min-w-30 font-mono text-badge;
+
+    @variant phone {
+      @apply min-h-tap;
+    }
+  }
+
+  @variant phone {
+    @apply pt-0 pb-3;
+  }
+}
+
 @utility project-side {
   @apply stack;
 

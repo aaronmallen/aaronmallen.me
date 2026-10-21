@@ -36,7 +36,7 @@ module Admin
             ButtonForm(
               action: path(:admin_move_project_task, id: @project_id, task_id: @task.id),
               label: t(".move", column: t(NAMES.fetch(to))), variant: :gh, icon:, icon_only: true, morph: true,
-              hidden: { to:, return_to: @return_to },
+              hidden: { to:, return_to: @return_to }, data: { board_move: true },
             )
           end
 

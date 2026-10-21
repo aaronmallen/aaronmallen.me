@@ -2262,6 +2262,11 @@ en:
         board_card:
           move: "Move to %{column}"
           pick: "Select %{task}"
+        board_list:
+          column_for: "Column for %{task}"
+          hint: "Pick a task's column, or drag its row onto another group. In progress starts the task in today's sprint; done and canceled close it."
+          label: "%{name} list"
+          move: "Move"
         bulk:
           label: "Ticked cards"
           move: "Move"
@@ -4077,6 +4082,10 @@ en:
           no_tagline: "No description yet."
           private: "board is private"
           published: "board published"
+          view: "View"
+          views:
+            board: "board"
+            list: "list"
       pull_requests:
         show:
           back: "Activity"

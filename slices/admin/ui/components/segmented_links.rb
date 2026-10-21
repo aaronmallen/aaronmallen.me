@@ -16,6 +16,7 @@ module Admin
 
         prop :label, Blog::Types::String
         prop :items, Blog::Types::Array.of(ITEM)
+        prop :labelled, Blog::Types::Bool, default: false
 
         def view_template
           nav(class: "seg", aria: { label: @label }) { @items.each { link(**it) } }
@@ -25,6 +26,7 @@ module Admin
 
         def content(text, icon)
           return plain(text) unless icon
+          return IconLabel(icon: ["fa-solid", icon]) { text } if @labelled
 
           Icon(["fa-solid", icon])
           span(class: "sr-only") { text }

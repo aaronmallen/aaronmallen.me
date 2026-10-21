@@ -26,6 +26,7 @@ module Admin
           prop :moves, Blog::Types::Bool, default: true
           prop :row, Blog::Types::Bool, default: false
           prop :ahead, Blog::Types::Bool, default: false
+          prop :return_to, Blog::Types::String.optional, default: nil
 
           def view_template
             @task.closed? ? reopen : progress
@@ -41,11 +42,15 @@ module Admin
           def change(route, icon, label, confirm: nil, data: Blog::Constants::EMPTY_HASH, key: nil)
             ButtonForm(
               action: path(route, id: @task.id), label:, icon:, icon_only: true, morph: true, confirm:, data:,
-              hidden: { filter: @filter, origin: @origin }, button: keyed(key),
+              hidden: { filter: @filter, origin: @origin, return_to: @return_to }, button: keyed(key),
             )
           end
 
-          def complete = CompleteForm(task: @task, filter: @filter, origin: @origin, compact: @row, keyed: @row)
+          def complete
+            CompleteForm(
+              task: @task, filter: @filter, origin: @origin, compact: @row, keyed: @row, return_to: @return_to,
+            )
+          end
 
           def keyed(key)
             return Blog::Constants::EMPTY_HASH unless @row && key
@@ -59,7 +64,8 @@ module Admin
 
             ButtonForm(
               action: path(:admin_move_task, id: @task.id, filter: place), label: t(".move", list:), icon:,
-              icon_only: true, morph: true, confirm:, hidden: { origin: @origin }, button: keyed(key),
+              icon_only: true, morph: true, confirm:, button: keyed(key),
+              hidden: { origin: @origin, return_to: @return_to },
             )
           end
 

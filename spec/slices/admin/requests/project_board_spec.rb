@@ -94,7 +94,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       end
 
       it "counts each column" do
-        expect(page.all(".kcol-count").map(&:text)).to eq(%w[1 1 1 1 1])
+        expect(page.all(".kb .kcol-count").map(&:text)).to eq(%w[1 1 1 1 1])
       end
 
       it "heads the board with the name and tagline", :aggregate_failures do
@@ -505,7 +505,7 @@ RSpec.describe "Admin project board", :frozen_clock, type: :request do
       it "counts every task in the heads and the facts bar", :aggregate_failures do
         get "/admin/projects/#{project.id}"
 
-        expect(page.all(".kcol-count").map(&:text)).to eq(%w[3 3 0 0 0])
+        expect(page.all(".kb .kcol-count").map(&:text)).to eq(%w[3 3 0 0 0])
         expect(page).to have_css(".kb-meta", text: "6 open · 6 total")
       end
 

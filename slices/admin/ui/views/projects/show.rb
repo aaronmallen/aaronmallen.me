@@ -14,11 +14,13 @@ module Admin
           ].freeze
           NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
+          VIEWS = { "board" => ["table-columns", ".views.board"], "list" => ["list", ".views.list"] }.freeze
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
           prop :board, Blog::Types::Instance(Blog::BoardSizes)
+          prop :view, Blog::Types::String.enum(*VIEWS.keys).optional, default: nil
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -27,21 +29,19 @@ module Admin
             end
             head
             facts
-            board
-            Hint { t(".hint") }
+            views
           end
 
           private
 
-          def board
-            columns = @tasks.group_by(&:board_column)
-
-            div(class: "kb-bulk") do
+          def board(columns)
+            div(class: "kb-bulk", data: { board_shows: "board" }) do
               Bulk(project_id: @project.id)
               div(class: "kb", aria: { label: t(".board", name: @project.name) }) do
                 input(type: "hidden", name: "return_to", value: here, form: Bulk::ID)
-                COLUMNS.each { column(it, columns.fetch(it, Blog::Constants::EMPTY_ARRAY)) }
+                COLUMNS.each { column(it, tasks_in(columns, it)) }
               end
+              Hint { t(".hint") }
             end
           end
 
@@ -55,7 +55,9 @@ module Admin
 
                 tasks.each { BoardCard(task: it, project_id: @project.id, return_to: here) }
               end
-              more(name, tasks.size)
+              LoadMore(
+                project_id: @project.id, board: @board, column: name, count: @counts.fetch(name), shown: tasks.size,
+              )
             end
           end
 
@@ -83,6 +85,7 @@ module Admin
               link(@project.url, bare_url(@project.url), :outbound) if site?
               counts
               published
+              toggle
             end
           end
 
@@ -102,16 +105,6 @@ module Admin
             a(href:, target: "_blank", rel: "noopener") { IconLabel(icon:) { text } }
           end
 
-          def more(name, shown)
-            left = @board.left(@counts.fetch(name), shown)
-            return unless left.positive?
-
-            AutoForm(action: path(:admin_project, id: @project.id)) do
-              HiddenFields(values: @board.more(name))
-              Button(type: "submit", variant: :gh, small: true) { t("ui.board.load_more", count: left) }
-            end
-          end
-
           def published
             return span { IconLabel(icon: "fa-solid fa-lock") { t(".private") } } unless published?
 
@@ -123,6 +116,26 @@ module Admin
           def site? = written?(@project.url) && @project.url != @project.repo_url
 
           def tagline = written?(@project.tagline) ? @project.tagline : t(".no_tagline")
+
+          def tasks_in(columns, name) = columns.fetch(name, Blog::Constants::EMPTY_ARRAY)
+
+          def toggle
+            items = VIEWS.map do |view, (icon, text)|
+              { text: t(text), href: path(:admin_project, id: @project.id, **@board.grown, view:), icon:,
+                current: view == @view, data: { board_pick: view } }
+            end
+
+            span(class: "kb-view") { SegmentedLinks(label: t(".view"), items:, labelled: true) }
+          end
+
+          def views
+            columns = @tasks.group_by(&:board_column)
+
+            div(class: "kb-views", data: { board_views: true, board_view: @view }) do
+              board(columns)
+              BoardList(project: @project, columns:, counts: @counts, board: @board, return_to: here)
+            end
+          end
         end
       end
     end

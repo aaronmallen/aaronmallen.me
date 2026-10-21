@@ -3,15 +3,18 @@ import { dragOnto, waitForDrag } from "./pointer.js";
 const CARD = "[data-board-card]";
 const COLUMN = "[data-board-column]";
 const DRAGGING = "kc-dragging";
-const MOVE = "form[data-morph]";
+const MOVE = "form[data-board-move]";
 const OVER = "kcol-over";
 const PRESS = "button, form, input, label";
-const TITLE = ".kc-title";
+const TITLE = ".kc-title, .task-title";
 
 export function bootBoardDrag() {
   document.addEventListener("pointerdown", (event) => {
     const card = event.target.closest(CARD);
     if (card && !event.target.closest(PRESS)) waitForDrag(event, (at) => drag(card, event, at));
+  });
+  document.addEventListener("dragstart", (event) => {
+    if (event.target.closest?.(CARD)) event.preventDefault();
   });
 }
 

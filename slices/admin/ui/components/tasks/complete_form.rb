@@ -12,10 +12,11 @@ module Admin
           prop :origin, Blog::Types::String
           prop :compact, Blog::Types::Bool, default: false
           prop :keyed, Blog::Types::Bool, default: false
+          prop :return_to, Blog::Types::String.optional, default: nil
 
           def view_template
             Form(action: path(:admin_complete_task, id: @task.id), data: { morph: true, task_act: "complete" }) do
-              HiddenFields(values: { filter: @filter, origin: @origin })
+              HiddenFields(values: { filter: @filter, origin: @origin, return_to: @return_to })
               tracked? ? toggle(type: "submit") : ask
             end
           end

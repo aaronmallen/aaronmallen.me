@@ -238,6 +238,8 @@ RSpec.describe "Admin screens", type: :feature do
       "performance requests" => "/admin/performance/requests?route=/writing/:slug&verb=GET",
       "posts" => "/admin/posts",
       "project board" => "/admin/projects/#{project.id}",
+      "project board as a board" => "/admin/projects/#{project.id}?view=board",
+      "project board as a list" => "/admin/projects/#{project.id}?view=list",
       "project editor" => "/admin/projects/#{project.id}/edit",
       "projects" => "/admin/projects",
       "review" => "/admin/review",

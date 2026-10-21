@@ -17,6 +17,8 @@ module Admin
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
           prop :bulk, Blog::Types::String.optional, default: nil
+          prop :return_to, Blog::Types::String.optional, default: nil
+          prop :project_id, Blog::Types::Integer.optional, default: nil
 
           def view_template
             div(class: classes, data: { key_row: true, menu: menu_path, **order }) do
@@ -46,7 +48,7 @@ module Admin
             Button(href:, label:, aria:, data:, small: true, icon: :edit)
           end
 
-          def menu_path = path(:admin_task_menu, id: @task.id, filter: tab, origin: @origin)
+          def menu_path = path(:admin_task_menu, id: @task.id, filter: tab, origin: @origin, project: @project_id)
 
           def order
             return Blog::Constants::EMPTY_HASH unless ordered?
@@ -63,7 +65,7 @@ module Admin
           def side
             div(class: "task-acts hov") do
               Grip(task: @task, lead: @lead) if ordered?
-              Controls(task: @task, filter: @filter, origin: @origin, row: true, ahead: waiting?)
+              Controls(task: @task, filter: @filter, origin: @origin, row: true, ahead: waiting?, return_to: @return_to)
               edit
             end
           end

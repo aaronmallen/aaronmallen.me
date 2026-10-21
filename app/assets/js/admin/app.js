@@ -1,6 +1,7 @@
 import "../../css/admin.css";
 import { bootAutosubmit, setupAutosubmit } from "./autosubmit.js";
 import { bootBoardDrag } from "./board_drag.js";
+import { bootBoardView, setupBoardView } from "./board_view.js";
 import { bootBulk, setupBulk } from "./bulk.js";
 import { setupCadences } from "./cadence.js";
 import { setupCalendars } from "./calendar.js";
@@ -42,6 +43,7 @@ import { setupWorkForms } from "./work_form.js";
 const SETUPS = [
   setupAccountPickers,
   setupAutosubmit,
+  setupBoardView,
   setupBulk,
   setupCadences,
   setupCalendars,
@@ -77,6 +79,7 @@ const SETUPS = [
 const BOOT = [
   bootAutosubmit,
   bootBoardDrag,
+  bootBoardView,
   bootBulk,
   bootCommitImports,
   bootContextMenus,
