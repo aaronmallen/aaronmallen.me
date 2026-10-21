@@ -2535,6 +2535,10 @@
 @utility card {
   @apply min-w-0 rounded-panel border border-line bg-ground-sunk p-panel;
 
+  &.flat {
+    @apply bg-transparent;
+  }
+
   & > .kicker {
     @apply mb-1.5;
   }
@@ -5416,8 +5420,40 @@
   }
 }
 
-@utility memory-type {
-  @apply mt-3 mb-1 text-meta font-semibold text-ink-muted first:mt-0;
+@utility memory-index-head {
+  @apply my-0 flex flex-wrap items-center gap-x-3 gap-y-2;
+}
+
+@utility memory-index-path {
+  @apply font-mono text-base font-medium wrap-anywhere text-ink;
+}
+
+@utility memory-index-description {
+  @apply mt-3 flex items-start gap-3;
+
+  & > .memory-index-text {
+    @apply my-0 min-w-0 flex-1 font-serif text-[1.12rem] leading-[1.55] text-ink;
+  }
+
+  &:has(> .memory-edit[open]) > .memory-index-text {
+    @apply hidden;
+  }
+}
+
+@utility memory-index-form {
+  @apply grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-2;
+
+  & .field > .f {
+    @apply sr-only;
+  }
+
+  @variant phone {
+    @apply grid-cols-1;
+
+    & > .bt {
+      @apply justify-self-start;
+    }
+  }
 }
 
 @utility memory-fact-list {
@@ -5425,26 +5461,39 @@
 }
 
 @utility memory-fact {
-  @apply flex min-w-0 flex-wrap items-start gap-3 border-b border-line py-2.5 last:border-b-0;
+  @apply grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply first:pt-0 last:border-b-0;
+
+  &:has(.memory-edit[open]) > .memory-fact-main {
+    @apply hidden;
+  }
+}
+
+@utility memory-fact-main {
+  @apply grid min-w-0 grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3.5 gap-y-1.5;
 
   & > .pill {
-    @apply mt-0.5 shrink-0;
+    @apply mt-0.75 justify-self-start;
+  }
+
+  @variant phone {
+    @apply grid-cols-1;
   }
 }
 
 @utility memory-fact-body {
-  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+  @apply flex min-w-0 flex-col gap-0.5;
 }
 
 @utility memory-fact-text {
-  @apply my-0 font-serif break-words text-ink;
+  @apply my-0 font-serif text-[1.02rem] leading-[1.55] break-words text-ink;
 }
 
 @utility memory-fact-acts {
-  @apply flex items-start gap-1;
+  @apply flex items-start gap-0.5;
 
   &:has(> .memory-edit[open]) {
-    @apply basis-full;
+    @apply col-span-full;
   }
 }
 
@@ -5472,28 +5521,60 @@
   }
 }
 
-@utility memory-fact-form {
-  @apply mt-4 flex flex-col items-end gap-2;
+@utility memory-fact-edit {
+  @apply grid grid-cols-[150px_minmax(0,1fr)] items-start gap-2;
 
-  & .field {
-    @apply w-full;
+  & .field > .f {
+    @apply sr-only;
+  }
+
+  @variant phone {
+    @apply grid-cols-1;
   }
 }
 
-@utility memory-event {
-  @apply flex min-w-0 flex-col gap-1 border-b border-line py-2.5 last:border-b-0;
+@utility memory-fact-edit-acts {
+  @apply col-span-full flex gap-1.5;
+}
+
+@utility memory-fact-form {
+  @apply mt-4 grid grid-cols-[150px_minmax(0,1fr)_auto] items-start gap-2;
+
+  & .field > .f {
+    @apply sr-only;
+  }
+
+  @variant phone {
+    @apply grid-cols-1;
+
+    & > .bt {
+      @apply justify-self-start;
+    }
+  }
 }
 
 @utility memory-event-what {
-  @apply my-0 break-words;
-}
+  @apply min-w-0 break-words;
 
-@utility memory-quote {
-  @apply my-0 font-serif text-li break-words text-ink-muted;
+  & > strong {
+    @apply font-semibold;
+  }
 }
 
 @utility memory-event-acts {
-  @apply flex items-center gap-3;
+  @apply ml-2.5 inline-flex gap-3 align-baseline;
+
+  & > form {
+    @apply inline;
+  }
+}
+
+@utility memory-link {
+  @apply cursor-pointer appearance-none border-0 bg-transparent p-0 font-mono text-xs text-mk-green-text no-underline;
+
+  @variant phone {
+    @apply tap-target;
+  }
 }
 
 @utility wm-card {

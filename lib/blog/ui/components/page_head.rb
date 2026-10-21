@@ -8,6 +8,7 @@ module Blog
         prop :sub, Blog::Types::String.optional
         prop :sub_icon, Blog::Types::String.optional
         prop :kicker, Blog::Types::String.optional
+        prop :kicker_icon, Blog::Types::String.optional, default: nil
 
         def view_template(&)
           content_for(:title, @title) unless content_for(:title)
@@ -23,9 +24,16 @@ module Blog
 
         def render_heading
           div do
-            span(class: "page-head-kicker") { @kicker } if @kicker
+            render_kicker if @kicker
             h1(class: "page-head-title") { render_title }
             render_sub
+          end
+        end
+
+        def render_kicker
+          span(class: "page-head-kicker") do
+            Icon(@kicker_icon) if @kicker_icon
+            plain @kicker
           end
         end
 

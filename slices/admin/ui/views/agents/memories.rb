@@ -8,10 +8,6 @@ module Admin
           include Components::Agents
 
           LIVE_TABLES = %w[memory_events memory_facts memory_files projects tasks].freeze
-          ICONS = {
-            "global" => "fa-solid fa-globe", "repo" => "fa-brands fa-github", "project" => "fa-solid fa-cube",
-            "task" => "fa-solid fa-list-check",
-          }.freeze
           FILTERS = ["all", *Blog::Types::MemoryScope.values].to_h { [it, ".filters.#{it}"] }.freeze
           SEARCH_ID = "memories-search"
 
@@ -69,7 +65,7 @@ module Admin
 
             Card(note: t(Helpers::MemoryScope.listed_for(choice.kind))) do |card|
               card.heading do
-                Icon([ICONS.fetch(choice.kind), "memory-scope-icon"])
+                Icon([Helpers::MemoryScope.icon(choice.kind), "memory-scope-icon"])
                 plain scope_text(choice)
               end
               files.each { MemoryRow(file: it, event: @latest[it.id], query: @query) }

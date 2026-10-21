@@ -11,7 +11,11 @@ module Agents
         end
       end
 
-      def last_description_id(memory_file_id) = where(memory_file_id:, memory_fact_id: nil, op: DESCRIBED).max(:id)
+      def described(memory_file_id) = where(memory_file_id:, memory_fact_id: nil, op: DESCRIBED)
+
+      def last_described_at(memory_file_id) = described(memory_file_id).max(:created_at)
+
+      def last_description_id(memory_file_id) = described(memory_file_id).max(:id)
 
       def latest_by_fact(memory_fact_ids)
         where(memory_fact_id: memory_fact_ids).dataset.unordered.group(:memory_fact_id)

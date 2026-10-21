@@ -223,12 +223,17 @@ en:
       untitled: "Give the task a title"
       woken: "Woken"
   memories_page:
+    kinds:
+      global: "global"
+      project: "project"
+      repo: "repo"
+      task: "task"
     listed_for:
       named:
-        global: "Listed for every session"
-        project: "Listed for sessions on %{name} or in its repo"
-        repo: "Listed for sessions in %{name}"
-        task: "Listed for sessions on %{name}"
+        global: "Listed in the index for every session"
+        project: "Listed in the index for sessions on %{name} or in its repo"
+        repo: "Listed in the index for sessions in %{name}"
+        task: "Listed in the index for sessions on %{name}"
       unnamed:
         global: "listed for every session"
         project: "listed for sessions on this project or in its repo"
@@ -580,17 +585,13 @@ en:
           you: "you"
         memory_facts:
           add: "Add fact"
-          agent: "%{agent} on %{model}"
+          cancel: "Cancel"
           confirm_remove: "Remove this fact? You can revert it from the history."
-          edit: "Edit"
+          edit: "Edit fact"
           empty: "No facts yet. Agents add them as they work, or add one below."
           fact: "Fact"
-          headings:
-            context: "Context"
-            convention: "Conventions"
-            gotcha: "Gotchas"
-            preference: "Preferences"
           new: "New fact"
+          placeholder: "One thing the agent should remember"
           remove: "Remove fact"
           save: "Save fact"
           title: "Facts"
@@ -622,25 +623,26 @@ en:
             blank: "Pick a type."
             format: "Pick a type."
         memory_history:
-          agent: "%{agent} on %{model}"
+          change: "“%{was}” to “%{now}”"
           confirm_revert: "Undo this change?"
           ops:
-            add: "added a fact"
+            add: "added"
             create: "created the file"
             describe: "changed the description"
-            edit: "changed a fact"
-            remove: "removed a fact"
-            scope: "moved the file to a new scope"
-          revert: "Revert"
+            edit: "changed"
+            remove: "removed"
+            scope: "moved it to a new scope"
+          quote: "“%{text}”"
+          revert: "revert"
           reverted: "reverted"
           reverts:
             add: "reverted an addition"
             describe: "reverted a description change"
             edit: "reverted an edit"
             remove: "reverted a removal"
-          session: "Session"
+          session: "session"
           title: "History"
-          you: "You"
+          you: "you"
         memory_index:
           behind:
             one: "%{count} fact behind them"
@@ -656,14 +658,18 @@ en:
           title: "What a session's index lists"
           working_in: "Working in"
         memory_index_line:
+          by: "description by %{who}"
+          cancel: "Cancel"
           description: "Description"
           edit: "Edit"
           facts:
             one: "%{count} fact"
             other: "%{count} facts"
           note: "what a session starts with"
+          placeholder: "What it covers and when to read it"
           save: "Save"
           title: "Index line"
+          you: "you"
         memory_new_form:
           cancel: "Cancel"
           create: "Create"

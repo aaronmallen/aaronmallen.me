@@ -21,6 +21,7 @@ module Admin
 
         {
           file:, form:, history:,
+          described_at: memory_file_queries.described_at(id) || file.created_at,
           history_count: memory_file_queries.history_count(id),
           history_marks: memory_file_queries.history_marks(history.rows),
           records: list_record_links.call(KIND, id, **records),

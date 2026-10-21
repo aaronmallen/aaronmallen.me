@@ -9,6 +9,8 @@ module Agents
 
       def by_id(id) = memory_files.combine(:memory_facts).by_pk(id).one
 
+      def described_at(memory_file_id) = memory_events.last_described_at(memory_file_id)
+
       def event(memory_file_id, id) = memory_events.where(memory_file_id:).by_pk(id).one
 
       def fact_count = memory_facts.where(removed_at: nil).count

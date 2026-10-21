@@ -6,6 +6,7 @@ module Admin
       module Agents
         class MemoryHistory < Component
           CHANGES = %w[edit describe].map { Blog::Types::MemoryEventOp[it] }.freeze
+          REMOVE = Blog::Types::MemoryEventOp["remove"]
           OPS = Blog::Types::MemoryEventOp.values.to_h { [it, ".ops.#{it}"] }.freeze
           REVERTIBLE = ::Agents::Operations::RevertMemoryEvent::REVERTIBLE
           REVERTS = REVERTIBLE.to_h { [it, ".reverts.#{it}"] }.freeze
@@ -28,46 +29,43 @@ module Admin
           private
 
           def acts(event)
-            div(class: "memory-event-acts") do
+            span(class: "memory-event-acts") do
               session(event.session_id) if event.session_id
               revert(event)
             end
           end
 
-          def author(event)
-            return t(".you") unless event.agent
-
-            t(".agent", agent: event.agent, model: Helpers::AgentBrand.model(event.model))
-          end
-
           def entry(event)
-            li(class: "memory-event", id: "memory-event-#{event.id}") do
+            li(class: "timeline-event memory-event", id: "memory-event-#{event.id}") do
               Moment(at: event.created_at, class: "timeline-time")
-              p(class: "memory-event-what") do
-                strong { author(event) }
+              span(class: "memory-event-what") do
+                strong { Helpers::AgentBrand.author(event) || t(".you") }
                 plain " #{what(event)}"
+                quotes(event)
+                acts(event)
               end
-              quote(event.was_text) if CHANGES.include?(event.op)
-              quote(event.text || event.was_text)
-              acts(event)
             end
           end
 
-          def quote(text) = (p(class: "memory-quote") { text } if text)
+          def quotes(event)
+            return if event.reverted_event_id
+            return plain(" #{t('.change', was: event.was_text, now: event.text)}") if CHANGES.include?(event.op)
+
+            text = event.op == REMOVE ? event.was_text : event.text
+            plain " #{t('.quote', text:)}" if text
+          end
 
           def revert(event)
             return span(class: "meta") { t(".reverted") } if @reverted.include?(event.id)
             return unless REVERTIBLE.include?(event.op) && @latest[event.memory_fact_id] == event.id
 
-            ButtonForm(
-              action: path(:admin_revert_memory_file_event, id: @file.id, event_id: event.id), label: t(".revert"),
-              variant: :gh, confirm: t(".confirm_revert"),
-            )
+            Form(
+              action: path(:admin_revert_memory_file_event, id: @file.id, event_id: event.id),
+              data: { confirm: t(".confirm_revert") },
+            ) { button(type: "submit", class: "memory-link") { t(".revert") } }
           end
 
-          def session(id)
-            Button(href: path(:admin_agent_sessions, session: id), small: true, variant: :gh) { t(".session") }
-          end
+          def session(id) = a(class: "memory-link", href: path(:admin_agent_sessions, session: id)) { t(".session") }
 
           def what(event)
             return t(OPS.fetch(event.op)) unless event.reverted_event_id

@@ -10,6 +10,7 @@ module Admin
           LIVE_TABLES = %w[agent_sessions memory_events memory_facts memory_files projects record_links tasks].freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
+          prop :described_at, Blog::Types::Time
           prop :history, Blog::Types::Instance(Blog::Structs::Paged)
           prop :history_count, Blog::Types::Integer
           prop :history_marks, Blog::Types::Hash
@@ -22,10 +23,10 @@ module Admin
             head
             div(class: "g-main") do
               div(class: "stack") do
-                MemoryIndexLine(file: @file, scope: current, form: @form)
+                MemoryIndexLine(file: @file, scope: current, form: @form, described_at: @described_at)
                 MemoryFacts(file: @file, form: @form)
               end
-              aside(class: "stack") { side }
+              aside(class: "stack stick") { side }
             end
           end
 
@@ -41,21 +42,25 @@ module Admin
           end
 
           def head
-            PageHead(title: @file.path, sub: lede) { BackLink(href: path(:admin_memory_files)) { t(".back") } }
+            PageHead(title: @file.path, sub: lede, kicker:, kicker_icon: Helpers::MemoryScope.icon(@file.scope)) do
+              BackLink(href: path(:admin_memory_files), variant: :gh) { t(".back") }
+            end
           end
+
+          def kicker = current.name&.to_s || t(Helpers::MemoryScope.label(current.kind))
 
           def lede
             facts = t(".fact_count", count: @file.facts.size)
 
             listed = t(Helpers::MemoryScope.listed_for(@file.scope, named: true), name: current.name.to_s)
 
-            [@file.description, "#{facts}. #{listed}."].compact.join(" · ")
+            "#{facts}. #{listed}."
           end
 
           def linked
             find_path = path(:admin_memory_file, id: @file.id)
 
-            RecordLinks::Section(records: @records, kind: "memory_file", id: @file.id, find_path:)
+            RecordLinks::Section(records: @records, kind: "memory_file", id: @file.id, find_path:, card: false)
           end
 
           def scope_form
@@ -71,8 +76,10 @@ module Admin
           end
 
           def side
-            Card { scope_form }
-            linked
+            Card(class: "flat") do
+              scope_form
+              linked
+            end
             MemoryHistory(file: @file, events: @history, count: @history_count, **@history_marks)
             div { delete_form }
           end

@@ -15,6 +15,8 @@ RSpec.describe "Admin agent memories", type: :request do
 
   def history = page.find(".card", text: "History")
 
+  def history_lines = history.all(".memory-event-what").map { it.text.sub(/ ?(revert|reverted)\z/, "") }
+
   def t(key, **) = i18n.t(key, **)
 
   def toast
@@ -262,25 +264,47 @@ RSpec.describe "Admin agent memories", type: :request do
     let(:file) { agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "global" }) }
     let(:fact) { agents(:add_memory_fact, file.id, { type: "gotcha", text: "Run specs through mise", **author }) }
 
-    it "shows its description" do
+    it "shows its description once, in the index line, not the head", :aggregate_failures do
       get file_path(file)
 
-      expect(page).to have_css(".page-head", text: "Notes")
+      expect(page).to have_no_css(".page-head", text: "Notes")
+      expect(page.all(".memory-description", text: "Notes").size).to eq(1)
     end
 
-    it "shows its facts under their type with who wrote them", :aggregate_failures do
+    it "heads the page with its scope and fact count", :aggregate_failures do
       fact
       get file_path(file)
 
-      expect(page).to have_css("h3.memory-type", text: "Gotchas")
-      expect(page.find("#memory-fact-#{fact.id}")).to have_text("claude-code on Anthropic claude-opus-5-5")
+      expect(page.find(".page-head-kicker")).to have_css("i.fa-globe").and have_text("Global")
+      expect(page).to have_css(".page-head-sub", text: t("memories_page.listed_for.named.global"))
     end
 
-    it "lists its facts in fact type order" do
+    it "shows its facts with type, text and who wrote them", :aggregate_failures do
+      fact
+      get file_path(file)
+
+      row = page.find("#memory-fact-#{fact.id}")
+      expect([row.find(".pill").text, row.find(".memory-fact-text").text]).to eq(["gotcha", "Run specs through mise"])
+      expect(row).to have_text("Anthropic claude-opus-5-5")
+    end
+
+    def fact_with(text) = Agents::Slice["repos.memory_file_queries"].by_id(file.id).facts.find { it.text == text }
+
+    it "marks a fact an agent wrote, and none the owner wrote", :aggregate_failures do
+      fact
+      admin_post("#{file_path(file)}/facts", fact: { type: "convention", text: "Use jj" })
+      get file_path(file)
+
+      expect(page.find("#memory-fact-#{fact.id} .memory-fact-text")).to have_css(".agent-mark i.fa-robot")
+      expect(page.find("#memory-fact-#{fact_with('Use jj').id} .memory-fact-text")).to have_no_css(".agent-mark")
+    end
+
+    it "lists its facts in one flat list in fact type order", :aggregate_failures do
       %w[context gotcha preference].each { agents(:add_memory_fact, file.id, { type: it, text: "A #{it}", **author }) }
       get file_path(file)
 
-      expect(page.all("h3.memory-type").map(&:text)).to eq(%w[Preferences Gotchas Context])
+      expect(page).to have_css("ul.memory-fact-list", count: 1)
+      expect(page.all(".memory-fact .pill").map(&:text)).to eq(%w[preference gotcha context])
     end
 
     it "names the sessions that list it in the lede" do
@@ -311,15 +335,34 @@ RSpec.describe "Admin agent memories", type: :request do
     describe "its index line" do
       def describe_file(text) = admin_post("#{file_path(file)}/description", memory_file: { description: text })
 
+      def head_texts = %w[.memory-index-path .pill .meta].map { index_head.find(it).text }
+
+      def index_head = index_line.find(".memory-index-head")
+
       def index_line = page.find(".card", text: t("ui.components.agents.memory_index_line.title"))
 
       it "shows the path, scope, fact count and description", :aggregate_failures do
         fact
         get file_path(file)
 
-        expect([index_line.find("code").text, index_line.find(".pill").text, index_line.find(".meta").text])
-          .to eq(["hanami.md", "Global", "1 fact"])
+        expect(head_texts).to eq(["hanami.md", "global", "1 fact"])
+        expect(index_head).to have_css(".pill i.fa-globe")
         expect(index_line).to have_css(".memory-index-description", text: "Notes")
+      end
+
+      it "names the owner as the writer of a description they wrote" do
+        get file_path(file)
+
+        expect(index_line).to have_text(t("ui.components.agents.memory_index_line.by", who: "you"))
+      end
+
+      it "names and marks an agent that wrote the description", :aggregate_failures do
+        agents(:describe_memory_file, file.id, { description: "How we test", **author })
+        get file_path(file)
+
+        expect(index_line).to have_text(t("ui.components.agents.memory_index_line.by",
+                                          who: "Anthropic claude-opus-5-5"))
+        expect(index_line.find(".memory-description")).to have_css(".agent-mark i.fa-robot")
       end
 
       it "changes the description" do
@@ -341,8 +384,8 @@ RSpec.describe "Admin agent memories", type: :request do
         get file_path(file)
         entry = page.find("#memory-event-#{events(file).last[:id]}")
 
-        expect(entry).to have_text(t("ui.components.agents.memory_history.ops.describe"))
-        expect(entry.all(".memory-quote").map(&:text)).to eq(["Notes", "How we test"])
+        expect(entry.find(".memory-event-what").text)
+          .to start_with("you changed the description “Notes” to “How we test”")
       end
 
       it "reverts a describe, and the description goes back", :aggregate_failures do
@@ -360,7 +403,7 @@ RSpec.describe "Admin agent memories", type: :request do
 
         first, second = events(file).last(2)
         expect(page).to have_no_css("#memory-event-#{first[:id]} form")
-        expect(page).to have_css("#memory-event-#{second[:id]} form button", text: "Revert")
+        expect(page).to have_css("#memory-event-#{second[:id]} form button", text: "revert")
       end
 
       it "names what a revert of a describe undid" do
@@ -479,7 +522,7 @@ RSpec.describe "Admin agent memories", type: :request do
 
       add, edit = events(file).last(2)
       expect(page).to have_no_css("#memory-event-#{add[:id]} form")
-      expect(page).to have_css("#memory-event-#{edit[:id]} form button", text: "Revert")
+      expect(page).to have_css("#memory-event-#{edit[:id]} form button", text: "revert")
     end
 
     it "marks a reverted entry" do
@@ -496,7 +539,7 @@ RSpec.describe "Admin agent memories", type: :request do
       agents(:add_memory_fact, file.id, { type: "gotcha", text: "Use mise", **author, session_id: id })
       get file_path(file)
 
-      expect(history).to have_link("Session", href: "/admin/agents/sessions?session=#{id}")
+      expect(history).to have_link("session", href: "/admin/agents/sessions?session=#{id}")
     end
 
     it "names who made each change", :aggregate_failures do
@@ -505,7 +548,21 @@ RSpec.describe "Admin agent memories", type: :request do
       get file_path(file)
 
       expect(history.all(".memory-event-what strong").map(&:text))
-        .to eq(["You", "claude-code on Anthropic claude-opus-5-5", "You"])
+        .to eq(["you", "Anthropic claude-opus-5-5", "you"])
+    end
+
+    it "writes each history line as who, what and the quoted text", :aggregate_failures do
+      fact
+      agents(:edit_memory_fact, file.id, fact.id, { type: "gotcha", text: "Use mise", **author })
+      admin_post("#{file_path(file)}/facts/#{fact.id}/delete")
+      get file_path(file)
+
+      expect(history_lines).to eq(<<~LINES.lines(chomp: true))
+        you removed “Use mise”
+        Anthropic claude-opus-5-5 changed “Run specs through mise” to “Use mise”
+        Anthropic claude-opus-5-5 added “Run specs through mise”
+        you created the file
+      LINES
     end
 
     it "moves it to another scope and writes a scope entry", :aggregate_failures do
