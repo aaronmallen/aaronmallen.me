@@ -1,17 +1,19 @@
 ---
 id: "0194"
 title: Resolve a short code by its prefix and let the oldest code win
-status: active
+status: superseded
 created: 2026-10-19
 area: [db, shares, social, admin, api, mcp]
 supersedes: ["0178"]
+superseded-by: "0198"
 issue: "#1856"
+amended: ["#1887"]
 tags: [shares, share-groups, short-links, short-codes, aa-cool, prefix, code-length, oldest-wins]
 ---
 
 # ADR 0194: Resolve a short code by its prefix and let the oldest code win
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -77,4 +79,4 @@ record.
 [0143]: 0143-send-outside-links-in-social-posts-through-aa-cool-short-links.md
 [0163]: 0163-serve-a-share-groups-page-files-and-streamed-zip-under-its-code-on-the-share-host.md
 [0178]: 0178-give-each-new-short-code-the-shortest-length-with-a-free-code.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0198-black?style=for-the-badge&label=Superseded&labelColor=orange

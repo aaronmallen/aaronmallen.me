@@ -191,9 +191,10 @@ one.
 | [0191][0191] | Cap web queries with a statement timeout set on each request | ![Active][active] | 2026-10-18 |
 | [0192][0192] | Name another slice's constant only through an import, a contract or a struct | ![Active][active] | 2026-10-18 |
 | [0193][0193] | Hold the request's connection until Puma finishes the response | ![Active][active] | 2026-10-18 |
-| [0194][0194] | Resolve a short code by its prefix and let the oldest code win | ![Active][active] | 2026-10-19 |
+| [0194][0194] | Resolve a short code by its prefix and let the oldest code win | ![Superseded][superseded-0198] | 2026-10-19 |
 | [0195][0195] | Load agent memory as an index and read it on demand | ![Active][active] | 2026-10-20 |
 | [0196][0196] | Keep a copy of each session's memory index, searches and reads | ![Active][active] | 2026-10-20 |
+| [0198][0198] | Make a short code from its row id in base 36 and match it whole | ![Active][active] | 2026-10-20 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -384,6 +385,7 @@ one.
 [0194]: 0194-resolve-a-short-code-by-its-prefix-and-let-the-oldest-code-win.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [0196]: 0196-keep-a-copy-of-each-sessions-memory-index-searches-and-reads.md
+[0198]: 0198-make-a-short-code-from-its-row-id-in-base-36-and-match-it-whole.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -402,4 +404,5 @@ one.
 [superseded-0159]: https://img.shields.io/badge/0159-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0176]: https://img.shields.io/badge/0176-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0194]: https://img.shields.io/badge/0194-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0198]: https://img.shields.io/badge/0198-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
