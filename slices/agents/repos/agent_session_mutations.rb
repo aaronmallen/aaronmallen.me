@@ -27,6 +27,17 @@ module Agents
         agent_session_loads.dataset.insert_conflict.multi_insert(rows) unless rows.empty?
       end
 
+      def record_search(id, hits:, **fields)
+        search_id = agent_session_searches.dataset.insert(agent_session_id: id, **fields)
+        rows = hits.map do |fact|
+          {
+            agent_session_search_id: search_id, memory_fact_id: fact.id, memory_file_id: fact.memory_file_id,
+            text: fact.text, path: fact.memory_file.path,
+          }
+        end
+        agent_session_search_hits.dataset.multi_insert(rows) unless rows.empty?
+      end
+
       def start(task_ids:, **fields)
         id = agent_sessions.command(:create).call(fields).fetch(:id)
         agent_session_tasks.command(:create, result: :many).call(task_ids.map { { agent_session_id: id, task_id: it } })

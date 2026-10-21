@@ -41,6 +41,46 @@ RSpec.describe "API sessions", type: :request do
     expect(loaded).to eq([{ "memory_file_id" => file, "path" => "hanami.md" }])
   end
 
+  describe "a search in a session" do
+    let!(:file) { noted_file }
+    let(:query) { { query: "cache", scope: "global", repo: "aaronmallen/blog" } }
+
+    def hits
+      Agents::Slice["relations.agent_session_search_hits"].to_a.map { it.to_h.slice(:memory_file_id, :text, :path) }
+    end
+
+    it "returns the same facts as a search with no session" do
+      expect(call_api(:get, "/memory/search", { **query, session_id: })).to eq(call_api(:get, "/memory/search", query))
+    end
+
+    it "records its query and filters" do
+      call_api(:get, "/memory/search", { **query, session_id: })
+
+      expect(Agents::Slice["relations.agent_session_searches"].one.to_h)
+        .to include(agent_session_id: session_id, **query, project_id: nil, task_id: nil)
+    end
+
+    it "records each hit with a copy of its text and path" do
+      call_api(:get, "/memory/search", { **query, session_id: })
+
+      expect(hits).to eq([{ memory_file_id: file, text: "Mind the cache", path: "hanami.md" }])
+    end
+  end
+
+  it "records a search with no hits" do
+    call_api(:get, "/memory/search", { query: "nothing", session_id: })
+
+    expect([Agents::Slice["relations.agent_session_searches"].count,
+            Agents::Slice["relations.agent_session_search_hits"].count]).to eq([1, 0])
+  end
+
+  it "records no search without a session" do
+    noted_file
+    call_api(:get, "/memory/search", { query: "cache" })
+
+    expect(Agents::Slice["relations.agent_session_searches"].count).to eq(0)
+  end
+
   it "records each index line it returns and returns the same index" do
     file = noted_file
     files = call_api(:post, "/agent_sessions", { title: "Spike", **author }).fetch("files")

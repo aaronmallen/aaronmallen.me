@@ -13,8 +13,10 @@ module API
 
       private
 
-      def read_by(session_id, memory_file_ids)
-        case record_loads.call(session_id, memory_file_ids)
+      def read_by(session_id, memory_file_ids, &) = recorded(record_loads.call(session_id, memory_file_ids), &)
+
+      def recorded(result)
+        case result
           in Success then Success(yield)
           in Failure[:invalid, errors] then rejected(errors, Memory::COMPLAINTS)
         end

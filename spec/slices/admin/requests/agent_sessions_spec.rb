@@ -158,6 +158,99 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     end
   end
 
+  describe "searches" do
+    let(:hanami) { agents(:create_memory_file, { path: "hanami", description: "Hanami notes", scope: "global" }) }
+    let(:session_id) { start("Index the activities table") }
+
+    def clock = Admin::Slice["i18n"].l(Blog::TimeZone.local(Time.now), format: :clock)
+
+    def open_drawer = get("/admin/agents/sessions", { session: session_id })
+
+    def search(query, **filters)
+      page = Blog::Structs::Page.new(number: 1, size: 25)
+      found = Agents::Slice["operations.search_memory"].call(page, text: query, **filters)
+      agents(:record_search, session_id, { query:, **filters }, found.rows)
+    end
+
+    def searches = field("Searches")
+
+    it "follows the index" do
+      open_drawer
+
+      expect(drawer.all(".field > .f").map(&:text).first(2)).to eq(["Index it started with", "Searches"])
+    end
+
+    it "says None. when the session ran no search" do
+      open_drawer
+
+      expect(searches).to have_css(".hint", exact_text: "None.")
+    end
+
+    context "with a search that found facts" do
+      before do
+        agents(:add_memory_fact, hanami.id, { type: "gotcha", text: "Run specs through mise" })
+        agents(:add_memory_fact, hanami.id, { type: "gotcha", text: "Run lint through mise" })
+        search("mise", repo: "aaronmallen/blog", scope: "global")
+      end
+
+      it "shows the time, query, filter pills and count" do
+        open_drawer
+
+        expect(searches.find(".agent-search-head").all(:xpath, "./span").map(&:text))
+          .to eq([clock, "“mise”", "aaronmallen/blog", "global", "2 facts"])
+      end
+
+      it "shows each hit in full with its path", :aggregate_failures do
+        open_drawer
+
+        expect(searches.all(".agent-change-text").map(&:text)).to eq(["Run specs through mise",
+                                                                      "Run lint through mise"])
+        expect(searches).to have_link("hanami.md", href: "/admin/agents/memories/#{hanami.id}", count: 2)
+      end
+
+      context "when a fact is removed later" do
+        before do
+          fact = Agents::Slice["relations.memory_facts"].where(text: "Run lint through mise").one
+          agents(:remove_memory_fact, hanami.id, fact[:id], {})
+          open_drawer
+        end
+
+        it "keeps its text" do
+          expect(searches.all(".agent-change-text").map(&:text))
+            .to eq(["Run specs through mise", "Run lint through mise"])
+        end
+
+        it "marks it fact since removed" do
+          expect(searches.all(".record-link-row .hint").map(&:text)).to eq(["fact since removed"])
+        end
+      end
+
+      it "keeps a deleted file's hits without a link", :aggregate_failures do
+        agents(:delete_memory_file, hanami.id)
+        open_drawer
+
+        expect(searches.all("span.record-link-title").map(&:text)).to eq(["a deleted file"] * 2)
+        expect(searches).to have_no_link("a deleted file")
+      end
+    end
+
+    it "says no filters and No facts matched. for an empty search", :aggregate_failures do
+      search("nothing")
+      open_drawer
+
+      expect(searches.find(".agent-search-head")).to have_text("no filters")
+      expect(searches).to have_text("0 facts")
+      expect(searches).to have_css(".hint", text: /\ANo facts matched/)
+    end
+
+    it "pills a project and a task by id" do
+      search("mise", project_id: 7, task_id: task.id)
+      open_drawer
+
+      expect(searches.all(".pill").map(&:text)).to eq(["project 7", "task #{task.id}"])
+    end
+  end
+
   it "says so when no session exists" do
     get "/admin/agents/sessions"
 

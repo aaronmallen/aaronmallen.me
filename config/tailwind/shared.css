@@ -2223,6 +2223,14 @@
   @apply my-0 font-serif text-li break-words text-ink-muted;
 }
 
+@utility agent-search-head {
+  @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-mono text-ink-muted;
+}
+
+@utility agent-search-query {
+  @apply font-medium text-ink;
+}
+
 @utility avatar {
   @apply grid size-avatar shrink-0 cursor-pointer place-items-center rounded-full border-0 bg-wash;
   @apply font-display text-nav font-extrabold text-ink admin-focus;

@@ -26,7 +26,7 @@ module API
       COMPLAINTS = { **Memory::COMPLAINTS, query: { Blog::Contract::BLANK => "write the words to find" } }.freeze
       MALFORMED = { repo: [Blog::Contract::FORMAT] }.freeze
 
-      include Deps[search_memory: "agents.operations.search_memory"]
+      include Deps[record_search: "agents.operations.record_search", search_memory: "agents.operations.search_memory"]
 
       def handle(query:, repo: nil, page: 1, session_id: nil, **where)
         text = Blog::Types::OptionalText[query]
@@ -36,7 +36,7 @@ module API
         repo &&= Blog::Types::Normalized::Repo.call(repo) { return rejected(MALFORMED, COMPLAINTS) }
 
         found = search_memory.call(page_of(page), text:, repo:, **where)
-        read_by(session_id, found.rows.map(&:memory_file_id)) { hits(found) }
+        recorded(record_search.call(session_id, { query: text, repo:, **where }, found.rows)) { hits(found) }
       end
 
       private

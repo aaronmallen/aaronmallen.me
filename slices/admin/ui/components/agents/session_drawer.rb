@@ -57,9 +57,9 @@ module Admin
             end
           end
 
-          def list(label, rows, &)
+          def list(label, rows, empty: t(".none"))
             Field(label:) do
-              next Hint { t(".none") } if rows.empty?
+              next Hint { empty } if rows.empty?
 
               ul(class: "record-link-list") { rows.each { |found| li(class: "record-link-row") { yield(found) } } }
             end
@@ -67,8 +67,7 @@ module Admin
 
           def lists
             list(t(".tasks"), @tasks) { task(it) } unless @tasks.empty?
-            list(t(".index"), @session.agent_session_index_lines) { index_line(it) }
-            list(t(".loaded"), @session.agent_session_loads) { loaded(it) }
+            reads
             writes
           end
 
@@ -89,6 +88,13 @@ module Admin
 
             elapsed = Blog::Helpers::Figures.elapsed(@session.ended_at - @session.started_at)
             t(".span", from:, to: clock(@session.ended_at), elapsed:)
+          end
+
+          def reads
+            list(t(".index"), @session.agent_session_index_lines) { index_line(it) }
+            searches = @session.agent_session_searches
+            list(t(".searches"), searches, empty: t(".no_searches")) { |search| SessionSearch(search:) }
+            list(t(".loaded"), @session.agent_session_loads) { loaded(it) }
           end
 
           def repo

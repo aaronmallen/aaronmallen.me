@@ -694,6 +694,7 @@ en:
             other: "%{count} facts"
           index: "Index it started with"
           loaded: "Memory it read"
+          no_searches: "None."
           none: "Nothing."
           ops:
             add: "added to %{path}"
@@ -704,6 +705,7 @@ en:
             revert: "reverted in %{path}"
             scope: "moved %{path} to a new scope"
           running: "%{from} until now, still running"
+          searches: "Searches"
           span: "%{from}–%{to}, %{elapsed}"
           tasks: "Worked on"
           title: "agent session · %{date}"
@@ -711,6 +713,20 @@ en:
           via: "via %{client}"
           who: "%{agent} on %{model}"
           written: "Artifacts it wrote"
+        session_search:
+          deleted: "a deleted file"
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
+          filters:
+            project_id: "project %{value}"
+            repo: "%{value}"
+            scope: "%{value}"
+            task_id: "task %{value}"
+          no_filters: "no filters"
+          none: "No facts matched."
+          query: "“%{query}”"
+          removed: "fact since removed"
         session_row:
           artifacts:
             one: "%{count} artifact"

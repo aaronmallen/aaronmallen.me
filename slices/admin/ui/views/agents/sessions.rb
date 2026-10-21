@@ -8,7 +8,8 @@ module Admin
           include Components::Agents
 
           LIVE_TABLES = %w[
-            agent_session_index_lines agent_sessions artifact_versions artifacts memory_events memory_files
+            agent_session_index_lines agent_session_search_hits agent_session_searches agent_sessions artifact_versions
+            artifacts memory_events memory_files
           ].freeze
 
           prop :sessions, Blog::Types::Instance(Blog::Structs::Paged)
