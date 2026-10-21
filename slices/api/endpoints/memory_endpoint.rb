@@ -9,11 +9,7 @@ module API
       UNREVERTIBLE = "only an add, an edit, a remove or a describe can be reverted"
       REFUSALS = { removed: { fact_id: [REMOVED] }, unrevertible: { event_id: [UNREVERTIBLE] } }.freeze
 
-      include Deps[record_loads: "agents.operations.record_loads"]
-
       private
-
-      def read_by(session_id, memory_file_ids, &) = recorded(record_loads.call(session_id, memory_file_ids), &)
 
       def recorded(result)
         case result

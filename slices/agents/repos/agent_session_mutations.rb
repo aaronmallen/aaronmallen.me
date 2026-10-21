@@ -27,6 +27,10 @@ module Agents
         agent_session_loads.dataset.insert_conflict.multi_insert(rows) unless rows.empty?
       end
 
+      def record_read(id, memory_file_id, at)
+        agent_session_reads.dataset.insert(agent_session_id: id, memory_file_id:, read_at: at)
+      end
+
       def record_search(id, hits:, **fields)
         search_id = agent_session_searches.dataset.insert(agent_session_id: id, **fields)
         rows = hits.map do |fact|

@@ -81,6 +81,30 @@ RSpec.describe "API sessions", type: :request do
     expect(Agents::Slice["relations.agent_session_searches"].count).to eq(0)
   end
 
+  describe "a read in a session", :frozen_clock do
+    let!(:file) { noted_file }
+
+    def reads = Agents::Slice["relations.agent_session_reads"].to_a.map { it.to_h.slice(:memory_file_id, :read_at) }
+
+    it "records each read with its time, repeats included" do
+      2.times { call_api(:get, "/memory_files/#{file}", { session_id: }) }
+
+      expect(reads).to eq([{ memory_file_id: file, read_at: Time.now }] * 2)
+    end
+
+    it "records no read without a session" do
+      call_api(:get, "/memory_files/#{file}")
+
+      expect(reads).to be_empty
+    end
+
+    it "records no read for a session that is not open" do
+      call_api(:get, "/memory_files/#{file}", { session_id: 999 })
+
+      expect([last_response.status, reads]).to eq([422, []])
+    end
+  end
+
   it "records each index line it returns and returns the same index" do
     file = noted_file
     files = call_api(:post, "/agent_sessions", { title: "Spike", **author }).fetch("files")

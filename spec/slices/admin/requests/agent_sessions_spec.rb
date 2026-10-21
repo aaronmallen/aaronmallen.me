@@ -59,8 +59,17 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
 
     it "names the brand, repo, branch and counts on a row" do
       expect(page.find("#agent-session-#{running} .li-sub").text)
-        .to include("Anthropic claude-opus-5-5", "blog @ index", "0 memory files read", "2 memory changes",
+        .to include("Anthropic claude-opus-5-5", "blog @ index", "0 files read", "0 searches", "2 memory changes",
                     "1 artifact")
+    end
+
+    it "counts files read, repeats included, and searches run" do
+      file = agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
+      2.times { agents(:record_read, running, file.id) }
+      agents(:record_search, running, { query: "cache" }, [])
+      get "/admin/agents/sessions"
+
+      expect(page.find("#agent-session-#{running} .li-sub").text).to include("2 files read", "1 search")
     end
 
     it "counts today's sessions and the running ones in the lede" do
@@ -78,7 +87,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
   end
 
   describe "the drawer" do
-    let(:session_id) { start("Index the activities table", task_ids: [task.id], client: "Claude Code 2.4") }
+    let!(:session_id) { start("Index the activities table", task_ids: [task.id], client: "Claude Code 2.4") }
 
     before do
       preferences = agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
@@ -99,8 +108,14 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(field("Worked on")).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
     end
 
-    it "lists the memory it read and leaves out what it only wrote" do
+    it "keeps the old list for a session from before reads, with a note", :aggregate_failures do
       expect(field("Memory it read").all(".record-link-title").map(&:text)).to eq(["preferences.md"])
+      expect(field("Memory it read")).to have_css(".hint", text: "ran before the site recorded searches and reads")
+    end
+
+    it "shows no index, searches or files read for a session from before reads" do
+      expect(drawer.all(".field > .f").map(&:text))
+        .to eq(["Worked on", "Memory it read", "Memory it changed", "Artifacts it wrote"])
     end
 
     it "lists the memory it changed with the fact's text", :aggregate_failures do
@@ -248,6 +263,48 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       open_drawer
 
       expect(searches.all(".pill").map(&:text)).to eq(["project 7", "task #{task.id}"])
+    end
+  end
+
+  describe "files read" do
+    let(:hanami) { agents(:create_memory_file, { path: "hanami", description: "Hanami notes", scope: "global" }) }
+    let(:session_id) { start("Index the activities table") }
+
+    def clock = Admin::Slice["i18n"].l(Blog::TimeZone.local(Time.now), format: :clock)
+
+    def open_drawer = get("/admin/agents/sessions", { session: session_id })
+
+    def reads = field("Files read")
+
+    it "follows Searches and leaves out the old list", :aggregate_failures do
+      agents(:record_read, session_id, hanami.id)
+      open_drawer
+
+      expect(drawer.all(".field > .f").map(&:text))
+        .to eq(["Index it started with", "Searches", "Files read", "Memory it changed", "Artifacts it wrote"])
+    end
+
+    it "shows each read's time, scope and path, repeats included", :aggregate_failures do
+      2.times { agents(:record_read, session_id, hanami.id) }
+      open_drawer
+
+      expect(reads.all(".agent-read").map(&:text)).to eq(["#{clock}global hanami.md"] * 2)
+      expect(reads).to have_link("hanami.md", href: "/admin/agents/memories/#{hanami.id}", count: 2)
+    end
+
+    it "says the index and searches were enough when it read no file" do
+      open_drawer
+
+      expect(reads).to have_css(".hint", exact_text: "None. The index and searches were enough.")
+    end
+
+    it "keeps a deleted file's read without a link", :aggregate_failures do
+      agents(:record_read, session_id, hanami.id)
+      agents(:delete_memory_file, hanami.id)
+      open_drawer
+
+      expect(reads).to have_css("span.record-link-title", text: "a deleted file")
+      expect(reads).to have_no_link("a deleted file")
     end
   end
 

@@ -2223,6 +2223,18 @@
   @apply my-0 font-serif text-li break-words text-ink-muted;
 }
 
+@utility agent-read {
+  @apply flex min-w-0 flex-1 items-baseline gap-2.5;
+}
+
+@utility agent-read-scope {
+  @apply font-mono text-ink-muted;
+}
+
+@utility agent-read-time {
+  @apply w-11 shrink-0 font-mono text-ink-muted;
+}
+
 @utility agent-search-head {
   @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-mono text-ink-muted;
 }

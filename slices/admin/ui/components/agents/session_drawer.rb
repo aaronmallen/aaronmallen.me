@@ -57,6 +57,21 @@ module Admin
             end
           end
 
+          def legacy
+            Field(label: t(".loaded")) do
+              Hint { t(".before") }
+              ul(class: "record-link-list") do
+                @session.agent_session_loads.each { |load| li(class: "record-link-row") { loaded(load) } }
+              end
+            end
+          end
+
+          def legacy?
+            @session.agent_session_loads.any? &&
+              [@session.agent_session_index_lines, @session.agent_session_searches, @session.agent_session_reads]
+                .all?(&:empty?)
+          end
+
           def list(label, rows, empty: t(".none"))
             Field(label:) do
               next Hint { empty } if rows.empty?
@@ -91,10 +106,12 @@ module Admin
           end
 
           def reads
+            return legacy if legacy?
+
             list(t(".index"), @session.agent_session_index_lines) { index_line(it) }
             searches = @session.agent_session_searches
             list(t(".searches"), searches, empty: t(".no_searches")) { |search| SessionSearch(search:) }
-            list(t(".loaded"), @session.agent_session_loads) { loaded(it) }
+            list(t(".read"), @session.agent_session_reads, empty: t(".no_reads")) { |read| SessionRead(read:) }
           end
 
           def repo

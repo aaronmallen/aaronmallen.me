@@ -3,8 +3,9 @@
 module Agents
   module Repos
     class AgentSessionQueries < Blog::DB::Repo
-      CHILDREN = %i[agent_session_tasks agent_session_loads memory_events artifact_versions].freeze
+      CHILDREN = %i[agent_session_tasks agent_session_loads agent_session_reads memory_events artifact_versions].freeze
       DRAWER = [*CHILDREN, :agent_session_index_lines, { agent_session_searches: :agent_session_search_hits }].freeze
+      LISTED = [*CHILDREN, :agent_session_searches].freeze
       IDLE_HOURS = 2
       TODAY_ARTIFACTS = 3
 
@@ -12,7 +13,7 @@ module Agents
 
       def by_id(id) = agent_sessions.combine(*DRAWER).by_pk(id).one
 
-      def listed(page) = page.fill(agent_sessions.combine(*CHILDREN).latest_first.paged(page).to_a)
+      def listed(page) = page.fill(agent_sessions.combine(*LISTED).latest_first.paged(page).to_a)
 
       def memory_changes(session_id) = memory_events.where(session_id:).session_changes.to_a
 

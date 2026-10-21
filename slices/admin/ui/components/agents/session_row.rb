@@ -22,7 +22,8 @@ module Admin
 
           def counts
             [
-              t(".loaded", count: @session.agent_session_loads.size),
+              t(".read", count: @session.agent_session_reads.size),
+              t(".searches", count: @session.agent_session_searches.size),
               (t(".changes", count: @session.memory_events.size) if @session.memory_events.any?),
               (t(".artifacts", count: @session.artifact_versions.size) if @session.artifact_versions.any?),
             ]

@@ -686,6 +686,7 @@ en:
           updated: "updated %{at} by %{who}"
           you: "you"
         session_drawer:
+          before: "This session ran before the site recorded searches and reads."
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
           deleted: "a deleted file"
@@ -694,6 +695,7 @@ en:
             other: "%{count} facts"
           index: "Index it started with"
           loaded: "Memory it read"
+          no_reads: "None. The index and searches were enough."
           no_searches: "None."
           none: "Nothing."
           ops:
@@ -704,6 +706,7 @@ en:
             remove: "removed from %{path}"
             revert: "reverted in %{path}"
             scope: "moved %{path} to a new scope"
+          read: "Files read"
           running: "%{from} until now, still running"
           searches: "Searches"
           span: "%{from}–%{to}, %{elapsed}"
@@ -727,6 +730,8 @@ en:
           none: "No facts matched."
           query: "“%{query}”"
           removed: "fact since removed"
+        session_read:
+          deleted: "a deleted file"
         session_row:
           artifacts:
             one: "%{count} artifact"
@@ -735,11 +740,14 @@ en:
           changes:
             one: "%{count} memory change"
             other: "%{count} memory changes"
-          loaded:
-            one: "%{count} memory file read"
-            other: "%{count} memory files read"
           now: "now"
+          read:
+            one: "%{count} file read"
+            other: "%{count} files read"
           running: "running"
+          searches:
+            one: "%{count} search"
+            other: "%{count} searches"
           span: "%{from}–%{to}"
         today_card:
           artifact_count:
