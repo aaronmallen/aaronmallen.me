@@ -14,6 +14,7 @@ module Admin
           response.render(
             view,
             sessions: agent_session_queries.listed(page), counts: agent_session_queries.today_counts,
+            span: agent_session_queries.span,
             open: opened(Blog::Types::IdParam[request.params[:session]]), today: Blog::TimeZone.today,
           )
         end

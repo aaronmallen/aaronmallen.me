@@ -647,9 +647,6 @@ en:
           behind:
             one: "%{count} fact behind them"
             other: "%{count} facts behind them"
-          facts:
-            one: "%{count} fact"
-            other: "%{count} facts"
           lines:
             one: "%{count} line"
             other: "%{count} lines"
@@ -670,6 +667,10 @@ en:
           save: "Save"
           title: "Index line"
           you: "you"
+        memory_line:
+          facts:
+            one: "%{count} fact"
+            other: "%{count} facts"
         memory_new_form:
           cancel: "Cancel"
           create: "Create"
@@ -690,9 +691,6 @@ en:
           branch: "%{repo} @ %{branch}"
           changed: "Memory it changed"
           deleted: "a deleted file"
-          facts:
-            one: "%{count} fact"
-            other: "%{count} facts"
           index: "Index it started with"
           loaded: "Memory it read"
           no_reads: "None. The index and searches were enough."
@@ -712,7 +710,7 @@ en:
           span: "%{from}–%{to}, %{elapsed}"
           tasks: "Worked on"
           title: "agent session · %{date}"
-          version: "#%{id} · v%{number} %{title}"
+          version: "#%{id} · v%{number}"
           via: "via %{client}"
           who: "%{agent} on %{model}"
           written: "Artifacts it wrote"
@@ -749,6 +747,7 @@ en:
             one: "%{count} search"
             other: "%{count} searches"
           span: "%{from}–%{to}"
+          via: "via %{agent}"
         today_card:
           artifact_count:
             one: "%{count} written today"
@@ -3620,6 +3619,9 @@ en:
             running:
               one: "%{today}, %{count} still running."
               other: "%{today}, %{count} still running."
+            span:
+              one: "%{sessions} in the last %{count} day."
+              other: "%{sessions} in the last %{count} days."
             today:
               one: "%{count} session today"
               other: "%{count} sessions today"

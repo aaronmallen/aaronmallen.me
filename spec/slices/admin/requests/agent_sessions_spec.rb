@@ -58,9 +58,17 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     end
 
     it "names the brand, repo, branch and counts on a row" do
-      expect(page.find("#agent-session-#{running} .li-sub").text)
-        .to include("Anthropic claude-opus-5-5", "blog @ index", "0 files read", "0 searches", "2 memory changes",
-                    "1 artifact")
+      spans = page.find("#agent-session-#{running} .task-meta").all("span").map { it.text.strip }
+      counts = ["0 files read", "0 searches", "2 memory changes", "1 artifact"]
+
+      expect(spans).to match([/\A\d{1,2}:\d{2}–now\z/, "Anthropic claude-opus-5-5", "blog @ index", *counts])
+    end
+
+    it "marks the repo with the GitHub icon and the brand with the agent", :aggregate_failures do
+      meta = page.find("#agent-session-#{running} .task-meta")
+
+      expect(meta.find("span", text: "blog @ index")).to have_css("i.fa-brands.fa-github")
+      expect(meta.find("span", exact_text: "Anthropic claude-opus-5-5")["title"]).to eq("via claude-code")
     end
 
     it "counts files read, repeats included, and searches run" do
@@ -69,11 +77,15 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       agents(:record_search, running, { query: "cache" }, [])
       get "/admin/agents/sessions"
 
-      expect(page.find("#agent-session-#{running} .li-sub").text).to include("2 files read", "1 search")
+      expect(page.find("#agent-session-#{running} .task-meta").text).to include("2 files read", "1 search")
     end
 
-    it "counts today's sessions and the running ones in the lede" do
-      expect(page).to have_css(".page-head-sub", text: "1 session today, 1 still running.")
+    it "counts today's sessions, the running ones and every session since the first in the lede" do
+      expect(page).to have_css(".page-head-sub", exact_text: "1 session today, 1 still running. 2 in the last 2 days.")
+    end
+
+    it "sets the sessions in one card with a day column" do
+      expect(page.all(".card.agent-days > .card-body > .activity-day").size).to eq(2)
     end
 
     it "opens no drawer" do
@@ -101,7 +113,12 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     end
 
     it "names the agent, model and client" do
-      expect(drawer).to have_css(".hint", text: "claude-code on Anthropic claude-opus-5-5 · via Claude Code 2.4")
+      expect(drawer.find(".agent-session-meta").all("span").map(&:text).first(2))
+        .to eq(["claude-code on Anthropic claude-opus-5-5", "via Claude Code 2.4"])
+    end
+
+    it "keys the tasks it worked on" do
+      expect(field("Worked on")).to have_css(".meta", text: "##{task.id}")
     end
 
     it "links the tasks it worked on" do
@@ -121,7 +138,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     it "lists the memory it changed with the fact's text", :aggregate_failures do
       changed = field("Memory it changed")
 
-      expect(changed.all(".record-link-title").map(&:text)).to eq(["created hanami.md", "added to hanami.md"])
+      expect(changed.all("a.agent-change > .meta").map(&:text)).to eq(["created hanami.md", "added to hanami.md"])
       expect(changed).to have_css(".agent-change-text", text: "Run specs through mise")
     end
 
@@ -130,12 +147,12 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       agents(:describe_memory_file, file[:id], { description: "How we test", **author, session_id: })
       get "/admin/agents/sessions", { session: session_id }
 
-      expect(field("Memory it changed").all(".record-link-title").map(&:text).last)
+      expect(field("Memory it changed").all(".agent-change > .meta").map(&:text).last)
         .to eq("changed the description of hanami.md")
     end
 
     it "lists the artifacts it wrote" do
-      expect(field("Artifacts it wrote")).to have_css(".record-link-title", text: "v1 Index plan")
+      expect(field("Artifacts it wrote")).to have_css(".record-link-title", text: "· v1 Index plan")
     end
   end
 
@@ -159,8 +176,15 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     end
 
     it "lists each line with its scope, fact count and the description the agent got" do
-      expect(index.all(".agent-change-text").map(&:text))
-        .to eq(["global · 0 facts · Old notes", "global · 1 fact · Hanami notes"])
+      expect(index.all(".memory-line").map(&:text))
+        .to eq(["global a deleted file0 factsOld notes", "global hanami.md1 factHanami notes"])
+    end
+
+    it "marks a description an agent wrote" do
+      file = agents(:create_memory_file, { path: "agent", description: "By an agent", scope: "global", **author })
+      get "/admin/agents/sessions", { session: start("Later run") }
+
+      expect(index.find(".memory-line", text: file.path)).to have_css(".agent-mark i.fa-robot")
     end
 
     it "links a live file to its page" do
@@ -215,6 +239,14 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
           .to eq([clock, "“mise”", "aaronmallen/blog", "global", "2 facts"])
       end
 
+      it "marks only the hits an agent wrote" do
+        agents(:add_memory_fact, hanami.id, { type: "gotcha", text: "An agent wrote this", **author })
+        search("agent")
+        open_drawer
+
+        expect(searches.all(".agent-change-text").map { it.has_css?(".agent-mark") }).to eq([false, false, true])
+      end
+
       it "shows each hit in full with its path", :aggregate_failures do
         open_drawer
 
@@ -236,7 +268,8 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
         end
 
         it "marks it fact since removed" do
-          expect(searches.all(".record-link-row .hint").map(&:text)).to eq(["fact since removed"])
+          expect(searches.all(".agent-change > .meta").map(&:text))
+            .to eq(["hanami.md", "hanami.md · fact since removed"])
         end
       end
 
@@ -244,7 +277,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
         agents(:delete_memory_file, hanami.id)
         open_drawer
 
-        expect(searches.all("span.record-link-title").map(&:text)).to eq(["a deleted file"] * 2)
+        expect(searches.all("span.agent-change > .meta").map(&:text)).to eq(["a deleted file"] * 2)
         expect(searches).to have_no_link("a deleted file")
       end
     end

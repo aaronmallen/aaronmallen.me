@@ -19,6 +19,13 @@ module Agents
 
       def memory_changes(session_id) = memory_events.where(session_id:).session_changes.to_a
 
+      def span
+        first = agent_sessions.dataset.unordered.min(:started_at)
+        return unless first
+
+        { sessions: agent_sessions.count, first: Blog::TimeZone.local_date(first) }
+      end
+
       def today_artifacts(now: Time.now)
         found = artifacts.where(id: written_ids(day_of(now))).latest_version_first.limit(TODAY_ARTIFACTS).to_a
         current = current_versions(found.map(&:id))

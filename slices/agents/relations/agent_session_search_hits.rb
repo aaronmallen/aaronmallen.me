@@ -7,7 +7,7 @@ module Agents
 
       def with_removal
         left_join(:memory_facts, id: self[:memory_fact_id].qualified)
-          .select_append(memory_facts[:removed_at].qualified)
+          .select_append(*%i[removed_at agent model].map { memory_facts[it].qualified })
           .order(self[:id].qualified.asc)
       end
     end

@@ -2203,18 +2203,26 @@
   }
 }
 
-@utility agent-days {
-  @apply flex min-w-0 flex-col gap-4;
+@utility agent-session-title {
+  @apply mb-5 task-read-title leading-[1.2] tracking-[-0.02em];
+}
+
+@utility agent-session-meta {
+  @apply mt-0 mb-[22px];
 }
 
 @utility agent-change {
-  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+  @apply flex min-w-0 flex-1 flex-col items-start gap-0.5 font-display text-li font-medium text-ink no-underline;
 
-  & > a.record-link-title {
-    @apply no-underline hover:text-accent-text hover:underline focus-ring;
+  & > .agent-change-text {
+    @apply font-normal text-pretty text-ink;
+  }
+
+  &:is(a) {
+    @apply hover:text-accent-text focus-ring;
 
     @variant phone {
-      @apply min-h-tap content-center;
+      @apply min-h-tap justify-center;
     }
   }
 }
@@ -2235,12 +2243,24 @@
   @apply w-11 shrink-0 font-mono text-ink-muted;
 }
 
+@utility agent-search {
+  @apply flex min-w-0 flex-1 flex-col gap-0.5 pt-1 pb-1.5;
+
+  & .record-link-row {
+    @apply pl-3.5;
+  }
+}
+
 @utility agent-search-head {
-  @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-mono text-ink-muted;
+  @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-mono text-meta text-ink-muted;
 }
 
 @utility agent-search-query {
-  @apply font-medium text-ink;
+  @apply text-[13.5px] font-medium text-ink;
+}
+
+@utility agent-search-count {
+  @apply ml-auto;
 }
 
 @utility avatar {

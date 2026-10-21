@@ -22,16 +22,7 @@ module Admin
           private
 
           def link(file)
-            a(class: "record-link-title memory-line", href: path(:admin_memory_file, id: file.id)) do
-              span(class: "memory-line-head") do
-                span(class: "memory-line-path") do
-                  span(class: "meta") { "#{file.scope} " }
-                  plain file.path
-                end
-                span(class: "meta") { t(".facts", count: file.facts.size) }
-              end
-              MemoryDescription(file:, tag: :span)
-            end
+            MemoryLine(file:, facts: file.facts.size, href: path(:admin_memory_file, id: file.id))
           end
 
           def repo_form

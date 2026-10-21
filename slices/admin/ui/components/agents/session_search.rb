@@ -16,7 +16,7 @@ module Admin
           def view_template
             hits = @search.agent_session_search_hits
 
-            div(class: "agent-change") do
+            div(class: "agent-search") do
               head(hits.size)
               next Hint { t(".none") } if hits.empty?
 
@@ -38,19 +38,19 @@ module Admin
               span { l(Blog::TimeZone.local(@search.searched_at), format: :clock) }
               span(class: "agent-search-query") { t(".query", query: @search.query) }
               filters
-              span { t(".facts", count:) }
+              span(class: "agent-search-count") { t(".facts", count:) }
             end
           end
 
           def hit(found)
-            div(class: "agent-change") do
-              if found.memory_file_id
-                a(class: "record-link-title", href: path(:admin_memory_file, id: found.memory_file_id)) { found.path }
-              else
-                span(class: "record-link-title") { t(".deleted") }
+            id = found.memory_file_id
+
+            tag(id ? :a : :span, class: "agent-change", href: (path(:admin_memory_file, id:) if id)) do
+              span(class: "agent-change-text") do
+                AgentMark(model: found.model) if found.agent
+                plain found.text
               end
-              p(class: "agent-change-text") { found.text }
-              Hint { t(".removed") } if found.removed_at
+              span(class: "meta") { dotted(id ? found.path : t(".deleted"), (t(".removed") if found.removed_at)) }
             end
           end
         end

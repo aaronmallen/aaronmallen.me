@@ -729,7 +729,7 @@ RSpec.describe "Admin agent memories", type: :request do
       agents(:add_memory_fact, file.id, { type: "gotcha", text: "Use mise", **author, session_id: id })
       get "/admin/agents/sessions", { session: id }
 
-      expect(session_links).to eq(["hanami.md", "global hanami.md", "added to hanami.md"])
+      expect(session_links).to eq(["global hanami.md0 factsNotes", "global hanami.md", "added to hanami.mdUse mise"])
     end
 
     it "links a memory file in a task's links" do

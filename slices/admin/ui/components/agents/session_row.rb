@@ -13,7 +13,12 @@ module Admin
           def view_template
             href = path(:admin_agent_sessions, **@place, session: @session.id)
 
-            div(id: "agent-session-#{@session.id}") { ListItem(title: @session.title, href:, sub:) { side } }
+            div(id: "agent-session-#{@session.id}") do
+              ListItem(title: @session.title, href:) do |item|
+                item.meta { p(class: "task-meta") { meta } }
+                side
+              end
+            end
           end
 
           private
@@ -21,12 +26,17 @@ module Admin
           def clock(time) = l(Blog::TimeZone.local(time), format: :clock)
 
           def counts
-            [
-              t(".read", count: @session.agent_session_reads.size),
-              t(".searches", count: @session.agent_session_searches.size),
-              (t(".changes", count: @session.memory_events.size) if @session.memory_events.any?),
-              (t(".artifacts", count: @session.artifact_versions.size) if @session.artifact_versions.any?),
-            ]
+            span { t(".read", count: @session.agent_session_reads.size) }
+            span { t(".searches", count: @session.agent_session_searches.size) }
+            span { t(".changes", count: @session.memory_events.size) } if @session.memory_events.any?
+            span { t(".artifacts", count: @session.artifact_versions.size) } if @session.artifact_versions.any?
+          end
+
+          def meta
+            span { period }
+            span(title: t(".via", agent: @session.agent)) { Helpers::AgentBrand.model(@session.model) }
+            repo
+            counts
           end
 
           def period
@@ -40,7 +50,11 @@ module Admin
             return unless @session.repo
 
             name = @session.repo.split(OWNER_SEPARATOR).last
-            @session.branch ? t(".branch", repo: name, branch: @session.branch) : name
+            span do
+              Icon("fa-brands fa-github")
+              whitespace
+              plain @session.branch ? t(".branch", repo: name, branch: @session.branch) : name
+            end
           end
 
           def side
@@ -48,8 +62,6 @@ module Admin
 
             span { Blog::Helpers::Figures.elapsed(@session.ended_at - @session.started_at) }
           end
-
-          def sub = dotted(period, Helpers::AgentBrand.model(@session.model), repo, *counts)
         end
       end
     end
