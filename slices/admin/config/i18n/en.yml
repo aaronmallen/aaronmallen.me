@@ -1867,6 +1867,12 @@ en:
           heading: "Saved views"
         screen_tabs:
           label: "Screens"
+          notes:
+            facts:
+              one: "%{count} fact"
+              other: "%{count} facts"
+            running: "%{count} running"
+            today: "%{count} today"
           waiting: "waiting"
         sections:
           activity: "activity"
@@ -3482,7 +3488,7 @@ en:
             all: "All"
             empty: "No artifacts yet."
             find: "Find"
-            heading: "Artifacts"
+            heading: "Agents"
             lede:
               one: "%{count} artifact, %{week} updated this week."
               other: "%{count} artifacts, %{week} updated this week."
@@ -3520,7 +3526,7 @@ en:
             project: "Projects · %{count}"
             repo: "Repos · %{count}"
             task: "Tasks · %{count}"
-          heading: "Memories"
+          heading: "Agents"
           lede:
             one: "%{facts} in %{count} file."
             other: "%{facts} in %{count} files."
@@ -3544,7 +3550,7 @@ en:
           show: "Show"
         sessions:
           empty: "No agent has opened a session yet."
-          heading: "Sessions"
+          heading: "Agents"
           label: "Sessions by day"
           lede:
             running:

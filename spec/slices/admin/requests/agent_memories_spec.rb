@@ -46,6 +46,13 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_css(".screen-tabs a[aria-current='page']", text: "memories")
     end
 
+    it "titles the screen Agents and counts on each tab", :aggregate_failures do
+      get "/admin/agents/memories"
+
+      expect(page).to have_css("h1.page-head-title", exact_text: "Agents")
+      expect(page.all("a.screen-tab").map(&:text)).to eq(["memories 1 fact", "artifacts 0", "sessions 0 today"])
+    end
+
     it "groups files by scope, global first" do
       get "/admin/agents/memories"
 

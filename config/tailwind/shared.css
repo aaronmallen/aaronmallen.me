@@ -2117,6 +2117,10 @@
   @apply font-mono text-badge text-mk-orange-text;
 }
 
+@utility screen-tab-note {
+  @apply font-mono text-badge text-ink-muted;
+}
+
 @utility bt {
   @apply inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-transparent px-4 py-[11px];
   @apply font-mono text-tab leading-none tracking-normal whitespace-nowrap text-ink no-underline;

@@ -52,7 +52,7 @@ module Admin
 
           Structs::Section.new(
             name:, group:, icon: icon.to_s, path:, count:, current: path == current, jump: JUMPS[name],
-            also: ALSO.fetch(name, Blog::Constants::EMPTY_HASH).keys,
+            also: ALSO.fetch(name, Blog::Constants::EMPTY_HASH).keys, note: nil,
           )
         end
       end

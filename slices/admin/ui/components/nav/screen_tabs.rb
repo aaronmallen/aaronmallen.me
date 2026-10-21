@@ -20,11 +20,17 @@ module Admin
           private
 
           def count(section)
+            return note(section.note) if section.note
             return unless section.waiting?
 
             whitespace
             span(class: "screen-tab-count") { section.count.to_s }
             span(class: "sr-only") { t(".waiting") }
+          end
+
+          def note(text)
+            whitespace
+            span(class: "screen-tab-note") { text }
           end
 
           def tab(section)

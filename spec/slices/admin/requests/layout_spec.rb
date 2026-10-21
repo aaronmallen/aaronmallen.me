@@ -228,6 +228,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
       expect(tabs.map { it["href"] }).to eq(%w[/admin/inbox /admin/mail /admin/webmentions])
       expect(tabs.map(&:text)).to eq(%w[waiting mail mentions])
+      expect(page).to have_no_css(".screen-tab-note")
       expect(page).to have_css("a.screen-tab[aria-current='page']", count: 1, text: "waiting")
     end
   end

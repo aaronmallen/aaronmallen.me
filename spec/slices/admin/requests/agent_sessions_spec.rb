@@ -43,6 +43,11 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(page).to have_css("a.pill-nav-link[aria-current='page']", text: "Agents")
     end
 
+    it "titles the screen Agents and counts on each tab", :aggregate_failures do
+      expect(page).to have_css("h1.page-head-title", exact_text: "Agents")
+      expect(page.all("a.screen-tab").map(&:text)).to eq(["memories 1 fact", "artifacts 1", "sessions 1 running"])
+    end
+
     it "groups sessions by day, newest first" do
       expect(page.all(".agent-days .day-head .day-note").map(&:text)).to eq(["Today · 1", "Yesterday · 1"])
     end

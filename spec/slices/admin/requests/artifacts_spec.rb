@@ -41,6 +41,13 @@ RSpec.describe "Admin artifacts", type: :request do
       expect(page).to have_css("a.pill-nav-link[aria-current='page']", text: "Agents")
     end
 
+    it "titles the screen Agents and counts on each tab", :aggregate_failures do
+      get "/admin/agents/artifacts"
+
+      expect(page).to have_css("h1.page-head-title", exact_text: "Agents")
+      expect(page.all("a.screen-tab").map(&:text)).to eq(["memories 0 facts", "artifacts 2", "sessions 0 today"])
+    end
+
     it "sorts by the latest version" do
       get "/admin/agents/artifacts"
 

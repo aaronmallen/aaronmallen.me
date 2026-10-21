@@ -7,6 +7,8 @@ module Agents
 
       def event(memory_file_id, id) = memory_events.where(memory_file_id:).by_pk(id).one
 
+      def fact_count = memory_facts.where(removed_at: nil).count
+
       def history(memory_file_id, page) = page.fill(memory_events.where(memory_file_id:).newest_first.paged(page).to_a)
 
       def history_count(memory_file_id) = memory_events.where(memory_file_id:).count
