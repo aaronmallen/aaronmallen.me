@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
-amended: ["#1747", "#1752", "#1750", "#1751", "#1860"]
+amended: ["#1747", "#1752", "#1750", "#1751", "#1860", "#1868"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -34,9 +34,12 @@ An agent opens a session with `start_session` and closes it with `end_session`.
   path, description and fact count, and no facts ([ADR 0195][0195]). It records no loads.
 - **Loads are reads.** Since #1860 a session records the memory files the agent read. `read_memory_file` and
   `search_memory` take an optional session id; a read records its file, and a search records each file it hit.
+  Since #1868 a session also keeps a copy of what it got: the index lines `start_session` returned, each search with
+  its query, filters and hits, and each read with its time ([ADR 0196][0196]).
 - **Writes name the session.** Memory and artifact writes take an optional session id and record the change against
   it. A write without one belongs to no session. Each call that names a session moves its last-seen time. Since
-  #1747 a write that names a session that ended or never existed is refused.
+  #1747 a write that names a session that ended or never existed is refused. Since #1868 `read_memory_file` and
+  `search_memory` answer on an ended session and record nothing, because a read has nothing to protect.
 - **`end_session`** sets the end time. A second call is refused.
 - **A sidekiq-scheduler job** closes each session not seen for 2 hours, and #1747 sets its end time to when a call
   last named it. It never retries and catches up on its next run ([ADR 0012][0012]).
@@ -46,7 +49,8 @@ one's tasks, the memory it loaded and changed and the artifacts it wrote. Today 
 memory changes agents made and the artifacts they wrote. Since #1750 the drawer links each memory file to its page,
 and Today's memory line opens the memories screen. Since #1751 each artifact in the drawer opens the version the session
 wrote, and the card's Artifacts line opens the Artifacts screen. Since #1860 the drawer lists only the memory
-files the session read.
+files the session read. Since #1868 it shows the index the session started with, its searches and the files it
+read, in place of that list.
 
 ## Alternatives
 
@@ -62,11 +66,13 @@ Nothing ties a session to the token that opened it, so any client holding `agent
 whose id it knows.
 
 Since #1747 a session keeps its tasks and loaded files as links, so deleting a task or a memory file drops it from
-each session that named or loaded it.
+each session that named or loaded it. Since #1868 a session's index lines, search hits and reads outlive a deleted
+file: their link goes to null, and the drawer marks the line as a deleted file.
 
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md
 [0058]: 0058-serve-mcp-as-one-stateless-post-action.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0189]: 0189-name-an-agent-by-the-slugs-it-reports-on-each-write.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
+[0196]: 0196-keep-a-copy-of-each-sessions-memory-index-searches-and-reads.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

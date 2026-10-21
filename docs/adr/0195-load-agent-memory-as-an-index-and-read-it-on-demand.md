@@ -5,6 +5,7 @@ status: active
 created: 2026-10-20
 area: [db, agents, admin, api, mcp]
 issue: "#1861"
+amended: ["#1868"]
 tags: [agents, memory, sessions, mcp, search, index, context]
 ---
 
@@ -36,7 +37,9 @@ An agent loads an index at the start of a run and reads facts when the work call
   returns each fact with its file's ID and path. Text an agent wrote keeps its untrusted marker.
 - **Loads.** A session records the files the agent read, not the files the index listed. `read_memory_file` and
   `search_memory` take an optional `session_id`. A read records its file, and a search records each file it hit.
-  `start_session` records none, and the admin session drawer lists only what the session read.
+  `start_session` records none, and the admin session drawer lists only what the session read. Since #1868
+  `start_session` records the index lines it returns, and the drawer shows them above the searches and reads
+  ([ADR 0196][0196]).
 
 Memory stays out of the global `search` tool.
 
@@ -75,4 +78,5 @@ Until the later migration lands, a file can have no description, and its index l
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [0190]: 0190-open-and-close-agent-sessions-through-tools-and-close-idle-ones-from-a-job.md
+[0196]: 0196-keep-a-copy-of-each-sessions-memory-index-searches-and-reads.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
