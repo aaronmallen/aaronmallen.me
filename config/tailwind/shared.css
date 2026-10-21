@@ -5210,10 +5210,6 @@
   }
 }
 
-@utility memory-raw {
-  @apply m-0 font-mono text-meta whitespace-pre-wrap break-words text-ink;
-}
-
 @utility memory-type {
   @apply mt-3 mb-1 text-meta font-semibold text-ink-muted first:mt-0;
 }

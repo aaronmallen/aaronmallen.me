@@ -29,7 +29,6 @@ RSpec.describe "Admin screens", type: :feature do
         visit "/admin/agents/memories/#{memory_file_id}"
         find(".memory-edit summary").click
       end,
-      "memory file as loaded" => -> { visit "/admin/agents/memories/#{memory_file_id}?view=loaded" },
     }
   end
 

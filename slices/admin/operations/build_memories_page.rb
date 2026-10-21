@@ -27,7 +27,7 @@ module Admin
         {
           files:, scope:, query:, repos:, errors:,
           counts: memory_file_queries.scope_counts,
-          loads: load_memory.call(repo: shown_repo),
+          index: load_memory.call(repo: shown_repo),
           repo: shown_repo,
           scopes: scopes(files, live:, repos:),
           values: { path: "", scope: GLOBAL, **values.to_h },

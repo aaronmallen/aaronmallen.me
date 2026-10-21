@@ -223,17 +223,17 @@ en:
       untitled: "Give the task a title"
       woken: "Woken"
   memories_page:
-    loads_for:
+    listed_for:
       named:
-        global: "Loads for every session"
-        project: "Loads for sessions on %{name} or in its repo"
-        repo: "Loads for sessions in %{name}"
-        task: "Loads for sessions on %{name}"
+        global: "Listed for every session"
+        project: "Listed for sessions on %{name} or in its repo"
+        repo: "Listed for sessions in %{name}"
+        task: "Listed for sessions on %{name}"
       unnamed:
-        global: "loads for every session"
-        project: "loads for sessions on this project or in its repo"
-        repo: "loads for sessions in this repo"
-        task: "loads for sessions on this task"
+        global: "listed for every session"
+        project: "listed for sessions on this project or in its repo"
+        repo: "listed for sessions in this repo"
+        task: "listed for sessions on this task"
     scopes:
       global: "Global"
       project: "Project · %{name}"
@@ -242,7 +242,7 @@ en:
     toasts:
       added: "Fact added"
       created: "Memory file created"
-      deleted: "Memory file deleted · agents stop loading it"
+      deleted: "Memory file deleted · agents can no longer read it"
       removed: "Fact removed · revert it from the history"
       reverted: "Reverted"
       saved: "Fact saved"
@@ -606,11 +606,11 @@ en:
             format: "Use letters, digits, _, ., / and - only."
             taken: "A file in this scope already has this path."
           scope:
-            blank: "Pick where the file loads."
-            extra: "Pick where the file loads."
-            format: "Pick where the file loads."
+            blank: "Pick a scope."
+            extra: "Pick a scope."
+            format: "Pick a scope."
             missing: "That record is gone. Pick another scope."
-            taken: "A file with this path already loads there."
+            taken: "That scope already has a file with this path."
           text:
             blank: "Write the fact first."
             visible: "Write the fact first."
@@ -635,7 +635,7 @@ en:
           session: "Session"
           title: "History"
           you: "You"
-        memory_loads:
+        memory_index:
           facts:
             one: "%{count} fact"
             other: "%{count} facts"
@@ -643,8 +643,8 @@ en:
             one: "%{count} file"
             other: "%{count} files"
           show: "Show"
-          tasks: "Task files also load when a session starts on that task."
-          title: "What a session loads"
+          tasks: "A session on a task also lists that task's files."
+          title: "What a session's index lists"
           working_in: "Working in"
         memory_new_form:
           create: "Create"
@@ -653,7 +653,7 @@ en:
           new: "New memory file"
           path: "File"
           path_hint: "testing.md"
-          scope: "Loads for"
+          scope: "Scope"
         memory_row:
           facts:
             one: "%{count} fact"
@@ -3544,19 +3544,14 @@ en:
           scope: "Scope"
           search: "Search memories"
         memory_file:
-          as_loaded: "What the agent reads"
           back: "All memories"
-          confirm_delete: "Delete %{path}? Agents stop loading it."
+          confirm_delete: "Delete %{path}? It drops out of every session's index, and agents can no longer read or search it."
           delete: "Delete file"
           fact_count:
             one: "%{count} fact"
             other: "%{count} facts"
-          facts: "facts"
-          loaded: "as loaded"
-          markdown: "markdown"
           move: "Change scope"
           scope: "Scope"
-          show: "Show"
         sessions:
           empty: "No agent has opened a session yet."
           heading: "Agents"

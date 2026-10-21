@@ -4,7 +4,7 @@ module Admin
   module Helpers
     module MemoryScope
       LABELS = "memories_page.scopes"
-      LOADS_FOR = "memories_page.loads_for"
+      LISTED_FOR = "memories_page.listed_for"
       SEPARATOR = ":"
       TARGETS = ::Agents::Contracts::MemoryScopeContract::TARGETS
 
@@ -23,7 +23,7 @@ module Admin
 
       def label(scope) = "#{LABELS}.#{scope}"
 
-      def loads_for(scope, named: false) = "#{LOADS_FOR}.#{named ? :named : :unnamed}.#{scope}"
+      def listed_for(scope, named: false) = "#{LISTED_FOR}.#{named ? :named : :unnamed}.#{scope}"
     end
   end
 end

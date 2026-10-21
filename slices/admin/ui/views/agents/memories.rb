@@ -16,7 +16,7 @@ module Admin
           prop :query, Blog::Types::String.optional
           prop :repo, Blog::Types::String.optional
           prop :repos, Blog::Types::Array.of(Blog::Types::String)
-          prop :loads, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :index, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash
           prop :scopes, Blog::Types::Array
           prop :values, Blog::Types::Hash
@@ -29,7 +29,7 @@ module Admin
             div(class: "g-main") do
               div(class: "stack") { list }
               aside(class: "stack") do
-                MemoryLoads(repo: @repo, repos: @repos, files: @loads, keep: { scope: @scope, query: @query }.compact)
+                MemoryIndex(repo: @repo, repos: @repos, files: @index, keep: { scope: @scope, query: @query }.compact)
               end
             end
           end
@@ -61,7 +61,7 @@ module Admin
           def group(key, files)
             choice = scoped(key)
 
-            Card(title: scope_text(choice), note: t(Helpers::MemoryScope.loads_for(choice.kind))) do
+            Card(title: scope_text(choice), note: t(Helpers::MemoryScope.listed_for(choice.kind))) do
               files.each { MemoryRow(file: it, query: @query) }
             end
           end

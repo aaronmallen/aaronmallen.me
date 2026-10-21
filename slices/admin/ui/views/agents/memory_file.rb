@@ -13,7 +13,6 @@ module Admin
           prop :history, Blog::Types::Instance(Blog::Structs::Paged)
           prop :history_count, Blog::Types::Integer
           prop :history_marks, Blog::Types::Hash
-          prop :loaded, Blog::Types::Bool, default: false
           prop :scopes, Blog::Types::Array
           prop :form, Blog::Types::Hash
           prop :records, Blog::Types::Hash
@@ -22,7 +21,7 @@ module Admin
             content_for(:live_tables, LIVE_TABLES)
             head
             div(class: "g-main") do
-              div(class: "stack") { @loaded ? markdown : MemoryFacts(file: @file, form: @form) }
+              div(class: "stack") { MemoryFacts(file: @file, form: @form) }
               aside(class: "stack") { side }
             end
           end
@@ -39,34 +38,21 @@ module Admin
           end
 
           def head
-            PageHead(title: @file.path, sub: lede) do
-              BackLink(href: path(:admin_memory_files)) { t(".back") }
-              SegmentedLinks(label: t(".show"), items: [mode(".facts", false), mode(".loaded", true)])
-            end
+            PageHead(title: @file.path, sub: lede) { BackLink(href: path(:admin_memory_files)) { t(".back") } }
           end
 
           def lede
             facts = t(".fact_count", count: @file.facts.size)
 
-            loads = t(Helpers::MemoryScope.loads_for(@file.scope, named: true), name: current.name.to_s)
+            listed = t(Helpers::MemoryScope.listed_for(@file.scope, named: true), name: current.name.to_s)
 
-            [@file.description, "#{facts}. #{loads}."].compact.join(" · ")
+            [@file.description, "#{facts}. #{listed}."].compact.join(" · ")
           end
 
           def linked
             find_path = path(:admin_memory_file, id: @file.id)
 
             RecordLinks::Section(records: @records, kind: "memory_file", id: @file.id, find_path:)
-          end
-
-          def markdown
-            Card(title: t(".as_loaded"), note: t(".markdown")) { pre(class: "memory-raw") { @file.markdown } }
-          end
-
-          def mode(text, loaded)
-            query = loaded ? { view: Operations::BuildMemoryFilePage::LOADED } : Blog::Constants::EMPTY_HASH
-
-            { text: t(text), current: @loaded == loaded, href: path(:admin_memory_file, id: @file.id, **query) }
           end
 
           def scope_form
@@ -84,9 +70,7 @@ module Admin
           def side
             Card { scope_form }
             linked
-            params = @loaded ? { view: Operations::BuildMemoryFilePage::LOADED } : Blog::Constants::EMPTY_HASH
-
-            MemoryHistory(file: @file, events: @history, count: @history_count, params:, **@history_marks)
+            MemoryHistory(file: @file, events: @history, count: @history_count, **@history_marks)
             div { delete_form }
           end
         end

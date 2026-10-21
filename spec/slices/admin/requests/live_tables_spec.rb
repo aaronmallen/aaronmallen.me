@@ -26,8 +26,7 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/people/#{create(:person).id}/edit", "/admin/files/#{upload_share.value!.id}/edit",
       "/admin/files/groups/#{file_group.id}/edit", "/admin/links/#{short_link.id}/edit",
       "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
-      "/admin/agents/memories/#{memory_file.id}?view=loaded", "/admin/agents/artifacts/#{artifact.id}",
-      "/admin/agents/artifacts/#{artifact.id}/edit",
+      "/admin/agents/artifacts/#{artifact.id}", "/admin/agents/artifacts/#{artifact.id}/edit",
     ]
   end
 

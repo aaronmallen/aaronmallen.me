@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       module Agents
-        class MemoryLoads < Component
+        class MemoryIndex < Component
           prop :repo, Blog::Types::String.optional
           prop :repos, Blog::Types::Array.of(Blog::Types::String)
           prop :files, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -31,7 +31,7 @@ module Admin
           def repo_form
             AutoForm(action: path(:admin_memory_files)) do
               HiddenFields(values: @keep)
-              Field(label: t(".working_in"), id: "memory-loads-repo") do |control|
+              Field(label: t(".working_in"), id: "memory-index-repo") do |control|
                 Select(**control, name: "repo", options: @repos.to_h { [it, it] }, selected: @repo)
               end
               noscript { Button(type: "submit", small: true) { t(".show") } }

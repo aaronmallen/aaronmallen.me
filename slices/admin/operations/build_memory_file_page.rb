@@ -5,7 +5,6 @@ module Admin
     class BuildMemoryFilePage
       KIND = Blog::Types::RecordKind["memory_file"]
       EMPTY = Blog::Constants::EMPTY_HASH
-      LOADED = "loaded"
 
       include Deps[
         "settings",
@@ -14,7 +13,7 @@ module Admin
         memory_file_queries: "agents.repos.memory_file_queries",
       ]
 
-      def call(id, page: first_page, view: nil, form: EMPTY, records: EMPTY)
+      def call(id, page: first_page, form: EMPTY, records: EMPTY)
         file = memory_file_queries.by_id(id)
         return unless file
 
@@ -24,7 +23,6 @@ module Admin
           file:, form:, history:,
           history_count: memory_file_queries.history_count(id),
           history_marks: memory_file_queries.history_marks(history.rows),
-          loaded: view == LOADED,
           records: list_record_links.call(KIND, id, **records),
           scopes: build_memories_page.scopes([file]),
         }

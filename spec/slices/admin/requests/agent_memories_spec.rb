@@ -85,10 +85,10 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_css(".empty", text: t("ui.views.agents.memories.no_match", query: "zeppelin"))
     end
 
-    it "lists what a session in the chosen repo loads, linked to each file" do
+    it "lists what the index of a session in the chosen repo lists, linked to each file" do
       get "/admin/agents/memories", { repo: "aaronmallen/blog" }
 
-      expect(page.find(".card", text: "What a session loads").all("a.record-link-title").map(&:text))
+      expect(page.find(".card", text: "What a session's index lists").all("a.record-link-title").map(&:text))
         .to eq(["global preferences.md", "repo hanami.md", "project deploys.md"])
     end
 
@@ -101,10 +101,10 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_no_css("option", text: "Task · Drop the old feed", visible: :all)
     end
 
-    it "notes what each group loads for" do
+    it "notes which sessions list each group" do
       get "/admin/agents/memories"
 
-      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_text("loads for sessions in this repo")
+      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_text("listed for sessions in this repo")
     end
 
     it "picks the first repo when none is chosen" do
@@ -134,6 +134,12 @@ RSpec.describe "Admin agent memories", type: :request do
   end
 
   describe "a new file" do
+    it "labels its scope field Scope" do
+      get "/admin/agents/memories"
+
+      expect(page.find("details.memory-new")).to have_css("label", exact_text: "Scope", visible: :all)
+    end
+
     it "creates it as the owner and opens it", :aggregate_failures do
       admin_post("/admin/agents/memories", memory_file: { path: "testing", description: "Tests", scope: "global" })
       file = Agents::Slice["repos.memory_file_queries"].listed.last
@@ -171,6 +177,13 @@ RSpec.describe "Admin agent memories", type: :request do
 
       expect(page).to have_css("#memory-scope-error", text: "That record is gone")
     end
+
+    it "names the scope, not where the file loads, when the scope is bad", :aggregate_failures do
+      admin_post("/admin/agents/memories", memory_file: { path: "testing", description: "Notes", scope: "" })
+
+      expect(page).to have_css("#memory-scope-error", text: t("ui.components.agents.memory_field_error.scope.blank"))
+      expect(page).to have_no_text(/\bload/i)
+    end
   end
 
   describe "a file" do
@@ -198,21 +211,22 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page.all("h3.memory-type").map(&:text)).to eq(%w[Preferences Gotchas Context])
     end
 
-    it "names what loads it in the lede" do
+    it "names the sessions that list it in the lede" do
       moved = agents(
         :create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" },
       )
       get file_path(moved)
 
-      expect(page).to have_text(t("memories_page.loads_for.named.repo", name: "aaronmallen/blog"))
+      expect(page).to have_text(t("memories_page.listed_for.named.repo", name: "aaronmallen/blog"))
     end
 
-    it "shows the markdown start_session hands an agent" do
+    it "shows the facts for the old as loaded view", :aggregate_failures do
       fact
-      _, loaded = agents(:start_session, { title: "Spike", **author, task_ids: [] })
       get file_path(file), { view: "loaded" }
 
-      expect(page.find("pre.memory-raw").text).to eq(loaded.find { it.id == file.id }.markdown)
+      expect(page).to have_css("#memory-fact-#{fact.id}")
+      expect(page).to have_no_css("pre")
+      expect(page).to have_no_text("as loaded")
     end
 
     it "escapes what an agent wrote" do
@@ -361,11 +375,19 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_css("#memory-scope-error", text: t("ui.components.agents.memory_field_error.scope.taken"))
     end
 
+    it "asks before it deletes, in the index's words" do
+      get file_path(file)
+
+      expect(page.find("form[action='#{file_path(file)}/delete']")["data-confirm"])
+        .to eq(t("ui.views.agents.memory_file.confirm_delete", path: "hanami.md"))
+    end
+
     it "deletes it", :aggregate_failures do
       admin_post("#{file_path(file)}/delete")
 
       expect(last_response.location).to end_with("/admin/agents/memories")
       expect(Agents::Slice["repos.memory_file_queries"].by_id(file.id)).to be_nil
+      expect(toast).to eq("Memory file deleted · agents can no longer read it")
     end
   end
 
@@ -393,10 +415,10 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(history).to have_css("a[rel='next'][href='#{file_path(file)}?page=2']")
     end
 
-    it "keeps the loaded view when it links to older entries" do
+    it "drops the old loaded view from links to older entries" do
       get file_path(file), { view: "loaded" }
 
-      expect(history).to have_css("a[rel='next'][href='#{file_path(file)}?view=loaded&page=2']")
+      expect(history).to have_css("a[rel='next'][href='#{file_path(file)}?page=2']")
     end
 
     it "reaches the oldest entry on a later page" do
