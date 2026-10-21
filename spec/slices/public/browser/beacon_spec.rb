@@ -135,7 +135,7 @@ RSpec.describe "Analytics beacon", type: :feature do
         const sent = [];
         const sendBeacon = navigator.sendBeacon.bind(navigator);
         navigator.sendBeacon = (url, body) => {
-          body.text().then((text) => sent.push(JSON.parse(text)));
+          sent.push(body.text().then(JSON.parse));
           return sendBeacon(url, body);
         };
         const frame = () => new Promise((settled) => requestAnimationFrame(() => requestAnimationFrame(settled)));
@@ -147,7 +147,7 @@ RSpec.describe "Analytics beacon", type: :feature do
           }
           dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true }));
           await frame();
-          done(sent.map((visit) => Object.keys(visit).includes("scroll_depth") ? [visit.kind, visit.scroll_depth] : [visit.kind]));
+          done((await Promise.all(sent)).map((visit) => Object.keys(visit).includes("scroll_depth") ? [visit.kind, visit.scroll_depth] : [visit.kind]));
         })();
       JS
     end

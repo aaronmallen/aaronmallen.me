@@ -124,7 +124,8 @@ RSpec.describe "Admin files", type: :request do
       end
 
       it "narrows by code" do
-        get "/admin/files", search: coded("notes.txt")[:code]
+        Shares::Slice["relations.short_codes"].where(code: coded("notes.txt")[:code]).update(code: "zzqzzqzz")
+        get "/admin/files", search: "zzqzzqzz"
 
         expect(names).to eq(%w[notes.txt])
       end
