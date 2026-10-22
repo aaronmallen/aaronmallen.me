@@ -9,6 +9,13 @@ RSpec.describe "MCP memory tools", type: :request do
     mcp_answer("create_memory_file", path:, description:, scope:, **author, **)
   end
 
+  def fresh_project_and_rule
+    [
+      Projects::Slice["repos.project_queries"].ids_by_repo("aaronmallen/fresh"),
+      Tasks::Slice["repos.task_rule_queries"].by_pattern("github", "aaronmallen/fresh"),
+    ]
+  end
+
   def history(file) = mcp_answer("read_memory_file", id: file).fetch("history")
 
   def live_texts(file) = trusted(mcp_answer("read_memory_file", id: file).fetch("facts")).map { it.fetch("text") }
@@ -132,10 +139,18 @@ RSpec.describe "MCP memory tools", type: :request do
       expect(mcp_text("read_memory", project: "NOPE")).to eq("project: name a project key that exists")
     end
 
-    it "makes a private project for a repo no project holds" do
-      mcp_answer("read_memory", repo: "aaronmallen/fresh")
+    describe "given a repo no project holds" do
+      it "loads the global and task files" do
+        files = mcp_answer("read_memory", repo: "aaronmallen/fresh", task_id: task.id).fetch("files")
 
-      expect(Projects::Slice["repos.project_queries"].ids_by_repo("aaronmallen/fresh").length).to eq(1)
+        expect(files.map { it.fetch("path") }).to eq(%w[preferences.md task-notes.md])
+      end
+
+      it "makes no project and no task rule" do
+        mcp_answer("read_memory", repo: "aaronmallen/fresh")
+
+        expect(fresh_project_and_rule).to eq([[], nil])
+      end
     end
   end
 
@@ -203,6 +218,19 @@ RSpec.describe "MCP memory tools", type: :request do
     it "refuses a project key that names no project" do
       expect(mcp_text("search_memory", query: "cache", project: "NOPE"))
         .to eq("project: name a project key that exists")
+    end
+
+    describe "given a repo no project holds" do
+      it "searches the global and task files" do
+        expect(texts(query: "cache", repo: "aaronmallen/fresh", task_id: task.id))
+          .to contain_exactly("Mind the cache index", "No emdash in the cache docs")
+      end
+
+      it "makes no project and no task rule" do
+        found(query: "cache", repo: "aaronmallen/fresh")
+
+        expect(fresh_project_and_rule).to eq([[], nil])
+      end
     end
 
     it "searches the files read_memory lists for a task" do

@@ -7,26 +7,21 @@ module Agents
 
       include Deps[
         add_repo_rule: "tasks.operations.add_repo_rule",
-        project_queries: "projects.repos.project_queries",
+        find_project: "operations.find_project",
         save_project: "projects.operations.save_project",
       ]
 
       def call(project: nil, repo: nil)
-        return step(keyed(project)) if project
-        return unless repo
+        id = step find_project.call(project:, repo:)
+        return id if id || repo.nil?
 
-        project_queries.ids_by_repo(repo).first || step(created(repo))
+        step created(repo)
       end
 
       private
 
       def created(repo)
         save_project.call({ name: repo.split("/").last, repo:, visibility: PRIVATE }).fmap { add_repo_rule.call(it).id }
-      end
-
-      def keyed(key)
-        id = project_queries.id_by_key(key)
-        id ? Success(id) : invalid(:project, Blog::Contract::MISSING)
       end
     end
   end

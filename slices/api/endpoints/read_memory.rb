@@ -17,17 +17,16 @@ module API
 
       MALFORMED = { repo: [Blog::Contract::FORMAT] }.freeze
 
-      include Deps[load_memory: "agents.operations.load_memory", resolve_project: "agents.operations.resolve_project"]
+      include Deps[find_project: "agents.operations.find_project", load_memory: "agents.operations.load_memory"]
 
       def handle(task_id: nil, project_id: nil, project: nil, repo: nil)
         repo = Blog::Types::OptionalText[repo]
         repo &&= Blog::Types::Normalized::Repo.call(repo) { return rejected(MALFORMED, Memory::COMPLAINTS) }
 
         project = Blog::Types::OptionalText[project]
-        case resolve_project.call(project:, repo:)
+        case find_project.call(project:, repo:)
           in Success(id) then Success(Memory.loaded(load(project_id || id, task_id)))
           in Failure[:invalid, errors] then rejected(errors, Memory::COMPLAINTS)
-          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 

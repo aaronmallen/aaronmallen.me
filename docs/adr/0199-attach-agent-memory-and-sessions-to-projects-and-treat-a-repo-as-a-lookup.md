@@ -11,6 +11,8 @@ area:
   - mcp
   - projects
 issue: "#1894"
+amended:
+  - "#1899"
 tags:
   - agents
   - memory
@@ -46,10 +48,12 @@ Memory and sessions attach to projects. The `repo` memory scope goes away, and m
 - **A repo is a lookup.** `start_session`, `read_memory` and `search_memory` take a project key, or `repo` as
   `owner/name`. A repo resolves to the project whose `repo` matches. An unknown project key is an error, since a key
   alone names no repo to build a project from.
-- **An unknown repo makes a project.** When a repo matches no project, the `agents` slice creates a private project
-  for it through the `projects` slice's normal save, as the admin would. The project takes the repo's name part as
-  its name and the usual generated key, and the save adds the GitHub task rule every project repo gets
-  ([ADR 0122][0122]). The session then loads that project's memory.
+- **An unknown repo makes a project when a session starts.** When `start_session` gets a repo that matches no
+  project, the `agents` slice creates a private project for it through the `projects` slice's normal save, as the
+  admin would. The project takes the repo's name part as its name and the usual generated key, and the save adds the
+  GitHub task rule every project repo gets ([ADR 0122][0122]). The session then loads that project's memory. #1899
+  kept `read_memory` and `search_memory` to reads: an unknown repo there finds no project, and they return what they
+  would with none.
 - **A session records its project.** `agent_sessions` gains the project the session resolved to. `repo` and
   `branch` stay as plain facts about where the run happened, and the admin drawer shows all three. Sessions filter
   by project.
@@ -75,9 +79,9 @@ none.
 
 Each place has one home for memory, and a project's page, tasks and sessions all hang off the same row.
 
-An agent can now create a project. Any agent that starts a session in a new checkout adds a private project and a
-GitHub task rule, so a typo in `repo` leaves a stray project and rule for me to archive or
-delete. Since the rule matches the repo, issues synced from that repo land in the new project.
+An agent can now create a project, and since #1899 only `start_session` does. Any agent that starts a session in
+a new checkout adds a private project and a GitHub task rule, so a typo in `repo` leaves a stray project and rule
+for me to archive or delete. Since the rule matches the repo, issues synced from that repo land in the new project.
 
 `start_session` now writes through the `projects` slice, so a project save that slice refuses fails the session
 too.

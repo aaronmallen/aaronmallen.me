@@ -30,7 +30,7 @@ module API
       }.freeze
       PROJECT = { type: "string", description: "the key of the project to load, such as POD" }.freeze
       REPO = Helpers::Schema::REPO.merge(
-        description: "the repository as owner/name, to look up its project; one no project holds gets a new one",
+        description: "the repository as owner/name, to look up its project",
       ).freeze
       SCOPED = "only a %s file takes %s"
 

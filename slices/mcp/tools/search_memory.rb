@@ -7,9 +7,10 @@ module MCP
                   "file that holds it; read_memory_file reads that file whole. Give a project key in project, repo " \
                   "as owner/name to look up its project, project_id or task_id to search the files read_memory lists " \
                   "for them, and scope to keep one scope; leave them all out to search every file. A repo no project " \
-                  "holds makes a new private project, and an unknown key is refused. count gives the facts on this " \
-                  "page. Give session_id to record the search, its facts and the files they came from against that " \
-                  "session; an ended session still allows the search but records nothing. " \
+                  "holds searches no project files and makes no project, since only start_session makes one, and " \
+                  "an unknown key is refused. count gives the facts on this page. Give session_id to record the " \
+                  "search, its facts and the files they came from against that session; an ended session still " \
+                  "allows the search but records nothing. " \
                   "#{API::Helpers::Paging::USAGE}. #{Untrusted::MEMORY}"
       endpoint
     end

@@ -13,7 +13,9 @@ module API
           model: Memory::AUTHOR.fetch(:model),
           client: { type: "string", description: "the client the agent runs in, such as Claude Code 2.4 on macOS" },
           project: Memory::PROJECT,
-          repo: Memory::REPO,
+          repo: Memory::REPO.merge(
+            description: "the repository as owner/name, to look up its project; one no project holds gets a new one",
+          ),
           branch: { type: "string", description: "the branch it works on" },
           tasks: Helpers::Schema.list(Helpers::Schema::TASK).merge(
             maxItems: Blog::Contract::MAX_IDS, description: "the tasks it works on",

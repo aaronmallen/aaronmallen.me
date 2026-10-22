@@ -28,8 +28,8 @@ module API
       MALFORMED = { repo: [Blog::Contract::FORMAT] }.freeze
 
       include Deps[
+        find_project: "agents.operations.find_project",
         record_search: "agents.operations.record_search",
-        resolve_project: "agents.operations.resolve_project",
         search_memory: "agents.operations.search_memory",
       ]
 
@@ -41,10 +41,9 @@ module API
         repo &&= Blog::Types::Normalized::Repo.call(repo) { return rejected(MALFORMED, COMPLAINTS) }
 
         project = Blog::Types::OptionalText[project]
-        case resolve_project.call(project:, repo:)
+        case find_project.call(project:, repo:)
           in Success(id) then searched({ query: text, repo:, **where }, id, (id if project), page, session_id)
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
-          in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
       end
 
