@@ -1932,7 +1932,6 @@ en:
           analytics: "analytics"
           artifacts: "artifacts"
           calendar: "calendar"
-          clients: "MCP clients"
           decisions: "decisions"
           files: "files"
           health: "health"
@@ -1942,7 +1941,6 @@ en:
           links: "links"
           mail: "mail"
           memories: "memories"
-          people: "people"
           performance: "performance"
           posts: "posts"
           projects: "projects"
@@ -1951,12 +1949,10 @@ en:
           services: "connected services"
           sessions: "sessions"
           social: "social"
-          tags: "tags"
-          task_rules: "task rules"
+          tagging: "tagging"
           tasks: "tasks"
           time: "time report"
           today: "today"
-          tokens: "API tokens"
           webmention_settings: "webmentions"
           webmentions: "mentions"
         switcher:
@@ -2658,8 +2654,8 @@ en:
           label: "Settings tabs"
           security: "security"
           services: "connected services"
-          socials: "socials"
           tagging: "tagging"
+          webmentions: "webmentions"
       share_drawer:
         file: "Shared file"
         group: "Shared group"
@@ -4220,14 +4216,14 @@ en:
             kill: "Click again · moves to dead, no more tries"
           copied_error: "Error copied"
           copy_error: "Copy error"
-        socials:
-          heading: "Socials"
-          people: "People"
-          webmentions: "Webmentions"
         tagging:
           heading: "Tagging"
           rules: "Task rules"
           tags: "Tags"
+        webmentions:
+          heading: "Webmentions"
+          people: "People"
+          webmentions: "Webmentions"
       social:
         index:
           cross_posting: "Cross-posting to %{accounts}"

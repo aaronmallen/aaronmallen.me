@@ -352,8 +352,8 @@ RSpec.describe "Admin keys", type: :feature do
       end
     end
 
-    it "opens the new person drawer on the socials tab" do
-      visit "/admin/settings/socials"
+    it "opens the new person drawer on the webmentions tab" do
+      visit "/admin/settings/webmentions"
       press("c")
 
       expect(page).to have_css("dialog#person-new-drawer[open] form[data-person-form='new']")

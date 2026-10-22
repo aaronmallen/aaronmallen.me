@@ -59,7 +59,7 @@ module Admin
             div(class: "cols", data: { key_list: true }) { mentions.rows.each { |mention| row(mention) } }
           end
 
-          def settings_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::WEBMENTIONS}"
+          def settings_path = "#{path(:admin_settings_webmentions)}##{Helpers::WebmentionTab::WEBMENTIONS}"
 
           def sub
             dotted(

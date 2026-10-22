@@ -17,10 +17,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
       /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links /admin/agents/memories
       /admin/agents/artifacts /admin/agents/sessions /admin/analytics /admin/activity /admin/health /admin/time
-      /admin/settings/tagging#tags
-      /admin/settings/socials#people /admin/settings/tagging#task-rules /admin/settings/socials#webmentions
-      /admin/settings/services#tokens /admin/settings/services#services /admin/settings/services#clients
-      /admin/settings/security /admin/settings/jobs
+      /admin/settings/webmentions /admin/settings/tagging /admin/settings/services /admin/settings/security
+      /admin/settings/jobs
     ]
   end
 
@@ -255,12 +253,12 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "lists the settings tabs as screen-tabs", :aggregate_failures do
       expect(page.all("a.screen-tab").map { it.text.sub(/ \d+\z/, "") })
-        .to eq(["socials", "tagging", "connected services", "security", "jobs"])
+        .to eq(["tagging", "webmentions", "connected services", "jobs", "security"])
       expect(page).to have_css("a.screen-tab[aria-current='page']", text: "connected services")
     end
 
     {
-      "/admin/settings/tagging" => "Tagging", "/admin/settings/socials" => "Socials",
+      "/admin/settings/tagging" => "Tagging", "/admin/settings/webmentions" => "Webmentions",
       "/admin/settings/services" => "Connected services", "/admin/settings/security" => "Security",
       "/admin/settings/jobs" => "Jobs",
     }.each do |route, title|
@@ -279,9 +277,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     {
-      "/admin/settings/tagging" => ["tags", "/admin/settings/tagging#tags"],
-      "/admin/settings/socials" => ["people", "/admin/settings/socials#people"],
-      "/admin/settings/services" => ["API tokens", "/admin/settings/services#tokens"],
+      "/admin/settings/tagging" => ["tagging", "/admin/settings/tagging"],
+      "/admin/settings/webmentions" => ["webmentions", "/admin/settings/webmentions"],
+      "/admin/settings/services" => ["connected services", "/admin/settings/services"],
       "/admin/settings/jobs" => ["jobs", "/admin/settings/jobs"],
     }.each do |route, (screen, href)|
       it "names Settings and #{screen} in the switcher on #{route}", :aggregate_failures do

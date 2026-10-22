@@ -122,7 +122,7 @@ module Admin
 
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }
 
-          def webmentions_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::WEBMENTIONS}"
+          def webmentions_path = "#{path(:admin_settings_webmentions)}##{Helpers::WebmentionTab::WEBMENTIONS}"
 
           def work
             AutoForm(

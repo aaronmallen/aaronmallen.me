@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Settings
-      class Socials < Action
+      class Webmentions < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
           build_settings_tabs: "operations.build_settings_tabs",
@@ -14,16 +14,14 @@ module Admin
         ]
 
         def handle(_request, response)
-          people = person_queries.all
-
           response.render(
             view,
-            people: { people:, editor: build_person_editor.call, searchable: },
+            people: { people: person_queries.all, editor: build_person_editor.call, searchable: },
             webmentions: {
               posts: post_queries.summaries, settings: webmention_queries.settings,
               trusted: webmention_queries.trusted,
             },
-            tabs: build_settings_tabs.call(socials: people.size),
+            tabs: build_settings_tabs.call,
           )
         end
 

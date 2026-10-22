@@ -8,7 +8,7 @@ RSpec.describe "Admin live tables", type: :request do
       /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings /admin/people/new
       /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
       /admin/projects/new /admin/review /admin/search /admin/settings/jobs /admin/settings/security
-      /admin/settings/services /admin/settings/socials /admin/settings/tagging /admin/social /admin/tasks
+      /admin/settings/services /admin/settings/webmentions /admin/settings/tagging /admin/social /admin/tasks
       /admin/tasks/new /admin/time /admin/webmentions
     ]
   end
@@ -85,8 +85,8 @@ RSpec.describe "Admin live tables", type: :request do
     expect(tables).to include("post_tags", "task_tags", "task_rules", "task_rule_projects", "projects")
   end
 
-  it "lists the tables of both the people and the webmention settings on the socials tab" do
-    get "/admin/settings/socials"
+  it "lists the tables of both the people and the webmention settings on the webmentions tab" do
+    get "/admin/settings/webmentions"
 
     expect(tables).to include("service_connections", "posts", "trusted_authors", "webmention_settings")
   end

@@ -80,10 +80,10 @@ RSpec.describe "Admin connected services", type: :request do
                   /admin/settings/services?connect=linear#services])
     end
 
-    it "opens its section of the tab from the command palette" do
+    it "opens the tab from the command palette" do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/settings/services#services']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/services']", visible: :all)
     end
 
     it "heads the tab as Settings and titles it Connected services", :aggregate_failures do
@@ -303,7 +303,7 @@ RSpec.describe "Admin connected services", type: :request do
       it "sends Bridgy to the webmention toggle" do
         get "/admin/settings/services?selected=bridgy"
 
-        expect(page).to have_link("webmentions →", href: "/admin/settings/socials#webmentions")
+        expect(page).to have_link("webmentions →", href: "/admin/settings/webmentions#webmentions")
       end
     end
   end

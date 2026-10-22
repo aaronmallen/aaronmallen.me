@@ -118,10 +118,10 @@ RSpec.describe "Admin task rules", type: :request do
       expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/tagging#task-rules"])
     end
 
-    it "opens its section of the tagging tab from the command palette" do
+    it "opens the tagging tab from the command palette" do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/settings/tagging#task-rules']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/tagging']", visible: :all)
     end
 
     it "says something useful when there is no rule yet" do

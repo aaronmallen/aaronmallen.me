@@ -28,53 +28,45 @@ RSpec.describe "Admin people", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "opens its section of the socials tab from the command palette" do
+    it "opens the webmentions tab from the command palette" do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/settings/socials#people']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/webmentions']", visible: :all)
     end
 
-    it "sends the old address to its section of the socials tab" do
+    it "sends the old address to its section of the webmentions tab" do
       get "/admin/people"
 
-      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/socials#people"])
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/webmentions#people"])
     end
 
-    it "sits first on the socials tab, under no pill", :aggregate_failures do
+    it "sits below the webmentions on their tab, under no pill", :aggregate_failures do
       create(:person)
-      get "/admin/settings/socials"
+      get "/admin/settings/webmentions"
 
       expect(page).to have_no_css("a.pill-nav-link[aria-current]")
-      expect(page.all(".settings-section").map { it[:id] }).to eq(%w[people webmentions])
+      expect(page.all(".settings-section").map { it[:id] }).to eq(%w[webmentions people])
       expect(page).to have_css("#people .person-row", count: 1)
     end
 
-    it "counts the people on the socials tab" do
-      2.times { create(:person) }
-      get "/admin/settings/socials"
+    it "puts no count on the webmentions tab" do
+      create(:person)
+      get "/admin/settings/webmentions"
 
       expect(page.find("nav[aria-label='Settings tabs'] a[aria-current='page']"))
-        .to have_text("socials").and have_css(".settings-tab-count", exact_text: "2")
-    end
-
-    it "counts the people on the socials tab from another tab" do
-      create(:person)
-      get "/admin/settings/security"
-
-      expect(page.find("nav[aria-label='Settings tabs'] a", text: "socials"))
-        .to have_css(".settings-tab-count", exact_text: "1")
+        .to have_text("webmentions").and have_no_css(".settings-tab-count")
     end
 
     describe "the list" do
       it "says who to add when there is nobody yet" do
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.people.list.empty"))
       end
 
       it "counts the people and says how a post names them" do
         2.times { create(:person) }
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         sub = i18n.t("ui.components.people.list.sub", count: 2)
 
@@ -83,7 +75,7 @@ RSpec.describe "Admin people", type: :request do
 
       it "leaves no hint under the list" do
         create(:person)
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_no_css("[data-key-list] ~ .hint")
       end
@@ -91,14 +83,14 @@ RSpec.describe "Admin people", type: :request do
       it "lists everyone in name order" do
         create(:person, name: "Grace Hopper")
         create(:person, name: "Ada Lovelace")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all(".person-row-name").map(&:text)).to eq(["Ada Lovelace", "Grace Hopper"])
       end
 
       it "shows the token, then each handle as a link" do
         create(:person, :bluesky, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all(".person-row-meta > *").map { it.text.strip })
           .to eq(["@{ada}", "@ada@ruby.social", "@ada.bsky.social"])
@@ -106,14 +98,14 @@ RSpec.describe "Admin people", type: :request do
 
       it "links each person to their editor" do
         person = create(:person)
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css("a.person-row-name[href='/admin/people/#{person.id}/edit']")
       end
 
       it "draws one empty edit drawer however many people there are", :aggregate_failures do
         3.times { create(:person) }
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css("form[data-person-form]", count: 1, visible: :all)
         expect(page).to have_css("dialog#person-edit-drawer [data-person-edit-body]:empty", visible: :all)
@@ -121,14 +113,14 @@ RSpec.describe "Admin people", type: :request do
 
       it "marks each person's name to open the edit drawer" do
         person = create(:person)
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css("a.person-row-name[href='/admin/people/#{person.id}/edit'][data-person-edit]")
       end
 
       it "offers a pencil on each row that opens the edit drawer" do
         person = create(:person, name: "Ada")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         pencil = page.find(".person-row .hov a:has(i.fa-pen-to-square)")
 
@@ -137,7 +129,7 @@ RSpec.describe "Admin people", type: :request do
       end
 
       it "opens a new person in a drawer the page draws" do
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css("a[href='/admin/people/new'][data-dialog-open='person-new-drawer']")
           .and have_css("dialog#person-new-drawer form[action='/admin/people'][data-person-form='new']", visible: :all)
@@ -145,7 +137,7 @@ RSpec.describe "Admin people", type: :request do
 
       it "marks each handle with its network's icon and color" do
         create(:person, :bluesky, name: "Ada Lovelace")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all(".person-row .person-link").map { [it[:class], it.find("i")[:class]] })
           .to eq([["person-link mastodon", "fa-brands fa-mastodon"], ["person-link bluesky", "fa-brands fa-bluesky"]])
@@ -153,42 +145,42 @@ RSpec.describe "Admin people", type: :request do
 
       it "shows only the handle of the one network someone is on" do
         create(:person, mastodon_handle: "@ada@ruby.social")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all(".person-link").map { it.text.strip }).to eq(["@ada@ruby.social"])
       end
 
       it "shows only the Bluesky handle for someone with no Mastodon handle" do
         create(:person, :bluesky, mastodon_handle: nil, bluesky_handle: "ada.bsky.social")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all(".person-link").map { it.text.strip }).to eq(["@ada.bsky.social"])
       end
 
       it "links the Bluesky handle to the profile by DID" do
         create(:person, :bluesky, bluesky_did: "did:plc:ada")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_link(class: "person-link", href: "https://bsky.app/profile/did:plc:ada")
       end
 
       it "links the Mastodon handle to the profile on the person's instance" do
         create(:person, mastodon_handle: "@ada@ruby.social")
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_link(class: "person-link", href: "https://ruby.social/@ada")
       end
 
       it "opens each profile in a new tab" do
         create(:person, :bluesky)
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all("a.person-link").map { [it[:target], it[:rel]] })
           .to eq([["_blank", "noopener noreferrer"]] * 2)
       end
 
       it "links to the form for a new person" do
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_link(href: "/admin/people/new")
       end
@@ -208,12 +200,12 @@ RSpec.describe "Admin people", type: :request do
           .to eq([["Ada Lovelace", "ada", "@ada@ruby.social", nil]])
       end
 
-      it "goes back to its section of the socials tab and says so", :aggregate_failures do
+      it "goes back to its section of the webmentions tab and says so", :aggregate_failures do
         add(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
-        expect(last_response.location).to eq("/admin/settings/socials#people")
+        expect(last_response.location).to eq("/admin/settings/webmentions#people")
         follow_redirect!
 
-        expect(last_request.path).to eq("/admin/settings/socials")
+        expect(last_request.path).to eq("/admin/settings/webmentions")
         expect(page).to have_css("[data-toast]", text: "Person added")
       end
 
@@ -508,7 +500,7 @@ RSpec.describe "Admin people", type: :request do
       end
 
       it "offers one search panel beside the people list", :aggregate_failures do
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_css(".g-main > aside[data-person-finder][hidden]", visible: :all)
         expect(page.all("[data-person-finder] input[name='network']", visible: :all).map(&:value))
@@ -517,14 +509,14 @@ RSpec.describe "Admin people", type: :request do
 
       it "offers only the networks with credentials" do
         connect_social_networks(mastodon: {})
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page.all("[data-person-finder] input[name='network']", visible: :all).map(&:value)).to eq(%w[bluesky])
       end
 
       it "leaves the panel out when no network has credentials" do
         connect_social_networks(bluesky: {}, mastodon: {})
-        get "/admin/settings/socials"
+        get "/admin/settings/webmentions"
 
         expect(page).to have_no_css("[data-person-finder]", visible: :all).and have_no_css("#people .g-main")
       end
@@ -555,10 +547,10 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_field("person[bluesky_handle]", with: "ada.bsky.social")
       end
 
-      it "leads back to the people on the socials tab" do
+      it "leads back to the people on the webmentions tab" do
         get "/admin/people/#{person.id}/edit"
 
-        expect(page).to have_link("All people", href: "/admin/settings/socials#people")
+        expect(page).to have_link("All people", href: "/admin/settings/webmentions#people")
       end
 
       it "marks the editor the drawer fills from" do
@@ -569,9 +561,9 @@ RSpec.describe "Admin people", type: :request do
         )
       end
 
-      it "saves a change and says so, back on its section of the socials tab", :aggregate_failures do
+      it "saves a change and says so, back on its section of the webmentions tab", :aggregate_failures do
         save(name: "Ada Lovelace")
-        expect(last_response.location).to eq("/admin/settings/socials#people")
+        expect(last_response.location).to eq("/admin/settings/webmentions#people")
         follow_redirect!
 
         expect(person_queries.by_id(person.id).name).to eq("Ada Lovelace")
@@ -638,9 +630,9 @@ RSpec.describe "Admin people", type: :request do
         )
       end
 
-      it "removes them and says so, back on its section of the socials tab", :aggregate_failures do
+      it "removes them and says so, back on its section of the webmentions tab", :aggregate_failures do
         admin_post("/admin/people/#{person.id}/delete")
-        expect(last_response.location).to eq("/admin/settings/socials#people")
+        expect(last_response.location).to eq("/admin/settings/webmentions#people")
         follow_redirect!
 
         expect(everyone).to be_empty

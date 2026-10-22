@@ -150,15 +150,15 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
   it "keeps the people finder on screen after a live update" do
     connect_social_networks
-    live "/admin/settings/socials"
+    live "/admin/settings/webmentions"
     create(:message, subject: "Hello there")
     find(".top-bar .pill-nav-dot")
 
     expect(find_by_id("person-finder")).to have_field("Search Mastodon")
   end
 
-  it "shows a new trusted author on the open socials tab" do
-    live "/admin/settings/socials"
+  it "shows a new trusted author on the open webmentions tab" do
+    live "/admin/settings/webmentions"
     Social::Slice["repos.webmention_mutations"].trust("https://ada.example/", approve_pending: false)
 
     expect(page).to have_css("#webmentions", text: "ada.example")

@@ -146,10 +146,10 @@ RSpec.describe "Admin tags", type: :request do
       end
     end
 
-    it "opens its section of the tagging tab from the command palette" do
+    it "opens the tagging tab from the command palette" do
       get "/admin"
 
-      expect(page).to have_css("[data-palette-href='/admin/settings/tagging#tags']", visible: :all)
+      expect(page).to have_css("[data-palette-href='/admin/settings/tagging']", visible: :all)
     end
 
     it "sends the old address to its section of the tagging tab, keeping the scope, search and page" do

@@ -4,7 +4,7 @@ module Admin
   module UI
     module Views
       module Settings
-        class Socials < View
+        class Webmentions < View
           LIVE_TABLES = (Components::People::List::LIVE_TABLES | Components::Webmentions::Settings::LIVE_TABLES).freeze
 
           prop :people, Blog::Types::Hash
@@ -13,13 +13,13 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            SettingsHead(tab: :socials, title: t(".heading"), counts: @tabs)
+            SettingsHead(tab: :webmentions, title: t(".heading"), counts: @tabs)
             div(class: "settings-stack") do
-              SettingsSection(id: Helpers::Socials::PEOPLE, title: t(".people")) do
-                Components::People::List(**@people)
-              end
-              SettingsSection(id: Helpers::Socials::WEBMENTIONS, title: t(".webmentions")) do
+              SettingsSection(id: Helpers::WebmentionTab::WEBMENTIONS, title: t(".webmentions")) do
                 Components::Webmentions::Settings(**@webmentions)
+              end
+              SettingsSection(id: Helpers::WebmentionTab::PEOPLE, title: t(".people")) do
+                Components::People::List(**@people)
               end
             end
           end

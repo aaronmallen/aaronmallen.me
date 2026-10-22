@@ -28,9 +28,9 @@ RSpec.describe "Admin security", type: :request do
 
   def tabs
     {
-      "socials 0" => "/admin/settings/socials", "tagging 0" => "/admin/settings/tagging",
+      "tagging 0" => "/admin/settings/tagging", "webmentions" => "/admin/settings/webmentions",
       "connected services #{Admin::Slice['operations.list_services'].count}" => "/admin/settings/services",
-      "security" => "/admin/settings/security", "jobs 0" => "/admin/settings/jobs",
+      "jobs 0" => "/admin/settings/jobs", "security" => "/admin/settings/security",
     }.to_a
   end
 
@@ -50,13 +50,19 @@ RSpec.describe "Admin security", type: :request do
     it "lists every Settings tab in order" do
       get "/admin/settings/security"
 
-      expect(settings_tabs).to eq(%w[socials tagging services security jobs].map { "/admin/settings/#{it}" })
+      expect(settings_tabs).to eq(%w[tagging webmentions services jobs security].map { "/admin/settings/#{it}" })
     end
 
     it "lands Settings on its first tab" do
       get "/admin/settings"
 
-      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/socials"])
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/tagging"])
+    end
+
+    it "sends the old socials address to the webmentions tab" do
+      get "/admin/settings/socials"
+
+      expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/webmentions"])
     end
 
     it "sends the old security address to the tab" do

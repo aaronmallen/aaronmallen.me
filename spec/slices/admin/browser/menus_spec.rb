@@ -112,7 +112,7 @@ RSpec.describe "Admin context menus", type: :feature do
 
   def person
     create(:person, key: "matz")
-    visit "/admin/settings/socials"
+    visit "/admin/settings/webmentions"
   end
 
   def posts

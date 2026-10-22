@@ -18,7 +18,7 @@ module Admin
 
           private
 
-          def people_path = "#{path(:admin_settings_socials)}##{Helpers::Socials::PEOPLE}"
+          def people_path = "#{path(:admin_settings_webmentions)}##{Helpers::WebmentionTab::PEOPLE}"
         end
       end
     end

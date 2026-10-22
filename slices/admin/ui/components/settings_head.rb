@@ -5,8 +5,8 @@ module Admin
     module Components
       class SettingsHead < Component
         TABS = {
-          socials: :admin_settings_socials, tagging: :admin_settings_tagging, services: :admin_settings_services,
-          security: :admin_security, jobs: :admin_settings_jobs,
+          tagging: :admin_settings_tagging, webmentions: :admin_settings_webmentions,
+          services: :admin_settings_services, jobs: :admin_settings_jobs, security: :admin_security,
         }.freeze
         LABELS = TABS.keys.to_h { [it, ".tabs.#{it}"] }.freeze
 

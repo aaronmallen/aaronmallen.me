@@ -10,7 +10,7 @@ module Admin
 
         def handle(request, response)
           result = remove_trusted_author.call(request.params[:author_url].to_s)
-          settle(response, result, REMOVED, Helpers::Socials.webmentions(routes))
+          settle(response, result, REMOVED, Helpers::WebmentionTab.webmentions(routes))
         end
       end
     end

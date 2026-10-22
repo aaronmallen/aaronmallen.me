@@ -31,7 +31,7 @@ module Admin
           return mention(response, person) if request.params[:reply] == MENTION
 
           toast(response, ADDED)
-          response.redirect_to(Helpers::Socials.people(routes))
+          response.redirect_to(Helpers::WebmentionTab.people(routes))
         end
 
         def mention(response, person)

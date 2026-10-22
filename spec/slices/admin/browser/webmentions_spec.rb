@@ -3,7 +3,7 @@
 RSpec.describe "Admin webmentions", type: :feature do
   before do
     sign_in_to_admin
-    visit "/admin/settings/socials"
+    visit "/admin/settings/webmentions"
   end
 
   it "saves a setting turned off without a button" do

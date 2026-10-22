@@ -41,7 +41,7 @@ RSpec.describe "Admin people", type: :feature do
 
     before do
       connect_social_networks
-      visit "/admin/settings/socials"
+      visit "/admin/settings/webmentions"
     end
 
     it "shows the panel beside the list once scripts run" do
@@ -111,7 +111,7 @@ RSpec.describe "Admin people", type: :feature do
 
   it "offers only the networks with credentials" do
     connect_social_networks(bluesky: {})
-    visit "/admin/settings/socials"
+    visit "/admin/settings/webmentions"
 
     expect(page).to have_css("#person-finder .seg-option.mastodon")
       .and have_no_css("#person-finder .seg-option.bluesky")
@@ -121,7 +121,7 @@ RSpec.describe "Admin people", type: :feature do
     before do
       create(:person, name: "Ada Lovelace", key: "ada")
       create(:person, name: "Grace Hopper", key: "grace")
-      visit "/admin/settings/socials"
+      visit "/admin/settings/webmentions"
     end
 
     it "opens a person's editor from their name" do

@@ -19,7 +19,7 @@ module Admin
 
           result = save_person.call(params, id:)
 
-          settle(response, result, SAVED, Helpers::Socials.people(routes)) do |errors|
+          settle(response, result, SAVED, Helpers::WebmentionTab.people(routes)) do |errors|
             invalid(response, person_queries.by_id(id), params, errors)
           end
         end

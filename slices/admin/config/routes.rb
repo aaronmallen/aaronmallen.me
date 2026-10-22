@@ -179,7 +179,7 @@ module Admin
     post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
     post "/mail/:id/task", to: "mail.make_task", as: :make_mail_task, id: ID
     post "/mail/:id/wake", to: "mail.wake", as: :wake_mail, id: ID
-    redirect_temporary "/people", to: "/settings/socials#people"
+    redirect_temporary "/people", to: "/settings/webmentions#people"
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person
     get "/people/search/:network", to: "people.search", as: :search_people, network: NETWORK
@@ -250,7 +250,7 @@ module Admin
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
-    redirect_temporary "/settings", to: "/settings/socials", as: :settings
+    redirect_temporary "/settings", to: "/settings/tagging", as: :settings
     get "/settings/jobs", to: "settings.jobs", as: :settings_jobs
     get "/settings/jobs/cron/:name/menu", to: "settings.cron_entry_menu", as: :cron_entry_menu, name: CRON_ENTRY
     post "/settings/jobs/cron/:name/run", to: "settings.run_cron_entry", as: :run_cron_entry, name: CRON_ENTRY
@@ -261,8 +261,9 @@ module Admin
                                           act: JOB_ACT
     get "/settings/security", to: "security.show", as: :security
     get "/settings/services", to: "settings.services", as: :settings_services
-    get "/settings/socials", to: "settings.socials", as: :settings_socials
+    redirect_temporary "/settings/socials", to: "/settings/webmentions"
     get "/settings/tagging", to: "settings.tagging", as: :settings_tagging
+    get "/settings/webmentions", to: "settings.webmentions", as: :settings_webmentions
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     get "/social/:id/menu", to: "social.menu", as: :social_post_menu, id: ID
@@ -345,7 +346,7 @@ module Admin
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
     get "/webmentions/bulk/menu", to: "webmentions.bulk_menu", as: :webmentions_bulk_menu
-    redirect_temporary "/webmentions/settings", to: "/settings/socials#webmentions"
+    redirect_temporary "/webmentions/settings", to: "/settings/webmentions#webmentions"
     get "/webmentions/:id/menu", to: "webmentions.menu", as: :webmention_menu, id: ID
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post(

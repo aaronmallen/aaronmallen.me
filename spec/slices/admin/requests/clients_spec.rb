@@ -247,11 +247,11 @@ RSpec.describe "Admin MCP clients", type: :request do
     expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/services#clients"])
   end
 
-  it "opens its section of the connected services tab from the command palette" do
+  it "opens the connected services tab from the command palette" do
     sign_in_to_admin
     get "/admin"
 
-    expect(page).to have_css("[data-palette-href='/admin/settings/services#clients']", visible: :all)
+    expect(page).to have_css("[data-palette-href='/admin/settings/services']", visible: :all)
   end
 
   it "links to the page from Today" do

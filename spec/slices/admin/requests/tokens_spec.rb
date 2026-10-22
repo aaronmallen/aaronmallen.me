@@ -418,10 +418,10 @@ RSpec.describe "Admin API tokens", type: :request do
     expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/services#tokens"])
   end
 
-  it "is a section of the command palette" do
+  it "opens the tab that holds it from the command palette" do
     sign_in_to_admin
     get "/admin"
 
-    expect(page).to have_css("[data-palette-href='/admin/settings/services#tokens']", visible: :all)
+    expect(page).to have_css("[data-palette-href='/admin/settings/services']", visible: :all)
   end
 end
