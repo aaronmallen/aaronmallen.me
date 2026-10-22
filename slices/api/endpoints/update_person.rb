@@ -9,7 +9,9 @@ module API
         required: ["id"],
       }.freeze
 
+      CONFLICTS = true
       REPLY = Serializers::Person.reference
+      UNAVAILABLE = true
 
       include Deps[
         person_queries: "contacts.repos.person_queries",
@@ -43,6 +45,8 @@ module API
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
           in Failure(:not_found) then missing("person", id)
+          in Failure(:conflict) then Failure(Structs::Refusal.conflict(People::CONFLICT))
+          in Failure[:google_failed, _] then Failure(Structs::Refusal.unavailable(People::GOOGLE_DOWN))
           in unmatched then unhandled(unmatched, People::UNSAVED)
         end
       end

@@ -5,6 +5,7 @@ module Admin
     module People
       class Create < Action
         ADDED = "people_page.toasts.added"
+        GOOGLE_FAILED = "people_page.toasts.google_failed"
         MENTION = "mention"
 
         include Deps[
@@ -34,6 +35,7 @@ module Admin
               response.render(mention_view, handles: resolve_mentions.handles([person]), person:)
             in Failure[:invalid, errors]
               unprocessable(response, new_mention_view, **build_person_editor.call(params:, errors:))
+            in Failure[:google_failed, _] then halt :bad_gateway
           end
         end
 
@@ -42,11 +44,14 @@ module Admin
 
           case save_person.call(Helpers::ContactForm.fields(values))
             in Success(person) then toast_back(response, ADDED, routes.path(:admin_person, id: person.id))
-            in Failure[:invalid, errors]
-              unprocessable(
-                response, new_view, values:, errors: Helpers::ContactForm.errors(errors), labels: person_queries.labels,
-              )
+            in Failure[:invalid, errors] then refused(response, values, Helpers::ContactForm.errors(errors))
+            in Failure[:google_failed, _]
+              refused(response, values, Blog::Constants::EMPTY_HASH, alert: i18n.t!(GOOGLE_FAILED))
           end
+        end
+
+        def refused(response, values, errors, alert: nil)
+          unprocessable(response, new_view, values:, errors:, labels: person_queries.labels, alert:)
         end
       end
     end

@@ -4,7 +4,9 @@
 module API
   module Endpoints
     module People
+      CONFLICT = "Google changed this contact first, so nothing changed; read it again and redo the edit"
       FIELDS = %i[name key mastodon_handle bluesky_handle].freeze
+      GOOGLE_DOWN = "Google did not take the change, so nothing changed; try again soon"
       ID = Helpers::Schema::ID
       MENTIONED = "scheduled social post %s, which mentions @{%s},"
       UNSAVED = "could not save the person"

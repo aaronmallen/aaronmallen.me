@@ -11,6 +11,13 @@ module Spec
     ROLLUPS = %w[steps active-zone-minutes].freeze
     TOKEN_URL = "https://oauth2.googleapis.com/token"
 
+    def connect_contacts(account_id: "me@example.com", token: "ya29.me")
+      connect_google(
+        account_id:, token:, scopes: [Contacts::Operations::SyncContacts::SCOPE], sync_contacts: true,
+        saves_contacts: true,
+      )
+    end
+
     def connect_google(account_id: "aaron@example.com", scopes: HEALTH_SCOPES, revoked_at: nil, token: "ya29.token", **)
       set_up_google_client
       Services::Slice["repos.connection_mutations"].add(
@@ -55,6 +62,10 @@ module Spec
 
     def google_civil(date) = { date: { year: date.year, month: date.month, day: date.day } }
 
+    def google_contact(id, name, etag: "e1", **fields)
+      { resourceName: "people/#{id}", etag:, names: [{ displayName: name, metadata: { primary: true } }], **fields }
+    end
+
     def google_date(date) = { year: date.year, month: date.month, day: date.day }
 
     def google_health_json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
@@ -65,6 +76,11 @@ module Spec
       allow(Hanami.app.settings).to receive(:google).and_return(credentials)
       replace_component("google.auth", ::Google::Providers::ClientProvider.auth(Hanami.app.settings))
       replace_component("google.client", ::Google::Providers::ClientProvider.client(Hanami.app.settings))
+    end
+
+    def stub_contact_groups(*groups)
+      stub_request(:get, %r{\A#{Contacts::Helpers::GooglePerson::API}/contactGroups\?}o)
+        .to_return(google_health_json({ contactGroups: groups }))
     end
 
     def stub_gmail(history: [], history_id: "200", labels: [], profile: "100", signature: "", threads: {})

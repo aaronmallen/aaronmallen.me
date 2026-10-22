@@ -87,6 +87,21 @@ RSpec.describe Contacts::Jobs::SyncContacts do
       expect(people.first).to include(stored_ada)
     end
 
+    def links
+      [
+        { value: "https://ruby.social/@ada", type: "Mastodon" },
+        { value: "https://bsky.app/profile/ada.bsky.social", type: "Bluesky" },
+        { value: "https://ada.example.com", type: "blog" },
+      ]
+    end
+
+    it "keeps Google's etag for each contact" do
+      stub_contacts("ya29.me", contact("c1", "Ada", etag: "e1"))
+      run
+
+      expect(people.map { it[:google_etag] }).to eq(["e1"])
+    end
+
     def stored_ada
       {
         google_connection_id: connection.id, google_id: "c1", name: "Ada Lovelace", given_name: "Ada",
@@ -101,6 +116,13 @@ RSpec.describe Contacts::Jobs::SyncContacts do
         relations: [{ "value" => "Byron", "type" => "father" }],
         custom_fields: [{ "key" => "Engine", "value" => "Difference" }],
       }
+    end
+
+    it "drops the profile links a push writes for the handles" do
+      stub_contacts("ya29.me", contact("c1", "Ada", urls: links))
+      run
+
+      expect(people.first[:websites]).to eq([{ "value" => "https://ada.example.com", "type" => "blog" }])
     end
 
     it "takes labels from my contact groups and the star from favorites" do
@@ -186,6 +208,14 @@ RSpec.describe Contacts::Jobs::SyncContacts do
         run
 
         expect(people.first.values_at(:key, :mastodon_handle)).to eq(["ada", "@ada@ruby.social"])
+      end
+
+      it "keeps the handles stored here when their profile links change in Google" do
+        link = { value: "https://mastodon.social/@ada", type: "Mastodon" }
+        stub_contacts("ya29.me", contact("c1", "Ada", urls: [link]), nextSyncToken: "second")
+        run
+
+        expect(people.first.values_at(:mastodon_handle, :websites)).to eq(["@ada@ruby.social", []])
       end
 
       it "moves to the new token" do

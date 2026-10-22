@@ -14,6 +14,7 @@ module API
     MISSING_SCOPE = "this endpoint needs a token with the %s scope"
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     STATUSES = {
+      conflict: :conflict,
       failed: :internal_server_error,
       invalid: :unprocessable_content,
       not_found: :not_found,

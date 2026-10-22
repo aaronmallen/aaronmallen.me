@@ -5,6 +5,7 @@ module API
     class CreatePerson < Endpoint
       SCHEMA = { additionalProperties: false, properties: People::PROPERTIES, required: %w[name] }.freeze
       REPLY = Serializers::Person.reference
+      UNAVAILABLE = true
 
       include Deps[
         save_person: "contacts.operations.save_person",
@@ -16,6 +17,7 @@ module API
           in Success(person) then Success(serialized(Serializers::Person, person))
           in Failure[:invalid, errors]
             invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
+          in Failure[:google_failed, _] then Failure(Structs::Refusal.unavailable(People::GOOGLE_DOWN))
           in unmatched then unhandled(unmatched, People::UNSAVED)
         end
       end

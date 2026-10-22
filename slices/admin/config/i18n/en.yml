@@ -275,6 +275,8 @@ en:
   people_page:
     toasts:
       added: "Contact added"
+      conflict: "Google changed this contact first. This is its version now, so make your edit again."
+      google_failed: "Google didn't take that, so nothing changed. Try again in a moment."
       removed: "Contact deleted"
       saved: "Contact saved"
       starred: "Contact starred"

@@ -797,5 +797,51 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_no_field(type: "search", visible: :all)
       end
     end
+
+    describe "a contact linked to Google" do
+      let(:api) { Contacts::Helpers::GooglePerson::API }
+      let(:person) do
+        linked = { google_connection_id: connect_contacts.id, google_id: "c1", google_etag: "e1" }
+        create(:person, name: "Ada", given_name: "Ada", key: "ada", mastodon_handle: nil, **linked)
+      end
+
+      def alert = page.find("[role=alert]").text
+
+      def changed_in_google
+        names = [{ displayName: "Ada King", givenName: "Ada", familyName: "King" }]
+        newer = google_contact("c1", "Ada King", etag: "e2", names:)
+        stub_request(:get, %r{\A#{api}/people/c1\?}).to_return(google_health_json(newer))
+      end
+
+      def save = admin_post("/admin/contacts/#{person.id}", person: { given_name: "Ada", nickname: "Countess" })
+
+      before { stub_contact_groups }
+
+      it "loads Google's version on the editor when Google changed it first", :aggregate_failures do
+        changed_in_google
+        save
+
+        expect(page).to have_field("person[family_name]", with: "King").and have_field("person[nickname]", with: "")
+        expect(alert).to eq(i18n.t("people_page.toasts.conflict"))
+      end
+
+      it "keeps the typed edit on the editor when Google refuses it", :aggregate_failures do
+        stub_request(:get, %r{\A#{api}/people/c1\?}).to_return(google_health_json(google_contact("c1", "Ada")))
+        stub_request(:patch, /updateContact/).to_return(status: 500)
+        save
+
+        expect(page).to have_field("person[nickname]", with: "Countess")
+        expect(alert).to eq(i18n.t("people_page.toasts.google_failed"))
+      end
+
+      it "keeps the contact and says so when Google refuses the delete", :aggregate_failures do
+        stub_request(:delete, "#{api}/people/c1:deleteContact").to_return(status: 500)
+        admin_post("/admin/contacts/#{person.id}/delete")
+        follow_redirect!
+
+        expect(everyone.map(&:id)).to eq([person.id])
+        expect(page).to have_css("[data-toast]", text: i18n.t("people_page.toasts.google_failed"))
+      end
+    end
   end
 end

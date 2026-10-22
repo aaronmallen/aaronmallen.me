@@ -11,16 +11,14 @@ module Admin
           prop :values, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
           prop :labels, Blog::Types::Array.of(Blog::Types::String)
+          prop :alert, Blog::Types::String.optional, default: nil
 
           def view_template
             Form(action: form_action, class: "contact-form", data: { contact_form: "" }) do
               Top(person: { **@values, name: }, title:, sub: t(@person ? ".sub_edit" : ".sub_new"), **back) do
                 actions
               end
-              div(class: "g-main") do
-                Card(class: "contact-card") { ContactFields(values: @values, errors: @errors) }
-                ContactSide(values: @values, labels: @labels)
-              end
+              main
             end
             delete_form if @person
           end
@@ -45,6 +43,14 @@ module Admin
           end
 
           def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
+
+          def main
+            p(class: "field-error", role: "alert") { @alert } if @alert
+            div(class: "g-main") do
+              Card(class: "contact-card") { ContactFields(values: @values, errors: @errors) }
+              ContactSide(values: @values, labels: @labels)
+            end
+          end
 
           def name = Helpers::ContactForm.name(@values) || Blog::Types::OptionalText[@values[:company]]
 

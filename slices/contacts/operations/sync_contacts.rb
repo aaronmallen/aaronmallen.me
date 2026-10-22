@@ -2,14 +2,10 @@
 
 module Contacts
   module Operations
-    class SyncContacts < Blog::Operation
-      PAGE_SIZE = 1000
+    class SyncContacts < ContactOperation
       SCOPE = "https://www.googleapis.com/auth/contacts"
 
-      include Deps[
-        google: "google.client", connection_queries: "services.repos.connection_queries",
-        person_mutations: "repos.person_mutations", person_queries: "repos.person_queries",
-      ]
+      include Deps[person_mutations: "repos.person_mutations", person_queries: "repos.person_queries"]
 
       def call = step synced
 
@@ -18,7 +14,7 @@ module Contacts
       def contacts(account, token)
         found = account.pages(
           "#{Helpers::GooglePerson::API}/people/me/connections",
-          rows: "connections", personFields: fields, pageSize: PAGE_SIZE, requestSyncToken: true,
+          rows: "connections", personFields: Helpers::GooglePerson::FIELDS, pageSize: PAGE_SIZE, requestSyncToken: true,
           **({ syncToken: token } if token),
         )
 
@@ -27,21 +23,6 @@ module Contacts
         raise if token.nil?
 
         contacts(account, nil)
-      end
-
-      def fields
-        %w[
-          addresses biographies birthdays emailAddresses events fileAses imClients memberships names nicknames
-          organizations phoneNumbers relations urls userDefined
-        ].join(",")
-      end
-
-      def groups(account)
-        rows = account.pages(
-          "#{Helpers::GooglePerson::API}/contactGroups", rows: "contactGroups", pageSize: PAGE_SIZE,
-        ).fetch("contactGroups")
-
-        Helpers::GooglePerson.groups(rows)
       end
 
       def pulled(account, token)
@@ -70,7 +51,7 @@ module Contacts
 
       def syncing(client)
         holders = client.holders(SCOPE)
-        connections = connection_queries.for(Blog::Types::ServiceProvider["google"])
+        connections = connection_queries.for(PROVIDER)
 
         connections.select { it.sync_contacts && holders.include?(it.account_id) }
       end

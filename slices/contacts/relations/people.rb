@@ -7,7 +7,8 @@ module Contacts
         name name_prefix given_name middle_name family_name name_suffix
         phonetic_given_name phonetic_middle_name phonetic_family_name
         nickname file_as company job_title department notes
-        emails phones addresses websites chats dates relations custom_fields birthday labels starred updated_at
+        emails phones addresses websites chats dates relations custom_fields birthday labels starred
+        google_etag updated_at
       ].freeze
       LISTS = %i[emails phones addresses websites chats dates relations custom_fields].freeze
       SEARCHED = %i[name nickname key company job_title mastodon_handle bluesky_handle].freeze

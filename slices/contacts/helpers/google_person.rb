@@ -4,6 +4,12 @@ module Contacts
   module Helpers
     module GooglePerson
       API = "https://people.googleapis.com/v1"
+      FIELDS = %w[
+        addresses biographies birthdays emailAddresses events fileAses imClients memberships names nicknames
+        organizations phoneNumbers relations urls userDefined
+      ].join(",")
+      HANDLE_LINKS = { mastodon_handle: "Mastodon", bluesky_handle: "Bluesky" }.freeze
+      STARRED = "contactGroups/starred"
 
       module_function
 
@@ -49,7 +55,7 @@ module Contacts
       def lists(person)
         {
           emails: typed(person, "emailAddresses"), phones: typed(person, "phoneNumbers"), addresses: addresses(person),
-          websites: typed(person, "urls"), chats: chats(person), dates: dates(person),
+          websites: websites(person), chats: chats(person), dates: dates(person),
           relations: typed(person, "relations", "person"), custom_fields: custom_fields(person),
         }
       end
@@ -84,10 +90,11 @@ module Contacts
 
       def row(person, groups)
         {
-          google_id: google_id(person), **names(person), **organization(person), **lists(person),
+          google_id: google_id(person), google_etag: text(person["etag"]), **names(person), **organization(person),
+          **lists(person),
           nickname: value(person, "nicknames"), file_as: value(person, "fileAses"), notes: value(person, "biographies"),
           birthday: birthday(person), labels: labels(person, groups),
-          starred: memberships(person).include?("contactGroups/starred"),
+          starred: memberships(person).include?(STARRED),
         }
       end
 
@@ -98,6 +105,8 @@ module Contacts
       end
 
       def value(person, field) = text(first(person, field)&.fetch("value", nil))
+
+      def websites(person) = typed(person, "urls").reject { HANDLE_LINKS.value?(it[:type]) }
     end
   end
 end

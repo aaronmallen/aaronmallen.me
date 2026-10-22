@@ -3,6 +3,8 @@
 module API
   module Structs
     Refusal = Data.define(:error, :message, :errors) do
+      def self.conflict(message) = new(error: :conflict, message:, errors: {})
+
       def self.failed(message) = new(error: :failed, message:, errors: {})
 
       def self.invalid(errors, message: errors.values.flatten.uniq.join("; ")) = new(error: :invalid, message:, errors:)

@@ -179,6 +179,32 @@ RSpec.describe "API people", type: :request do
     end
   end
 
+  describe "a contact linked to Google" do
+    let(:api) { Contacts::Helpers::GooglePerson::API }
+    let(:person) do
+      create(:person, name: "Ada", key: "ada", google_connection_id: connect_contacts.id, google_id: "c1",
+                      google_etag: "e1")
+    end
+
+    before { stub_contact_groups }
+
+    it "refuses an edit with 409 when Google changed it first", :aggregate_failures do
+      newer = google_contact("c1", "Ada King", etag: "e2")
+      stub_request(:get, %r{\A#{api}/people/c1\?}).to_return(google_health_json(newer))
+
+      expect(edit(person.id, name: "Ada Lovelace"))
+        .to eq("error" => "conflict", "message" => API::Endpoints::People::CONFLICT)
+      expect(last_response.status).to eq(409)
+    end
+
+    it "answers 503 when Google refuses the delete", :aggregate_failures do
+      stub_request(:delete, "#{api}/people/c1:deleteContact").to_return(status: 500)
+
+      expect(remove(person.id)).to eq("error" => "unavailable", "message" => API::Endpoints::People::GOOGLE_DOWN)
+      expect(last_response.status).to eq(503)
+    end
+  end
+
   describe "GET /api/v1/people/search/:network" do
     let(:ada) { { avatar: "https://cdn.bsky.app/ada.jpg", displayName: "Ada Lovelace", handle: "ada.bsky.social" } }
 
