@@ -14,7 +14,7 @@ module Notes
       def call(id)
         note = step found(note_queries.by_id(id))
         fields = step validated(contract.call(copy(note)))
-        copied = step constrained(note_mutations, REFUSALS) { Success(create(fields)) }
+        copied = step constrained(note_mutations, REFUSALS) { Success(create(fields, note)) }
 
         note_queries.by_id(copied.id)
       end
@@ -25,9 +25,11 @@ module Notes
         { title: note_queries.free_title("#{note.title} copy"), body: note.body, folder_id: note.folder_id }
       end
 
-      def create(fields)
+      def create(fields, source)
         transaction do
-          note_mutations.create(**fields).tap { note_mutations.store_links(it.id, it.body) }
+          copied = note_mutations.create(**fields, written_by_agent: source.written_by_agent)
+          note_mutations.store_links(copied.id, copied.body)
+          copied
         end
       end
     end

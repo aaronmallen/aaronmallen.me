@@ -11,19 +11,19 @@ module Notes
         note_queries: "repos.note_queries",
       ]
 
-      def call(id, params)
+      def call(id, params, agent: false)
         fields = step validated(contract.call(title: params[:title]))
-        step constrained(note_mutations, REFUSALS) { Success(transaction { rename(id, fields.fetch(:title)) }) }
+        step constrained(note_mutations, REFUSALS) { Success(transaction { rename(id, fields.fetch(:title), agent) }) }
 
         note_queries.by_id(id)
       end
 
       private
 
-      def rename(id, title)
+      def rename(id, title, agent)
         note = step found(note_mutations.by_id_for_update(id))
-        note_mutations.update(id, title:)
-        note_mutations.relink(note.title, title) unless note.title == title
+        note_mutations.update(id, title:, **(agent ? { written_by_agent: true } : {}))
+        note_mutations.relink(note.title, title, agent:) unless note.title == title
       end
     end
   end

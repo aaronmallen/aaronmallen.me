@@ -12,7 +12,7 @@ module Admin
         def handle(request, response)
           params = request.params
 
-          case create_note.call(title: params[:title], folder_id: Blog::Types::IdParam[params[:folder_id]])
+          case create_note.call({ title: params[:title], folder_id: Blog::Types::IdParam[params[:folder_id]] })
             in Success(note) then toast_back(response, CREATED, routes.path(:admin_note, id: note.id, edit: 1))
             in Failure[:invalid, errors] then refused(request, response, errors)
           end

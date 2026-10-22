@@ -26,6 +26,8 @@ RSpec.describe "API record links", type: :request do
 
   def mailless = api_token(%w[read write delete])
 
+  def noteless = api_token(Blog::Types::OAuthScope.values - %w[notes])
+
   def refusal = [last_response.status, last_response.headers["WWW-Authenticate"], JSON.parse(last_response.body)]
 
   def refused_for(scope)
@@ -123,11 +125,17 @@ RSpec.describe "API record links", type: :request do
       expect([refusal, stored]).to eq([refused_for("mail"), 0])
     end
 
-    it "refuses a note or folder on either side, naming notes, since no token holds it yet", :aggregate_failures do
-      link("post", post_record.id, other_kind: "note", other_id: create(:note).id)
+    it "refuses a note or folder on either side without the notes scope, naming notes", :aggregate_failures do
+      link("post", post_record.id, other_kind: "note", other_id: create(:note).id, token: noteless)
       expect(refusal).to eq(refused_for("notes"))
-      link("note_folder", create(:note_folder).id, other_kind: "post", other_id: post_record.id)
+      link("note_folder", create(:note_folder).id, other_kind: "post", other_id: post_record.id, token: noteless)
       expect([refusal, stored]).to eq([refused_for("notes"), 0])
+    end
+
+    it "links a note with the notes scope" do
+      link("post", post_record.id, other_kind: "note", other_id: create(:note, title: "Draft ideas").id)
+
+      expect([status, stored]).to eq([201, 1])
     end
 
     it "names every kind it links when it refuses a kind it does not know" do
@@ -194,12 +202,21 @@ RSpec.describe "API record links", type: :request do
       expect(list("task", task.id, token: mailless).fetch("links")).to eq({})
     end
 
-    it "leaves linked notes and folders out, since notes need the notes scope" do
-      link = Links::Slice["operations.link_records"]
-      link.call("post", post_record.id, { other_kind: "note", other_id: create(:note).id })
-      link.call("post", post_record.id, { other_kind: "note_folder", other_id: create(:note_folder).id })
+    describe "with a linked note and folder" do
+      before do
+        link = Links::Slice["operations.link_records"]
+        link.call("post", post_record.id, { other_kind: "note", other_id: create(:note, title: "Draft ideas").id })
+        link.call("post", post_record.id,
+                  { other_kind: "note_folder", other_id: create(:note_folder, name: "work").id })
+      end
 
-      expect(list("post", post_record.id).fetch("links")).to eq({})
+      it "leaves them out for a token without the notes scope" do
+        expect(list("post", post_record.id, token: noteless).fetch("links")).to eq({})
+      end
+
+      it "lists them for a token with the notes scope" do
+        expect(titles(list("post", post_record.id))).to eq("note" => ["Draft ideas"], "note_folder" => ["work"])
+      end
     end
 
     it "refuses the links of a mail thread without the mail scope" do

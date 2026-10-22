@@ -8,6 +8,7 @@ module API
     DELETE = Blog::Types::OAuthScope["delete"]
     HEALTH = Blog::Types::OAuthScope["health"]
     MAIL = Blog::Types::OAuthScope["mail"]
+    NOTES = Blog::Types::OAuthScope["notes"]
     OK = 200
     PUBLISH = Blog::Types::OAuthScope["publish"]
     READ = Blog::Types::OAuthScope["read"]
@@ -107,6 +108,24 @@ module API
       ["edit_memory_fact", "patch", "/memory_files/{id}/facts/{fact_id}", OK, AGENTS],
       ["remove_memory_fact", "post", "/memory_files/{id}/facts/{fact_id}/remove", OK, AGENTS],
       ["revert_memory_event", "post", "/memory_files/{id}/history/{event_id}/revert", OK, AGENTS],
+      ["list_notes", "get", "/notes", OK, NOTES],
+      ["create_note", "post", "/notes", CREATED, NOTES],
+      ["search_notes", "get", "/notes/search", OK, NOTES],
+      ["read_note", "get", "/notes/{id}", OK, NOTES],
+      ["edit_note", "patch", "/notes/{id}", OK, NOTES],
+      ["delete_note", "delete", "/notes/{id}", OK, [NOTES, DELETE]],
+      ["rename_note", "post", "/notes/{id}/rename", OK, NOTES],
+      ["move_note", "post", "/notes/{id}/move", OK, NOTES],
+      ["pin_note", "post", "/notes/{id}/pin", OK, NOTES],
+      ["duplicate_note", "post", "/notes/{id}/duplicate", CREATED, NOTES],
+      ["tag_note", "post", "/notes/{id}/tags", CREATED, NOTES],
+      ["untag_note", "delete", "/notes/{id}/tags/{tag}", OK, NOTES],
+      ["list_note_folders", "get", "/note_folders", OK, NOTES],
+      ["create_note_folder", "post", "/note_folders", CREATED, NOTES],
+      ["remove_note_folder", "delete", "/note_folders/{id}", OK, [NOTES, DELETE]],
+      ["rename_note_folder", "post", "/note_folders/{id}/rename", OK, NOTES],
+      ["move_note_folder", "post", "/note_folders/{id}/move", OK, NOTES],
+      ["describe_note_folder", "post", "/note_folders/{id}/describe", OK, NOTES],
       ["list_posts", "get", "/posts", OK, READ],
       ["create_post", "post", "/posts", CREATED, WRITE],
       ["delete_posts", "post", "/posts/bulk/delete", OK, DELETE],

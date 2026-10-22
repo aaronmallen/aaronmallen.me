@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "API search", type: :request do
-  def find(**params)
-    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
+  def find(token: nil, **params)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token(token)}" }
     get "/api/v1/search", params, headers
     JSON.parse(last_response.body)
   end
@@ -175,25 +175,47 @@ RSpec.describe "API search", type: :request do
       create(:note, title: "Zeppelin sketches")
     end
 
-    it "finds one of each kind but notes" do
-      expect(results(query: "zeppelin").map { it.fetch("kind") })
-        .to match_array(Blog::Types::SearchKind.values - %w[note])
+    it "finds one of each kind" do
+      expect(results(query: "zeppelin").map { it.fetch("kind") }).to match_array(Blog::Types::SearchKind.values)
     end
 
-    it "leaves the note out of MCP search" do
+    it "leaves the note out of MCP search for a token without notes" do
       expect(mcp_answer("search", query: "zeppelin").fetch("results").map { it.fetch("kind") }).not_to include("note")
     end
 
-    it "leaves out a note the search screen lists" do
+    it "lists the note a token without notes leaves out", :aggregate_failures do
       expect(screen_titles(q: "zeppelin")).to include("Zeppelin sketches")
+      expect(find(query: "zeppelin", token: %w[read]).fetch("results").map { it.fetch("kind") }).not_to include("note")
     end
   end
 
   describe "the note kind" do
-    it "refuses it with a 422" do
-      find(query: "zeppelin", kind: "note")
+    let!(:note) { create(:note, title: "Zeppelin sketches") }
 
-      expect(last_response.status).to eq(422)
+    it "refuses it from a token without notes with a 422 on kind" do
+      find(query: "zeppelin", kind: "note", token: Blog::Types::OAuthScope.values - %w[notes])
+
+      expect([document.fetch("errors"),
+              last_response.status]).to eq([{ "kind" => ["note rows need the notes scope"] }, 422])
+    end
+
+    it "finds the note for a token with notes" do
+      expect(results(query: "zeppelin", kind: "note").map { it.values_at("kind", "id") }).to eq([["note", note.id]])
+    end
+
+    describe "in MCP search" do
+      def mcp_scopes = %w[read notes]
+
+      it "keeps an owner's note plain" do
+        expect(mcp_answer("search", query: "zeppelin").fetch("results").first.fetch("title")).to eq("Zeppelin sketches")
+      end
+
+      it "marks the title and match of a note an agent wrote" do
+        Notes::Slice["repos.note_mutations"].update(note.id, written_by_agent: true)
+
+        expect(mcp_answer("search", query: "zeppelin").fetch("results").first.values_at("title", "match"))
+          .to all(include("untrusted" => true))
+      end
     end
   end
 

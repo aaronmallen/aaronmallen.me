@@ -9,6 +9,8 @@ area:
   - api
   - mcp
 issue: "#1925"
+amended:
+  - "#1932"
 tags:
   - notes
   - oauth
@@ -48,6 +50,11 @@ it at consent and the owner ticks it on an API token, and it takes a consent lin
   link, unlink or list that names a note or folder on either side gets a 403 naming `notes`, as mail threads do
   ([ADR 0093][0093]).
 - **Nothing public** reads notes, whatever scope a request carries.
+- **A note an agent wrote comes back marked untrusted.** Since #1932, `notes.written_by_agent` turns on when a
+  token writes a note's title or body, or a rename by a token rewrites links in its body, and turns off when I save
+  the note's title and body in the admin. A duplicate keeps its source's mark. While it is on, the note's title and
+  body come back as `{ untrusted: true, text }` in every notes tool and in search, as agent memory does
+  ([ADR 0188][0188]).
 
 ## Alternatives
 

@@ -61,12 +61,17 @@ RSpec.describe "MCP tool scopes", type: :request do
         read_memory_file remove_memory_fact restore_artifact_version revert_memory_event search_memory start_session
         update_artifact
       ],
+      "notes" => %w[
+        create_note create_note_folder delete_note describe_note_folder duplicate_note edit_note list_note_folders
+        list_notes move_note move_note_folder pin_note read_note remove_note_folder rename_note rename_note_folder
+        search_notes tag_note untag_note
+      ],
       "delete" => %w[
         delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_event
-        delete_journal_entry delete_person delete_post delete_posts delete_saved_view delete_share delete_share_group
-        delete_social_post delete_task delete_task_comment
-        delete_task_rule delete_tasks delete_work_entry delete_work_session remove_share_group_file remove_tag
-        remove_trusted_author
+        delete_journal_entry delete_note delete_person delete_post delete_posts delete_saved_view delete_share
+        delete_share_group delete_social_post delete_task delete_task_comment
+        delete_task_rule delete_tasks delete_work_entry delete_work_session remove_note_folder remove_share_group_file
+        remove_tag remove_trusted_author
       ],
     }
   end
@@ -138,6 +143,28 @@ RSpec.describe "MCP tool scopes", type: :request do
       mcp_rpc("tools/call", { name: "delete_memory_file", arguments: { id: 1 } })
 
       expect(mcp_reply.dig("error", "data")).to start_with("delete_memory_file needs the delete permission,")
+    end
+  end
+
+  describe "a token holding notes and every scope but delete" do
+    def mcp_scopes = guarded.keys - ["delete"]
+
+    %w[delete_note remove_note_folder].each do |name|
+      it "refuses #{name}, naming delete alone" do
+        mcp_rpc("tools/call", { name:, arguments: { id: 1 } })
+
+        expect(mcp_reply.dig("error", "data")).to start_with("#{name} needs the delete permission,")
+      end
+    end
+  end
+
+  describe "a token holding delete and every scope but notes" do
+    def mcp_scopes = guarded.keys - ["notes"]
+
+    it "refuses remove_note_folder, naming notes" do
+      mcp_rpc("tools/call", { name: "remove_note_folder", arguments: { id: 1 } })
+
+      expect(mcp_reply.dig("error", "data")).to start_with("remove_note_folder needs the notes permission,")
     end
   end
 

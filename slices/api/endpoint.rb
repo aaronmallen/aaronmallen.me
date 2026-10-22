@@ -22,7 +22,7 @@ module API
       OperationTable::AGENTS => Serializers::Link::AGENT_KINDS,
       OperationTable::HEALTH => [WORKOUT],
       OperationTable::MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD],
-      "notes" => Serializers::Link::NOTE_KINDS,
+      OperationTable::NOTES => Serializers::Link::NOTE_KINDS,
     }.freeze
 
     include Dry::Monads[:result]

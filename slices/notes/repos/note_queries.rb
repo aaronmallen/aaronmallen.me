@@ -3,14 +3,14 @@
 module Notes
   module Repos
     class NoteQueries < Blog::DB::Repo
-      FOUND = %i[id title folder_id body updated_at].freeze
+      FOUND = %i[id title folder_id body pinned updated_at written_by_agent].freeze
 
       def backlink_counts(ids) = note_links.backlink_counts(ids).to_h { [it[:id], it[:count]] }
 
       def backlinks(note)
         linking = notes.where(id: note_links.linking(note.title).select(:note_id).dataset).exclude(id: note.id)
 
-        linking.select(:id, :title, :body).order(Sequel.function(:lower, :title)).to_a
+        linking.select(:id, :title, :body, :written_by_agent).order(Sequel.function(:lower, :title)).to_a
       end
 
       def by_id(id) = notes.combine(:tags).by_pk(id).one
@@ -44,7 +44,10 @@ module Notes
 
       def links_out(id) = note_links.out(id).to_a
 
-      def listed = notes.select(:id, :title, :folder_id, :pinned).order(Sequel.function(:lower, :title)).to_a
+      def listed
+        listing = notes.select(:id, :title, :folder_id, :pinned, :updated_at, :written_by_agent)
+        listing.order(Sequel.function(:lower, :title)).to_a
+      end
 
       def recent(limit) = notes.combine(:tags).order(Sequel.desc(:updated_at), Sequel.desc(:id)).limit(limit).to_a
 
@@ -64,6 +67,8 @@ module Notes
           { title: linked.first[:title], sources: linked.map { it[:source] }, folder_id: linked.first[:folder_id] }
         end
       end
+
+      def written_by_agent(ids) = notes.where(id: ids, written_by_agent: true).pluck(:id)
     end
   end
 end

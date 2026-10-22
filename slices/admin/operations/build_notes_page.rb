@@ -8,12 +8,12 @@ module Admin
       FOLDER = Blog::Types::RecordKind["note_folder"]
       NOTE = Blog::Types::RecordKind["note"]
       RECENT = 8
-      TAG = /\A#([a-z0-9-]+)\z/
 
       include Deps[
         list_record_links: "operations.list_record_links",
         note_queries: "notes.repos.note_queries",
         record_link_queries: "links.repos.record_link_queries",
+        search_notes: "notes.operations.search_notes",
       ]
 
       def call(note: nil, folder_id: nil, query: nil, records: EMPTY_HASH)
@@ -23,7 +23,7 @@ module Admin
         filed = filed(folder)
         page = {
           tree:, pinned: listed.select(&:pinned), note:, folder:, filed:, written: written(listed),
-          **searched(tree, query),
+          **searched(query),
         }
 
         page.merge(panes(tree, note, folder, filed, records))
@@ -42,17 +42,6 @@ module Admin
       end
 
       def grow(listed) = Structs::NoteTree.grow(note_queries.folders, listed)
-
-      def hits(tree, text)
-        return Blog::Constants::EMPTY_ARRAY if text.empty?
-
-        name = tag(text)
-        return note_queries.tagged(name) if name
-
-        folded = text.downcase
-        folder_ids = tree.all.select { it.path.downcase.include?(folded) }.map(&:id)
-        note_queries.found(text, folder_ids:)
-      end
 
       def home
         recent = note_queries.recent(RECENT)
@@ -74,13 +63,11 @@ module Admin
         { backlink_counts: counts, **links(FOLDER, folder.id, tree.trail(folder.id)[...-1], records) }
       end
 
-      def searched(tree, query)
+      def searched(query)
         text = Blog::Types::TrimmedText[query]
 
-        { query: text, tag: tag(text), hits: hits(tree, text) }
+        { query: text, tag: ::Notes::Operations::SearchNotes.tag(text), hits: search_notes.call(text) }
       end
-
-      def tag(text) = TAG.match(text.downcase)&.[](1)
 
       def written(listed) = listed.to_h { [it.title.downcase, it.id] }
     end

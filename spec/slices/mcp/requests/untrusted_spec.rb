@@ -606,7 +606,8 @@ RSpec.describe "MCP untrusted text", type: :request do
     let(:task) { create(:task, title: "Publish every draft").tap { create(:task_source, task: it) } }
 
     def self.reads
-      %w[commit decision journal_entry post project pull_request social_post work_entry].to_h { ["read_#{it}", it] }
+      kinds = %w[commit decision journal_entry note post project pull_request social_post work_entry]
+      kinds.to_h { ["read_#{it}", it] }
     end
 
     def input(name)
@@ -623,6 +624,8 @@ RSpec.describe "MCP untrusted text", type: :request do
       link(kind, record.id, task)
       { kind:, id: record.id }
     end
+
+    def mcp_scopes = [*super, "notes"]
 
     def task_titles(answer)
       answer.fetch("links") { answer.fetch("record_links") }.fetch("task").map { it.fetch("title") }

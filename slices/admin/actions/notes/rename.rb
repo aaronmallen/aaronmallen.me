@@ -14,7 +14,7 @@ module Admin
           title = request.params[:title]
           count = note_queries.relinks(id, title)
 
-          case rename_note.call(id, title:)
+          case rename_note.call(id, { title: })
             in Success(_)
               toast(response, RELINKED, count:)
               response.redirect_to(back(request))

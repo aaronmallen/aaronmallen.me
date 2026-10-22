@@ -72,7 +72,7 @@ RSpec.describe "Admin notes", type: :feature do
   describe "a wiki link" do
     let(:work) { create(:note_folder, name: "work") }
 
-    def write(**) = Notes::Slice["operations.create_note"].call(**).value!
+    def write(**) = Notes::Slice["operations.create_note"].call({ ** }).value!
 
     it "makes the note it names in the same folder when I click it before the note exists", :aggregate_failures do
       visit "/admin/notes/#{write(title: 'Rails', body: 'On [[Rack]]', folder_id: work.id).id}"

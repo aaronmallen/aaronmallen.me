@@ -11,10 +11,10 @@ module Notes
 
       def move_out(folder_id, parent_id) = notes.where(folder_id:).update(folder_id: parent_id, updated_at: Time.now)
 
-      def relink(from, to)
+      def relink(from, to, agent: false)
         notes.where(id: note_links.linking(from).select(:note_id).dataset).select(:id, :body).to_a.each do |note|
           body = Markdown::WikiLinks.rewrite(note.body, from, to)
-          update(note.id, body:)
+          update(note.id, body:, **(agent ? { written_by_agent: true } : {}))
           store_links(note.id, body)
         end
       end

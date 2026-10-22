@@ -15,17 +15,17 @@ module Notes
         note_queries: "repos.note_queries",
       ]
 
-      def call(params)
+      def call(params, agent: false)
         fields = step validated(contract.call(form(params)))
-        id = step constrained(note_mutations, REFUSALS) { Success(transaction { create(fields) }) }
+        id = step constrained(note_mutations, REFUSALS) { Success(transaction { create(fields, agent) }) }
 
         note_queries.by_id(id)
       end
 
       private
 
-      def create(fields)
-        note = note_mutations.create(**fields.except(:tags))
+      def create(fields, agent)
+        note = note_mutations.create(**fields.except(:tags), written_by_agent: agent)
         note_mutations.replace_tags(note.id, fields.fetch(:tags))
         note_mutations.store_links(note.id, note.body)
         note.id

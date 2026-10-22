@@ -6,7 +6,7 @@ module Notes
       operations.create_note operations.create_note_folder operations.create_note_folder_path operations.delete_note
       operations.describe_note_folder operations.duplicate_note operations.edit_note operations.move_note
       operations.move_note_folder operations.pin_note operations.remove_note_folder operations.rename_note
-      operations.rename_note_folder operations.tag_note operations.untag_note repos.note_queries
+      operations.rename_note_folder operations.search_notes operations.tag_note operations.untag_note repos.note_queries
     ]
   end
 end

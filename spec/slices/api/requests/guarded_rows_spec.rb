@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API guarded rows", type: :request do
-  def self.guarded = %w[workout message mail_thread]
+  def self.guarded = %w[workout message mail_thread note note_folder]
 
   def answer(rows, scopes)
     endpoint = Class.new(API::Endpoint) do
@@ -50,19 +50,21 @@ RSpec.describe "API guarded rows", type: :request do
     thread = create(:message, subject: "#{marker} letter", received_at: yesterday)
     create(:mail_message, mail_thread_id: thread.id, body: "#{marker} body", received_at: yesterday)
     create(:message, :read, subject: "#{marker} reply", received_at: yesterday)
+    create(:note, title: "#{marker} sketches", body: "#{marker} body")
+    create(:note_folder, name: "#{marker} folder")
   end
 
-  it "shows no workout or mail row from any endpoint to a token with only read" do
+  it "shows no workout, mail or note row from any endpoint to a token with only read" do
     leaked = operations.flat_map { |verb, path| leaks(verb, path) }
 
-    expect(leaked).to be_empty, "these show a workout or mail row:\n#{leaked.join("\n")}"
+    expect(leaked).to be_empty, "these show a workout, mail or note row:\n#{leaked.join("\n")}"
   end
 
-  it "drops workout and mail rows from an endpoint that does not drop them itself" do
+  it "drops workout, mail and note rows from an endpoint that does not drop them itself" do
     expect(answer(rows, %w[read])).to eq([{ kind: "task" }])
   end
 
-  it "keeps workout and mail rows for a token with health and mail" do
-    expect(answer(rows, %w[read health mail])).to eq(rows)
+  it "keeps workout, mail and note rows for a token with health, mail and notes" do
+    expect(answer(rows, %w[read health mail notes])).to eq(rows)
   end
 end

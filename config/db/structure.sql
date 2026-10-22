@@ -269,7 +269,8 @@ CREATE TYPE public.oauth_scope AS ENUM (
     'delete',
     'health',
     'mail',
-    'agents'
+    'agents',
+    'notes'
 );
 
 
@@ -3529,7 +3530,8 @@ CREATE TABLE public.notes (
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, (title)::text), 'A'::"char") || setweight(to_tsvector('english'::regconfig, body), 'B'::"char"))) STORED
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, (title)::text), 'A'::"char") || setweight(to_tsvector('english'::regconfig, body), 'B'::"char"))) STORED,
+    written_by_agent boolean DEFAULT false NOT NULL
 );
 
 
@@ -10377,4 +10379,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022200000_create_note_links.rb'),
 ('20261022210000_add_notes_and_note_folders_to_record_links.rb'),
 ('20261022220000_add_signed_out_at_to_devices.rb'),
-('20261023030000_add_notes_to_search_documents.rb');
+('20261023030000_add_notes_to_search_documents.rb'),
+('20261023040000_add_notes_to_oauth_scope.rb'),
+('20261023040100_add_written_by_agent_to_notes.rb');

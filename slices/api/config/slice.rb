@@ -56,6 +56,13 @@ module API
     import keys: %w[operations.read_photo operations.upload_photo], from: :media
 
     import keys: %w[
+      operations.create_note operations.create_note_folder_path operations.delete_note operations.describe_note_folder
+      operations.duplicate_note operations.edit_note operations.move_note operations.move_note_folder
+      operations.pin_note operations.remove_note_folder operations.rename_note operations.rename_note_folder
+      operations.search_notes operations.tag_note operations.untag_note repos.note_queries
+    ], from: :notes
+
+    import keys: %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.publish_draft
       operations.queue_link_check operations.queue_link_check_run operations.revise_edit_note operations.save_post
       operations.save_post_seo repos.post_figure_queries repos.post_queries
