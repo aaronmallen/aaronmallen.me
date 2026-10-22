@@ -37,6 +37,17 @@ RSpec.describe "Admin journal", type: :feature do
     JS
   end
 
+  def tags_span_foot?(foot)
+    evaluate_script(<<~JS)
+      (() => {
+        const box = document.querySelector("#{foot}");
+        const style = getComputedStyle(box);
+        const width = box.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return Math.abs(box.querySelector(".tag-pick").getBoundingClientRect().width - width) < 1;
+      })()
+    JS
+  end
+
   def top(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().top")
 
   before do
@@ -438,6 +449,30 @@ RSpec.describe "Admin journal", type: :feature do
 
     it "stacks the composer above the entries" do
       expect(bottom(".journal-compose")).to be <= top(".journal-days")
+    end
+
+    it "gives the composer's tags the foot's full width" do
+      expect(tags_span_foot?(".jbox-foot")).to be(true)
+    end
+
+    it "puts the composer's tags above the date" do
+      expect(bottom(".jbox-foot .tag-pick")).to be <= top("#journal-entry-date")
+    end
+
+    describe "the quick-write modal" do
+      before do
+        visit "/admin/analytics"
+        press("w")
+        find("dialog#journal-write[open]")
+      end
+
+      it "gives the tags the foot's full width" do
+        expect(tags_span_foot?("#journal-write .journal-modal-foot")).to be(true)
+      end
+
+      it "puts the tags above the Save button" do
+        expect(bottom("#journal-write .tag-pick")).to be <= top("#journal-write .journal-modal-foot > .bt")
+      end
     end
   end
 end

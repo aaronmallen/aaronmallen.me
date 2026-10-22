@@ -51,8 +51,8 @@ module Admin
 
           def foot
             div(class: "jbox-foot") do
-              date_field
               fields(:tags)
+              date_field
               WordCount(count: @word_count)
               SaveButton(body: @values[:body], feather: true) { t(".save") }
             end
