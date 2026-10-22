@@ -3,10 +3,31 @@ id: "0162"
 title: Keep request, job and page load timing in a performance slice
 status: active
 created: 2026-10-14
-area: [app, config, db, assets, analytics, public, admin, mcp]
+area:
+  - app
+  - config
+  - db
+  - assets
+  - analytics
+  - public
+  - admin
+  - mcp
 issue: "#1251"
-amended: ["#1735"]
-tags: [performance, timing, requests, jobs, sidekiq, puma, after-reply, beacon, lcp, retention, rollups, p95]
+amended:
+  - "#1735"
+tags:
+  - performance
+  - timing
+  - requests
+  - jobs
+  - sidekiq
+  - puma
+  - after-reply
+  - beacon
+  - lcp
+  - retention
+  - rollups
+  - p95
 ---
 
 # ADR 0162: Keep request, job and page load timing in a performance slice

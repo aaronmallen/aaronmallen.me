@@ -3,9 +3,21 @@ id: "0067"
 title: Park an imported task on an external list
 status: active
 created: 2026-09-28
-area: [db, admin, tasks]
+area:
+  - db
+  - admin
+  - tasks
 issue: "#10"
-tags: [tasks, sprints, schema, enums, constraints, imports, github, external, planning]
+tags:
+  - tasks
+  - sprints
+  - schema
+  - enums
+  - constraints
+  - imports
+  - github
+  - external
+  - planning
 ---
 
 # ADR 0067: Park an imported task on an external list

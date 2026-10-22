@@ -3,10 +3,18 @@ id: "0041"
 title: Generate author_domain in Postgres, not in Ruby
 status: active
 created: 2026-09-28
-area: [db, social]
+area:
+  - db
+  - social
 issue: AA-289
-amended: [AA-537, AA-682]
-tags: [webmentions, types, postgres, hosts]
+amended:
+  - AA-537
+  - AA-682
+tags:
+  - webmentions
+  - types
+  - postgres
+  - hosts
 ---
 
 # ADR 0041: Generate `author_domain` in Postgres, not in Ruby

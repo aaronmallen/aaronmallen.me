@@ -3,10 +3,27 @@ id: "0157"
 title: Publish a project's tasks through its board flag
 status: active
 created: 2026-10-12
-area: [db, admin, api, mcp, projects, public]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - projects
+  - public
 issue: "#1163"
-amended: ["#1182", "#1315", "#1657"]
-tags: [projects, tasks, kanban, board, public, privacy, visibility, tags]
+amended:
+  - "#1182"
+  - "#1315"
+  - "#1657"
+tags:
+  - projects
+  - tasks
+  - kanban
+  - board
+  - public
+  - privacy
+  - visibility
+  - tags
 ---
 
 # ADR 0157: Publish a project's tasks through its board flag

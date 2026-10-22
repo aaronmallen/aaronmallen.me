@@ -3,10 +3,21 @@ id: "0104"
 title: Version releases with CalVer, back to the first release
 status: active
 created: 2026-10-03
-area: [config]
+area:
+  - config
 issue: "#383"
-amended: ["#1383", "#1799"]
-tags: [version, calver, release, git, tags, changelog, deploy, raspberry-pi]
+amended:
+  - "#1383"
+  - "#1799"
+tags:
+  - version
+  - calver
+  - release
+  - git
+  - tags
+  - changelog
+  - deploy
+  - raspberry-pi
 ---
 
 # ADR 0104: Version releases with CalVer, back to the first release

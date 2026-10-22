@@ -3,11 +3,42 @@ id: "0003"
 title: Reach another slice only through its exports
 status: superseded
 created: 2026-09-28
-area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area:
+  - db
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 superseded-by: "0123"
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524", "#620", "#665", "#1702"]
-tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
+amended:
+  - AA-559
+  - AA-571
+  - AA-803
+  - AA-809
+  - "#236"
+  - "#245"
+  - "#524"
+  - "#620"
+  - "#665"
+  - "#1702"
+tags:
+  - slices
+  - exports
+  - rom
+  - associations
+  - sidekiq
+  - cycles
+  - providers
 ---
 
 # ADR 0003: Reach another slice only through its exports

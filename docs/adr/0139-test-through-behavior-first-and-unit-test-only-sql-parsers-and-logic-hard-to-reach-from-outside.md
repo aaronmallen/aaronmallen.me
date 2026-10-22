@@ -3,11 +3,45 @@ id: "0139"
 title: Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside
 status: active
 created: 2026-10-10
-area: [app, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts, projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
-supersedes: ["0035"]
+area:
+  - app
+  - lib
+  - activity
+  - admin
+  - analytics
+  - api
+  - backups
+  - contact
+  - decisions
+  - links
+  - mcp
+  - media
+  - posts
+  - projects
+  - public
+  - record
+  - saved_views
+  - search
+  - security
+  - services
+  - social
+  - suggestions
+  - tags
+  - tasks
+supersedes:
+  - "0035"
 issue: "#916"
-amended: ["#1377", "#1385"]
-tags: [testing, rspec, coverage, capybara, sidekiq, mcp, unit-specs]
+amended:
+  - "#1377"
+  - "#1385"
+tags:
+  - testing
+  - rspec
+  - coverage
+  - capybara
+  - sidekiq
+  - mcp
+  - unit-specs
 ---
 
 # ADR 0139: Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside

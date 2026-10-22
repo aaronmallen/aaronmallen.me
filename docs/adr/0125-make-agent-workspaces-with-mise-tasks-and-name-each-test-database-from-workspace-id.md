@@ -3,10 +3,22 @@ id: "0125"
 title: Make agent workspaces with mise tasks, and name each test database from WORKSPACE_ID
 status: active
 created: 2026-10-07
-area: [config]
+area:
+  - config
 issue: "#711"
-amended: ["#1082", "#1393"]
-tags: [mise, tasks, jj, workspaces, agents, orchestrate, database, testing, settings]
+amended:
+  - "#1082"
+  - "#1393"
+tags:
+  - mise
+  - tasks
+  - jj
+  - workspaces
+  - agents
+  - orchestrate
+  - database
+  - testing
+  - settings
 ---
 
 # ADR 0125: Make agent workspaces with mise tasks, and name each test database from WORKSPACE_ID

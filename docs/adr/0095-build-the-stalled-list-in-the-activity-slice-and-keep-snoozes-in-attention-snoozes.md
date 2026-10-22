@@ -3,10 +3,30 @@ id: "0095"
 title: Build the stalled list in the activity slice and keep snoozes in attention_snoozes
 status: active
 created: 2026-10-03
-area: [activity, admin, api, db]
+area:
+  - activity
+  - admin
+  - api
+  - db
 issue: "#350"
-amended: ["#351", "#353", "#655", "#706", "#869", "#868", "#1792"]
-tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
+amended:
+  - "#351"
+  - "#353"
+  - "#655"
+  - "#706"
+  - "#869"
+  - "#868"
+  - "#1792"
+tags:
+  - activity
+  - attention
+  - today
+  - snooze
+  - view
+  - postgres
+  - tasks
+  - posts
+  - journal
 ---
 
 # ADR 0095: Build the stalled list in the activity slice and keep snoozes in attention_snoozes

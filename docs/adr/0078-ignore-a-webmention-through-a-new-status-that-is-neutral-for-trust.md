@@ -3,10 +3,22 @@ id: "0078"
 title: Ignore a webmention through a new status that is neutral for trust
 status: active
 created: 2026-09-30
-area: [admin, db, lib, mcp, social]
+area:
+  - admin
+  - db
+  - lib
+  - mcp
+  - social
 issue: "#115"
-amended: ["#911"]
-tags: [webmentions, moderation, trust, spam, enums, schema]
+amended:
+  - "#911"
+tags:
+  - webmentions
+  - moderation
+  - trust
+  - spam
+  - enums
+  - schema
 ---
 
 # ADR 0078: Ignore a webmention through a new status that is neutral for trust

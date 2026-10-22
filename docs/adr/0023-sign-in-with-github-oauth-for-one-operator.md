@@ -3,11 +3,21 @@ id: "0023"
 title: Sign in with GitHub OAuth for one operator
 status: superseded
 created: 2026-09-28
-area: [admin, lib, db]
+area:
+  - admin
+  - lib
+  - db
 superseded-by: "0131"
 issue: AA-628
-amended: ["#792"]
-tags: [auth, oauth, github, sessions, cookies, sign-out]
+amended:
+  - "#792"
+tags:
+  - auth
+  - oauth
+  - github
+  - sessions
+  - cookies
+  - sign-out
 ---
 
 # ADR 0023: Sign in with GitHub OAuth for one operator

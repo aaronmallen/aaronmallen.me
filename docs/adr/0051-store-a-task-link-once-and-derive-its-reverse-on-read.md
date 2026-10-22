@@ -3,10 +3,18 @@ id: "0051"
 title: Store a task link once and derive its reverse on read
 status: active
 created: 2026-09-28
-area: [db, tasks]
+area:
+  - db
+  - tasks
 issue: AA-761
-amended: ["#631"]
-tags: [postgres, schema, tasks, links, constraints]
+amended:
+  - "#631"
+tags:
+  - postgres
+  - schema
+  - tasks
+  - links
+  - constraints
 ---
 
 # ADR 0051: Store a task link once and derive its reverse on read

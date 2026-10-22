@@ -3,10 +3,22 @@ id: "0113"
 title: Share a repeated view fragment as a kit component with slots
 status: active
 created: 2026-10-06
-area: [lib, admin, mcp, public]
+area:
+  - lib
+  - admin
+  - mcp
+  - public
 issue: "#552"
-amended: ["#957", "#1010"]
-tags: [phlex, components, kit, ui, slots, partials]
+amended:
+  - "#957"
+  - "#1010"
+tags:
+  - phlex
+  - components
+  - kit
+  - ui
+  - slots
+  - partials
 ---
 
 # ADR 0113: Share a repeated view fragment as a kit component with slots

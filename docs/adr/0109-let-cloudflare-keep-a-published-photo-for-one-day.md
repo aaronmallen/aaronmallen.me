@@ -3,9 +3,17 @@ id: "0109"
 title: Let Cloudflare keep a published photo for one day
 status: active
 created: 2026-10-04
-area: [public]
+area:
+  - public
 issue: "#468"
-tags: [media, photos, cache, cloudflare, cache-control, privacy, public]
+tags:
+  - media
+  - photos
+  - cache
+  - cloudflare
+  - cache-control
+  - privacy
+  - public
 ---
 
 # ADR 0109: Let Cloudflare keep a published photo for one day

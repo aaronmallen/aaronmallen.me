@@ -3,10 +3,24 @@ id: "0155"
 title: Show mail HTML inline with its remote images, and clean it once at sync
 status: active
 created: 2026-10-12
-area: [admin, lib, mail]
+area:
+  - admin
+  - lib
+  - mail
 issue: "#1157"
-amended: ["#1392", "#1499", "#1602"]
-tags: [mail, gmail, html, sanitize, images, privacy, csp, reader]
+amended:
+  - "#1392"
+  - "#1499"
+  - "#1602"
+tags:
+  - mail
+  - gmail
+  - html
+  - sanitize
+  - images
+  - privacy
+  - csp
+  - reader
 ---
 
 # ADR 0155: Show mail HTML inline with its remote images, and clean it once at sync

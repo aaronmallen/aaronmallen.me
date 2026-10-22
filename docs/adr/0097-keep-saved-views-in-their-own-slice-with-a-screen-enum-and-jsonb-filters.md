@@ -3,10 +3,25 @@ id: "0097"
 title: Keep saved views in their own slice with a screen enum and jsonb filters
 status: active
 created: 2026-10-03
-area: [db, lib, admin, api, mcp]
+area:
+  - db
+  - lib
+  - admin
+  - api
+  - mcp
 issue: "#315"
-amended: ["#452"]
-tags: [saved-views, slices, schema, enums, jsonb, filters, admin, api, mcp]
+amended:
+  - "#452"
+tags:
+  - saved-views
+  - slices
+  - schema
+  - enums
+  - jsonb
+  - filters
+  - admin
+  - api
+  - mcp
 ---
 
 # ADR 0097: Keep saved views in their own slice with a screen enum and jsonb filters

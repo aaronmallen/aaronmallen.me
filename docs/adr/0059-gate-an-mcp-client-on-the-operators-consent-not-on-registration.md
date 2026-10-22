@@ -3,10 +3,23 @@ id: "0059"
 title: Gate an MCP client on the operator's consent, not on registration
 status: active
 created: 2026-09-28
-area: [db, mcp, admin]
+area:
+  - db
+  - mcp
+  - admin
 issue: AA-670
-amended: ["#176", "#463", "#465", "#941"]
-tags: [mcp, oauth, consent, registration, clients, revoke]
+amended:
+  - "#176"
+  - "#463"
+  - "#465"
+  - "#941"
+tags:
+  - mcp
+  - oauth
+  - consent
+  - registration
+  - clients
+  - revoke
 ---
 
 # ADR 0059: Gate an MCP client on the operator's consent, not on registration

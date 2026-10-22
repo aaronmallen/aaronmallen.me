@@ -3,11 +3,26 @@ id: "0107"
 title: Trust a webmention author only under their URL, and a whole host only when marked
 status: active
 created: 2026-10-04
-area: [social, admin, mcp, lib, db]
-supersedes: ["0042"]
+area:
+  - social
+  - admin
+  - mcp
+  - lib
+  - db
+supersedes:
+  - "0042"
 issue: "#461"
-amended: ["#946", "#911", "#1570"]
-tags: [webmentions, moderation, trust, spam, bridgy, security]
+amended:
+  - "#946"
+  - "#911"
+  - "#1570"
+tags:
+  - webmentions
+  - moderation
+  - trust
+  - spam
+  - bridgy
+  - security
 ---
 
 # ADR 0107: Trust a webmention author only under their URL, and a whole host only when marked

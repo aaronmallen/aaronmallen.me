@@ -3,10 +3,17 @@ id: "0046"
 title: Let the garbage collector take a superseded MaxMind reader
 status: active
 created: 2026-09-28
-area: [analytics]
+area:
+  - analytics
 issue: AA-681
-amended: ["#941", "#1372"]
-tags: [analytics, geolite2, maxmind, concurrency]
+amended:
+  - "#941"
+  - "#1372"
+tags:
+  - analytics
+  - geolite2
+  - maxmind
+  - concurrency
 ---
 
 # ADR 0046: Let the garbage collector take a superseded MaxMind reader

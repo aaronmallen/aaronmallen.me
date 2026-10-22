@@ -3,10 +3,26 @@ id: "0070"
 title: Share one issue sync across providers, and run each provider as its own job
 status: active
 created: 2026-09-29
-area: [db, lib, record, tasks]
+area:
+  - db
+  - lib
+  - record
+  - tasks
 issue: "#43"
-amended: ["#631", "#1658"]
-tags: [tasks, imports, sync, github, linear, providers, jobs, locks, sync-states, enums]
+amended:
+  - "#631"
+  - "#1658"
+tags:
+  - tasks
+  - imports
+  - sync
+  - github
+  - linear
+  - providers
+  - jobs
+  - locks
+  - sync-states
+  - enums
 ---
 
 # ADR 0070: Share one issue sync across providers, and run each provider as its own job

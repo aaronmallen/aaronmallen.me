@@ -3,10 +3,28 @@ id: "0115"
 title: Keep task contributors in their own table, and list the owner when a task has none
 status: active
 created: 2026-10-06
-area: [db, activity, admin, api, mcp, record, tasks]
+area:
+  - db
+  - activity
+  - admin
+  - api
+  - mcp
+  - record
+  - tasks
 issue: "#617"
-amended: ["#620"]
-tags: [tasks, contributors, agents, models, commits, trailers, sync, postgres, enums, domains]
+amended:
+  - "#620"
+tags:
+  - tasks
+  - contributors
+  - agents
+  - models
+  - commits
+  - trailers
+  - sync
+  - postgres
+  - enums
+  - domains
 ---
 
 # ADR 0115: Keep task contributors in their own table, and list the owner when a task has none

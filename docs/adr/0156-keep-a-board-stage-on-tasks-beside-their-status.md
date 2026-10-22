@@ -3,9 +3,22 @@ id: "0156"
 title: Keep a board stage on tasks beside their status
 status: active
 created: 2026-10-12
-area: [db, admin, api, mcp, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - tasks
 issue: "#1163"
-tags: [tasks, projects, kanban, board, stage, status, enum, schema]
+tags:
+  - tasks
+  - projects
+  - kanban
+  - board
+  - stage
+  - status
+  - enum
+  - schema
 ---
 
 # ADR 0156: Keep a board stage on tasks beside their status

@@ -3,10 +3,25 @@ id: "0158"
 title: Match the owner on a verified email from GitHub or Google
 status: active
 created: 2026-10-12
-area: [admin, config, db, lib, security]
-supersedes: ["0131"]
+area:
+  - admin
+  - config
+  - db
+  - lib
+  - security
+supersedes:
+  - "0131"
 issue: "#1155"
-tags: [auth, oauth, github, google, owner, identities, sign-in, email, sessions]
+tags:
+  - auth
+  - oauth
+  - github
+  - google
+  - owner
+  - identities
+  - sign-in
+  - email
+  - sessions
 ---
 
 # ADR 0158: Match the owner on a verified email from GitHub or Google

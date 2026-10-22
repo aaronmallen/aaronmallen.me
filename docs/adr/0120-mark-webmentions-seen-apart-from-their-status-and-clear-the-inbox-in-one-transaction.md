@@ -3,10 +3,30 @@ id: "0120"
 title: Mark webmentions seen apart from their status, and clear the inbox in one transaction
 status: active
 created: 2026-10-07
-area: [db, admin, api, contact, mcp, social, tasks]
+area:
+  - db
+  - admin
+  - api
+  - contact
+  - mcp
+  - social
+  - tasks
 issue: "#650"
-amended: ["#911", "#1603", "#1839"]
-tags: [inbox, webmentions, messages, tasks, schema, bulk, transactions, savepoint, api, mcp]
+amended:
+  - "#911"
+  - "#1603"
+  - "#1839"
+tags:
+  - inbox
+  - webmentions
+  - messages
+  - tasks
+  - schema
+  - bulk
+  - transactions
+  - savepoint
+  - api
+  - mcp
 ---
 
 # ADR 0120: Mark webmentions seen apart from their status, and clear the inbox in one transaction

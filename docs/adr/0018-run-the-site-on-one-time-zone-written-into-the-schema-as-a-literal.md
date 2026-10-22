@@ -3,10 +3,27 @@ id: "0018"
 title: Run the site on one time zone, written into the schema as a literal
 status: active
 created: 2026-09-28
-area: [activity, admin, config, db, lib, public, record, tasks]
+area:
+  - activity
+  - admin
+  - config
+  - db
+  - lib
+  - public
+  - record
+  - tasks
 issue: AA-669
-amended: [AA-819, "#943"]
-tags: [time-zone, postgres, indexes, activity, sidekiq, cron, dates]
+amended:
+  - AA-819
+  - "#943"
+tags:
+  - time-zone
+  - postgres
+  - indexes
+  - activity
+  - sidekiq
+  - cron
+  - dates
 ---
 
 # ADR 0018: Run the site on one time zone, written into the schema as a literal

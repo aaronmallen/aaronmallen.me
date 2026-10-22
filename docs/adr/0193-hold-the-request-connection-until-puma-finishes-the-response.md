@@ -3,9 +3,19 @@ id: "0193"
 title: Hold the request's connection until Puma finishes the response
 status: active
 created: 2026-10-18
-area: [config, lib]
+area:
+  - config
+  - lib
 issue: "#1787"
-tags: [postgres, connections, connection-validator, puma, after-reply, response-finished, request-connection, timing]
+tags:
+  - postgres
+  - connections
+  - connection-validator
+  - puma
+  - after-reply
+  - response-finished
+  - request-connection
+  - timing
 ---
 
 # ADR 0193: Hold the request's connection until Puma finishes the response

@@ -3,11 +3,25 @@ id: "0048"
 title: Import commits over GitHub's GraphQL API and keep REST for two project reads
 status: superseded
 created: 2026-09-28
-area: [lib, record, projects]
+area:
+  - lib
+  - record
+  - projects
 superseded-by: "0069"
 issue: AA-687
-amended: [AA-793, AA-813, AA-821, AA-823, "#33"]
-tags: [github, graphql, rest, commits, import, rate-limit]
+amended:
+  - AA-793
+  - AA-813
+  - AA-821
+  - AA-823
+  - "#33"
+tags:
+  - github
+  - graphql
+  - rest
+  - commits
+  - import
+  - rate-limit
 ---
 
 # ADR 0048: Import commits over GitHub's GraphQL API and keep REST for two project reads

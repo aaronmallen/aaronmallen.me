@@ -3,10 +3,26 @@ id: "0181"
 title: Hold maintenance mode in a flag file on the Pi
 status: active
 created: 2026-10-16
-area: [app, config, lib]
+area:
+  - app
+  - config
+  - lib
 issue: "#1584"
-amended: ["#1642", "#1728"]
-tags: [maintenance, flag-file, settings, deploy, pi, nas, sidekiq, honeybadger, postgres, redis, rustfs]
+amended:
+  - "#1642"
+  - "#1728"
+tags:
+  - maintenance
+  - flag-file
+  - settings
+  - deploy
+  - pi
+  - nas
+  - sidekiq
+  - honeybadger
+  - postgres
+  - redis
+  - rustfs
 ---
 
 # ADR 0181: Hold maintenance mode in a flag file on the Pi

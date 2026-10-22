@@ -3,10 +3,28 @@ id: "0039"
 title: Keep the announcement on the post and send it once
 status: active
 created: 2026-09-28
-area: [posts, social, admin, db]
+area:
+  - posts
+  - social
+  - admin
+  - db
 issue: AA-646
-amended: ["#245", "#524", "#957", "#1631", "#1702", "#1505", "#994"]
-tags: [posts, social, syndication, announcement, limits, mastodon, bluesky]
+amended:
+  - "#245"
+  - "#524"
+  - "#957"
+  - "#1631"
+  - "#1702"
+  - "#1505"
+  - "#994"
+tags:
+  - posts
+  - social
+  - syndication
+  - announcement
+  - limits
+  - mastodon
+  - bluesky
 ---
 
 # ADR 0039: Keep the announcement on the post and send it once

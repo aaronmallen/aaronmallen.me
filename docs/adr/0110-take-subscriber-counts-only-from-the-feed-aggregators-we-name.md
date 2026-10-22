@@ -3,11 +3,21 @@ id: "0110"
 title: Take subscriber counts only from the feed aggregators we name
 status: active
 created: 2026-10-04
-area: [analytics, lib]
-supersedes: ["0106"]
+area:
+  - analytics
+  - lib
+supersedes:
+  - "0106"
 issue: "#470"
-amended: ["#911"]
-tags: [analytics, feed, atom, subscribers, user-agent, aggregators]
+amended:
+  - "#911"
+tags:
+  - analytics
+  - feed
+  - atom
+  - subscribers
+  - user-agent
+  - aggregators
 ---
 
 # ADR 0110: Take subscriber counts only from the feed aggregators we name

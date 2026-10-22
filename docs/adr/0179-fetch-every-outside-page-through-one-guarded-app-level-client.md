@@ -3,10 +3,24 @@ id: "0179"
 title: Fetch every outside page through one guarded app-level client
 status: active
 created: 2026-10-15
-area: [config, lib, posts, shares, social]
+area:
+  - config
+  - lib
+  - posts
+  - shares
+  - social
 issue: "#1455"
-amended: ["#1470", "#1784"]
-tags: [http, fetch, security, webmentions, short-links, providers, clients]
+amended:
+  - "#1470"
+  - "#1784"
+tags:
+  - http
+  - fetch
+  - security
+  - webmentions
+  - short-links
+  - providers
+  - clients
 ---
 
 # ADR 0179: Fetch every outside page through one guarded app-level client

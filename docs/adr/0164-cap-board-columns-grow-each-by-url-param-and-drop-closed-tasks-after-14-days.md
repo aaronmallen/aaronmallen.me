@@ -3,9 +3,22 @@ id: "0164"
 title: Cap board columns, grow each by URL param, and drop closed tasks after 14 days
 status: active
 created: 2026-10-14
-area: [admin, public, tasks, config]
+area:
+  - admin
+  - public
+  - tasks
+  - config
 issue: "#1268"
-tags: [projects, tasks, kanban, board, paging, load-more, settings, position, completed-at]
+tags:
+  - projects
+  - tasks
+  - kanban
+  - board
+  - paging
+  - load-more
+  - settings
+  - position
+  - completed-at
 ---
 
 # ADR 0164: Cap board columns, grow each by URL param, and drop closed tasks after 14 days

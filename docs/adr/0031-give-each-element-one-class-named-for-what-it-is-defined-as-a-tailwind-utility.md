@@ -3,10 +3,22 @@ id: "0031"
 title: Give each element one class named for what it is, defined as a Tailwind utility
 status: active
 created: 2026-09-28
-area: [config, lib, public, admin, mcp]
+area:
+  - config
+  - lib
+  - public
+  - admin
+  - mcp
 issue: AA-667
-amended: ["#1304", "#1824"]
-tags: [css, tailwind, design, phlex, ui]
+amended:
+  - "#1304"
+  - "#1824"
+tags:
+  - css
+  - tailwind
+  - design
+  - phlex
+  - ui
 ---
 
 # ADR 0031: Give each element one class named for what it is, defined as a Tailwind utility

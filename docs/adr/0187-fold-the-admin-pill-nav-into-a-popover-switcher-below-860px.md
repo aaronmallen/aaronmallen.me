@@ -3,10 +3,23 @@ id: "0187"
 title: Fold the admin pill nav into a popover switcher below 860px
 status: active
 created: 2026-10-17
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#1742"
-amended: ["#1752", "#1748", "#1825"]
-tags: [admin, layout, navigation, top-bar, popover, responsive, mobile, design]
+amended:
+  - "#1752"
+  - "#1748"
+  - "#1825"
+tags:
+  - admin
+  - layout
+  - navigation
+  - top-bar
+  - popover
+  - responsive
+  - mobile
+  - design
 ---
 
 # ADR 0187: Fold the admin pill nav into a popover switcher below 860px

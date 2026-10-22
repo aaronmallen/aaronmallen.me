@@ -3,10 +3,26 @@ id: "0050"
 title: Derive Today from sprint membership
 status: active
 created: 2026-09-28
-area: [db, admin, tasks]
+area:
+  - db
+  - admin
+  - tasks
 issue: AA-689
-amended: [AA-397, AA-398, "#53", "#81", "#941", "#1290"]
-tags: [tasks, sprints, schema, today, upcoming, rollover, dashboard]
+amended:
+  - AA-397
+  - AA-398
+  - "#53"
+  - "#81"
+  - "#941"
+  - "#1290"
+tags:
+  - tasks
+  - sprints
+  - schema
+  - today
+  - upcoming
+  - rollover
+  - dashboard
 ---
 
 # ADR 0050: Derive Today from sprint membership

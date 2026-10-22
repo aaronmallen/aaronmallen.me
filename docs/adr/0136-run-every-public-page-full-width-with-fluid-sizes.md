@@ -3,11 +3,22 @@ id: "0136"
 title: Run every public page full width with fluid sizes
 status: active
 created: 2026-10-09
-area: [assets, config, public]
-supersedes: ["0034"]
+area:
+  - assets
+  - config
+  - public
+supersedes:
+  - "0034"
 issue: "#842"
-amended: ["#925"]
-tags: [layout, design, css, tailwind, public, responsive]
+amended:
+  - "#925"
+tags:
+  - layout
+  - design
+  - css
+  - tailwind
+  - public
+  - responsive
 ---
 
 # ADR 0136: Run every public page full width with fluid sizes

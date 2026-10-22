@@ -3,11 +3,30 @@ id: "0033"
 title: Draw every icon as a Font Awesome Free class
 status: superseded
 created: 2026-09-28
-area: [assets, config, db, lib, admin, public, tasks]
+area:
+  - assets
+  - config
+  - db
+  - lib
+  - admin
+  - public
+  - tasks
 superseded-by: "0176"
 issue: AA-685
-amended: [AA-801, "#17", "#19", "#1030", "#1305"]
-tags: [icons, font-awesome, svg, css, tailwind, accessibility, enums]
+amended:
+  - AA-801
+  - "#17"
+  - "#19"
+  - "#1030"
+  - "#1305"
+tags:
+  - icons
+  - font-awesome
+  - svg
+  - css
+  - tailwind
+  - accessibility
+  - enums
 ---
 
 # ADR 0033: Draw every icon as a Font Awesome Free class

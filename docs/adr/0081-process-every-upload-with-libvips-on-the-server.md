@@ -3,10 +3,23 @@ id: "0081"
 title: Process every upload with libvips on the server
 status: active
 created: 2026-09-30
-area: [admin, media]
+area:
+  - admin
+  - media
 issue: "#133"
-amended: ["#137", "#911"]
-tags: [media, photos, uploads, libvips, libheif, heic, metadata, privacy, gps]
+amended:
+  - "#137"
+  - "#911"
+tags:
+  - media
+  - photos
+  - uploads
+  - libvips
+  - libheif
+  - heic
+  - metadata
+  - privacy
+  - gps
 ---
 
 # ADR 0081: Process every upload with libvips on the server

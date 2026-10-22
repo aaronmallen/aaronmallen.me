@@ -3,10 +3,25 @@ id: "0188"
 title: Gate agent memory, artifacts and sessions behind an agents scope
 status: active
 created: 2026-10-17
-area: [lib, db, api, mcp]
+area:
+  - lib
+  - db
+  - api
+  - mcp
 issue: "#1741"
-amended: ["#1743", "#1749", "#1823", "#1860"]
-tags: [agents, oauth, scopes, consent, api-tokens, mcp, untrusted]
+amended:
+  - "#1743"
+  - "#1749"
+  - "#1823"
+  - "#1860"
+tags:
+  - agents
+  - oauth
+  - scopes
+  - consent
+  - api-tokens
+  - mcp
+  - untrusted
 ---
 
 # ADR 0188: Gate agent memory, artifacts and sessions behind an `agents` scope

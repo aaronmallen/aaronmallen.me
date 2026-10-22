@@ -3,10 +3,25 @@ id: "0143"
 title: Send outside links in social posts through aa.cool short links
 status: active
 created: 2026-10-10
-area: [social, admin, db]
+area:
+  - social
+  - admin
+  - db
 issue: "#1066"
-amended: ["#1856", "#1888", "#1889"]
-tags: [social, links, short-links, redirect, aa.cool, clicks, webmentions, bluesky, delivery]
+amended:
+  - "#1856"
+  - "#1888"
+  - "#1889"
+tags:
+  - social
+  - links
+  - short-links
+  - redirect
+  - aa.cool
+  - clicks
+  - webmentions
+  - bluesky
+  - delivery
 ---
 
 # ADR 0143: Send outside links in social posts through aa.cool short links

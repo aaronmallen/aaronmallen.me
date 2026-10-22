@@ -3,10 +3,28 @@ id: "0014"
 title: Build every absolute URL from the site setting
 status: active
 created: 2026-09-28
-area: [admin, config, lib, mcp, posts, public, social]
+area:
+  - admin
+  - config
+  - lib
+  - mcp
+  - posts
+  - public
+  - social
 issue: AA-655
-amended: [AA-819, "#957", "#1816"]
-tags: [urls, settings, routes, base-url, feeds, webmentions, oauth, tunnel]
+amended:
+  - AA-819
+  - "#957"
+  - "#1816"
+tags:
+  - urls
+  - settings
+  - routes
+  - base-url
+  - feeds
+  - webmentions
+  - oauth
+  - tunnel
 ---
 
 # ADR 0014: Build every absolute URL from the site setting

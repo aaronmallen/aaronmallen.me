@@ -3,9 +3,22 @@ id: "0167"
 title: Tie a decision to its task with a sourced from record link the tasks slice writes
 status: active
 created: 2026-10-14
-area: [db, decisions, links, tasks]
+area:
+  - db
+  - decisions
+  - links
+  - tasks
 issue: "#1324"
-tags: [decisions, tasks, links, record-links, schema, enums, constraints, slices, transactions]
+tags:
+  - decisions
+  - tasks
+  - links
+  - record-links
+  - schema
+  - enums
+  - constraints
+  - slices
+  - transactions
 ---
 
 # ADR 0167: Tie a decision to its task with a sourced from record link the tasks slice writes

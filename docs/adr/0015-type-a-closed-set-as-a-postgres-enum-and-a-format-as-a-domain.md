@@ -3,10 +3,25 @@ id: "0015"
 title: Type a closed set as a Postgres enum and a format as a domain
 status: active
 created: 2026-09-28
-area: [db, lib]
+area:
+  - db
+  - lib
 issue: AA-609
-amended: [AA-758, AA-801, AA-819, "#17", "#791", "#931", "#1823"]
-tags: [postgres, schema, enums, domains, constraints, types]
+amended:
+  - AA-758
+  - AA-801
+  - AA-819
+  - "#17"
+  - "#791"
+  - "#931"
+  - "#1823"
+tags:
+  - postgres
+  - schema
+  - enums
+  - domains
+  - constraints
+  - types
 ---
 
 # ADR 0015: Type a closed set as a Postgres enum and a format as a domain

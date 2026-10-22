@@ -3,9 +3,17 @@ id: "0134"
 title: Store each pull request once and read it twice in the activity view
 status: active
 created: 2026-10-09
-area: [record, activity, db]
+area:
+  - record
+  - activity
+  - db
 issue: "#814"
-tags: [pull-requests, github, activity, view, schema]
+tags:
+  - pull-requests
+  - github
+  - activity
+  - view
+  - schema
 ---
 
 # ADR 0134: Store each pull request once and read it twice in the activity view

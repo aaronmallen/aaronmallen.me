@@ -3,10 +3,25 @@ id: "0065"
 title: Label a task with tags alone
 status: active
 created: 2026-09-28
-area: [db, lib, activity, admin, mcp, tasks]
+area:
+  - db
+  - lib
+  - activity
+  - admin
+  - mcp
+  - tasks
 issue: "#17"
-amended: ["#76"]
-tags: [tasks, tags, task-types, schema, migrations, admin, mcp, activity]
+amended:
+  - "#76"
+tags:
+  - tasks
+  - tags
+  - task-types
+  - schema
+  - migrations
+  - admin
+  - mcp
+  - activity
 ---
 
 # ADR 0065: Label a task with tags alone

@@ -3,10 +3,27 @@ id: "0062"
 title: Send every kind in the activity feed to a client holding read
 status: active
 created: 2026-09-28
-area: [mcp, activity]
+area:
+  - mcp
+  - activity
 issue: AA-426
-amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123", "#1421", "#897"]
-tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
+amended:
+  - AA-434
+  - AA-811
+  - AA-824
+  - "#935"
+  - "#941"
+  - "#1123"
+  - "#1421"
+  - "#897"
+tags:
+  - mcp
+  - oauth
+  - scopes
+  - activity
+  - journal
+  - commits
+  - privacy
 ---
 
 # ADR 0062: Send every kind in the activity feed to a client holding `read`

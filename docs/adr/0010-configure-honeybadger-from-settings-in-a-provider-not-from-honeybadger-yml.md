@@ -3,10 +3,28 @@ id: "0010"
 title: Configure Honeybadger from settings in a provider, not from honeybadger.yml
 status: active
 created: 2026-09-28
-area: [config, lib, admin, api, mcp]
+area:
+  - config
+  - lib
+  - admin
+  - api
+  - mcp
 issue: AA-660
-amended: [AA-819, "#237", "#467", "#1012", "#1805", "#1803", "#1501"]
-tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
+amended:
+  - AA-819
+  - "#237"
+  - "#467"
+  - "#1012"
+  - "#1805"
+  - "#1803"
+  - "#1501"
+tags:
+  - honeybadger
+  - errors
+  - providers
+  - settings
+  - sidekiq
+  - privacy
 ---
 
 # ADR 0010: Configure Honeybadger from settings in a provider, not from honeybadger.yml

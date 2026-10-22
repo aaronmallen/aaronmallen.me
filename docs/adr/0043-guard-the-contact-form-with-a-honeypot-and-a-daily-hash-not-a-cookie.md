@@ -3,10 +3,39 @@ id: "0043"
 title: Guard the contact form with a honeypot and a daily hash, not a cookie
 status: active
 created: 2026-09-28
-area: [config, analytics, contact, public, social]
+area:
+  - config
+  - analytics
+  - contact
+  - public
+  - social
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918", "#1122", "#1759"]
-tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
+amended:
+  - AA-490
+  - AA-505
+  - AA-561
+  - AA-708
+  - AA-717
+  - AA-749
+  - "#200"
+  - "#204"
+  - "#463"
+  - "#504"
+  - "#532"
+  - "#898"
+  - "#918"
+  - "#1122"
+  - "#1759"
+tags:
+  - concurrency
+  - contact
+  - csrf
+  - honeypot
+  - privacy
+  - retention
+  - spam
+  - throttle
+  - timer
 ---
 
 # ADR 0043: Guard the contact form with a honeypot and a daily hash, not a cookie

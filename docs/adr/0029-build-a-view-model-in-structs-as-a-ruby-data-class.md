@@ -3,10 +3,29 @@ id: "0029"
 title: Build a view model in structs/ as a Ruby Data class
 status: active
 created: 2026-09-28
-area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area:
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-661
-amended: [AA-783]
-tags: [structs, data, view-models, rom]
+amended:
+  - AA-783
+tags:
+  - structs
+  - data
+  - view-models
+  - rom
 ---
 
 # ADR 0029: Build a view model in `structs/` as a Ruby `Data` class

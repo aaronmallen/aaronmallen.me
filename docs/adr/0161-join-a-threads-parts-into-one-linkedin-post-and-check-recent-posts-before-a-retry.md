@@ -3,9 +3,17 @@ id: "0161"
 title: Join a thread's parts into one LinkedIn post, and check recent posts before a retry
 status: active
 created: 2026-10-14
-area: [social, lib]
+area:
+  - social
+  - lib
 issue: "#1243"
-tags: [social, linkedin, delivery, retry, idempotency, threads]
+tags:
+  - social
+  - linkedin
+  - delivery
+  - retry
+  - idempotency
+  - threads
 ---
 
 # ADR 0161: Join a thread's parts into one LinkedIn post, and check recent posts before a retry

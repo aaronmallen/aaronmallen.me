@@ -3,10 +3,27 @@ id: "0163"
 title: Serve a share group's page, files and streamed zip under its code on the share host
 status: active
 created: 2026-10-14
-area: [config, db, shares]
+area:
+  - config
+  - db
+  - shares
 issue: "#1259"
-amended: ["#1384", "#1447", "#1856", "#1888"]
-tags: [shares, share-groups, aa-cool, hosts, routing, zip, streaming, puma, cache-control, short-codes]
+amended:
+  - "#1384"
+  - "#1447"
+  - "#1856"
+  - "#1888"
+tags:
+  - shares
+  - share-groups
+  - aa-cool
+  - hosts
+  - routing
+  - zip
+  - streaming
+  - puma
+  - cache-control
+  - short-codes
 ---
 
 # ADR 0163: Serve a share group's page, files and streamed zip under its code on the share host

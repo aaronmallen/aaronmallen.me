@@ -3,9 +3,21 @@ id: "0129"
 title: Store MaxMind's country name beside each country code
 status: active
 created: 2026-10-08
-area: [analytics, security, admin, mcp, db, lib]
+area:
+  - analytics
+  - security
+  - admin
+  - mcp
+  - db
+  - lib
 issue: "#765"
-tags: [analytics, security, geoip, maxmind, country, schema]
+tags:
+  - analytics
+  - security
+  - geoip
+  - maxmind
+  - country
+  - schema
 ---
 
 # ADR 0129: Store MaxMind's country name beside each country code

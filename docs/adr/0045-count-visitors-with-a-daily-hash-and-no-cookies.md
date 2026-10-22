@@ -3,11 +3,35 @@ id: "0045"
 title: Count visitors with a daily hash and no cookies
 status: superseded
 created: 2026-09-28
-area: [analytics, public, admin, assets, db]
+area:
+  - analytics
+  - public
+  - admin
+  - assets
+  - db
 superseded-by: "0102"
 issue: AA-613
-amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210", "#183", "#371", "#1772", "#1756"]
-tags: [analytics, privacy, beacon, retention, geoip, throttle]
+amended:
+  - AA-470
+  - AA-472
+  - AA-485
+  - AA-492
+  - AA-527
+  - AA-537
+  - AA-552
+  - AA-714
+  - "#210"
+  - "#183"
+  - "#371"
+  - "#1772"
+  - "#1756"
+tags:
+  - analytics
+  - privacy
+  - beacon
+  - retention
+  - geoip
+  - throttle
 ---
 
 # ADR 0045: Count visitors with a daily hash and no cookies

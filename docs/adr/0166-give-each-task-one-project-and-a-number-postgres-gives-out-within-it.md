@@ -3,9 +3,27 @@ id: "0166"
 title: Give each task one project, and a number Postgres gives out within it
 status: active
 created: 2026-10-14
-area: [db, admin, api, mcp, projects, public, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - projects
+  - public
+  - tasks
 issue: "#1316"
-tags: [tasks, projects, keys, numbers, labels, rules, links, triggers, constraints, backfill, schema]
+tags:
+  - tasks
+  - projects
+  - keys
+  - numbers
+  - labels
+  - rules
+  - links
+  - triggers
+  - constraints
+  - backfill
+  - schema
 ---
 
 # ADR 0166: Give each task one project, and a number Postgres gives out within it

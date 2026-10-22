@@ -3,10 +3,23 @@ id: "0127"
 title: Replay each Linear state change at Linear's time, from a cursor on task sources
 status: active
 created: 2026-10-07
-area: [db, lib, record, tasks]
+area:
+  - db
+  - lib
+  - record
+  - tasks
 issue: "#737"
-amended: ["#902"]
-tags: [tasks, imports, sync, linear, history, time-tracking, work-sessions, cursors]
+amended:
+  - "#902"
+tags:
+  - tasks
+  - imports
+  - sync
+  - linear
+  - history
+  - time-tracking
+  - work-sessions
+  - cursors
 ---
 
 # ADR 0127: Replay each Linear state change at Linear's time, from a cursor on task sources

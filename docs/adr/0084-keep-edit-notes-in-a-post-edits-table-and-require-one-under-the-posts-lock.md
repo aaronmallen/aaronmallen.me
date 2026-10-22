@@ -3,9 +3,18 @@ id: "0084"
 title: Keep edit notes in a post_edits table and require one under the post's lock
 status: active
 created: 2026-09-30
-area: [db, posts]
+area:
+  - db
+  - posts
 issue: "#142"
-tags: [posts, edit-notes, post-edits, operations, contracts, locks, markdown]
+tags:
+  - posts
+  - edit-notes
+  - post-edits
+  - operations
+  - contracts
+  - locks
+  - markdown
 ---
 
 # ADR 0084: Keep edit notes in a post_edits table and require one under the post's lock

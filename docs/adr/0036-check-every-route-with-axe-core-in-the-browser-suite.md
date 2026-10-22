@@ -3,10 +3,21 @@ id: "0036"
 title: Check every route with axe-core in the browser suite
 status: active
 created: 2026-09-28
-area: [public, admin, mcp]
+area:
+  - public
+  - admin
+  - mcp
 issue: AA-836
-amended: ["#1063"]
-tags: [accessibility, wcag, axe-core, testing, capybara, cuprite, browser]
+amended:
+  - "#1063"
+tags:
+  - accessibility
+  - wcag
+  - axe-core
+  - testing
+  - capybara
+  - cuprite
+  - browser
 ---
 
 # ADR 0036: Check every route with axe-core in the browser suite

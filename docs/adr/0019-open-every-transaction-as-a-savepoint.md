@@ -3,10 +3,24 @@ id: "0019"
 title: Open every transaction as a savepoint
 status: active
 created: 2026-09-28
-area: [lib, contact, mcp, analytics, social]
+area:
+  - lib
+  - contact
+  - mcp
+  - analytics
+  - social
 issue: AA-645
-amended: [AA-819, "#957"]
-tags: [transactions, savepoint, rom, sequel, dry-operation, after-commit, rollback]
+amended:
+  - AA-819
+  - "#957"
+tags:
+  - transactions
+  - savepoint
+  - rom
+  - sequel
+  - dry-operation
+  - after-commit
+  - rollback
 ---
 
 # ADR 0019: Open every transaction as a savepoint

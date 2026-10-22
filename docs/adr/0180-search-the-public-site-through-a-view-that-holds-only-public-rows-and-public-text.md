@@ -3,9 +3,22 @@ id: "0180"
 title: Search the public site through a view that holds only public rows and public text
 status: active
 created: 2026-10-15
-area: [db, public]
+area:
+  - db
+  - public
 issue: "#1465"
-tags: [search, postgres, full-text, view, public, privacy, visibility, posts, projects, tasks, tags]
+tags:
+  - search
+  - postgres
+  - full-text
+  - view
+  - public
+  - privacy
+  - visibility
+  - posts
+  - projects
+  - tasks
+  - tags
 ---
 
 # ADR 0180: Search the public site through a view that holds only public rows and public text

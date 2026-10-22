@@ -3,10 +3,26 @@ id: "0142"
 title: Serve shares on their own host, picked in config.ru, and let no cache keep them
 status: active
 created: 2026-10-10
-area: [config]
+area:
+  - config
 issue: "#1055"
-amended: ["#1259", "#1384", "#1775", "#1825"]
-tags: [shares, short-links, hosts, routing, rack, settings, cache, cloudflare, cache-control, puma, aa-cool]
+amended:
+  - "#1259"
+  - "#1384"
+  - "#1775"
+  - "#1825"
+tags:
+  - shares
+  - short-links
+  - hosts
+  - routing
+  - rack
+  - settings
+  - cache
+  - cloudflare
+  - cache-control
+  - puma
+  - aa-cool
 ---
 
 # ADR 0142: Serve shares on their own host, picked in config.ru, and let no cache keep them

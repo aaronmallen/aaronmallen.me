@@ -3,9 +3,17 @@ id: "0111"
 title: Send Strict-Transport-Security from the app, for the apex alone
 status: active
 created: 2026-10-04
-area: [config, lib]
+area:
+  - config
+  - lib
 issue: "#471"
-tags: [security, https, hsts, cloudflare, headers, middleware]
+tags:
+  - security
+  - https
+  - hsts
+  - cloudflare
+  - headers
+  - middleware
 ---
 
 # ADR 0111: Send Strict-Transport-Security from the app, for the apex alone

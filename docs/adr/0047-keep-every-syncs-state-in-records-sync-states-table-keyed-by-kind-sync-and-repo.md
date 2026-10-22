@@ -3,10 +3,27 @@ id: "0047"
 title: Keep every sync's state in record's sync_states table, keyed by kind, sync and repo
 status: active
 created: 2026-09-28
-area: [admin, analytics, db, projects, record]
+area:
+  - admin
+  - analytics
+  - db
+  - projects
+  - record
 issue: AA-688
-amended: [AA-821, AA-823, "#941", "#1565"]
-tags: [sync-states, sync, failures, today, schema, postgres, slices, exports]
+amended:
+  - AA-821
+  - AA-823
+  - "#941"
+  - "#1565"
+tags:
+  - sync-states
+  - sync
+  - failures
+  - today
+  - schema
+  - postgres
+  - slices
+  - exports
 ---
 
 # ADR 0047: Keep every sync's state in record's sync_states table, keyed by kind, sync and repo

@@ -3,10 +3,30 @@ id: "0082"
 title: Tie a photo to the records whose Markdown points to it
 status: active
 created: 2026-09-30
-area: [media, posts, record, tasks, decisions]
+area:
+  - media
+  - posts
+  - record
+  - tasks
+  - decisions
 issue: "#134"
-amended: ["#140", "#247", "#911", "#1071", "#1493"]
-tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
+amended:
+  - "#140"
+  - "#247"
+  - "#911"
+  - "#1071"
+  - "#1493"
+tags:
+  - media
+  - photos
+  - uploads
+  - claims
+  - references
+  - deletion
+  - sweep
+  - sidekiq
+  - feeds
+  - webmentions
 ---
 
 # ADR 0082: Tie a photo to the records whose Markdown points to it

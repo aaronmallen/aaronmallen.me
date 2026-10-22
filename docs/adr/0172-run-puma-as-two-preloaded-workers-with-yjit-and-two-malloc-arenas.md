@@ -3,10 +3,24 @@ id: "0172"
 title: Run Puma as two preloaded workers, with YJIT and two malloc arenas
 status: active
 created: 2026-10-14
-area: [config]
+area:
+  - config
 issue: "#1314"
-amended: ["#1577", "#1787"]
-tags: [puma, cluster, preload, fork, yjit, malloc, sidekiq, postgres, connections, raspberry-pi, systemd]
+amended:
+  - "#1577"
+  - "#1787"
+tags:
+  - puma
+  - cluster
+  - preload
+  - fork
+  - yjit
+  - malloc
+  - sidekiq
+  - postgres
+  - connections
+  - raspberry-pi
+  - systemd
 ---
 
 # ADR 0172: Run Puma as two preloaded workers, with YJIT and two malloc arenas

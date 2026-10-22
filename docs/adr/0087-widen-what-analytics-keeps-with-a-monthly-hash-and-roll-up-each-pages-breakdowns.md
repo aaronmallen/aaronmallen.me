@@ -3,10 +3,25 @@ id: "0087"
 title: Widen what analytics keeps with a monthly hash, and roll up each page's breakdowns
 status: active
 created: 2026-10-01
-area: [analytics, public, mcp, assets, db]
+area:
+  - analytics
+  - public
+  - mcp
+  - assets
+  - db
 issue: "#210"
-amended: ["#1292"]
-tags: [analytics, privacy, beacon, retention, reach, ref, scroll, device-class, rollups]
+amended:
+  - "#1292"
+tags:
+  - analytics
+  - privacy
+  - beacon
+  - retention
+  - reach
+  - ref
+  - scroll
+  - device-class
+  - rollups
 ---
 
 # ADR 0087: Widen what analytics keeps with a monthly hash, and roll up each page's breakdowns

@@ -3,11 +3,45 @@ id: "0017"
 title: Enforce rules over stored state in Postgres, not in contracts
 status: active
 created: 2026-09-28
-area: [db, lib, admin, agents, decisions, links, posts, projects, record, services, social, tags, tasks]
+area:
+  - db
+  - lib
+  - admin
+  - agents
+  - decisions
+  - links
+  - posts
+  - projects
+  - record
+  - services
+  - social
+  - tags
+  - tasks
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957", "#1056",
-  "#1743", "#607", "#1889"]
-tags: [postgres, constraints, triggers, contracts, validation, operations]
+amended:
+  - AA-816
+  - "#17"
+  - "#77"
+  - "#143"
+  - "#274"
+  - "#319"
+  - "#284"
+  - "#415"
+  - "#913"
+  - "#940"
+  - "#937"
+  - "#957"
+  - "#1056"
+  - "#1743"
+  - "#607"
+  - "#1889"
+tags:
+  - postgres
+  - constraints
+  - triggers
+  - contracts
+  - validation
+  - operations
 ---
 
 # ADR 0017: Enforce rules over stored state in Postgres, not in contracts

@@ -3,10 +3,42 @@ id: "0118"
 title: Keep admin pages live through Postgres notify, a hijacked event stream and a morph
 status: active
 created: 2026-10-06
-area: [db, lib, admin, assets]
+area:
+  - db
+  - lib
+  - admin
+  - assets
 issue: "#637"
-amended: ["#911", "#1284", "#1286", "#1287", "#1400", "#1403", "#1357", "#1473", "#1785", "#1418", "#1811", "#1810", "#1841"]
-tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
+amended:
+  - "#911"
+  - "#1284"
+  - "#1286"
+  - "#1287"
+  - "#1400"
+  - "#1403"
+  - "#1357"
+  - "#1473"
+  - "#1785"
+  - "#1418"
+  - "#1811"
+  - "#1810"
+  - "#1841"
+tags:
+  - admin
+  - live
+  - sse
+  - eventsource
+  - postgres
+  - listen
+  - notify
+  - triggers
+  - puma
+  - threads
+  - hijack
+  - cloudflare
+  - tunnel
+  - idiomorph
+  - javascript
 ---
 
 # ADR 0118: Keep admin pages live through Postgres notify, a hijacked event stream and a morph

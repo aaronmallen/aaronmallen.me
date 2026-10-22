@@ -3,9 +3,22 @@ id: "0182"
 title: Approve likes and reposts on receipt, and keep trusted webmention authors in a stored list
 status: active
 created: 2026-10-16
-area: [admin, api, db, mcp, social]
+area:
+  - admin
+  - api
+  - db
+  - mcp
+  - social
 issue: "#1570"
-tags: [webmentions, moderation, trust, spam, bridgy, likes, reposts, settings]
+tags:
+  - webmentions
+  - moderation
+  - trust
+  - spam
+  - bridgy
+  - likes
+  - reposts
+  - settings
 ---
 
 # ADR 0182: Approve likes and reposts on receipt, and keep trusted webmention authors in a stored list

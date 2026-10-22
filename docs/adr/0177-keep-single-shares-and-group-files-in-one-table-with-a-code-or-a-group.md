@@ -3,9 +3,17 @@ id: "0177"
 title: Keep single shares and group files in one table, each with a code or a group
 status: active
 created: 2026-10-15
-area: [db, shares]
+area:
+  - db
+  - shares
 issue: "#1447"
-tags: [shares, share-groups, short-codes, schema, migrations, check-constraints]
+tags:
+  - shares
+  - share-groups
+  - short-codes
+  - schema
+  - migrations
+  - check-constraints
 ---
 
 # ADR 0177: Keep single shares and group files in one table, each with a code or a group

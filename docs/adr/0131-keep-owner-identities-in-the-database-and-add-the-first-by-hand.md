@@ -3,12 +3,24 @@ id: "0131"
 title: Keep owner identities in the database and add the first by hand
 status: superseded
 created: 2026-10-08
-area: [admin, config, db]
+area:
+  - admin
+  - config
+  - db
 superseded-by: "0158"
-supersedes: ["0023"]
+supersedes:
+  - "0023"
 issue: "#792"
-amended: ["#1155"]
-tags: [auth, oauth, github, owner, identities, sign-in, settings]
+amended:
+  - "#1155"
+tags:
+  - auth
+  - oauth
+  - github
+  - owner
+  - identities
+  - sign-in
+  - settings
 ---
 
 # ADR 0131: Keep owner identities in the database and add the first by hand

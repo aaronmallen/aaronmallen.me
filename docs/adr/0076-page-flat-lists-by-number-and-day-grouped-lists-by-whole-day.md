@@ -3,9 +3,21 @@ id: "0076"
 title: Page flat lists by number and day-grouped lists by whole day
 status: active
 created: 2026-09-29
-area: [public, admin, mcp, activity, record]
+area:
+  - public
+  - admin
+  - mcp
+  - activity
+  - record
 issue: "#92"
-tags: [paging, lists, feeds, journal, activity, commits, settings]
+tags:
+  - paging
+  - lists
+  - feeds
+  - journal
+  - activity
+  - commits
+  - settings
 ---
 
 # ADR 0076: Page flat lists by number and day-grouped lists by whole day

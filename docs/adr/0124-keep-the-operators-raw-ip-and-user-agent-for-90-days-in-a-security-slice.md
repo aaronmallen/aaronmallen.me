@@ -3,10 +3,27 @@ id: "0124"
 title: Keep the operator's raw IP and user agent for 90 days in a security slice
 status: active
 created: 2026-10-07
-area: [admin, api, mcp, config, db]
+area:
+  - admin
+  - api
+  - mcp
+  - config
+  - db
 issue: "#701"
-amended: ["#911", "#1759"]
-tags: [security, privacy, ip, user-agent, retention, geoip, slices, sign-in, api-tokens, mcp]
+amended:
+  - "#911"
+  - "#1759"
+tags:
+  - security
+  - privacy
+  - ip
+  - user-agent
+  - retention
+  - geoip
+  - slices
+  - sign-in
+  - api-tokens
+  - mcp
 ---
 
 # ADR 0124: Keep the operator's raw IP and user agent for 90 days in a security slice

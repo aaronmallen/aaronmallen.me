@@ -3,9 +3,18 @@ id: "0148"
 title: Edit a task in the task drawer, and keep the task modal for new tasks
 status: active
 created: 2026-10-11
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#1102"
-tags: [admin, tasks, drawer, dialog, forms, progressive-enhancement, design]
+tags:
+  - admin
+  - tasks
+  - drawer
+  - dialog
+  - forms
+  - progressive-enhancement
+  - design
 ---
 
 # ADR 0148: Edit a task in the task drawer, and keep the task modal for new tasks

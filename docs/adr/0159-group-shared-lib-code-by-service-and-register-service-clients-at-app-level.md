@@ -3,13 +3,46 @@ id: "0159"
 title: Group shared lib code by service and register service clients at app level
 status: active
 created: 2026-10-12
-area: [config, lib, admin, analytics, backups, calendar, health, mail, media, performance, posts, projects, record,
-  services, shares, social, suggestions, tasks]
-supersedes: ["0149"]
+area:
+  - config
+  - lib
+  - admin
+  - analytics
+  - backups
+  - calendar
+  - health
+  - mail
+  - media
+  - performance
+  - posts
+  - projects
+  - record
+  - services
+  - shares
+  - social
+  - suggestions
+  - tasks
+supersedes:
+  - "0149"
 issue: "#1171"
-amended: ["#1576", "#1702"]
-tags: [layout, lib, providers, clients, services, google, github, linear, mastodon, bluesky, object-store, markdown,
-  errors, rubocop]
+amended:
+  - "#1576"
+  - "#1702"
+tags:
+  - layout
+  - lib
+  - providers
+  - clients
+  - services
+  - google
+  - github
+  - linear
+  - mastodon
+  - bluesky
+  - object-store
+  - markdown
+  - errors
+  - rubocop
 ---
 
 # ADR 0159: Group shared lib code by service and register service clients at app level

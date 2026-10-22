@@ -3,10 +3,30 @@ id: "0052"
 title: Read activity through one view across every content kind
 status: active
 created: 2026-09-28
-area: [activity, admin, mcp, db]
+area:
+  - activity
+  - admin
+  - mcp
+  - db
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623", "#1013", "#929"]
-tags: [activity, view, postgres, timeline, search, tags]
+amended:
+  - AA-792
+  - AA-824
+  - AA-826
+  - "#17"
+  - "#75"
+  - "#279"
+  - "#263"
+  - "#623"
+  - "#1013"
+  - "#929"
+tags:
+  - activity
+  - view
+  - postgres
+  - timeline
+  - search
+  - tags
 ---
 
 # ADR 0052: Read activity through one view across every content kind

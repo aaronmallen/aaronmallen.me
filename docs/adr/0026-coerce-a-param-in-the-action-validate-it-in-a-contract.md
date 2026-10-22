@@ -3,10 +3,34 @@ id: "0026"
 title: Coerce a param in the action, validate it in a contract
 status: active
 created: 2026-09-28
-area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area:
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-462
-amended: [AA-542, AA-543, AA-809, "#956"]
-tags: [actions, params, coercion, validation, types, contracts]
+amended:
+  - AA-542
+  - AA-543
+  - AA-809
+  - "#956"
+tags:
+  - actions
+  - params
+  - coercion
+  - validation
+  - types
+  - contracts
 ---
 
 # ADR 0026: Coerce a param in the action, validate it in a contract

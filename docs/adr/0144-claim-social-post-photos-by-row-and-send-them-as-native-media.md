@@ -3,9 +3,22 @@ id: "0144"
 title: Claim social post photos by row, and send them as native media
 status: active
 created: 2026-10-10
-area: [social, media, admin, db]
+area:
+  - social
+  - media
+  - admin
+  - db
 issue: "#1071"
-tags: [social, mastodon, bluesky, media, photos, uploads, claims, alt-text, sweep]
+tags:
+  - social
+  - mastodon
+  - bluesky
+  - media
+  - photos
+  - uploads
+  - claims
+  - alt-text
+  - sweep
 ---
 
 # ADR 0144: Claim social post photos by row, and send them as native media

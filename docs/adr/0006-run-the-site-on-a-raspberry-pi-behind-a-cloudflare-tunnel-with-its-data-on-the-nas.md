@@ -3,10 +3,27 @@ id: "0006"
 title: Run the site on a Raspberry Pi behind a Cloudflare Tunnel, with its data on the NAS
 status: active
 created: 2026-09-28
-area: [config]
+area:
+  - config
 issue: AA-277
-amended: ["#63", "#132", "#396", "#1314", "#1372", "#1373", "#1816"]
-tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
+amended:
+  - "#63"
+  - "#132"
+  - "#396"
+  - "#1314"
+  - "#1372"
+  - "#1373"
+  - "#1816"
+tags:
+  - deploy
+  - raspberry-pi
+  - cloudflare
+  - tunnel
+  - nas
+  - postgres
+  - redis
+  - s3
+  - systemd
 ---
 
 # ADR 0006: Run the site on a Raspberry Pi behind a Cloudflare Tunnel, with its data on the NAS

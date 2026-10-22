@@ -3,10 +3,24 @@ id: "0147"
 title: Gate health data behind a health scope that read does not cover
 status: active
 created: 2026-10-11
-area: [lib, admin, api, mcp]
+area:
+  - lib
+  - admin
+  - api
+  - mcp
 issue: "#1112"
-amended: ["#1118", "#1123", "#1823"]
-tags: [health, oauth, scopes, consent, api-tokens, mcp, privacy]
+amended:
+  - "#1118"
+  - "#1123"
+  - "#1823"
+tags:
+  - health
+  - oauth
+  - scopes
+  - consent
+  - api-tokens
+  - mcp
+  - privacy
 ---
 
 # ADR 0147: Gate health data behind a health scope that read does not cover

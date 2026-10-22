@@ -3,10 +3,27 @@ id: "0190"
 title: Open and close agent sessions through tools, and close idle ones from a job
 status: active
 created: 2026-10-17
-area: [config, db, api, mcp]
+area:
+  - config
+  - db
+  - api
+  - mcp
 issue: "#1741"
-amended: ["#1747", "#1752", "#1750", "#1751", "#1860", "#1868", "#1893"]
-tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
+amended:
+  - "#1747"
+  - "#1752"
+  - "#1750"
+  - "#1751"
+  - "#1860"
+  - "#1868"
+  - "#1893"
+tags:
+  - agents
+  - sessions
+  - mcp
+  - sidekiq
+  - scheduled-jobs
+  - memory
 ---
 
 # ADR 0190: Open and close agent sessions through tools, and close idle ones from a job

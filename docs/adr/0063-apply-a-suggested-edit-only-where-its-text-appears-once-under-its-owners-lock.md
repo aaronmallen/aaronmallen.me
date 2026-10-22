@@ -3,10 +3,22 @@ id: "0063"
 title: Apply a suggested edit only where its text appears once, under its owner's lock
 status: active
 created: 2026-09-28
-area: [suggestions, posts, social, mcp]
+area:
+  - suggestions
+  - posts
+  - social
+  - mcp
 issue: AA-671
-amended: [AA-818, "#996"]
-tags: [suggestions, edits, mcp, locks, transactions, gateways]
+amended:
+  - AA-818
+  - "#996"
+tags:
+  - suggestions
+  - edits
+  - mcp
+  - locks
+  - transactions
+  - gateways
 ---
 
 # ADR 0063: Apply a suggested edit only where its text appears once, under its owner's lock

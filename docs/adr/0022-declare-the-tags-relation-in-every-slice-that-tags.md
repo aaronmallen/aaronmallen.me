@@ -3,10 +3,33 @@ id: "0022"
 title: Declare the tags relation in every slice that tags
 status: active
 created: 2026-09-28
-area: [contact, db, decisions, lib, posts, projects, record, tags, tasks]
+area:
+  - contact
+  - db
+  - decisions
+  - lib
+  - posts
+  - projects
+  - record
+  - tags
+  - tasks
 issue: AA-584
-amended: [AA-809, "#76", "#718", "#954", "#992", "#957", "#1200", "#1693"]
-tags: [tags, rom, relations, combine, slices, exports]
+amended:
+  - AA-809
+  - "#76"
+  - "#718"
+  - "#954"
+  - "#992"
+  - "#957"
+  - "#1200"
+  - "#1693"
+tags:
+  - tags
+  - rom
+  - relations
+  - combine
+  - slices
+  - exports
 ---
 
 # ADR 0022: Declare the tags relation in every slice that tags

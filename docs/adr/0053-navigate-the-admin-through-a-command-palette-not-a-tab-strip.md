@@ -3,11 +3,31 @@ id: "0053"
 title: Navigate the admin through a command palette, not a tab strip
 status: superseded
 created: 2026-09-28
-area: [admin, assets]
+area:
+  - admin
+  - assets
 superseded-by: "0128"
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320", "#745", "#768", "#607"]
-tags: [admin, navigation, palette, keyboard, accessibility, design]
+amended:
+  - "#17"
+  - "#87"
+  - "#201"
+  - "#297"
+  - "#303"
+  - "#311"
+  - "#314"
+  - "#282"
+  - "#320"
+  - "#745"
+  - "#768"
+  - "#607"
+tags:
+  - admin
+  - navigation
+  - palette
+  - keyboard
+  - accessibility
+  - design
 ---
 
 # ADR 0053: Navigate the admin through a command palette, not a tab strip

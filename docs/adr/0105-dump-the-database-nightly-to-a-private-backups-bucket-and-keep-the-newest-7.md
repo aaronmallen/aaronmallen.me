@@ -3,10 +3,26 @@ id: "0105"
 title: Dump the database nightly to a private backups bucket and keep the newest 7
 status: active
 created: 2026-10-03
-area: [config, lib, record]
+area:
+  - config
+  - lib
+  - record
 issue: "#396"
-amended: ["#1373", "#1371"]
-tags: [backups, postgres, pg-dump, s3, rustfs, nas, sidekiq, schedule, providers, sync-states, honeybadger]
+amended:
+  - "#1373"
+  - "#1371"
+tags:
+  - backups
+  - postgres
+  - pg-dump
+  - s3
+  - rustfs
+  - nas
+  - sidekiq
+  - schedule
+  - providers
+  - sync-states
+  - honeybadger
 ---
 
 # ADR 0105: Dump the database nightly to a private backups bucket and keep the newest 7

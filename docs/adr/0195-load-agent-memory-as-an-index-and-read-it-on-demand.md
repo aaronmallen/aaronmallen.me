@@ -3,10 +3,24 @@ id: "0195"
 title: Load agent memory as an index and read it on demand
 status: active
 created: 2026-10-20
-area: [db, agents, admin, api, mcp]
+area:
+  - db
+  - agents
+  - admin
+  - api
+  - mcp
 issue: "#1861"
-amended: ["#1868", "#1893"]
-tags: [agents, memory, sessions, mcp, search, index, context]
+amended:
+  - "#1868"
+  - "#1893"
+tags:
+  - agents
+  - memory
+  - sessions
+  - mcp
+  - search
+  - index
+  - context
 ---
 
 # ADR 0195: Load agent memory as an index and read it on demand

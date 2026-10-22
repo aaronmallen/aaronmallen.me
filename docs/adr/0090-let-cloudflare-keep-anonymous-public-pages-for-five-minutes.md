@@ -3,10 +3,25 @@ id: "0090"
 title: Let Cloudflare keep anonymous public pages for five minutes
 status: active
 created: 2026-10-01
-area: [config, public]
+area:
+  - config
+  - public
 issue: "#235"
-amended: ["#376", "#468", "#911", "#1308", "#1405"]
-tags: [cache, cloudflare, cache-control, cookies, sessions, theme, deploy, public]
+amended:
+  - "#376"
+  - "#468"
+  - "#911"
+  - "#1308"
+  - "#1405"
+tags:
+  - cache
+  - cloudflare
+  - cache-control
+  - cookies
+  - sessions
+  - theme
+  - deploy
+  - public
 ---
 
 # ADR 0090: Let Cloudflare keep anonymous public pages for five minutes

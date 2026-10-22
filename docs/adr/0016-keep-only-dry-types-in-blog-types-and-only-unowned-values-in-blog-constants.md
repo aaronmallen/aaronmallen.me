@@ -3,10 +3,30 @@ id: "0016"
 title: Keep only dry types in Blog::Types, and only unowned values in Blog::Constants
 status: active
 created: 2026-09-28
-area: [lib, admin, posts, projects, public]
+area:
+  - lib
+  - admin
+  - posts
+  - projects
+  - public
 issue: AA-665
-amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934", "#1013", "#975", "#1179", "#1797"]
-tags: [types, constants, enums, dry-types, kernel]
+amended:
+  - AA-561
+  - AA-562
+  - AA-809
+  - "#17"
+  - "#647"
+  - "#934"
+  - "#1013"
+  - "#975"
+  - "#1179"
+  - "#1797"
+tags:
+  - types
+  - constants
+  - enums
+  - dry-types
+  - kernel
 ---
 
 # ADR 0016: Keep only dry types in `Blog::Types`, and only unowned values in `Blog::Constants`

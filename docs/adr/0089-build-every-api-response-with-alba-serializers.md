@@ -3,10 +3,24 @@ id: "0089"
 title: Build every API response with Alba serializers
 status: active
 created: 2026-10-01
-area: [lib, api, mcp]
+area:
+  - lib
+  - api
+  - mcp
 issue: "#155"
-amended: ["#1011", "#927", "#959"]
-tags: [api, mcp, json, serializers, alba, dependencies, journal, tasks]
+amended:
+  - "#1011"
+  - "#927"
+  - "#959"
+tags:
+  - api
+  - mcp
+  - json
+  - serializers
+  - alba
+  - dependencies
+  - journal
+  - tasks
 ---
 
 # ADR 0089: Build every API response with Alba serializers

@@ -3,9 +3,20 @@ id: "0184"
 title: Turn maintenance mode off from a signed owner cookie, and keep the admin blocked
 status: active
 created: 2026-10-17
-area: [config, lib, admin]
+area:
+  - config
+  - lib
+  - admin
 issue: "#1728"
-tags: [maintenance, flag-file, cookies, auth, csrf, app-secret, settings, pi]
+tags:
+  - maintenance
+  - flag-file
+  - cookies
+  - auth
+  - csrf
+  - app-secret
+  - settings
+  - pi
 ---
 
 # ADR 0184: Turn maintenance mode off from a signed owner cookie, and keep the admin blocked

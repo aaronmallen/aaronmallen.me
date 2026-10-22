@@ -3,10 +3,21 @@ id: "0066"
 title: Keep an imported task's origin in a task_sources table
 status: active
 created: 2026-09-28
-area: [db, tasks]
+area:
+  - db
+  - tasks
 issue: "#9"
-amended: ["#43"]
-tags: [tasks, schema, imports, github, linear, providers, enums, constraints]
+amended:
+  - "#43"
+tags:
+  - tasks
+  - schema
+  - imports
+  - github
+  - linear
+  - providers
+  - enums
+  - constraints
 ---
 
 # ADR 0066: Keep an imported task's origin in a task_sources table

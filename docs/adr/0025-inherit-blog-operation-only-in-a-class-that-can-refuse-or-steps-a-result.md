@@ -3,10 +3,36 @@ id: "0025"
 title: Inherit Blog::Operation only in a class that can refuse or steps a Result
 status: active
 created: 2026-09-28
-area: [lib, activity, admin, analytics, api, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area:
+  - lib
+  - activity
+  - admin
+  - analytics
+  - api
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-661
-amended: [AA-757, "#718", "#955", "#996", "#1805"]
-tags: [operations, dry-operation, monads, result, callables, transactions]
+amended:
+  - AA-757
+  - "#718"
+  - "#955"
+  - "#996"
+  - "#1805"
+tags:
+  - operations
+  - dry-operation
+  - monads
+  - result
+  - callables
+  - transactions
 ---
 
 # ADR 0025: Inherit `Blog::Operation` only in a class that can refuse or steps a `Result`

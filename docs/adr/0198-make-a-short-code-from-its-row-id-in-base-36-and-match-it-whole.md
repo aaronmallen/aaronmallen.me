@@ -3,10 +3,26 @@ id: "0198"
 title: Make a short code from its row id in base 36 and match it whole
 status: active
 created: 2026-10-20
-area: [db, lib, shares, social, admin, api, mcp]
-supersedes: ["0194"]
+area:
+  - db
+  - lib
+  - shares
+  - social
+  - admin
+  - api
+  - mcp
+supersedes:
+  - "0194"
 issue: "#1887"
-tags: [shares, share-groups, short-links, short-codes, aa-cool, base-36, exact-match, vanity-codes]
+tags:
+  - shares
+  - share-groups
+  - short-links
+  - short-codes
+  - aa-cool
+  - base-36
+  - exact-match
+  - vanity-codes
 ---
 
 # ADR 0198: Make a short code from its row id in base 36 and match it whole

@@ -3,9 +3,25 @@ id: "0119"
 title: Mark a project archived by its archive date, and keep visibility in its own enum
 status: active
 created: 2026-10-07
-area: [db, lib, activity, admin, api, mcp, projects, public, search]
+area:
+  - db
+  - lib
+  - activity
+  - admin
+  - api
+  - mcp
+  - projects
+  - public
+  - search
 issue: "#646"
-tags: [projects, archive, visibility, schema, enums, migrations, views]
+tags:
+  - projects
+  - archive
+  - visibility
+  - schema
+  - enums
+  - migrations
+  - views
 ---
 
 # ADR 0119: Mark a project archived by its archive date, and keep visibility in its own enum

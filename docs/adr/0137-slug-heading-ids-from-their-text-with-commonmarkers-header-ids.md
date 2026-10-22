@@ -3,10 +3,17 @@ id: "0137"
 title: Slug heading ids from their text with commonmarker's header ids
 status: active
 created: 2026-10-09
-area: [lib]
+area:
+  - lib
 issue: "#848"
-amended: ["#910"]
-tags: [posts, markdown, commonmarker, anchors, headings]
+amended:
+  - "#910"
+tags:
+  - posts
+  - markdown
+  - commonmarker
+  - anchors
+  - headings
 ---
 
 # ADR 0137: Slug heading ids from their text with commonmarker's header ids

@@ -3,9 +3,17 @@ id: "0060"
 title: Rotate a refresh token on each use and revoke a client's tokens on replay
 status: active
 created: 2026-09-28
-area: [mcp]
+area:
+  - mcp
 issue: AA-673
-tags: [mcp, oauth, tokens, refresh, replay, rotation, postgres]
+tags:
+  - mcp
+  - oauth
+  - tokens
+  - refresh
+  - replay
+  - rotation
+  - postgres
 ---
 
 # ADR 0060: Rotate a refresh token on each use and revoke a client's tokens on replay

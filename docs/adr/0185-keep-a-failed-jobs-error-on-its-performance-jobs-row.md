@@ -3,9 +3,20 @@ id: "0185"
 title: Keep a failed job's error on its performance_jobs row
 status: active
 created: 2026-10-17
-area: [lib, db, performance, admin]
+area:
+  - lib
+  - db
+  - performance
+  - admin
 issue: "#1735"
-tags: [performance, jobs, sidekiq, cron, errors, failures, retention]
+tags:
+  - performance
+  - jobs
+  - sidekiq
+  - cron
+  - errors
+  - failures
+  - retention
 ---
 
 # ADR 0185: Keep a failed job's error on its performance_jobs row

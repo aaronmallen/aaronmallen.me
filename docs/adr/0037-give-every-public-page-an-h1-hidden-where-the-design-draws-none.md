@@ -3,9 +3,16 @@ id: "0037"
 title: Give every public page an h1, hidden where the design draws none
 status: active
 created: 2026-09-28
-area: [assets, public]
+area:
+  - assets
+  - public
 issue: AA-538
-tags: [accessibility, headings, design, public, screen-reader]
+tags:
+  - accessibility
+  - headings
+  - design
+  - public
+  - screen-reader
 ---
 
 # ADR 0037: Give every public page an `h1`, hidden where the design draws none

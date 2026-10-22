@@ -3,11 +3,28 @@ id: "0106"
 title: Count feed fetches on the server, and capture outbound clicks from the beacon
 status: superseded
 created: 2026-10-03
-area: [analytics, public, admin, assets, db]
+area:
+  - analytics
+  - public
+  - admin
+  - assets
+  - db
 superseded-by: "0110"
 issue: "#376"
-amended: ["#470", "#1066"]
-tags: [analytics, privacy, feed, atom, subscribers, user-agent, clicks, beacon, cache, cloudflare]
+amended:
+  - "#470"
+  - "#1066"
+tags:
+  - analytics
+  - privacy
+  - feed
+  - atom
+  - subscribers
+  - user-agent
+  - clicks
+  - beacon
+  - cache
+  - cloudflare
 ---
 
 # ADR 0106: Count feed fetches on the server, and capture outbound clicks from the beacon

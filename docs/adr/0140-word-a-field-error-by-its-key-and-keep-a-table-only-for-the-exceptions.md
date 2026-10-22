@@ -3,11 +3,28 @@ id: "0140"
 title: Word a field error by its key, and keep a table only for the exceptions
 status: active
 created: 2026-10-10
-area: [lib, admin, api, public, mcp]
-supersedes: ["0027"]
+area:
+  - lib
+  - admin
+  - api
+  - public
+  - mcp
+supersedes:
+  - "0027"
 issue: "#1002"
-amended: ["#1435", "#1559", "#1670", "#1817", "#1390"]
-tags: [contracts, validation, errors, i18n, dry-validation, forms]
+amended:
+  - "#1435"
+  - "#1559"
+  - "#1670"
+  - "#1817"
+  - "#1390"
+tags:
+  - contracts
+  - validation
+  - errors
+  - i18n
+  - dry-validation
+  - forms
 ---
 
 # ADR 0140: Word a field error by its key, and keep a table only for the exceptions

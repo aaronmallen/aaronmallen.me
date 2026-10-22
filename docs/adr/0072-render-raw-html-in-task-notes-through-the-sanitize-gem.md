@@ -3,10 +3,21 @@ id: "0072"
 title: Render raw HTML in task notes through the sanitize gem
 status: active
 created: 2026-09-29
-area: [admin, lib, tasks]
+area:
+  - admin
+  - lib
+  - tasks
 issue: "#38"
-amended: ["#52", "#466"]
-tags: [tasks, markdown, html, sanitize, security, commonmarker]
+amended:
+  - "#52"
+  - "#466"
+tags:
+  - tasks
+  - markdown
+  - html
+  - sanitize
+  - security
+  - commonmarker
 ---
 
 # ADR 0072: Render raw HTML in task notes through the sanitize gem

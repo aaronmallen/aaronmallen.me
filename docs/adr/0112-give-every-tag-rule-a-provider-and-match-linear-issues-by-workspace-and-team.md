@@ -3,10 +3,25 @@ id: "0112"
 title: Give every tag rule a provider, and match Linear issues by workspace and team
 status: active
 created: 2026-10-06
-area: [db, admin, api, mcp, record, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - record
+  - tasks
 issue: "#506"
-amended: ["#911"]
-tags: [tasks, tags, rules, imports, sync, github, linear, providers]
+amended:
+  - "#911"
+tags:
+  - tasks
+  - tags
+  - rules
+  - imports
+  - sync
+  - github
+  - linear
+  - providers
 ---
 
 # ADR 0112: Give every tag rule a provider, and match Linear issues by workspace and team

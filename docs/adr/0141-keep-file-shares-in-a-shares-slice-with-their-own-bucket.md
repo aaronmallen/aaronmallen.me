@@ -3,10 +3,27 @@ id: "0141"
 title: Keep file shares in a shares slice with their own bucket
 status: active
 created: 2026-10-10
-area: [config, db, lib, media]
+area:
+  - config
+  - db
+  - lib
+  - media
 issue: "#1054"
-amended: ["#1259", "#1447", "#1775", "#1825"]
-tags: [shares, short-codes, uploads, s3, buckets, providers, slices, media, photos]
+amended:
+  - "#1259"
+  - "#1447"
+  - "#1775"
+  - "#1825"
+tags:
+  - shares
+  - short-codes
+  - uploads
+  - s3
+  - buckets
+  - providers
+  - slices
+  - media
+  - photos
 ---
 
 # ADR 0141: Keep file shares in a shares slice with their own bucket

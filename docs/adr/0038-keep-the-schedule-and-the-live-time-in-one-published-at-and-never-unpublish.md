@@ -3,10 +3,23 @@ id: "0038"
 title: Keep the schedule and the live time in one published_at, and never unpublish
 status: active
 created: 2026-09-28
-area: [db, posts, public, social]
+area:
+  - db
+  - posts
+  - public
+  - social
 issue: AA-651
-amended: ["#941"]
-tags: [posts, social-posts, publishing, scheduling, published_at, posted_at, delete, webmentions]
+amended:
+  - "#941"
+tags:
+  - posts
+  - social-posts
+  - publishing
+  - scheduling
+  - published_at
+  - posted_at
+  - delete
+  - webmentions
 ---
 
 # ADR 0038: Keep the schedule and the live time in one published_at, and never unpublish

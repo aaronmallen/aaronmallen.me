@@ -3,10 +3,24 @@ id: "0101"
 title: Bind every admin key through one key map that reads keys from the markup
 status: active
 created: 2026-10-03
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#297"
-amended: ["#745", "#915", "#1106", "#1362", "#1525"]
-tags: [admin, keyboard, shortcuts, palette, help, accessibility, javascript]
+amended:
+  - "#745"
+  - "#915"
+  - "#1106"
+  - "#1362"
+  - "#1525"
+tags:
+  - admin
+  - keyboard
+  - shortcuts
+  - palette
+  - help
+  - accessibility
+  - javascript
 ---
 
 # ADR 0101: Bind every admin key through one key map that reads keys from the markup

@@ -3,11 +3,47 @@ id: "0012"
 title: Never retry a scheduled job, and make its next run catch up
 status: active
 created: 2026-09-28
-area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
+area:
+  - analytics
+  - backups
+  - config
+  - contact
+  - lib
+  - mcp
+  - media
+  - posts
+  - projects
+  - record
+  - security
+  - social
+  - tasks
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114", "#1219", "#1375", "#1469", "#1470", "#1565", "#1772",
-  "#1690", "#1518", "#1237"]
-tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures, check-ins]
+amended:
+  - AA-823
+  - "#140"
+  - "#252"
+  - "#990"
+  - "#926"
+  - "#957"
+  - "#1114"
+  - "#1219"
+  - "#1375"
+  - "#1469"
+  - "#1470"
+  - "#1565"
+  - "#1772"
+  - "#1690"
+  - "#1518"
+  - "#1237"
+tags:
+  - sidekiq
+  - jobs
+  - retries
+  - schedule
+  - sync-states
+  - honeybadger
+  - failures
+  - check-ins
 ---
 
 # ADR 0012: Never retry a scheduled job, and make its next run catch up

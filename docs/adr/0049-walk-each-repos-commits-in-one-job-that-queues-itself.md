@@ -3,10 +3,27 @@ id: "0049"
 title: Walk each repo's commits in one job that queues itself
 status: active
 created: 2026-09-28
-area: [config, lib, record]
+area:
+  - config
+  - lib
+  - record
 issue: AA-684
-amended: [AA-758, AA-821, AA-823, "#248", "#941", "#1629", "#1235"]
-tags: [commits, github, sync, walk, sidekiq, rate-limit, sync-states]
+amended:
+  - AA-758
+  - AA-821
+  - AA-823
+  - "#248"
+  - "#941"
+  - "#1629"
+  - "#1235"
+tags:
+  - commits
+  - github
+  - sync
+  - walk
+  - sidekiq
+  - rate-limit
+  - sync-states
 ---
 
 # ADR 0049: Walk each repo's commits in one job that queues itself

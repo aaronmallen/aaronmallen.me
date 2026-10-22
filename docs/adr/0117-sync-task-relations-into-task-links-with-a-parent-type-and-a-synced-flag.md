@@ -3,10 +3,28 @@ id: "0117"
 title: Sync task relations into task_links, with a parent type and a synced flag
 status: active
 created: 2026-10-06
-area: [db, admin, api, mcp, record, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - record
+  - tasks
 issue: "#631"
-amended: ["#1700"]
-tags: [tasks, links, relations, sync, github, linear, providers, schema, postgres, enums, imports]
+amended:
+  - "#1700"
+tags:
+  - tasks
+  - links
+  - relations
+  - sync
+  - github
+  - linear
+  - providers
+  - schema
+  - postgres
+  - enums
+  - imports
 ---
 
 # ADR 0117: Sync task relations into task_links, with a parent type and a synced flag

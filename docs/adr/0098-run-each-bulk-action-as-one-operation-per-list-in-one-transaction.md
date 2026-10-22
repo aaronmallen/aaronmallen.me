@@ -3,10 +3,33 @@ id: "0098"
 title: Run each bulk action as one operation per list, in one transaction
 status: active
 created: 2026-10-03
-area: [admin, api, assets, contact, mcp, posts, social, tasks]
+area:
+  - admin
+  - api
+  - assets
+  - contact
+  - mcp
+  - posts
+  - social
+  - tasks
 issue: "#329"
-amended: ["#1273", "#1780", "#1847"]
-tags: [bulk, transactions, savepoint, after-commit, forms, routes, api, mcp, paging, tasks, posts, messages]
+amended:
+  - "#1273"
+  - "#1780"
+  - "#1847"
+tags:
+  - bulk
+  - transactions
+  - savepoint
+  - after-commit
+  - forms
+  - routes
+  - api
+  - mcp
+  - paging
+  - tasks
+  - posts
+  - messages
 ---
 
 # ADR 0098: Run each bulk action as one operation per list, in one transaction

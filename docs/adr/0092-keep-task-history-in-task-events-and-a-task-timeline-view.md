@@ -3,9 +3,22 @@ id: "0092"
 title: Keep task history in task_events and a task_timeline view
 status: active
 created: 2026-10-03
-area: [db, tasks, admin, api, mcp]
+area:
+  - db
+  - tasks
+  - admin
+  - api
+  - mcp
 issue: "#258"
-tags: [tasks, history, timeline, work-sessions, view, postgres, enums, constraints]
+tags:
+  - tasks
+  - history
+  - timeline
+  - work-sessions
+  - view
+  - postgres
+  - enums
+  - constraints
 ---
 
 # ADR 0092: Keep task history in task_events and a task_timeline view

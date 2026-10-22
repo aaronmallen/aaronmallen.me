@@ -3,10 +3,21 @@ id: "0189"
 title: Name an agent by the slugs it reports on each write
 status: active
 created: 2026-10-17
-area: [db, admin, api, mcp]
+area:
+  - db
+  - admin
+  - api
+  - mcp
 issue: "#1741"
-amended: ["#1764"]
-tags: [agents, identity, contributors, models, domains, history]
+amended:
+  - "#1764"
+tags:
+  - agents
+  - identity
+  - contributors
+  - models
+  - domains
+  - history
 ---
 
 # ADR 0189: Name an agent by the slugs it reports on each write

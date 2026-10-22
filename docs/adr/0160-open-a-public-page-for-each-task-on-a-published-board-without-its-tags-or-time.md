@@ -3,10 +3,25 @@ id: "0160"
 title: Open a public page for each task on a published board, without its tags or time
 status: active
 created: 2026-10-14
-area: [public]
+area:
+  - public
 issue: "#1182"
-amended: ["#1315", "#1656"]
-tags: [projects, tasks, kanban, board, public, privacy, visibility, notes, comments, links, sources, tags]
+amended:
+  - "#1315"
+  - "#1656"
+tags:
+  - projects
+  - tasks
+  - kanban
+  - board
+  - public
+  - privacy
+  - visibility
+  - notes
+  - comments
+  - links
+  - sources
+  - tags
 ---
 
 # ADR 0160: Open a public page for each task on a published board, without its tags or time

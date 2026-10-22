@@ -3,9 +3,20 @@ id: "0083"
 title: Upload photos by fetch from the Markdown editor
 status: active
 created: 2026-09-30
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#135"
-tags: [media, photos, uploads, fetch, javascript, forms, markdown, editor, progressive-enhancement]
+tags:
+  - media
+  - photos
+  - uploads
+  - fetch
+  - javascript
+  - forms
+  - markdown
+  - editor
+  - progressive-enhancement
 ---
 
 # ADR 0083: Upload photos by fetch from the Markdown editor

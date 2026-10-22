@@ -3,10 +3,25 @@ id: "0086"
 title: Serve a JSON API behind long-lived tokens minted in the admin
 status: active
 created: 2026-10-01
-area: [config, db, admin, api, mcp]
+area:
+  - config
+  - db
+  - admin
+  - api
+  - mcp
 issue: "#153"
-amended: ["#897", "#927"]
-tags: [api, auth, tokens, cli, mcp, oauth, journal, tasks]
+amended:
+  - "#897"
+  - "#927"
+tags:
+  - api
+  - auth
+  - tokens
+  - cli
+  - mcp
+  - oauth
+  - journal
+  - tasks
 ---
 
 # ADR 0086: Serve a JSON API behind long-lived tokens minted in the admin

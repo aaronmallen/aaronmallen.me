@@ -3,9 +3,22 @@ id: "0154"
 title: Draw admin row menus on the server when they open, and submit them by fetch and morph
 status: active
 created: 2026-10-11
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#1145"
-tags: [admin, context-menu, menu, javascript, fetch, idiomorph, morph, keyboard, confirm, live, toast]
+tags:
+  - admin
+  - context-menu
+  - menu
+  - javascript
+  - fetch
+  - idiomorph
+  - morph
+  - keyboard
+  - confirm
+  - live
+  - toast
 ---
 
 # ADR 0154: Draw admin row menus on the server when they open, and submit them by fetch and morph

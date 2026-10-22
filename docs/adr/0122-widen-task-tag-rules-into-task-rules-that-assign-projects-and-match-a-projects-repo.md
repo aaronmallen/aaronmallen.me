@@ -3,10 +3,31 @@ id: "0122"
 title: Widen task tag rules into task rules that assign projects, and match a project's own repo
 status: active
 created: 2026-10-07
-area: [db, admin, api, mcp, projects, record, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - projects
+  - record
+  - tasks
 issue: "#660"
-amended: ["#1315", "#1391", "#1517"]
-tags: [tasks, projects, tags, rules, imports, sync, github, linear, providers, repos, links]
+amended:
+  - "#1315"
+  - "#1391"
+  - "#1517"
+tags:
+  - tasks
+  - projects
+  - tags
+  - rules
+  - imports
+  - sync
+  - github
+  - linear
+  - providers
+  - repos
+  - links
 ---
 
 # ADR 0122: Widen task tag rules into task rules that assign projects, and match a project's own repo

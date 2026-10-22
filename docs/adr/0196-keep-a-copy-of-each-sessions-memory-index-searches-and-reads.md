@@ -3,10 +3,22 @@ id: "0196"
 title: Keep a copy of each session's memory index, searches and reads
 status: active
 created: 2026-10-20
-area: [db, agents, admin, mcp]
+area:
+  - db
+  - agents
+  - admin
+  - mcp
 issue: "#1869"
-amended: ["#1893"]
-tags: [agents, memory, sessions, mcp, index, search, admin]
+amended:
+  - "#1893"
+tags:
+  - agents
+  - memory
+  - sessions
+  - mcp
+  - index
+  - search
+  - admin
 ---
 
 # ADR 0196: Keep a copy of each session's memory index, searches and reads

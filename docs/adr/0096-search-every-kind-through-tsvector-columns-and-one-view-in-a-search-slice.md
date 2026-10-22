@@ -3,11 +3,35 @@ id: "0096"
 title: Search every kind through tsvector columns and one view in a search slice
 status: active
 created: 2026-10-03
-area: [db, admin, api, mcp, assets, posts, projects, record, social, tasks, contact]
-supersedes: ["0091"]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - assets
+  - posts
+  - projects
+  - record
+  - social
+  - tasks
+  - contact
+supersedes:
+  - "0091"
 issue: "#299"
-amended: ["#773", "#818", "#911", "#1302"]
-tags: [search, postgres, full-text, tsvector, gin, view, palette, slices]
+amended:
+  - "#773"
+  - "#818"
+  - "#911"
+  - "#1302"
+tags:
+  - search
+  - postgres
+  - full-text
+  - tsvector
+  - gin
+  - view
+  - palette
+  - slices
 ---
 
 # ADR 0096: Search every kind through tsvector columns and one view in a search slice

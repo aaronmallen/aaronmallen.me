@@ -3,9 +3,19 @@ id: "0064"
 title: Close a task as done or canceled under one completed_at
 status: active
 created: 2026-09-28
-area: [db, tasks]
+area:
+  - db
+  - tasks
 issue: "#2"
-tags: [tasks, schema, enums, constraints, canceled, rollover, sprints, activity]
+tags:
+  - tasks
+  - schema
+  - enums
+  - constraints
+  - canceled
+  - rollover
+  - sprints
+  - activity
 ---
 
 # ADR 0064: Close a task as done or canceled under one completed_at

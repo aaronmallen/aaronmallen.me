@@ -3,10 +3,23 @@ id: "0121"
 title: Keep inbox snoozes in a snoozed_until column on each record's table
 status: active
 created: 2026-10-07
-area: [db, api, contact, social, tasks]
+area:
+  - db
+  - api
+  - contact
+  - social
+  - tasks
 issue: "#655"
-amended: ["#1122"]
-tags: [inbox, snooze, schema, slices, tasks, messages, webmentions]
+amended:
+  - "#1122"
+tags:
+  - inbox
+  - snooze
+  - schema
+  - slices
+  - tasks
+  - messages
+  - webmentions
 ---
 
 # ADR 0121: Keep inbox snoozes in a snoozed_until column on each record's table

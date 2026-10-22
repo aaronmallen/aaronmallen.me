@@ -3,10 +3,36 @@ id: "0093"
 title: Link any two records through one record_links table in a links slice
 status: active
 created: 2026-10-03
-area: [db, admin, api, mcp, posts, projects, record, social, tasks]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - posts
+  - projects
+  - record
+  - social
+  - tasks
 issue: "#317"
-amended: ["#966", "#911", "#1139", "#1315", "#1324", "#1749", "#1750", "#1751", "#1444"]
-tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
+amended:
+  - "#966"
+  - "#911"
+  - "#1139"
+  - "#1315"
+  - "#1324"
+  - "#1749"
+  - "#1750"
+  - "#1751"
+  - "#1444"
+tags:
+  - postgres
+  - schema
+  - links
+  - slices
+  - exports
+  - triggers
+  - constraints
+  - enums
 ---
 
 # ADR 0093: Link any two records through one record_links table in a links slice

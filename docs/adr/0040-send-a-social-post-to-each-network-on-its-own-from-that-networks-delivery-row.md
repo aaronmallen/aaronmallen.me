@@ -3,11 +3,27 @@ id: "0040"
 title: Send a social post to each network on its own, from that network's delivery row
 status: superseded
 created: 2026-09-28
-area: [db, lib, social, admin]
+area:
+  - db
+  - lib
+  - social
+  - admin
 superseded-by: "0132"
 issue: AA-577
-amended: [AA-814, "#793", "#922", "#1243", "#1702"]
-tags: [social, sidekiq, jobs, retry, mastodon, bluesky, idempotency]
+amended:
+  - AA-814
+  - "#793"
+  - "#922"
+  - "#1243"
+  - "#1702"
+tags:
+  - social
+  - sidekiq
+  - jobs
+  - retry
+  - mastodon
+  - bluesky
+  - idempotency
 ---
 
 # ADR 0040: Send a social post to each network on its own, from that network's delivery row

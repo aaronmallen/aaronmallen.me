@@ -3,11 +3,39 @@ id: "0002"
 title: Hold app/ and the slices to Hanami's own directories
 status: active
 created: 2026-09-28
-area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
-  suggestions, tags, tasks]
+area:
+  - app
+  - assets
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-620
-amended: [AA-809, "#665", "#718", "#952", "#950", "#1171", "#1701"]
-tags: [layout, hanami, providers, lib, slices, assets]
+amended:
+  - AA-809
+  - "#665"
+  - "#718"
+  - "#952"
+  - "#950"
+  - "#1171"
+  - "#1701"
+tags:
+  - layout
+  - hanami
+  - providers
+  - lib
+  - slices
+  - assets
 ---
 
 # ADR 0002: Hold `app/` and the slices to Hanami's own directories

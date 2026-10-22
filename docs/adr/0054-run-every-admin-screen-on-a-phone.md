@@ -3,10 +3,26 @@ id: "0054"
 title: Run every admin screen on a phone
 status: active
 created: 2026-09-28
-area: [assets, admin, public, mcp]
+area:
+  - assets
+  - admin
+  - public
+  - mcp
 issue: AA-346
-amended: [AA-539, AA-765, AA-835, "#17", "#745", "#923", "#1746"]
-tags: [admin, layout, responsive, accessibility, design]
+amended:
+  - AA-539
+  - AA-765
+  - AA-835
+  - "#17"
+  - "#745"
+  - "#923"
+  - "#1746"
+tags:
+  - admin
+  - layout
+  - responsive
+  - accessibility
+  - design
 ---
 
 # ADR 0054: Run every admin screen on a phone

@@ -3,9 +3,17 @@ id: "0073"
 title: Read the app version from the git tag at boot
 status: active
 created: 2026-09-29
-area: [lib, admin, mcp]
+area:
+  - lib
+  - admin
+  - mcp
 issue: "#27"
-tags: [version, git, deploy, release, kernel]
+tags:
+  - version
+  - git
+  - deploy
+  - release
+  - kernel
 ---
 
 # ADR 0073: Read the app version from the git tag at boot

@@ -3,10 +3,21 @@ id: "0133"
 title: Count overlapping work sessions once in rollups by merging them in SQL at read time
 status: active
 created: 2026-10-08
-area: [tasks, activity, db]
+area:
+  - tasks
+  - activity
+  - db
 issue: "#776"
-amended: ["#1506"]
-tags: [tasks, activity, review, time, work-sessions, sql, schema]
+amended:
+  - "#1506"
+tags:
+  - tasks
+  - activity
+  - review
+  - time
+  - work-sessions
+  - sql
+  - schema
 ---
 
 # ADR 0133: Count overlapping work sessions once in rollups by merging them in SQL at read time

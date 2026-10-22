@@ -3,10 +3,27 @@ id: "0151"
 title: Gate mail behind a mail scope that read does not cover
 status: active
 created: 2026-10-11
-area: [lib, db, admin, api, mcp, contact]
+area:
+  - lib
+  - db
+  - admin
+  - api
+  - mcp
+  - contact
 issue: "#1123"
-amended: ["#1380", "#1598", "#1823"]
-tags: [mail, gmail, oauth, scopes, consent, api-tokens, mcp, privacy]
+amended:
+  - "#1380"
+  - "#1598"
+  - "#1823"
+tags:
+  - mail
+  - gmail
+  - oauth
+  - scopes
+  - consent
+  - api-tokens
+  - mcp
+  - privacy
 ---
 
 # ADR 0151: Gate mail behind a mail scope that `read` does not cover

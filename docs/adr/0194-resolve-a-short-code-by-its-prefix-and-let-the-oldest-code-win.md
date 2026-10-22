@@ -3,12 +3,28 @@ id: "0194"
 title: Resolve a short code by its prefix and let the oldest code win
 status: superseded
 created: 2026-10-19
-area: [db, shares, social, admin, api, mcp]
-supersedes: ["0178"]
+area:
+  - db
+  - shares
+  - social
+  - admin
+  - api
+  - mcp
+supersedes:
+  - "0178"
 superseded-by: "0198"
 issue: "#1856"
-amended: ["#1887"]
-tags: [shares, share-groups, short-links, short-codes, aa-cool, prefix, code-length, oldest-wins]
+amended:
+  - "#1887"
+tags:
+  - shares
+  - share-groups
+  - short-links
+  - short-codes
+  - aa-cool
+  - prefix
+  - code-length
+  - oldest-wins
 ---
 
 # ADR 0194: Resolve a short code by its prefix and let the oldest code win

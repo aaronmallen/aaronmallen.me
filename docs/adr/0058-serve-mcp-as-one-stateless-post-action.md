@@ -3,10 +3,23 @@ id: "0058"
 title: Serve MCP as one stateless POST action
 status: active
 created: 2026-09-28
-area: [mcp]
+area:
+  - mcp
 issue: AA-679
-amended: ["#463", "#573", "#1343", "#1756", "#1793"]
-tags: [mcp, transport, json-rpc, sdk, cors, sessions, hanami-actions]
+amended:
+  - "#463"
+  - "#573"
+  - "#1343"
+  - "#1756"
+  - "#1793"
+tags:
+  - mcp
+  - transport
+  - json-rpc
+  - sdk
+  - cors
+  - sessions
+  - hanami-actions
 ---
 
 # ADR 0058: Serve MCP as one stateless POST action

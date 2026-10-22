@@ -3,10 +3,26 @@ id: "0005"
 title: Run every tool through a mise task and pin tool versions in mise.lock
 status: active
 created: 2026-09-28
-area: [config]
+area:
+  - config
 issue: AA-654
-amended: [AA-787, "#711", "#921", "#957", "#1718", "#1815", "#1824"]
-tags: [mise, tasks, lockfile, ruby, dotenv, pitchfork, ci, deploy]
+amended:
+  - AA-787
+  - "#711"
+  - "#921"
+  - "#957"
+  - "#1718"
+  - "#1815"
+  - "#1824"
+tags:
+  - mise
+  - tasks
+  - lockfile
+  - ruby
+  - dotenv
+  - pitchfork
+  - ci
+  - deploy
 ---
 
 # ADR 0005: Run every tool through a mise task and pin tool versions in mise.lock

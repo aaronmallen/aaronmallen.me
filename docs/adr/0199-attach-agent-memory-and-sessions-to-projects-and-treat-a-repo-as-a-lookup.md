@@ -3,9 +3,24 @@ id: "0199"
 title: Attach agent memory and sessions to projects, and treat a repo as a lookup
 status: active
 created: 2026-10-21
-area: [db, agents, admin, api, mcp, projects]
+area:
+  - db
+  - agents
+  - admin
+  - api
+  - mcp
+  - projects
 issue: "#1894"
-tags: [agents, memory, sessions, projects, repos, scopes, mcp, github, rules]
+tags:
+  - agents
+  - memory
+  - sessions
+  - projects
+  - repos
+  - scopes
+  - mcp
+  - github
+  - rules
 ---
 
 # ADR 0199: Attach agent memory and sessions to projects, and treat a repo as a lookup

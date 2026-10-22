@@ -3,10 +3,25 @@ id: "0100"
 title: Build the review in one activity query that admin and api share
 status: active
 created: 2026-10-03
-area: [activity, admin, api]
+area:
+  - activity
+  - admin
+  - api
 issue: "#340"
-amended: ["#623", "#873", "#872"]
-tags: [activity, review, tasks, posts, social, journal, commits, time, exports]
+amended:
+  - "#623"
+  - "#873"
+  - "#872"
+tags:
+  - activity
+  - review
+  - tasks
+  - posts
+  - social
+  - journal
+  - commits
+  - time
+  - exports
 ---
 
 # ADR 0100: Build the review in one activity query that admin and api share

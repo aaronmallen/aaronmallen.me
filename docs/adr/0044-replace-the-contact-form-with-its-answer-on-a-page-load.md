@@ -3,10 +3,21 @@ id: "0044"
 title: Replace the contact form with its answer, on a page load
 status: active
 created: 2026-09-28
-area: [assets, public]
+area:
+  - assets
+  - public
 issue: AA-668
-amended: ["#920", "#957", "#1122"]
-tags: [contact, forms, javascript, redirect, throttle, validation]
+amended:
+  - "#920"
+  - "#957"
+  - "#1122"
+tags:
+  - contact
+  - forms
+  - javascript
+  - redirect
+  - throttle
+  - validation
 ---
 
 # ADR 0044: Replace the contact form with its answer, on a page load

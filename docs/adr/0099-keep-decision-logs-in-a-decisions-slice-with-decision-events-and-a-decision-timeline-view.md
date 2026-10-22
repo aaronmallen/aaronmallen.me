@@ -3,10 +3,26 @@ id: "0099"
 title: Keep decision logs in a decisions slice with decision_events and a decision_timeline view
 status: active
 created: 2026-10-03
-area: [db, activity, admin, api, mcp]
+area:
+  - db
+  - activity
+  - admin
+  - api
+  - mcp
 issue: "#273"
-amended: ["#911"]
-tags: [decisions, slices, history, timeline, view, postgres, enums, constraints, comments, tags]
+amended:
+  - "#911"
+tags:
+  - decisions
+  - slices
+  - history
+  - timeline
+  - view
+  - postgres
+  - enums
+  - constraints
+  - comments
+  - tags
 ---
 
 # ADR 0099: Keep decision logs in a decisions slice with decision_events and a decision_timeline view

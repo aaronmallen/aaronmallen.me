@@ -3,10 +3,21 @@ id: "0004"
 title: Hand every slice the app's routes helper through a prepend
 status: active
 created: 2026-09-28
-area: [config, lib, admin, mcp, public]
+area:
+  - config
+  - lib
+  - admin
+  - mcp
+  - public
 issue: AA-586
-amended: [AA-809]
-tags: [routes, hanami, slices, patch, upstream]
+amended:
+  - AA-809
+tags:
+  - routes
+  - hanami
+  - slices
+  - patch
+  - upstream
 ---
 
 # ADR 0004: Hand every slice the app's routes helper through a prepend

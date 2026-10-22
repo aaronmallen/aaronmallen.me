@@ -3,11 +3,25 @@ id: "0069"
 title: Read GitHub over GraphQL, and keep REST for project reads and the issue move check
 status: active
 created: 2026-09-29
-area: [lib, record, projects, tasks]
-supersedes: ["0048"]
+area:
+  - lib
+  - record
+  - projects
+  - tasks
+supersedes:
+  - "0048"
 issue: "#33"
-amended: ["#941"]
-tags: [github, graphql, rest, commits, issues, import, sync, rate-limit]
+amended:
+  - "#941"
+tags:
+  - github
+  - graphql
+  - rest
+  - commits
+  - issues
+  - import
+  - sync
+  - rate-limit
 ---
 
 # ADR 0069: Read GitHub over GraphQL, and keep REST for project reads and the issue move check

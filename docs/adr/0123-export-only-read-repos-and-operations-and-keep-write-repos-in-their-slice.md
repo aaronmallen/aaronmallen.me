@@ -3,12 +3,47 @@ id: "0123"
 title: Export only read repos and operations, and keep write repos in their slice
 status: active
 created: 2026-10-07
-area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts, projects, public,
-  record, saved_views, search, social, suggestions, tags, tasks]
-supersedes: ["0003"]
+area:
+  - activity
+  - admin
+  - analytics
+  - api
+  - backups
+  - contact
+  - decisions
+  - links
+  - mcp
+  - media
+  - posts
+  - projects
+  - public
+  - record
+  - saved_views
+  - search
+  - social
+  - suggestions
+  - tags
+  - tasks
+supersedes:
+  - "0003"
 issue: "#665"
-amended: ["#917", "#994", "#911", "#1171", "#1604", "#1702", "#1797", "#1177"]
-tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
+amended:
+  - "#917"
+  - "#994"
+  - "#911"
+  - "#1171"
+  - "#1604"
+  - "#1702"
+  - "#1797"
+  - "#1177"
+tags:
+  - slices
+  - exports
+  - repos
+  - queries
+  - mutations
+  - rubocop
+  - cycles
 ---
 
 # ADR 0123: Export only read repos and operations, and keep write repos in their slice

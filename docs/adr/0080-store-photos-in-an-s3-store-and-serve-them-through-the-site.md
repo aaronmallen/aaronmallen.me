@@ -3,10 +3,30 @@ id: "0080"
 title: Store photos in an S3 store and serve them through the site
 status: active
 created: 2026-09-30
-area: [config, media, public]
+area:
+  - config
+  - media
+  - public
 issue: "#132"
-amended: ["#137", "#396", "#394", "#468", "#1310", "#1656", "#1634"]
-tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
+amended:
+  - "#137"
+  - "#396"
+  - "#394"
+  - "#468"
+  - "#1310"
+  - "#1656"
+  - "#1634"
+tags:
+  - media
+  - photos
+  - uploads
+  - s3
+  - rustfs
+  - nas
+  - providers
+  - cloudflare
+  - tunnel
+  - puma
 ---
 
 # ADR 0080: Store photos in an S3 store and serve them through the site

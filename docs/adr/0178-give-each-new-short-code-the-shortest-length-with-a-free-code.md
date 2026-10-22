@@ -3,11 +3,21 @@ id: "0178"
 title: Give each new short code the shortest length with a free code
 status: superseded
 created: 2026-10-15
-area: [lib, shares]
+area:
+  - lib
+  - shares
 superseded-by: "0194"
 issue: "#1448"
-amended: ["#1856"]
-tags: [shares, share-groups, short-links, short-codes, aa-cool, code-length, guessing]
+amended:
+  - "#1856"
+tags:
+  - shares
+  - share-groups
+  - short-links
+  - short-codes
+  - aa-cool
+  - code-length
+  - guessing
 ---
 
 # ADR 0178: Give each new short code the shortest length with a free code

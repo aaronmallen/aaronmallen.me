@@ -3,11 +3,21 @@ id: "0034"
 title: Hold every page to a 1040px column and prose to its own measure
 status: superseded
 created: 2026-09-28
-area: [assets, public, admin]
+area:
+  - assets
+  - public
+  - admin
 superseded-by: "0136"
 issue: AA-538
-amended: [AA-539, "#842"]
-tags: [layout, design, css, tailwind, public]
+amended:
+  - AA-539
+  - "#842"
+tags:
+  - layout
+  - design
+  - css
+  - tailwind
+  - public
 ---
 
 # ADR 0034: Hold every page to a 1040px column and prose to its own measure

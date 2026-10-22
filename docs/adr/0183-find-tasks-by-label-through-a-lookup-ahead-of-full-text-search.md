@@ -3,9 +3,23 @@ id: "0183"
 title: Find tasks by label through a lookup ahead of full-text search
 status: active
 created: 2026-10-16
-area: [admin, api, mcp, search, tasks]
+area:
+  - admin
+  - api
+  - mcp
+  - search
+  - tasks
 issue: "#1486"
-tags: [search, tasks, labels, keys, numbers, full-text, tsvector, palette, record-picker]
+tags:
+  - search
+  - tasks
+  - labels
+  - keys
+  - numbers
+  - full-text
+  - tsvector
+  - palette
+  - record-picker
 ---
 
 # ADR 0183: Find tasks by label through a lookup ahead of full-text search

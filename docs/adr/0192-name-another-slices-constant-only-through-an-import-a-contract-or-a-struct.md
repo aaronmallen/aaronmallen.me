@@ -3,9 +3,29 @@ id: "0192"
 title: Name another slice's constant only through an import, a contract or a struct
 status: active
 created: 2026-10-18
-area: [admin, agents, analytics, api, app, lib, mcp, media, performance, posts, public, record, social]
+area:
+  - admin
+  - agents
+  - analytics
+  - api
+  - app
+  - lib
+  - mcp
+  - media
+  - performance
+  - posts
+  - public
+  - record
+  - social
 issue: "#1797"
-tags: [slices, exports, constants, contracts, structs, field-errors, kernel]
+tags:
+  - slices
+  - exports
+  - constants
+  - contracts
+  - structs
+  - field-errors
+  - kernel
 ---
 
 # ADR 0192: Name another slice's constant only through an import, a contract or a struct

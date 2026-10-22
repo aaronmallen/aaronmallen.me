@@ -3,10 +3,20 @@ id: "0057"
 title: Put the mcp slice inside the SDK's own MCP module
 status: active
 created: 2026-09-28
-area: [config, lib, mcp]
+area:
+  - config
+  - lib
+  - mcp
 issue: AA-675
-amended: [AA-809]
-tags: [mcp, sdk, zeitwerk, inflection, namespace, autoload]
+amended:
+  - AA-809
+tags:
+  - mcp
+  - sdk
+  - zeitwerk
+  - inflection
+  - namespace
+  - autoload
 ---
 
 # ADR 0057: Put the `mcp` slice inside the SDK's own `MCP` module

@@ -3,10 +3,29 @@ id: "0094"
 title: Keep a seen_at on task_sources, and merge the inbox in the api slice
 status: active
 created: 2026-10-03
-area: [db, admin, api, contact, mcp, social, tasks]
+area:
+  - db
+  - admin
+  - api
+  - contact
+  - mcp
+  - social
+  - tasks
 issue: "#325"
-amended: ["#650", "#655"]
-tags: [inbox, tasks, imports, schema, slices, exports, api, mcp, messages, webmentions]
+amended:
+  - "#650"
+  - "#655"
+tags:
+  - inbox
+  - tasks
+  - imports
+  - schema
+  - slices
+  - exports
+  - api
+  - mcp
+  - messages
+  - webmentions
 ---
 
 # ADR 0094: Keep a seen_at on task_sources, and merge the inbox in the api slice

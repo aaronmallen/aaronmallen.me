@@ -3,10 +3,34 @@ id: "0008"
 title: Build the database URL from settings, in a db provider in every slice
 status: active
 created: 2026-09-28
-area: [config, lib, activity, admin, analytics, contact, mcp, posts, projects, record, social, suggestions, tags, tasks]
+area:
+  - config
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-594
-amended: [AA-808, "#711", "#957", "#1824"]
-tags: [database, settings, providers, hanami, connection-pool, postgres]
+amended:
+  - AA-808
+  - "#711"
+  - "#957"
+  - "#1824"
+tags:
+  - database
+  - settings
+  - providers
+  - hanami
+  - connection-pool
+  - postgres
 ---
 
 # ADR 0008: Build the database URL from settings, in a db provider in every slice

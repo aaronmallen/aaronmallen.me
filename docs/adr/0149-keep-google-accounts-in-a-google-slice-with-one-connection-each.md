@@ -3,11 +3,27 @@ id: "0149"
 title: Keep Google accounts in a google slice with one connection each
 status: superseded
 created: 2026-10-11
-area: [admin, config, db, health, lib, services]
+area:
+  - admin
+  - config
+  - db
+  - health
+  - lib
+  - services
 superseded-by: "0159"
 issue: "#1121"
-amended: ["#1171"]
-tags: [google, gmail, calendar, health, slices, services, oauth, scopes, accounts]
+amended:
+  - "#1171"
+tags:
+  - google
+  - gmail
+  - calendar
+  - health
+  - slices
+  - services
+  - oauth
+  - scopes
+  - accounts
 ---
 
 # ADR 0149: Keep Google accounts in a google slice with one connection each

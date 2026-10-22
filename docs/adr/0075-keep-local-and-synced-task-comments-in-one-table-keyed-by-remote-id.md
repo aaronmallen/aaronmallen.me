@@ -3,10 +3,25 @@ id: "0075"
 title: Keep local and synced task comments in one table keyed by remote id
 status: active
 created: 2026-09-29
-area: [db, admin, mcp, activity, tasks]
+area:
+  - db
+  - admin
+  - mcp
+  - activity
+  - tasks
 issue: "#70"
-amended: ["#903"]
-tags: [tasks, comments, schema, sync, github, linear, providers, constraints, markdown]
+amended:
+  - "#903"
+tags:
+  - tasks
+  - comments
+  - schema
+  - sync
+  - github
+  - linear
+  - providers
+  - constraints
+  - markdown
 ---
 
 # ADR 0075: Keep local and synced task comments in one table keyed by remote id

@@ -3,10 +3,25 @@ id: "0071"
 title: Load a task's read and edit pages into dialogs with fetch
 status: active
 created: 2026-09-29
-area: [admin, assets]
+area:
+  - admin
+  - assets
 issue: "#37"
-amended: ["#41", "#90", "#745", "#1102", "#1106", "#1395"]
-tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
+amended:
+  - "#41"
+  - "#90"
+  - "#745"
+  - "#1102"
+  - "#1106"
+  - "#1395"
+tags:
+  - admin
+  - tasks
+  - dialog
+  - fetch
+  - javascript
+  - forms
+  - progressive-enhancement
 ---
 
 # ADR 0071: Load a task's read and edit pages into dialogs with fetch

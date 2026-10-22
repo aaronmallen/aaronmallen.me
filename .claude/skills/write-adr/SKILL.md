@@ -44,7 +44,13 @@ after the highest one in `docs/adr/`, a number is never reused, and a gap is nev
 
 Title the record with the decision. Copy the front matter from the template, set `created` to the launch day
 (2026-09-28) before launch or to today after it, and drop every key you have nothing to put in. A new record has
-no `supersedes` or `superseded-by`, so it carries neither.
+no `supersedes` or `superseded-by`, so it carries neither. Write each list in block style, one item to a line:
+
+```yaml
+area:
+  - db
+  - agents
+```
 
 Put the status badge on its own line under the heading, as a reference link with the URL defined at the bottom of
 the file. The badge and the front matter `status` say the same thing, so change them together or not at all.

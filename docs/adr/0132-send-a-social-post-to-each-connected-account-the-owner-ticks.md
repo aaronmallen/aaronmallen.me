@@ -3,11 +3,25 @@ id: "0132"
 title: Send a social post to each connected account the owner ticks
 status: active
 created: 2026-10-08
-area: [social, admin, db]
-supersedes: ["0040"]
+area:
+  - social
+  - admin
+  - db
+supersedes:
+  - "0040"
 issue: "#793"
-amended: ["#805", "#899", "#1243", "#1225"]
-tags: [social, mastodon, bluesky, connections, delivery, composer]
+amended:
+  - "#805"
+  - "#899"
+  - "#1243"
+  - "#1225"
+tags:
+  - social
+  - mastodon
+  - bluesky
+  - connections
+  - delivery
+  - composer
 ---
 
 # ADR 0132: Send a social post to each connected account the owner ticks

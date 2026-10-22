@@ -3,9 +3,16 @@ id: "0135"
 title: Find pull requests by searching GitHub for ones I authored
 status: active
 created: 2026-10-09
-area: [record, lib]
+area:
+  - record
+  - lib
 issue: "#814"
-tags: [pull-requests, github, import, search, sync]
+tags:
+  - pull-requests
+  - github
+  - import
+  - search
+  - sync
 ---
 
 # ADR 0135: Find pull requests by searching GitHub for ones I authored

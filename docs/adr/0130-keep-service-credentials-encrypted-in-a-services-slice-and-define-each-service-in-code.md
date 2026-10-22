@@ -3,10 +3,32 @@ id: "0130"
 title: Keep service credentials encrypted in a services slice and define each service in code
 status: active
 created: 2026-10-08
-area: [admin, config, db, lib, record, social, tasks]
+area:
+  - admin
+  - config
+  - db
+  - lib
+  - record
+  - social
+  - tasks
 issue: "#791"
-amended: ["#831", "#1121", "#1180", "#1379"]
-tags: [services, credentials, encryption, settings, providers, clients, oauth, github, linear, mastodon, bluesky]
+amended:
+  - "#831"
+  - "#1121"
+  - "#1180"
+  - "#1379"
+tags:
+  - services
+  - credentials
+  - encryption
+  - settings
+  - providers
+  - clients
+  - oauth
+  - github
+  - linear
+  - mastodon
+  - bluesky
 ---
 
 # ADR 0130: Keep service credentials encrypted in a services slice and define each service in code

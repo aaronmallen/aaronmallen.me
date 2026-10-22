@@ -3,10 +3,24 @@ id: "0032"
 title: Keep the theme in a site_theme cookie the browser sets, and draw it with light-dark()
 status: active
 created: 2026-09-28
-area: [admin, assets, config, lib, mcp, public]
+area:
+  - admin
+  - assets
+  - config
+  - lib
+  - mcp
+  - public
 issue: AA-678
-amended: ["#1308"]
-tags: [theme, dark-mode, cookie, privacy, css, tailwind, cache]
+amended:
+  - "#1308"
+tags:
+  - theme
+  - dark-mode
+  - cookie
+  - privacy
+  - css
+  - tailwind
+  - cache
 ---
 
 # ADR 0032: Keep the theme in a `site_theme` cookie the browser sets, and draw it with `light-dark()`

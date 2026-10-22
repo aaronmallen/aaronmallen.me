@@ -3,10 +3,29 @@ id: "0074"
 title: Split tags into a public and a private scope
 status: active
 created: 2026-09-29
-area: [db, lib, admin, mcp, posts, projects, record, tags, tasks]
+area:
+  - db
+  - lib
+  - admin
+  - mcp
+  - posts
+  - projects
+  - record
+  - tags
+  - tasks
 issue: "#76"
-amended: ["#284", "#911"]
-tags: [tags, scope, schema, migrations, constraints, foreign-keys, mcp, admin]
+amended:
+  - "#284"
+  - "#911"
+tags:
+  - tags
+  - scope
+  - schema
+  - migrations
+  - constraints
+  - foreign-keys
+  - mcp
+  - admin
 ---
 
 # ADR 0074: Split tags into a public and a private scope

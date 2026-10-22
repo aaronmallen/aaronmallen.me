@@ -3,10 +3,22 @@ id: "0024"
 title: Mount the session cookie in admin and mcp alone, and let public read it by hand
 status: active
 created: 2026-09-28
-area: [config, lib, admin, mcp, public]
+area:
+  - config
+  - lib
+  - admin
+  - mcp
+  - public
 issue: AA-664
-amended: [AA-809]
-tags: [sessions, cookies, csrf, privacy, auth, hanami]
+amended:
+  - AA-809
+tags:
+  - sessions
+  - cookies
+  - csrf
+  - privacy
+  - auth
+  - hanami
 ---
 
 # ADR 0024: Mount the session cookie in admin and mcp alone, and let public read it by hand

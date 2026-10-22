@@ -3,10 +3,25 @@ id: "0138"
 title: Read dead jobs from the Sidekiq dead set in an activity query
 status: active
 created: 2026-10-09
-area: [activity, admin, api]
+area:
+  - activity
+  - admin
+  - api
 issue: "#869"
-amended: ["#1731", "#1732", "#1733", "#1734", "#1776", "#1819"]
-tags: [activity, attention, sidekiq, redis, jobs, dead-set]
+amended:
+  - "#1731"
+  - "#1732"
+  - "#1733"
+  - "#1734"
+  - "#1776"
+  - "#1819"
+tags:
+  - activity
+  - attention
+  - sidekiq
+  - redis
+  - jobs
+  - dead-set
 ---
 
 # ADR 0138: Read dead jobs from the Sidekiq dead set in an activity query

@@ -3,11 +3,33 @@ id: "0011"
 title: Run jobs on Sidekiq in one worker that boots the app
 status: active
 created: 2026-09-28
-area: [config, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions,
-  tags, tasks]
+area:
+  - config
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: AA-649
-amended: [AA-821]
-tags: [sidekiq, sidekiq-scheduler, redis, jobs, queues, schedule, worker]
+amended:
+  - AA-821
+tags:
+  - sidekiq
+  - sidekiq-scheduler
+  - redis
+  - jobs
+  - queues
+  - schedule
+  - worker
 ---
 
 # ADR 0011: Run jobs on Sidekiq in one worker that boots the app

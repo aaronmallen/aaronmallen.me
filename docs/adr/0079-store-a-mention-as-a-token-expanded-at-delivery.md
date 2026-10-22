@@ -3,10 +3,22 @@ id: "0079"
 title: Store a mention as a token expanded at delivery
 status: active
 created: 2026-09-30
-area: [admin, social]
+area:
+  - admin
+  - social
 issue: "#120"
-amended: ["#225", "#226", "#913"]
-tags: [social, mentions, mastodon, bluesky, delivery, directory, did]
+amended:
+  - "#225"
+  - "#226"
+  - "#913"
+tags:
+  - social
+  - mentions
+  - mastodon
+  - bluesky
+  - delivery
+  - directory
+  - did
 ---
 
 # ADR 0079: Store a mention as a token expanded at delivery

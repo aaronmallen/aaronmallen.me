@@ -3,11 +3,21 @@ id: "0091"
 title: Fetch the palette's open tasks from a session-only admin route when it opens
 status: superseded
 created: 2026-10-01
-area: [admin, assets]
+area:
+  - admin
+  - assets
 superseded-by: "0096"
 issue: "#201"
-amended: ["#299"]
-tags: [admin, palette, tasks, fetch, json, javascript, performance]
+amended:
+  - "#299"
+tags:
+  - admin
+  - palette
+  - tasks
+  - fetch
+  - json
+  - javascript
+  - performance
 ---
 
 # ADR 0091: Fetch the palette's open tasks from a session-only admin route when it opens

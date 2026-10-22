@@ -3,10 +3,29 @@ id: "0028"
 title: Render views with phlex-hanami instead of hanami-view
 status: active
 created: 2026-09-28
-area: [config, lib, admin, mcp, public]
+area:
+  - config
+  - lib
+  - admin
+  - mcp
+  - public
 issue: AA-632
-amended: [AA-783, AA-809, "#570", "#941", "#1575"]
-tags: [views, phlex, phlex-hanami, hanami-view, dry-types, props, components, layouts, ui]
+amended:
+  - AA-783
+  - AA-809
+  - "#570"
+  - "#941"
+  - "#1575"
+tags:
+  - views
+  - phlex
+  - phlex-hanami
+  - hanami-view
+  - dry-types
+  - props
+  - components
+  - layouts
+  - ui
 ---
 
 # ADR 0028: Render views with phlex-hanami instead of hanami-view

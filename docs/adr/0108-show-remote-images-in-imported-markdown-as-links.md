@@ -3,10 +3,21 @@ id: "0108"
 title: Show remote images in imported markdown as links
 status: active
 created: 2026-10-04
-area: [admin, lib, tasks]
+area:
+  - admin
+  - lib
+  - tasks
 issue: "#466"
-amended: ["#911", "#1751"]
-tags: [tasks, commits, markdown, images, privacy, csp]
+amended:
+  - "#911"
+  - "#1751"
+tags:
+  - tasks
+  - commits
+  - markdown
+  - images
+  - privacy
+  - csp
 ---
 
 # ADR 0108: Show remote images in imported markdown as links

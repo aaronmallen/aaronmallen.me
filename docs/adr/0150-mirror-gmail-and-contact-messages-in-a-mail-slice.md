@@ -3,10 +3,29 @@ id: "0150"
 title: Mirror Gmail and contact messages in a mail slice
 status: active
 created: 2026-10-11
-area: [db, admin, api, contact]
+area:
+  - db
+  - admin
+  - api
+  - contact
 issue: "#1122"
-amended: ["#1159", "#1381", "#1766", "#1779", "#1770"]
-tags: [mail, gmail, google, contact, messages, slices, sync, polling, inbox, snooze]
+amended:
+  - "#1159"
+  - "#1381"
+  - "#1766"
+  - "#1779"
+  - "#1770"
+tags:
+  - mail
+  - gmail
+  - google
+  - contact
+  - messages
+  - slices
+  - sync
+  - polling
+  - inbox
+  - snooze
 ---
 
 # ADR 0150: Mirror Gmail and contact messages in a mail slice

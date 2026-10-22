@@ -3,10 +3,22 @@ id: "0013"
 title: Read the visitor address from one proxy header, and only from a trusted peer
 status: active
 created: 2026-09-28
-area: [app, config, public, mcp, security]
+area:
+  - app
+  - config
+  - public
+  - mcp
+  - security
 issue: AA-638
-amended: ["#957"]
-tags: [privacy, analytics, throttles, proxy, cloudflare, security]
+amended:
+  - "#957"
+tags:
+  - privacy
+  - analytics
+  - throttles
+  - proxy
+  - cloudflare
+  - security
 ---
 
 # ADR 0013: Read the visitor address from one proxy header, and only from a trusted peer

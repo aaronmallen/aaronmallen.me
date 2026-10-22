@@ -3,9 +3,20 @@ id: "0085"
 title: Reorder tasks by drag and save the order through fetch
 status: active
 created: 2026-10-01
-area: [admin, assets, tasks]
+area:
+  - admin
+  - assets
+  - tasks
 issue: "#149"
-tags: [tasks, order, drag-and-drop, keyboard, fetch, javascript, forms, progressive-enhancement]
+tags:
+  - tasks
+  - order
+  - drag-and-drop
+  - keyboard
+  - fetch
+  - javascript
+  - forms
+  - progressive-enhancement
 ---
 
 # ADR 0085: Reorder tasks by drag and save the order through fetch

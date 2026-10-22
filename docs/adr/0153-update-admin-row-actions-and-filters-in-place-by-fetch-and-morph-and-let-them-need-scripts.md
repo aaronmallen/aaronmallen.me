@@ -3,10 +3,23 @@ id: "0153"
 title: Update admin row actions and filters in place by fetch and morph, and let them need scripts
 status: active
 created: 2026-10-11
-area: [admin, assets]
-supersedes: ["0055"]
+area:
+  - admin
+  - assets
+supersedes:
+  - "0055"
 issue: "#1126"
-tags: [admin, forms, filters, javascript, fetch, idiomorph, morph, toast, history, noscript]
+tags:
+  - admin
+  - forms
+  - filters
+  - javascript
+  - fetch
+  - idiomorph
+  - morph
+  - toast
+  - history
+  - noscript
 ---
 
 # ADR 0153: Update admin row actions and filters in place by fetch and morph, and let them need scripts

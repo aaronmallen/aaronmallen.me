@@ -3,10 +3,28 @@ id: "0009"
 title: Register every service client, with or without its credentials
 status: active
 created: 2026-09-28
-area: [admin, analytics, config, lib, projects, record, social]
+area:
+  - admin
+  - analytics
+  - config
+  - lib
+  - projects
+  - record
+  - social
 issue: AA-674
-amended: [AA-822, "#791", "#1702"]
-tags: [providers, clients, settings, credentials, github, maxmind, bluesky, mastodon]
+amended:
+  - AA-822
+  - "#791"
+  - "#1702"
+tags:
+  - providers
+  - clients
+  - settings
+  - credentials
+  - github
+  - maxmind
+  - bluesky
+  - mastodon
 ---
 
 # ADR 0009: Register every service client, with or without its credentials

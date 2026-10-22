@@ -3,10 +3,21 @@ id: "0077"
 title: Tag an imported task from its labels only on import
 status: active
 created: 2026-09-29
-area: [record, tasks]
+area:
+  - record
+  - tasks
 issue: "#107"
-amended: ["#389"]
-tags: [tasks, tags, labels, imports, sync, github, linear, providers]
+amended:
+  - "#389"
+tags:
+  - tasks
+  - tags
+  - labels
+  - imports
+  - sync
+  - github
+  - linear
+  - providers
 ---
 
 # ADR 0077: Tag an imported task from its labels only on import

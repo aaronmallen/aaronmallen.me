@@ -3,10 +3,24 @@ id: "0088"
 title: Hold the layer the API and MCP share in the api slice, and call it in process
 status: active
 created: 2026-10-01
-area: [api, mcp]
+area:
+  - api
+  - mcp
 issue: "#154"
-amended: ["#927", "#1001", "#1188", "#1823"]
-tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
+amended:
+  - "#927"
+  - "#1001"
+  - "#1188"
+  - "#1823"
+tags:
+  - api
+  - mcp
+  - slices
+  - exports
+  - openapi
+  - json-schema
+  - journal
+  - tasks
 ---
 
 # ADR 0088: Hold the layer the API and MCP share in the api slice, and call it in process

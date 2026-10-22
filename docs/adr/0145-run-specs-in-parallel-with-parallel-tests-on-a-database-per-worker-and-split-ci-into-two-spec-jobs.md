@@ -3,10 +3,20 @@ id: "0145"
 title: Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs
 status: active
 created: 2026-10-10
-area: [config]
+area:
+  - config
 issue: "#1082"
-amended: ["#1393"]
-tags: [testing, rspec, parallel_tests, coverage, simplecov, ci, database, workspaces]
+amended:
+  - "#1393"
+tags:
+  - testing
+  - rspec
+  - parallel_tests
+  - coverage
+  - simplecov
+  - ci
+  - database
+  - workspaces
 ---
 
 # ADR 0145: Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs

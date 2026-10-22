@@ -3,11 +3,19 @@ id: "0042"
 title: Trust a webmention author by exact URL, on their own host
 status: superseded
 created: 2026-09-28
-area: [social]
+area:
+  - social
 superseded-by: "0107"
 issue: AA-598
-amended: ["#461"]
-tags: [webmentions, moderation, trust, spam, bridgy, security]
+amended:
+  - "#461"
+tags:
+  - webmentions
+  - moderation
+  - trust
+  - spam
+  - bridgy
+  - security
 ---
 
 # ADR 0042: Trust a webmention author by exact URL, on their own host

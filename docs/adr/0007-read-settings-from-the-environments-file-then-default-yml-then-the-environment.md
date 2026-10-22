@@ -3,10 +3,21 @@ id: "0007"
 title: Read settings from the environment's file, then default.yml, then the environment
 status: active
 created: 2026-09-28
-area: [config]
+area:
+  - config
 issue: AA-353
-amended: [AA-797, "#953", "#1816"]
-tags: [settings, environment, yaml, erb, secrets, fork, hanami-settings-stores]
+amended:
+  - AA-797
+  - "#953"
+  - "#1816"
+tags:
+  - settings
+  - environment
+  - yaml
+  - erb
+  - secrets
+  - fork
+  - hanami-settings-stores
 ---
 
 # ADR 0007: Read settings from the environment's file, then default.yml, then the environment

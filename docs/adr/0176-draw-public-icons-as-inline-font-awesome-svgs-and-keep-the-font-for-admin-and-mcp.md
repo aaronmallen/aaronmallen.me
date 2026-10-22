@@ -3,11 +3,27 @@ id: "0176"
 title: Draw public icons as inline Font Awesome SVGs and keep the font for admin and MCP
 status: active
 created: 2026-10-14
-area: [assets, config, lib, public, admin, mcp]
-supersedes: ["0033"]
+area:
+  - assets
+  - config
+  - lib
+  - public
+  - admin
+  - mcp
+supersedes:
+  - "0033"
 issue: "#1305"
-amended: ["#1282", "#1215"]
-tags: [icons, font-awesome, svg, css, tailwind, accessibility, performance]
+amended:
+  - "#1282"
+  - "#1215"
+tags:
+  - icons
+  - font-awesome
+  - svg
+  - css
+  - tailwind
+  - accessibility
+  - performance
 ---
 
 # ADR 0176: Draw public icons as inline Font Awesome SVGs and keep the font for admin and MCP

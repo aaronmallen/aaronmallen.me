@@ -3,10 +3,28 @@ id: "0186"
 title: Keep agent memory, artifacts and sessions in an agents slice
 status: active
 created: 2026-10-17
-area: [db, admin, api, mcp, links]
+area:
+  - db
+  - admin
+  - api
+  - mcp
+  - links
 issue: "#1741"
-amended: ["#1745", "#1750", "#1790", "#1859", "#1860", "#1893"]
-tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
+amended:
+  - "#1745"
+  - "#1750"
+  - "#1790"
+  - "#1859"
+  - "#1860"
+  - "#1893"
+tags:
+  - agents
+  - memory
+  - artifacts
+  - sessions
+  - slices
+  - mcp
+  - privacy
 ---
 
 # ADR 0186: Keep agent memory, artifacts and sessions in an agents slice

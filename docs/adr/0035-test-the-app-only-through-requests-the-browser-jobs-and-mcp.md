@@ -3,11 +3,34 @@ id: "0035"
 title: Test the app only through requests, the browser, jobs and MCP
 status: superseded
 created: 2026-09-28
-area: [app, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+area:
+  - app
+  - lib
+  - activity
+  - admin
+  - analytics
+  - contact
+  - mcp
+  - posts
+  - projects
+  - public
+  - record
+  - social
+  - suggestions
+  - tags
+  - tasks
 superseded-by: "0139"
 issue: AA-807
-amended: ["#916", "#1377"]
-tags: [testing, rspec, coverage, capybara, sidekiq, mcp]
+amended:
+  - "#916"
+  - "#1377"
+tags:
+  - testing
+  - rspec
+  - coverage
+  - capybara
+  - sidekiq
+  - mcp
 ---
 
 # ADR 0035: Test the app only through requests, the browser, jobs and MCP

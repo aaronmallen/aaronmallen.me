@@ -3,10 +3,21 @@ id: "0068"
 title: Follow a change in an issue's state, not the state itself
 status: active
 created: 2026-09-29
-area: [db, tasks]
+area:
+  - db
+  - tasks
 issue: "#33"
-amended: ["#43", "#735"]
-tags: [tasks, imports, github, linear, sync, schema, enums]
+amended:
+  - "#43"
+  - "#735"
+tags:
+  - tasks
+  - imports
+  - github
+  - linear
+  - sync
+  - schema
+  - enums
 ---
 
 # ADR 0068: Follow a change in an issue's state, not the state itself

@@ -3,9 +3,23 @@ id: "0152"
 title: Mirror Google events in a calendar slice and write every change back to Google
 status: active
 created: 2026-10-11
-area: [admin, api, config, db, mcp, record, services]
+area:
+  - admin
+  - api
+  - config
+  - db
+  - mcp
+  - record
+  - services
 issue: "#1124"
-tags: [calendar, google, slices, sync, polling, recurring-events, work-calendars]
+tags:
+  - calendar
+  - google
+  - slices
+  - sync
+  - polling
+  - recurring-events
+  - work-calendars
 ---
 
 # ADR 0152: Mirror Google events in a calendar slice and write every change back to Google

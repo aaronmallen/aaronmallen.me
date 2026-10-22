@@ -3,11 +3,49 @@ id: "0126"
 title: Keep only base classes and gem wrappers in lib, and give the rest a Hanami shape
 status: active
 created: 2026-10-07
-area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
-  projects, public, record, saved_views, search, security, social, suggestions, tags, tasks]
+area:
+  - app
+  - config
+  - lib
+  - activity
+  - admin
+  - analytics
+  - api
+  - backups
+  - contact
+  - decisions
+  - links
+  - mcp
+  - media
+  - posts
+  - projects
+  - public
+  - record
+  - saved_views
+  - search
+  - security
+  - social
+  - suggestions
+  - tags
+  - tasks
 issue: "#718"
-amended: ["#957", "#1171", "#1575"]
-tags: [layout, hanami, lib, app, rom, plugins, operations, contracts, structs, enums, helpers, markdown]
+amended:
+  - "#957"
+  - "#1171"
+  - "#1575"
+tags:
+  - layout
+  - hanami
+  - lib
+  - app
+  - rom
+  - plugins
+  - operations
+  - contracts
+  - structs
+  - enums
+  - helpers
+  - markdown
 ---
 
 # ADR 0126: Keep only base classes and gem wrappers in `lib`, and give the rest a Hanami shape

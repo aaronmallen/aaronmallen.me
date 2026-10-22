@@ -3,10 +3,30 @@ id: "0116"
 title: Build the tag summary in the tags slice from each kind's tag lookup
 status: active
 created: 2026-10-06
-area: [admin, api, mcp, decisions, posts, projects, record, tags, tasks]
+area:
+  - admin
+  - api
+  - mcp
+  - decisions
+  - posts
+  - projects
+  - record
+  - tags
+  - tasks
 issue: "#626"
-amended: ["#1612", "#1846"]
-tags: [tags, summary, scope, slices, exports, activity, view, admin, mcp]
+amended:
+  - "#1612"
+  - "#1846"
+tags:
+  - tags
+  - summary
+  - scope
+  - slices
+  - exports
+  - activity
+  - view
+  - admin
+  - mcp
 ---
 
 # ADR 0116: Build the tag summary in the tags slice from each kind's tag lookup

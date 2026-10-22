@@ -3,10 +3,25 @@ id: "0146"
 title: Keep health data in a health slice as daily summaries and workouts polled from Google
 status: active
 created: 2026-10-11
-area: [config, db, record, services]
+area:
+  - config
+  - db
+  - record
+  - services
 issue: "#1111"
-amended: ["#1121"]
-tags: [health, google, slices, sync, polling, webhooks, sleep, workouts, privacy, time-zone]
+amended:
+  - "#1121"
+tags:
+  - health
+  - google
+  - slices
+  - sync
+  - polling
+  - webhooks
+  - sleep
+  - workouts
+  - privacy
+  - time-zone
 ---
 
 # ADR 0146: Keep health data in a health slice as daily summaries and workouts polled from Google

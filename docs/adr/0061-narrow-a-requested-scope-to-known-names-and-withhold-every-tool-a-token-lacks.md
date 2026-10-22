@@ -3,10 +3,22 @@ id: "0061"
 title: Narrow a requested scope to known names and withhold every tool a token lacks
 status: active
 created: 2026-09-28
-area: [mcp, lib]
+area:
+  - mcp
+  - lib
 issue: AA-677
-amended: [AA-811, "#551", "#941", "#1823"]
-tags: [mcp, oauth, scopes, tools, consent, sdk]
+amended:
+  - AA-811
+  - "#551"
+  - "#941"
+  - "#1823"
+tags:
+  - mcp
+  - oauth
+  - scopes
+  - tools
+  - consent
+  - sdk
 ---
 
 # ADR 0061: Narrow a requested scope to known names and withhold every tool a token lacks

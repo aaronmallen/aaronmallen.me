@@ -3,10 +3,23 @@ id: "0165"
 title: Keep task recurrence in a series beside tasks, and copy the last task when it closes
 status: active
 created: 2026-10-14
-area: [db, tasks, admin, api, mcp]
+area:
+  - db
+  - tasks
+  - admin
+  - api
+  - mcp
 issue: "#1275"
-amended: ["#1768"]
-tags: [tasks, recurrence, series, cadence, schema, sprints, jobs]
+amended:
+  - "#1768"
+tags:
+  - tasks
+  - recurrence
+  - series
+  - cadence
+  - schema
+  - sprints
+  - jobs
 ---
 
 # ADR 0165: Keep task recurrence in a series beside tasks, and copy the last task when it closes

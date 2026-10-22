@@ -3,10 +3,21 @@ id: "0191"
 title: Cap web queries with a statement timeout set on each request
 status: active
 created: 2026-10-18
-area: [config, lib]
+area:
+  - config
+  - lib
 issue: "#1795"
-amended: ["#1787"]
-tags: [postgres, statement-timeout, puma, sidekiq, migrations, backups, connections, request-connection]
+amended:
+  - "#1787"
+tags:
+  - postgres
+  - statement-timeout
+  - puma
+  - sidekiq
+  - migrations
+  - backups
+  - connections
+  - request-connection
 ---
 
 # ADR 0191: Cap web queries with a statement timeout set on each request

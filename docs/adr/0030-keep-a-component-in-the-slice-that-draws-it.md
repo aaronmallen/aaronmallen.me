@@ -3,10 +3,25 @@ id: "0030"
 title: Keep a component in the slice that draws it
 status: active
 created: 2026-09-28
-area: [lib, admin, public, mcp]
+area:
+  - lib
+  - admin
+  - public
+  - mcp
 issue: AA-672
-amended: [AA-783, AA-809, "#17", "#1041", "#1797"]
-tags: [phlex, components, kit, ui, slices, kernel]
+amended:
+  - AA-783
+  - AA-809
+  - "#17"
+  - "#1041"
+  - "#1797"
+tags:
+  - phlex
+  - components
+  - kit
+  - ui
+  - slices
+  - kernel
 ---
 
 # ADR 0030: Keep a component in the slice that draws it

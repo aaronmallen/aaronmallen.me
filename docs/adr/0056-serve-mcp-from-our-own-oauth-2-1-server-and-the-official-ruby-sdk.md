@@ -3,10 +3,33 @@ id: "0056"
 title: Serve MCP from our own OAuth 2.1 server and the official Ruby SDK
 status: active
 created: 2026-09-28
-area: [config, mcp, admin]
+area:
+  - config
+  - mcp
+  - admin
 issue: AA-262
-amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153", "#551", "#932", "#941"]
-tags: [mcp, auth, oauth, github, tokens, claude, scopes]
+amended:
+  - AA-348
+  - AA-390
+  - AA-408
+  - AA-480
+  - AA-525
+  - AA-537
+  - AA-663
+  - AA-809
+  - AA-824
+  - "#153"
+  - "#551"
+  - "#932"
+  - "#941"
+tags:
+  - mcp
+  - auth
+  - oauth
+  - github
+  - tokens
+  - claude
+  - scopes
 ---
 
 # ADR 0056: Serve MCP from our own OAuth 2.1 server and the official Ruby SDK

@@ -3,12 +3,53 @@ id: "0021"
 title: Let SQL read another slice's tables, never write them
 status: active
 created: 2026-09-28
-area: [activity, analytics, contact, db, decisions, lib, links, posts, search, social, tags, tasks]
+area:
+  - activity
+  - analytics
+  - contact
+  - db
+  - decisions
+  - lib
+  - links
+  - posts
+  - search
+  - social
+  - tags
+  - tasks
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818",
-  "#954", "#1013", "#957", "#911", "#1115",
-  "#1118", "#1139", "#1324", "#1749", "#1797"]
-tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
+amended:
+  - AA-792
+  - AA-809
+  - AA-824
+  - "#17"
+  - "#351"
+  - "#302"
+  - "#342"
+  - "#319"
+  - "#305"
+  - "#353"
+  - "#394"
+  - "#706"
+  - "#818"
+  - "#954"
+  - "#1013"
+  - "#957"
+  - "#911"
+  - "#1115"
+  - "#1118"
+  - "#1139"
+  - "#1324"
+  - "#1749"
+  - "#1797"
+tags:
+  - slices
+  - sql
+  - postgres
+  - views
+  - triggers
+  - tags
+  - exports
+  - guards
 ---
 
 # ADR 0021: Let SQL read another slice's tables, never write them

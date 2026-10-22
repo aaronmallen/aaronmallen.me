@@ -3,11 +3,25 @@ id: "0102"
 title: Count each post's unique readers with an undated hash kept for 12 months
 status: active
 created: 2026-10-03
-area: [analytics, public, admin, config, db]
-supersedes: ["0045"]
+area:
+  - analytics
+  - public
+  - admin
+  - config
+  - db
+supersedes:
+  - "0045"
 issue: "#371"
-amended: ["#463"]
-tags: [analytics, privacy, gdpr, legitimate-interest, unique-readers, retention, salt]
+amended:
+  - "#463"
+tags:
+  - analytics
+  - privacy
+  - gdpr
+  - legitimate-interest
+  - unique-readers
+  - retention
+  - salt
 ---
 
 # ADR 0102: Count each post's unique readers with an undated hash kept for 12 months

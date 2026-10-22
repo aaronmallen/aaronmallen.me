@@ -3,11 +3,27 @@ id: "0027"
 title: Fail a contract with a code and let the view word it
 status: superseded
 created: 2026-09-28
-area: [lib, admin, api, public, mcp]
+area:
+  - lib
+  - admin
+  - api
+  - public
+  - mcp
 superseded-by: "0140"
 issue: AA-662
-amended: ["#17", "#255", "#606", "#960", "#1002"]
-tags: [contracts, validation, errors, i18n, dry-validation, forms]
+amended:
+  - "#17"
+  - "#255"
+  - "#606"
+  - "#960"
+  - "#1002"
+tags:
+  - contracts
+  - validation
+  - errors
+  - i18n
+  - dry-validation
+  - forms
 ---
 
 # ADR 0027: Fail a contract with a code and let the view word it

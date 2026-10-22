@@ -3,10 +3,34 @@ id: "0020"
 title: Keep locks, throttles and claims in Postgres, not Redis
 status: active
 created: 2026-09-28
-area: [lib, record, contact, mcp, analytics, social, tasks, search, security]
+area:
+  - lib
+  - record
+  - contact
+  - mcp
+  - analytics
+  - social
+  - tasks
+  - search
+  - security
 issue: AA-644
-amended: [AA-823, "#200", "#585", "#988", "#957", "#1468", "#1759", "#1789"]
-tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
+amended:
+  - AA-823
+  - "#200"
+  - "#585"
+  - "#988"
+  - "#957"
+  - "#1468"
+  - "#1759"
+  - "#1789"
+tags:
+  - postgres
+  - redis
+  - advisory-lock
+  - throttle
+  - upsert
+  - concurrency
+  - sidekiq
 ---
 
 # ADR 0020: Keep locks, throttles and claims in Postgres, not Redis

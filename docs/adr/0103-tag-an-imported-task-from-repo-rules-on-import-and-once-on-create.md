@@ -3,10 +3,24 @@ id: "0103"
 title: Tag an imported task from repo rules on import, and once when a rule is created
 status: active
 created: 2026-10-03
-area: [db, record, tasks]
+area:
+  - db
+  - record
+  - tasks
 issue: "#389"
-amended: ["#506", "#660"]
-tags: [tasks, tags, rules, imports, sync, github, linear, providers, repos]
+amended:
+  - "#506"
+  - "#660"
+tags:
+  - tasks
+  - tags
+  - rules
+  - imports
+  - sync
+  - github
+  - linear
+  - providers
+  - repos
 ---
 
 # ADR 0103: Tag an imported task from repo rules on import, and once when a rule is created
