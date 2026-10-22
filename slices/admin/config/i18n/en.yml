@@ -3613,6 +3613,7 @@ en:
           scope: "Scope"
         sessions:
           empty: "No agent has opened a session yet."
+          every_project: "Every project"
           heading: "Agents"
           label: "Sessions by day"
           lede:
@@ -3626,6 +3627,8 @@ en:
               one: "%{count} session today"
               other: "%{count} sessions today"
               zero: "No sessions today"
+          project: "Project"
+          show: "Show"
       analytics:
         show:
           down: "down %{percent}% on the previous %{count} days"

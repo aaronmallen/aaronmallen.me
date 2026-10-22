@@ -6,8 +6,10 @@ module Admin
       module Agents
         class SessionRow < Component
           OWNER_SEPARATOR = "/"
+          PROJECT_ICON = "fa-solid fa-cube"
 
           prop :session, Blog::Types::Instance(ROM::Struct)
+          prop :project, Blog::Types::String.optional
           prop :place, Blog::Types::Hash
 
           def view_template
@@ -35,6 +37,7 @@ module Admin
           def meta
             span { period }
             span(title: t(".via", agent: @session.agent)) { Helpers::AgentBrand.model(@session.model) }
+            project
             repo
             counts
           end
@@ -44,6 +47,16 @@ module Admin
             to = @session.ended_at ? clock(@session.ended_at) : t(".now")
 
             t(".span", from:, to:)
+          end
+
+          def project
+            return unless @project
+
+            span do
+              Icon(PROJECT_ICON)
+              whitespace
+              plain @project
+            end
           end
 
           def repo

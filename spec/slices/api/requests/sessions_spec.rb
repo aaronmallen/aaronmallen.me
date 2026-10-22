@@ -33,6 +33,15 @@ RSpec.describe "API sessions", type: :request do
     expect(call_api(:get, "/agent_sessions").fetch("sessions").first).to include(walked(file))
   end
 
+  it "filters the list by the project a session ran in" do
+    project = create(:project, repo: "aaronmallen/blog")
+    inside = call_api(:post, "/agent_sessions", { title: "Spike", repo: "aaronmallen/blog", **author })
+    call_api(:post, "/agent_sessions", { title: "Spike", **author })
+    listed = call_api(:get, "/agent_sessions", { project_id: project.id }).fetch("sessions")
+
+    expect(listed.map { it.values_at("id", "project_id") }).to eq([[inside.fetch("session_id"), project.id]])
+  end
+
   it "records the files a session reads and searches" do
     file = noted_file
     call_api(:get, "/memory_files/#{file}", { session_id: })

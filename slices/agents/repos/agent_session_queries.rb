@@ -15,9 +15,14 @@ module Agents
 
       def ended?(id) = agent_sessions.by_pk(id).exclude(ended_at: nil).exist?
 
-      def listed(page) = page.fill(agent_sessions.combine(*LISTED).latest_first.paged(page).to_a)
+      def listed(page, project_id: nil)
+        found = project_id ? agent_sessions.where(project_id:) : agent_sessions
+        page.fill(found.combine(*LISTED).latest_first.paged(page).to_a)
+      end
 
       def memory_changes(session_id) = memory_events.where(session_id:).session_changes.to_a
+
+      def project_ids = agent_sessions.dataset.unordered.exclude(project_id: nil).distinct.select_map(:project_id)
 
       def span
         first = agent_sessions.dataset.unordered.min(:started_at)

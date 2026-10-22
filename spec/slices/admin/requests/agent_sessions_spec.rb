@@ -28,6 +28,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
   before { sign_in_to_admin }
 
   describe "the list" do
+    let!(:project) { create(:project, name: "The blog", repo: "aaronmallen/blog") }
     let!(:running) do
       start("Index the activities table", client: "Claude Code 2.4", repo: "aaronmallen/blog", branch: "index")
     end
@@ -57,11 +58,36 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       expect(page.all(".agent-days .li").last).to have_css(".li-side", text: "30m")
     end
 
-    it "names the brand, repo, branch and counts on a row" do
+    it "names the brand, project, repo, branch and counts on a row" do
       spans = page.find("#agent-session-#{running} .task-meta").all("span").map { it.text.strip }
       counts = ["0 files read", "0 searches", "2 memory changes", "1 artifact"]
 
-      expect(spans).to match([/\A\d{1,2}:\d{2}–now\z/, "Anthropic claude-opus-5-5", "blog @ index", *counts])
+      expect(spans)
+        .to match([/\A\d{1,2}:\d{2}–now\z/, "Anthropic claude-opus-5-5", "The blog", "blog @ index", *counts])
+    end
+
+    it "marks the project with its icon" do
+      expect(page.find("#agent-session-#{running} .task-meta span", text: "The blog")).to have_css("i.fa-cube")
+    end
+
+    it "offers the projects sessions ran in as a filter" do
+      expect(page.find("select[name='project']").all("option").map { [it.value, it.text] })
+        .to eq([["", "Every project"], [project.id.to_s, "The blog"]])
+    end
+
+    it "lists only the sessions of the project it filters by", :aggregate_failures do
+      get "/admin/agents/sessions", { project: project.id }
+
+      expect(page.all(".agent-days .li").size).to eq(1)
+      expect(page).to have_css("#agent-session-#{running}")
+      expect(page.find("select[name='project'] option[selected]").value).to eq(project.id.to_s)
+    end
+
+    it "keeps the project filter on each row's link" do
+      get "/admin/agents/sessions", { project: project.id }
+
+      expect(page.find("#agent-session-#{running} a.li-title")["href"])
+        .to eq("/admin/agents/sessions?project=#{project.id}&session=#{running}")
     end
 
     it "marks the repo with the GitHub icon and the brand with the agent", :aggregate_failures do
@@ -115,6 +141,15 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
     it "names the agent, model and client" do
       expect(drawer.find(".agent-session-meta").all("span").map(&:text).first(2))
         .to eq(["claude-code on Anthropic claude-opus-5-5", "via Claude Code 2.4"])
+    end
+
+    it "shows the project, repo and branch, and links the project to its sessions", :aggregate_failures do
+      project = create(:project, name: "The blog", repo: "aaronmallen/blog")
+      get "/admin/agents/sessions", { session: start("Spike", repo: project.repo, branch: "index") }
+      meta = drawer.find(".agent-session-meta")
+
+      expect(meta.all(:xpath, "./*").map { it.text.strip }[1, 2]).to eq(["The blog", "aaronmallen/blog @ index"])
+      expect(meta).to have_link("The blog", href: "/admin/agents/sessions?project=#{project.id}")
     end
 
     it "keys the tasks it worked on" do

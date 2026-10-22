@@ -1886,6 +1886,7 @@ CREATE TABLE public.agent_sessions (
     started_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ended_at timestamp with time zone,
+    project_id integer,
     CONSTRAINT agent_sessions_branch_length_check CHECK ((char_length((branch)::text) <= 255)),
     CONSTRAINT agent_sessions_client_length_check CHECK ((char_length((client)::text) <= 200)),
     CONSTRAINT agent_sessions_title_length_check CHECK ((char_length((title)::text) <= 200))
@@ -6674,6 +6675,13 @@ CREATE INDEX agent_sessions_open_index ON public.agent_sessions USING btree (las
 
 
 --
+-- Name: agent_sessions_project_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX agent_sessions_project_id_index ON public.agent_sessions USING btree (project_id);
+
+
+--
 -- Name: agent_sessions_started_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -8912,6 +8920,14 @@ ALTER TABLE ONLY public.agent_session_tasks
 
 
 --
+-- Name: agent_sessions agent_sessions_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.agent_sessions
+    ADD CONSTRAINT agent_sessions_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE SET NULL;
+
+
+--
 -- Name: analytics_clicks analytics_clicks_event_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9897,4 +9913,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261021030000_create_agent_session_index_lines.rb'),
 ('20261021110000_drop_short_code_length.rb'),
 ('20261021120000_create_agent_session_searches.rb'),
-('20261021140000_create_agent_session_reads.rb');
+('20261021140000_create_agent_session_reads.rb'),
+('20261021200000_add_project_id_to_agent_sessions.rb');

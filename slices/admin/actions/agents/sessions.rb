@@ -5,28 +5,38 @@ module Admin
     module Agents
       class Sessions < Action
         include Deps[
-          agent_session_queries: "agents.repos.agent_session_queries", task_queries: "tasks.repos.task_queries",
+          agent_session_queries: "agents.repos.agent_session_queries",
+          project_queries: "projects.repos.project_queries",
+          task_queries: "tasks.repos.task_queries",
         ]
 
         def handle(request, response)
-          page = Blog::Structs::Page.new(number: page_number(request), size: page_size)
+          projects = project_queries.by_ids(agent_session_queries.project_ids).to_h { [it.id, it.name] }
 
           response.render(
             view,
-            sessions: agent_session_queries.listed(page), counts: agent_session_queries.today_counts,
-            span: agent_session_queries.span,
-            open: opened(Blog::Types::IdParam[request.params[:session]]), today: Blog::TimeZone.today,
+            counts: agent_session_queries.today_counts, span: agent_session_queries.span, projects:,
+            open: opened(request, projects), today: Blog::TimeZone.today, **listing(request),
           )
         end
 
         private
 
-        def opened(id)
+        def listing(request)
+          page = Blog::Structs::Page.new(number: page_number(request), size: page_size)
+          project = Blog::Types::IdParam[request.params[:project]]
+
+          { sessions: agent_session_queries.listed(page, project_id: project), project: }
+        end
+
+        def opened(request, projects)
+          id = Blog::Types::IdParam[request.params[:session]]
           session = id && agent_session_queries.by_id(id)
           return unless session
 
           {
-            session:, tasks: tasks(session), memory_changes: agent_session_queries.memory_changes(id),
+            session:, project: projects[session.project_id], tasks: tasks(session),
+            memory_changes: agent_session_queries.memory_changes(id),
             artifacts: agent_session_queries.artifact_writes(id),
           }
         end

@@ -10,6 +10,7 @@ module Admin
           SHOW = { dialog_show: true }.freeze
 
           prop :session, Blog::Types::Instance(ROM::Struct)
+          prop :project, Blog::Types::String.optional
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :memory_changes, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :artifacts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -88,6 +89,8 @@ module Admin
           def meta
             span { t(".who", agent: @session.agent, model: Helpers::AgentBrand.model(@session.model)) }
             span { t(".via", client: @session.client) } if @session.client
+            href = path(:admin_agent_sessions, project: @session.project_id)
+            a(href:, class: "tap-target") { IconLabel(icon: SessionRow::PROJECT_ICON) { @project } } if @project
             repo
             span { period }
           end

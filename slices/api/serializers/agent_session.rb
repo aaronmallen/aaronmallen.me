@@ -13,6 +13,9 @@ module API
           agent: TEXT.merge(description: "the agent that opened it"),
           model: TEXT.merge(description: "the model the agent ran on"),
           client: Helpers::Schema.nullable(TEXT.merge(description: "the client the agent ran in#{MARKED}")),
+          project_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER).merge(
+            description: "the project it ran in; null when it named none, or its project was deleted",
+          ),
           repo: Helpers::Schema.nullable(Helpers::Schema::REPO),
           branch: Helpers::Schema.nullable(TEXT.merge(description: "the branch it worked on#{MARKED}")),
           task_ids: Helpers::Schema.list(Helpers::Schema::INTEGER).merge(description: "the tasks it worked on"),

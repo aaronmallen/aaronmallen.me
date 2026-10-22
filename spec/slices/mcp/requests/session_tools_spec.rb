@@ -55,6 +55,19 @@ RSpec.describe "MCP session tools", type: :request do
       expect(paths).to eq(%w[preferences.md release.md])
     end
 
+    it "records the project its repo or key names" do
+      started
+      start(project: project.key)
+
+      expect(sessions.map { it.fetch("project_id") }).to eq([project.id, project.id])
+    end
+
+    it "records no project when it names neither" do
+      start
+
+      expect(sessions.first.fetch("project_id")).to be_nil
+    end
+
     it "refuses a project key that names no project" do
       mcp_call("start_session", title: "Spike", **author, project: "NOPE")
 
@@ -73,6 +86,10 @@ RSpec.describe "MCP session tools", type: :request do
           .to eq([made])
       end
 
+      it "records that project on the session" do
+        expect(sessions.first.fetch("project_id")).to eq(made)
+      end
+
       it "loads that project's files on the next session" do
         create_file("fresh-notes", scope: "project", project_id: made)
 
@@ -86,6 +103,26 @@ RSpec.describe "MCP session tools", type: :request do
 
       expect(sessions.first)
         .to include("id" => id, "branch" => "activities-index", "task_ids" => [task.id], "loaded" => [])
+    end
+  end
+
+  describe "list_sessions" do
+    let(:project) { create(:project, repo: "aaronmallen/blog") }
+    let(:inside) { start(repo: project.repo).fetch("session_id") }
+
+    before do
+      inside
+      start(repo: "aaronmallen/other")
+    end
+
+    it "lists only the sessions of the project it names" do
+      listed = mcp_answer("list_sessions", project_id: project.id).fetch("sessions")
+
+      expect(listed.map { it.fetch("id") }).to eq([inside])
+    end
+
+    it "lists every session without a project" do
+      expect(sessions.length).to eq(2)
     end
   end
 
