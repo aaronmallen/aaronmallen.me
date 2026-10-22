@@ -22,7 +22,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       "write" => %w[
         accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_session
         archive_project cancel_task cancel_tasks capture_task
-        clear_inbox
+        check_post_links check_short_link clear_inbox
         complete_task complete_tasks
         create_event
         create_journal_entry create_post create_saved_view create_social_post
@@ -33,7 +33,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         link_tasks mark_task_seen mark_webmentions_spam
         moderate_webmention move_event move_task move_tasks open_decision pause_task pause_task_series plan_sprint
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project
-        resume_task_series save_person
+        resume_task_series run_link_check save_person
         save_project save_review_note save_tag save_task save_task_rule schedule_task set_task_total
         snooze_attention
         snooze_inbox

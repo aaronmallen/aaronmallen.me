@@ -57,8 +57,8 @@ module API
 
     import keys: %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.publish_draft
-      operations.revise_edit_note operations.save_post operations.save_post_seo repos.post_figure_queries
-      repos.post_queries
+      operations.queue_link_check operations.queue_link_check_run operations.revise_edit_note operations.save_post
+      operations.save_post_seo repos.post_figure_queries repos.post_queries
     ], from: :posts
 
     import keys: %w[
@@ -81,10 +81,10 @@ module API
 
     import keys: %w[
       operations.add_shares_to_group operations.delete_share operations.delete_share_group operations.group_shares
-      operations.name_share_group operations.remove_share_group_file operations.rename_share_file
-      operations.save_share operations.save_short_link operations.shorten_link operations.ungroup_share_file
-      operations.upload_share operations.upload_share_group repos.share_group_queries repos.share_queries
-      repos.short_link_queries
+      operations.name_share_group operations.queue_short_link_check operations.remove_share_group_file
+      operations.rename_share_file operations.save_share operations.save_short_link operations.shorten_link
+      operations.ungroup_share_file operations.upload_share operations.upload_share_group repos.share_group_queries
+      repos.share_queries repos.short_link_queries
     ], from: :shares
 
     import keys: %w[
