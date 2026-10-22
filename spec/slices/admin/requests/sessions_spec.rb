@@ -31,6 +31,8 @@ RSpec.describe "Admin sessions", type: :request do
 
   def cookie_session = Spec::AdminSession.encryptor.decrypt(session_cookie.value)
 
+  def device_cookie = rack_mock_session.cookie_jar.get_cookie(Blog::DeviceCookie::KEY)
+
   def live_session_cookie?
     !session_cookie.nil? && !session_cookie.expired?
   end
@@ -664,6 +666,66 @@ RSpec.describe "Admin sessions", type: :request do
       it "renders an error page" do
         expect(last_response.status).to eq(502)
       end
+    end
+  end
+
+  describe "the device cookie" do
+    let(:devices) { Security::Slice["db.rom"].gateways[:default].connection[:devices] }
+
+    it "sets one on sign-in that names the new device and only /admin reads", :aggregate_failures do
+      sign_in
+
+      expect([device_cookie.value, device_cookie.path]).to eq([devices.get(:id), "/admin"])
+      expect(device_cookie).to be_http_only
+    end
+
+    it "sets one that lives 400 days" do
+      now = Time.at(Time.now.to_i)
+      allow(Time).to receive(:now).and_return(now)
+      sign_in
+
+      expect(device_cookie.expires).to eq(now + (400 * 24 * 60 * 60))
+    end
+
+    it "keeps the one a browser already holds" do
+      sign_in
+      held = device_cookie.value
+      post "/admin/sign-out", _csrf_token: admin_csrf_token
+      sign_in
+
+      expect([device_cookie.value, devices.count]).to eq([held, 1])
+    end
+
+    it "swaps an ID that names no device for a fresh one", :aggregate_failures do
+      guessed = SecureRandom.uuid
+      set_cookie "#{Blog::DeviceCookie::KEY}=#{guessed}; path=/admin"
+      sign_in
+
+      expect(device_cookie.value).not_to eq(guessed)
+      expect(devices.select_map(:id)).to eq([device_cookie.value])
+    end
+
+    it "swaps a value that is no ID for a fresh one" do
+      set_cookie "#{Blog::DeviceCookie::KEY}=not-an-id; path=/admin"
+      sign_in
+
+      expect(devices.select_map(:id)).to eq([device_cookie.value])
+    end
+
+    it "stays when signing out" do
+      sign_in
+      held = device_cookie.value
+      post "/admin/sign-out", _csrf_token: admin_csrf_token
+
+      expect(device_cookie.value).to eq(held)
+    end
+
+    it "is neither sent to nor set by a public page", :aggregate_failures do
+      sign_in
+      get "/"
+
+      expect(last_request.cookies).not_to have_key(Blog::DeviceCookie::KEY)
+      expect(last_response.headers["set-cookie"].to_s).not_to include(Blog::DeviceCookie::KEY)
     end
   end
 

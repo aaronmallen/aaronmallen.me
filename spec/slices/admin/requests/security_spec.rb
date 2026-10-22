@@ -10,6 +10,8 @@ RSpec.describe "Admin security", type: :request do
 
   def credential(name) = page.find(".security-cred", text: name)
 
+  def device(**row) = database[:devices].returning(:id).insert(browser: "Safari", os: "iOS", **row).first[:id]
+
   def settings_tabs = page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { it["href"] }
 
   def sight(**row)
@@ -83,6 +85,53 @@ RSpec.describe "Admin security", type: :request do
       get "/admin/settings/security"
       expect(page).to have_css(".settings-aside", exact_text: Admin::Slice["i18n"].t("ui.views.security.show.sub"))
       expect([card("Sign-ins"), credential("Terminal")]).to all(have_css(".li"))
+    end
+
+    describe "a browser that signed in three times" do
+      let!(:phone) { device(last_signed_in_at: Time.now - 60) }
+
+      before do
+        sign_in_row(device_id: phone, city: "Austin", country: "US", created_at: Time.now - 3600)
+        sign_in_row(device_id: phone, city: "Austin", country: "US", created_at: Time.now - 600)
+        sign_in_row(device_id: phone, provider: "google", city: "Paris", country: "FR", address: "203.0.113.9",
+                    created_at: Time.now - 60)
+        get "/admin/settings/security"
+      end
+
+      it "shows as one device row" do
+        expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Safari · iOS"])
+      end
+
+      it "shows the place and time of its last sign-in", :aggregate_failures do
+        row = card("Sign-ins").find(".li")
+
+        expect(row).to have_text("Google · Paris · FR · 203.0.113.9")
+        expect(Time.iso8601(row.find("time")["datetime"])).to be_within(2).of(Time.now - 60)
+        expect(row).to have_css(".pill.green", exact_text: "signed in")
+      end
+    end
+
+    it "shows two browsers as two device rows, last signed in first" do
+      device(browser: "Firefox", os: "Linux", last_signed_in_at: Time.now - 600)
+      device(last_signed_in_at: Time.now - 60)
+      get "/admin/settings/security"
+
+      expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Safari · iOS", "Firefox · Linux"])
+    end
+
+    it "lists a device's failed sign-in beside it" do
+      phone = device(last_signed_in_at: Time.now)
+      sign_in_row(device_id: phone, browser: "Safari", os: "iOS", outcome: "denied")
+      get "/admin/settings/security"
+
+      expect(card("Sign-ins").all(".pill").map(&:text)).to eq(["signed in", "denied"])
+    end
+
+    it "names a device whose sign-ins were pruned" do
+      device(browser: nil, os: nil, last_signed_in_at: Time.now - (100 * 24 * 60 * 60))
+      get "/admin/settings/security"
+
+      expect(card("Sign-ins").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
     end
 
     it "lists sign-ins newest first" do

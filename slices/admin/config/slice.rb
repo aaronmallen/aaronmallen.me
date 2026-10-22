@@ -110,6 +110,7 @@ module Admin
 
     import keys: %w[
       operations.record_sign_in
+      repos.device_queries
       repos.sighting_queries
       repos.sign_in_queries
     ], from: :security

@@ -7,10 +7,11 @@ module Admin
         class Show < View
           include Components::Security
 
-          LIVE_TABLES = %w[oauth_clients oauth_tokens sign_ins].freeze
+          LIVE_TABLES = %w[devices oauth_clients oauth_tokens sign_ins].freeze
           ROWS = Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           prop :clients, ROWS
+          prop :devices, ROWS
           prop :honeybadger_url, Blog::Types::String.optional
           prop :sightings, ROWS
           prop :sign_ins, Blog::Types::Instance(Blog::Structs::Paged)
@@ -58,7 +59,9 @@ module Admin
           def sighted = @sighted ||= @sightings.group_by { [it.api_token_id, it.oauth_client_id] }
 
           def sign_ins
-            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if @sign_ins.rows.empty?)) do
+            empty = @devices.empty? && @sign_ins.rows.empty?
+            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if empty)) do
+              @devices.each { DeviceRow(device: it) }
               @sign_ins.rows.each { SignInRow(sign_in: it) }
               Pager(page: @sign_ins, route: :admin_security)
             end

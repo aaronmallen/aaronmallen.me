@@ -19,6 +19,8 @@ module Security
       def created_before(time) = where { created_at < time }
 
       def failed = exclude(outcome: SIGNED_IN)
+
+      def outside_devices = where(Sequel.|({ device_id: nil }, Sequel.~(outcome: SIGNED_IN)))
     end
   end
 end

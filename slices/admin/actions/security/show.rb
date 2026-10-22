@@ -9,6 +9,7 @@ module Admin
           api_token_queries: "api.repos.api_token_queries",
           build_settings_tabs: "operations.build_settings_tabs",
           client_queries: "api.repos.client_queries",
+          device_queries: "security.repos.device_queries",
           sighting_queries: "security.repos.sighting_queries",
           sign_in_queries: "security.repos.sign_in_queries",
         ]
@@ -20,6 +21,7 @@ module Admin
           response.render(
             view,
             **credentials,
+            devices: device_queries.newest_first,
             honeybadger_url: settings.honeybadger[:project_url],
             sign_ins:,
             tabs: build_settings_tabs.call,

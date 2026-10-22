@@ -51,4 +51,11 @@ RSpec.describe Security::Jobs::PruneAccessRecords, type: :request do
 
     expect(database[:known_devices].select_map(:city)).to eq(["London"])
   end
+
+  it "deletes a device whose last sign-in is more than 400 days old and keeps a newer one" do
+    database[:devices].insert(browser: "Old", last_signed_in_at: Time.now - (401 * day))
+    database[:devices].insert(browser: "New", last_signed_in_at: Time.now - (399 * day))
+
+    expect { prune }.to change { database[:devices].select_map(:browser) }.to(["New"])
+  end
 end

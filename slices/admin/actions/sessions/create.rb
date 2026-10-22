@@ -68,14 +68,19 @@ module Admin
           end
         end
 
-        def record(request, outcome) = record_sign_in.call(request, outcome, provider: request.params[:provider].to_sym)
+        def record(request, outcome)
+          record_sign_in.call(
+            request, outcome, provider: request.params[:provider].to_sym, device: request.cookies[Blog::DeviceCookie::KEY],
+          )
+        end
 
         def sign_in_client(provider) = { "github" => github, "google" => google }[provider]
 
         def sign_in_required? = false
 
         def signed_in(request, response, email)
-          record(request, :signed_in)
+          device = record(request, :signed_in)
+          response.set_cookie(Blog::DeviceCookie::KEY, Blog::DeviceCookie.cookie(device))
           path = auth_session(request).sign_in(email)
           response.redirect_to(path || routes.path(:admin_root))
         end

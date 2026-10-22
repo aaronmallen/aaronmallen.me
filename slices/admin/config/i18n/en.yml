@@ -2538,6 +2538,8 @@ en:
         label: "Saved views"
         save: "Save view"
       security:
+        device_row:
+          signed_in: "signed in"
         sighting_row:
           calls:
             one: "%{count} call"
@@ -4170,7 +4172,7 @@ en:
           no_sightings: "Nothing has used it yet."
           no_sign_ins: "No sign-ins yet."
           sign_ins: "Sign-ins"
-          sub: "Every sign-in, failed ones too, and where each token and client has called from."
+          sub: "Each browser you signed in from, each failed sign-in, and where each token and client has called from."
           token: "API token"
       services:
         menu:

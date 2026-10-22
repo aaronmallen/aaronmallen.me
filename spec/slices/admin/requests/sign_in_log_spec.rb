@@ -23,6 +23,8 @@ RSpec.describe "Admin sign-in log", type: :request do
     get "/admin/auth/github/callback", params, headers(user_agent)
   end
 
+  def devices = Security::Slice["db.rom"].gateways[:default].connection[:devices]
+
   def headers(user_agent) = { "HTTP_USER_AGENT" => user_agent, "HTTP_CF_CONNECTING_IP" => address }
 
   def recorded
@@ -80,6 +82,48 @@ RSpec.describe "Admin sign-in log", type: :request do
 
         expect(sign_ins.select(:browser, :os).first).to eq(browser:, os:)
       end
+    end
+  end
+
+  describe "signing in from one browser three times" do
+    before { 3.times { sign_in } }
+
+    it "names one device on every sign-in", :aggregate_failures do
+      expect(devices.count).to eq(1)
+      expect(sign_ins.select_map(:device_id)).to eq([devices.get(:id)] * 3)
+    end
+
+    it "keeps the device's browser and last sign-in time", :aggregate_failures do
+      expect(devices.select(:browser, :os).first).to eq(browser: "Chrome", os: "macOS")
+      expect(devices.get(:last_signed_in_at)).to be_within(1).of(sign_ins.max(:created_at))
+    end
+  end
+
+  describe "signing in from two browsers" do
+    it "names two devices" do
+      sign_in
+      clear_cookies
+      sign_in(user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0")
+
+      expect(devices.select_order_map(:browser)).to eq(%w[Chrome Firefox])
+    end
+  end
+
+  describe "a failed callback from a known device" do
+    it "names the device on the failure" do
+      sign_in
+      callback(error: "access_denied", state: start_sign_in)
+
+      expect(sign_ins.where(outcome: "denied").get(:device_id)).to eq(devices.get(:id))
+    end
+  end
+
+  describe "a failed callback from a browser with no device" do
+    it "records no device", :aggregate_failures do
+      callback(error: "access_denied", state: start_sign_in)
+
+      expect(sign_ins.get(:device_id)).to be_nil
+      expect(devices.count).to eq(0)
     end
   end
 
