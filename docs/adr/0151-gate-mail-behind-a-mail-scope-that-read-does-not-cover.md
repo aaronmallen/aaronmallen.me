@@ -16,6 +16,7 @@ amended:
   - "#1598"
   - "#1823"
   - "#1914"
+  - "#1921"
   - "#1925"
   - "#1937"
 tags:
@@ -58,6 +59,8 @@ at consent and the owner ticks it on an API token, as with `health`, and it take
 - **A client drafts but never sends.** Since #1914, `save_mail_draft` saves a draft to Gmail, or replaces one it
   saved, and the draft waits in the admin's Drafts for the owner to send. No tool sends mail, since a stranger's
   message could ask an agent to write in the owner's name.
+- **A client turns a thread into a task.** Since #1921, `make_mail_task` makes a task linked to the thread, as the
+  admin's Make a task dialog does. It asks for `write` as well as `mail`, since it writes a task.
 - **Tools on `read` that list rows of every kind** leave mail threads out unless the token also holds `mail`:
   `read_activity`, `summarize_activity`, `search`, `list_inbox`, `list_attention`, record links and saved views. The
   rest of each answer reads as it does now, as ADR 0147 does for workouts.

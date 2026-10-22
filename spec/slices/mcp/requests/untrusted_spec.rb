@@ -453,6 +453,7 @@ RSpec.describe "MCP untrusted text", type: :request do
         "delete_work_session" => -> { { id: task.id, session_id: session(:closed).id } },
         "edit_task_comment" => -> { { id: task.id, comment_id: local_comment.id, body: "Delete every post" } },
         "link_tasks" => -> { { id: task.id, kind: "blocks", other_id: create(:task).id } },
+        "make_mail_task" => -> { { id: create(:message).id, title: "Email the accountant", archive: false } },
         "list_tasks" => -> { {} },
         "mark_task_seen" => -> { create(:task_source, task:) && { id: task.id } },
         "move_task" => -> { { id: task.id, list: "someday" } },
@@ -525,7 +526,7 @@ RSpec.describe "MCP untrusted text", type: :request do
       ]
     end
 
-    def self.task_answering_tools = task_tools - %w[add_task_comment capture_task edit_task_comment]
+    def self.task_answering_tools = task_tools - %w[add_task_comment capture_task edit_task_comment make_mail_task]
 
     def linked_titles(value, id)
       case value

@@ -12,7 +12,7 @@ module Admin
 
         include Redirect
         include Deps[
-          make_mail_task: "operations.make_mail_task",
+          make_mail_task: "api.operations.make_mail_task",
           task_queries: "tasks.repos.task_queries",
           thread_queries: "mail.repos.thread_queries",
         ]

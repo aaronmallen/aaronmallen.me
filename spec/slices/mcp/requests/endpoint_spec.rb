@@ -2357,6 +2357,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "list_trusted_authors" => {},
         "list_webmentions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_work_entries" => { from: "2026-01-01", to: "2026-12-31" },
+        "make_mail_task" => { id: 1, title: "Reply" },
         "mark_mail_thread" => { id: 1, status: "read" },
         "mark_mail_threads_read" => { ids: [1] },
         "mark_mail_threads_unread" => { ids: [1] },

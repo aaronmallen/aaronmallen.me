@@ -125,9 +125,10 @@ module API
 
     export [
       *OperationTable::ENDPOINTS.map { "endpoints.#{it}" }, # rubocop:disable Hanami/SliceExports
-      "operations.clear_inbox", "operations.mint_token", "operations.revoke_token", "operations.snooze_inbox",
-      "operations.snooze_inbox_row", "operations.summarize_analytics", "operations.summarize_page",
-      "operations.wake_inbox_row", "repos.api_token_queries", "repos.client_queries", "repos.inbox_queries",
+      "operations.clear_inbox", "operations.make_mail_task", "operations.mint_token", "operations.revoke_token",
+      "operations.snooze_inbox", "operations.snooze_inbox_row", "operations.summarize_analytics",
+      "operations.summarize_page", "operations.wake_inbox_row", "repos.api_token_queries", "repos.client_queries",
+      "repos.inbox_queries",
     ]
   end
 end

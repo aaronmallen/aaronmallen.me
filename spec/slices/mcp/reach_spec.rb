@@ -60,7 +60,6 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.list_sections" => "lists the admin menu's sections",
       "admin.operations.list_services" => "builds the admin's connected services tab; no tool reads credentials",
       "admin.operations.list_social_accounts" => "lists the admin's accounts for its social screen",
-      "admin.operations.make_mail_task" => "makes a task from the admin's mail reader; link_records covers it",
       "admin.operations.open_journal_entry" => "opens an entry on the admin's journal; read_journal_entry reads it",
       "admin.operations.preview_announcement" => "previews the admin's announcement; compose_announcement writes one",
       "admin.operations.register_mastodon_app" => "registers the site on a Mastodon server as the admin connects it",

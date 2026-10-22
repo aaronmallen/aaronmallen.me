@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Admin
+module API
   module Operations
     class MakeMailTask < Blog::Operation
       ARCHIVE = Blog::Types::MessageBulkAction["archive"]

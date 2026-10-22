@@ -18,6 +18,7 @@ RSpec.describe "API record IDs", type: :request do
       "edit_task_comment" => { body: "A note" },
       "link_records" => { other_kind: "post", other_id: 1 },
       "link_tasks" => { kind: "relates", other_id: 1 },
+      "make_mail_task" => { title: "Reply" },
       "mark_mail_thread" => { status: "read" },
       "moderate_webmention" => { verdict: "approved" },
       "move_event" => { to: "2026-01-01" },

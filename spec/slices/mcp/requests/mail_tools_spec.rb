@@ -154,6 +154,65 @@ RSpec.describe "MCP mail tools", type: :request do
     end
   end
 
+  describe "make_mail_task" do
+    let(:thread) { create(:message, subject: "Lunch on Friday") }
+
+    def made(**) = mcp_answer("make_mail_task", id: thread.id, title: "Book lunch", **)
+
+    def task_of(thread) = Links::Slice["repos.record_link_queries"].partner_ids("mail_thread", [thread.id], "task")
+
+    def thread_queries = Mail::Slice["repos.thread_queries"]
+
+    it "makes the task on the list it names, linked to the thread", :aggregate_failures do
+      answer = made(list: "someday", archive: false)
+
+      expect(answer).to include("title" => "Book lunch", "list" => "someday", "archived" => false)
+      expect(task_of(thread)).to eq(thread.id => answer.fetch("id"))
+      expect(thread_queries.by_id(thread.id).archived).to be(false)
+    end
+
+    it "puts the task on next and archives the thread when told nothing", :aggregate_failures do
+      expect(made).to include("list" => "next", "archived" => true)
+      expect(thread_queries.by_id(thread.id).archived).to be(true)
+    end
+
+    it "refuses a second task for the same thread", :aggregate_failures do
+      made
+
+      expect(mcp_text("make_mail_task", id: thread.id, title: "Again"))
+        .to eq("mail thread #{thread.id} already has a task")
+      expect(Tasks::Slice["relations.tasks"].where(title: "Again").count).to eq(0)
+    end
+
+    it "refuses a blank title and makes nothing", :aggregate_failures do
+      expect(mcp_text("make_mail_task", id: thread.id, title: " ")).to eq("title: write the task down first")
+      expect(task_of(thread)).to be_empty
+    end
+
+    it "calls an unknown ID an error" do
+      expect(mcp_text("make_mail_task", id: 999_999, title: "Book lunch")).to eq("no mail thread has the ID 999999")
+    end
+
+    describe "on a Gmail thread" do
+      let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
+      let(:work) { create(:mail_account, name: "Work", address: "aaron@work.example") }
+
+      before do
+        connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+        stub_request(:post, "#{threads}/refused/modify").to_return(status: 500)
+      end
+
+      it "keeps the task and says archived is false when Gmail refuses to archive", :aggregate_failures do
+        thread = create(:message, mail_account_id: work.id, gmail_id: "refused")
+        answer = mcp_answer("make_mail_task", id: thread.id, title: "Reply")
+
+        expect(answer).to include("archived" => false)
+        expect(task_of(thread)).to eq(thread.id => answer.fetch("id"))
+        expect(thread_queries.by_id(thread.id).archived).to be(false)
+      end
+    end
+  end
+
   describe "mark_mail_thread" do
     it "marks a message read" do
       message = create(:message)

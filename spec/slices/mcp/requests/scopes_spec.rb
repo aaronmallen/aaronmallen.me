@@ -30,7 +30,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         drop_decision drop_sprint edit_decision
         edit_decision_comment edit_decision_option edit_event edit_task_comment ignore_webmentions import_commits
         link_records
-        link_tasks mark_task_seen mark_webmentions_spam
+        link_tasks make_mail_task mark_task_seen mark_webmentions_spam
         moderate_webmention move_event move_task move_tasks open_decision pause_task pause_task_series plan_sprint
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project
         resume_task_series run_link_check save_person
@@ -51,8 +51,9 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "health" => %w[read_health_days],
       "mail" => %w[
-        delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread
-        read_mail_thread save_mail_draft snooze_mail_threads tag_mail_threads untag_mail_threads
+        delete_mail_threads list_mail_threads make_mail_task mark_mail_thread mark_mail_threads_read
+        mark_mail_threads_unread read_mail_thread save_mail_draft snooze_mail_threads tag_mail_threads
+        untag_mail_threads
       ],
       "agents" => %w[
         add_memory_fact create_artifact create_memory_file delete_artifact delete_memory_file describe_memory_file
@@ -107,6 +108,26 @@ RSpec.describe "MCP tool scopes", type: :request do
           "Connect the app again to grant it",
         )
       end
+    end
+  end
+
+  describe "a token holding write and every scope but mail" do
+    def mcp_scopes = guarded.keys - ["mail"]
+
+    it "refuses make_mail_task, naming mail" do
+      mcp_rpc("tools/call", { name: "make_mail_task", arguments: { id: 1, title: "Reply" } })
+
+      expect(mcp_reply.dig("error", "data")).to start_with("make_mail_task needs the mail permission,")
+    end
+  end
+
+  describe "a token holding mail and every scope but write" do
+    def mcp_scopes = guarded.keys - ["write"]
+
+    it "refuses make_mail_task, naming write" do
+      mcp_rpc("tools/call", { name: "make_mail_task", arguments: { id: 1, title: "Reply" } })
+
+      expect(mcp_reply.dig("error", "data")).to start_with("make_mail_task needs the write permission,")
     end
   end
 

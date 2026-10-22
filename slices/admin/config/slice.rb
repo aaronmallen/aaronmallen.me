@@ -46,6 +46,7 @@ module Admin
 
     import keys: %w[
       operations.clear_inbox
+      operations.make_mail_task
       operations.mint_token operations.revoke_token
       operations.snooze_inbox
       operations.snooze_inbox_row
