@@ -13,8 +13,10 @@ module Admin
           def view_template
             ContextMenu(label: @person.name, return_to: @return_to) do |menu|
               menu.link(t(".edit"), href: act(:admin_edit_person), icon: :edit)
-              menu.copy(t(".copy_mention"), text: mention, copied: t(".copied_mention"), icon: :copy,
-                                            hint: mention)
+              if @person.key
+                menu.copy(t(".copy_mention"), text: mention, copied: t(".copied_mention"), icon: :copy,
+                                              hint: mention)
+              end
               menu.separator
               menu.post(t(".remove"), action: act(:admin_delete_person), icon: :trash, warn: true,
                                       confirm: :remove)

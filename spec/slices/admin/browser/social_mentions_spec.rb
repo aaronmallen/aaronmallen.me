@@ -338,13 +338,18 @@ RSpec.describe "Admin social mentions", type: :feature do
       expect(dialog).to have_field("person[key]", with: "zed")
     end
 
-    it "shows a refusal in the dialog and keeps what I entered", :aggregate_failures do
-      type "hi @zed", :enter
-      dialog.click_button "Add person"
+    describe "a refusal" do
+      before do
+        type "hi @zed", :enter
+        dialog.fill_in("person[mastodon_handle]", with: "zed")
+        dialog.click_button "Add person"
+      end
 
-      expect(dialog).to have_css("#person-handles-error")
-      expect(dialog).to have_field("person[name]", with: "zed")
-      expect(body).to match_selector(:field, with: "hi @zed")
+      it "shows in the dialog and keeps what I entered", :aggregate_failures do
+        expect(dialog).to have_css("#person-mastodon_handle-error")
+        expect(dialog).to have_field("person[name]", with: "zed")
+        expect(body).to match_selector(:field, with: "hi @zed")
+      end
     end
 
     describe "a good save" do

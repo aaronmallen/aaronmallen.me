@@ -6,8 +6,10 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
-          key: { type: "string", description: "the token a post mentions them by, as @{key}" },
-          name: Helpers::Schema::STRING,
+          key: Helpers::Schema.nullable(
+            { type: "string", description: "the token a post mentions them by, as @{key}; null without a handle" },
+          ),
+          name: Helpers::Schema.nullable(Helpers::Schema::STRING),
           mastodon_handle: Helpers::Schema.nullable(Helpers::Schema::STRING),
           bluesky_handle: Helpers::Schema.nullable(Helpers::Schema::STRING),
           created_at: Helpers::Schema::STAMP,

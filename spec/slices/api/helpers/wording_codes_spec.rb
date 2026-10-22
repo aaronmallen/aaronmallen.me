@@ -27,6 +27,7 @@ RSpec.describe API::Helpers::Wording do
         "session_id.format" => integer, "task_id.format" => "the endpoint turns a task's label into its ID first",
         "type.format" => enum,
       },
+      "People" => { "birthday.format" => unsent, "dates.format" => unsent, "emails.format" => unsent },
       "Posts" => { "syndication_targets.format" => enum },
       "SavedViews" => {
         "filters.format" => "the schema takes only text, and an object of text for types", "screen.format" => enum,

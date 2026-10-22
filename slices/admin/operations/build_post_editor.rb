@@ -111,7 +111,7 @@ module Admin
           body:,
           counts: count_network_lengths.call([body.strip.empty? ? preview : body]).first,
           enabled: form[:syndication_enabled],
-          handles: resolve_mentions.handles(person_queries.all),
+          handles: resolve_mentions.handles(person_queries.mentionable),
           networks: list_networks.call(selected: form[:syndication_targets]),
           preview:,
         }

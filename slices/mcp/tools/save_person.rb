@@ -12,7 +12,7 @@ module MCP
       }.freeze
 
       description "Add a person to the mention directory, or edit one when you give its id, so a social post can " \
-                  "mention them as @{key}. A new person needs a name, a key and at least one handle. A Bluesky " \
+                  "mention them as @{key}. A new person needs a name, and a key once they have a handle. A Bluesky " \
                   "handle is looked up on Bluesky as it saves, and one Bluesky does not know is refused. On an " \
                   "edit, a field you leave out keeps what it has, and null clears a handle. Use search_accounts " \
                   "to find a handle. A scheduled social post sends @{key} as the handles its person holds then, or " \

@@ -2007,22 +2007,68 @@ en:
         editor:
           all_people: "All people"
           new_person: "New person"
-          sub: "Give them a Mastodon handle, a Bluesky handle, or both."
+          sub: "Give them a Mastodon or Bluesky handle and a key, and a social post can mention them."
         field_error:
+          birthday:
+            format: "Give the day as 1815-12-10, or --12-10 with no year."
           bluesky_handle:
             format: "A Bluesky handle looks like ada.bsky.social."
             unreachable: "Bluesky did not answer. Try again in a moment."
             unresolved: "Bluesky knows no account by that handle."
-          handles:
-            none: "Give them at least one handle."
+          chats:
+            blank: "Fill in each chat or take it out."
+          company:
+            blank: "Type a letter or leave it empty."
+          custom_fields:
+            blank: "Give each custom field a key and a value."
+          dates:
+            blank: "Fill in each date or take it out."
+            format: "Give the day as 1815-12-10, or --12-10 with no year."
+          department:
+            blank: "Type a letter or leave it empty."
+          emails:
+            blank: "Fill in each email or take it out."
+            format: "An email looks like ada@example.com."
+          family_name:
+            blank: "Type a letter or leave it empty."
+          file_as:
+            blank: "Type a letter or leave it empty."
+          given_name:
+            blank: "Type a letter or leave it empty."
+          job_title:
+            blank: "Type a letter or leave it empty."
           key:
             blank: "Give them a key first."
             format: "A key is lowercase words joined by hyphens."
             taken: "Someone else already holds that key."
           mastodon_handle:
             format: "A Mastodon handle looks like @ada@ruby.social."
+          middle_name:
+            blank: "Type a letter or leave it empty."
           name:
             blank: "Give them a name first."
+          name_prefix:
+            blank: "Type a letter or leave it empty."
+          name_suffix:
+            blank: "Type a letter or leave it empty."
+          nickname:
+            blank: "Type a letter or leave it empty."
+          notes:
+            blank: "Type a letter or leave it empty."
+          phones:
+            blank: "Fill in each phone or take it out."
+          phonetic_family_name:
+            blank: "Type a letter or leave it empty."
+          phonetic_given_name:
+            blank: "Type a letter or leave it empty."
+          phonetic_middle_name:
+            blank: "Type a letter or leave it empty."
+          relations:
+            blank: "Fill in each relation or take it out."
+          starred:
+            blank: "Pick starred or not."
+          websites:
+            blank: "Fill in each website or take it out."
         finder:
           failed: "That search did not go through. Try again."
           label: "Search %{network}"

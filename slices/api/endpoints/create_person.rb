@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class CreatePerson < Endpoint
-      SCHEMA = { additionalProperties: false, properties: People::PROPERTIES, required: %w[name key] }.freeze
+      SCHEMA = { additionalProperties: false, properties: People::PROPERTIES, required: %w[name] }.freeze
       REPLY = Serializers::Person.reference
 
       include Deps[
@@ -23,6 +23,8 @@ module API
       private
 
       def going_public(fields)
+        return unless fields[:key]
+
         id = social_post_queries.scheduled_mentioning(fields[:key])
         format(People::MENTIONED, id, fields[:key]) if id
       end

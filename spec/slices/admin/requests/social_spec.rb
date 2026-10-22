@@ -207,6 +207,14 @@ RSpec.describe "Admin social", type: :request do
         expect(JSON.parse(page.find("[data-social-people]", visible: :all)["data-social-people"]))
           .to include("bluesky" => include("ada" => "@ada.bsky.social", "grace" => "Grace Hopper"))
       end
+
+      it "leaves a person with no key out of the handles" do
+        create(:person, name: "Charles Babbage", key: nil, mastodon_handle: nil)
+        get "/admin/social"
+
+        expect(JSON.parse(page.find("[data-social-people]", visible: :all)["data-social-people"])["mastodon"].keys)
+          .not_to include(nil, "")
+      end
     end
 
     describe "posting now" do

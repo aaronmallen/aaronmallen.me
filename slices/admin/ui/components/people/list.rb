@@ -40,7 +40,7 @@ module Admin
           end
 
           def meta(person)
-            span(class: "person-row-token") { t(".token", key: person.key) }
+            span(class: "person-row-token") { t(".token", key: person.key) } if person.key
             ProfileLinks(person:)
           end
 

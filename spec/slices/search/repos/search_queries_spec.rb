@@ -39,6 +39,22 @@ RSpec.describe Search::Repos::SearchQueries do
     end
   end
 
+  describe "a contact" do
+    def titles(text) = described_class.new.search(text:, page:).rows.map { [it.kind, it.title] }
+
+    it "finds a contact with no name by its company, titled by it" do
+      create(:person, name: nil, company: "Analytical Engines", key: nil, mastodon_handle: nil)
+
+      expect(titles("analytical")).to eq([["person", "Analytical Engines"]])
+    end
+
+    it "finds a named contact by its company, titled by its name" do
+      create(:person, name: "Ada Lovelace", company: "Analytical Engines")
+
+      expect(titles("engines")).to eq([["person", "Ada Lovelace"]])
+    end
+  end
+
   describe "the query plan" do
     let(:tables) do
       %w[

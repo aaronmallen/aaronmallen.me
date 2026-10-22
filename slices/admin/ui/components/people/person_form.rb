@@ -60,7 +60,6 @@ module Admin
             input_field(:key) { Hint { t(".key_note", key: key_token) } }
             input_field(:mastodon_handle)
             input_field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
-            FieldError(field: :handles, errors: @errors, scope: @scope)
             actions
           end
 

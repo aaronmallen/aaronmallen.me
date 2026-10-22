@@ -49,7 +49,7 @@ module Admin
 
       def composer(params, editing, errors, accounts)
         values = by_part(values(params, editing))
-        people = person_queries.all
+        people = person_queries.mentionable
 
         {
           counts: count_network_lengths.call(values[:parts]),

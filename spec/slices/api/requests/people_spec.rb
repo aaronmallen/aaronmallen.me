@@ -77,11 +77,16 @@ RSpec.describe "API people", type: :request do
       expect(everyone.first).to have_attributes(bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada")
     end
 
-    it "refuses a person with no handle and saves nothing", :aggregate_failures do
-      none = "give the person at least one handle"
+    it "adds a person with no handle and no key", :aggregate_failures do
+      expect([add(name: "Ada").values_at("name", "key"), status]).to eq([["Ada", nil], 201])
+      expect(everyone.map(&:key)).to eq([nil])
+    end
 
-      expect([add(name: "Ada", key: "ada"), status])
-        .to eq([{ "error" => "invalid", "message" => none, "errors" => { "handles" => [none] } }, 422])
+    it "refuses a handle with no key and saves nothing", :aggregate_failures do
+      blank = "give a person with a handle a key"
+
+      expect([add(name: "Ada", mastodon_handle: "@ada@ruby.social"), status])
+        .to eq([{ "error" => "invalid", "message" => blank, "errors" => { "key" => [blank] } }, 422])
       expect(everyone).to be_empty
     end
 
@@ -126,10 +131,6 @@ RSpec.describe "API people", type: :request do
       expect(add(name: "Ada", key: "ada", bluesky_handle: "ada.bsky.social").fetch("errors"))
         .to eq("bluesky_handle" => ["Bluesky did not answer; try again in a moment"])
     end
-
-    it "refuses a person with no key" do
-      expect(add(name: "Ada", mastodon_handle: "@ada@ruby.social").fetch("errors")).to eq("key" => ["key is missing"])
-    end
   end
 
   describe "PATCH /api/v1/people/:id" do
@@ -155,11 +156,11 @@ RSpec.describe "API people", type: :request do
       expect(person_queries.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
     end
 
-    it "refuses to take the last handle away", :aggregate_failures do
+    it "takes the last handle away and keeps the key" do
       edit(person.id, mastodon_handle: nil, bluesky_handle: nil)
 
-      expect(status).to eq(422)
-      expect(person_queries.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
+      expect(person_queries.by_id(person.id))
+        .to have_attributes(key: "ada", mastodon_handle: nil, bluesky_handle: nil, bluesky_did: nil)
     end
 
     it "refuses a key someone else holds" do
@@ -265,8 +266,8 @@ RSpec.describe "API people", type: :request do
     end
 
     it "refuse what the admin form refuses, with the message the endpoint gives" do
-      refused = add(name: "Ada", key: "ada")
-      answer = mcp_call("save_person", name: "Ada", key: "ada")
+      refused = add(name: "Ada", mastodon_handle: "@ada@ruby.social")
+      answer = mcp_call("save_person", name: "Ada", mastodon_handle: "@ada@ruby.social")
 
       expect([answer["isError"], answer.dig("content", 0, "text")]).to eq([true, refused.fetch("message")])
     end

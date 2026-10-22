@@ -244,12 +244,10 @@ RSpec.describe "Admin people", type: :request do
         expect(everyone.first).to have_attributes(mastodon_handle: "@ada@ruby.social", bluesky_did: "did:plc:ada")
       end
 
-      it "refuses a person with no handle", :aggregate_failures do
-        add(name: "Ada", key: "ada")
+      it "adds a person with no handle and no key" do
+        add(name: "Ada")
 
-        expect(last_response.status).to eq(422)
-        expect(page).to have_css("#person-handles-error", text: error(:handles, :none))
-        expect(everyone).to be_empty
+        expect(everyone.map { [it.name, it.key] }).to eq([["Ada", nil]])
       end
 
       it "refuses a blank name" do
@@ -355,10 +353,10 @@ RSpec.describe "Admin people", type: :request do
       end
 
       it "answers a refusal with the form and its errors", :aggregate_failures do
-        mention(name: "Ada", key: "ada")
+        mention(name: "Ada", mastodon_handle: "@ada@ruby.social")
 
         expect(last_response.status).to eq(422)
-        expect(page).to have_css("form[data-person-form='new'] #person-handles-error", text: error(:handles, :none))
+        expect(page).to have_css("form[data-person-form='new'] #person-key-error", text: error(:key, :blank))
       end
     end
 
@@ -590,11 +588,10 @@ RSpec.describe "Admin people", type: :request do
         expect(person_queries.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
       end
 
-      it "refuses to take the last handle away", :aggregate_failures do
+      it "takes the last handle away and keeps the key" do
         save(bluesky_handle: "")
 
-        expect(last_response.status).to eq(422)
-        expect(person_queries.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
+        expect(person_queries.by_id(person.id)).to have_attributes(key: person.key, bluesky_handle: nil)
       end
 
       it "refuses a new handle that resolves to nobody", :aggregate_failures do

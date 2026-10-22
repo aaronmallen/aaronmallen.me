@@ -4,8 +4,11 @@ module Contacts
   module Operations
     class SavePerson < Blog::Operation
       BLUESKY = Blog::Types::NetworkName["bluesky"]
-      KEY_INDEX = "people_key_index"
-      TAKEN = "taken"
+      CONSTRAINTS = {
+        "people_key_check" => [:key, Blog::Contract::BLANK],
+        "people_key_index" => [:key, "taken"],
+        "people_name_check" => [:name, Blog::Contract::BLANK],
+      }.freeze
       UNREACHABLE = "unreachable"
       UNRESOLVED = "unresolved"
 
@@ -19,9 +22,9 @@ module Contacts
       def call(params, id: nil)
         person = step find(id)
         fields = step validate(params)
-        bluesky_did = step resolve(person, fields[:bluesky_handle])
+        fields = step with_did(person, fields)
 
-        step persist(person, fields.merge(bluesky_did:))
+        step persist(person, fields)
       end
 
       private
@@ -41,7 +44,7 @@ module Contacts
       end
 
       def persist(person, fields)
-        constrained(person_mutations, KEY_INDEX => [:key, TAKEN]) do
+        constrained(person_mutations, CONSTRAINTS) do
           Success(transaction do
             person ? person_mutations.update(person.id, **fields) : person_mutations.create(**fields)
           end)
@@ -55,6 +58,14 @@ module Contacts
         return Success(person.bluesky_did) if person&.bluesky_handle == handle
 
         lookup(handle)
+      end
+
+      def validate(params) = validated(contract.call(params.slice(*contract_keys)))
+
+      def with_did(person, fields)
+        return Success(fields) unless fields.key?(:bluesky_handle)
+
+        resolve(person, fields[:bluesky_handle]).fmap { fields.merge(bluesky_did: it) }
       end
     end
   end

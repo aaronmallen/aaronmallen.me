@@ -36,6 +36,7 @@ amended:
   - "#607"
   - "#1889"
   - "#1926"
+  - "#1938"
 tags:
   - postgres
   - constraints
@@ -107,7 +108,9 @@ raises again.
 | `note_folders_parent_loop` | trigger | `Notes::Operations::MoveNoteFolder` | `parent_id: inside` |
 | `notes_folder_id_fkey` | foreign key | `Notes::Operations::CreateNote`, `MoveNote` | `folder_id: missing` |
 | `notes_title_index` | unique index | `Notes::Operations::CreateNote`, `EditNote`, `RenameNote`, `DuplicateNote` | `title: taken` |
+| `people_key_check` | `CHECK` | `Contacts::Operations::SavePerson` | `key: blank` |
 | `people_key_index` | unique index | `Contacts::Operations::SavePerson` | `key: taken` |
+| `people_name_check` | `CHECK` | `Contacts::Operations::SavePerson` | `name: blank` |
 | `posts_slug_key` | unique | `Posts::Operations::SavePost` | `slug: taken` |
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |
 | `projects_repo_index` | unique index | `Projects::Operations::SaveProject` | `repo: taken` |
