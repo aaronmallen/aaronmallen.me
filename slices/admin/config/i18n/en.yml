@@ -1056,10 +1056,15 @@ en:
         list:
           connected: "Connected clients"
           count:
-            one: "%{count} connected client"
-            other: "%{count} connected clients"
-            zero: "Nothing has connected yet"
+            one: "%{count} called in the last hour"
+            other: "%{count} called in the last hour"
+            zero: "None called in the last hour"
           empty: "No client has connected yet."
+          idle: "Authorized, idle"
+          nothing: "Nothing has connected yet"
+          registrations:
+            one: "%{count} registration"
+            other: "%{count} registrations"
       commits_card:
         activity: "All of today's commits →"
         commits: "Commits"

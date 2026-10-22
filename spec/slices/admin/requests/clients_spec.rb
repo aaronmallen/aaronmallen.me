@@ -50,7 +50,7 @@ RSpec.describe "Admin MCP clients", type: :request do
     it "says so when nothing has connected" do
       get "/admin/settings/services"
 
-      expect(list).to have_css(".empty")
+      expect(list).to have_css(".empty").and have_css(".card-side", exact_text: "Nothing has connected yet")
     end
 
     it "lists every client holding a live token, newest first" do
@@ -61,12 +61,79 @@ RSpec.describe "Admin MCP clients", type: :request do
       expect(names).to eq(%w[Newer Older])
     end
 
-    it "counts only the clients it lists" do
-      connect(client_name: "Claude")
-      create(:oauth_client, client_name: "Stranger")
+    it "counts only the clients that called in the last hour" do
+      connect(client_name: "Claude", last_used_at: Time.now - (30 * 60))
+      connect(client_name: "Codex", last_used_at: Time.now - (2 * 60 * 60))
+      connect(client_name: "Fresh", last_used_at: nil)
       get "/admin/settings/services"
 
-      expect(page).to have_css(".card-side", exact_text: "1 connected client")
+      expect(page).to have_css(".card-side", exact_text: "1 called in the last hour")
+    end
+
+    describe "a client with a live token and no call in the last hour" do
+      before do
+        connect(client_name: "Claude", last_used_at: Time.now)
+        connect(client_name: "Codex", last_used_at: used - 60)
+        get "/admin/settings/services"
+      end
+
+      it "shows under authorized, idle" do
+        expect(list.all(".li-title, .svc-group-label").map(&:text)).to eq(["Claude", "Authorized, idle", "Codex"])
+      end
+
+      it "shows its last call" do
+        expect(list.all(".li").last.all("time").last[:datetime]).to eq(Blog::TimeZone.local(used - 60).iso8601)
+      end
+    end
+
+    it "leaves out the idle label when every client called in the last hour" do
+      connect(client_name: "Claude", last_used_at: Time.now)
+      get "/admin/settings/services"
+
+      expect(list).to have_no_css(".svc-group-label")
+    end
+
+    describe "registrations of one app" do
+      def callback = %w[https://claude.ai/api/mcp/auth_callback]
+
+      def client_ids = MCP::Slice["db.rom"].relations[:oauth_clients].pluck(:id)
+
+      def group = list.find("details.today-more")
+
+      before do
+        connect(client_name: "Claude", redirect_uris: callback, last_used_at: Time.now)
+        connect(client_name: "Claude", redirect_uris: callback, last_used_at: nil)
+      end
+
+      it "counts them once" do
+        get "/admin/settings/services"
+
+        expect(page).to have_css(".card-side", exact_text: "1 called in the last hour")
+      end
+
+      it "shows them as one group" do
+        get "/admin/settings/services"
+
+        expect(list.all("summary").map(&:text)).to eq(["Claude · claude.ai · 2 registrations"])
+      end
+
+      it "keeps an app on another redirect host apart", :aggregate_failures do
+        connect(client_name: "Claude", redirect_uris: %w[https://evil.example/callback])
+        get "/admin/settings/services"
+
+        hosts = group.all(".li-sub", visible: :all).map { it.text(:all).split(" · ").first }
+
+        expect(hosts).to eq(%w[claude.ai claude.ai])
+        expect(list).to have_css(".li-sub", text: /\Aevil\.example/)
+      end
+
+      it "gives each registration its own revoke" do
+        get "/admin/settings/services"
+
+        revokes = client_ids.map { "/admin/clients/#{it}/revoke" }
+
+        expect(group.all("form[action$='/revoke']", visible: :all).map { it[:action] }).to match_array(revokes)
+      end
     end
 
     it "leaves out a registration that never got a token" do
