@@ -5,6 +5,19 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.31] - 2026-10-22
+
+### Changed
+
+- `read_memory` and `search_memory` only look a repo up. A repo no project holds no longer gets a new project from
+  them; they return the global and task files or facts instead. Only `start_session` creates a project.
+
+### Fixed
+
+- On a phone, groups in the nav switcher sat below blank space left by a taller group beside them, and 26.10.30 spread
+  "today" across the whole menu to hide it. The switcher now has a left and a right column that each stack their own
+  groups with an even gap, "today" is as wide as the rows under it, and Tab moves down the left column, then the right.
+
 ## [26.10.30] - 2026-10-22
 
 ### Added
@@ -1586,7 +1599,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...HEAD
+[26.10.31]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...26.10.31
 [26.10.30]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...26.10.30
 [26.10.29]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...26.10.29
 [26.10.28]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...26.10.28
