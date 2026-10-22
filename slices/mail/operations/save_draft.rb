@@ -3,26 +3,51 @@
 module Mail
   module Operations
     class SaveDraft < Blog::Operation
+      ADDRESS_SPLIT = /[\s,;]+/
+      GMAIL = Blog::Types::MailProvider["gmail"]
       HEADERS = %w[to cc bcc subject].freeze
       LISTED = 500
+      SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
       include Deps[
         google: "google.client",
         gmail_mutations: "repos.gmail_mutations",
         gmail_queries: "repos.gmail_queries",
         parse_gmail_thread: "operations.parse_gmail_thread",
-        send_mail: "operations.send_mail",
+        thread_queries: "repos.thread_queries",
       ]
 
       def call(params)
-        fields = send_mail.form(params)
-        account = step send_mail.sender(fields[:from])
-        draft = step saved(account, fields)
+        fields = form(params)
+        account = step sender(fields[:from])
 
-        store(account, draft.fetch("message"))
-        draft.fetch("id")
-      rescue Google::Error => e
-        Failure([:gmail_failed, e.message])
+        step saved(account, fields)
+      end
+
+      def form(params)
+        html = Blog::Types::OptionalText[params[:html]]
+
+        {
+          from: params[:from], to: addresses(params[:to]), cc: addresses(params[:cc]), bcc: addresses(params[:bcc]),
+          subject: params[:subject], body: html ? Outgoing.clean(html) : Outgoing.from_text(params[:body]),
+          **%i[thread draft].to_h { [it, Blog::Types::OptionalText[params[it]]] },
+        }
+      end
+
+      def mirror(account, gmail_id)
+        gmail_mutations.store_thread(account.id, parse_gmail_thread.call(mailbox(account).thread(gmail_id)))
+      end
+
+      def sender(id)
+        account = senders.find { it.id == Blog::Types::IdParam[id] }
+
+        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
+      end
+
+      def senders(accounts = thread_queries.accounts)
+        addresses = google.holders(SCOPE)
+
+        accounts.select { it.provider == GMAIL && it.sends && addresses.include?(it.address) }
       end
 
       def values(thread)
@@ -37,6 +62,8 @@ module Mail
       end
 
       private
+
+      def addresses(value) = value.to_s.split(ADDRESS_SPLIT).reject(&:empty?)
 
       def create(account, message) = mailbox(account).post("drafts", { message: })
 
@@ -64,18 +91,21 @@ module Mail
       def parsed(gmail_id, message) = parse_gmail_thread.call({ "id" => gmail_id, "messages" => [message] })
 
       def saved(account, fields)
-        html = fields[:body]
-        outgoing = Outgoing.new(from: account.address, **fields.slice(:to, :cc, :bcc, :subject), html:)
+        outgoing = Outgoing.new(from: account.address, **fields.slice(:to, :cc, :bcc, :subject), html: fields[:body])
         message = { raw: outgoing.raw }
         id = fields[:draft]
+        draft = id ? update(account, id, message) : create(account, message)
 
-        Success(id ? update(account, id, message) : create(account, message))
+        store(account, draft.fetch("message"))
+        Success(draft.fetch("id"))
+      rescue Google::Error => e
+        Failure([:gmail_failed, e.message])
       end
 
       def store(account, message)
         gmail_id = message.fetch("threadId")
         id = gmail_mutations.thread_id(account.id, gmail_id)
-        return send_mail.mirror(account, gmail_id) unless id
+        return mirror(account, gmail_id) unless id
 
         kept = kept(account, gmail_id)
         full = mailbox(account).get("messages/#{message.fetch('id')}", format: "full")

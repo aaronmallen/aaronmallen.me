@@ -85,6 +85,7 @@ module API
       ["untag_mail_threads", "post", "/mail/threads/bulk/untag", OK, MAIL],
       ["read_mail_thread", "get", "/mail/threads/{id}", OK, MAIL],
       ["mark_mail_thread", "post", "/mail/threads/{id}/mark", OK, MAIL],
+      ["save_mail_draft", "post", "/mail/drafts", OK, MAIL],
       ["list_artifacts", "get", "/artifacts", OK, AGENTS],
       ["create_artifact", "post", "/artifacts", CREATED, AGENTS],
       ["read_artifact", "get", "/artifacts/{id}", OK, AGENTS],

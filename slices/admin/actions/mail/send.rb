@@ -9,7 +9,7 @@ module Admin
         SENT = "mail_page.toasts.sent"
 
         include Redirect
-        include Deps[index_view: "ui.views.mail.index"]
+        include Deps[index_view: "ui.views.mail.index", send_mail: "mail.operations.send_mail"]
 
         def handle(request, response)
           fields = Blog::Types::Fields[request.params[:mail]]

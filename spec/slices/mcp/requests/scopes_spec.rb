@@ -50,7 +50,7 @@ RSpec.describe "MCP tool scopes", type: :request do
       "health" => %w[read_health_days],
       "mail" => %w[
         delete_mail_threads list_mail_threads mark_mail_thread mark_mail_threads_read mark_mail_threads_unread
-        read_mail_thread snooze_mail_threads tag_mail_threads untag_mail_threads
+        read_mail_thread save_mail_draft snooze_mail_threads tag_mail_threads untag_mail_threads
       ],
       "agents" => %w[
         add_memory_fact create_artifact create_memory_file delete_artifact delete_memory_file describe_memory_file

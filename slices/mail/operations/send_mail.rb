@@ -3,58 +3,26 @@
 module Mail
   module Operations
     class SendMail < Blog::Operation
-      ADDRESS_SPLIT = /[\s,;]+/
       ARCHIVE = Blog::Types::MessageBulkAction["archive"]
-      GMAIL = Blog::Types::MailProvider["gmail"]
       MESSAGE_ID = "Message-ID"
-      SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
       include Deps[
         google: "google.client",
         change_thread: "operations.change_thread",
         contract: "contracts.send_contract",
-        gmail_mutations: "repos.gmail_mutations",
-        parse_gmail_thread: "operations.parse_gmail_thread",
+        save_draft: "operations.save_draft",
         thread_queries: "repos.thread_queries",
       ]
 
       def call(params)
         fields = step validate(params)
-        account = step sender(fields[:from])
+        account = step save_draft.sender(fields[:from])
         thread = step replying(fields[:thread])
 
         step deliver(account, thread, fields, archive: Blog::Types::Checkbox[params[:archive]])
       end
 
-      def form(params)
-        html = Blog::Types::OptionalText[params[:html]]
-
-        {
-          from: params[:from], to: addresses(params[:to]), cc: addresses(params[:cc]), bcc: addresses(params[:bcc]),
-          subject: params[:subject], body: html ? Outgoing.clean(html) : Outgoing.from_text(params[:body]),
-          **%i[thread draft].to_h { [it, Blog::Types::OptionalText[params[it]]] },
-        }
-      end
-
-      def mirror(account, gmail_id)
-        gmail_mutations.store_thread(account.id, parse_gmail_thread.call(mailbox(account).thread(gmail_id)))
-      end
-
-      def sender(id)
-        account = senders.find { it.id == Blog::Types::IdParam[id] }
-
-        account ? Success(account) : invalid(:from, Blog::Contract::FORMAT)
-      end
-
-      def senders(accounts = thread_queries.accounts)
-        addresses = google.holders(SCOPE)
-
-        accounts.select { it.provider == GMAIL && it.sends && addresses.include?(it.address) }
-      end
-
       private
-
-      def addresses(value) = value.to_s.split(ADDRESS_SPLIT).reject(&:empty?)
 
       def deliver(account, thread, fields, archive:)
         same = thread&.mail_account_id == account.id
@@ -110,13 +78,13 @@ module Mail
 
       def settle(account, thread, gmail_id, archive:)
         change_thread.call(thread.id, ARCHIVE) if archive && thread
-        mirror(account, gmail_id)
+        save_draft.mirror(account, gmail_id)
       rescue Google::Error
         gmail_id
       end
 
       def validate(params)
-        fields = form(params)
+        fields = save_draft.form(params)
 
         extra = { **fields.slice(:draft), signature: Blog::Types::Checkbox[params[:signature]], files: files(params) }
 

@@ -3446,7 +3446,7 @@ en:
             agents: "Read and change agent memory, artifacts and sessions"
             delete: "Delete records for good"
             health: "Read health data"
-            mail: "Read and sort mail"
+            mail: "Read, sort and draft mail"
             publish: "Publish, send and change what the public sees"
             read: "Read every record but health data, mail and agent memory"
             suggest: "Suggest edits"

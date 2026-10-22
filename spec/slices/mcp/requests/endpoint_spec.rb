@@ -2406,6 +2406,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "restore_project" => { id: 1 },
         "resume_task_series" => { id: 1 },
         "revert_memory_event" => { id: 1, event_id: 2, **author },
+        "save_mail_draft" => { from: "Work" },
         "save_person" => { name: "Ada Lovelace", key: "ada" },
         "save_project" => { id: 1 },
         "save_review_note" => { day: "2026-09-16", body: "A good week" },

@@ -19,7 +19,7 @@ en:
             agents: "Read and change agent memory, artifacts and sessions: the facts that load into every agent's work, their history and reverts, the plans, specs and handoffs agents keep, and each run's record of what it loaded and wrote"
             delete: "Delete posts, social posts and any other record for good"
             health: "Read your health data: sleep, heart rate, HRV, steps and workouts, day by day beside your work"
-            mail: "Read, mark, tag, snooze and delete your mail from every account, contact form messages included"
+            mail: "Read, mark, tag, snooze and delete your mail from every account, contact form messages included, and save drafts for you to send. It can never send mail itself"
             publish: "Publish posts, send social posts and make any change that shows in public: shares, public projects and their boards, published and scheduled posts, work history, approved webmentions and webmention settings"
             read: "Read everything the site keeps but your health data, mail and agent memory: posts, drafts and all, social posts, your journal, tasks, projects, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
             suggest: "Send you suggested edits to accept or reject"

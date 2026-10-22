@@ -15,6 +15,7 @@ amended:
   - "#1380"
   - "#1598"
   - "#1823"
+  - "#1914"
   - "#1925"
   - "#1937"
 tags:
@@ -54,6 +55,9 @@ at consent and the owner ticks it on an API token, as with `health`, and it take
 - **A client's delete goes to the Trash.** `delete_mail_threads` runs the `trash` act, so a Gmail thread lands in
   Gmail's Trash and every thread lands in the site's trash folder, where the owner can restore it. Only the admin's
   "Delete forever" deletes for good.
+- **A client drafts but never sends.** Since #1914, `save_mail_draft` saves a draft to Gmail, or replaces one it
+  saved, and the draft waits in the admin's Drafts for the owner to send. No tool sends mail, since a stranger's
+  message could ask an agent to write in the owner's name.
 - **Tools on `read` that list rows of every kind** leave mail threads out unless the token also holds `mail`:
   `read_activity`, `summarize_activity`, `search`, `list_inbox`, `list_attention`, record links and saved views. The
   rest of each answer reads as it does now, as ADR 0147 does for workouts.

@@ -34,6 +34,7 @@ module API
     import keys: %w[
       operations.act_on_messages
       operations.change_thread
+      operations.save_draft
       operations.snooze_messages
       operations.wake_message
       repos.message_queries

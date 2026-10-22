@@ -186,4 +186,62 @@ RSpec.describe "MCP mail tools", type: :request do
       expect(message_queries.by_id(message.id).status).to eq("unread")
     end
   end
+
+  describe "save_mail_draft" do
+    let(:gmail) { Spec::GoogleAccounts::GMAIL }
+    let(:requests) { [] }
+    let(:scopes) { [*Spec::GoogleAccounts::GMAIL_SCOPES, "https://www.googleapis.com/auth/gmail.send"] }
+    let(:work) { create(:mail_account, name: "Work", address: "aaron@work.example") }
+
+    def raw = Base64.urlsafe_decode64(requests.last.dig("message", "raw"))
+
+    def saved(**)
+      mcp_answer("save_mail_draft", from: "Work", to: "ada@example.com", subject: "Plans", body: "Soon", **)
+    end
+
+    def stub_draft(verb, url)
+      stub_request(verb, url).to_return do |request|
+        requests << JSON.parse(request.body)
+        google_health_json({ id: "r1", message: { id: "d1", threadId: "t5" } })
+      end
+    end
+
+    before do
+      connect_google(account_id: work.address, scopes:)
+      stub_gmail_thread("t5", [gmail_message("d1", labels: %w[DRAFT], From: work.address, Subject: "Plans")])
+    end
+
+    it "saves a new draft to Gmail and answers with its id", :aggregate_failures do
+      stub_draft(:post, "#{gmail}/drafts")
+
+      expect(saved).to eq("draft" => "r1")
+      expect(raw).to include("From: aaron@work.example", "To: ada@example.com", "Subject: Plans")
+    end
+
+    it "files it in the admin's Drafts" do
+      stub_draft(:post, "#{gmail}/drafts")
+      saved
+
+      expect(Mail::Slice["relations.mail_threads"].where(gmail_id: "t5").one).to include(draft: true)
+    end
+
+    it "replaces the draft it names" do
+      update = stub_draft(:put, "#{gmail}/drafts/r1")
+      saved(draft: "r1")
+
+      expect(update).to have_been_requested
+    end
+
+    it "refuses an account that cannot send" do
+      create(:mail_account, name: "Home", address: "aaron@home.example")
+
+      expect(mcp_text("save_mail_draft", from: "Home")).to include("names no account that can send")
+    end
+
+    it "says when Gmail would not save it" do
+      stub_request(:post, "#{gmail}/drafts").to_return(status: 500)
+
+      expect(mcp_text("save_mail_draft", from: "Work")).to eq("Gmail would not save the draft; try again")
+    end
+  end
 end

@@ -13,7 +13,6 @@ module Admin
           person_queries: "social.repos.person_queries",
           record_link_queries: "links.repos.record_link_queries",
           save_draft: "mail.operations.save_draft",
-          send_mail: "mail.operations.send_mail",
           thread_queries: "mail.repos.thread_queries",
         ]
 
@@ -40,7 +39,7 @@ module Admin
         end
 
         def show_compose(response, draft, resume)
-          response[:senders] = send_mail.senders(response[:accounts])
+          response[:senders] = save_draft.senders(response[:accounts])
           drafted = save_draft.values(response[:open]) if resume && !draft
           response[:draft] = drafted ? { values: drafted, errors: Blog::Constants::EMPTY_HASH } : draft
         end
