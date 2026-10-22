@@ -4872,6 +4872,7 @@ CREATE TABLE public.sightings (
     first_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     country_name text,
+    product text,
     CONSTRAINT sightings_credential_check CHECK ((num_nonnulls(api_token_id, oauth_client_id) = 1)),
     CONSTRAINT sightings_last_user_agent_length CHECK ((length(last_user_agent) <= 1024))
 );
@@ -7807,10 +7808,10 @@ CREATE INDEX share_group_files_share_group_id_index ON public.share_group_files 
 
 
 --
--- Name: sightings_credential_device_place_index; Type: INDEX; Schema: public; Owner: -
+-- Name: sightings_credential_device_product_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX sightings_credential_device_place_index ON public.sightings USING btree (api_token_id, oauth_client_id, browser, os, city, country) NULLS NOT DISTINCT;
+CREATE UNIQUE INDEX sightings_credential_device_product_index ON public.sightings USING btree (api_token_id, oauth_client_id, browser, os, product) NULLS NOT DISTINCT;
 
 
 --
@@ -10296,6 +10297,7 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022110000_grow_people_into_contacts.rb'),
 ('20261022120000_create_devices.rb'),
 ('20261022130000_add_dismissed_at_to_sign_ins.rb'),
+('20261022140000_key_sightings_on_product.rb'),
 ('20261022150000_add_contacts_to_sync_name.rb'),
 ('20261022150100_add_contact_sync.rb'),
 ('20261022220000_add_signed_out_at_to_devices.rb');

@@ -356,10 +356,24 @@ RSpec.describe "Admin security", type: :request do
     end
 
     it "names a sighting's device and place it could not read" do
-      sight(api_token_id: token("Terminal").id, browser: nil, os: nil, city: nil, country: nil)
+      sight(api_token_id: token("Terminal").id, browser: nil, os: nil, city: nil, country: nil, last_user_agent: "")
       get "/admin/settings/security"
 
       expect(credential("Terminal").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
+    end
+
+    it "titles a sighting with no browser or OS by the first product in its user agent" do
+      sight(oauth_client_id: client("Claude").id, browser: nil, os: nil, last_user_agent: "claude-code/1.2 (cli)")
+      get "/admin/settings/security"
+
+      expect(credential("Claude")).to have_css(".li-title", exact_text: "claude-code 1.2")
+    end
+
+    it "names the OS beside the product of a sighting with no browser" do
+      sight(api_token_id: token("Terminal").id, browser: nil, last_user_agent: "curl/8.7.1")
+      get "/admin/settings/security"
+
+      expect(credential("Terminal")).to have_css(".li-title", exact_text: "curl 8.7.1 · Linux")
     end
 
     it "lists an MCP client's sightings under that client" do

@@ -3,7 +3,7 @@
 module Security
   module Relations
     class Sightings < Blog::DB::Relation
-      KEY = %i[api_token_id oauth_client_id browser os city country].freeze
+      KEY = %i[api_token_id oauth_client_id browser os product].freeze
 
       schema :sightings, infer: true
 
@@ -12,9 +12,10 @@ module Security
       def newest_first = order(self[:last_seen_at].desc, self[:id].desc)
 
       def sight(row, at:)
-        device = row.except(:last_address, :last_user_agent).merge(created_at: at)
-        known = dataset.db[:known_devices].insert_conflict(target: KEY).with_sql(:insert_sql, device)
-        update = excluded(%i[last_address last_user_agent last_seen_at]).merge(calls: Sequel[:sightings][:calls] + 1)
+        device = row.except(:last_address, :last_user_agent, :product).merge(created_at: at)
+        known = dataset.db[:known_devices].insert_conflict(target: KnownDevices::KEY).with_sql(:insert_sql, device)
+        latest = excluded(%i[city country country_name last_address last_user_agent last_seen_at])
+        update = latest.merge(calls: Sequel[:sightings][:calls] + 1)
 
         sightings = dataset.with(:known, known).insert_conflict(target: KEY, update:)
 

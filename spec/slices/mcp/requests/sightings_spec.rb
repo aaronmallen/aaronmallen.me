@@ -48,11 +48,20 @@ RSpec.describe "MCP client sightings", type: :request do
     expect(sightings.select_map(:calls)).to eq([3])
   end
 
-  it "adds a row for another city" do
-    call_mcp
-    call_mcp(address: "198.51.100.7")
+  it "keeps one row with the latest city and address when the client calls from another city" do
+    call_mcp(user_agent: "claude-code/1.2")
+    call_mcp(address: "198.51.100.7", user_agent: "claude-code/1.2")
 
-    expect(sightings.order(:id).select_map(:city)).to eq(%w[London Nowhere])
+    expect(sightings.select(:city, :last_address, :calls).all)
+      .to eq([{ city: "Nowhere", last_address: "198.51.100.7", calls: 2 }])
+  end
+
+  it "keys a client it can't read on the first product in its user agent" do
+    call_mcp(user_agent: "claude-code/1.2 (external, cli)")
+    call_mcp(user_agent: "claude-code/1.3")
+    call_mcp(user_agent: "python-httpx/0.27")
+
+    expect(sightings.order(:id).select_map(%i[product calls])).to eq([["claude-code", 2], ["python-httpx", 1]])
   end
 
   it "records nothing for a token it refuses" do

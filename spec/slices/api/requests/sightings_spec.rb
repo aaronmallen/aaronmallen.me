@@ -62,11 +62,12 @@ RSpec.describe "API token sightings", type: :request do
       .to match(first_seen_at: be_within(5).of(Time.now - 3600), last_seen_at: be_within(5).of(Time.now))
   end
 
-  it "adds a row for another city" do
+  it "keeps one row with the latest city and address when the token calls from another city" do
     check_in
     check_in(address: "198.51.100.7")
 
-    expect(sightings.order(:id).select_map(:city)).to eq(%w[London Nowhere])
+    expect(sightings.select(:city, :last_address, :calls).all)
+      .to eq([{ city: "Nowhere", last_address: "198.51.100.7", calls: 2 }])
   end
 
   it "adds a row for another device" do

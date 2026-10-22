@@ -15,6 +15,7 @@ amended:
   - "#1759"
   - "#1905"
   - "#1910"
+  - "#1912"
 tags:
   - security
   - privacy
@@ -59,7 +60,9 @@ ADR 0010 has them. The address comes from `Blog::Operations::ReadVisitorAddress`
 **Raw rows last 90 days.** A scheduled job deletes every sign-in and every sighting older than that. What outlives
 it is the list of known devices and cities, so an old device does not alert as new. That list holds the browser, OS,
 city and country, and no IP or raw user agent. The admin's device rows outlive it too (#1905, [ADR 0202][0202]),
-with a browser and OS and no address, until 400 days after their last sign-in.
+with a browser and OS and no address, until 400 days after their last sign-in. A sighting holds one row per
+credential, browser, OS and first product in the user agent, such as `claude-code`, and keeps the city, address and
+user agent of its last call (#1912). The known list still keys on city, so a call from a new city still alerts.
 
 **Failed sign-ins stop at a throttle.** The callback is public, so a script can fail it as often as it likes. A
 failed sign-in records a row only while its sender has fewer than `sign_ins.throttle_limit` failures in the window,
