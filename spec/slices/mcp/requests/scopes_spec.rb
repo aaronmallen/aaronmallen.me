@@ -8,6 +8,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         list_inbox list_journal_entries list_links list_people list_posts list_projects list_pull_requests
         list_saved_views
         list_share_groups list_shares
+        list_short_links
         list_social_posts list_sprints list_suggestions list_tags list_task_rules list_task_series list_tasks
         list_trusted_authors
         list_webmentions list_work_entries read_activity read_analytics read_commit read_current_sprint read_decision
@@ -43,9 +44,10 @@ RSpec.describe "MCP tool scopes", type: :request do
         wake_inbox_row write_post_seo
       ],
       "publish" => %w[
-        add_shares_to_group add_work_entry approve_webmentions delete_share delete_share_group group_shares
-        publish_post send_social_post ungroup_share_file update_post_edit_note update_share update_share_group
-        update_share_group_file update_webmention_settings upload_share upload_share_group
+        add_shares_to_group add_work_entry approve_webmentions create_short_link delete_share delete_share_group
+        group_shares publish_post send_social_post ungroup_share_file update_post_edit_note update_share
+        update_share_group update_share_group_file update_short_link update_webmention_settings upload_share
+        upload_share_group
       ],
       "health" => %w[read_health_days],
       "mail" => %w[

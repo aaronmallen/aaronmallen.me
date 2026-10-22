@@ -20,7 +20,7 @@ en:
             delete: "Delete posts, social posts and any other record for good"
             health: "Read your health data: sleep, heart rate, HRV, steps and workouts, day by day beside your work"
             mail: "Read, mark, tag, snooze and delete your mail from every account, contact form messages included, and save drafts for you to send. It can never send mail itself"
-            publish: "Publish posts, send social posts and make any change that shows in public: shares, public projects and their boards, published and scheduled posts, work history, approved webmentions and webmention settings"
+            publish: "Publish posts, send social posts and make any change that shows in public: shares, short links, public projects and their boards, published and scheduled posts, work history, approved webmentions and webmention settings"
             read: "Read everything the site keeps but your health data, mail and agent memory: posts, drafts and all, social posts, your journal, tasks, projects, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
             suggest: "Send you suggested edits to accept or reject"
             write: "Make any change the admin makes short of publishing, sending and deleting: write and edit drafts, and change any record the public cannot see"
