@@ -115,6 +115,29 @@ RSpec.describe "Admin menu switcher", type: :feature do
     end
   end
 
+  describe "at 375px" do
+    def space_above(heading, link)
+      evaluate_script(<<~JS)
+        (() => {
+          const panel = document.querySelector("#nav-switcher")
+          const top = [...panel.querySelectorAll(".switcher-heading")].find(it => it.textContent.trim() === "#{heading}")
+          const row = [...panel.querySelectorAll(".switcher-row")].find(it => it.textContent.trim() === "#{link}")
+          return top.getBoundingClientRect().top - row.getBoundingClientRect().bottom
+        })()
+      JS
+    end
+
+    before do
+      page.current_window.resize_to(375, 800)
+      visit "/admin"
+      open_switcher
+    end
+
+    it "starts Tasks right under today, with the gap between any two groups" do
+      expect(space_above("Tasks", "today")).to eq(space_above("Publish", "projects"))
+    end
+  end
+
   describe "at 400px" do
     before do
       page.current_window.resize_to(400, 844)

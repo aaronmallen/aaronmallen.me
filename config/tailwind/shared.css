@@ -2097,6 +2097,12 @@
 
 @utility switcher-column {
   @apply flex flex-col gap-px pb-2;
+
+  @variant phone {
+    &:not(:has(.switcher-heading)) {
+      @apply col-span-full;
+    }
+  }
 }
 
 @utility switcher-heading {
