@@ -196,6 +196,7 @@ one.
 | [0196][0196] | Keep a copy of each session's memory index, searches and reads | ![Active][active] | 2026-10-20 |
 | [0197][0197] | Draw both board views and pick one in the browser | ![Active][active] | 2026-10-20 |
 | [0198][0198] | Make a short code from its row id in base 36 and match it whole | ![Active][active] | 2026-10-20 |
+| [0199][0199] | Attach agent memory and sessions to projects, and treat a repo as a lookup | ![Active][active] | 2026-10-21 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -388,6 +389,7 @@ one.
 [0196]: 0196-keep-a-copy-of-each-sessions-memory-index-searches-and-reads.md
 [0197]: 0197-draw-both-board-views-and-pick-one-in-the-browser.md
 [0198]: 0198-make-a-short-code-from-its-row-id-in-base-36-and-match-it-whole.md
+[0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

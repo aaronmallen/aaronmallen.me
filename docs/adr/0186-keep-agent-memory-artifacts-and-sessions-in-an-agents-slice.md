@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [db, admin, api, mcp, links]
 issue: "#1741"
-amended: ["#1745", "#1750", "#1790", "#1859", "#1860"]
+amended: ["#1745", "#1750", "#1790", "#1859", "#1860", "#1893"]
 tags: [agents, memory, artifacts, sessions, slices, mcp, privacy]
 ---
 
@@ -36,7 +36,9 @@ read it through its exported read repos and operations and never write its table
 - **Nothing is public.** No public page reads the slice.
 - **I fix memory in the admin.** Since #1750 the memories screens add, edit, remove and revert facts, move a file
   to another scope, link it to other records and delete it. Each change names me as its author. A move adds a
-  `scope` entry to the file's history, and agents move a file the same way through `move_memory_file`.
+  `scope` entry to the file's history, and agents move a file the same way through `move_memory_file`. Since
+  #1893 a file's scope is global, a project or a task; the `repo` scope is gone, and a repo only finds its project
+  ([ADR 0199][0199]).
 - **Nothing expires.** History, versions and sessions stay. A cap on artifact bodies (100,000 characters) keeps each
   row small. #1859 dropped the cap on fact text, so an agent can save a whole gotcha; the request body limit still
   bounds what a client sends. Since #1790 `read_memory_file` and the admin memory file page read history a
@@ -75,4 +77,5 @@ screens, the MCP tools or a record link.
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
+[0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

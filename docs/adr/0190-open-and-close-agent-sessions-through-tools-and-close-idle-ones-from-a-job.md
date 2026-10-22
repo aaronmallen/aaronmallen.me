@@ -5,7 +5,7 @@ status: active
 created: 2026-10-17
 area: [config, db, api, mcp]
 issue: "#1741"
-amended: ["#1747", "#1752", "#1750", "#1751", "#1860", "#1868"]
+amended: ["#1747", "#1752", "#1750", "#1751", "#1860", "#1868", "#1893"]
 tags: [agents, sessions, mcp, sidekiq, scheduled-jobs, memory]
 ---
 
@@ -31,7 +31,9 @@ An agent opens a session with `start_session` and closes it with `end_session`.
   header comment names `file <id>`, and each fact's bullet starts with `[fact <id>]`. The reply's `files` lists
   each file's ID, path and scope without its facts, which `read_memory_file` gives whole, so the reply holds each
   fact once. Since #1860 it returns an index in place of that memory: one line per file in scope with its ID, scope,
-  path, description and fact count, and no facts ([ADR 0195][0195]). It records no loads.
+  path, description and fact count, and no facts ([ADR 0195][0195]). It records no loads. Since #1893 it takes a
+  project key, or a repo that it resolves to a project, and records that project on the session
+  ([ADR 0199][0199]).
 - **Loads are reads.** Since #1860 a session records the memory files the agent read. `read_memory_file` and
   `search_memory` take an optional session id; a read records its file, and a search records each file it hit.
   Since #1868 a session also keeps a copy of what it got: the index lines `start_session` returned, each search with
@@ -75,4 +77,5 @@ file: their link goes to null, and the drawer marks the line as a deleted file.
 [0189]: 0189-name-an-agent-by-the-slugs-it-reports-on-each-write.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [0196]: 0196-keep-a-copy-of-each-sessions-memory-index-searches-and-reads.md
+[0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
