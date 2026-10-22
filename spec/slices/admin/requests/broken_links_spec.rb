@@ -172,7 +172,7 @@ RSpec.describe "Admin broken links", type: :request do
       fail_nights(post_with(dead, title: "Once"), dead, 1)
       get "/admin/posts"
 
-      expect(post_row("Once")).to have_css(".post-row-meta .pill.orange", text: "1 link failing")
+      expect(post_row("Once")).to have_css(".post-row-meta .tone-text.orange", text: "1 link failing")
     end
 
     it "tags a post failing two nights or more in pink" do
@@ -181,7 +181,7 @@ RSpec.describe "Admin broken links", type: :request do
       fail_nights(post, slow, 1)
       get "/admin/posts"
 
-      expect(post_row("Twice")).to have_css(".post-row-meta .pill.pink", text: "2 links failing")
+      expect(post_row("Twice")).to have_css(".post-row-meta .tone-text.pink", text: "2 links failing")
     end
 
     it "leaves a post with fine links untagged" do

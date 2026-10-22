@@ -2186,7 +2186,6 @@ en:
           links_failing:
             one: "%{count} link failing"
             other: "%{count} links failing"
-          mentions: "@%{count}"
           mentions_label:
             one: "%{count} webmention"
             other: "%{count} webmentions"

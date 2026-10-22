@@ -355,13 +355,20 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       end
     end
 
-    it "counts the mentions a post received in a pill" do
+    it "counts the mentions a post received in pink text" do
       post = create(:post)
       create(:webmention, post: post)
       create(:webmention, :spam, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".post-row-meta .pill.pink span[aria-hidden='true']", exact_text: "@2")
+      expect(page).to have_css(".post-row-meta .tone-text.pink span[aria-hidden='true']", exact_text: "2")
+    end
+
+    it "marks the mention count with an at sign a screen reader skips" do
+      create(:webmention, post: create(:post))
+      get "/admin/posts"
+
+      expect(page).to have_css(".post-row-meta .tone-text.pink i.fa-at[aria-hidden='true']")
     end
 
     it "counts an ignored mention as received" do
@@ -370,7 +377,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       create(:webmention, :ignored, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".post-row-meta .pill.pink span[aria-hidden='true']", exact_text: "@2")
+      expect(page).to have_css(".post-row-meta .tone-text.pink span[aria-hidden='true']", exact_text: "2")
     end
 
     it "names the mention count for a screen reader" do
@@ -378,7 +385,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       create(:webmention, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".post-row-meta .pill.pink .sr-only", exact_text: "1 webmention")
+      expect(page).to have_css(".post-row-meta .tone-text.pink .sr-only", exact_text: "1 webmention")
     end
 
     describe "suggestions" do
@@ -391,22 +398,22 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
         suggest(create(:post, :draft, body: "teh teh"), 2)
         get "/admin/posts"
 
-        expect(page).to have_css(".post-row-meta .pill.blue", exact_text: "2 suggestions")
+        expect(page).to have_css(".post-row-meta .tone-text.blue", exact_text: "2 suggestions")
       end
 
       it "counts nothing on a published post, where the editor shows none" do
         suggest(create(:post, :published, body: "teh"), 1)
         get "/admin/posts"
 
-        expect(page).to have_no_css(".post-row-meta .pill.blue")
+        expect(page).to have_no_css(".post-row-meta .tone-text.blue")
       end
     end
 
-    it "shows no mention pill on a post without mentions" do
+    it "shows no mention count on a post without mentions" do
       create(:post)
       get "/admin/posts"
 
-      expect(page).to have_no_css(".pill.pink")
+      expect(page).to have_no_css(".post-row-meta .tone-text.pink")
     end
 
     { draft: "orange", scheduled: "blue", published: "green" }.each do |status, color|

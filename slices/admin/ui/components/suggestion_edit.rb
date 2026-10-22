@@ -16,7 +16,7 @@ module Admin
             diff
             p(class: "sg-reason") { @reason }
             div(class: "sg-actions") do
-              Pill(color: :sand) { t(".stale") } if @stale
+              ToneText(color: :sand) { t(".stale") } if @stale
               yield
             end
           end

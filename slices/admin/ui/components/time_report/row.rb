@@ -42,7 +42,7 @@ module Admin
             @by == DAY ? l(@group.key, format: :weekday) : @group.name
           end
 
-          def shared = Pill(color: :orange) { t(".shared") }
+          def shared = ToneText(color: :orange) { t(".shared") }
 
           def task(found)
             ListItem(title: found.title, href: path(:admin_task, id: found.id)) do

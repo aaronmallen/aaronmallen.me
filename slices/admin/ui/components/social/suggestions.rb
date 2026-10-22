@@ -42,7 +42,7 @@ module Admin
           def refusal(edit)
             network = t(Structs::Network::LABELS.fetch(edit[:over].network))
 
-            Pill(color: :orange) { t(".over_limit", limit: edit[:over].limit, network:) }
+            ToneText(color: :orange) { t(".over_limit", limit: edit[:over].limit, network:) }
             Button(small: true, **submit(edit, reject: true)) { t(".reject") }
           end
 

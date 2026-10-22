@@ -126,7 +126,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
 
       it "flags no project as sharing time, since a task counts in one project" do
-        expect(page).to have_no_css(".time-row .pill", text: "shared")
+        expect(page).to have_no_css(".time-row .tone-text", text: "shared")
       end
 
       it "leaves out the hint, since the rows add up to the total" do
@@ -182,11 +182,11 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
 
       it "flags no row, since most tasks carry more than one tag" do
-        expect(page).to have_no_css(".time-row .pill")
+        expect(page).to have_no_css(".time-row .tone-text")
       end
 
       it "flags each task line that counts under another tag" do
-        expect(tasks_in("ruby").map { it.has_css?(".pill", text: "shared", visible: :all) }).to eq([true, false])
+        expect(tasks_in("ruby").map { it.has_css?(".tone-text", text: "shared", visible: :all) }).to eq([true, false])
       end
 
       it "groups by tag when the URL names no grouping" do
@@ -208,7 +208,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
 
       it "flags no day, since a day never shares time" do
-        expect(page).to have_no_css(".pill")
+        expect(page).to have_no_css(".tone-text")
       end
     end
 

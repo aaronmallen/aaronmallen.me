@@ -241,7 +241,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       end
 
       it "marks it stale" do
-        expect(page).to have_css(".sg-edit .pill", text: "stale")
+        expect(page).to have_css(".sg-edit .tone-text.sand", text: "stale")
       end
 
       it "offers only Dismiss" do
@@ -266,7 +266,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       end
 
       it "still shows it as stale" do
-        expect(page).to have_css(".sg-edit .pill", text: "stale")
+        expect(page).to have_css(".sg-edit .tone-text.sand", text: "stale")
       end
 
       it "offers only Dismiss" do

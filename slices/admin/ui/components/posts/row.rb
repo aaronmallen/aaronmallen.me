@@ -41,15 +41,16 @@ module Admin
             return if @failing.empty?
 
             color = @failing.first[:check].failures < 2 ? :orange : :pink
-            Pill(color:, icon: "fa-solid fa-link-slash") { t(".links_failing", count: @failing.size) }
+            ToneText(color:, icon: "fa-solid fa-link-slash") { t(".links_failing", count: @failing.size) }
           end
 
           def mentions
             count = @stats.fetch(:mentions)
             return unless count.positive?
 
-            Pill(color: MENTION_COLOR) do
-              span(aria: { hidden: "true" }) { t(".mentions", count:) }
+            ToneText(color: MENTION_COLOR) do
+              Icon("fa-solid fa-at")
+              span(aria: { hidden: "true" }) { count.to_s }
               span(class: "sr-only") { t(".mentions_label", count:) }
             end
           end
@@ -84,7 +85,7 @@ module Admin
             count = @stats.fetch(:suggestions)
             return unless count.positive?
 
-            Pill(color: :blue) { IconLabel(icon: "fa-solid fa-robot") { t(".suggestions", count:) } }
+            ToneText(color: :blue, icon: "fa-solid fa-robot") { t(".suggestions", count:) }
           end
 
           def unique_readers

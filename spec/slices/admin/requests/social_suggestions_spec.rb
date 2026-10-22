@@ -208,7 +208,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
 
       it "marks it stale" do
-        expect(page).to have_css(".sg-edit .pill", text: "stale")
+        expect(page).to have_css(".sg-edit .tone-text.sand", text: "stale")
       end
 
       it "offers only Dismiss" do
@@ -377,7 +377,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       it "says which limit it would pass" do
         open_item(social_post)
 
-        expect(page).to have_css(".sg-edit .pill", text: "Over the Mastodon limit of 500")
+        expect(page).to have_css(".sg-edit .tone-text.orange", text: "Over the Mastodon limit of 500")
       end
 
       it "offers no Accept" do
@@ -433,7 +433,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       it "says which limit it would pass" do
         open_item(social_post)
 
-        expect(page).to have_css(".sg-edit .pill", text: "Over the Bluesky limit of 300")
+        expect(page).to have_css(".sg-edit .tone-text.orange", text: "Over the Bluesky limit of 300")
       end
 
       it "leaves the part alone", :aggregate_failures do
@@ -454,7 +454,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       it "says which limit it would pass" do
         open_item(social_post)
 
-        expect(page).to have_css(".sg-edit .pill", text: "Over the Bluesky limit of 300")
+        expect(page).to have_css(".sg-edit .tone-text.orange", text: "Over the Bluesky limit of 300")
       end
 
       it "leaves the part alone", :aggregate_failures do
@@ -480,7 +480,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       it "says which limit it would pass" do
         open_item(social_post)
 
-        expect(page).to have_css(".sg-edit .pill", text: "Over the LinkedIn limit of 3000")
+        expect(page).to have_css(".sg-edit .tone-text.orange", text: "Over the LinkedIn limit of 3000")
       end
 
       it "leaves the thread alone on Accept all", :aggregate_failures do

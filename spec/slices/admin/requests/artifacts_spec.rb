@@ -68,11 +68,11 @@ RSpec.describe "Admin artifacts", type: :request do
       expect(page.all(".artifact-row > .record-key:first-child").map(&:text)).to eq(["##{plan.id}", "##{notes.id}"])
     end
 
-    it "shows each row's type as a pill in its tone with its icon", :aggregate_failures do
+    it "shows each row's type as tone text in its color with its icon", :aggregate_failures do
       get "/admin/agents/artifacts"
 
-      expect(page).to have_css(".artifact-row-meta .pill.blue i.fa-route", count: 1)
-      expect(page).to have_css(".artifact-row-meta .pill.sand i.fa-note-sticky", count: 1)
+      expect(page).to have_css(".artifact-row-meta .tone-text.blue i.fa-route", count: 1)
+      expect(page).to have_css(".artifact-row-meta .tone-text.sand i.fa-note-sticky", count: 1)
     end
 
     it "colours each tag from the private tag of its name" do
@@ -218,10 +218,10 @@ RSpec.describe "Admin artifacts", type: :request do
         .to match([/\Av2you · .+ · currentTidied\z/, /\Av1Anthropic claude-opus-5-5 · .+\z/])
     end
 
-    it "shows its type as a pill in its tone with its icon in the head" do
+    it "shows its type as tone text in its color with its icon in the head" do
       get "/admin/agents/artifacts/#{found.id}"
 
-      expect(page).to have_css(".page-head-actions .pill.blue i.fa-route", count: 1)
+      expect(page).to have_css(".page-head-actions .tone-text.blue i.fa-route", count: 1)
     end
 
     it "colours its tags" do

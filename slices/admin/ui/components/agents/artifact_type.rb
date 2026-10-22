@@ -25,7 +25,7 @@ module Admin
           def view_template
             look = self.class.look(@type)
 
-            Pill(color: look.tone, icon: look.icon) { @type }
+            ToneText(color: look.tone, icon: look.icon) { @type }
           end
         end
       end

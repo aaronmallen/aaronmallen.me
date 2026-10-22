@@ -3973,6 +3973,34 @@
   }
 }
 
+@utility tone-text {
+  @apply inline-flex items-center gap-1.5 font-mono text-badge whitespace-nowrap;
+
+  &.green {
+    @apply text-mk-green-text;
+  }
+
+  &.pink {
+    @apply text-mk-pink-text;
+  }
+
+  &.blue {
+    @apply text-mk-blue-text;
+  }
+
+  &.violet {
+    @apply text-mk-violet-text;
+  }
+
+  &.sand {
+    @apply text-mk-sand-text;
+  }
+
+  &.orange {
+    @apply text-mk-orange-text;
+  }
+}
+
 @utility li {
   @apply relative flex flex-wrap items-center justify-between gap-4 border-t border-line py-3 first:border-t-0 first:pt-0;
 
