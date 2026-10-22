@@ -16,6 +16,8 @@ module Contacts
       def emailed = people.emailed.in_name_order.to_a
 
       def mentionable = people.exclude(key: nil).in_name_order.to_a
+
+      def sync_tokens = contact_syncs.dataset.select_map(%i[google_connection_id sync_token]).to_h
     end
   end
 end

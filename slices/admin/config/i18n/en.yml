@@ -255,6 +255,7 @@ en:
       added: "Person added"
       removed: "Person removed"
       saved: "Person saved"
+      sync_queued: "Contact sync queued · Google's changes land in a moment"
   post_form:
     toasts:
       applied:
@@ -356,6 +357,10 @@ en:
     toasts:
       answered: "%{name} answered"
       bad_server: "That isn't a server name · nothing was saved"
+      contacts:
+        saves: "%{account} syncs its contacts and takes new ones"
+        stopped: "%{account} no longer syncs contacts"
+        syncs: "%{account} syncs its contacts"
       connected: "%{name} connected as %{account}"
       declined: "%{name} didn't grant access · nothing was saved"
       disconnected: "%{name} disconnected"
@@ -2090,6 +2095,7 @@ en:
           edit: "Edit %{name}"
           empty: "Nobody yet. Add the people you mention."
           new_person: "New person"
+          sync: "Sync now"
           sub:
             one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
             other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
@@ -2668,6 +2674,11 @@ en:
           server: "Your server"
           revoke: "Disconnect any time and the site revokes its token on %{name}."
           token: "Personal access token"
+        contact_options:
+          hint: "Google's contacts, labels and stars come in every hour. New contacts made here save to one account."
+          save: "Save"
+          saves: "Save new contacts here"
+          sync: "Sync contacts"
         detail:
           access: "Access"
           app_credentials: "App credentials"
@@ -2918,6 +2929,7 @@ en:
           dump_failed: "pg_dump failed"
           github_failed: "GitHub didn't answer"
           google_calendar_failed: "Google Calendar didn't answer"
+          google_contacts_failed: "Google Contacts didn't answer"
           google_health_failed: "Google Health didn't answer"
           invalid_database: "The file it sent won't open"
           linear_failed: "Linear didn't answer"
@@ -2942,6 +2954,7 @@ en:
           backups: "Database backup"
           calendar: "Google Calendar sync"
           commits: "Commit import"
+          contacts: "Google Contacts sync"
           countries: "Country lookup"
           country_database: "Country database refresh"
           health: "Google Health sync"

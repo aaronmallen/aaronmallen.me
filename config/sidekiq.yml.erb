@@ -114,6 +114,10 @@ production:
       description: "every 15 minutes, from :13"
       cron: "13-59/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Health::Jobs::SyncHealth
+    sync_contacts:
+      description: "every hour at :37"
+      cron: "37 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Contacts::Jobs::SyncContacts
     sync_gmail:
       description: "every 5 minutes"
       cron: "*/5 * * * * <%= Blog::TimeZone::NAME %>"

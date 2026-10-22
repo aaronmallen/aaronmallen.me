@@ -40,7 +40,9 @@ module Admin
       repos.calendar_day_queries repos.calendar_queries
     ], from: :calendar
 
-    import keys: %w[operations.delete_person operations.save_person repos.person_queries], from: :contacts
+    import keys: %w[
+      operations.delete_person operations.queue_contact_sync operations.save_person repos.person_queries
+    ], from: :contacts
 
     import keys: %w[
       operations.clear_inbox

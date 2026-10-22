@@ -184,6 +184,7 @@ module Admin
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person
     get "/people/search/:network", to: "people.search", as: :search_people, network: NETWORK
+    post "/people/sync", to: "people.sync", as: :sync_people
     get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
     get "/people/:id/menu", to: "people.menu", as: :person_menu, id: ID
     post "/people/:id", to: "people.update", as: :update_person, id: ID
@@ -248,6 +249,7 @@ module Admin
     get "/services/:key/menu", to: "services.menu", as: :service_menu, key: SERVICE_KEY
     post "/services/:provider", to: "services.create", as: :create_service, provider: SERVICE
     post "/services/:provider/connect", to: "services.connect", as: :connect_service, provider: OAUTH_SERVICE
+    post "/services/:id/contacts", to: "services.contacts", as: :contacts_service, id: ID
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID

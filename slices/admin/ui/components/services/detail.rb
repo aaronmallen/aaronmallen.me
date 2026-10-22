@@ -16,7 +16,8 @@ module Admin
             status
             powers
             access if definition.oauth? && @row.connection
-            work if definition.id == GOOGLE && @row.connection
+            work if google?
+            ContactOptions(connection: @row.connection) if google?
             credentials
             jobs
             Actions(row: @row, connectable: @connectable)
@@ -51,6 +52,8 @@ module Admin
           end
 
           def definition = @row.definition
+
+          def google? = definition.id == GOOGLE && @row.connection
 
           def held(yes, color, held_key, lacking_key)
             yes ? Pill(color:) { t(held_key) } : Pill(color: :orange) { t(lacking_key) }

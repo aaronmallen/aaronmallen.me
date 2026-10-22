@@ -12,7 +12,10 @@ module Services
       def add(credentials:, **columns) = create(credentials: seal(credentials), **columns)
 
       def change(id, credentials: nil, **columns)
-        update(id, **(credentials ? { credentials: seal(credentials) } : {}), **columns)
+        transaction do
+          service_connections.exclude(id:).update(saves_contacts: false) if columns[:saves_contacts]
+          update(id, **(credentials ? { credentials: seal(credentials) } : {}), **columns)
+        end
       end
 
       def reseal

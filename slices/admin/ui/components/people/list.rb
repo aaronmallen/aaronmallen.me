@@ -14,7 +14,7 @@ module Admin
           def view_template
             div(class: "people-bar") do
               Hint { t(".sub", count: @people.size) }
-              new_person
+              acts
             end
             div(class: ("g-main" if @searchable.any?)) do
               div(class: "settings-main") { list }
@@ -25,6 +25,11 @@ module Admin
           end
 
           private
+
+          def acts
+            ButtonForm(action: path(:admin_sync_people), label: t(".sync"), icon: "fa-solid fa-arrows-rotate")
+            CreateLink(href: path(:admin_new_person), label: t(".new_person"), dialog: Drawer.id_for(Drawer::NEW))
+          end
 
           def edit(person)
             label = t(".edit", name: person.name)
@@ -42,10 +47,6 @@ module Admin
           def meta(person)
             span(class: "person-row-token") { t(".token", key: person.key) } if person.key
             ProfileLinks(person:)
-          end
-
-          def new_person
-            CreateLink(href: path(:admin_new_person), label: t(".new_person"), dialog: Drawer.id_for(Drawer::NEW))
           end
 
           def row(person)

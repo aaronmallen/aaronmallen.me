@@ -213,7 +213,7 @@ module Blog
     SuggestionEditStatus = Types::String.enum("pending", "accepted", "rejected", "stale")
     SyncName = Types::String.enum(
       "analytics_rollup", "commits", "country_database", "projects", "issues", "linear_issues", "backups",
-      "pull_requests", "health", "mail", "calendar",
+      "pull_requests", "health", "mail", "calendar", "contacts",
     )
     SyncStateKind = Types::String.enum("commits", "backfill", "failure", "pull_requests")
     Tag = Types::String.constrained(format: SLUG_FORMAT)

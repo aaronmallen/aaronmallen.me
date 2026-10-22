@@ -79,6 +79,7 @@ honeybadger:
     send_due_social_posts: <%= ENV["HONEYBADGER_CHECK_IN_SEND_DUE_SOCIAL_POSTS"].to_json %>
     sweep_photos: <%= ENV["HONEYBADGER_CHECK_IN_SWEEP_PHOTOS"].to_json %>
     sync_calendar: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_CALENDAR"].to_json %>
+    sync_contacts: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_CONTACTS"].to_json %>
     sync_gmail: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_GMAIL"].to_json %>
     sync_health: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_HEALTH"].to_json %>
     sync_issues_github: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_ISSUES_GITHUB"].to_json %>

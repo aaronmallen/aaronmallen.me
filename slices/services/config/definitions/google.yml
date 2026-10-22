@@ -9,12 +9,17 @@ env:
 powers:
   - Gmail in Mail
   - Google Calendar events on the calendar
+  - Google Contacts in Contacts
   - Sleep, heart rate and workouts beside each day's work
 scopes:
   - id: "openid https://www.googleapis.com/auth/userinfo.email"
     label: See your address
     why: Which account mail and events come from
   - {id: "https://mail.google.com/", label: "Read, send, label and delete mail", why: Mail, optional: true}
+  - id: "https://www.googleapis.com/auth/contacts"
+    label: See and edit your contacts
+    why: Contacts, synced both ways
+    optional: true
   - id: "https://www.googleapis.com/auth/calendar"
     label: See and edit calendars and events
     why: Events on the calendar
@@ -34,4 +39,5 @@ scopes:
 jobs:
   - {every: every 5 minutes, sync: mail}
   - {every: every 15 minutes, sync: calendar}
+  - {every: every hour, sync: contacts}
   - {every: every 15 minutes, sync: health}

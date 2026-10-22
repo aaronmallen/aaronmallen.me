@@ -101,7 +101,7 @@ short link's destination (#1470).
 | Scheduled job | On failure |
 | --- | --- |
 | `BackUpDatabase`, `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
-| `RefreshProjects`, `SyncCalendar`, `SyncGmail`, `SyncHealth`, `SyncIssues` | Record a `Failure`; record an exception, then raise |
+| `RefreshProjects`, `SyncCalendar`, `SyncContacts`, `SyncGmail`, `SyncHealth`, `SyncIssues` | Record a `Failure`; record an exception, then raise |
 | `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `QueueHeldTitleFetches`, `QueueHeldBackfills`, `CheckPostLinks`, `RollUpTiming`, `RerenderPosts` | Raise |
 | `ImportCommits`, `ImportPullRequests` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos`, `PruneAccessRecords`, `ReapSpamMessages` | Drop it |

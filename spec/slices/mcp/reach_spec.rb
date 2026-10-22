@@ -92,6 +92,8 @@ RSpec.describe "MCP reach", type: :app do
       "backups.operations.restore_database" => "the db:restore mise task runs it",
       "calendar.operations.show_calendars" => "the owner picks the calendars the admin page shows; tools list them all",
       "calendar.operations.sync_calendar" => "a background job mirrors Google events every 15 minutes",
+      "contacts.operations.queue_contact_sync" => "#1944 gives agents the contacts tools; Sync now runs it until then",
+      "contacts.operations.sync_contacts" => "a background job pulls Google contacts every hour",
       "decisions.operations.tag_decision" => "the admin's decision rows tag it; the tag_decision tool covers it",
       "decisions.operations.untag_decision" => "the admin's decision rows untag it; the untag_decision tool covers it",
       "mail.operations.create_message" => "a reader sends a message through the public form",
