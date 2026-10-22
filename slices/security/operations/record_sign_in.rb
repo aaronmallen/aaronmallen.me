@@ -37,8 +37,8 @@ module Security
       end
 
       def sign_in(device, row, access)
+        known_device_mutations.know(**access.slice(*ReadAccess::DEVICE)) unless device_queries.known(device)
         device_id = device_mutations.sign_in(device, **access.slice(:browser, :os))
-        known_device_mutations.know(**access.slice(*ReadAccess::DEVICE))
         sign_in_mutations.create(**row, **access, device_id:)
         device_id
       end

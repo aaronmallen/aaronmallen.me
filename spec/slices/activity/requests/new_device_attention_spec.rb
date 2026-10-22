@@ -148,9 +148,9 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
   end
 
   describe "a sign-in" do
-    def callback(user_agent)
+    def callback(user_agent, address = "81.2.69.160")
       get "/admin/auth/github/callback", { code: "code", state: start_admin_sign_in("github") },
-          access_headers(user_agent)
+          access_headers(user_agent, address)
     end
 
     def card_row = Capybara.string(last_response.body).find("section.card[data-attention] .li")
@@ -160,9 +160,14 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
       [row.find(".li-title").text, row.find(".li-sub").text, row.has_css?("input[value=new_device]", visible: :all)]
     end
 
-    def sign_in(user_agent)
+    def new_browser(user_agent)
+      clear_cookies
+      sign_in(user_agent)
+    end
+
+    def sign_in(user_agent, address = "81.2.69.160")
       stub_github_sign_in
-      callback(user_agent)
+      callback(user_agent, address)
     end
 
     def wrong_account(user_agent)
@@ -172,9 +177,32 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
 
     it "adds a row for a device the operator has not signed in from" do
       sign_in(agent)
-      sign_in(firefox)
+      new_browser(firefox)
 
       expect(titles).to eq(["Sign-in: Firefox on Linux in London, GB"])
+    end
+
+    it "adds nothing for a known device cookie in a new city" do
+      sign_in(agent)
+      sign_in(agent, "198.51.100.7")
+
+      expect([rows, known_devices.count]).to eq([[], 1])
+    end
+
+    it "adds a row for the same browser in a new city once its cookies are cleared" do
+      sign_in(agent)
+      clear_cookies
+      sign_in(agent, "198.51.100.7")
+
+      expect(titles).to eq(["Sign-in: Chrome on macOS in Nowhere"])
+    end
+
+    it "adds a row for a device cookie no row holds" do
+      sign_in(agent)
+      set_cookie "#{Blog::DeviceCookie::KEY}=#{SecureRandom.uuid}; path=/admin"
+      sign_in(agent, "198.51.100.7")
+
+      expect(titles).to eq(["Sign-in: Chrome on macOS in Nowhere"])
     end
 
     it "adds nothing for a failed sign-in from a new device" do
@@ -185,7 +213,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     end
 
     it "shows the row on the admin card with a snooze" do
-      [agent, firefox].each { sign_in(it) }
+      sign_in(agent)
+      new_browser(firefox)
       sign_in_to_admin
       get "/admin"
 
