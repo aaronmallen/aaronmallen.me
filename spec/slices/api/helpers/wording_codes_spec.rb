@@ -50,7 +50,6 @@ RSpec.describe API::Helpers::Wording do
         "cadence.format" => enum, "every.format" => integer, "month.format" => integer, "tracked.format" => unsent,
         "week.format" => enum, "weekday.format" => integer,
       },
-      "UpdateShare" => { "code.format" => unsent },
       "UpdateShareGroup" => { "code.format" => unsent, "filename.format" => unsent },
       "UpdateShareGroupFile" => { "code.format" => unsent },
     }

@@ -137,6 +137,12 @@ RSpec.describe "MCP tool scopes", type: :request do
 
       expect(mcp_reply.dig("error", "data")).to start_with("delete_share needs the publish permission,")
     end
+
+    it "refuses update_share, naming publish" do
+      mcp_rpc("tools/call", { name: "update_share", arguments: { id: 1, code: "resume" } })
+
+      expect(mcp_reply.dig("error", "data")).to start_with("update_share needs the publish permission,")
+    end
   end
 
   describe "a token holding neither agents nor delete" do

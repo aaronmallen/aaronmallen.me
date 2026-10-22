@@ -3,8 +3,8 @@
 module MCP
   module Tools
     class UpdateShare < Base
-      description "Rename a shared file by ID. The new name is the one a download saves as, and the link stays " \
-                  "the same"
+      description "Edit a shared file by ID: its name, the one a download saves as; its short code, which moves " \
+                  "its link; or its alt text. A field you leave out keeps what it has"
       endpoint
     end
   end

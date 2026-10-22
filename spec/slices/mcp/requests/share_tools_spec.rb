@@ -126,10 +126,41 @@ RSpec.describe "MCP share tools", type: :request do
   end
 
   describe "update_share" do
-    it "renames a share" do
-      share = Shares::Slice["operations.upload_share"].call(share_upload("a", "a.txt", "text/plain")).value!
+    let(:share) { upload_share.value! }
 
+    it "renames a share" do
       expect(answer("update_share", id: share.id, filename: "b.txt")).to include("filename" => "b.txt")
+    end
+
+    it "sets a share's alt text and keeps its code", :aggregate_failures do
+      answered = answer("update_share", id: share.id, alt_text: "A red door")
+
+      expect(answered).to include("alt_text" => "A red door", "code" => share.code)
+      expect(answer("update_share", id: share.id, alt_text: "")).to include("alt_text" => nil)
+    end
+
+    it "changes a share's code and moves its link", :aggregate_failures do
+      answered = answer("update_share", id: share.id, code: " Resume-Me ")
+
+      expect(answered).to include("code" => "resume-me", "url" => "http://shares.localhost/resume-me")
+      expect(Shares::Slice["relations.short_codes"].pluck(:code)).to eq(["resume-me"])
+    end
+
+    it "refuses a code another share holds and keeps its own", :aggregate_failures do
+      other = upload_share.value!
+
+      expect(refusal("update_share", id: share.id, code: other.code).last.first.fetch("text"))
+        .to include("another share or short link already has this code")
+      expect(share_link(share.id)).to eq("http://shares.localhost/#{share.code}")
+    end
+
+    it "refuses a code that breaks the format" do
+      expect(refusal("update_share", id: share.id, code: "re--sume").last.first.fetch("text"))
+        .to include("code takes lowercase letters and digits")
+    end
+
+    it "refuses an ID no share holds" do
+      expect(refusal("update_share", id: 0, alt_text: "A door").first).to be(true)
     end
   end
 
