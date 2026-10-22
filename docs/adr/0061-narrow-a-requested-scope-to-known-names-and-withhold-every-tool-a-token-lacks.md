@@ -13,6 +13,7 @@ amended:
   - "#941"
   - "#1823"
   - "#1925"
+  - "#1937"
 tags:
   - mcp
   - oauth
@@ -58,9 +59,10 @@ A new scope needs three things: a value in `Blog::Types::OAuthScope`, a consent 
 `slices/mcp/config/i18n/en.yml`, and an operation row that names it (#1823). `scopes_supported` in the metadata
 reads `OAuthScope` on its own.
 
-Since #551 split `publish` and `delete` out of `write`, `OAuthScope` holds five names. ADR 0114 says which tools each
-one guards. ADR 0147, ADR 0151 and ADR 0188 add `health`, `mail` and `agents`, which no other scope covers.
-Since #1925, ADR 0203 adds `notes` the same way.
+Since #551 split `publish` and `delete` out of `write`, `OAuthScope` held five names. ADR 0114 says which tools each
+one guards. ADRs 0147, 0151 and 0188 add `health`, `mail` and `agents`, which no other scope covers. Since #1925,
+ADR 0203 adds `notes` the same way. Since #1937, ADR 0204 adds `contacts`, which guards a person's private fields
+rather than a tool.
 
 ## Alternatives
 

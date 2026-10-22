@@ -201,6 +201,7 @@ one.
 | [0201][0201] | Grow People into contacts in a contacts slice and sync them both ways with Google | ![Active][active] | 2026-10-22 |
 | [0202][0202] | Tell admin browsers apart with a device cookie, and sign each one out on its own | ![Active][active] | 2026-10-22 |
 | [0203][0203] | Gate notes behind a notes scope that read does not cover | ![Active][active] | 2026-10-22 |
+| [0204][0204] | Gate private contact fields behind a contacts scope | ![Active][active] | 2026-10-22 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -398,6 +399,7 @@ one.
 [0201]: 0201-grow-people-into-contacts-in-a-contacts-slice-and-sync-them-both-ways-with-google.md
 [0202]: 0202-tell-admin-browsers-apart-with-a-device-cookie-and-sign-each-one-out-on-its-own.md
 [0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
+[0204]: 0204-gate-private-contact-fields-behind-a-contacts-scope.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

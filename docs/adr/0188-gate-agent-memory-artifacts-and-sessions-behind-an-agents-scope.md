@@ -15,6 +15,7 @@ amended:
   - "#1823"
   - "#1860"
   - "#1925"
+  - "#1937"
 tags:
   - agents
   - oauth
@@ -81,6 +82,8 @@ it.
 
 Since #1925, [ADR 0203][0203] gates notes behind a `notes` scope the same way.
 
+Since #1937, [ADR 0204][0204] adds `contacts`, another scope no other covers, for a person's private fields.
+
 [0061]: 0061-narrow-a-requested-scope-to-known-names-and-withhold-every-tool-a-token-lacks.md
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
 [0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
@@ -89,4 +92,5 @@ Since #1925, [ADR 0203][0203] gates notes behind a `notes` scope the same way.
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
+[0204]: 0204-gate-private-contact-fields-behind-a-contacts-scope.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

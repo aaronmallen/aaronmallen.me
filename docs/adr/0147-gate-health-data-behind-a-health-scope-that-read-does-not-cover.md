@@ -14,6 +14,7 @@ amended:
   - "#1123"
   - "#1823"
   - "#1925"
+  - "#1937"
 tags:
   - health
   - oauth
@@ -81,5 +82,8 @@ The `read_activity` endpoint checks a scope itself, where every other check sits
 
 Since #1123, ADR 0151 gates mail the same way, behind a `mail` scope, and `read` endpoints drop mail threads as
 they drop workouts. Since #1925, ADR 0203 gates notes behind a `notes` scope.
+
+Since #1937, ADR 0204 adds a `contacts` scope for a person's private fields. It narrows what `read` and `write`
+tools return and take, where `health` withholds a tool.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

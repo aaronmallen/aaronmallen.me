@@ -16,6 +16,7 @@ amended:
   - "#1598"
   - "#1823"
   - "#1925"
+  - "#1937"
 tags:
   - mail
   - gmail
@@ -85,5 +86,8 @@ it should still drop them in its query, or a page can come back short. One reque
 with a `read` token over a workout and a mail thread, and fails when either shows.
 
 Since #1925, ADR 0203 gates notes behind a `notes` scope the same way.
+
+Since #1937, ADR 0204 adds a `contacts` scope for a person's private fields. The mail threads on a contact stay
+behind `mail`.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
