@@ -159,6 +159,46 @@ RSpec.describe "MCP share tools", type: :request do
     end
   end
 
+  describe "delete_share" do
+    let(:share) { upload_share.value! }
+
+    it "deletes the share and its stored file", :aggregate_failures do
+      removed = stub_request(:delete, share_store_url(share.key))
+
+      expect(answer("delete_share", id: share.id)).to eq("id" => share.id, "deleted" => true)
+      expect(shares).to be_empty
+      expect(removed).to have_been_requested
+    end
+
+    it "keeps the share when the store fails", :aggregate_failures do
+      stub_request(:delete, share_store_url(share.key)).to_return(status: 500)
+
+      expect(refusal("delete_share", id: share.id))
+        .to eq([true, [{ "type" => "text", "text" => API::Helpers::Upload::STORE_DOWN }]])
+      expect(shares.size).to eq(1)
+    end
+
+    it "refuses an ID no share holds" do
+      expect(refusal("delete_share", id: 0).first).to be(true)
+    end
+  end
+
+  describe "delete_share_group" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain")) }
+
+    it "deletes the group and every stored file", :aggregate_failures do
+      removed = group.share_group_files.map { stub_request(:delete, share_store_url(it.key)) }
+
+      expect(answer("delete_share_group", id: group.id)).to eq("id" => group.id, "deleted" => true)
+      expect(Shares::Slice["relations.share_groups"].to_a).to be_empty
+      expect(removed).to all(have_been_requested)
+    end
+
+    it "refuses an ID no group holds" do
+      expect(refusal("delete_share_group", id: 0).first).to be(true)
+    end
+  end
+
   describe "group_shares" do
     it "groups single shares under one new link" do
       ids = [upload_share.value!.id, upload_share.value!.id]

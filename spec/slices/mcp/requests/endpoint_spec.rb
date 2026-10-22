@@ -2300,6 +2300,8 @@ RSpec.describe "MCP endpoint", type: :request do
         "delete_post" => { id: 1 },
         "delete_posts" => { ids: [1] },
         "delete_saved_view" => { id: 1 },
+        "delete_share" => { id: 1 },
+        "delete_share_group" => { id: 1 },
         "delete_social_post" => { id: 1 },
         "delete_task" => { id: 1 },
         "delete_task_comment" => { id: 1, comment_id: 2 },

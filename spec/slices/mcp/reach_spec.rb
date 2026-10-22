@@ -172,8 +172,6 @@ RSpec.describe "MCP reach", type: :app do
       "shares.operations.backfill_previews" => "the owner runs it once after a deploy to store older images' previews",
       "shares.operations.change_code" => "spec #1053 and spec #1064 keep MCP tools out of shares and short links",
       "shares.operations.check_short_links" => "the nightly link check job checks every short link's destination",
-      "shares.operations.delete_share" => "spec #1053 keeps MCP tools out of shares",
-      "shares.operations.delete_share_group" => "spec #1258 keeps group edits in the admin",
       "shares.operations.delete_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.fetch_short_link_title" => "a background job fills a blank short link title",
       "shares.operations.queue_short_link_check" => "the owner checks a destination again from the admin's Links tab",
