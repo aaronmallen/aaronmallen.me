@@ -12,7 +12,8 @@ module API
           agent: Memory::AUTHOR.fetch(:agent).merge(description: "the agent opening it, such as claude-code"),
           model: Memory::AUTHOR.fetch(:model),
           client: { type: "string", description: "the client the agent runs in, such as Claude Code 2.4 on macOS" },
-          repo: Helpers::Schema::REPO.merge(description: "the repository it works in, as owner/name"),
+          project: Memory::PROJECT,
+          repo: Memory::REPO,
           branch: { type: "string", description: "the branch it works on" },
           tasks: Helpers::Schema.list(Helpers::Schema::TASK).merge(
             maxItems: Blog::Contract::MAX_IDS, description: "the tasks it works on",
@@ -28,7 +29,7 @@ module API
 
       CONTRACTS = [::Agents::Contracts::SessionContract].freeze
       COMPLAINTS = {
-        **Memory::COMPLAINTS.slice(:agent, :model, :repo),
+        **Memory::COMPLAINTS.slice(:agent, :model, :name, :project, :repo),
         branch: { "long" => "keep a branch to #{LIMITS::BRANCH_LIMIT} characters" },
         client: { "long" => "keep a client to #{LIMITS::CLIENT_LIMIT} characters" },
         tasks: { Blog::Contract::MISSING => "name tasks that exist" },

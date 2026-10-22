@@ -122,6 +122,21 @@ RSpec.describe "MCP memory tools", type: :request do
     it "loads only the global files when the repo is blank" do
       expect(mcp_answer("read_memory", repo: " ").fetch("files").map { it.fetch("path") }).to eq(%w[preferences.md])
     end
+
+    it "loads the files of the project its key names" do
+      expect(mcp_answer("read_memory", project: project.key).fetch("files").map { it.fetch("path") })
+        .to eq(%w[preferences.md release.md])
+    end
+
+    it "refuses a project key that names no project" do
+      expect(mcp_text("read_memory", project: "NOPE")).to eq("project: name a project key that exists")
+    end
+
+    it "makes a private project for a repo no project holds" do
+      mcp_answer("read_memory", repo: "aaronmallen/fresh")
+
+      expect(Projects::Slice["repos.project_queries"].ids_by_repo("aaronmallen/fresh").length).to eq(1)
+    end
   end
 
   describe "search_memory" do
@@ -177,6 +192,16 @@ RSpec.describe "MCP memory tools", type: :request do
     it "searches the files read_memory lists for a project" do
       expect(texts(query: "cache", project_id: project.id))
         .to contain_exactly("Cache the tag", "No emdash in the cache docs")
+    end
+
+    it "searches the files read_memory lists for a project key" do
+      expect(texts(query: "cache", project: project.key))
+        .to contain_exactly("Cache the tag", "No emdash in the cache docs")
+    end
+
+    it "refuses a project key that names no project" do
+      expect(mcp_text("search_memory", query: "cache", project: "NOPE"))
+        .to eq("project: name a project key that exists")
     end
 
     it "searches the files read_memory lists for a task" do

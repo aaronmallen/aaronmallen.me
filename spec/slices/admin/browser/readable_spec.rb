@@ -3,7 +3,9 @@
 RSpec.describe "Admin screens", type: :feature do
   let(:commit) { create(:commit, message: "app: make the admin usable on a phone", repo: "aaronmallen/blog") }
   let(:draft) { create(:post, :draft, title: "A draft in progress") }
-  let(:project) { create(:project, name: "aaronmallen.me", tagline: "This website") }
+  let(:project) do
+    create(:project, name: "aaronmallen.me", repo: "aaronmallen/aaronmallen.me", tagline: "This website")
+  end
   let(:social_post) { create(:social_post, :draft) }
   let(:task) do
     create(

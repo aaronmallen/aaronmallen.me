@@ -28,6 +28,10 @@ module API
           description: "an index of the files in scope without their facts: global, then repo, project and task",
         ),
       }.freeze
+      PROJECT = { type: "string", description: "the key of the project to load, such as POD" }.freeze
+      REPO = Helpers::Schema::REPO.merge(
+        description: "the repository as owner/name, to look up its project; one no project holds gets a new one",
+      ).freeze
       SCOPED = "only a %s file takes %s"
 
       CONTRACTS = [
@@ -57,6 +61,8 @@ module API
           "taken" => "a file in this scope already has this path",
         },
         scope: { "taken" => "a file in that scope already has this path" },
+        name: { "taken" => "another project has the repo's name; name the project by its key" },
+        project: { Blog::Contract::MISSING => "name a project key that exists" },
         project_id: {
           Blog::Contract::MISSING => "a project file needs a project that exists",
           "extra" => format(SCOPED, "project", "project_id"),

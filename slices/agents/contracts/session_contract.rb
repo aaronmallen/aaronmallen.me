@@ -12,6 +12,7 @@ module Agents
         required(:agent).filled(Blog::Types::Normalized::ContributorSlug)
         required(:model).filled(Blog::Types::Normalized::ContributorSlug)
         optional(:client).maybe(Blog::Types::OptionalText, max_size?: CLIENT_LIMIT)
+        optional(:project).maybe(Blog::Types::OptionalText)
         optional(:repo).maybe(Blog::Types::Nullable::Repo)
         optional(:branch).maybe(Blog::Types::OptionalText, max_size?: BRANCH_LIMIT)
         optional(:task_ids).value(Blog::Types::IdList, max_size?: MAX_IDS)

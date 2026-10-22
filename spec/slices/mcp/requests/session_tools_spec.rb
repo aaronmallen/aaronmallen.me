@@ -49,6 +49,38 @@ RSpec.describe "MCP session tools", type: :request do
       expect(mcp_message).to eq("repo: name the repository as owner/name")
     end
 
+    it "loads the files of the project its key names" do
+      paths = start(project: project.key.downcase).fetch("files").map { it.fetch("path") }
+
+      expect(paths).to eq(%w[preferences.md release.md])
+    end
+
+    it "refuses a project key that names no project" do
+      mcp_call("start_session", title: "Spike", **author, project: "NOPE")
+
+      expect(mcp_message).to eq("project: name a project key that exists")
+    end
+
+    describe "given a repo no project holds" do
+      let(:made) { Projects::Slice["repos.project_queries"].ids_by_repo("aaronmallen/fresh").first }
+
+      before { start(repo: "aaronmallen/fresh") }
+
+      it "makes a private project named after the repo", :aggregate_failures do
+        expect(Projects::Slice["repos.project_queries"].by_id(made))
+          .to have_attributes(name: "fresh", visibility: "private")
+        expect(Tasks::Slice["repos.task_rule_queries"].by_pattern("github", "aaronmallen/fresh").projects.map(&:id))
+          .to eq([made])
+      end
+
+      it "loads that project's files on the next session" do
+        create_file("fresh-notes", scope: "project", project_id: made)
+
+        expect(start(repo: "aaronmallen/fresh").fetch("files").map { it.fetch("path") })
+          .to eq(%w[preferences.md fresh-notes.md])
+      end
+    end
+
     it "lists the session with its tasks and no files loaded" do
       id = started.fetch("session_id")
 
