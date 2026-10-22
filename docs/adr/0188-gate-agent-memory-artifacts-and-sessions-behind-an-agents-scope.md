@@ -14,6 +14,7 @@ amended:
   - "#1749"
   - "#1823"
   - "#1860"
+  - "#1925"
 tags:
   - agents
   - oauth
@@ -78,6 +79,8 @@ with `read_memory_file` or matches a `search_memory` query ([ADR 0195][0195]). A
 that reads its file, and only the untrusted marker warns of it. I catch a bad fact through its history and revert
 it.
 
+Since #1925, [ADR 0203][0203] gates notes behind a `notes` scope the same way.
+
 [0061]: 0061-narrow-a-requested-scope-to-known-names-and-withhold-every-tool-a-token-lacks.md
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
 [0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
@@ -85,4 +88,5 @@ it.
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
+[0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

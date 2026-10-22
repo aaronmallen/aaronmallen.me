@@ -12,6 +12,7 @@ amended:
   - "#551"
   - "#941"
   - "#1823"
+  - "#1925"
 tags:
   - mcp
   - oauth
@@ -58,7 +59,8 @@ A new scope needs three things: a value in `Blog::Types::OAuthScope`, a consent 
 reads `OAuthScope` on its own.
 
 Since #551 split `publish` and `delete` out of `write`, `OAuthScope` holds five names. ADR 0114 says which tools each
-one guards.
+one guards. ADR 0147, ADR 0151 and ADR 0188 add `health`, `mail` and `agents`, which no other scope covers.
+Since #1925, ADR 0203 adds `notes` the same way.
 
 ## Alternatives
 

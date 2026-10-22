@@ -13,6 +13,7 @@ amended:
   - "#1118"
   - "#1123"
   - "#1823"
+  - "#1925"
 tags:
   - health
   - oauth
@@ -79,6 +80,6 @@ The `read_activity` endpoint checks a scope itself, where every other check sits
 `health`, and nothing but its specs will catch one that forgets.
 
 Since #1123, ADR 0151 gates mail the same way, behind a `mail` scope, and `read` endpoints drop mail threads as
-they drop workouts.
+they drop workouts. Since #1925, ADR 0203 gates notes behind a `notes` scope.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

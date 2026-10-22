@@ -15,6 +15,7 @@ amended:
   - "#1380"
   - "#1598"
   - "#1823"
+  - "#1925"
 tags:
   - mail
   - gmail
@@ -82,5 +83,7 @@ More endpoints check a scope by hand. ADR 0147 left one, `read_activity`; mail a
 links and saved views. A later `read` endpoint that joins every kind gets both kinds dropped by the base class, but
 it should still drop them in its query, or a page can come back short. One request spec calls every API operation
 with a `read` token over a workout and a mail thread, and fails when either shows.
+
+Since #1925, ADR 0203 gates notes behind a `notes` scope the same way.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
