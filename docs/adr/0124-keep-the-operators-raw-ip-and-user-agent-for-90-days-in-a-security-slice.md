@@ -14,6 +14,7 @@ amended:
   - "#911"
   - "#1759"
   - "#1905"
+  - "#1910"
 tags:
   - security
   - privacy
@@ -64,8 +65,10 @@ with a browser and OS and no address, until 400 days after their last sign-in.
 failed sign-in records a row only while its sender has fewer than `sign_ins.throttle_limit` failures in the window,
 10 an hour unless set (#1759). Each row keeps the sender's `HashVisitor` throttle hash beside the address, and
 `Security::Relations::SignIns#claim_failure` counts and writes under one lock, as [ADR 0020][0020] has it. A sign-in
-that goes through always records. The settings tab shows one row per device with its last sign-in, then the
-failed sign-ins and those that named no device a page at a time, newest first (#1906).
+that goes through always records. The settings tab shows one row per device with its last sign-in, then a page at a
+time, newest first, the sign-ins that named no device and the failures of the last 7 days not yet dismissed (#1906).
+It counts those failures, and the owner can dismiss each one, which hides it but keeps its row until the prune
+(#1910).
 
 **A new `security` slice owns the tables.** It is a feature slice in the sense of ADR 0001: it owns the tables and the
 writes, and answers no route. `admin`, `api` and `mcp` record an access by calling an operation

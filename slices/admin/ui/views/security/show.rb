@@ -12,6 +12,7 @@ module Admin
 
           prop :clients, ROWS
           prop :devices, ROWS
+          prop :failures, Blog::Types::Integer
           prop :honeybadger_url, Blog::Types::String.optional
           prop :sightings, ROWS
           prop :sign_ins, Blog::Types::Instance(Blog::Structs::Paged)
@@ -60,7 +61,8 @@ module Admin
 
           def sign_ins
             empty = @devices.empty? && @sign_ins.rows.empty?
-            Card(title: t(".sign_ins"), empty: (t(".no_sign_ins") if empty)) do
+            note = t(".failures", count: @failures)
+            Card(title: t(".sign_ins"), note:, empty: (t(".no_sign_ins") if empty)) do
               @devices.each { DeviceRow(device: it) }
               @sign_ins.rows.each { SignInRow(sign_in: it) }
               Pager(page: @sign_ins, route: :admin_security)

@@ -111,6 +111,7 @@ module Admin
     ], from: :shares
 
     import keys: %w[
+      operations.dismiss_sign_in
       operations.record_sign_in
       operations.sign_out_device
       repos.device_queries

@@ -16,16 +16,24 @@ RSpec.describe Security::Jobs::PruneAccessRecords, type: :request do
     )
   end
 
-  def sign_in_row(created_at:, city: "London")
+  def sign_in_row(created_at:, city: "London", **row)
     database[:sign_ins].insert(
       outcome: "signed_in", provider: "github", address: "81.2.69.160", user_agent: "Chrome/141", browser: "Chrome",
-      os: "macOS", city:, country: "GB", created_at:,
+      os: "macOS", city:, country: "GB", created_at:, **row,
     )
   end
 
   it "deletes sign-ins older than 90 days and keeps the rest" do
     sign_in_row(created_at: Time.now - keep_for - 60, city: "Old")
     sign_in_row(created_at: Time.now - keep_for + 60, city: "New")
+
+    expect { prune }.to change { database[:sign_ins].select_map(:city) }.to(["New"])
+  end
+
+  it "keeps a dismissed failure until it is 90 days old" do
+    dismissed = { outcome: "denied", dismissed_at: Time.now - (20 * day) }
+    sign_in_row(created_at: Time.now - keep_for - 60, city: "Old", **dismissed)
+    sign_in_row(created_at: Time.now - (30 * day), city: "New", **dismissed)
 
     expect { prune }.to change { database[:sign_ins].select_map(:city) }.to(["New"])
   end

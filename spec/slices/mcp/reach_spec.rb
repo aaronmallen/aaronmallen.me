@@ -159,6 +159,7 @@ RSpec.describe "MCP reach", type: :app do
       "record.operations.untag_journal_entry" => "the admin's journal rows untag it; update_journal_entry sets tags",
       "search.operations.claim_search_attempt" => "counts a reader's search against the public search throttle",
       "search.operations.reap_search_attempts" => "a background job reaps old public search attempts",
+      "security.operations.dismiss_sign_in" => "hides one failed admin sign-in; sign in stays out of the MCP",
       "security.operations.prune_access_records" => "a background job prunes old sign-ins, sightings and devices",
       "security.operations.read_access" => "reads where a request came from as the security log stores it",
       "security.operations.read_device" => "reads a request's browser and system as read_access reads the request",

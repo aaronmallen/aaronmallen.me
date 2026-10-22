@@ -4893,6 +4893,7 @@ CREATE TABLE public.sign_ins (
     provider public.sign_in_provider NOT NULL,
     visitor_hash public.visitor_hash,
     device_id uuid,
+    dismissed_at timestamp with time zone,
     CONSTRAINT sign_ins_user_agent_length CHECK ((length(user_agent) <= 1024))
 );
 
@@ -10255,4 +10256,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022100000_create_notes.rb'),
 ('20261022110000_grow_people_into_contacts.rb'),
 ('20261022120000_create_devices.rb'),
+('20261022130000_add_dismissed_at_to_sign_ins.rb'),
 ('20261022220000_add_signed_out_at_to_devices.rb');

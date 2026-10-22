@@ -346,6 +346,7 @@ en:
       saved: "View saved"
   security_page:
     toasts:
+      dismissed: "Failed sign-in dismissed"
       signed_out: "Device signed out · it has to sign in again"
   services_page:
     refusals:
@@ -2625,6 +2626,7 @@ en:
           first_seen: "first seen %{time}"
           last_seen: "last seen %{time}"
         sign_in_row:
+          dismiss: "Dismiss"
           outcomes:
             denied: "denied"
             provider_failed: "%{name} failed"
@@ -4244,6 +4246,9 @@ en:
         show:
           client: "MCP client"
           credentials: "Clients and tokens"
+          failures:
+            one: "%{count} failed in the last 7 days"
+            other: "%{count} failed in the last 7 days"
           heading: "Security"
           honeybadger: "Errors on Honeybadger"
           no_credentials: "No live token or client."

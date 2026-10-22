@@ -20,7 +20,15 @@ module Security
 
       def failed = exclude(outcome: SIGNED_IN)
 
-      def outside_devices = where(Sequel.|({ device_id: nil }, Sequel.~(outcome: SIGNED_IN)))
+      def listed(since) = where(Sequel.|(Sequel.&({ device_id: nil }, { outcome: SIGNED_IN }), open_failure(since)))
+
+      def open_failures(since) = where(open_failure(since))
+
+      private
+
+      def open_failure(since)
+        Sequel.&(Sequel.~(outcome: SIGNED_IN), { dismissed_at: nil }, Sequel[:created_at] >= since)
+      end
     end
   end
 end

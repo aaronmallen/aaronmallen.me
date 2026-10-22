@@ -22,6 +22,7 @@ module Admin
             view,
             **credentials,
             devices: device_queries.newest_first,
+            failures: sign_in_queries.failure_count,
             honeybadger_url: settings.honeybadger[:project_url],
             sign_ins:,
             tabs: build_settings_tabs.call,

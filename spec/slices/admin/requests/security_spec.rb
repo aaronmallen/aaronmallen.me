@@ -2,6 +2,7 @@
 
 RSpec.describe "Admin security", type: :request do
   let(:database) { Security::Slice["db.rom"].gateways[:default].connection }
+  let(:day) { 24 * 60 * 60 }
   let(:page) { Capybara.string(last_response.body) }
 
   def card(title) = page.find(".card", text: title)
@@ -193,6 +194,73 @@ RSpec.describe "Admin security", type: :request do
       get "/admin/settings/security"
 
       expect(titles).to eq(["Firefox · macOS", "Safari · macOS"])
+    end
+
+    describe "failed sign-ins" do
+      def failures_note = card("Sign-ins").find(".card-note").text
+
+      before do
+        sign_in_row(browser: "Edge", outcome: "denied", created_at: Time.now - (6 * day))
+        sign_in_row(browser: "Firefox", outcome: "wrong_account", created_at: Time.now - (8 * day))
+        sign_in_row(browser: "Opera", outcome: "denied", dismissed_at: Time.now)
+        sign_in_row(browser: "Safari", created_at: Time.now - (30 * day))
+        get "/admin/settings/security"
+      end
+
+      it "counts the undismissed failures from the last 7 days" do
+        expect(failures_note).to eq("1 failed in the last 7 days")
+      end
+
+      it "lists only undismissed failures from the last 7 days and every sign-in that went through" do
+        expect(titles).to eq(["Edge · macOS", "Safari · macOS"])
+      end
+
+      it "offers to dismiss a failure and not a sign-in that went through", :aggregate_failures do
+        edge = card("Sign-ins").find(".li", text: "Edge")
+
+        expect(edge).to have_css("form[action^='/admin/settings/security/sign-ins/'][action$='/dismiss']")
+        expect(edge).to have_button("Dismiss")
+        expect(card("Sign-ins").find(".li", text: "Safari")).to have_no_css("form")
+      end
+    end
+
+    it "counts no failures when none are recent" do
+      get "/admin/settings/security"
+
+      expect(card("Sign-ins").find(".card-note")).to have_text("0 failed in the last 7 days")
+    end
+
+    describe "dismissing a failed sign-in" do
+      let!(:failure) { sign_in_row(browser: "Edge", outcome: "denied") }
+
+      before { admin_post "/admin/settings/security/sign-ins/#{failure}/dismiss" }
+
+      it "stamps the row dismissed, keeps it and comes back to the tab", :aggregate_failures do
+        expect(last_response.location).to eq("/admin/settings/security")
+        expect(database[:sign_ins].where(id: failure).get(:dismissed_at)).to be_within(2).of(Time.now)
+      end
+
+      it "takes it off the list and the count", :aggregate_failures do
+        follow_redirect!
+
+        expect(page).to have_text(Admin::Slice["i18n"].t("security_page.toasts.dismissed"))
+        expect(titles).to be_empty
+        expect(card("Sign-ins").find(".card-note")).to have_text("0 failed in the last 7 days")
+      end
+
+      it "returns 404 for a failure already dismissed" do
+        admin_post "/admin/settings/security/sign-ins/#{failure}/dismiss"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
+    it "returns 404 for dismissing a sign-in that went through", :aggregate_failures do
+      went_through = sign_in_row
+      admin_post "/admin/settings/security/sign-ins/#{went_through}/dismiss"
+
+      expect(last_response).to be_not_found
+      expect(database[:sign_ins].where(id: went_through).get(:dismissed_at)).to be_nil
     end
 
     describe "paging sign-ins" do

@@ -5,6 +5,7 @@ module Security
     import keys: %w[operations.find_place operations.hash_visitor], from: :analytics
 
     export %w[
+      operations.dismiss_sign_in
       operations.record_sighting
       operations.record_sign_in
       operations.sign_out_device

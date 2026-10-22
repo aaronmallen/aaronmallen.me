@@ -262,6 +262,7 @@ module Admin
                                           act: JOB_ACT
     get "/settings/security", to: "security.show", as: :security
     post "/settings/security/devices/:id/sign-out", to: "security.sign_out_device", as: :sign_out_device, id: UUID
+    post "/settings/security/sign-ins/:id/dismiss", to: "security.dismiss_sign_in", as: :dismiss_sign_in, id: ID
     get "/settings/services", to: "settings.services", as: :settings_services
     redirect_temporary "/settings/socials", to: "/settings/webmentions"
     get "/settings/tagging", to: "settings.tagging", as: :settings_tagging

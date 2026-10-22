@@ -19,15 +19,27 @@ module Admin
                 p(class: "li-sub") { dotted(provider, place(@sign_in), @sign_in.address) }
                 p(class: "li-sub") { Moment(at: @sign_in.created_at) }
               end
-              Pill(color: @sign_in.outcome == SIGNED_IN ? :green : :pink) do
-                t(OUTCOMES.fetch(@sign_in.outcome), name: provider)
-              end
+              outcome
             end
           end
 
           private
 
+          def dismiss_form
+            ButtonForm(
+              action: path(:admin_dismiss_sign_in, id: @sign_in.id), label: t(".dismiss"), variant: :gh, icon: :close,
+              icon_only: true,
+            )
+          end
+
+          def outcome
+            Pill(color: signed_in? ? :green : :pink) { t(OUTCOMES.fetch(@sign_in.outcome), name: provider) }
+            dismiss_form unless signed_in?
+          end
+
           def provider = PROVIDERS.fetch(@sign_in.provider)
+
+          def signed_in? = @sign_in.outcome == SIGNED_IN
         end
       end
     end
