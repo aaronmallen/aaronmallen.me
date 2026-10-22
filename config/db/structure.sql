@@ -3514,7 +3514,8 @@ CREATE TABLE public.notes (
     pinned boolean DEFAULT false NOT NULL,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, (title)::text), 'A'::"char") || setweight(to_tsvector('english'::regconfig, body), 'B'::"char"))) STORED
 );
 
 
@@ -4638,7 +4639,21 @@ UNION ALL
     NULL::text AS url,
     mail_messages.search_vector
    FROM (public.mail_messages
-     JOIN public.mail_threads ON ((mail_threads.id = mail_messages.mail_thread_id)));
+     JOIN public.mail_threads ON ((mail_threads.id = mail_messages.mail_thread_id)))
+UNION ALL
+ SELECT 'note'::text AS kind,
+    notes.id AS source_id,
+    (notes.title)::text AS title,
+    (((notes.title)::text || '
+'::text) || notes.body) AS body,
+    ((notes.updated_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    notes.search_vector
+   FROM public.notes;
 
 
 --
@@ -7434,6 +7449,13 @@ CREATE INDEX note_tags_tag_id_index ON public.note_tags USING btree (tag_id);
 --
 
 CREATE INDEX notes_folder_id_index ON public.notes USING btree (folder_id);
+
+
+--
+-- Name: notes_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notes_search_vector_index ON public.notes USING gin (search_vector);
 
 
 --
@@ -10300,4 +10322,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022140000_key_sightings_on_product.rb'),
 ('20261022150000_add_contacts_to_sync_name.rb'),
 ('20261022150100_add_contact_sync.rb'),
-('20261022220000_add_signed_out_at_to_devices.rb');
+('20261022220000_add_signed_out_at_to_devices.rb'),
+('20261023030000_add_notes_to_search_documents.rb');

@@ -41,6 +41,22 @@ RSpec.describe "Admin palette search", type: :request do
       end
     end
 
+    describe "a phrase from a note" do
+      let!(:note) { create(:note, title: "Glaze recipes", body: "Celadon over porcelain") }
+
+      it "lists the note by its title, linked to its page" do
+        search("glaze")
+
+        expect(hit("note")).to include("kind" => "note", "id" => note.id, "href" => "/admin/notes/#{note.id}")
+      end
+
+      it "lists the note by its body" do
+        search("porcelain")
+
+        expect(hit("note")).to include("title" => "Glaze recipes")
+      end
+    end
+
     describe "a task label" do
       before do
         project = create(:project, name: "Podcast")

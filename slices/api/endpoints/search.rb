@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class Search < Endpoint
-      KINDS = Blog::Types::SearchKind.values.freeze
+      KINDS = (Blog::Types::SearchKind.values - [Blog::Types::SearchKind["note"]]).freeze
       MESSAGE = Blog::Types::SearchKind["message"]
       SCOPED = true
 

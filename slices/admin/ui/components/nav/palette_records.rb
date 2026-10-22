@@ -8,6 +8,7 @@ module Admin
           ID = "command-palette-group-records"
           KINDS = {
             **Blog::Helpers::RecordKinds::ALL.values.select(&:search_kind).to_h { [it.search_kind, it.icon] },
+            Blog::Types::SearchKind["note"] => "fa-note-sticky",
             Blog::Types::SearchKind["person"] => "fa-address-book",
             Blog::Types::SearchKind["webmention"] => "fa-at",
           }.freeze

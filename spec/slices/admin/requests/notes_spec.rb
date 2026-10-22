@@ -45,7 +45,7 @@ RSpec.describe "Admin notes", type: :request do
     end
 
     it "lists pinned notes first" do
-      expect(page).to have_css(".nt-side > p.nt-g:first-child + a.nt-r", text: "Pinned one")
+      expect(page).to have_css(".nt-side > form.nt-sr:first-child + p.nt-g + a.nt-r", text: "Pinned one")
     end
 
     it "nests folders that collapse and count every note beneath them", :aggregate_failures do
@@ -120,6 +120,99 @@ RSpec.describe "Admin notes", type: :request do
       admin_post "/admin/notes/folders/#{work.id}/rename", name: "jobs"
 
       expect(queries.folder_by_id(work.id).name).to eq("jobs")
+    end
+  end
+
+  describe "the sidebar search" do
+    let!(:pottery) { create(:note_folder, name: "pottery") }
+
+    def hits = page.all(".nt-side a.nt-hit").map { [it.find(".nt-t").text, it.find(".nt-p").text] }
+
+    def search(text, at: "/admin/notes") = get(at, q: text)
+
+    before do
+      create(:note, title: "Glaze log", body: "Tried celadon", folder_id: pottery.id, updated_at: Time.now - 60)
+      create(:note, title: "Firing", body: "Intro\n## The **glaze** went [[Glaze log|cloudy]]", updated_at: Time.now)
+      create(:note, title: "Wheel", body: "Centering", folder_id: pottery.id, updated_at: Time.now - 120)
+      create(:note, title: "Errands", body: "Buy milk")
+      admin_post "/admin/notes/#{queries.listed.find { it.title == 'Errands' }.id}/tags", tag: "kiln"
+    end
+
+    it "holds a search box that asks for words or a #tag" do
+      search("")
+
+      expect(page).to have_css(
+        "form.nt-sr[role='search'][method='get'][action='/admin/notes'] input[type='search'][name='q']" \
+        "[aria-label='Search notes'][placeholder='search notes · #tag']",
+      )
+    end
+
+    it "lists title matches first, then the rest newest first, each with its folder and a snippet" do
+      search("glaze")
+
+      expect(hits).to eq([["Glaze log", "pottery"], ["Firing", "/ · The glaze went cloudy"]])
+    end
+
+    it "counts the matches in place of the tree", :aggregate_failures do
+      search("glaze")
+
+      expect(page).to have_css(".nt-side p.nt-g", exact_text: "2 matches")
+      expect(page).to have_no_css(".nt-tree")
+    end
+
+    it "matches a note by its folder" do
+      search("pottery")
+
+      expect(hits.map(&:first)).to eq(["Glaze log", "Wheel"])
+    end
+
+    it "matches a note by its tags" do
+      search("kiln")
+
+      expect(hits).to eq([%w[Errands /]])
+    end
+
+    it "filters by a #tag", :aggregate_failures do
+      search("#kiln")
+
+      expect(hits).to eq([%w[Errands /]])
+      expect(page).to have_css(".nt-side p.nt-g", exact_text: "1 tagged #kiln")
+    end
+
+    it "keeps the search when a hit opens its note" do
+      search("glaze")
+
+      expect(page).to have_link("Firing", href: %r{/admin/notes/\d+\?q=glaze\z})
+    end
+
+    it "searches from a note page and keeps the note open", :aggregate_failures do
+      wheel = queries.listed.find { it.title == "Wheel" }
+      search("glaze", at: "/admin/notes/#{wheel.id}")
+
+      expect(page).to have_css("form.nt-sr[action='/admin/notes/#{wheel.id}']")
+      expect(hits.map(&:first)).to eq(["Glaze log", "Firing"])
+    end
+
+    it "offers to create a note by that name when nothing matches", :aggregate_failures do
+      search("Bisque")
+
+      expect(page).to have_css(".nt-side p.nt-g", exact_text: "0 matches")
+      offer = ".nt-side form[action='/admin/notes'] input[name='title'][value='Bisque'] ~ button.nt-r"
+      expect(page).to have_css(offer, text: "Create “Bisque”", visible: :all)
+    end
+
+    it "offers nothing to create for a #tag no note holds" do
+      search("#nothing")
+
+      expect(page).to have_no_css(".nt-side form[action='/admin/notes'] input[name='title']", visible: :all)
+    end
+
+    it "offers to create it in the open note's folder" do
+      search("Bisque", at: "/admin/notes/#{queries.listed.find { it.title == 'Wheel' }.id}")
+
+      expect(page).to have_css(
+        ".nt-side form[action='/admin/notes'] input[name='folder_id'][value='#{pottery.id}']", visible: :all,
+      )
     end
   end
 

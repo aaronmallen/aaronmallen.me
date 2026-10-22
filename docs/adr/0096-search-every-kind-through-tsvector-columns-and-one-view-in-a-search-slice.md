@@ -15,6 +15,7 @@ area:
   - social
   - tasks
   - contact
+  - notes
 supersedes:
   - "0091"
 issue: "#299"
@@ -23,6 +24,7 @@ amended:
   - "#818"
   - "#911"
   - "#1302"
+  - "#1931"
 tags:
   - search
   - postgres
@@ -82,8 +84,11 @@ among them, so `GET /admin/tasks/palette` and `Admin::Actions::Tasks::Palette` g
 route.
 
 A new kind joins by giving its table a `search_vector` column and its GIN index, adding a branch to the view in a
-new migration, and adding its name to the kinds the query accepts. Decisions (#272) joined this way in #773, and pull
-requests in #818.
+new migration, and adding its name to the kinds the query accepts. Decisions (#272) joined this way in #773, pull
+requests in #818, and notes in #1931.
+
+Notes show in the palette and the search screen as kind `note`. The API and the MCP leave the kind out until the
+`notes` scope of [ADR 0203][0203] can gate it, since `read` must never reach a note.
 
 ## Alternatives
 
@@ -118,4 +123,5 @@ has to drop a reply that a newer one has overtaken.
 [0052]: 0052-read-activity-through-one-view-across-every-content-kind.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
+[0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

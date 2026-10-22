@@ -1965,6 +1965,7 @@ en:
             decision: "decision"
             journal: "journal"
             message: "message"
+            note: "note"
             person: "person"
             post: "post"
             project: "project"
@@ -2086,13 +2087,22 @@ en:
           placeholder: "ruby"
           remove: "Remove tag %{tag}"
         tree:
+          create: "Create “%{title}”"
           files: "Files"
           folder_path: "New folder path"
           folder_placeholder: "Folder name, or a/b for nested"
           label: "Notes"
+          matches:
+            one: "%{count} match"
+            other: "%{count} matches"
           new_folder: "New folder"
           new_note: "New note at the top level"
           pinned: "Pinned"
+          search: "Search notes"
+          search_placeholder: "search notes · #tag"
+          tagged:
+            one: "%{count} tagged #%{tag}"
+            other: "%{count} tagged #%{tag}"
       people:
         drawer:
           edit: "edit person"
@@ -4369,6 +4379,7 @@ en:
             decision: "Decisions"
             journal: "Journal entries"
             message: "Messages"
+            note: "Notes"
             person: "People"
             post: "Posts"
             project: "Projects"

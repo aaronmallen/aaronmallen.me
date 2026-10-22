@@ -6,7 +6,7 @@ module Admin
       class Index < Action
         include Deps[build_notes_page: "operations.build_notes_page"]
 
-        def handle(_request, response) = response.render(view, **build_notes_page.call)
+        def handle(request, response) = response.render(view, **build_notes_page.call(query: request.params[:q]))
       end
     end
   end

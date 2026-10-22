@@ -14,7 +14,8 @@ module Admin
           note = note_queries.by_id(record_id(request))
           not_found(response) unless note
 
-          response.render(view, **build_notes_page.call(note:), editing: Blog::Types::Checkbox[request.params[:edit]])
+          page = build_notes_page.call(note:, query: request.params[:q])
+          response.render(view, **page, editing: Blog::Types::Checkbox[request.params[:edit]])
         end
       end
     end

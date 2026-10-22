@@ -7,7 +7,7 @@ module Admin
         class Index < View
           KINDS_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           LIVE_TABLES = %w[
-            commits decisions journal_entries posts projects pull_requests social_posts work_entries
+            commits decisions journal_entries notes posts projects pull_requests social_posts work_entries
           ].freeze
           QUERY_ID = "search-q"
 

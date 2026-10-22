@@ -5,6 +5,7 @@ module Admin
     class LinkSearchHit
       ALL = Blog::Types::MailFolder["all"]
       MESSAGE = Blog::Types::SearchKind["message"]
+      NOTE = Blog::Types::SearchKind["note"]
       PERSON = Blog::Types::SearchKind["person"]
       SPAM = Blog::Types::MailFolder["spam"]
 
@@ -18,6 +19,7 @@ module Admin
         row = Blog::Helpers::RecordKinds.searched(kind)
         return Blog::Helpers::RecordKinds.path(routes, row.kind, id:, day: hit.day) if row
         return routes.path(:admin_edit_person, id:) if kind == PERSON
+        return routes.path(:admin_note, id:) if kind == NOTE
 
         routes.path(:admin_webmentions, status: hit.status)
       end

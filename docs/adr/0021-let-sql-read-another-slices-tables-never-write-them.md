@@ -100,8 +100,8 @@ exports refuses. These reads cross today:
   read by `slices/search/relations/search_documents.rb`, unions `tasks`, `posts`, `social_posts`,
   `social_post_parts`, `journal_entries`, `commits`, `projects`, `work_entries`, `people`, `messages`,
   `webmentions`, `decisions` and `pull_requests`, which `tasks`, `posts`, `social`, `record`, `projects`, `contact`
-  and `decisions` own. #1936 moves `people` to the `contacts` slice ([ADR 0201][0201]). The record on searching every
-  kind holds why one view serves every search.
+  and `decisions` own. #1936 moves `people` to the `contacts` slice ([ADR 0201][0201]), and #1931 adds `notes`,
+  which `notes` owns. The record on searching every kind holds why one view serves every search.
 - **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags`,
   `task_tags`, `decision_tags`, `task_rule_tags` and `message_tags`, seven kinds since #957 listed the last three.
   The tags screen is the one place that answers for every kind at once, and the SQL spares it one import per

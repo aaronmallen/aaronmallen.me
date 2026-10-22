@@ -425,7 +425,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "names a read tool in search for every kind it finds" do
       description = mcp_result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
-      readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
+      readers = API::Endpoints::Search::KINDS.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
 
       expect(readers.values - [*read_kinds.keys, "read_mail_thread"]).to be_empty
     end

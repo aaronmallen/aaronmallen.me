@@ -130,6 +130,34 @@ RSpec.describe "Admin search", type: :request do
       end
     end
 
+    describe "a phrase a note holds" do
+      let!(:note) { create(:note, title: "Glaze recipes", body: "Celadon over porcelain, fired in the kiln") }
+
+      it "lists the note under its kind by its title" do
+        get "/admin/search", q: "glaze"
+
+        expect(page.find(".card", text: "Notes")).to have_css(".li-title", text: "Glaze recipes")
+      end
+
+      it "finds the note by its body" do
+        get "/admin/search", q: "porcelain"
+
+        expect(titles).to eq(["Glaze recipes"])
+      end
+
+      it "counts it under a Notes pill" do
+        get "/admin/search", q: "glaze"
+
+        expect(kinds).to include(["Notes 1", nil])
+      end
+
+      it "links it to its page" do
+        get "/admin/search", q: "glaze"
+
+        expect(page).to have_link("Glaze recipes", href: "/admin/notes/#{note.id}")
+      end
+    end
+
     describe "filtering by kind" do
       before do
         create(:task, title: "Track the zeppelin")

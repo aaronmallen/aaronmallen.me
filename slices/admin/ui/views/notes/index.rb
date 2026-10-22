@@ -13,6 +13,9 @@ module Admin
           prop :pinned, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :note, Blog::Types::Instance(ROM::Struct).optional
           prop :recent, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :query, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
+          prop :tag, Blog::Types::String.optional, default: nil
+          prop :hits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
           prop :editing, Blog::Types::Bool, default: false
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
@@ -23,7 +26,10 @@ module Admin
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock") { new_note }
 
             div(class: ["nt", ("open" if @note)]) do
-              Tree(tree: @tree, pinned: @pinned, current: @note&.id)
+              Tree(
+                tree: @tree, pinned: @pinned, current: @note&.id, folder_id: @note&.folder_id,
+                query: @query, tag: @tag, hits: @hits,
+              )
               @note ? page : Home(notes: @recent, tree: @tree)
             end
           end

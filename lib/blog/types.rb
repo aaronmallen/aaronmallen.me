@@ -188,8 +188,8 @@ module Blog
     ScrollDepth = Types::Integer.enum(0, 25, 50, 75, 100)
     SecretDigest = Types::String.constructor { |value| Digest::SHA256.hexdigest(value.to_s) }
     SearchKind = Types::String.enum(
-      "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention", "decision",
-      "pull_request",
+      "task", "post", "social", "journal", "note", "commit", "project", "work", "person", "message", "webmention",
+      "decision", "pull_request",
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
     SignInOutcome = Types::String.enum("signed_in", "denied", "provider_failed", "wrong_account", "unexpected")

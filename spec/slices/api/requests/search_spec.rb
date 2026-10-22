@@ -172,10 +172,28 @@ RSpec.describe "API search", type: :request do
       create(:webmention, excerpt: "Nice zeppelin")
       create(:decision, title: "Buy a zeppelin")
       create(:pull_request, title: "Land the zeppelin")
+      create(:note, title: "Zeppelin sketches")
     end
 
-    it "finds one of each" do
-      expect(results(query: "zeppelin").map { it.fetch("kind") }).to match_array(Blog::Types::SearchKind.values)
+    it "finds one of each kind but notes" do
+      expect(results(query: "zeppelin").map { it.fetch("kind") })
+        .to match_array(Blog::Types::SearchKind.values - %w[note])
+    end
+
+    it "leaves the note out of MCP search" do
+      expect(mcp_answer("search", query: "zeppelin").fetch("results").map { it.fetch("kind") }).not_to include("note")
+    end
+
+    it "leaves out a note the search screen lists" do
+      expect(screen_titles(q: "zeppelin")).to include("Zeppelin sketches")
+    end
+  end
+
+  describe "the note kind" do
+    it "refuses it with a 422" do
+      find(query: "zeppelin", kind: "note")
+
+      expect(last_response.status).to eq(422)
     end
   end
 

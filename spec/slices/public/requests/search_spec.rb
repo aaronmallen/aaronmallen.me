@@ -117,6 +117,14 @@ RSpec.describe "Search", type: :request do
     expect(page).to have_link("Zeppelin", href: "/projects/zeppelin")
   end
 
+  it "never finds a note" do
+    publish("Airships")
+    create(:note, title: "Zeppelin and airships", body: "Private airships thoughts")
+    get "/search", q: "airships"
+
+    expect(page).to have_no_text("Zeppelin and airships")
+  end
+
   it "marks the matches and escapes the record's own HTML", :aggregate_failures do
     publish("Airships", body: "A zeppelin & a blimp, 1 < 2 > 0, <mark>no</mark>")
     get "/search", q: "zeppelin"

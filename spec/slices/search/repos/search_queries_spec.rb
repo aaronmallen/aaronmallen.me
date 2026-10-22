@@ -55,11 +55,25 @@ RSpec.describe Search::Repos::SearchQueries do
     end
   end
 
+  describe "a note" do
+    def found(text) = described_class.new.search(text:, page:).rows.map { [it.kind, it.source_id, it.title] }
+
+    let!(:note) { create(:note, title: "Kiln schedule", body: "Bisque at cone 04, then glaze") }
+
+    it "finds a note by its title" do
+      expect(found("kiln")).to eq([["note", note.id, "Kiln schedule"]])
+    end
+
+    it "finds a note by its body" do
+      expect(found("bisque")).to eq([["note", note.id, "Kiln schedule"]])
+    end
+  end
+
   describe "the query plan" do
     let(:tables) do
       %w[
         tasks posts social_post_parts journal_entries commits projects work_entries people mail_messages webmentions
-        decisions pull_requests
+        decisions pull_requests notes
       ]
     end
     let(:indexes) { tables.map { "#{it}_search_vector_index" } }

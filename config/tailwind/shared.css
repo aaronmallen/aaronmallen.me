@@ -9566,6 +9566,30 @@ i > svg {
   }
 }
 
+@utility nt-sr {
+  @apply mb-1 flex items-center gap-2 rounded-[10px] border border-line bg-ground px-2.5;
+
+  &:focus-within {
+    @apply border-ink-muted;
+  }
+
+  & i {
+    @apply text-xs text-ink-muted;
+  }
+
+  & input {
+    @apply min-w-0 flex-1 bg-transparent py-[9px] font-mono text-[13px] admin-focus;
+
+    @variant phone {
+      @apply min-h-tap;
+    }
+  }
+}
+
+@utility nt-p {
+  @apply truncate font-mono text-xs font-normal text-ink-muted;
+}
+
 @utility nt-g {
   @apply m-0 px-2 pt-3.5 pb-1.5 font-mono text-xs tracking-[0.1em] text-ink-muted uppercase;
 }
@@ -9588,6 +9612,10 @@ i > svg {
 
   & > i {
     @apply w-3.5 flex-none text-center text-[0.82em] text-ink-muted;
+  }
+
+  &.nt-hit {
+    @apply flex-col items-stretch gap-0.5;
   }
 
   @media (width < 53.75rem) {
