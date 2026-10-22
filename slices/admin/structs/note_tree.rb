@@ -24,6 +24,17 @@ module Admin
       def find(id) = all.find { it.id == id }
 
       def path_of(id) = find(id)&.path.to_s
+
+      def trail(id)
+        folders.each do |folder|
+          return [folder] if folder.id == id
+
+          below = folder.trail(id)
+          return [folder, *below] unless below.empty?
+        end
+
+        []
+      end
     end
   end
 end

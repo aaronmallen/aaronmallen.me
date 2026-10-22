@@ -22,6 +22,7 @@ module API
       OperationTable::AGENTS => Serializers::Link::AGENT_KINDS,
       OperationTable::HEALTH => [WORKOUT],
       OperationTable::MAIL => [MAIL_ROW, Serializers::Link::MAIL_THREAD],
+      "notes" => Serializers::Link::NOTE_KINDS,
     }.freeze
 
     include Dry::Monads[:result]
@@ -68,8 +69,6 @@ module API
       PUBLIC_TASK if task_queries.public_board_slugs(ids).any?
     end
 
-    def guarded?(row, kinds) = row.is_a?(Hash) && kinds.include?((row[:kind] || row["kind"]).to_s)
-
     def handled(fields, scopes)
       refusal = publish_refusal(fields, scopes)
       return refusal if refusal
@@ -79,7 +78,7 @@ module API
 
     def hidden(payload, scopes)
       kinds = GUARDED.except(*scopes).values.flatten
-      kinds.empty? ? payload : without(payload, kinds)
+      kinds.empty? ? payload : Helpers::Guarded.without(payload, kinds)
     end
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
@@ -141,14 +140,6 @@ module API
       end
 
       Success(fields)
-    end
-
-    def without(value, kinds)
-      case value
-        when Hash then value.except(*kinds & Blog::Types::RecordKind.values).transform_values { without(it, kinds) }
-        when Array then value.reject { guarded?(it, kinds) }.map { without(it, kinds) }
-        else value
-      end
     end
   end
 end

@@ -2088,10 +2088,16 @@ en:
             other: "%{count} words"
         folder_row:
           pinned: "pinned"
+        folder_links:
+          applies:
+            one: "Links here apply to every note in %{name} (%{count}), including subfolders. Each note lists them under “From folders”."
+            other: "Links here apply to every note in %{name} (%{count}), including subfolders. Each note lists them under “From folders”."
+            zero: "Links here apply to every note in %{name}, including subfolders. Each note lists them under “From folders”."
+          from_parents: "From parent folders"
         folder_settings:
           confirm_remove:
-            one: "Remove %{name}? Its %{count} note moves to %{place}."
-            other: "Remove %{name}? Its %{count} notes move to %{place}."
+            one: "Remove %{name}? Its %{count} note moves to %{place}. Folder links are dropped."
+            other: "Remove %{name}? Its %{count} notes move to %{place}. Folder links are dropped."
           description: "Description"
           description_placeholder: "What belongs in here. Shows on the folder page."
           inside: "Inside"
@@ -2110,12 +2116,28 @@ en:
           from: "from %{titles}"
           recent: "Recently edited"
           unwritten: "Linked, not written"
+        linked:
+          from_folders: "From folders"
+          via: "via %{folder}"
         links:
           backlinks: "Backlinks"
           links_out: "Links out"
           no_backlinks: "No note links here yet."
           none: "None."
           not_written: "not written"
+        meta:
+          confirm_delete:
+            zero: "Delete “%{title}”?"
+            one: "Delete “%{title}”? %{count} note links to it."
+            other: "Delete “%{title}”? %{count} notes link to it."
+          created: "created %{date}"
+          delete: "Delete note"
+          folder: "Folder"
+          private: "private"
+          top_level: "top level"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
         move_to:
           blank: "Type a folder first"
           move: "Move to"
@@ -2123,26 +2145,14 @@ en:
           top_level: "Top level"
         page:
           autosaves: "autosaves"
-          confirm_delete:
-            zero: "Delete “%{title}”?"
-            one: "Delete “%{title}”? %{count} note links to it."
-            other: "Delete “%{title}”? %{count} notes link to it."
-          created: "created %{date}"
-          delete: "Delete note"
           done: "Done"
           edit: "Edit"
           edited: "edited"
           empty: "Empty."
           files: "Files"
-          folder: "Folder"
           pin: "Pin"
-          private: "private"
           start: "Start writing"
-          top_level: "top level"
           unpin: "Unpin"
-          words:
-            one: "%{count} word"
-            other: "%{count} words"
         prose:
           missing: "No note yet. Click to create it."
         tags:
@@ -2761,6 +2771,8 @@ en:
           journal_entry: "Journal entries"
           mail_thread: "Mail threads"
           memory_file: "Memory files"
+          note: "Notes"
+          note_folder: "Note folders"
           post: "Posts"
           project: "Projects"
           pull_request: "Pull requests"
@@ -4329,6 +4341,7 @@ en:
           copy_path: "Copy path"
           expand: "Expand"
           folder_name: "Folder name…"
+          linked: "Linked records"
           new_note: "New note here"
           new_subfolder: "New subfolder"
           open: "Open folder"

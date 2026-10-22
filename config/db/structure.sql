@@ -393,7 +393,9 @@ CREATE TYPE public.record_kind AS ENUM (
     'pull_request',
     'mail_thread',
     'memory_file',
-    'artifact'
+    'artifact',
+    'note',
+    'note_folder'
 );
 
 
@@ -969,6 +971,8 @@ BEGIN
     WHEN 'mail_thread' THEN PERFORM 1 FROM mail_threads WHERE id = record_id FOR KEY SHARE;
     WHEN 'memory_file' THEN PERFORM 1 FROM memory_files WHERE id = record_id FOR KEY SHARE;
     WHEN 'artifact' THEN PERFORM 1 FROM artifacts WHERE id = record_id FOR KEY SHARE;
+    WHEN 'note' THEN PERFORM 1 FROM notes WHERE id = record_id FOR KEY SHARE;
+    WHEN 'note_folder' THEN PERFORM 1 FROM note_folders WHERE id = record_id FOR KEY SHARE;
   END CASE;
 
   RETURN FOUND;
@@ -8673,6 +8677,13 @@ CREATE TRIGGER memory_files_notify_admin_change AFTER INSERT OR DELETE OR UPDATE
 
 
 --
+-- Name: note_folders note_folders_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER note_folders_drop_record_links AFTER DELETE ON public.note_folders FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('note_folder');
+
+
+--
 -- Name: note_folders note_folders_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -8691,6 +8702,13 @@ CREATE TRIGGER note_folders_refuse_loop BEFORE INSERT OR UPDATE OF parent_id ON 
 --
 
 CREATE TRIGGER note_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.note_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: notes notes_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER notes_drop_record_links AFTER DELETE ON public.notes FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('note');
 
 
 --
@@ -10355,5 +10373,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022150000_add_contacts_to_sync_name.rb'),
 ('20261022150100_add_contact_sync.rb'),
 ('20261022200000_create_note_links.rb'),
+('20261022210000_add_notes_and_note_folders_to_record_links.rb'),
 ('20261022220000_add_signed_out_at_to_devices.rb'),
 ('20261023030000_add_notes_to_search_documents.rb');

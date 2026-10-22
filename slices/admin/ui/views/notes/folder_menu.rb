@@ -12,6 +12,7 @@ module Admin
           prop :folder, Blog::Types::Instance(Structs::NoteTree)
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
           prop :shut, Blog::Types::Bool
+          prop :links, Blog::Types::Integer
           prop :return_to, Blog::Types::String.optional
 
           def view_template
@@ -49,6 +50,8 @@ module Admin
             end
             parent = @folder.path.rpartition("/").first
             MoveTo(menu:, tree: @tree, current: parent, action: act(:admin_move_note_folder), skip: @folder.path)
+            hint = @links.to_s unless @links.zero?
+            menu.link(t(".linked"), href: act(:admin_note_folder), icon: "fa-solid fa-link", hint:)
           end
 
           def fold(menu)

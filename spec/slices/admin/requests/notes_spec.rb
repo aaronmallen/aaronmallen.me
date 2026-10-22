@@ -462,9 +462,18 @@ RSpec.describe "Admin notes", type: :request do
       create(:note, folder_id: work.id)
       get "/admin/notes/folders/#{work.id}/menu"
 
-      expect(menu_items).to include("Collapse", "New note here", "New subfolder", "Rename", "Move to", "Copy path",
-                                    "Remove folder")
+      expect(menu_items).to include("Collapse", "New note here", "New subfolder", "Rename", "Move to",
+                                    "Linked records", "Copy path", "Remove folder")
       expect(page).to have_css("[data-confirm-inline='Click again · 1 note moves up']", visible: :all)
+    end
+
+    it "counts the folder's links beside Linked records and opens the folder page", :aggregate_failures do
+      task = create(:task)
+      Links::Slice["operations.link_records"].call("note_folder", work.id, { other_kind: "task", other_id: task.id })
+      get "/admin/notes/folders/#{work.id}/menu"
+
+      expect(page).to have_css("a[href='/admin/notes/folders/#{work.id}'] .ctx-hint", text: "1", visible: :all)
+      expect(page).to have_css("a[href='/admin/notes/folders/#{work.id}']", text: "Linked records", visible: :all)
     end
 
     it "offers to expand a folder that is shut" do
@@ -484,6 +493,78 @@ RSpec.describe "Admin notes", type: :request do
       get "/admin/notes/menu"
 
       expect(menu_items).to eq(["New note", "New folder", "Collapse all", "Expand all"])
+    end
+  end
+
+  describe "record links" do
+    let(:task) { create(:task, title: "Index the activities table") }
+    let(:work) { create(:note_folder, name: "work") }
+    let(:clients) { create(:note_folder, name: "clients", parent_id: work.id) }
+    let(:note) { create(:note, title: "Acme", folder_id: clients.id) }
+
+    def from_folders = page.first(".nt-meta .field", text: "From folders")
+
+    def link(kind, id, other_kind, other_id)
+      Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: })
+    end
+
+    def linked(kind, id) = Links::Slice["repos.record_link_queries"].for_record(kind, id)
+
+    it "shows the note's links" do
+      link("note", note.id, "task", task.id)
+      get "/admin/notes/#{note.id}"
+
+      expect(page.find(".record-links")).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
+    end
+
+    it "links a record with a plain form and comes back to the note", :aggregate_failures do
+      admin_post "/admin/notes/#{note.id}/records", record: { other_kind: "task", other_id: task.id.to_s }
+
+      expect(last_response.location).to end_with("/admin/notes/#{note.id}")
+      expect(linked("note", note.id).keys).to eq(%w[task])
+    end
+
+    it "unlinks a record with a plain form and comes back to the note", :aggregate_failures do
+      link("note", note.id, "task", task.id)
+      admin_post "/admin/records/note/#{note.id}/links/task/#{task.id}/delete"
+
+      expect(last_response.location).to end_with("/admin/notes/#{note.id}")
+      expect(linked("note", note.id)).to be_empty
+    end
+
+    it "refuses a record that is gone and keeps the note open" do
+      admin_post "/admin/notes/#{note.id}/records", record: { other_kind: "task", other_id: "999999" }
+
+      expect(page).to have_css(".nt-h", text: "Acme")
+    end
+
+    it "finds notes and folders from another record's picker" do
+      note
+      get "/admin/tasks/#{task.id}?record_q=Acme"
+
+      expect(page.find(".record-picker-results")).to have_text("Notes")
+    end
+
+    it "links back from the task to the note page" do
+      link("task", task.id, "note", note.id)
+
+      expect(linked("task", task.id).fetch("note").first.url).to eq("/admin/notes/#{note.id}")
+    end
+
+    it "lists the links of its folder and every folder above it under From folders", :aggregate_failures do
+      link("note_folder", work.id, "task", task.id)
+      link("note_folder", clients.id, "post", create(:post, title: "Kickoff").id)
+      get "/admin/notes/#{note.id}"
+
+      expect(from_folders).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
+      expect(from_folders.all("li").map(&:text)).to eq(["Index the activities tablevia work", "Kickoffvia clients"])
+    end
+
+    it "leaves out the links of folders the note is not in" do
+      link("note_folder", create(:note_folder, name: "elsewhere").id, "task", task.id)
+      get "/admin/notes/#{note.id}"
+
+      expect(page).to have_no_css(".nt-meta .field", text: "From folders")
     end
   end
 end

@@ -24,6 +24,7 @@ amended:
   - "#1750"
   - "#1751"
   - "#1444"
+  - "#1930"
 tags:
   - postgres
   - schema
@@ -61,14 +62,17 @@ the `api` endpoints ([ADR 0088][0088]). Since #1444 the `api` links and lists ev
 a mail thread stays behind the `mail` scope ([ADR 0151][0151]). Without it, a link, unlink or list that names a mail
 thread on either side gets a 403 naming `mail`, and a record's links leave mail threads out. A mail thread's subject
 comes marked untrusted, as a commit's title does. #1749 gates `memory_file` and `artifact` the same way behind the
-`agents` scope ([ADR 0188][0188]), and marks their titles untrusted too.
+`agents` scope ([ADR 0188][0188]), and marks their titles untrusted too. #1930 keeps `note` and `note_folder` behind
+the `notes` scope ([ADR 0203][0203]) the same way. Until that scope ships, no token holds it, so the `api` answers
+every link that names a note or folder with a 403 and leaves both kinds out of every list.
 
 **Each side is a kind and an id.** A `record_kind` enum (ADR 0015) holds the eight kinds, declared in the order above,
-since the Linked section groups by kind in that order. It now holds twelve: #911 declared `pull_request` ninth,
-`mail_thread` came tenth in #1139, and #1749 added `memory_file` and `artifact` last ([ADR 0186][0186]). A row holds
-`left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The operation sorts the two sides, kind first and
-then id, so a pair has one spelling. #1324 gives each link a `relation`: `related`, or `sourced_from` for the task the
-site opens for a decision, as [ADR 0167][0167] decides.
+since the Linked section groups by kind in that order. It now holds fourteen: #911 declared `pull_request` ninth,
+`mail_thread` came tenth in #1139, #1749 added `memory_file` and `artifact` ([ADR 0186][0186]), and #1930 added
+`note` and `note_folder` last ([ADR 0200][0200]). A row holds `left_kind`, `left_id`, `right_kind`, `right_id` and
+`created_at`. The operation sorts the two sides, kind first and then id, so a pair has one spelling. #1324 gives each
+link a `relation`: `related`, or `sourced_from` for the task the site opens for a decision, as [ADR 0167][0167]
+decides.
 
 **Postgres holds the rules.**
 
@@ -86,19 +90,24 @@ site opens for a decision, as [ADR 0167][0167] decides.
 - A trigger before insert finds the row each side names in its kind's table, and locks it `FOR KEY SHARE` as a
   foreign key would. A missing row raises with `ERRCODE = 'foreign_key_violation'` and `CONSTRAINT =
   'record_links_record_missing'`.
-- An `AFTER DELETE` trigger on each of the kinds' tables, twelve since `memory_file` and `artifact` (#1749), runs
+- An `AFTER DELETE` trigger on each of the kinds' tables, fourteen since `note` and `note_folder` (#1930), runs
   one function, which takes its kind as the trigger's argument and deletes every link on either side that names the
-  old row. A cascade from another table fires it too.
+  old row. A cascade from another table fires it too. Removing a note folder deletes its row once its notes and
+  subfolders move up, so the folder's links go with it.
 
 `Links::Operations::LinkRecords` maps the four names to field errors as ADR 0017 lays out: `taken`, `self`,
 `task_pair` and `missing`. `UnlinkRecords` adds `scoped` for a memory file's link to its scope.
 
 **Titles and searches cross through exports** ([ADR 0123][0123]). Each owning slice exports one query per kind, which
-names its records by id and finds them by text, and `links` imports all of them, twelve as #1749 counts. Since #1750 a
-memory file's link opens its admin page, and since #1751 an artifact's does too. Both pages link and unlink records.
-The list query builds each admin URL from the kind and id through the app's routes helper (ADR 0004), so the pages and
-the tools share one map from kind to route. Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each
-kind's icon, label key and search kind, and admin search hits read their routes from it too.
+names its records by id and finds them by text, and `links` imports all of them, fourteen as #1930 counts. The notes
+slice's one query serves both `note` and `note_folder`. Since #1750 a memory file's link opens its admin page, and
+since #1751 an artifact's does too. Both pages link and unlink records. Since #1930 a note's link opens its page,
+which also lists, under "From folders", the links of its folder and of each folder above it. A folder's link opens
+the folder page, which links and unlinks records too and shows the links of each folder above it, read only. The list
+query builds each admin URL from the kind and id through the app's routes helper (ADR 0004), so the pages and the
+tools share one map from kind to route. Since #966 that map is
+`Blog::Helpers::RecordKinds`, which also holds each kind's icon, label key and search kind, and admin search hits read
+their routes from it too.
 
 ## Alternatives
 
@@ -131,7 +140,7 @@ The operation sorts in Ruby by the enum's order, which Postgres compares on. ADR
 drift out of order, but here a twin out of order sends some pairs unsorted, and `record_links_order_check` refuses
 them as a self link.
 
-A search runs one query per kind, twelve as #1749 counts, and merges them in Ruby, so results rank within a kind, not
+A search runs one query per kind, fourteen as #1930 counts, and merges them in Ruby, so results rank within a kind, not
 across kinds.
 
 The list query names admin routes from a feature slice. Renaming one breaks the Linked section when it runs, not at
@@ -148,4 +157,6 @@ ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 upd
 [0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
+[0200]: 0200-keep-notes-folders-and-wiki-links-in-a-notes-slice.md
+[0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -73,7 +73,8 @@ RSpec.describe "Admin note folders", type: :request do
 
     it "asks before it removes a folder that holds notes" do
       expect(page).to have_css(
-        "form[action='#{folder_page}/delete'][data-confirm='Remove clients? Its 2 notes move to work.']",
+        "form[action='#{folder_page}/delete']" \
+        "[data-confirm='Remove clients? Its 2 notes move to work. Folder links are dropped.']",
       )
     end
   end
@@ -150,6 +151,68 @@ RSpec.describe "Admin note folders", type: :request do
       admin_post "/admin/notes/folders/#{work.id}/delete", return_to: "/admin/notes/folders/#{work.id}"
 
       expect(last_response.location).to eq("/admin/notes")
+    end
+  end
+
+  describe "record links" do
+    let(:task) { create(:task, title: "Index the activities table") }
+
+    def link(kind, id, other_kind, other_id)
+      Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: })
+    end
+
+    def linked(kind, id) = Links::Slice["repos.record_link_queries"].for_record(kind, id)
+
+    def parents = page.find(".nt-meta .card", text: "From parent folders")
+
+    it "shows the folder's links with the picker", :aggregate_failures do
+      link("note_folder", clients.id, "task", task.id)
+      get folder_page
+
+      expect(page.find(".record-links")).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
+      expect(page).to have_css(".record-links .record-picker")
+    end
+
+    it "says the links apply to every note inside it" do
+      get folder_page
+
+      expect(page).to have_text(/Links here apply to every note in clients, including subfolders/)
+    end
+
+    it "links a record with a plain form and comes back to the folder", :aggregate_failures do
+      admin_post "#{folder_page}/records", record: { other_kind: "task", other_id: task.id.to_s }
+
+      expect(last_response.location).to end_with(folder_page)
+      expect(linked("note_folder", clients.id).keys).to eq(%w[task])
+    end
+
+    it "unlinks a record with a plain form and comes back to the folder", :aggregate_failures do
+      link("note_folder", clients.id, "task", task.id)
+      admin_post "/admin/records/note_folder/#{clients.id}/links/task/#{task.id}/delete"
+
+      expect(last_response.location).to end_with(folder_page)
+      expect(linked("note_folder", clients.id)).to be_empty
+    end
+
+    it "lists the links of its parent folders read only", :aggregate_failures do
+      link("note_folder", work.id, "task", task.id)
+      get folder_page
+
+      expect(parents).to have_link("Index the activities table", href: "/admin/tasks/#{task.id}")
+      expect(parents).to have_text("work")
+      expect(parents).to have_no_css("form")
+    end
+
+    it "leaves the parent card off when no folder above it has links" do
+      get folder_page
+
+      expect(page).to have_no_text("From parent folders")
+    end
+
+    it "links back from the task to the folder page" do
+      link("task", task.id, "note_folder", clients.id)
+
+      expect(linked("task", task.id).fetch("note_folder").first.url).to eq(folder_page)
     end
   end
 end

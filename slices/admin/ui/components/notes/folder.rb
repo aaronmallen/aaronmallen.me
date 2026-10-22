@@ -9,6 +9,8 @@ module Admin
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
           prop :notes, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :backlink_counts, Blog::Types::Hash
+          prop :records, Blog::Types::Hash
+          prop :from_folders, Blog::Types::Array
 
           def view_template
             div(class: "nt-doc") do
@@ -17,7 +19,7 @@ module Admin
                 head
                 index
               end
-              FolderSettings(folder: @folder, tree: @tree)
+              FolderSettings(folder: @folder, tree: @tree, records: @records, from_folders: @from_folders)
             end
           end
 

@@ -12,6 +12,10 @@ module Notes
         end
       end
 
+      def linkable = linkables(title: :title, day: self.class.site_day(:created_at))
+
+      def matching(text) = containing(text, :title, :body)
+
       def titled_from(base) = where(Sequel.ilike(:title, "#{dataset.escape_like(base)}%"))
 
       def titles_first(text)

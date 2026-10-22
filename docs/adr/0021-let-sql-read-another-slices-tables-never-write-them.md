@@ -42,6 +42,7 @@ amended:
   - "#1749"
   - "#1797"
   - "#1936"
+  - "#1930"
 tags:
   - slices
   - sql
@@ -129,12 +130,13 @@ exports refuses. These reads cross today:
   import the other way would close a cycle.
 - **The `record_links_find_records` trigger**, in `config/db/migrate/20261003000094_create_record_links.rb`, finds and
   locks the row each side of a new link names in `tasks`, `posts`, `social_posts`, `journal_entries`, `commits`,
-  `projects`, `work_entries`, `decisions`, `pull_requests`, `mail_threads`, `memory_files` or `artifacts`, which
-  `tasks`, `posts`, `social`, `record`, `projects`, `decisions`, `mail` and `agents` own. The same migration hangs a
-  `<table>_drop_record_links` trigger on each of those tables, which deletes the links of a deleted row from
-  `record_links`, a table `links` owns. #818 added `pull_requests`, #1139 added `mail_threads` and #1749 added
-  `memory_files` and `artifacts`, each in a new migration. A migration that drops and rebuilds one of the tables loses
-  its trigger. The record on linking any two records (ADR 0093) holds why Postgres keeps these rules.
+  `projects`, `work_entries`, `decisions`, `pull_requests`, `mail_threads`, `memory_files`, `artifacts`, `notes` or
+  `note_folders`, which `tasks`, `posts`, `social`, `record`, `projects`, `decisions`, `mail`, `agents` and `notes`
+  own. The same migration hangs a `<table>_drop_record_links` trigger on each of those tables, which deletes the links
+  of a deleted row from `record_links`, a table `links` owns. #818 added `pull_requests`, #1139 added `mail_threads`,
+  #1749 added `memory_files` and `artifacts`, and #1930 added `notes` and `note_folders`, each in a new migration. A
+  migration that drops and rebuilds one of the tables loses its trigger. The record on linking any two records (ADR
+  0093) holds why Postgres keeps these rules.
 - **`Links::Relations::RecordLinks#implied`** reads `tasks` and `memory_files`, which `tasks` and `agents` own, to
   show a task's project and a memory file's task or project as links with no row in `record_links`. `tasks` and
   `agents` own those columns, so the links slice reads them rather than keep a copy.

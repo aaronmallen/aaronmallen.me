@@ -8,6 +8,7 @@ module API
       PULL_REQUEST = Blog::Types::RecordKind["pull_request"]
       TASK = Blog::Types::RecordKind["task"]
       MAIL_THREAD = Blog::Types::RecordKind["mail_thread"]
+      NOTE_KINDS = %w[note note_folder].map { Blog::Types::RecordKind[it] }.freeze
       KINDS = Blog::Types::RecordKind.values.freeze
       UNMAILED = (KINDS - [MAIL_THREAD]).freeze
       SCHEMA = Helpers::Schema.object(

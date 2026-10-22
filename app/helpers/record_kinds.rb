@@ -13,6 +13,8 @@ module Blog
         "journal_entry" => ["fa-feather", :admin_journal, "journal"],
         "mail_thread" => ["fa-envelope", :admin_mail, "message"],
         "memory_file" => ["fa-brain", :admin_memory_file, nil],
+        "note" => ["fa-note-sticky", :admin_note, nil],
+        "note_folder" => ["fa-folder", :admin_note_folder, nil],
         "post" => ["fa-file-lines", :admin_edit_post, "post"],
         "project" => ["fa-cube", :admin_edit_project, "project"],
         "pull_request" => ["fa-code-pull-request", :admin_pull_request, "pull_request"],

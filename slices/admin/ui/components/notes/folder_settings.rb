@@ -7,6 +7,8 @@ module Admin
         class FolderSettings < Component
           prop :folder, Blog::Types::Instance(Structs::NoteTree)
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
+          prop :records, Blog::Types::Hash
+          prop :from_folders, Blog::Types::Array
 
           def view_template
             aside(class: "nt-meta", aria: { label: t(".label") }) do
@@ -15,6 +17,7 @@ module Admin
                 inside
                 description
               end
+              FolderLinks(folder: @folder, records: @records, from_folders: @from_folders)
               div { remove }
             end
           end

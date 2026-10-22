@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Notes::Operations::RemoveNoteFolder do
+  let(:post) { linkable_record("post") }
+
   def folder(id) = Notes::Slice["repos.note_queries"].folder_by_id(id)
+
+  def link(id, kind)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind: "post", other_id: post.id })
+  end
 
   def note(id) = Notes::Slice["repos.note_queries"].by_id(id)
 
@@ -39,6 +45,15 @@ RSpec.describe Notes::Operations::RemoveNoteFolder do
     run(:remove_note_folder, removed.id)
 
     expect(note(held.id).folder_id).to be_nil
+  end
+
+  it "drops the folder's record links and keeps those of the notes it held" do
+    removed = create(:note_folder)
+    link(removed.id, "note_folder")
+    link(create(:note, folder_id: removed.id).id, "note")
+    run(:remove_note_folder, removed.id)
+
+    expect(Links::Slice["repos.record_link_queries"].for_record("post", post.id).keys).to eq(%w[note])
   end
 
   it "answers not found for a folder that does not exist" do

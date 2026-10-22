@@ -13,7 +13,9 @@ RSpec.describe "API record links", type: :request do
   end
 
   def link_every_pair
-    API::Serializers::Link::KINDS.to_h { [it, linkable_record(it)] }.tap do |records|
+    kinds = API::Serializers::Link::KINDS - API::Serializers::Link::NOTE_KINDS
+
+    kinds.to_h { [it, linkable_record(it)] }.tap do |records|
       records.keys.combination(2).each do |one, two|
         link(one, records[one].id, other_kind: two, other_id: records[two].id)
       end
@@ -26,10 +28,11 @@ RSpec.describe "API record links", type: :request do
 
   def refusal = [last_response.status, last_response.headers["WWW-Authenticate"], JSON.parse(last_response.body)]
 
-  def refused_for_mail
-    body = { "error" => "insufficient_scope", "error_description" => "this endpoint needs a token with the mail scope" }
+  def refused_for(scope)
+    description = "this endpoint needs a token with the #{scope} scope"
 
-    [403, 'Bearer error="insufficient_scope", scope="mail"', body]
+    [403, %(Bearer error="insufficient_scope", scope="#{scope}"), { "error" => "insufficient_scope",
+                                                                    "error_description" => description }]
   end
 
   def stored = Links::Slice["relations.record_links"].count
@@ -115,9 +118,16 @@ RSpec.describe "API record links", type: :request do
       thread = create(:message)
 
       link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id, token: mailless)
-      expect(refusal).to eq(refused_for_mail)
+      expect(refusal).to eq(refused_for("mail"))
       link("mail_thread", thread.id, other_kind: "post", other_id: post_record.id, token: mailless)
-      expect([refusal, stored]).to eq([refused_for_mail, 0])
+      expect([refusal, stored]).to eq([refused_for("mail"), 0])
+    end
+
+    it "refuses a note or folder on either side, naming notes, since no token holds it yet", :aggregate_failures do
+      link("post", post_record.id, other_kind: "note", other_id: create(:note).id)
+      expect(refusal).to eq(refused_for("notes"))
+      link("note_folder", create(:note_folder).id, other_kind: "post", other_id: post_record.id)
+      expect([refusal, stored]).to eq([refused_for("notes"), 0])
     end
 
     it "names every kind it links when it refuses a kind it does not know" do
@@ -125,7 +135,7 @@ RSpec.describe "API record links", type: :request do
 
       expect(message.scan(/"(\w+)"/).flatten)
         .to eq(%w[task post social_post journal_entry commit project work_entry decision pull_request mail_thread
-                  memory_file artifact])
+                  memory_file artifact note note_folder])
     end
 
     it "answers an unknown record with a 404" do
@@ -159,7 +169,7 @@ RSpec.describe "API record links", type: :request do
       link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id)
       unlink("post", post_record.id, "mail_thread", thread.id, token: mailless)
 
-      expect([refusal, stored]).to eq([refused_for_mail, 1])
+      expect([refusal, stored]).to eq([refused_for("mail"), 1])
     end
 
     it "refuses another kind it does not know with a 422" do
@@ -184,10 +194,18 @@ RSpec.describe "API record links", type: :request do
       expect(list("task", task.id, token: mailless).fetch("links")).to eq({})
     end
 
+    it "leaves linked notes and folders out, since notes need the notes scope" do
+      link = Links::Slice["operations.link_records"]
+      link.call("post", post_record.id, { other_kind: "note", other_id: create(:note).id })
+      link.call("post", post_record.id, { other_kind: "note_folder", other_id: create(:note_folder).id })
+
+      expect(list("post", post_record.id).fetch("links")).to eq({})
+    end
+
     it "refuses the links of a mail thread without the mail scope" do
       list("mail_thread", create(:message).id, token: mailless)
 
-      expect(refusal).to eq(refused_for_mail)
+      expect(refusal).to eq(refused_for("mail"))
     end
 
     it "cuts a long title" do

@@ -6,8 +6,8 @@ module Admin
       class Unlink < Action
         PAGES = {
           "artifact" => :admin_artifact, "commit" => :admin_commit, "decision" => :admin_decision,
-          "memory_file" => :admin_memory_file, "post" => :admin_edit_post, "project" => :admin_edit_project,
-          "pull_request" => :admin_pull_request,
+          "memory_file" => :admin_memory_file, "note" => :admin_note, "note_folder" => :admin_note_folder,
+          "post" => :admin_edit_post, "project" => :admin_edit_project, "pull_request" => :admin_pull_request,
         }.freeze
         SCOPED = "record_links.toasts.scoped"
         TASK = Blog::Types::RecordKind["task"]

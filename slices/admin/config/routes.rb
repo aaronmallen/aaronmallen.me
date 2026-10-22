@@ -200,6 +200,7 @@ module Admin
     get "/notes/folders/:id/menu", to: "notes.folder_menu", as: :note_folder_menu, id: ID
     post "/notes/folders/:id/delete", to: "notes.remove_folder", as: :remove_note_folder, id: ID
     post "/notes/folders/:id/move", to: "notes.move_folder", as: :move_note_folder, id: ID
+    post "/notes/folders/:id/records", to: "notes.link_folder_record", as: :link_note_folder_record, id: ID
     post "/notes/folders/:id/rename", to: "notes.rename_folder", as: :rename_note_folder, id: ID
     get "/notes/:id", to: "notes.show", as: :note, id: ID
     get "/notes/:id/menu", to: "notes.menu", as: :note_menu, id: ID
@@ -208,6 +209,7 @@ module Admin
     post "/notes/:id/duplicate", to: "notes.duplicate", as: :duplicate_note, id: ID
     post "/notes/:id/move", to: "notes.move", as: :move_note, id: ID
     post "/notes/:id/pin", to: "notes.pin", as: :pin_note, id: ID
+    post "/notes/:id/records", to: "notes.link_record", as: :link_note_record, id: ID
     post "/notes/:id/rename", to: "notes.rename", as: :rename_note, id: ID
     post "/notes/:id/tags", to: "notes.tag", as: :tag_note, id: ID
     post "/notes/:id/tags/delete", to: "notes.untag", as: :untag_note, id: ID

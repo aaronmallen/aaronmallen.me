@@ -13,6 +13,8 @@ module Spec
       "pull_request" => %i[pull_request title],
       "mail_thread" => %i[message subject],
       "artifact" => %i[artifact title],
+      "note" => %i[note title],
+      "note_folder" => %i[note_folder name],
     }.freeze
 
     def linkable_record(kind, text = Faker::Lorem.sentence)

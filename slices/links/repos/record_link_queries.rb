@@ -12,6 +12,8 @@ module Links
         "journal_entry" => :journal_entries,
         "mail_thread" => :mail_threads,
         "memory_file" => :memory_files,
+        "note" => :notes,
+        "note_folder" => :note_folders,
         "post" => :posts,
         "project" => :projects,
         "pull_request" => :pull_requests,
@@ -35,6 +37,8 @@ module Links
         mail_thread: "mail.repos.thread_queries",
         memory_file: "agents.repos.memory_file_queries",
         artifact: "agents.repos.artifact_queries",
+        note: "notes.repos.note_queries",
+        note_folder: "notes.repos.note_queries",
       ]
 
       def counts(kind, ids)

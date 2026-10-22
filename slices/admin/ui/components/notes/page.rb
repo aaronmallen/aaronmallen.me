@@ -13,6 +13,8 @@ module Admin
           prop :written, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :backlinks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :links_out, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :records, Blog::Types::Hash
+          prop :from_folders, Blog::Types::Array
 
           def view_template
             div(class: "nt-doc") do
@@ -20,7 +22,10 @@ module Admin
                 bar
                 @editing ? Editor(note: @note, errors: @errors, values: @values) : read
               end
-              aside(class: "nt-meta") { meta }
+              Meta(
+                note: @note, tree: @tree, backlinks: @backlinks, links_out: @links_out, records: @records,
+                from_folders: @from_folders,
+              )
             end
           end
 
@@ -64,36 +69,7 @@ module Admin
             end
           end
 
-          def delete
-            ButtonForm(
-              action: path(:admin_delete_note, id: @note.id), label: t(".delete"), variant: :gh, icon: :trash,
-              confirm: t(".confirm_delete", title: @note.title, count: @backlinks.size),
-            )
-          end
-
-          def folder_field
-            AutoForm(method: "post", action: path(:admin_move_note, id: @note.id), data: { morph: true }) do
-              Field(label: t(".folder"), id: "note-folder") do |control|
-                Input(**control, name: "path", value: folder_path, list: "note-folders", placeholder: t(".top_level"))
-              end
-              datalist(id: "note-folders") { @tree.all.each { option(value: it.path) } }
-            end
-          end
-
           def folder_path = @tree.path_of(@note.folder_id)
-
-          def meta
-            div(class: "nt-facts") do
-              folder_field
-              p(class: "nt-mt") do
-                span { t(".created", date: l(Blog::TimeZone.local(@note.created_at).to_date, format: :short)) }
-                span { t(".words", count: Blog::Helpers::Figures.words(@note.body)) }
-                span { IconLabel(icon: "fa-solid fa-lock") { t(".private") } }
-              end
-            end
-            Links(note: @note, backlinks: @backlinks, links_out: @links_out)
-            div { delete }
-          end
 
           def pin
             label = @note.pinned ? t(".unpin") : t(".pin")

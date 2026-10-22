@@ -7,7 +7,7 @@ module Admin
         class Index < View
           include Components::Notes
 
-          LIVE_TABLES = %w[note_folders note_tags notes].freeze
+          LIVE_TABLES = %w[note_folders note_tags notes record_links].freeze
 
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
           prop :pinned, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -26,6 +26,8 @@ module Admin
           prop :editing, Blog::Types::Bool, default: false
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :records, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :from_folders, Blog::Types::Array, default: Blog::Constants::EMPTY_ARRAY
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -41,9 +43,16 @@ module Admin
 
           private
 
+          def folder
+            Folder(
+              folder: @folder, tree: @tree, notes: @filed, backlink_counts: @backlink_counts, records: @records,
+              from_folders: @from_folders,
+            )
+          end
+
           def main_pane
             return page if @note
-            return Folder(folder: @folder, tree: @tree, notes: @filed, backlink_counts: @backlink_counts) if @folder
+            return folder if @folder
 
             Home(notes: @recent, tree: @tree, backlink_counts: @backlink_counts, unwritten: @unwritten)
           end
@@ -58,7 +67,7 @@ module Admin
           def page
             Page(
               note: @note, tree: @tree, editing: @editing, errors: @errors, values: @values, written: @written,
-              backlinks: @backlinks, links_out: @links_out,
+              backlinks: @backlinks, links_out: @links_out, records: @records, from_folders: @from_folders,
             )
           end
 

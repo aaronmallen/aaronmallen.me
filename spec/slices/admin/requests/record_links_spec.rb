@@ -211,6 +211,11 @@ RSpec.describe "Admin record links", type: :request do
   end
 
   describe "the picker on a post" do
+    def create_past_notes
+      create(:note, body: "Draw the zeppelin")
+      create(:note_folder, description: "Plans for the zeppelin")
+    end
+
     def create_past_titles
       create(:task, note: "Bring the zeppelin")
       create(:post, body: "All about the zeppelin")
@@ -248,6 +253,7 @@ RSpec.describe "Admin record links", type: :request do
 
     it "finds a record of every kind but a memory file, which has only its path, by text beyond its title" do
       create_past_titles
+      create_past_notes
       Agents::Slice["relations.artifact_versions"].insert(artifact_id: create(:artifact).id, body: "Moor the zeppelin")
       show(record_q: "zeppelin")
 
