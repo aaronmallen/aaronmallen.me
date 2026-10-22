@@ -10,6 +10,7 @@ module Contacts
 
       def store_google(google_connection_id, found, now: Time.now)
         transaction do
+          link_local(google_connection_id, found[:people]) if found[:first]
           people.store(google_connection_id, found[:people], now:)
           stale(google_connection_id, found).delete
           keep_sync_token(google_connection_id, found[:sync_token], now)
@@ -26,6 +27,15 @@ module Contacts
           target: :google_connection_id, update: { sync_token:, updated_at: now },
         )
         upsert.insert(google_connection_id:, sync_token:, created_at: now, updated_at: now)
+      end
+
+      def link_local(google_connection_id, rows)
+        held = people.where(google_connection_id:).pluck(:google_id)
+        local = people.where(google_connection_id: nil).to_a
+
+        Helpers::LocalMatch.pairs(local, rows.reject { held.include?(it[:google_id]) }).each do |person, row|
+          people.by_pk(person.id).update(google_connection_id:, google_id: row[:google_id])
+        end
       end
 
       def stale(google_connection_id, found)

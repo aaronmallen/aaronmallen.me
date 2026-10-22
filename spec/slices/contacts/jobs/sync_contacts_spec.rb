@@ -305,6 +305,87 @@ RSpec.describe Contacts::Jobs::SyncContacts do
     it("keeps them") { expect(people.map { it[:key] }).to eq(["local"]) }
   end
 
+  describe "on a connection's first run with people already here" do
+    before do
+      connect("me@example.com", "ya29.me")
+      stub_groups("ya29.me")
+    end
+
+    def first_run(*contacts)
+      stub_contacts("ya29.me", *contacts, nextSyncToken: "first")
+      run
+    end
+
+    def linked(person) = Contacts::Slice["relations.people"].by_pk(person.id).one
+
+    it "links a person whose email matches, whatever its case" do
+      ada = create(:person, name: "Countess", emails: [{ value: "Ada@Example.com" }])
+      first_run(contact("c1", "Ada Lovelace", emailAddresses: [{ value: "ada@example.com" }]))
+
+      expect(people.map { it.values_at(:id, :google_id, :name) }).to eq([[ada.id, "c1", "Ada Lovelace"]])
+    end
+
+    it "links a person whose Mastodon profile Google holds as a link" do
+      ada = create(:person, name: "Countess", mastodon_handle: "@ada@ruby.social")
+      first_run(contact("c1", "Ada Lovelace", urls: [{ value: "https://Ruby.social/@ada/", type: "profile" }]))
+
+      expect(people.map { it.values_at(:id, :google_id) }).to eq([[ada.id, "c1"]])
+    end
+
+    it "links a person whose Bluesky profile Google holds as a link" do
+      ada = create(:person, :bluesky, name: "Countess", mastodon_handle: nil)
+      first_run(contact("c1", "Ada Lovelace", urls: [{ value: "https://bsky.app/profile/#{ada.bluesky_handle}" }]))
+
+      expect(people.map { it.values_at(:id, :google_id) }).to eq([[ada.id, "c1"]])
+    end
+
+    it "links a person whose name matches exactly" do
+      ada = create(:person, name: "Ada Lovelace")
+      first_run(contact("c1", "Ada Lovelace"))
+
+      expect(people.map { it.values_at(:id, :google_id) }).to eq([[ada.id, "c1"]])
+    end
+
+    it "keeps the key and handles of a person it links" do
+      ada = create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social")
+      first_run(contact("c1", "Ada Lovelace"))
+
+      expect(linked(ada).values_at(:key, :mastodon_handle)).to eq(["ada", "@ada@ruby.social"])
+    end
+
+    it "prefers an email match to a name match" do
+      named = create(:person, name: "Ada Lovelace")
+      emailed = create(:person, name: "Countess", emails: [{ value: "ada@example.com" }])
+      first_run(contact("c1", "Ada Lovelace", emailAddresses: [{ value: "ada@example.com" }]))
+
+      expect([linked(emailed)[:google_id], linked(named)[:google_id]]).to eq(["c1", nil])
+    end
+
+    it "links each person to one contact at most" do
+      create(:person, name: "Ada Lovelace")
+      first_run(contact("c1", "Ada Lovelace"), contact("c2", "Ada Lovelace"))
+
+      expect(people.map { it[:google_id] }).to eq(%w[c1 c2])
+    end
+
+    it "leaves a person with no match as it was", :aggregate_failures do
+      grace = create(:person, name: "Grace Hopper", emails: [{ value: "grace@example.com" }])
+      first_run(contact("c1", "Ada Lovelace", emailAddresses: [{ value: "ada@example.com" }]))
+
+      expect(linked(grace)).to include(name: "Grace Hopper", google_connection_id: nil, google_id: nil)
+      expect(people.size).to eq(2)
+    end
+
+    it "links nobody on a later run" do
+      first_run
+      grace = create(:person, name: "Grace Hopper")
+      stub_contacts("ya29.me", contact("c2", "Grace Hopper"), query: { "syncToken" => "first" }, nextSyncToken: "next")
+      run
+
+      expect([linked(grace)[:google_id], people.size]).to eq([nil, 2])
+    end
+  end
+
   describe "a run that crashes" do
     before { replace_component("operations.sync_contacts", ->(*) { raise KeyError, "key not found: :id" }) }
 

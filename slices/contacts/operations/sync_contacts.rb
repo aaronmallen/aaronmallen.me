@@ -54,7 +54,7 @@ module Contacts
       end
 
       def sync(account, connection_id, token)
-        Success(person_mutations.store_google(connection_id, pulled(account, token)))
+        Success(person_mutations.store_google(connection_id, { **pulled(account, token), first: token.nil? }))
       rescue Google::Error => e
         Failure([:google_contacts_failed, e.message])
       end
