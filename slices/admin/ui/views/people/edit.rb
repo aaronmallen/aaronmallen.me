@@ -7,11 +7,14 @@ module Admin
         class Edit < View
           include Components::People
 
-          prop :editor, Blog::Types::Hash, :**
+          prop :person, Blog::Types::Instance(ROM::Struct)
+          prop :values, Blog::Types::Hash
+          prop :errors, Blog::Types::Hash
+          prop :labels, Blog::Types::Array.of(Blog::Types::String)
 
           def view_template
             content_for(:live_tables, Blog::Constants::EMPTY_ARRAY)
-            Editor(**@editor)
+            ContactEditor(person: @person, values: @values, errors: @errors, labels: @labels)
           end
         end
       end

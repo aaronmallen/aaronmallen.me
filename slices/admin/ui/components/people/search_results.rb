@@ -7,6 +7,7 @@ module Admin
         class SearchResults < Component
           AVATAR_SIZE = 32
           BLUESKY = Blog::Types::NetworkName["bluesky"]
+          HANDLES = { "bluesky" => "bluesky_handle", "mastodon" => "mastodon_handle" }.freeze
           PROBLEMS = { failed: ".failed", rate_limited: ".rate_limited" }.freeze
           SECURE = "https://"
 
@@ -24,10 +25,14 @@ module Admin
 
           private
 
-          def add_button(account)
+          def add_link(account)
+            name = name(account)
+            key = Blog::Types::Normalized::LabelTag.call(name.split.first) { nil }
+            query = { name:, "person[key]" => key, "person[#{HANDLES.fetch(@network)}]" => account.handle }
+
             Button(
-              small: true, aria: { label: t(".add_label", name: name(account)) },
-              data: { person_add: account.handle, person_add_name: account.name, person_add_network: @network },
+              href: path(:admin_new_person, **query.compact), small: true, aria: { label: t(".add_label", name:) },
+              data: { person_add: account.handle },
             ) { t(".add") }
           end
 
@@ -60,7 +65,7 @@ module Admin
             div(class: "person-result", data: { person_result: "" }) do
               avatar(account)
               body(account)
-              add_button(account)
+              add_link(account)
             end
           end
 

@@ -94,11 +94,6 @@ RSpec.describe "Admin screens", type: :feature do
       "inline confirm" => -> { open_confirm },
       "palette" => -> { open_palette },
       "person dialog" => -> { open_person_dialog },
-      "person drawer" => lambda do
-        visit "/admin/settings/webmentions"
-        click_link person.name
-        find("dialog#person-edit-drawer[open] form[data-person-form]")
-      end,
       "snooze drawer" => -> { open_snooze },
       "task editor" => -> { open_editor },
       "task panel" => -> { open_panel },
@@ -287,9 +282,11 @@ RSpec.describe "Admin screens", type: :feature do
 
   def people
     {
-      "new person" => "/admin/people/new",
+      "contacts" => "/admin/contacts",
+      "new contact" => "/admin/contacts/new",
+      "contact page" => "/admin/contacts/#{person.id}",
+      "contact editor" => "/admin/contacts/#{person.id}/edit",
       "webmentions tab" => "/admin/settings/webmentions",
-      "person editor" => "/admin/people/#{person.id}/edit",
     }
   end
 
@@ -302,7 +299,7 @@ RSpec.describe "Admin screens", type: :feature do
         stub_bluesky_search("ada",
                             { avatar: "https://cdn.bsky.app/a.jpg", displayName: "Ada Lovelace",
                               handle: "ada.bsky.social" })
-        visit "/admin/settings/webmentions"
+        visit "/admin/contacts"
         find("#person-finder .seg-option.bluesky").click
         fill_in("person-finder-q", with: "ada")
         click_button("Search")

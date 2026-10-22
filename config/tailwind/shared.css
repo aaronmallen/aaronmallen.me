@@ -5746,6 +5746,305 @@
   @apply relative;
 }
 
+@utility contacts-filters {
+  @apply flex flex-wrap items-center gap-3;
+
+  & .search-kinds {
+    @apply mb-0;
+  }
+}
+
+@utility contacts-search {
+  @apply w-full max-w-80;
+}
+
+@utility contact-row {
+  @apply relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply first:pt-0 last:border-b-0 last:pb-0;
+}
+
+@utility contact-row-avatar {
+  @apply mt-0.5 grid size-avatar shrink-0 place-items-center rounded-full bg-wash;
+  @apply font-display text-nav font-extrabold text-ink;
+  box-shadow: 0 0 0 1px var(--color-line);
+}
+
+@utility contact-row-body {
+  @apply min-w-0;
+}
+
+@utility contact-row-title {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+@utility contact-row-name {
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent-text focus-ring;
+  @apply after:absolute after:inset-0;
+
+  @variant phone {
+    @apply flex min-h-tap items-center;
+  }
+}
+
+@utility contact-star {
+  @apply text-[11px] text-mk-sand-text;
+}
+
+@utility contact-row-sub {
+  @apply font-mono text-xs text-ink-muted;
+}
+
+@utility contact-row-meta {
+  @apply mt-1.5 meta-row gap-y-1 meta-badge;
+
+  & a {
+    @apply relative;
+  }
+}
+
+@utility contact-row-email {
+  @apply inline-flex items-center gap-1.5 text-ink no-underline hover:text-accent-text focus-ring;
+}
+
+@utility contact-row-more {
+  @apply text-ink-muted;
+}
+
+@utility contact-row-none {
+  @apply inline-flex items-center gap-1.5;
+}
+
+@utility contact-row-acts {
+  @apply relative;
+}
+
+@utility contact-back {
+  @apply mb-4;
+}
+
+@utility contact-head {
+  @apply mb-6 flex flex-wrap items-center gap-5;
+}
+
+@utility contact-avatar {
+  @apply grid size-22 flex-none place-items-center rounded-full bg-wash font-display text-[30px] font-extrabold text-ink;
+  box-shadow: 0 0 0 1px var(--color-line);
+}
+
+@utility contact-head-text {
+  @apply min-w-0;
+}
+
+@utility contact-head-title {
+  @apply m-0 font-display text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.05] font-extrabold tracking-[-0.02em];
+}
+
+@utility contact-head-sub {
+  @apply mt-2 text-base text-ink-muted;
+}
+
+@utility contact-head-labels {
+  @apply mt-2 flex flex-wrap gap-2;
+}
+
+@utility contact-head-acts {
+  @apply ml-auto flex flex-wrap items-center gap-2;
+
+  & .on i {
+    @apply text-mk-sand-text;
+  }
+}
+
+@utility contact-sec {
+  @apply border-t border-line py-5 first:border-t-0 first:pt-0 last:pb-0;
+
+  & > h3 {
+    @apply m-0 mb-3 meta tracking-[0.14em] uppercase;
+  }
+}
+
+@utility contact-dl {
+  @apply m-0 grid grid-cols-[minmax(90px,140px)_minmax(0,1fr)] gap-x-5 gap-y-2.5;
+
+  & dt {
+    @apply pt-0.5 meta;
+  }
+
+  & dd {
+    @apply m-0 flex min-w-0 flex-col gap-1.5;
+  }
+}
+
+@utility contact-v {
+  @apply flex flex-wrap items-baseline gap-2.5 wrap-anywhere;
+
+  & a {
+    @apply text-ink hover:text-accent-text focus-ring;
+  }
+
+  @variant phone {
+    & a {
+      @apply inline-flex min-h-tap items-center;
+    }
+  }
+}
+
+@utility contact-v-type {
+  @apply meta-badge;
+}
+
+@utility contact-address {
+  @apply whitespace-pre-line;
+}
+
+@utility contact-mono {
+  @apply font-mono;
+}
+
+@utility contact-copy {
+  @apply cursor-pointer border-0 bg-transparent p-0 meta underline hover:text-ink focus-ring;
+
+  @variant phone {
+    @apply min-h-tap min-w-tap;
+  }
+}
+
+@utility contact-notes {
+  @apply m-0 font-serif text-[1.05rem] leading-[1.55] whitespace-pre-wrap;
+}
+
+@utility contact-side {
+  @apply flex flex-col gap-stack;
+}
+
+@utility contact-mail {
+  @apply block border-b border-line py-2.5 text-ink no-underline last:border-b-0 focus-ring;
+
+  &:hover .contact-mail-subject {
+    @apply text-accent-text;
+  }
+}
+
+@utility contact-mail-subject {
+  @apply m-0 font-display text-[0.98rem] font-semibold;
+}
+
+@utility contact-mail-meta {
+  @apply mt-1 meta;
+}
+
+@utility contact-mail-empty {
+  @apply m-0;
+}
+
+@utility contact-google-icon {
+  @apply mr-2;
+}
+
+@utility contact-sync {
+  @apply meta before:mr-1.5 before:inline-block before:size-[7px] before:rounded-full before:bg-mk-sand-text;
+  @apply before:content-[''];
+
+  &.on {
+    @apply before:bg-mk-green-text;
+  }
+}
+
+@utility contact-google-open {
+  @apply mt-3.5;
+}
+
+@utility contact-fields {
+  @apply grid gap-3;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+}
+
+@utility contact-more {
+  @apply mt-3 cursor-pointer border-0 bg-transparent p-0 meta underline hover:text-ink focus-ring;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility contact-entries {
+  @apply mt-4 flex flex-col items-start gap-2 first:mt-0;
+}
+
+@utility contact-entry {
+  @apply grid w-full grid-cols-[minmax(0,1fr)_minmax(110px,150px)_auto] items-center gap-2;
+
+  &.two {
+    @apply grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto];
+  }
+}
+
+@utility contact-remove {
+  @apply grid size-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-ink-muted hover:text-ink;
+  @apply focus-ring;
+
+  @variant phone {
+    @apply size-tap;
+  }
+}
+
+@utility contact-add {
+  @apply cursor-pointer border-0 bg-transparent p-0 meta text-accent-text hover:underline focus-ring;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility contact-address-entry {
+  @apply grid w-full gap-2 rounded-xl border border-line p-3;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+
+  & .wide {
+    @apply col-span-full;
+  }
+}
+
+@utility contact-address-foot {
+  @apply col-span-full flex items-center justify-between gap-2;
+}
+
+@utility contact-remove-text {
+  @apply cursor-pointer border-0 bg-transparent p-0 meta underline hover:text-ink focus-ring;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility contact-birthday {
+  @apply mt-0 max-w-60;
+}
+
+@utility contact-picks {
+  @apply mb-0;
+}
+
+@utility contact-pick {
+  @apply cursor-pointer;
+
+  &:has(:checked) {
+    @apply border-ink-muted bg-ground-sunk text-ink;
+  }
+
+  &:has(:focus-visible) {
+    @apply outline-2 outline-offset-4 outline-accent;
+  }
+}
+
+@utility contact-new-label {
+  @apply mt-3 flex gap-2;
+}
+
+@utility contact-star-form {
+  @apply contents;
+}
+
 @utility project-card {
   & > .card-body {
     @apply flex flex-col gap-2.5;

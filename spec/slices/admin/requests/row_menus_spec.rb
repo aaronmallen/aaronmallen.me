@@ -184,17 +184,17 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
     describe "a person" do
       let(:person) { create(:person, name: "Matz", key: "matz") }
 
-      before { menu("/admin/people/#{person.id}/menu") }
+      before { menu("/admin/contacts/#{person.id}/menu") }
 
       it_behaves_like "a row menu"
 
-      it "holds edit, copy mention and remove", :aggregate_failures do
-        expect(menu_items).to eq(["Edit", "Copy mention", "Remove"])
+      it "holds open, edit, copy mention and delete", :aggregate_failures do
+        expect(menu_items).to eq(["Open", "Edit", "Copy mention", "Delete"])
         expect(copies.fetch("Copy mention")).to eq("@{matz}")
       end
 
-      it "asks before it removes" do
-        expect(page).to have_css("button[data-confirm-inline='Click again to remove']", text: "Remove")
+      it "asks before it deletes" do
+        expect(page).to have_css("button[data-confirm-inline='Click again to delete']", text: "Delete")
       end
     end
 
@@ -222,9 +222,9 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
 
       it "carry the menu on people" do
         person = create(:person)
-        get "/admin/settings/webmentions"
+        get "/admin/contacts"
 
-        expect(page).to have_css(".person-row[data-menu='/admin/people/#{person.id}/menu']")
+        expect(page).to have_css(".contact-row[data-menu='/admin/contacts/#{person.id}/menu']")
       end
     end
 
@@ -246,21 +246,15 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       end
 
       it "removes a person and lands back" do
-        act("/admin/people/#{create(:person).id}/delete")
+        act("/admin/contacts/#{create(:person).id}/delete")
 
         expect(last_response.location).to eq("/admin/x?y=1")
       end
 
-      it "removes a person from the webmentions tab and lands on its section" do
-        act("/admin/people/#{create(:person).id}/delete", return_to: "/admin/settings/webmentions")
-
-        expect(last_response.location).to eq("/admin/settings/webmentions#people")
-      end
-
       it "ignores a return path outside the admin" do
-        act("/admin/people/#{create(:person).id}/delete", return_to: "https://example.com/")
+        act("/admin/contacts/#{create(:person).id}/delete", return_to: "https://example.com/")
 
-        expect(last_response.location).to eq("/admin/settings/webmentions#people")
+        expect(last_response.location).to eq("/admin/contacts")
       end
     end
   end

@@ -4,9 +4,10 @@ RSpec.describe "Admin live tables", type: :request do
   let(:screens) do
     %w[
       /admin /admin/activity /admin/agents/artifacts /admin/agents/artifacts/new /admin/agents/memories
-      /admin/agents/sessions /admin/analytics /admin/calendar /admin/decisions /admin/decisions/new /admin/files
-      /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings /admin/notes
-      /admin/people/new /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
+      /admin/agents/sessions /admin/analytics /admin/calendar /admin/contacts /admin/decisions /admin/decisions/new
+      /admin/files /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings
+      /admin/notes /admin/contacts/new
+      /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
       /admin/projects/new /admin/review /admin/search /admin/settings/jobs /admin/settings/security
       /admin/settings/services /admin/settings/webmentions /admin/settings/tagging /admin/social /admin/tasks
       /admin/tasks/new /admin/time /admin/webmentions
@@ -23,7 +24,8 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/projects/#{project.id}/edit", "/admin/posts/#{post.id}/edit", "/admin/posts/#{post.id}/analytics",
       "/admin/tasks/#{task.id}", "/admin/tasks/#{task.id}/edit", "/admin/commits/#{create(:commit).id}",
       "/admin/pull-requests/#{create(:pull_request).id}", "/admin/tags/#{create(:tag).name}",
-      "/admin/people/#{create(:person).id}/edit", "/admin/files/#{upload_share.value!.id}/edit",
+      "/admin/contacts/#{create(:person).id}", "/admin/contacts/#{create(:person).id}/edit",
+      "/admin/files/#{upload_share.value!.id}/edit",
       "/admin/files/groups/#{file_group.id}/edit", "/admin/links/#{short_link.id}/edit",
       "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
       "/admin/agents/artifacts/#{artifact.id}", "/admin/agents/artifacts/#{artifact.id}/edit",
@@ -87,10 +89,10 @@ RSpec.describe "Admin live tables", type: :request do
     expect(tables).to include("post_tags", "task_tags", "task_rules", "task_rule_projects", "projects")
   end
 
-  it "lists the tables of both the people and the webmention settings on the webmentions tab" do
+  it "lists the tables of the webmention settings on the webmentions tab" do
     get "/admin/settings/webmentions"
 
-    expect(tables).to include("service_connections", "posts", "trusted_authors", "webmention_settings")
+    expect(tables).to include("posts", "trusted_authors", "webmention_settings")
   end
 
   it "lists the tables of both the services and the MCP clients on the connected services tab" do

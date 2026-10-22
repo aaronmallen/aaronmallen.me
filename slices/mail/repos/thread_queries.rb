@@ -40,6 +40,13 @@ module Mail
         end
       end
 
+      def latest_with(addresses, limit:)
+        return Blog::Constants::EMPTY_ARRAY if addresses.empty?
+
+        found = mail_threads.shown.in_folder(FOLDER["all"]).where(id: written_by(addresses))
+        found.with_account.newest_first.limit(limit).to_a
+      end
+
       def page_listed(page, **)
         page.fill(listed(**).with_summary.combine(:mail_labels, :tags).newest_first.paged(page).to_a)
       end
@@ -88,6 +95,11 @@ module Mail
         rows = unread(label_threads, Sequel[:mail_labels][:name]) + unread(tagged, Sequel[:tags][:name])
 
         rows.to_h { [[it[:account], it[:name]], it[:count]] }
+      end
+
+      def written_by(addresses)
+        found = mail_messages.where(Sequel.function(:lower, :reply_to) => addresses.map(&:downcase))
+        found.dataset.unordered.select(:mail_thread_id)
       end
     end
   end

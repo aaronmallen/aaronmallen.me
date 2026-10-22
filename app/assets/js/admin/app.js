@@ -8,6 +8,7 @@ import { setupCalendars } from "./calendar.js";
 import { setupCommentAdds } from "./comment_add.js";
 import { bootCommitImports, setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
+import { bootContactForms } from "./contact_form.js";
 import { bootContextMenus } from "./context_menu.js";
 import { setupDialogs } from "./dialog.js";
 import { setupEditNotes } from "./edit_note.js";
@@ -22,7 +23,6 @@ import { setupMarkdownEditors } from "./markdown_editor.js";
 import { bootMorphForms } from "./morph_form.js";
 import { setupNotes } from "./notes.js";
 import { bootPalette, setupPalette } from "./palette.js";
-import { bootPersonDrawer } from "./person_drawer.js";
 import { setupPersonFinder } from "./person_finder.js";
 import { setupPersonForms } from "./person_form.js";
 import { setupPools } from "./pools.js";
@@ -85,13 +85,13 @@ const BOOT = [
   bootBoardView,
   bootBulk,
   bootCommitImports,
+  bootContactForms,
   bootContextMenus,
   bootKeys,
   bootLive,
   bootMailDrag,
   bootMorphForms,
   bootPalette,
-  bootPersonDrawer,
   bootPostEditors,
   bootTaskOrder,
   bootTaskPanel,

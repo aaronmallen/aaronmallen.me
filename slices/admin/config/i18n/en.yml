@@ -270,10 +270,12 @@ en:
       unpinned: "Unpinned"
   people_page:
     toasts:
-      added: "Person added"
-      removed: "Person removed"
-      saved: "Person saved"
+      added: "Contact added"
+      removed: "Contact deleted"
+      saved: "Contact saved"
+      starred: "Contact starred"
       sync_queued: "Contact sync queued · Google's changes land in a moment"
+      unstarred: "Star taken off"
   post_form:
     toasts:
       applied:
@@ -1991,6 +1993,7 @@ en:
           analytics: "analytics"
           artifacts: "artifacts"
           calendar: "calendar"
+          contacts: "contacts"
           decisions: "decisions"
           files: "files"
           health: "health"
@@ -2141,13 +2144,126 @@ en:
             one: "%{count} tagged #%{tag}"
             other: "%{count} tagged #%{tag}"
       people:
-        drawer:
-          edit: "edit person"
-          new: "new person"
-        editor:
-          all_people: "All people"
-          new_person: "New person"
-          sub: "Give them a Mastodon or Bluesky handle and a key, and a social post can mention them."
+        addresses:
+          add: "+ add address"
+          city: "City"
+          country: "Country"
+          extended: "Apt, suite, PO box"
+          label: "Addresses"
+          postal_code: "Postal code"
+          region: "State / region"
+          remove: "Remove"
+          street: "Street address"
+          type: "Address type"
+        contact_editor:
+          add: "Add contact"
+          cancel: "Cancel"
+          confirm_delete: "Delete %{name} here and in Google?"
+          contacts: "Contacts"
+          delete: "Delete"
+          new_contact: "New contact"
+          save: "Save"
+          sub_edit: "Changes sync to Google when you save."
+          sub_new: "Saved to Google Contacts."
+          unnamed: "Unnamed"
+        contact_fields:
+          fewer: "Fewer name fields"
+          fields:
+            birthday: "Birthday"
+            bluesky_handle: "Bluesky"
+            company: "Company"
+            department: "Department"
+            family_name: "Last"
+            file_as: "File as"
+            given_name: "First"
+            job_title: "Job title"
+            key: "Mention key"
+            mastodon_handle: "Mastodon"
+            middle_name: "Middle"
+            name_prefix: "Prefix"
+            name_suffix: "Suffix"
+            nickname: "Nickname"
+            notes: "Notes"
+            phonetic_family_name: "Phonetic last"
+            phonetic_given_name: "Phonetic first"
+            phonetic_middle_name: "Phonetic middle"
+          key_first: "add a handle first"
+          key_none: "Only people with a handle can be mentioned."
+          key_note: "A post mentions them as @{%{key}}. Handles save to Google as profile links."
+          more: "Prefix, middle, suffix, phonetic, file as"
+          relation: "Name"
+          sections:
+            contact: "Contact"
+            more: "More"
+            name: "Name"
+            personal: "Personal"
+            social: "Social"
+            work: "Work"
+          username: "username"
+        contact_side:
+          add_label: "Add"
+          favorite: "Show in Google’s favorites"
+          labels: "Labels"
+          labels_hint: "Labels are Google contact groups."
+          new_label: "New label"
+          starred: "Starred"
+        details:
+          copied: "Mention copied"
+          copy: "copy"
+          rows:
+            addresses: "Address"
+            birthday: "Birthday"
+            bluesky: "Bluesky"
+            chats: "Chat"
+            company: "Company"
+            dates: "Dates"
+            department: "Department"
+            emails: "Email"
+            job_title: "Job title"
+            mastodon: "Mastodon"
+            mention: "Mention as"
+            nickname: "Nickname"
+            phones: "Phone"
+            relations: "Related"
+            websites: "Website"
+          sections:
+            contact: "Contact"
+            custom_fields: "Custom fields"
+            notes: "Notes"
+            personal: "Personal"
+            social: "Social"
+            work: "Work"
+          years:
+            one: "%{count} year"
+            other: "%{count} years"
+        entries:
+          add:
+            chats: "+ add chat"
+            custom_fields: "+ add custom field"
+            dates: "+ add significant date"
+            emails: "+ add email"
+            phones: "+ add phone"
+            relations: "+ add related person"
+            websites: "+ add website"
+          custom_key: "label"
+          custom_value: "value"
+          labels:
+            chats: "Chat"
+            custom_fields: "Custom fields"
+            dates: "Significant dates"
+            emails: "Emails"
+            phones: "Phones"
+            relations: "Related people"
+            websites: "Websites"
+          remove:
+            chats: "Remove chat"
+            custom_fields: "Remove custom field"
+            dates: "Remove date"
+            emails: "Remove email"
+            phones: "Remove phone"
+            relations: "Remove related person"
+            websites: "Remove website"
+          type: "%{list} type"
         field_error:
           birthday:
             format: "Give the day as 1815-12-10, or --12-10 with no year."
@@ -2168,7 +2284,7 @@ en:
             blank: "Type a letter or leave it empty."
           emails:
             blank: "Fill in each email or take it out."
-            format: "An email looks like ada@example.com."
+            format: "One of those doesn’t look like an email address."
           family_name:
             blank: "Type a letter or leave it empty."
           file_as:
@@ -2178,7 +2294,7 @@ en:
           job_title:
             blank: "Type a letter or leave it empty."
           key:
-            blank: "Give them a key first."
+            blank: "Someone you can mention needs a key."
             format: "A key is lowercase words joined by hyphens."
             taken: "Someone else already holds that key."
           mastodon_handle:
@@ -2186,7 +2302,7 @@ en:
           middle_name:
             blank: "Type a letter or leave it empty."
           name:
-            blank: "Give them a name first."
+            blank: "Give them a name or a company."
           name_prefix:
             blank: "Type a letter or leave it empty."
           name_suffix:
@@ -2216,15 +2332,23 @@ en:
           placeholder: "Search %{network} by name or handle"
           search: "Search"
           title: "Find an account"
-        list:
-          edit: "Edit %{name}"
-          empty: "Nobody yet. Add the people you mention."
-          new_person: "New person"
-          sync: "Sync now"
-          sub:
-            one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
-            other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
-          token: "@{%{key}}"
+        google_card:
+          account: "Account"
+          file_as: "File as"
+          local: "here only"
+          no_account: "none"
+          open: "Open in Google Contacts"
+          phonetic: "Phonetic"
+          resource: "Resource"
+          synced: "in sync"
+          title: "Google"
+          updated: "Updated"
+        mail_card:
+          empty: "No threads with %{who} yet."
+          none: "none"
+          them: "them"
+          title: "Mail"
+          unread: "unread"
         person_dialog:
           failed: "The new person form didn't load · try again"
           title: "New person"
@@ -2245,6 +2369,12 @@ en:
           save: "Save"
         profile_links:
           bluesky_handle: "@%{handle}"
+        row:
+          edit: "Edit %{name}"
+          more: "+%{count}"
+          no_email: "no email"
+          starred: "Starred"
+          token: "@{%{key}}"
         search_results:
           add: "Add"
           add_label: "Add %{name}"
@@ -4209,11 +4339,41 @@ en:
           new_folder: "New folder"
           new_note: "New note"
       people:
+        index:
+          empty: "Nobody yet. Sync Google Contacts or add someone."
+          heading: "Contacts"
+          labels: "Labels"
+          lede:
+            one: "%{count} contact, synced both ways with Google Contacts"
+            other: "%{count} contacts, synced both ways with Google Contacts"
+          never_synced: "not synced yet."
+          new: "New contact"
+          no_match: "No contacts match."
+          placeholder: "Search name, email, phone, handle, org"
+          search: "Search contacts"
+          show: "Show"
+          shows:
+            all: "all"
+            mentionable: "mentionable"
+            starred: "starred"
+          sync: "Sync now"
+          sync_failed: "the last sync failed."
+          synced: "last synced %{at}."
         menu:
           copied_mention: "Mention copied"
           copy_mention: "Copy mention"
           edit: "Edit"
-          remove: "Remove"
+          open: "Open"
+          remove: "Delete"
+        new_mention:
+          heading: "New contact"
+          sub: "Give them a Mastodon or Bluesky handle and a key, and a social post can mention them."
+        show:
+          back: "Contacts"
+          edit: "Edit"
+          email: "Email"
+          star: "Star"
+          starred: "Starred"
       performance:
         requests:
           back: "All routes"
@@ -4496,7 +4656,6 @@ en:
           tags: "Tags"
         webmentions:
           heading: "Webmentions"
-          people: "People"
           webmentions: "Webmentions"
       social:
         index:

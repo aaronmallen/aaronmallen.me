@@ -16,7 +16,7 @@ RSpec.describe "Admin context menus", type: :feature do
       "notes.folder_menu" => [:note_folder, %r{/notes/folders/\d+/menu}],
       "notes.menu" => [:note, %r{/notes/\d+/menu}],
       "notes.root_menu" => [:notes_root, %r{/notes/menu}, ".nt-gh"],
-      "people.menu" => [:person, %r{/people/\d+/menu}],
+      "people.menu" => [:person, %r{/contacts/\d+/menu}],
       "posts.bulk_menu" => [:posts_picked, %r{/posts/\d+/menu}, ".li-sub"],
       "posts.menu" => [:posts, %r{/posts/\d+/menu}, ".li-sub"],
       "projects.menu" => [:project, %r{/projects/\d+/menu}],
@@ -127,7 +127,7 @@ RSpec.describe "Admin context menus", type: :feature do
 
   def person
     create(:person, key: "matz")
-    visit "/admin/settings/webmentions"
+    visit "/admin/contacts"
   end
 
   def posts

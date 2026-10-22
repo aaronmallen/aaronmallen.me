@@ -8,6 +8,7 @@ module Admin
         inbox_queries: "api.repos.inbox_queries", artifact_queries: "agents.repos.artifact_queries",
         memory_file_queries: "agents.repos.memory_file_queries",
         agent_session_queries: "agents.repos.agent_session_queries", note_queries: "notes.repos.note_queries",
+        person_queries: "contacts.repos.person_queries",
       ]
 
       def call(current_path:)
@@ -28,13 +29,18 @@ module Admin
       end
 
       def noted(sections)
-        notes = case sections.find(&:current)&.group
-                  when :agents then agent_notes
-                  when :journal then { notes: Blog::Helpers::Figures.count(note_queries.count) }
-                end
+        notes = notes_for(sections.find(&:current)&.group)
         return sections unless notes
 
         sections.map { it.with(note: notes[it.name]) }
+      end
+
+      def notes_for(group)
+        case group
+          when :agents then agent_notes
+          when :inbox then { contacts: person_queries.count.to_s }
+          when :journal then { notes: Blog::Helpers::Figures.count(note_queries.count) }
+        end
       end
 
       def sessions_note

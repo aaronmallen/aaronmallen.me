@@ -14,8 +14,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/inbox /admin/mail /admin/webmentions /admin/tasks /admin/calendar /admin/projects /admin/journal
-      /admin/notes /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links
+      /admin /admin/inbox /admin/mail /admin/webmentions /admin/contacts /admin/tasks /admin/calendar /admin/projects
+      /admin/journal /admin/notes /admin/decisions /admin/review /admin/posts /admin/social /admin/files /admin/links
       /admin/agents/memories /admin/agents/artifacts /admin/agents/sessions /admin/analytics /admin/activity
       /admin/health /admin/time
       /admin/settings/webmentions /admin/settings/tagging /admin/settings/services /admin/settings/security
@@ -235,9 +235,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "lists the pill's screens as screen-tabs under the page head", :aggregate_failures do
       tabs = page.all(".page-head + .screen-tabs a.screen-tab")
 
-      expect(tabs.map { it["href"] }).to eq(%w[/admin/inbox /admin/mail /admin/webmentions])
-      expect(tabs.map(&:text)).to eq(%w[waiting mail mentions])
-      expect(page).to have_no_css(".screen-tab-note")
+      expect(tabs.map { it["href"] }).to eq(%w[/admin/inbox /admin/mail /admin/webmentions /admin/contacts])
+      expect(tabs.map(&:text)).to eq(["waiting", "mail", "mentions", "contacts 0"])
+      expect(page.all(".screen-tab-note").map(&:text)).to eq(%w[0])
       expect(page).to have_css("a.screen-tab[aria-current='page']", count: 1, text: "waiting")
     end
   end

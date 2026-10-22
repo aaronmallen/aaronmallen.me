@@ -18,7 +18,7 @@ module Admin
 
         row = Blog::Helpers::RecordKinds.searched(kind)
         return Blog::Helpers::RecordKinds.path(routes, row.kind, id:, day: hit.day) if row
-        return routes.path(:admin_edit_person, id:) if kind == PERSON
+        return routes.path(:admin_person, id:) if kind == PERSON
         return routes.path(:admin_note, id:) if kind == NOTE
 
         routes.path(:admin_webmentions, status: hit.status)

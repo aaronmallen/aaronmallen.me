@@ -95,9 +95,9 @@ RSpec.describe "Admin post, social, project and person row menus", type: :featur
   describe "a person" do
     before do
       create(:person, key: "matz")
-      visit "/admin/settings/webmentions"
+      visit "/admin/contacts"
       watch_clipboard
-      open_menu(".person-row")
+      open_menu(".contact-row")
     end
 
     it "copies the mention and shows a toast", :aggregate_failures do
@@ -107,12 +107,12 @@ RSpec.describe "Admin post, social, project and person row menus", type: :featur
       expect(evaluate_script("window.copiedKeys")).to eq(["@{matz}"])
     end
 
-    it "removes the person on the second click", :aggregate_failures do
-      item("Remove").click
-      item("Click again to remove").click
+    it "deletes the contact on the second click", :aggregate_failures do
+      item("Delete").click
+      item("Click again to delete").click
 
       expect(page).to have_css(".toast", text: Admin::Slice["i18n"].t("people_page.toasts.removed"))
-      expect(page).to have_no_css(".person-row")
+      expect(page).to have_no_css(".contact-row")
     end
   end
 end

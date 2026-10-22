@@ -17,7 +17,7 @@ RSpec.describe "Admin contact sync", type: :request do
 
   def queued = Contacts::Jobs::SyncContacts.jobs.size
 
-  def sync_now = post("/admin/people/sync", _csrf_token: admin_csrf_token)
+  def sync_now = post("/admin/contacts/sync", _csrf_token: admin_csrf_token)
 
   before { sign_in_to_admin }
 
@@ -78,9 +78,15 @@ RSpec.describe "Admin contact sync", type: :request do
 
   describe "Sync now" do
     it "offers the button above the contacts" do
-      get "/admin/settings/webmentions"
+      get "/admin/contacts"
 
-      expect(page).to have_css("form[action='/admin/people/sync'] button", text: "Sync now")
+      expect(page).to have_css("form[action='/admin/contacts/sync'] button", text: "Sync now")
+    end
+
+    it "lands back on the contacts" do
+      sync_now
+
+      expect(last_response.location).to eq("/admin/contacts")
     end
 
     it "queues the same job the schedule runs", :aggregate_failures do

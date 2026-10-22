@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       class Input < Component
-        TYPES = %w[date datetime-local email number password search text time url].freeze
+        TYPES = %w[date datetime-local email number password search tel text time url].freeze
 
         prop :type, Blog::Types::String.enum(*TYPES), default: "text"
         prop :attributes, Blog::Types::Hash, :**

@@ -9,10 +9,11 @@ module Admin
           MASTODON_PROFILE = "https://%<instance>s/@%<user>s"
 
           prop :person, Blog::Types::Instance(ROM::Struct)
+          prop :networks, Blog::Types::Array.of(Blog::Types::NetworkName), default: -> { %w[mastodon bluesky] }
 
           def view_template
-            mastodon if @person.mastodon_handle
-            bluesky if @person.bluesky_did
+            mastodon if @person.mastodon_handle && @networks.include?("mastodon")
+            bluesky if @person.bluesky_did && @networks.include?("bluesky")
           end
 
           private

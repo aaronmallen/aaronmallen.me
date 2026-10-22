@@ -352,11 +352,11 @@ RSpec.describe "Admin keys", type: :feature do
       end
     end
 
-    it "opens the new person drawer on the webmentions tab" do
-      visit "/admin/settings/webmentions"
+    it "opens a new contact from the contacts list" do
+      visit "/admin/contacts"
       press("c")
 
-      expect(page).to have_css("dialog#person-new-drawer[open] form[data-person-form='new']")
+      expect(page).to have_current_path("/admin/contacts/new")
     end
 
     ["/admin", "/admin/tasks", "/admin/analytics"].each do |screen|

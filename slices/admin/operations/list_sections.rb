@@ -9,6 +9,7 @@ module Admin
         %i[inbox inbox fa-inbox admin_inbox].freeze,
         %i[mail inbox fa-envelope admin_mail].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,
+        %i[contacts inbox fa-address-book admin_contacts].freeze,
         [:tasks, :tasks, KINDS.icon("task"), :admin_tasks].freeze,
         %i[calendar tasks fa-calendar-days admin_calendar].freeze,
         [:projects, :tasks, KINDS.icon("project"), :admin_projects].freeze,

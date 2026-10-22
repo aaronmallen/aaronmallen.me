@@ -150,7 +150,7 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
   it "keeps the people finder on screen after a live update" do
     connect_social_networks
-    live "/admin/settings/webmentions"
+    live "/admin/contacts"
     create(:message, subject: "Hello there")
     find(".top-bar .pill-nav-dot")
 

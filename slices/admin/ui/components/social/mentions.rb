@@ -11,6 +11,7 @@ module Admin
             bluesky: ".groups.bluesky",
           }.freeze
           LIST_ID = "social-mentions"
+          MENTION = "mention"
 
           prop :handles, Blog::Types::Hash
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -24,15 +25,16 @@ module Admin
 
           private
 
-          def add_link(**)
-            a(href: path(:admin_new_person), **) do
+          def add_link(href: path(:admin_new_person), **)
+            a(href:, **) do
               IconLabel(icon: :add) { t(".add") }
             end
           end
 
           def add_option
             add_link(
-              id: "#{LIST_ID}-new", class: "compose-mention compose-mention-add", role: "option", tabindex: "-1",
+              href: path(:admin_new_person, reply: MENTION), id: "#{LIST_ID}-new",
+              class: "compose-mention compose-mention-add", role: "option", tabindex: "-1",
               aria: { selected: "false" }, data: { social_mention_add: "" },
             )
           end

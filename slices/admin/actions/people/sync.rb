@@ -10,7 +10,7 @@ module Admin
 
         def handle(_request, response)
           toast(response, queue_contact_sync.call.success? ? QUEUED : QUEUE_UNAVAILABLE)
-          response.redirect_to(Helpers::WebmentionTab.people(routes))
+          response.redirect_to(routes.path(:admin_contacts))
         end
       end
     end

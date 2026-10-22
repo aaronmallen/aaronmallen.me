@@ -18,12 +18,19 @@ module Admin
 
         def handle(request, response)
           message_queries.memoizing do
-            show(request, response, draft: (COMPOSE if request.params[:compose]), resume: request.params[:resume])
+            show(request, response, draft: (compose(request) if request.params[:compose]),
+                                    resume: request.params[:resume])
             response.render(view)
           end
         end
 
         private
+
+        def compose(request)
+          to = Blog::Types::OptionalText[request.params[:to]]
+
+          to ? COMPOSE.merge(values: { to: }) : COMPOSE
+        end
 
         def show(request, response, draft:, resume: nil)
           list = Helpers::MailList.from(request.params)

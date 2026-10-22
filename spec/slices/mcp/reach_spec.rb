@@ -13,6 +13,8 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.build_calendar_page" => "builds the admin's calendar screen; list_calendar reads the same days",
       "admin.operations.build_commit_page" => "builds the admin's commit page; read_commit reads the same commit",
       "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",
+      "admin.operations.build_contact_page" => "builds the admin's contact page; read_person reads the contact",
+      "admin.operations.build_contacts_page" => "builds the admin's contacts list; list_people lists the same people",
       "admin.operations.build_decision_page" => "builds the admin's decision page; read_decision reads it",
       "admin.operations.build_links_page" => "builds the admin's links screen; list_short_links reads the same",
       "admin.operations.build_memories_page" => "builds the admin's memories screen; read_memory reads the same",

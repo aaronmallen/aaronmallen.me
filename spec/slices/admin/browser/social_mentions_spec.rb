@@ -387,7 +387,7 @@ RSpec.describe "Admin social mentions", type: :feature do
 
     describe "when the new person form fails to load" do
       before do
-        request_gate.refuse("/admin/people/new", 502)
+        request_gate.refuse("/admin/contacts/new", 502)
         type "hi @zed", :enter
       end
 

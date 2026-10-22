@@ -1,13 +1,8 @@
-import { openDialog } from "./dialog.js";
 import { setupFetch } from "./fetching.js";
 import { fresh } from "./fresh.js";
 import { parse } from "./in_place.js";
-import { fillField } from "./person_field.js";
-import { slugify } from "./slug.js";
 
 const ANSWERED = [429, 502];
-const DRAWER = "person-new-drawer";
-const HANDLES = { bluesky: "bluesky_handle", mastodon: "mastodon_handle" };
 
 const ready = new WeakSet();
 
@@ -57,22 +52,4 @@ function setup(finder) {
     fetcher.stop();
     results.replaceChildren();
   });
-
-  results.addEventListener("click", (event) => {
-    const add = event.target.closest("[data-person-add]");
-    if (add) addPerson(add.dataset);
-  });
-}
-
-function addPerson({ personAdd, personAddName, personAddNetwork }) {
-  const drawer = document.getElementById(DRAWER);
-  if (!drawer) return;
-
-  const field = (name) => drawer.querySelector(`[name='person[${name}]']`);
-  fillField(field("name"), personAddName);
-  fillField(field("key"), slugify(personAddName.split(" ")[0]));
-  for (const [network, name] of Object.entries(HANDLES)) {
-    fillField(field(name), network === personAddNetwork ? personAdd : "");
-  }
-  openDialog(DRAWER);
 }

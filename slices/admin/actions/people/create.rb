@@ -10,33 +10,43 @@ module Admin
         include Deps[
           build_person_editor: "operations.build_person_editor",
           mention_view: "ui.views.people.mention",
+          new_mention_view: "ui.views.people.new_mention",
           new_view: "ui.views.people.new",
+          person_queries: "contacts.repos.person_queries",
           resolve_mentions: "social.operations.resolve_mentions",
           save_person: "contacts.operations.save_person",
         ]
 
-        def handle(request, response)
-          params = Blog::Types::Fields[request.params[:person]]
+        def self.mention?(request) = request.params[:reply] == MENTION
 
-          case save_person.call(params)
-            in Success(person) then added(request, response, person)
-            in Failure[:invalid, errors]
-              unprocessable(response, new_view, **build_person_editor.call(params:, errors:))
-          end
+        def handle(request, response)
+          self.class.mention?(request) ? from_composer(request, response) : from_page(request, response)
         end
 
         private
 
-        def added(request, response, person)
-          return mention(response, person) if request.params[:reply] == MENTION
+        def from_composer(request, response)
+          params = Blog::Types::Fields[request.params[:person]]
 
-          toast(response, ADDED)
-          response.redirect_to(Helpers::WebmentionTab.people(routes))
+          case save_person.call(params)
+            in Success(person)
+              response.status = :created
+              response.render(mention_view, handles: resolve_mentions.handles([person]), person:)
+            in Failure[:invalid, errors]
+              unprocessable(response, new_mention_view, **build_person_editor.call(params:, errors:))
+          end
         end
 
-        def mention(response, person)
-          response.status = :created
-          response.render(mention_view, handles: resolve_mentions.handles([person]), person:)
+        def from_page(request, response)
+          values = Helpers::ContactForm.read(request.params[:person])
+
+          case save_person.call(Helpers::ContactForm.fields(values))
+            in Success(person) then toast_back(response, ADDED, routes.path(:admin_person, id: person.id))
+            in Failure[:invalid, errors]
+              unprocessable(
+                response, new_view, values:, errors: Helpers::ContactForm.errors(errors), labels: person_queries.labels,
+              )
+          end
         end
       end
     end

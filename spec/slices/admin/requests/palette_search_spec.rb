@@ -143,7 +143,7 @@ RSpec.describe "Admin palette search", type: :request do
         person = create(:person, name: "Ada Lovelace")
         search("lovelace")
 
-        expect(hit("person").fetch("href")).to eq("/admin/people/#{person.id}/edit")
+        expect(hit("person").fetch("href")).to eq("/admin/contacts/#{person.id}")
       end
 
       it "sends a message to its thread in Mail" do

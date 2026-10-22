@@ -59,6 +59,8 @@ module Blog
     ClosedTaskSourceState = Types::String.enum("completed", "not_planned", "unassigned")
     ClosedTaskStatus = Types::String.enum("done", "canceled")
     CodeChallengeMethod = Types::String.enum("S256")
+    ContactShow = Types::String.enum("all", "starred", "mentionable")
+    ContactShowParam = ContactShow.fallback(ContactShow.values.first)
     ContributorKind = Types::String.enum("owner", "agent")
     ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/,
                                                 max_size: CONTRIBUTOR_SLUG_LIMIT)

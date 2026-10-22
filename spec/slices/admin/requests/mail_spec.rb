@@ -417,7 +417,7 @@ RSpec.describe "Admin mail", type: :request do
         it "says the sender isn't in Contacts and offers to add them", :aggregate_failures do
           expect(page).to have_css(".mail-who", text: "Ada Lovelace isn’t in Contacts")
           expect(page).to have_link("Add to Contacts",
-                                    href: "/admin/people/new?name=Ada%20Lovelace&email=ada@example.com")
+                                    href: "/admin/contacts/new?name=Ada%20Lovelace&email=ada@example.com")
         end
 
         it "offers Trash and links a Gmail thread out to Gmail, keeping spam and delete for the contact form" do
@@ -453,7 +453,7 @@ RSpec.describe "Admin mail", type: :request do
         get "/admin/mail", thread: thread.id
 
         expect(page).to have_css(".mail-who .mail-who-name", text: "Countess of Lovelace")
-        expect(page).to have_link("Open person", href: "/admin/people/#{person.id}/edit")
+        expect(page).to have_link("Open person", href: "/admin/contacts/#{person.id}/edit")
       end
 
       it "treats a contact with the sender's name but not their email as a stranger" do
@@ -497,7 +497,7 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, reply_to: "visitor@example.com")
         get "/admin/mail", thread: thread.id
 
-        expect(page).to have_link("Add to Contacts", href: "/admin/people/new?email=visitor@example.com")
+        expect(page).to have_link("Add to Contacts", href: "/admin/contacts/new?email=visitor@example.com")
       end
     end
 

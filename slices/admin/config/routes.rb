@@ -81,6 +81,17 @@ module Admin
     get "/commits/:id/menu", to: "commits.menu", as: :commit_menu, id: ID
     post "/commits/import", to: "commits.import", as: :import_commits
     post "/commits/:id/records", to: "commits.link_record", as: :link_commit_record, id: ID
+    get "/contacts", to: "people.index", as: :contacts
+    post "/contacts", to: "people.create", as: :create_person
+    get "/contacts/new", to: "people.new", as: :new_person
+    get "/contacts/search/:network", to: "people.search", as: :search_people, network: NETWORK
+    post "/contacts/sync", to: "people.sync", as: :sync_people
+    get "/contacts/:id", to: "people.show", as: :person, id: ID
+    get "/contacts/:id/edit", to: "people.edit", as: :edit_person, id: ID
+    get "/contacts/:id/menu", to: "people.menu", as: :person_menu, id: ID
+    post "/contacts/:id", to: "people.update", as: :update_person, id: ID
+    post "/contacts/:id/delete", to: "people.destroy", as: :delete_person, id: ID
+    post "/contacts/:id/star", to: "people.star", as: :star_person, id: ID
     get "/decisions", to: "decisions.index", as: :decisions
     post "/decisions", to: "decisions.create", as: :create_decision
     get "/decisions/new", to: "decisions.new", as: :new_decision
@@ -200,15 +211,8 @@ module Admin
     post "/notes/:id/rename", to: "notes.rename", as: :rename_note, id: ID
     post "/notes/:id/tags", to: "notes.tag", as: :tag_note, id: ID
     post "/notes/:id/tags/delete", to: "notes.untag", as: :untag_note, id: ID
-    redirect_temporary "/people", to: "/settings/webmentions#people"
-    post "/people", to: "people.create", as: :create_person
-    get "/people/new", to: "people.new", as: :new_person
-    get "/people/search/:network", to: "people.search", as: :search_people, network: NETWORK
-    post "/people/sync", to: "people.sync", as: :sync_people
-    get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
-    get "/people/:id/menu", to: "people.menu", as: :person_menu, id: ID
-    post "/people/:id", to: "people.update", as: :update_person, id: ID
-    post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID
+    redirect_temporary "/people", to: "/contacts"
+    redirect_temporary "/people/new", to: "/contacts/new"
     get "/performance", to: "performance.show", as: :performance
     get "/performance/requests", to: "performance.requests", as: :performance_requests
     post "/photos", to: "photos.create", as: :create_photo

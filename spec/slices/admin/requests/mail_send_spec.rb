@@ -114,6 +114,12 @@ RSpec.describe "Admin mail sending", type: :request do
       expect(page).to have_css("#mail-compose[data-dialog-show]", visible: :all)
     end
 
+    it "fills the address a contact page sends it" do
+      get "/admin/mail", compose: "1", to: "ada@example.com"
+
+      expect(page).to have_field("mail[to]", with: "ada@example.com", visible: :all)
+    end
+
     describe "with contacts" do
       let(:to) { page.find("#mail-compose input[name='mail[to]']", visible: :all) }
 

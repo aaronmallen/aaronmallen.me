@@ -124,7 +124,8 @@ RSpec.describe "Admin social", type: :request do
 
         expect(page.all("[data-social-mentions] [role='option']", visible: :all).map { it.text.strip })
           .to eq(["Add New"])
-        expect(page).to have_css("[data-social-mentions] a[role='option'][href='/admin/people/new']", visible: :all)
+        option = "[data-social-mentions] a[role='option'][href='/admin/contacts/new?reply=mention']"
+        expect(page).to have_css(option, visible: :all)
       end
 
       it "puts the Add New row after everyone in the directory" do
@@ -137,7 +138,7 @@ RSpec.describe "Admin social", type: :request do
       it "links to the people form for a browser with no script" do
         get "/admin/social"
 
-        expect(page).to have_css("noscript a[href='/admin/people/new']", text: "Add New", visible: :all)
+        expect(page).to have_css("noscript a[href='/admin/contacts/new']", text: "Add New", visible: :all)
       end
 
       it "draws the people dialog outside the composer form", :aggregate_failures do

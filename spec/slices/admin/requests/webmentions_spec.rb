@@ -502,8 +502,8 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_css("a.screen-tab[aria-current='page']", text: "webmentions")
       end
 
-      it "sits above the people on the webmentions tab" do
-        expect(page).to have_css("#webmentions #webmention-settings").and have_css("#webmentions ~ #people")
+      it "fills the webmentions tab alone" do
+        expect(page).to have_css("#webmentions #webmention-settings").and have_no_css("#people")
       end
 
       it "shows the settings and per post cards", :aggregate_failures do

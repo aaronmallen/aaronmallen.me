@@ -5,19 +5,11 @@ RSpec.describe "Admin people", type: :feature do
 
   before { sign_in_to_admin }
 
-  it "fills the key from the name of a new person" do
-    visit "/admin/people/new"
+  it "fills the key from the name in the composer's short form" do
+    visit "/admin/contacts/new?reply=mention"
     fill_in("person[name]", with: "Ada Lovelace")
 
     expect(page).to have_field("person[key]", with: "ada-lovelace")
-  end
-
-  it "leaves a stored person's key alone when the name changes" do
-    person = create(:person, name: "Ada", key: "ada")
-    visit "/admin/people/#{person.id}/edit"
-    fill_in("person[name]", with: "Ada Lovelace")
-
-    expect(page).to have_field("person[key]", with: "ada")
   end
 
   describe "finding an account" do
@@ -26,7 +18,7 @@ RSpec.describe "Admin people", type: :feature do
 
     def add_from(network, query, name)
       search(network, query)
-      within(finder.find(".person-result", text: name)) { click_button "Add" }
+      within(finder.find(".person-result", text: name)) { click_link "Add" }
     end
 
     def finder = find_by_id("person-finder")
@@ -41,7 +33,7 @@ RSpec.describe "Admin people", type: :feature do
 
     before do
       connect_social_networks
-      visit "/admin/settings/webmentions"
+      visit "/admin/contacts"
     end
 
     it "shows the panel beside the list once scripts run" do
@@ -68,20 +60,13 @@ RSpec.describe "Admin people", type: :feature do
       expect(finder).to have_css(".person-result-handle", text: "@grace@hachyderm.io")
     end
 
-    it "says so when nothing matches" do
-      stub_bluesky_search("nobody")
-      search("bluesky", "nobody")
-
-      expect(finder).to have_css(".empty", text: "No accounts match")
-    end
-
     it "keeps the results when a change redraws the page" do
       stub_bluesky_search("nobody")
       search("bluesky", "nobody")
       finder.find(".empty")
       create(:person, name: "Grace Hopper", key: "grace")
 
-      expect(page).to have_css(".person-row-name", text: "Grace").and have_css("#person-finder .empty")
+      expect(page).to have_css(".contact-row-name", text: "Grace").and have_css("#person-finder .empty")
     end
 
     it "shows the error when the network fails" do
@@ -91,129 +76,103 @@ RSpec.describe "Admin people", type: :feature do
       expect(finder).to have_css(".hint.bad", text: "Bluesky did not answer")
     end
 
-    it "opens the new person drawer from Add with the name, key and handle", :aggregate_failures do
+    it "opens a new contact from Add with the name, key and handle", :aggregate_failures do
       stub_bluesky_search("ada", ada)
       add_from("bluesky", "ada", "Ada Lovelace")
 
-      expect(page).to have_field("person-new-name", with: "Ada Lovelace")
-      expect(page).to have_field("person-new-key", with: "ada")
-      expect(page).to have_field("person-new-bluesky_handle", with: "ada.bsky.social")
+      expect(%w[given_name family_name key bluesky_handle].map { find_field("person[#{it}]").value })
+        .to eq(%w[Ada Lovelace ada ada.bsky.social])
     end
 
-    it "adds the person it found" do
+    it "adds the contact it found" do
       stub_mastodon_search("grace", grace)
       add_from("mastodon", "grace", "Grace Hopper")
-      within("#person-new-drawer") { click_button "Add person" }
+      click_button "Add contact"
 
-      expect(page).to have_css(".person-row-name", text: "Grace Hopper")
+      expect(page).to have_css("h1.contact-head-title", text: "Grace Hopper")
     end
   end
 
   it "offers only the networks with credentials" do
     connect_social_networks(bluesky: {})
-    visit "/admin/settings/webmentions"
+    visit "/admin/contacts"
 
     expect(page).to have_css("#person-finder .seg-option.mastodon")
       .and have_no_css("#person-finder .seg-option.bluesky")
   end
 
-  describe "the drawers" do
+  describe "the list" do
     before do
-      create(:person, name: "Ada Lovelace", key: "ada")
+      create(:person, name: "Ada Lovelace", key: "ada", labels: %w[family])
       create(:person, name: "Grace Hopper", key: "grace")
-      visit "/admin/settings/webmentions"
+      visit "/admin/contacts"
     end
 
-    it "opens a person's editor from their name" do
+    it "opens a contact's page from their name" do
       click_link "Ada Lovelace"
 
-      expect(page).to have_field("person-key", with: "ada")
+      expect(page).to have_css("h1.contact-head-title", text: "Ada Lovelace")
     end
 
-    it "saves from the drawer" do
-      click_link "Ada Lovelace"
-      fill_in "person-name", with: "Countess Ada"
-      within("#person-edit-drawer") { click_button "Save" }
+    it "searches as I type" do
+      fill_in "contacts-search", with: "grace"
 
-      expect(page).to have_css(".person-row-name", text: "Countess Ada")
+      expect(page).to have_no_css(".contact-row-name", text: "Ada").and have_css(".contact-row-name", text: "Grace")
     end
 
-    it "titles the drawers new person and edit person", :aggregate_failures do
-      click_link "New person"
-      expect(page).to have_css("#person-new-title", text: "new person")
+    it "filters by a label" do
+      within(".contacts-labels") { click_link "#family" }
 
-      find_by_id("person-new-drawer").find("[data-dialog-close]").click
-      click_link "Ada Lovelace"
-      expect(page).to have_css("#person-edit-title", text: "edit person")
-    end
-
-    it "shows the person's key in the key hint" do
-      click_link "Ada Lovelace"
-
-      hint = admin_t("ui.components.people.person_form.key_note", key: "ada")
-
-      expect(page).to have_css("#person-edit-drawer .hint", text: hint)
-    end
-
-    it "marks the handle fields with their network", :aggregate_failures do
-      click_link "Ada Lovelace"
-
-      within("#person-edit-drawer") do
-        expect(page).to have_css(".field-net.mastodon .fa-mastodon")
-        expect(page).to have_css(".field-net.bluesky .fa-bluesky")
-      end
-    end
-
-    it "fills the one drawer with whichever person I open next" do
-      click_link "Ada Lovelace"
-      find_by_id("person-edit-drawer").find("[data-dialog-close]").click
-      click_link "Grace Hopper"
-
-      expect(page).to have_field("person-key", with: "grace")
-    end
-
-    it "asks before removing from the drawer" do
-      click_link "Ada Lovelace"
-      message = confirm_no { within("#person-edit-drawer") { click_button "Remove" } }
-
-      expect(message).to eq(admin_t("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
-    end
-
-    it "puts Remove before Save" do
-      click_link "Ada Lovelace"
-
-      expect(find("#person-edit-drawer .person-form-actions")).to have_text(/Remove.*Save/m)
-    end
-
-    it "fills the key from the name in the new person drawer" do
-      click_link "New person"
-      fill_in "person-new-name", with: "Grace Hopper"
-
-      expect(page).to have_field("person-new-key", with: "grace-hopper")
+      expect(page).to have_no_css(".contact-row-name", text: "Grace").and have_css(".contact-row-name", text: "Ada")
     end
   end
 
-  describe "removing a person" do
-    let!(:person) { create(:person, name: "Ada Lovelace") }
+  describe "the editor" do
+    let!(:person) { create(:person, name: "Ada Lovelace", key: "ada", emails: [{ value: "ada@example.com" }]) }
 
-    before { visit "/admin/people/#{person.id}/edit" }
+    before { visit "/admin/contacts/#{person.id}/edit" }
 
-    it "asks with the confirmation text" do
-      message = confirm_no { click_button "Remove" }
+    it "adds a row" do
+      click_button "+ add phone"
+      find("input[name='person[phones][][value]']").fill_in(with: "+1 555 0100")
+      click_button "Save"
 
-      expect(message).to eq(admin_t("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
+      expect(page).to have_link("+1 555 0100", href: "tel:+15550100")
     end
 
-    it "keeps them when I don't confirm" do
-      confirm_no { click_button "Remove" }
+    it "removes a row" do
+      find("button[aria-label='Remove email']").click
+      click_button "Save"
 
-      expect(person_queries.all.map(&:name)).to eq(["Ada Lovelace"])
+      expect(page).to have_no_link("ada@example.com")
     end
 
-    it "removes them once I confirm" do
-      confirm_yes { click_button "Remove" }
+    it "shows the extra name fields on request" do
+      click_button "Prefix, middle, suffix, phonetic, file as"
+      fill_in "person[name_prefix]", with: "Countess"
+      click_button "Save"
 
-      expect(page).to have_css(".toast", text: "Person removed")
+      expect(page).to have_css("h1.contact-head-title", text: "Countess Ada Lovelace")
+    end
+
+    it "adds a new label as a picked chip" do
+      fill_in "person[new_label]", with: "Ruby Friends"
+      click_button "Add"
+      click_button "Save"
+
+      expect(page).to have_css(".contact-head-labels .tag", text: "#ruby-friends")
+    end
+
+    it "asks before deleting here and in Google" do
+      message = confirm_no { click_button "Delete" }
+
+      expect(message).to eq(admin_t("ui.components.people.contact_editor.confirm_delete", name: "Ada Lovelace"))
+    end
+
+    it "deletes once I confirm" do
+      confirm_yes { click_button "Delete" }
+
+      expect(page).to have_css(".toast", text: "Contact deleted")
     end
   end
 end
