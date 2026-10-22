@@ -5,6 +5,7 @@ module API
     class CreatePerson < Endpoint
       SCHEMA = { additionalProperties: false, properties: People::PROPERTIES, required: %w[name] }.freeze
       REPLY = Serializers::Person.reference
+      SCOPED = true
       UNAVAILABLE = true
 
       include Deps[
@@ -12,11 +13,13 @@ module API
         social_post_queries: "social.repos.social_post_queries",
       ]
 
-      def handle(**fields)
-        case save_person.call(People::FIELDS.to_h { [it, fields[it]] })
-          in Success(person) then Success(serialized(Serializers::Person, person))
-          in Failure[:invalid, errors]
-            invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
+      def handle(scopes:, **fields)
+        refusal = People.unscoped(fields, scopes)
+        return Failure(refusal) if refusal
+
+        case save_person.call(fields)
+          in Success(person) then Success(People.shown(serialized(Serializers::Person, person), scopes))
+          in Failure[:invalid, errors] then invalid(People.complaints(errors))
           in Failure[:google_failed, _] then Failure(Structs::Refusal.unavailable(People::GOOGLE_DOWN))
           in unmatched then unhandled(unmatched, People::UNSAVED)
         end

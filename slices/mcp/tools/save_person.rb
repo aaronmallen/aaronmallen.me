@@ -11,13 +11,16 @@ module MCP
         },
       }.freeze
 
-      description "Add a person to the mention directory, or edit one when you give its id, so a social post can " \
-                  "mention them as @{key}. A new person needs a name, and a key once they have a handle. A Bluesky " \
-                  "handle is looked up on Bluesky as it saves, and one Bluesky does not know is refused. On an " \
-                  "edit, a field you leave out keeps what it has, and null clears a handle. Use search_accounts " \
-                  "to find a handle. A scheduled social post sends @{key} as the handles its person holds then, or " \
-                  "as the bare key when nobody holds it, so adding or editing a person whose key one mentions " \
-                  "needs the publish scope"
+      description "Add a contact, or edit one when you give its id, so a social post can mention them as " \
+                  "@{key}. A new contact needs a name, and a key once they have a handle. Every field past name, " \
+                  "key and the handles needs the contacts permission. A Bluesky handle is looked up on Bluesky as " \
+                  "it saves, and one Bluesky does not know is refused. On an edit, a field you leave out keeps " \
+                  "what it has, null clears a field and a list replaces the stored one. A contact linked to " \
+                  "Google saves there too, and a new one goes to the Google account that saves contacts; an edit " \
+                  "to one Google changed first is refused, so read it again and redo the edit. Use " \
+                  "search_accounts to find a handle. A scheduled social post sends @{key} as the handles its " \
+                  "person holds then, or as the bare key when nobody holds it, so adding or editing a person whose " \
+                  "key one mentions needs the publish scope"
       input_schema(SCHEMA)
       operations :create_person, :update_person
 

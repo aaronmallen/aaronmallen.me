@@ -11,6 +11,7 @@ module API
 
       CONFLICTS = true
       REPLY = Serializers::Person.reference
+      SCOPED = true
       UNAVAILABLE = true
 
       include Deps[
@@ -19,11 +20,11 @@ module API
         social_post_queries: "social.repos.social_post_queries",
       ]
 
-      def handle(id:, **fields)
-        person = person_queries.by_id(id)
-        return missing("person", id) if person.nil?
+      def handle(id:, scopes:, **fields)
+        refusal = People.unscoped(fields, scopes)
+        return Failure(refusal) if refusal
 
-        saved(id, save_person.call(person.to_h.slice(*People::FIELDS).merge(fields), id:))
+        saved(id, save_person.call(fields, id:), scopes)
       end
 
       private
@@ -39,11 +40,10 @@ module API
         nil
       end
 
-      def saved(id, result)
+      def saved(id, result, scopes)
         case result
-          in Success(person) then Success(serialized(Serializers::Person, person))
-          in Failure[:invalid, errors]
-            invalid(Helpers::Wording.complaints(errors, People::COMPLAINTS, named: true))
+          in Success(person) then Success(People.shown(serialized(Serializers::Person, person), scopes))
+          in Failure[:invalid, errors] then invalid(People.complaints(errors))
           in Failure(:not_found) then missing("person", id)
           in Failure(:conflict) then Failure(Structs::Refusal.conflict(People::CONFLICT))
           in Failure[:google_failed, _] then Failure(Structs::Refusal.unavailable(People::GOOGLE_DOWN))

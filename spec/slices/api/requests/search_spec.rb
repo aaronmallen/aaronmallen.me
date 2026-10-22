@@ -189,6 +189,34 @@ RSpec.describe "API search", type: :request do
     end
   end
 
+  describe "a contact" do
+    let(:open) { Blog::Types::OAuthScope.values - %w[contacts] }
+
+    def titles(**) = results(**).map { it.values_at("kind", "title") }
+
+    before do
+      create(:person, name: "Ada", key: "countess", company: "Analytical Engines")
+      create(:person, name: nil, key: "babbage", mastodon_handle: nil, company: "Difference Engines")
+    end
+
+    it "matches the company and titles a contact without a name by it" do
+      expect(titles(query: "engines")).to contain_exactly(%w[person Ada], ["person", "Difference Engines"])
+    end
+
+    it "matches only the name, key and handles for a token without contacts", :aggregate_failures do
+      expect(titles(query: "engines", token: open)).to eq([])
+      expect(titles(query: "countess", token: open)).to eq([%w[person Ada]])
+    end
+
+    it "titles a contact without a name by its key for a token without contacts" do
+      expect(titles(query: "babbage", token: open)).to eq([%w[person babbage]])
+    end
+
+    it "narrows MCP search the same way without the contacts permission" do
+      expect(mcp_answer("search", query: "engines").fetch("results")).to eq([])
+    end
+  end
+
   describe "the note kind" do
     let!(:note) { create(:note, title: "Zeppelin sketches") }
 

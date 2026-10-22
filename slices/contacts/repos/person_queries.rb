@@ -21,12 +21,12 @@ module Contacts
 
       def last_synced_at = contact_syncs.dataset.max(:updated_at)
 
-      def listed(query: nil, show: nil, label: nil)
+      def listed(query: nil, show: nil, label: nil, open: false)
         found = people
         found = found.public_send(SHOWS.fetch(show)) if SHOWS.key?(show)
         found = found.labeled(label) if label
-        found = found.matching(query) if query
-        found.in_file_order.to_a
+        found = found.public_send(open ? :matching_open : :matching, query) if query
+        (open ? found.in_name_order : found.in_file_order).to_a
       end
 
       def mentionable = people.mentionable.in_name_order.to_a

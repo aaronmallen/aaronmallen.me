@@ -39,6 +39,13 @@ module API
 
       private
 
+      def found(query, kind, scopes, page)
+        search_queries.search(
+          text: query, page: page_of(page), kinds: kinds(kind, scopes),
+          open_people: !scopes.include?(OperationTable::CONTACTS),
+        )
+      end
+
       def kinds(kind, scopes)
         chosen = kind ? [kind] : KINDS
         chosen -= [MESSAGE] unless mail?(scopes)
@@ -50,7 +57,7 @@ module API
       def refuse_notes(kind, scopes) = (invalid(kind: [NOTE_ROWS]) if kind == NOTE && !notes?(scopes))
 
       def searched(query, kind, scopes, page)
-        found = search_queries.search(text: query, page: page_of(page), kinds: kinds(kind, scopes))
+        found = found(query, kind, scopes, page)
         notes = found.rows.select { it.kind == NOTE }.map(&:source_id)
         written = notes.empty? ? notes : note_queries.written_by_agent(notes)
         results = serialized(Serializers::SearchHit, found.rows, written:)

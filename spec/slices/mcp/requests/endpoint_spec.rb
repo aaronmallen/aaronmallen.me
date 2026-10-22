@@ -2455,6 +2455,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
         "sync_issues" => {},
+        "sync_people" => {},
         "tag_decision" => { id: 1, tags: ["queues"] },
         "tag_mail_threads" => { ids: [1], tag: "ruby" },
         "tag_note" => { id: 1, tag: "ruby" },

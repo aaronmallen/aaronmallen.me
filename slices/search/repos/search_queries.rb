@@ -16,11 +16,12 @@ module Search
         search_documents.kind_counts(phrase, kinds:, labelled:).to_a.to_h { [it[:kind], it[:count]] }
       end
 
-      def search(text:, page:, kinds: Blog::Types::SearchKind.values)
+      def search(text:, page:, kinds: Blog::Types::SearchKind.values, open_people: false)
         phrase = text.to_s.strip
         return page.fill(NONE) if phrase.empty?
 
-        rows = search_documents.hits(phrase, kinds:, page:, labelled: task_label_queries.ids_labelled(phrase)).to_a
+        documents = open_people ? search_documents.open_people : search_documents
+        rows = documents.hits(phrase, kinds:, page:, labelled: task_label_queries.ids_labelled(phrase)).to_a
         page.fill(labelled(rows))
       end
 

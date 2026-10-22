@@ -270,7 +270,8 @@ CREATE TYPE public.oauth_scope AS ENUM (
     'health',
     'mail',
     'agents',
-    'notes'
+    'notes',
+    'contacts'
 );
 
 
@@ -10381,4 +10382,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261022220000_add_signed_out_at_to_devices.rb'),
 ('20261023030000_add_notes_to_search_documents.rb'),
 ('20261023040000_add_notes_to_oauth_scope.rb'),
-('20261023040100_add_written_by_agent_to_notes.rb');
+('20261023040100_add_written_by_agent_to_notes.rb'),
+('20261023050000_add_contacts_to_oauth_scope.rb');

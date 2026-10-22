@@ -38,7 +38,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         snooze_attention
         snooze_inbox
         snooze_inbox_row
-        stage_task start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task
+        stage_task start_task sync_issues sync_people tag_decision tag_posts tag_tasks unlink_records unlink_task
         untag_decision untag_tasks update_journal_entry update_post update_saved_view
         update_social_post update_work_session upload_photo
         wake_inbox_row write_post_seo
@@ -66,6 +66,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         list_notes move_note move_note_folder pin_note read_note remove_note_folder rename_note rename_note_folder
         search_notes tag_note untag_note
       ],
+      "contacts" => %w[delete_person sync_people],
       "delete" => %w[
         delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_event
         delete_journal_entry delete_note delete_person delete_post delete_posts delete_saved_view delete_share

@@ -4,6 +4,7 @@ module API
   module OperationTable
     ACTIONS = { "read_document" => "documents.show", "read_token" => "tokens.show" }.freeze
     AGENTS = Blog::Types::OAuthScope["agents"]
+    CONTACTS = Blog::Types::OAuthScope["contacts"]
     CREATED = 201
     DELETE = Blog::Types::OAuthScope["delete"]
     HEALTH = Blog::Types::OAuthScope["health"]
@@ -178,9 +179,10 @@ module API
       ["list_people", "get", "/people", OK, READ],
       ["create_person", "post", "/people", CREATED, WRITE],
       ["search_accounts", "get", "/people/search/{network}", OK, READ],
+      ["sync_people", "post", "/people/sync", OK, [CONTACTS, WRITE]],
       ["read_person", "get", "/people/{id}", OK, READ],
       ["update_person", "patch", "/people/{id}", OK, WRITE],
-      ["delete_person", "delete", "/people/{id}", OK, DELETE],
+      ["delete_person", "delete", "/people/{id}", OK, [CONTACTS, DELETE]],
       ["list_projects", "get", "/projects", OK, READ],
       ["create_project", "post", "/projects", CREATED, WRITE],
       ["read_project", "get", "/projects/{id}", OK, READ],

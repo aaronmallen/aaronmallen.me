@@ -11,6 +11,7 @@ module Contacts
         google_etag updated_at
       ].freeze
       LISTS = %i[emails phones addresses websites chats dates relations custom_fields].freeze
+      OPEN = %i[name key mastodon_handle bluesky_handle].freeze
       SEARCHED = %i[name nickname key company job_title mastodon_handle bluesky_handle].freeze
 
       schema :people, infer: true
@@ -26,6 +27,8 @@ module Contacts
       def labeled(label) = where(Sequel.expr(label => Sequel.pg_array_op(:labels).any))
 
       def matching(text) = containing(text, *SEARCHED, values(:emails), values(:phones))
+
+      def matching_open(text) = containing(text, *OPEN)
 
       def mentionable = exclude(key: nil)
 

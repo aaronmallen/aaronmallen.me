@@ -28,7 +28,6 @@ RSpec.describe API::Helpers::Wording do
         "type.format" => enum,
       },
       "Notes" => { "folder_id.format" => integer, "parent_id.format" => integer, "version.format" => integer },
-      "People" => { "birthday.format" => unsent, "dates.format" => unsent, "emails.format" => unsent },
       "Posts" => { "syndication_targets.format" => enum },
       "SavedViews" => {
         "filters.format" => "the schema takes only text, and an object of text for types", "screen.format" => enum,

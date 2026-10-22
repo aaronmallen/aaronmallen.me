@@ -40,8 +40,10 @@ module MCP
         "and reverts, artifacts: numbered plans, specs and handoffs kept in versions, and sessions: each run from",
         "start_session to end_session with what it loaded and wrote; deleting a memory file or an artifact needs",
         "delete as well. Only the notes permission grants the owner's private notes and their folders: it reads,",
-        "writes, renames, moves, tags and pins them; deleting a note or removing a folder needs delete as well. The",
-        "tool list holds only what this connection was granted.",
+        "writes, renames, moves, tags and pins them; deleting a note or removing a folder needs delete as well.",
+        "Only the contacts permission grants the private fields of people, everything past the ID, name, key and",
+        "Mastodon and Bluesky handles: read and write still decide what it reads and changes, and deleting a",
+        "person or running a contact sync needs it too. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       BATCH_OPENING = /\A[ \t\r\n]*\[/
