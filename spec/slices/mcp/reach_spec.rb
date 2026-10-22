@@ -164,6 +164,7 @@ RSpec.describe "MCP reach", type: :app do
       "security.operations.read_device" => "reads a request's browser and system as read_access reads the request",
       "security.operations.record_sighting" => "records where an API token or MCP client called from as it calls",
       "security.operations.record_sign_in" => "records an admin sign-in as GitHub calls back",
+      "security.operations.sign_out_device" => "signs one admin browser out; sign in stays out of the MCP",
       "services.operations.add_connection" => "saves a connection the admin's connect flow checked; no tool does",
       "services.operations.change_connection" => "stores a refreshed or revoked token for a client; no tool does",
       "services.operations.remove_connection" => "deletes a connection the admin disconnects; no tool does",

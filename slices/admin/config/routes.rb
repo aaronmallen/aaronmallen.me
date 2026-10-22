@@ -21,6 +21,7 @@ module Admin
     SERVICE_KEY = /[a-z0-9_]+/
     TAG = %r{[^/]+}
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
+    UUID = /\h{8}(?:-\h{4}){3}-\h{12}/
     WEBMENTION_VERDICT = Regexp.union(Blog::Types::WebmentionModeration.mapping.values)
 
     use(*Admin::Slice.config.actions.sessions.middleware)
@@ -260,6 +261,7 @@ module Admin
     post "/settings/jobs/:set/:jid/:act", to: "settings.act_on_set_job", as: :act_on_set_job, set: JOB_SET, jid: JID,
                                           act: JOB_ACT
     get "/settings/security", to: "security.show", as: :security
+    post "/settings/security/devices/:id/sign-out", to: "security.sign_out_device", as: :sign_out_device, id: UUID
     get "/settings/services", to: "settings.services", as: :settings_services
     redirect_temporary "/settings/socials", to: "/settings/webmentions"
     get "/settings/tagging", to: "settings.tagging", as: :settings_tagging

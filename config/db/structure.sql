@@ -2879,7 +2879,8 @@ CREATE TABLE public.devices (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     browser text,
     os text,
-    last_signed_in_at timestamp with time zone NOT NULL
+    last_signed_in_at timestamp with time zone NOT NULL,
+    signed_out_at timestamp with time zone
 );
 
 
@@ -10253,4 +10254,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261021210000_drop_repo_from_memory_scope.rb'),
 ('20261022100000_create_notes.rb'),
 ('20261022110000_grow_people_into_contacts.rb'),
-('20261022120000_create_devices.rb');
+('20261022120000_create_devices.rb'),
+('20261022220000_add_signed_out_at_to_devices.rb');

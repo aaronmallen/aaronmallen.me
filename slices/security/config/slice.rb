@@ -7,6 +7,7 @@ module Security
     export %w[
       operations.record_sighting
       operations.record_sign_in
+      operations.sign_out_device
       repos.device_queries
       repos.sighting_queries
       repos.sign_in_queries

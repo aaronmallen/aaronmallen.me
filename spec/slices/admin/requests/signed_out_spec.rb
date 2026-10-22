@@ -18,8 +18,9 @@ RSpec.describe "Admin signed out", type: :request do
   end
 
   def self.sample(constraint)
-    ["1", "github", constraint.source.split("|").first.delete("\\")].find { /\A(?:#{constraint})\z/.match?(it) } ||
-      raise(ArgumentError, "no sample matches #{constraint.inspect}")
+    samples = ["1", "github", "00000000-0000-0000-0000-000000000000", constraint.source.split("|").first.delete("\\")]
+    sample = samples.find { /\A(?:#{constraint})\z/.match?(it) }
+    sample || raise(ArgumentError, "no sample matches #{constraint.inspect}")
   end
 
   def self.url(path, kwargs)

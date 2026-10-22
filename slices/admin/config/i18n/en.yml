@@ -344,6 +344,9 @@ en:
       invalid: "Nothing saved · give the view a name of %{max} characters or fewer"
       renamed: "View renamed"
       saved: "View saved"
+  security_page:
+    toasts:
+      signed_out: "Device signed out · it has to sign in again"
   services_page:
     refusals:
       refused: "Nothing was saved · %{reason}"
@@ -2610,7 +2613,10 @@ en:
         save: "Save view"
       security:
         device_row:
+          confirm_sign_out: "Sign out %{device}? It will have to sign in again."
+          sign_out: "Sign out"
           signed_in: "signed in"
+          signed_out: "signed out"
         sighting_row:
           calls:
             one: "%{count} call"

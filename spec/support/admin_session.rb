@@ -7,6 +7,7 @@ require "securerandom"
 module Spec
   module AdminSession
     CSRF_TOKEN = Hanami::Action::CSRFProtection::CSRF_TOKEN.to_s
+    DEVICE = { browser: "Owner", os: "Spec" }.freeze
     EMAIL = "owner@example.com"
 
     module_function
@@ -30,6 +31,7 @@ module Spec
     def session(csrf_token)
       {
         CSRF_TOKEN => csrf_token,
+        "device_id" => Security::Slice["repos.device_mutations"].sign_in(nil, **DEVICE),
         "email" => EMAIL,
         "session_id" => SecureRandom.hex(16),
         "signed_in_at" => Time.now.to_i,

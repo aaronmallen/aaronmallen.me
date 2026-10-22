@@ -81,7 +81,7 @@ module Admin
         def signed_in(request, response, email)
           device = record(request, :signed_in)
           response.set_cookie(Blog::DeviceCookie::KEY, Blog::DeviceCookie.cookie(device))
-          path = auth_session(request).sign_in(email)
+          path = auth_session(request).sign_in(email, device:)
           response.redirect_to(path || routes.path(:admin_root))
         end
 

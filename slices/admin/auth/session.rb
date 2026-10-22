@@ -9,7 +9,12 @@ module Admin
       LOCAL_PATH = %r{\A/(?![/\\])[^\\[:space:][:cntrl:]]*\z}
       REQUEST_KEY = "admin.auth.session"
 
-      include Deps["routes", "repos.owner_identity_queries", "repos.session_validity_queries"]
+      include Deps[
+        "routes",
+        "repos.owner_identity_queries",
+        "repos.session_validity_queries",
+        device_queries: "security.repos.device_queries",
+      ]
 
       def self.for(request) = request.env[REQUEST_KEY] ||= new(request.session)
 
@@ -36,10 +41,11 @@ module Admin
         @session["return_to"] = path
       end
 
-      def sign_in(email)
+      def sign_in(email, device:)
         path = return_to
         @session.clear
         @session.options[:renew] = true
+        @session["device_id"] = device
         @session["email"] = email
         @session["signed_in_at"] = @now
         @signed_in = nil
@@ -57,7 +63,7 @@ module Admin
       def signed_in?
         return @signed_in unless @signed_in.nil?
 
-        @signed_in = !expired? && !ended? && owner_identity_queries.email?(@session["email"])
+        @signed_in = !expired? && !ended? && !device_signed_out? && owner_identity_queries.email?(@session["email"])
       end
 
       private
@@ -65,6 +71,11 @@ module Admin
       def admin_path?(path)
         admin_root = routes.path(:admin_root)
         path == admin_root || path.start_with?("#{admin_root}/")
+      end
+
+      def device_signed_out?
+        device = device_queries.by_id(@session["device_id"])
+        device.nil? || (!device.signed_out_at.nil? && @session["signed_in_at"] <= device.signed_out_at.to_i)
       end
 
       def ended?

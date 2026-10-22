@@ -776,6 +776,69 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "signing out a device from the security tab" do
+    let!(:phone) do
+      sign_in
+      { device: device_cookie.value, session: session_cookie.raw }.tap do
+        clear_cookies
+        sign_in
+      end
+    end
+
+    def device_count = Security::Slice["db.rom"].gateways[:default].connection[:devices].count
+
+    def sign_in_on_phone
+      restore(phone[:session])
+      set_cookie "#{Blog::DeviceCookie::KEY}=#{phone[:device]}; path=/admin"
+      allow(Time).to receive(:now).and_return(Time.now + 1)
+      sign_in
+    end
+
+    def sign_out_device(id) = post("/admin/settings/security/devices/#{id}/sign-out", _csrf_token: admin_csrf_token)
+
+    before { sign_out_device(phone[:device]) }
+
+    it "ends that browser's session on its next request" do
+      restore(phone[:session])
+
+      expect(signed_out?).to be(true)
+    end
+
+    it "keeps the other devices signed in" do
+      expect(signed_out?).to be(false)
+    end
+
+    it "lets that browser sign in again as the same device", :aggregate_failures do
+      sign_in_on_phone
+
+      expect(signed_out?).to be(false)
+      expect([device_cookie.value, device_count]).to eq([phone[:device], 2])
+    end
+
+    it "ends the session of the browser that signs out its own device" do
+      sign_out_device(device_cookie.value)
+
+      expect(signed_out?).to be(true)
+    end
+
+    it "returns 404 for a device that is not there" do
+      sign_out_device(SecureRandom.uuid)
+
+      expect(last_response).to be_not_found
+    end
+  end
+
+  describe "a session whose device is gone" do
+    before do
+      sign_in
+      Security::Slice["db.rom"].gateways[:default].connection[:devices].delete
+    end
+
+    it "asks for sign-in again" do
+      expect(signed_out?).to be(true)
+    end
+  end
+
   describe "signing out without a CSRF token" do
     before do
       sign_in

@@ -112,6 +112,7 @@ module Admin
 
     import keys: %w[
       operations.record_sign_in
+      operations.sign_out_device
       repos.device_queries
       repos.sighting_queries
       repos.sign_in_queries

@@ -8,9 +8,13 @@ RSpec.describe "Admin security", type: :request do
 
   def client(name) = create(:oauth_client, client_name: name).tap { create(:oauth_token, oauth_client: it) }
 
+  def confirm_sign_out(device) = Admin::Slice["i18n"].t("ui.components.security.device_row.confirm_sign_out", device:)
+
   def credential(name) = page.find(".security-cred", text: name)
 
   def device(**row) = database[:devices].returning(:id).insert(browser: "Safari", os: "iOS", **row).first[:id]
+
+  def rows = card("Sign-ins").all(".li").reject { it.has_css?(".li-title", exact_text: "Owner · Spec") }
 
   def settings_tabs = page.all("nav[aria-label='Settings tabs'] a.screen-tab").map { it["href"] }
 
@@ -35,6 +39,8 @@ RSpec.describe "Admin security", type: :request do
       "jobs 0" => "/admin/settings/jobs", "security" => "/admin/settings/security",
     }.to_a
   end
+
+  def titles = rows.map { it.find(".li-title").text }
 
   def token(name) = API::Slice["operations.mint_token"].call(name:).value![:token]
 
@@ -73,10 +79,10 @@ RSpec.describe "Admin security", type: :request do
       expect([last_response.status, last_response.location]).to eq([302, "/admin/settings/security"])
     end
 
-    it "says so when nobody has signed in" do
+    it "lists only this browser when nothing else has signed in" do
       get "/admin/settings/security"
 
-      expect(card("Sign-ins")).to have_css(".empty")
+      expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Owner · Spec"])
     end
 
     it "says it lists every sign-in, failed ones too, and where each token called from", :aggregate_failures do
@@ -99,11 +105,11 @@ RSpec.describe "Admin security", type: :request do
       end
 
       it "shows as one device row" do
-        expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Safari · iOS"])
+        expect(titles).to eq(["Safari · iOS"])
       end
 
       it "shows the place and time of its last sign-in", :aggregate_failures do
-        row = card("Sign-ins").find(".li")
+        row = rows.first
 
         expect(row).to have_text("Google · Paris · FR · 203.0.113.9")
         expect(Time.iso8601(row.find("time")["datetime"])).to be_within(2).of(Time.now - 60)
@@ -116,7 +122,54 @@ RSpec.describe "Admin security", type: :request do
       device(last_signed_in_at: Time.now - 60)
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Safari · iOS", "Firefox · Linux"])
+      expect(titles).to eq(["Safari · iOS", "Firefox · Linux"])
+    end
+
+    it "offers to sign out a signed-in device", :aggregate_failures do
+      phone = device(last_signed_in_at: Time.now - 60)
+      get "/admin/settings/security"
+      form = rows.first.find("form[action='/admin/settings/security/devices/#{phone}/sign-out']")
+
+      expect(form["data-confirm"]).to eq(confirm_sign_out("Safari · iOS"))
+      expect(form).to have_button("Sign out", class: "warn")
+    end
+
+    it "pills a signed-out device and offers no sign-out", :aggregate_failures do
+      device(last_signed_in_at: Time.now - 60, signed_out_at: Time.now)
+      get "/admin/settings/security"
+
+      expect(rows.first).to have_css(".pill:not(.green)", exact_text: "signed out")
+      expect(rows.first).to have_no_css("form")
+    end
+
+    it "pills a device signed in again after a sign-out as signed in" do
+      device(last_signed_in_at: Time.now, signed_out_at: Time.now - 60)
+      get "/admin/settings/security"
+
+      expect(rows.first).to have_css(".pill.green", exact_text: "signed in").and have_css("form")
+    end
+
+    describe "signing out a device" do
+      let!(:phone) { device(last_signed_in_at: Time.now - 60) }
+
+      before { admin_post "/admin/settings/security/devices/#{phone}/sign-out" }
+
+      it "stamps the device signed out and comes back to the tab", :aggregate_failures do
+        expect(last_response.location).to eq("/admin/settings/security")
+        expect(database[:devices].where(id: phone).get(:signed_out_at)).to be_within(2).of(Time.now)
+      end
+
+      it "says so" do
+        follow_redirect!
+
+        expect(page).to have_text(Admin::Slice["i18n"].t("security_page.toasts.signed_out"))
+      end
+    end
+
+    it "returns 404 for a device ID that is no ID" do
+      admin_post "/admin/settings/security/devices/not-an-id/sign-out"
+
+      expect(last_response).to be_not_found
     end
 
     it "lists a device's failed sign-in beside it" do
@@ -124,14 +177,14 @@ RSpec.describe "Admin security", type: :request do
       sign_in_row(device_id: phone, browser: "Safari", os: "iOS", outcome: "denied")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").all(".pill").map(&:text)).to eq(["signed in", "denied"])
+      expect(rows.map { it.find(".pill").text }).to eq(["signed in", "denied"])
     end
 
     it "names a device whose sign-ins were pruned" do
       device(browser: nil, os: nil, last_signed_in_at: Time.now - (100 * 24 * 60 * 60))
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
+      expect(rows.first).to have_text("Unknown device").and have_text("Unknown place")
     end
 
     it "lists sign-ins newest first" do
@@ -139,11 +192,11 @@ RSpec.describe "Admin security", type: :request do
       sign_in_row(browser: "Firefox", outcome: "wrong_account")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").all(".li-title").map(&:text)).to eq(["Firefox · macOS", "Safari · macOS"])
+      expect(titles).to eq(["Firefox · macOS", "Safari · macOS"])
     end
 
     describe "paging sign-ins" do
-      def browsers = card("Sign-ins").all(".li-title").map { it.text.split(" · ").first }
+      def browsers = titles.map { it.split(" · ").first }
 
       before do
         lower_page_size(:admin, to: 2)
@@ -177,7 +230,7 @@ RSpec.describe "Admin security", type: :request do
       sign_in_row(outcome: "wrong_account", address: "203.0.113.9", city: "Paris", country: "FR")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_text("wrong account").and have_text("Paris · FR · 203.0.113.9")
+      expect(rows.first).to have_text("wrong account").and have_text("Paris · FR · 203.0.113.9")
         .and have_css("time")
     end
 
@@ -185,14 +238,14 @@ RSpec.describe "Admin security", type: :request do
       sign_in_row(provider: "google")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_text("Google · London · GB · 81.2.69.160")
+      expect(rows.first).to have_text("Google · London · GB · 81.2.69.160")
     end
 
     it "names the provider that failed" do
       sign_in_row(provider: "google", outcome: "provider_failed")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_css(".pill.pink", exact_text: "Google failed")
+      expect(rows.first).to have_css(".pill.pink", exact_text: "Google failed")
     end
 
     it "pills a sign-in green when it went through and pink when it did not", :aggregate_failures do
@@ -208,14 +261,14 @@ RSpec.describe "Admin security", type: :request do
       sign_in_row(country_name: "United Kingdom")
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_text("London · United Kingdom · 81.2.69.160")
+      expect(rows.first).to have_text("London · United Kingdom · 81.2.69.160")
     end
 
     it "names a device and place it could not read" do
       sign_in_row(browser: nil, os: nil, city: nil, country: nil)
       get "/admin/settings/security"
 
-      expect(card("Sign-ins").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
+      expect(rows.first).to have_text("Unknown device").and have_text("Unknown place")
     end
 
     it "lists a token's sightings with place, calls, address and both times" do
