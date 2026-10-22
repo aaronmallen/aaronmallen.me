@@ -121,6 +121,10 @@ gh issue close 12 --reason 'not planned'
 gh issue reopen 12
 ```
 
+Each issue syncs to a task on the site, and the task keeps the time. Pair each state label change with the
+matching task call through the site's MCP server: `start_task` when you add `in progress`, and `pause_task` when
+you swap it for `needs review`. `/implement` says how to find the task.
+
 Finished work does not close by hand. Its commit says `Closes #12`, and GitHub closes the issue when the owner
 pushes. Until then the issue sits open in `needs review`. GitHub leaves that label on a closed issue, so take it
 off once the issue closes: `gh issue edit 12 --remove-label 'needs review'`.

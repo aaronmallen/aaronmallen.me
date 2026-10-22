@@ -18,7 +18,12 @@ Read the story for the why and the criteria for the what. Every criterion has to
 Read the code the issue touches before you change any of it. Read the tests too. A test name states the intent,
 so read it before you call any behaviour a bug.
 
-Then add the `in progress` label.
+Then find the task synced from the issue. Search `list_tasks` for the issue's title and take the one whose source
+issue is this one. If none turns up, call `sync_issues`, wait until `read_sync_state` shows the sync done, and
+search again.
+
+Add the `in progress` label and call `start_task` on that task, which opens a work session. If the second search
+found no task, skip the task calls here and in step 6, and say so when you hand over.
 
 ## 2. Write the code
 
@@ -70,17 +75,17 @@ closes it. Do not close the issue or the spec with `gh`. The commit closes them 
 
 ## 6. Hand it over
 
-Swap `in progress` for `needs review` on the issue. Then read the issues it blocks, and take `blocked` off each
-one whose blockers are all closed or in `needs review`.
+Swap `in progress` for `needs review` on the issue, and call `pause_task` on the task from step 1 to close its
+work session. Then read the issues it blocks, and take `blocked` off each one whose blockers are all closed or in
+`needs review`.
 
-Then credit yourself on the task synced from the issue. Find it with `list_tasks`, searching for the issue's
-title, and take the one whose source issue is this one. Read it with `read_task`, then call `save_task` with every
-contributor it lists plus yourself as `{kind: "agent", agent:, model:}`, named as [ADR 0115][0115] names them:
-`claude-code` and your model's id, such as `claude-opus-5-5`. `save_task` replaces the whole set, so leave none of
-the old ones out. If no task syncs from the issue, or it already lists you, skip this step.
+Then credit yourself on that task. Read it with `read_task`, then call `save_task` with every contributor it lists
+plus yourself as `{kind: "agent", agent:, model:}`, named as [ADR 0115][0115] names them: `claude-code` and your
+model's id, such as `claude-opus-5-5`. `save_task` replaces the whole set, so leave none of the old ones out. If
+step 1 found no task, or the task already lists you, skip this step.
 
-If a step failed and you could not fix it, leave the issue `in progress` and tell the user what stopped you. Do
-not mark work done that is not.
+If a step failed and you could not fix it, leave the issue `in progress` and tell the user what stopped you. Still
+call `pause_task`, so the work session stops while nobody works the issue. Do not mark work done that is not.
 
 [0115]: docs/adr/0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [issues]: .claude/issues.md
