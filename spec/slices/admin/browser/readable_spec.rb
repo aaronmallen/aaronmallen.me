@@ -177,6 +177,7 @@ RSpec.describe "Admin screens", type: :feature do
       "notes" => "/admin/notes",
       "note" => "/admin/notes/#{note.id}",
       "note editor" => "/admin/notes/#{note.id}?edit=1",
+      "note folder" => "/admin/notes/folders/#{folder.id}",
     }
   end
 

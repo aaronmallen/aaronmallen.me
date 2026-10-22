@@ -184,6 +184,8 @@ module Admin
     post "/notes", to: "notes.create", as: :create_note
     get "/notes/menu", to: "notes.root_menu", as: :notes_menu
     post "/notes/folders", to: "notes.create_folder", as: :create_note_folder
+    get "/notes/folders/:id", to: "notes.show_folder", as: :note_folder, id: ID
+    post "/notes/folders/:id/describe", to: "notes.describe_folder", as: :describe_note_folder, id: ID
     get "/notes/folders/:id/menu", to: "notes.folder_menu", as: :note_folder_menu, id: ID
     post "/notes/folders/:id/delete", to: "notes.remove_folder", as: :remove_note_folder, id: ID
     post "/notes/folders/:id/move", to: "notes.move_folder", as: :move_note_folder, id: ID

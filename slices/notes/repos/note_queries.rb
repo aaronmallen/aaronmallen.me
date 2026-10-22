@@ -13,6 +13,10 @@ module Notes
 
       def count = notes.count
 
+      def filed(folder_ids)
+        notes.combine(:tags).where(folder_id: folder_ids).order(Sequel.desc(:updated_at), Sequel.desc(:id)).to_a
+      end
+
       def folder_by_id(id) = note_folders.by_pk(id).one
 
       def folders = note_folders.order(Sequel.function(:lower, :name), :id).to_a

@@ -30,12 +30,13 @@ function saveShut(tree) {
 }
 
 function marked(dir) {
-  const row = dir.querySelector("summary");
-  const url = new URL(row.dataset.menu, window.location.href);
+  for (const row of dir.querySelectorAll(":scope > [data-menu]")) {
+    const url = new URL(row.dataset.menu, window.location.href);
 
-  if (dir.open) url.searchParams.delete("shut");
-  else url.searchParams.set("shut", "1");
-  row.dataset.menu = url.pathname + url.search;
+    if (dir.open) url.searchParams.delete("shut");
+    else url.searchParams.set("shut", "1");
+    row.dataset.menu = url.pathname + url.search;
+  }
 }
 
 function setupTree(tree) {
@@ -202,7 +203,7 @@ function setupEditor(form) {
 
     made.className = "nt-tg";
     made.dataset.noteTag = name;
-    link.className = "nt-tn";
+    link.className = "tag";
     link.href = `/admin/tags/${name}`;
     link.textContent = `#${name}`;
     remove.type = "button";

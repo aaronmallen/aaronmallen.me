@@ -254,6 +254,7 @@ en:
     toasts:
       created: "Note created · private"
       deleted: "Note deleted"
+      described: "Description saved"
       duplicated: "Note duplicated"
       folder_created: "Folder created"
       folder_removed: "Folder removed"
@@ -2037,6 +2038,7 @@ en:
       notes:
         branch:
           empty: "Empty"
+          fold: "Fold %{path}"
           new_folder: "New folder in %{path}"
           new_note: "New note in %{path}"
           remove: "Remove empty folder %{path}"
@@ -2052,6 +2054,41 @@ en:
           taken: "Another note is called “%{title}”. Pick a different title."
           tip: "Markdown."
           title: "Title"
+        folder:
+          empty: "This folder is empty."
+          empty_folder: "empty"
+          folders:
+            one: "%{count} folder"
+            other: "%{count} folders"
+          last_edited: "last edited"
+          notes:
+            one: "%{count} note"
+            other: "%{count} notes"
+        folder_bar:
+          files: "Files"
+          folder_name: "New folder name"
+          folder_placeholder: "Folder name, or a/b for nested"
+          new_folder: "New folder"
+          new_note: "New note"
+        folder_note:
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+        folder_row:
+          pinned: "pinned"
+        folder_settings:
+          confirm_remove:
+            one: "Remove %{name}? Its %{count} note moves to %{place}."
+            other: "Remove %{name}? Its %{count} notes move to %{place}."
+          description: "Description"
+          description_placeholder: "What belongs in here. Shows on the folder page."
+          inside: "Inside"
+          label: "Folder settings"
+          name: "Name"
+          remove: "Remove folder"
+          the_top_level: "the top level"
+          title: "Folder settings"
+          top_level: "top level"
         home:
           empty: "No notes yet."
           recent: "Recently edited"
@@ -4138,6 +4175,7 @@ en:
           folder_name: "Folder name…"
           new_note: "New note here"
           new_subfolder: "New subfolder"
+          open: "Open folder"
           remove: "Remove folder"
           rename: "Rename"
         index:

@@ -49,8 +49,8 @@ RSpec.describe "Admin notes", type: :request do
     end
 
     it "nests folders that collapse and count every note beneath them", :aggregate_failures do
-      expect(page).to have_css("details.nt-dir[open] > summary.nt-dr", text: /work\s*2/)
-      expect(page).to have_css("details.nt-dir details.nt-dir > summary.nt-dr", text: /clients\s*1/)
+      expect(page).to have_css("details.nt-dir[open] > a.nt-dl", text: /work\s*2/)
+      expect(page).to have_css("details.nt-dir details.nt-dir > a.nt-dl", text: /clients\s*1/)
     end
 
     it "lists folders before the notes beside them" do

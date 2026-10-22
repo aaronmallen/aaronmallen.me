@@ -52,6 +52,7 @@ module Admin
           end
 
           def fold(menu)
+            menu.link(t(".open"), href: act(:admin_note_folder), icon: "fa-regular fa-folder-open")
             target = "note-folder-#{@folder.id}"
             return menu.click(t(".expand"), target:, icon: "fa-solid fa-chevron-down") if @shut
 

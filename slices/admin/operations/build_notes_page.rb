@@ -8,20 +8,23 @@ module Admin
 
       include Deps[note_queries: "notes.repos.note_queries"]
 
-      def call(note: nil, query: nil)
+      def call(note: nil, folder_id: nil, query: nil)
         listed = note_queries.listed
         tree = grow(listed)
+        folder = tree.find(folder_id) if folder_id
         text = Blog::Types::TrimmedText[query]
 
         {
-          tree:, pinned: listed.select(&:pinned), note:, recent: note ? [] : note_queries.recent(RECENT),
-          query: text, tag: tag(text), hits: hits(tree, text),
+          tree:, pinned: listed.select(&:pinned), note:, folder:, filed: filed(folder),
+          recent: note || folder_id ? [] : note_queries.recent(RECENT), query: text, tag: tag(text), hits: hits(tree, text),
         }
       end
 
       def tree = grow(note_queries.listed)
 
       private
+
+      def filed(folder) = folder ? note_queries.filed([folder.id, *folder.all.map(&:id)]) : []
 
       def grow(listed) = Structs::NoteTree.grow(note_queries.folders, listed)
 

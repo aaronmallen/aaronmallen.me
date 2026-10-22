@@ -2,19 +2,18 @@
 
 module Admin
   module Structs
-    NoteTree = Data.define(:id, :name, :path, :folders, :notes) do
-      def self.grow(folders, notes)
-        under = folders.group_by(&:parent_id)
-        filed = notes.group_by(&:folder_id)
-        branch = lambda do |folder, path|
-          new(
-            id: folder&.id, name: folder&.name.to_s, path:, notes: filed.fetch(folder&.id, []),
-            folders: under.fetch(folder&.id, []).map { branch.call(it, [path, it.name].reject(&:empty?).join("/")) },
-          )
-        end
-
-        branch.call(nil, "")
+    NoteTree = Data.define(:id, :name, :description, :path, :folders, :notes) do
+      def self.branch(folder, path, under, filed)
+        new(
+          id: folder&.id, name: folder&.name.to_s, description: folder&.description.to_s, path:,
+          notes: filed.fetch(folder&.id, []),
+          folders: under.fetch(folder&.id, []).map do |child|
+            branch(child, [path, child.name].reject(&:empty?).join("/"), under, filed)
+          end,
+        )
       end
+
+      def self.grow(folders, notes) = branch(nil, "", folders.group_by(&:parent_id), notes.group_by(&:folder_id))
 
       def all = folders.flat_map { [it, *it.all] }
 

@@ -28,6 +28,7 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
       "/admin/agents/artifacts/#{artifact.id}", "/admin/agents/artifacts/#{artifact.id}/edit",
       "/admin/notes/#{create(:note).id}", "/admin/notes/#{create(:note).id}?edit=1",
+      "/admin/notes/folders/#{create(:note_folder).id}",
     ]
   end
 

@@ -13,6 +13,7 @@ module Admin
           prop :pinned, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :current, Blog::Types::Integer.optional
           prop :folder_id, Blog::Types::Integer.optional, default: nil
+          prop :open_folder, Blog::Types::Integer.optional, default: nil
           prop :query, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
           prop :tag, Blog::Types::String.optional, default: nil
           prop :hits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
@@ -33,7 +34,7 @@ module Admin
             pins
             files
             new_folder
-            div(class: "nt-tree") { Branch(folder: @tree, current: @current) }
+            div(class: "nt-tree") { Branch(folder: @tree, current: @current, open_folder: @open_folder) }
           end
 
           def create

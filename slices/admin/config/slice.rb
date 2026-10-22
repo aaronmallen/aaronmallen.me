@@ -80,10 +80,10 @@ module Admin
     ], from: :links
 
     import keys: %w[
-      operations.create_note operations.create_note_folder_path operations.delete_note operations.duplicate_note
-      operations.edit_note operations.move_note operations.move_note_folder operations.pin_note
-      operations.remove_note_folder operations.rename_note operations.rename_note_folder operations.tag_note
-      operations.untag_note repos.note_queries
+      operations.create_note operations.create_note_folder_path operations.delete_note operations.describe_note_folder
+      operations.duplicate_note operations.edit_note operations.move_note operations.move_note_folder
+      operations.pin_note operations.remove_note_folder operations.rename_note operations.rename_note_folder
+      operations.tag_note operations.untag_note repos.note_queries
     ], from: :notes
 
     import keys: %w[operations.upload_photo], from: :media

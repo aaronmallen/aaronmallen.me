@@ -52,11 +52,17 @@ RSpec.describe "Admin notes", type: :feature do
       find_by_id("note-new-folder").click
       find("[data-note-folder-form] input").send_keys("work/clients", :enter)
 
-      expect(page).to have_css("summary.nt-dr", text: "clients")
+      expect(page).to have_css("a.nt-dl", text: "clients")
+    end
+
+    it "opens a folder's page when I click its name" do
+      find("a.nt-dl", text: "work").click
+
+      expect(page).to have_css("h1.nt-h", text: "work")
     end
 
     it "remembers a folder I collapse", :aggregate_failures do
-      find("summary.nt-dr", text: "work").click
+      find("summary.nt-dr", text: "Fold work").trigger("click")
       visit "/admin/notes"
 
       expect(page).to have_css("details.nt-dir:not([open])")

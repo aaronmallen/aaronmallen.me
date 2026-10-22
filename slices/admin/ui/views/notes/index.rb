@@ -12,6 +12,8 @@ module Admin
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
           prop :pinned, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :note, Blog::Types::Instance(ROM::Struct).optional
+          prop :folder, Blog::Types::Instance(Structs::NoteTree).optional, default: nil
+          prop :filed, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
           prop :recent, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :query, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
           prop :tag, Blog::Types::String.optional, default: nil
@@ -22,19 +24,27 @@ module Admin
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
-            content_for(:title, @note.title) if @note
+            title = @note&.title || @folder&.name
+            content_for(:title, title) if title
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock") { new_note }
 
-            div(class: ["nt", ("open" if @note)]) do
+            div(class: ["nt", ("open" if title)]) do
               Tree(
-                tree: @tree, pinned: @pinned, current: @note&.id, folder_id: @note&.folder_id,
+                tree: @tree, pinned: @pinned, current: @note&.id, folder_id: @note ? @note.folder_id : @folder&.id,
                 query: @query, tag: @tag, hits: @hits,
               )
-              @note ? page : Home(notes: @recent, tree: @tree)
+              main_pane
             end
           end
 
           private
+
+          def main_pane
+            return page if @note
+            return Folder(folder: @folder, tree: @tree, notes: @filed) if @folder
+
+            Home(notes: @recent, tree: @tree)
+          end
 
           def new_note
             Form(action: path(:admin_create_note)) do

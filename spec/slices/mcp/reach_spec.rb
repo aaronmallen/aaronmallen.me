@@ -122,7 +122,7 @@ RSpec.describe "MCP reach", type: :app do
       "notes.operations.create_note_folder" => "#1932 gives agents the notes tools; only specs call it until then",
       "notes.operations.create_note_folder_path" => "#1932 gives agents the notes tools; the admin calls it until then",
       "notes.operations.delete_note" => "#1932 gives agents the notes tools; only specs call it until then",
-      "notes.operations.describe_note_folder" => "#1932 gives agents the notes tools; only specs call it until then",
+      "notes.operations.describe_note_folder" => "#1932 gives agents the notes tools; the admin calls it until then",
       "notes.operations.duplicate_note" => "#1932 gives agents the notes tools; only specs call it until then",
       "notes.operations.edit_note" => "#1932 gives agents the notes tools; only specs call it until then",
       "notes.operations.move_note" => "#1932 gives agents the notes tools; only specs call it until then",

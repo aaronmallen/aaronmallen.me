@@ -9642,9 +9642,13 @@ i > svg {
     @apply -rotate-90;
   }
 
-  &[open] > .nt-dr .nt-fc,
-  &:not([open]) > .nt-dr .nt-fo {
+  &[open] > .nt-dl .nt-fc,
+  &:not([open]) > .nt-dl .nt-fo {
     --fa-display: none;
+  }
+
+  &:has(> .nt-dl:hover) > .nt-dr {
+    background-color: color-mix(in oklab, var(--color-ink) 5%, transparent);
   }
 }
 
@@ -9658,9 +9662,22 @@ i > svg {
   & > i.nt-cv {
     @apply w-2.5 text-[0.6em];
   }
+}
+
+@utility nt-dl {
+  @apply absolute inset-x-0 top-0 flex h-9 items-center gap-2 rounded-lg pr-2 pl-7 font-display text-[0.95rem];
+  @apply leading-[1.3] font-semibold text-ink no-underline admin-focus;
+
+  @media (width < 53.75rem) {
+    @apply h-11;
+  }
 
   &:hover .nt-n {
     @apply invisible;
+  }
+
+  & > i {
+    @apply w-3.5 flex-none text-center text-[0.82em] text-ink-muted;
   }
 }
 
@@ -9679,7 +9696,7 @@ i > svg {
     @apply absolute top-1 right-1 rounded-md bg-ground-sunk;
   }
 
-  .nt-dr:hover + &,
+  .nt-dl:hover + &,
   &:hover,
   &:focus-within,
   &.on {
@@ -9845,45 +9862,10 @@ i > svg {
 }
 
 @utility nt-tg {
-  --tone: var(--color-mk-violet-text);
-  @apply inline-flex items-center rounded-full border;
-  border-color: color-mix(in oklab, var(--tone) 40%, var(--color-line));
-  background-color: color-mix(in oklab, var(--tone) 10%, transparent);
-
-  &.green {
-    --tone: var(--color-mk-green-text);
-  }
-
-  &.pink {
-    --tone: var(--color-mk-pink-text);
-  }
-
-  &.blue {
-    --tone: var(--color-mk-blue-text);
-  }
-
-  &.sand {
-    --tone: var(--color-mk-sand-text);
-  }
-
-  &.orange {
-    --tone: var(--color-mk-orange-text);
-  }
+  @apply inline-flex items-center;
 
   & form {
     @apply contents;
-  }
-}
-
-@utility nt-tn {
-  @apply py-1.5 pr-1 pl-2.5 font-mono text-xs leading-none text-ink no-underline admin-focus;
-
-  @variant phone {
-    @apply inline-flex min-h-tap items-center;
-  }
-
-  &:hover {
-    @apply underline;
   }
 }
 
@@ -9970,4 +9952,102 @@ i > svg {
 
 @utility nt-mt {
   @apply m-0 meta-row gap-y-1 meta;
+}
+
+@utility nt-cb {
+  @apply text-ink-muted no-underline admin-focus;
+
+  &:hover {
+    @apply text-accent-text underline;
+  }
+}
+
+@utility nt-nf {
+  @apply inline-flex;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &[open] > summary {
+    @apply hidden;
+  }
+
+  & form {
+    @apply contents;
+  }
+}
+
+@utility nt-set {
+  & > .card-body {
+    @apply flex flex-col gap-4;
+  }
+}
+
+@utility nt-fh {
+  @apply border-b border-line pb-5.5;
+}
+
+@utility nt-fi {
+  @apply mr-3.5 text-[0.6em] text-ink-muted;
+  vertical-align: 0.2em;
+}
+
+@utility nt-fd {
+  @apply m-0 mt-2.5 max-w-[68ch] px-8 font-serif text-[1.08rem] leading-[1.55] text-ink;
+  text-wrap: pretty;
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-fm {
+  @apply mt-2.5 px-8;
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-ix {
+  @apply px-8 pt-1 pb-4;
+
+  & > .nt-rw {
+    @apply py-4;
+  }
+
+  @media (width < 53.75rem) {
+    @apply px-5 pb-3;
+  }
+}
+
+@utility nt-ixr {
+  @apply flex min-w-0 items-start gap-3.5;
+
+  & > i {
+    @apply mt-1.25 w-4 flex-none text-center text-ink-muted;
+  }
+
+  & > div {
+    @apply flex min-w-0 flex-1 flex-col gap-1;
+  }
+}
+
+@utility nt-ixt {
+  @apply m-0;
+}
+
+@utility nt-ex {
+  @apply m-0 line-clamp-2 font-serif text-base leading-normal text-ink-muted;
+  text-wrap: pretty;
+}
+
+@utility nt-pn {
+  @apply ml-2.5 text-[0.7em] text-mk-sand-text;
+  vertical-align: 0.15em;
 }
