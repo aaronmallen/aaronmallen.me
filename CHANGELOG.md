@@ -5,6 +5,36 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.30] - 2026-10-22
+
+### Added
+
+- Each agent session records the project it worked in. `list_sessions` and its endpoint filter by project, the admin
+  session row and drawer show the project beside the repo and branch, and the sessions list has a project select.
+  Sessions from before this release whose repo matches a project get that project.
+
+### Changed
+
+- Agent memory and sessions attach to projects. `start_session`, `read_memory` and `search_memory` take a project key,
+  and an unknown key returns an error. A `repo` only finds the project that holds it, and a repo no project holds gets
+  a new private project, named after the repo, with a GitHub task rule.
+
+### Removed
+
+- The `repo` memory scope. Each repo file moves onto the project whose repo matches it, and the rest are gone.
+  `create_memory_file` and `move_memory_file` refuse a `repo` scope, memory files no longer return `repo`, and the
+  admin memories page drops its repo pill and lists projects under "Working in".
+
+### Fixed
+
+- Typing "activity" in the command palette and pressing Enter opened a matching record rather than the Activity
+  screen. Records now sit below the section groups.
+- On a phone, the journal composer and quick-write modal squeezed the tag field into a sliver. It now takes a line of
+  its own.
+- On a phone, the nav switcher left a blank space under "today". The groups now pack under it.
+- The session drawer's "Files read" rows ran the time into the scope, and memory descriptions in the drawer were cut
+  off. The time takes the small type with a gap after it, and descriptions wrap.
+
 ## [26.10.29] - 2026-10-21
 
 ### Added
@@ -1556,7 +1586,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...HEAD
+[26.10.30]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...26.10.30
 [26.10.29]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...26.10.29
 [26.10.28]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.27...26.10.28
 [26.10.27]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.26...26.10.27
