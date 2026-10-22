@@ -11,6 +11,7 @@ amended:
   - "#225"
   - "#226"
   - "#913"
+  - "#1936"
 tags:
   - social
   - mentions
@@ -50,7 +51,8 @@ check before delivery and the preview measure and show the expanded text for eac
 A token that names nobody in the directory is refused when the post is saved. The contract checks it in Ruby, which
 [ADR 0017][0017] lists as an exception since #913.
 
-The directory is a table in the social slice. The operator fills it in from the admin, with whichever handles a person
+The directory is a table in the social slice, until #1936 moves it to the `contacts` slice and lets a person hold no
+handle at all ([ADR 0201][0201]). The operator fills it in from the admin, with whichever handles a person
 has, through one people form that the socials tab of Settings and the composer's `@` list both show. Each handle field
 can search its network for accounts, and picking one fills the handle, and the name when the operator has not typed one.
 A pick only fills the form, and nothing joins the directory until the operator saves. We store each person's Bluesky
@@ -95,4 +97,5 @@ refuses such a token, but delivery does not. `ResolveMentions#expand` writes the
 `@{alice}` goes out as `alice` on both networks, with no handle and no Bluesky facet.
 
 [0017]: 0017-enforce-rules-over-stored-state-in-postgres-not-in-contracts.md
+[0201]: 0201-grow-people-into-contacts-in-a-contacts-slice-and-sync-them-both-ways-with-google.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

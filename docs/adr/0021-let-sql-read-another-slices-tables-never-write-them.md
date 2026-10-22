@@ -41,6 +41,7 @@ amended:
   - "#1324"
   - "#1749"
   - "#1797"
+  - "#1936"
 tags:
   - slices
   - sql
@@ -99,7 +100,8 @@ exports refuses. These reads cross today:
   read by `slices/search/relations/search_documents.rb`, unions `tasks`, `posts`, `social_posts`,
   `social_post_parts`, `journal_entries`, `commits`, `projects`, `work_entries`, `people`, `messages`,
   `webmentions`, `decisions` and `pull_requests`, which `tasks`, `posts`, `social`, `record`, `projects`, `contact`
-  and `decisions` own. The record on searching every kind holds why one view serves every search.
+  and `decisions` own. #1936 moves `people` to the `contacts` slice ([ADR 0201][0201]). The record on searching every
+  kind holds why one view serves every search.
 - **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags`,
   `task_tags`, `decision_tags`, `task_rule_tags` and `message_tags`, seven kinds since #957 listed the last three.
   The tags screen is the one place that answers for every kind at once, and the SQL spares it one import per
@@ -188,4 +190,5 @@ row under the old path unmatched, so each post's past views drop to zero with no
 
 [0167]: 0167-tie-a-decision-to-its-task-with-a-sourced-from-record-link-the-tasks-slice-writes.md
 [0192]: 0192-name-another-slices-constant-only-through-an-import-a-contract-or-a-struct.md
+[0201]: 0201-grow-people-into-contacts-in-a-contacts-slice-and-sync-them-both-ways-with-google.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

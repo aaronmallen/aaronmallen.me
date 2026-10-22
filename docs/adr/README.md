@@ -198,6 +198,7 @@ one.
 | [0198][0198] | Make a short code from its row id in base 36 and match it whole | ![Active][active] | 2026-10-20 |
 | [0199][0199] | Attach agent memory and sessions to projects, and treat a repo as a lookup | ![Active][active] | 2026-10-21 |
 | [0200][0200] | Keep notes, folders and wiki links in a notes slice | ![Active][active] | 2026-10-22 |
+| [0201][0201] | Grow People into contacts in a contacts slice and sync them both ways with Google | ![Active][active] | 2026-10-22 |
 | [0203][0203] | Gate notes behind a notes scope that read does not cover | ![Active][active] | 2026-10-22 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
@@ -393,6 +394,7 @@ one.
 [0198]: 0198-make-a-short-code-from-its-row-id-in-base-36-and-match-it-whole.md
 [0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
 [0200]: 0200-keep-notes-folders-and-wiki-links-in-a-notes-slice.md
+[0201]: 0201-grow-people-into-contacts-in-a-contacts-slice-and-sync-them-both-ways-with-google.md
 [0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
