@@ -2087,7 +2087,7 @@
 
 @utility switcher-panel {
   @apply fixed inset-x-admin-gutter top-top-bar bottom-auto m-0 max-h-[calc(100dvh-var(--spacing-top-bar)-1rem)];
-  @apply w-auto grid-cols-[repeat(auto-fill,minmax(136px,1fr))] gap-x-2.5 gap-y-1 overflow-auto p-3 menu-surface;
+  @apply w-auto grid-cols-2 items-start gap-x-2.5 overflow-auto p-3 menu-surface;
   @apply text-ink;
 
   &:popover-open {
@@ -2095,14 +2095,12 @@
   }
 }
 
+@utility switcher-side {
+  @apply flex min-w-0 flex-col gap-1;
+}
+
 @utility switcher-column {
   @apply flex flex-col gap-px pb-2;
-
-  @variant phone {
-    &:not(:has(.switcher-heading)) {
-      @apply col-span-full;
-    }
-  }
 }
 
 @utility switcher-heading {

@@ -115,27 +115,57 @@ RSpec.describe "Admin menu switcher", type: :feature do
     end
   end
 
-  describe "at 375px" do
-    def space_above(heading, link)
+  shared_examples "two stacked sides" do
+    def gaps = sides.flat_map { |side| side.each_cons(2).map { |above, below| below["top"] - above["bottom"] } }
+
+    def sides
       evaluate_script(<<~JS)
-        (() => {
-          const panel = document.querySelector("#nav-switcher")
-          const top = [...panel.querySelectorAll(".switcher-heading")].find(it => it.textContent.trim() === "#{heading}")
-          const row = [...panel.querySelectorAll(".switcher-row")].find(it => it.textContent.trim() === "#{link}")
-          return top.getBoundingClientRect().top - row.getBoundingClientRect().bottom
-        })()
+        [...document.querySelectorAll("#nav-switcher > .switcher-side")].map(side =>
+          [...side.querySelectorAll(".switcher-column")].map(column => {
+            const box = column.getBoundingClientRect()
+            const heading = column.querySelector(".switcher-heading")
+            const name = (heading ? heading.firstChild : column).textContent.trim()
+            return { name, top: box.top, bottom: box.bottom, left: box.left, width: box.width }
+          })
+        )
       JS
     end
 
     before do
-      page.current_window.resize_to(375, 800)
       visit "/admin"
       open_switcher
     end
 
-    it "starts Tasks right under today, with the gap between any two groups" do
-      expect(space_above("Tasks", "today")).to eq(space_above("Publish", "projects"))
+    it "deals today, Tasks, Publish and Insights to the left and Inbox, Journal and Agents to the right" do
+      expect(sides.map { |side| side.map { it["name"] } })
+        .to eq([%w[today Tasks Publish Insights], %w[Inbox Journal Agents]])
     end
+
+    it "keeps each side in one column" do
+      expect(sides.map { |side| side.map { it["left"] }.uniq.size }).to eq([1, 1])
+    end
+
+    it "sets each group 4px under the one above it on both sides" do
+      expect(gaps.map(&:to_f).uniq).to eq([4.0])
+    end
+
+    it "makes today as wide as the groups under it" do
+      left = sides.first
+
+      expect(left.map { it["width"] }.uniq.size).to eq(1)
+    end
+  end
+
+  describe "at 375px" do
+    before { page.current_window.resize_to(375, 800) }
+
+    it_behaves_like "two stacked sides"
+  end
+
+  describe "at 800px" do
+    before { page.current_window.resize_to(800, 800) }
+
+    it_behaves_like "two stacked sides"
   end
 
   describe "at 400px" do

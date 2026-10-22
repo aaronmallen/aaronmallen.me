@@ -20,7 +20,7 @@ module Admin
             end
 
             nav(id: ID, class: "switcher-panel", popover: "auto", aria: { label: t(".panel") }) do
-              @navigation.pills.each { |name, sections| column(name, sections) }
+              sides.each { |groups| side(groups) }
             end
           end
 
@@ -62,6 +62,14 @@ module Admin
             label = t(current.label_key)
             label unless label.casecmp?(group)
           end
+
+          def side(groups)
+            div(class: "switcher-side") do
+              groups.each { |name, sections| column(name, sections) }
+            end
+          end
+
+          def sides = @navigation.pills.to_a.partition.with_index { |_, index| index.even? }
 
           def waiting? = @navigation.pills.fetch(TopBar::INBOX, []).any?(&:waiting?)
         end

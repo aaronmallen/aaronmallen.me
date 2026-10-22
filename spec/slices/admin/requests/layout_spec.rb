@@ -3,6 +3,14 @@
 RSpec.describe "Admin layout", :frozen_clock, type: :request do
   def section_groups = "[data-palette-group]:not([aria-labelledby$='-actions']):not([aria-labelledby$='-see-all'])"
 
+  def switcher_sides
+    page.all("#nav-switcher > .switcher-side", visible: :all).map do |side|
+      side.all(".switcher-column", visible: :all).map do |column|
+        column.first(".switcher-heading, .switcher-row", visible: :all).text(:all).strip
+      end
+    end
+  end
+
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
@@ -58,12 +66,14 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css(".switcher[popovertarget='nav-switcher'] + #nav-switcher[popover]", visible: :all)
     end
 
-    it "lists every screen but settings in the switcher, grouped", :aggregate_failures do
+    it "lists every screen but settings in the switcher, grouped" do
       rows = page.all("#nav-switcher a.switcher-row", visible: :all).map { it["href"] }
 
-      expect(rows).to eq(screens.grep_v(%r{\A/admin/settings/}))
-      expect(page.all("#nav-switcher .switcher-heading", visible: :all).map { it.text(:all) })
-        .to eq(%w[Inbox Tasks Journal Publish Agents Insights])
+      expect(rows).to match_array(screens.grep_v(%r{\A/admin/settings/}))
+    end
+
+    it "deals the switcher groups to a left and a right side in turn" do
+      expect(switcher_sides).to eq([%w[today Tasks Publish Insights], %w[Inbox Journal Agents]])
     end
 
     it "marks today current in the switcher", :aggregate_failures do
