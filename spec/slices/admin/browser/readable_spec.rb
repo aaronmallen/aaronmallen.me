@@ -137,7 +137,7 @@ RSpec.describe "Admin screens", type: :feature do
         find("#journal-entry .seg-option", text: "Preview").click
         find("#journal-entry .preview strong")
       end,
-    }
+    }.merge(notes)
   end
 
   def journal_entry
@@ -166,6 +166,17 @@ RSpec.describe "Admin screens", type: :feature do
         visit "/admin/inbox"
         find(".switcher").click if page.current_window.size.first < 860
       end,
+    }
+  end
+
+  def notes
+    folder = create(:note_folder, name: "work")
+    note = create(:note, title: "Plan the quarter", body: "Ship **it**", folder_id: folder.id, pinned: true)
+    Notes::Slice["operations.tag_note"].call(note.id, "ruby")
+    {
+      "notes" => "/admin/notes",
+      "note" => "/admin/notes/#{note.id}",
+      "note editor" => "/admin/notes/#{note.id}?edit=1",
     }
   end
 

@@ -13,6 +13,9 @@ RSpec.describe "Admin context menus", type: :feature do
       "links.menu" => [:link, %r{/links/\d+/menu}],
       "mail.bulk_menu" => [:mail_picked, %r{/mail/\d+/menu}],
       "mail.menu" => [:mail, %r{/mail/\d+/menu}],
+      "notes.folder_menu" => [:note_folder, %r{/notes/folders/\d+/menu}],
+      "notes.menu" => [:note, %r{/notes/\d+/menu}],
+      "notes.root_menu" => [:notes_root, %r{/notes/menu}, ".nt-gh"],
       "people.menu" => [:person, %r{/people/\d+/menu}],
       "posts.bulk_menu" => [:posts_picked, %r{/posts/\d+/menu}, ".li-sub"],
       "posts.menu" => [:posts, %r{/posts/\d+/menu}, ".li-sub"],
@@ -99,6 +102,18 @@ RSpec.describe "Admin context menus", type: :feature do
     click_button "Select"
     all(".mail-row input[name='ids[]']").each(&:check)
   end
+
+  def note
+    create(:note, title: "Plan")
+    visit "/admin/notes"
+  end
+
+  def note_folder
+    create(:note, folder_id: create(:note_folder, name: "work").id)
+    visit "/admin/notes"
+  end
+
+  def notes_root = visit("/admin/notes")
 
   def open_menu(name)
     setup, pattern, target = self.class.menus.fetch(name)

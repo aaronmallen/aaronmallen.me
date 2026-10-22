@@ -180,6 +180,24 @@ module Admin
     post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
     post "/mail/:id/task", to: "mail.make_task", as: :make_mail_task, id: ID
     post "/mail/:id/wake", to: "mail.wake", as: :wake_mail, id: ID
+    get "/notes", to: "notes.index", as: :notes
+    post "/notes", to: "notes.create", as: :create_note
+    get "/notes/menu", to: "notes.root_menu", as: :notes_menu
+    post "/notes/folders", to: "notes.create_folder", as: :create_note_folder
+    get "/notes/folders/:id/menu", to: "notes.folder_menu", as: :note_folder_menu, id: ID
+    post "/notes/folders/:id/delete", to: "notes.remove_folder", as: :remove_note_folder, id: ID
+    post "/notes/folders/:id/move", to: "notes.move_folder", as: :move_note_folder, id: ID
+    post "/notes/folders/:id/rename", to: "notes.rename_folder", as: :rename_note_folder, id: ID
+    get "/notes/:id", to: "notes.show", as: :note, id: ID
+    get "/notes/:id/menu", to: "notes.menu", as: :note_menu, id: ID
+    post "/notes/:id", to: "notes.update", as: :update_note, id: ID
+    post "/notes/:id/delete", to: "notes.destroy", as: :delete_note, id: ID
+    post "/notes/:id/duplicate", to: "notes.duplicate", as: :duplicate_note, id: ID
+    post "/notes/:id/move", to: "notes.move", as: :move_note, id: ID
+    post "/notes/:id/pin", to: "notes.pin", as: :pin_note, id: ID
+    post "/notes/:id/rename", to: "notes.rename", as: :rename_note, id: ID
+    post "/notes/:id/tags", to: "notes.tag", as: :tag_note, id: ID
+    post "/notes/:id/tags/delete", to: "notes.untag", as: :untag_note, id: ID
     redirect_temporary "/people", to: "/settings/webmentions#people"
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person

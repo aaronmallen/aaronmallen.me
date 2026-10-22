@@ -5,8 +5,8 @@ RSpec.describe "Admin live tables", type: :request do
     %w[
       /admin /admin/activity /admin/agents/artifacts /admin/agents/artifacts/new /admin/agents/memories
       /admin/agents/sessions /admin/analytics /admin/calendar /admin/decisions /admin/decisions/new /admin/files
-      /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings /admin/people/new
-      /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
+      /admin/health /admin/inbox /admin/journal /admin/links /admin/mail /admin/mail/settings /admin/notes
+      /admin/people/new /admin/performance /admin/performance/requests /admin/posts /admin/posts/new /admin/projects
       /admin/projects/new /admin/review /admin/search /admin/settings/jobs /admin/settings/security
       /admin/settings/services /admin/settings/webmentions /admin/settings/tagging /admin/social /admin/tasks
       /admin/tasks/new /admin/time /admin/webmentions
@@ -27,6 +27,7 @@ RSpec.describe "Admin live tables", type: :request do
       "/admin/files/groups/#{file_group.id}/edit", "/admin/links/#{short_link.id}/edit",
       "/admin/agents/sessions?session=#{agent_session}", "/admin/agents/memories/#{memory_file.id}",
       "/admin/agents/artifacts/#{artifact.id}", "/admin/agents/artifacts/#{artifact.id}/edit",
+      "/admin/notes/#{create(:note).id}", "/admin/notes/#{create(:note).id}?edit=1",
     ]
   end
 

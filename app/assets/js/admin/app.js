@@ -20,6 +20,7 @@ import { bootMailDrag } from "./mail_drag.js";
 import { setupMailEditors } from "./mail_editor.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { bootMorphForms } from "./morph_form.js";
+import { setupNotes } from "./notes.js";
 import { bootPalette, setupPalette } from "./palette.js";
 import { bootPersonDrawer } from "./person_drawer.js";
 import { setupPersonFinder } from "./person_finder.js";
@@ -59,6 +60,7 @@ const SETUPS = [
   setupLinkForms,
   setupMailEditors,
   setupMarkdownEditors,
+  setupNotes,
   setupPalette,
   setupPersonFinder,
   setupPersonForms,

@@ -23,6 +23,10 @@ module Admin
           end
         end
 
+        def click(label, target:, icon:)
+          button(type: "button", **item(data: { menu_click: target })) { inner(label, icon:) }
+        end
+
         def copy(label, text:, copied:, icon:, hint: nil)
           button(type: "button", **item(data: { copy: text, copied: })) { inner(label, icon:, hint:) }
         end

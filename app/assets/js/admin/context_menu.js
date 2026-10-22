@@ -60,6 +60,10 @@ function clicked(event) {
     copy(item.dataset.copy, item.dataset.copied);
     return close(true);
   }
+  if ("menuClick" in item.dataset) {
+    close(true);
+    return document.getElementById(item.dataset.menuClick)?.click();
+  }
   if (item.matches("a")) setTimeout(() => close(true));
 }
 

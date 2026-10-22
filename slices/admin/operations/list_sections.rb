@@ -13,6 +13,7 @@ module Admin
         %i[calendar tasks fa-calendar-days admin_calendar].freeze,
         [:projects, :tasks, KINDS.icon("project"), :admin_projects].freeze,
         [:journal, :journal, KINDS.icon("journal_entry"), :admin_journal].freeze,
+        %i[notes journal fa-note-sticky admin_notes].freeze,
         [:decisions, :journal, KINDS.icon("decision"), :admin_decisions].freeze,
         %i[review journal fa-magnifying-glass-chart admin_review].freeze,
         [:posts, :publish, KINDS.icon("post"), :admin_posts].freeze,

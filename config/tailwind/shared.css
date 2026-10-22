@@ -9542,3 +9542,404 @@ i > svg {
   overflow: visible;
   vertical-align: -0.125em;
 }
+
+@utility nt {
+  @apply grid grid-cols-1 items-start gap-stack;
+
+  @variant wide {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  @media (width < 53.75rem) {
+    &.open > .nt-side {
+      @apply hidden;
+    }
+  }
+}
+
+@utility nt-side {
+  @apply card p-2.5;
+
+  @variant wide {
+    @apply stick-bar overflow-auto;
+    max-height: calc(100vh - 110px);
+  }
+}
+
+@utility nt-g {
+  @apply m-0 px-2 pt-3.5 pb-1.5 font-mono text-xs tracking-[0.1em] text-ink-muted uppercase;
+}
+
+@utility nt-gh {
+  @apply flex items-center justify-between gap-2;
+}
+
+@utility nt-r {
+  @apply flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left font-display text-[0.95rem];
+  @apply leading-[1.3] font-medium text-ink no-underline admin-focus;
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--color-ink) 5%, transparent);
+  }
+
+  &.on {
+    @apply bg-wash;
+  }
+
+  & > i {
+    @apply w-3.5 flex-none text-center text-[0.82em] text-ink-muted;
+  }
+
+  @media (width < 53.75rem) {
+    @apply min-h-11;
+  }
+}
+
+@utility nt-t {
+  @apply min-w-0 flex-1 truncate;
+}
+
+@utility nt-n {
+  @apply font-mono text-xs font-normal text-ink-muted;
+}
+
+@utility nt-tree {
+  @apply flex flex-col;
+}
+
+@utility nt-dir {
+  @apply relative;
+
+  &:not([open]) > .nt-dr .nt-cv {
+    @apply -rotate-90;
+  }
+
+  &[open] > .nt-dr .nt-fc,
+  &:not([open]) > .nt-dr .nt-fo {
+    --fa-display: none;
+  }
+}
+
+@utility nt-dr {
+  @apply nt-r list-none font-semibold;
+
+  &::-webkit-details-marker {
+    @apply hidden;
+  }
+
+  & > i.nt-cv {
+    @apply w-2.5 text-[0.6em];
+  }
+
+  &:hover .nt-n {
+    @apply invisible;
+  }
+}
+
+@utility nt-kids {
+  @apply flex flex-col pl-4;
+}
+
+@utility nt-emp {
+  @apply m-0 py-1 pr-2 pl-7.5 font-mono text-xs text-ink-muted;
+}
+
+@utility nt-da {
+  @apply flex gap-0.5 opacity-0 transition-opacity;
+
+  .nt-dir > & {
+    @apply absolute top-1 right-1 rounded-md bg-ground-sunk;
+  }
+
+  .nt-dr:hover + &,
+  &:hover,
+  &:focus-within,
+  &.on {
+    @apply opacity-100;
+  }
+
+  & button {
+    @apply grid size-7 cursor-pointer place-items-center rounded-md text-xs text-ink-muted admin-focus;
+
+    &:hover {
+      @apply bg-wash text-ink;
+    }
+  }
+
+  @media (hover: none), (width < 53.75rem) {
+    @apply opacity-100;
+
+    & button {
+      @apply size-11;
+    }
+  }
+}
+
+@utility nt-nd {
+  @apply mb-1 flex items-center gap-2 rounded-lg border border-ink-muted bg-ground px-2.5;
+
+  & i {
+    @apply text-xs text-ink-muted;
+  }
+
+  & input {
+    @apply min-w-0 flex-1 bg-transparent py-2 font-mono text-[13px] outline-none;
+  }
+}
+
+@utility nt-doc {
+  @apply grid min-w-0 grid-cols-1 items-start gap-stack;
+
+  @media (width >= 77.5rem) {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+}
+
+@utility nt-page {
+  @apply card min-w-0 overflow-hidden p-0;
+}
+
+@utility nt-bar {
+  @apply flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-line px-3.5 py-2.5;
+
+  & .bt.on {
+    @apply text-mk-sand-text;
+  }
+}
+
+@utility nt-back {
+  @apply hidden;
+
+  @media (width < 53.75rem) {
+    @apply inline-flex;
+  }
+}
+
+@utility nt-crumb {
+  @apply flex min-w-0 flex-wrap gap-1.5 font-mono text-xs text-ink-muted;
+}
+
+@utility nt-cur {
+  @apply text-ink;
+}
+
+@utility nt-sp {
+  @apply flex-1;
+}
+
+@utility nt-st {
+  @apply font-mono text-xs text-ink-muted;
+}
+
+@utility nt-h {
+  @apply m-0 max-w-[76ch] px-8 pt-7.5 font-display font-bold text-ink;
+  font-size: clamp(1.7rem, 2.2vw, 2.3rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+
+  @media (width < 53.75rem) {
+    @apply px-5 pt-5.5;
+  }
+}
+
+@utility nt-prose {
+  @apply px-8 pt-3.5 pb-6;
+
+  & > :first-child {
+    @apply mt-0;
+  }
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-blank {
+  @apply text-ink-muted;
+
+  & a {
+    @apply text-accent-text underline;
+  }
+}
+
+@utility nt-edit {
+  @apply flex flex-col;
+}
+
+@utility nt-ttl {
+  @apply block w-full bg-transparent px-8 pt-7.5 font-display font-bold text-ink admin-focus
+    focus-visible:-outline-offset-2;
+  font-size: clamp(1.7rem, 2.2vw, 2.3rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+
+  @media (width < 53.75rem) {
+    @apply px-5 pt-5.5;
+  }
+}
+
+@utility nt-ta {
+  @apply block min-h-[58vh] w-full resize-y bg-transparent px-8 pt-4 pb-5 font-mono text-sm leading-[1.75] text-ink;
+  @apply admin-focus focus-visible:-outline-offset-2;
+
+  @media (width < 53.75rem) {
+    @apply px-5 py-3.5;
+  }
+}
+
+@utility nt-tip {
+  @apply m-0 px-8 pb-5 hint;
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-bad {
+  @apply m-0 px-8 pt-2 field-error;
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-save {
+  @apply px-8 pb-5;
+}
+
+@utility nt-tags {
+  @apply flex flex-wrap items-center gap-x-2 gap-y-1.5 px-8 pt-3;
+
+  @media (width < 53.75rem) {
+    @apply px-5;
+  }
+}
+
+@utility nt-tg {
+  --tone: var(--color-mk-violet-text);
+  @apply inline-flex items-center rounded-full border;
+  border-color: color-mix(in oklab, var(--tone) 40%, var(--color-line));
+  background-color: color-mix(in oklab, var(--tone) 10%, transparent);
+
+  &.green {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.pink {
+    --tone: var(--color-mk-pink-text);
+  }
+
+  &.blue {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.sand {
+    --tone: var(--color-mk-sand-text);
+  }
+
+  &.orange {
+    --tone: var(--color-mk-orange-text);
+  }
+
+  & form {
+    @apply contents;
+  }
+}
+
+@utility nt-tn {
+  @apply py-1.5 pr-1 pl-2.5 font-mono text-xs leading-none text-ink no-underline admin-focus;
+
+  @variant phone {
+    @apply inline-flex min-h-tap items-center;
+  }
+
+  &:hover {
+    @apply underline;
+  }
+}
+
+@utility nt-x {
+  @apply cursor-pointer py-1.5 pr-2.25 pl-1 text-[10px] leading-none text-ink-muted opacity-60 admin-focus;
+
+  @variant phone {
+    @apply tap-target;
+  }
+
+  &:hover {
+    @apply text-ink opacity-100;
+  }
+}
+
+@utility nt-add {
+  @apply inline-flex;
+
+  & form {
+    @apply contents;
+  }
+}
+
+@utility nt-ta-add {
+  @apply inline-flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-dashed border-line px-2.5 py-1.25;
+  @apply font-mono text-xs text-ink-muted admin-focus;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+
+  &::-webkit-details-marker {
+    @apply hidden;
+  }
+
+  &:hover {
+    @apply border-ink-muted text-ink;
+  }
+
+  & i {
+    @apply text-[10px];
+  }
+
+  .nt-add[open] > & {
+    @apply hidden;
+  }
+}
+
+@utility nt-ti {
+  @apply w-[16ch] rounded-full border border-ink-muted bg-ground px-2.5 py-1.25 font-mono text-xs admin-focus;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility nt-meta {
+  @apply stack;
+
+  @media (width >= 77.5rem) {
+    @apply stick-bar self-start;
+  }
+}
+
+@utility nt-facts {
+  @apply card flex flex-col gap-3 bg-transparent;
+}
+
+@utility nt-rw {
+  @apply flex flex-col gap-1 border-b border-line py-3.5 last:border-b-0;
+}
+
+@utility nt-rt {
+  @apply font-display text-task font-semibold text-ink no-underline focus-ring;
+
+  @variant phone {
+    @apply inline-flex min-h-tap items-center;
+  }
+
+  &:hover {
+    @apply underline;
+  }
+}
+
+@utility nt-mt {
+  @apply m-0 meta-row gap-y-1 meta;
+}

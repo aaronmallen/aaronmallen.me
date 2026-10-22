@@ -250,6 +250,23 @@ en:
       saved: "Fact saved"
       scoped: "Scope changed"
       stale: "A later change came after this one · revert that one first"
+  notes_page:
+    toasts:
+      created: "Note created · private"
+      deleted: "Note deleted"
+      duplicated: "Note duplicated"
+      folder_created: "Folder created"
+      folder_removed: "Folder removed"
+      moved: "Moved to %{path}"
+      moved_top: "Moved to the top level"
+      pinned: "Pinned"
+      refused:
+        inside: "A folder can't move inside itself"
+        invalid: "Nothing changed · check what you typed"
+        taken: "Another note has that title"
+      renamed: "Renamed"
+      saved: "Note saved"
+      unpinned: "Unpinned"
   people_page:
     toasts:
       added: "Person added"
@@ -1981,6 +1998,7 @@ en:
           links: "links"
           mail: "mail"
           memories: "memories"
+          notes: "notes"
           performance: "performance"
           posts: "posts"
           projects: "projects"
@@ -2015,6 +2033,66 @@ en:
           previous: "Highlight the row above"
           reorder: "Move the focused task up or down"
           title: "Keys"
+      notes:
+        branch:
+          empty: "Empty"
+          new_folder: "New folder in %{path}"
+          new_note: "New note in %{path}"
+          remove: "Remove empty folder %{path}"
+        edited:
+          today: "today %{time}"
+        editor:
+          body: "Body"
+          changed: "This note changed elsewhere, so this edit did not save. Reload to see the newer one."
+          failed: "Not saved"
+          placeholder: "Write."
+          save: "Save"
+          saved: "saved %{time}"
+          taken: "Another note is called “%{title}”. Pick a different title."
+          tip: "Markdown."
+          title: "Title"
+        home:
+          empty: "No notes yet."
+          recent: "Recently edited"
+        move_to:
+          blank: "Type a folder first"
+          move: "Move to"
+          new_folder: "New folder…"
+          top_level: "Top level"
+        page:
+          autosaves: "autosaves"
+          confirm_delete: "Delete “%{title}”?"
+          created: "created %{date}"
+          delete: "Delete note"
+          done: "Done"
+          edit: "Edit"
+          edited: "edited"
+          empty: "Empty."
+          files: "Files"
+          folder: "Folder"
+          pin: "Pin"
+          private: "private"
+          start: "Start writing"
+          top_level: "top level"
+          unpin: "Unpin"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+        tags:
+          add: "add"
+          add_tags: "add tags"
+          label: "Tags"
+          new: "New tag"
+          placeholder: "ruby"
+          remove: "Remove tag %{tag}"
+        tree:
+          files: "Files"
+          folder_path: "New folder path"
+          folder_placeholder: "Folder name, or a/b for nested"
+          label: "Notes"
+          new_folder: "New folder"
+          new_note: "New note at the top level"
+          pinned: "Pinned"
       people:
         drawer:
           edit: "edit person"
@@ -4037,6 +4115,51 @@ en:
         message: "Nothing lives at this address. The link may be wrong, or the page may have moved."
         status: "404"
         today: "Go to today"
+      notes:
+        folder_menu:
+          blank: "Type a name first"
+          collapse: "Collapse"
+          confirm_remove:
+            one: "Click again · %{count} note moves up"
+            other: "Click again · %{count} notes move up"
+          copied_path: "Path copied"
+          copy_path: "Copy path"
+          expand: "Expand"
+          folder_name: "Folder name…"
+          new_note: "New note here"
+          new_subfolder: "New subfolder"
+          remove: "Remove folder"
+          rename: "Rename"
+        index:
+          counts: "%{notes} in %{folders}"
+          folders:
+            one: "%{count} folder"
+            other: "%{count} folders"
+          heading: "Journal"
+          never_public: "never shown on the public site"
+          new_note: "New note"
+          notes:
+            one: "%{count} note"
+            other: "%{count} notes"
+          private: "Private notes"
+        menu:
+          blank: "Type a title first"
+          copied_link: "Link copied · paste it in another note"
+          copy_link: "Copy link"
+          delete: "Delete note"
+          duplicate: "Duplicate"
+          edit: "Edit"
+          new_beside: "New note beside it"
+          open: "Open"
+          pin: "Pin"
+          rename: "Rename"
+          unpin: "Unpin"
+        root_menu:
+          collapse_all: "Collapse all"
+          expand_all: "Expand all"
+          label: "Notes"
+          new_folder: "New folder"
+          new_note: "New note"
       people:
         menu:
           copied_mention: "Mention copied"
