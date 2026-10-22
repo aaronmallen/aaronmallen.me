@@ -25,7 +25,11 @@ module Notes
         { title: note_queries.free_title("#{note.title} copy"), body: note.body, folder_id: note.folder_id }
       end
 
-      def create(fields) = transaction { note_mutations.create(**fields) }
+      def create(fields)
+        transaction do
+          note_mutations.create(**fields).tap { note_mutations.store_links(it.id, it.body) }
+        end
+      end
     end
   end
 end

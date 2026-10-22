@@ -52,6 +52,13 @@ RSpec.describe "Admin note folders", type: :request do
       expect(page).to have_css(".nt-rw .nt-mt a.tag", text: "#ruby")
     end
 
+    it "counts each note's backlinks" do
+      Notes::Slice["operations.create_note"].call({ title: "Plan", body: "See [[Brief]]" })
+      get folder_page
+
+      expect(page).to have_css(".nt-rw", text: /Brief.*1 backlink/m)
+    end
+
     it "makes notes and subfolders in the folder", :aggregate_failures do
       new_note = ".nt-bar form[action='/admin/notes'] input[name='folder_id'][value='#{clients.id}']"
       new_folder = ".nt-bar form[action='/admin/notes/folders'] input[name='prefix'][value='work/clients/']"

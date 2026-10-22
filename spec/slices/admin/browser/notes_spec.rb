@@ -69,6 +69,29 @@ RSpec.describe "Admin notes", type: :feature do
     end
   end
 
+  describe "a wiki link" do
+    let(:work) { create(:note_folder, name: "work") }
+
+    def write(**) = Notes::Slice["operations.create_note"].call(**).value!
+
+    it "makes the note it names in the same folder when I click it before the note exists", :aggregate_failures do
+      visit "/admin/notes/#{write(title: 'Rails', body: 'On [[Rack]]', folder_id: work.id).id}"
+      within(".nt-prose") { click_button "Rack" }
+
+      expect(page).to have_css("input[name='note[title]'][value='Rack']")
+      expect(queries.listed.find { it.title == "Rack" }.folder_id).to eq(work.id)
+    end
+
+    it "tells me how many notes changed when I rename a linked note in the editor" do
+      write(title: "Rails", body: "On [[Plan]]")
+      visit "/admin/notes/#{note.id}?edit=1"
+      find("input[name='note[title]']").fill_in(with: "Roadmap")
+      find("textarea[name='note[body]']").click
+
+      expect(page).to have_css(".toast", text: "Renamed · links updated in 1 note")
+    end
+  end
+
   describe "on a phone" do
     before { page.current_window.resize_to(390, 844) }
 

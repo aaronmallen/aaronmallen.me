@@ -8,6 +8,7 @@ module Admin
           prop :folder, Blog::Types::Instance(Structs::NoteTree)
           prop :tree, Blog::Types::Instance(Structs::NoteTree)
           prop :notes, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :backlink_counts, Blog::Types::Hash
 
           def view_template
             div(class: "nt-doc") do
@@ -67,7 +68,7 @@ module Admin
           def index
             div(class: "nt-ix") do
               @folder.folders.each { folder_row(it) }
-              filed.each { FolderNote(note: it) }
+              filed.each { FolderNote(note: it, backlinks: @backlink_counts.fetch(it.id, 0)) }
               Empty { t(".empty") } if @folder.empty?
             end
           end

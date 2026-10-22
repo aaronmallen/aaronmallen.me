@@ -10,6 +10,12 @@ RSpec.describe Notes::Operations::CreateNote do
     expect(note).to have_attributes(title: "Coffee ratios", body: "1:16", folder_id: folder.id, pinned: false)
   end
 
+  it "stores the links its body names" do
+    note = run(:create_note, { title: "Rails", body: "On [[Ruby]] and [[Rack|the server API]]" }).value!
+
+    expect(Notes::Slice["repos.note_queries"].links_out(note.id).map { it[:title] }).to eq(%w[Rack Ruby])
+  end
+
   it "takes private tags", :aggregate_failures do
     note = run(:create_note, { title: "Coffee ratios", tags: "home, coffee" }).value!
 

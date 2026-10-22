@@ -14,6 +14,21 @@ RSpec.describe Notes::Operations::EditNote do
     expect(edited.tags.map(&:name)).to eq(%w[writing])
   end
 
+  it "stores the links the new body names in place of the old ones" do
+    note = run(:create_note, { title: "Rails", body: "[[Ruby]]" }).value!
+    run(:edit_note, note.id, { body: "[[Rack]]", version: note.version })
+
+    expect(Notes::Slice["repos.note_queries"].links_out(note.id).map { it[:title] }).to eq(%w[Rack])
+  end
+
+  it "rewrites the links in other notes when the title changes" do
+    note = run(:create_note, { title: "Ruby" }).value!
+    rails = run(:create_note, { title: "Rails", body: "On [[Ruby|the language]]" }).value!
+    run(:edit_note, note.id, { title: "Crystal", body: "", version: note.version })
+
+    expect(stored(rails.id).body).to eq("On [[Crystal|the language]]")
+  end
+
   it "keeps the tags when the edit sends none" do
     note = create(:note, tags: %w[ruby])
     run(:edit_note, note.id, { body: "Changed", version: note.version })

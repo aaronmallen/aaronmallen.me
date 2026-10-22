@@ -265,6 +265,10 @@ en:
         inside: "A folder can't move inside itself"
         invalid: "Nothing changed · check what you typed"
         taken: "Another note has that title"
+      relinked:
+        zero: "Renamed"
+        one: "Renamed · links updated in %{count} note"
+        other: "Renamed · links updated in %{count} notes"
       renamed: "Renamed"
       saved: "Note saved"
       unpinned: "Unpinned"
@@ -2051,11 +2055,13 @@ en:
           body: "Body"
           changed: "This note changed elsewhere, so this edit did not save. Reload to see the newer one."
           failed: "Not saved"
-          placeholder: "Write."
+          placeholder: "Write. Link another note with [[Its title]]."
           save: "Save"
           saved: "saved %{time}"
           taken: "Another note is called “%{title}”. Pick a different title."
           tip: "Markdown."
+          tip_link: "links a note,"
+          tip_text: "sets the link text. A link to a note not written yet creates it when you click it."
           title: "Title"
         folder:
           empty: "This folder is empty."
@@ -2074,6 +2080,9 @@ en:
           new_folder: "New folder"
           new_note: "New note"
         folder_note:
+          backlinks:
+            one: "%{count} backlink"
+            other: "%{count} backlinks"
           words:
             one: "%{count} word"
             other: "%{count} words"
@@ -2093,8 +2102,20 @@ en:
           title: "Folder settings"
           top_level: "top level"
         home:
+          backlinks:
+            one: "%{count} backlink"
+            other: "%{count} backlinks"
+          create: "Create"
           empty: "No notes yet."
+          from: "from %{titles}"
           recent: "Recently edited"
+          unwritten: "Linked, not written"
+        links:
+          backlinks: "Backlinks"
+          links_out: "Links out"
+          no_backlinks: "No note links here yet."
+          none: "None."
+          not_written: "not written"
         move_to:
           blank: "Type a folder first"
           move: "Move to"
@@ -2102,7 +2123,10 @@ en:
           top_level: "Top level"
         page:
           autosaves: "autosaves"
-          confirm_delete: "Delete “%{title}”?"
+          confirm_delete:
+            zero: "Delete “%{title}”?"
+            one: "Delete “%{title}”? %{count} note links to it."
+            other: "Delete “%{title}”? %{count} notes link to it."
           created: "created %{date}"
           delete: "Delete note"
           done: "Done"
@@ -2119,6 +2143,8 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+        prose:
+          missing: "No note yet. Click to create it."
         tags:
           add: "add"
           add_tags: "add tags"

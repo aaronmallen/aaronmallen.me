@@ -4,15 +4,23 @@ module Admin
   module Actions
     module Notes
       class Rename < Action
-        RENAMED = "notes_page.toasts.renamed"
+        RELINKED = "notes_page.toasts.relinked"
 
         include Place
-        include Deps[rename_note: "notes.operations.rename_note"]
+        include Deps[note_queries: "notes.repos.note_queries", rename_note: "notes.operations.rename_note"]
 
         def handle(request, response)
-          renamed = rename_note.call(record_id(request), title: request.params[:title])
+          id = record_id(request)
+          title = request.params[:title]
+          count = note_queries.relinks(id, title)
 
-          settle(response, renamed, RENAMED, back(request)) { refused(request, response, it) }
+          case rename_note.call(id, title:)
+            in Success(_)
+              toast(response, RELINKED, count:)
+              response.redirect_to(back(request))
+            in Failure[:invalid, errors] then refused(request, response, errors)
+            in Failure(:not_found) then halt :not_found
+          end
         end
       end
     end

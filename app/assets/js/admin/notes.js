@@ -1,5 +1,6 @@
 import { fresh } from "./fresh.js";
 import { whilePosting } from "./live.js";
+import { showToast } from "./toast.js";
 
 const KEY = "admin:notes-shut";
 const SAVE_WAIT = 800;
@@ -113,6 +114,7 @@ function setupEditor(form) {
   let held = version.value;
   let savedTitle = title.dataset.noteTitle;
   let badTitle = null;
+  let relinked = null;
   let stopped = !refused.hidden;
   let timer = null;
   let saving = Promise.resolve();
@@ -131,11 +133,18 @@ function setupEditor(form) {
     if (status) status.textContent = text;
   };
 
+  const tellRelinked = () => {
+    if (relinked) showToast(relinked);
+    relinked = null;
+  };
+
   const settle = async (response) => {
     if (response.ok) {
       const answer = await response.json();
       held = String(answer.version);
       savedTitle = answer.title;
+      relinked = answer.relinked ?? relinked;
+      if (document.activeElement !== title) tellRelinked();
       say(savedText.replace("{time}", new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })));
       return;
     }
@@ -235,6 +244,7 @@ function setupEditor(form) {
     title.blur();
   });
   title.addEventListener("blur", () => {
+    tellRelinked();
     if (title.value.trim() && title.value.trim() !== badTitle) return;
 
     title.value = savedTitle;

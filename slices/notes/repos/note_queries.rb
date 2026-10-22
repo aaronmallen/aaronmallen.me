@@ -5,6 +5,14 @@ module Notes
     class NoteQueries < Blog::DB::Repo
       FOUND = %i[id title folder_id body updated_at].freeze
 
+      def backlink_counts(ids) = note_links.backlink_counts(ids).to_h { [it[:id], it[:count]] }
+
+      def backlinks(note)
+        linking = notes.where(id: note_links.linking(note.title).select(:note_id).dataset).exclude(id: note.id)
+
+        linking.select(:id, :title, :body).order(Sequel.function(:lower, :title)).to_a
+      end
+
       def by_id(id) = notes.combine(:tags).by_pk(id).one
 
       def child_folder(parent_id, name)
@@ -34,11 +42,28 @@ module Notes
         (1..).lazy.map { it == 1 ? base : "#{base} #{it}" }.find { !taken.include?(it.downcase) }
       end
 
+      def links_out(id) = note_links.out(id).to_a
+
       def listed = notes.select(:id, :title, :folder_id, :pinned).order(Sequel.function(:lower, :title)).to_a
 
       def recent(limit) = notes.combine(:tags).order(Sequel.desc(:updated_at), Sequel.desc(:id)).limit(limit).to_a
 
+      def relinks(id, title)
+        note = notes.by_pk(id).one
+        return 0 if note.nil? || note.title == Blog::Types::TrimmedText[title]
+
+        backlink_counts([id]).fetch(id, 0)
+      end
+
       def tagged(name) = notes.tagged([name]).select(*FOUND).order(Sequel.desc(:updated_at), Sequel.desc(:id)).to_a
+
+      def unwritten
+        rows = note_links.unwritten.to_a
+
+        rows.chunk_while { |link, other| link[:title].casecmp?(other[:title]) }.map do |linked|
+          { title: linked.first[:title], sources: linked.map { it[:source] }, folder_id: linked.first[:folder_id] }
+        end
+      end
     end
   end
 end

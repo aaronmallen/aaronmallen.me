@@ -13,9 +13,17 @@ module Notes
 
       def call(id, params)
         fields = step validated(contract.call(title: params[:title]))
-        step constrained(note_mutations, REFUSALS) { transaction { found(note_mutations.update(id, fields)) } }
+        step constrained(note_mutations, REFUSALS) { Success(transaction { rename(id, fields.fetch(:title)) }) }
 
         note_queries.by_id(id)
+      end
+
+      private
+
+      def rename(id, title)
+        note = step found(note_mutations.by_id_for_update(id))
+        note_mutations.update(id, title:)
+        note_mutations.relink(note.title, title) unless note.title == title
       end
     end
   end

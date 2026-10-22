@@ -13,11 +13,13 @@ module Admin
         tree = grow(listed)
         folder = tree.find(folder_id) if folder_id
         text = Blog::Types::TrimmedText[query]
-
-        {
-          tree:, pinned: listed.select(&:pinned), note:, folder:, filed: filed(folder),
-          recent: note || folder_id ? [] : note_queries.recent(RECENT), query: text, tag: tag(text), hits: hits(tree, text),
+        filed = filed(folder)
+        page = {
+          tree:, pinned: listed.select(&:pinned), note:, folder:, filed:, query: text, tag: tag(text),
+          hits: hits(tree, text), written: written(listed),
         }
+
+        page.merge(panes(note, folder, filed))
       end
 
       def tree = grow(note_queries.listed)
@@ -39,7 +41,24 @@ module Admin
         note_queries.found(text, folder_ids:)
       end
 
+      def home
+        recent = note_queries.recent(RECENT)
+
+        { recent:, backlink_counts: note_queries.backlink_counts(recent.map(&:id)), unwritten: note_queries.unwritten }
+      end
+
+      def linked(note) = { backlinks: note_queries.backlinks(note), links_out: note_queries.links_out(note.id) }
+
+      def panes(note, folder, filed)
+        return linked(note) if note
+        return { backlink_counts: note_queries.backlink_counts(filed.map(&:id)) } if folder
+
+        home
+      end
+
       def tag(text) = TAG.match(text.downcase)&.[](1)
+
+      def written(listed) = listed.to_h { [it.title.downcase, it.id] }
     end
   end
 end

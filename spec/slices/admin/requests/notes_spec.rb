@@ -373,8 +373,81 @@ RSpec.describe "Admin notes", type: :request do
     end
   end
 
+  describe "wiki links" do
+    let(:work) { create(:note_folder, name: "work") }
+    let!(:ruby) { write("Ruby", "See [[Rails|the framework]]") }
+    let!(:rails) { write("Rails", "Built on [[ruby]]\n\n- [[Rack]]", folder_id: work.id) }
+
+    def write(title, body, folder_id: nil)
+      Notes::Slice["operations.create_note"].call({ title:, body:, folder_id: }).value!
+    end
+
+    it "links a written note by its title and keeps the link text" do
+      get "/admin/notes/#{ruby.id}"
+
+      expect(page).to have_css(".nt-prose a.wl[href='/admin/notes/#{rails.id}']", text: "the framework")
+    end
+
+    it "draws a link to a note not written yet as a button that makes it in the same folder", :aggregate_failures do
+      get "/admin/notes/#{rails.id}"
+
+      expect(page).to have_css(".nt-prose button.wl.miss[form='note-create'][name='title'][value='Rack']", text: "Rack")
+      form = "form#note-create[action='/admin/notes'] input[name='folder_id'][value='#{work.id}']"
+      expect(page).to have_css(form, visible: :all)
+    end
+
+    it "makes the missing note under the title its link sends, in the folder the form holds", :aggregate_failures do
+      admin_post "/admin/notes", title: "Rack", folder_id: work.id
+
+      made = queries.listed.find { it.title == "Rack" }
+      expect(made.folder_id).to eq(work.id)
+      expect(last_response.location).to end_with("/admin/notes/#{made.id}?edit=1")
+    end
+
+    it "lists the backlinks with the line that links and marks the links out not written", :aggregate_failures do
+      get "/admin/notes/#{rails.id}"
+
+      expect(page).to have_css(".nt-links li.nt-bl a[href='/admin/notes/#{ruby.id}']", text: /Ruby\s*See the framework/)
+      expect(page.all(".nt-links li.record-link-row").map(&:text)).to eq(["Racknot written", "Ruby"])
+    end
+
+    it "warns how many notes link to a note before it deletes it" do
+      get "/admin/notes/#{rails.id}"
+
+      expect(page).to have_css("form[data-confirm='Delete “Rails”? 1 note links to it.']")
+    end
+
+    it "lists titles linked but not written on the home pane, each with a Create button", :aggregate_failures do
+      get "/admin/notes"
+
+      expect(page).to have_css(".nt-links .card-title", text: "Linked, not written")
+      expect(page).to have_css(".nt-ms", text: /Rack\s*from Rails/)
+      expect(page).to have_css("form[action='/admin/notes'] input[name='title'][value='Rack']", visible: :all)
+      expect(page).to have_css(".nt-rw", text: /Rails.*1 backlink/)
+    end
+
+    it "renames a note, rewrites the links to it and says how many notes changed", :aggregate_failures do
+      admin_post "/admin/notes/#{rails.id}/rename", title: "Hanami"
+
+      expect(toast).to eq("Renamed · links updated in 1 note")
+      expect(queries.by_id(ruby.id).body).to eq("See [[Hanami|the framework]]")
+    end
+
+    it "says how many notes changed when the editor saves a new title" do
+      json_post "/admin/notes/#{rails.id}", note: { title: "Hanami", version: rails.version }
+
+      expect(JSON.parse(last_response.body)["relinked"]).to eq("Renamed · links updated in 1 note")
+    end
+  end
+
   describe "menus" do
     let(:work) { create(:note_folder, name: "work") }
+
+    it "copies the note's wiki link" do
+      get "/admin/notes/#{create(:note, title: 'Plan').id}/menu"
+
+      expect(page).to have_css("button[data-copy='[[Plan]]']", text: "Copy link")
+    end
 
     it "offers the note actions the design draws" do
       get "/admin/notes/#{create(:note, folder_id: work.id).id}/menu"

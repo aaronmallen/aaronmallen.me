@@ -10094,6 +10094,20 @@ i > svg {
     @apply mt-0;
   }
 
+  & .wl {
+    @apply text-mk-violet-text no-underline admin-focus;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-mk-violet-text) 45%, transparent);
+
+    &:hover {
+      border-bottom-color: var(--color-mk-violet-text);
+    }
+  }
+
+  & .wl.miss {
+    @apply cursor-pointer text-ink-muted;
+    border-bottom: 1px dashed var(--color-ink-muted);
+  }
+
   @media (width < 53.75rem) {
     @apply px-5;
   }
@@ -10134,6 +10148,10 @@ i > svg {
 
 @utility nt-tip {
   @apply m-0 px-8 pb-5 hint;
+
+  & code {
+    @apply font-mono;
+  }
 
   @media (width < 53.75rem) {
     @apply px-5;
@@ -10226,6 +10244,44 @@ i > svg {
 
   @media (width >= 77.5rem) {
     @apply stick-bar self-start;
+  }
+}
+
+@utility nt-links {
+  & ul {
+    @apply flex min-w-0 flex-col;
+  }
+
+  & .hint {
+    @apply m-0;
+  }
+}
+
+@utility nt-bl {
+  @apply border-b border-line py-1.5 last:border-b-0;
+}
+
+@utility nt-blt {
+  @apply flex min-w-0 flex-col items-start gap-0.5 font-display text-li font-medium text-ink no-underline focus-ring;
+
+  &:hover > span:first-child {
+    @apply text-accent-text underline;
+  }
+}
+
+@utility nt-sn {
+  @apply font-serif text-sm text-ink-muted;
+}
+
+@utility nt-miss {
+  @apply cursor-pointer text-left text-ink-muted;
+}
+
+@utility nt-ms {
+  @apply flex min-w-0 flex-1 flex-col gap-0.5 font-display text-li font-medium text-ink;
+
+  & > span:last-child {
+    @apply font-mono text-xs font-normal text-ink-muted;
   }
 }
 

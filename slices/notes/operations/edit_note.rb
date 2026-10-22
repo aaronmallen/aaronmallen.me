@@ -28,9 +28,11 @@ module Notes
       end
 
       def edit(id, version:, tags: nil, **fields)
-        step current(note_mutations.by_id_for_update(id), version)
+        note = step current(note_mutations.by_id_for_update(id), version)
         note_mutations.update(id, fields)
         note_mutations.replace_tags(id, tags) if tags
+        note_mutations.store_links(id, fields[:body]) if fields.key?(:body)
+        note_mutations.relink(note.title, fields[:title]) if fields.fetch(:title, note.title) != note.title
       end
     end
   end

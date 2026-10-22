@@ -10,6 +10,9 @@ module Admin
           prop :editing, Blog::Types::Bool
           prop :errors, Blog::Types::Hash
           prop :values, Blog::Types::Hash
+          prop :written, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :backlinks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :links_out, Blog::Types::Array.of(Blog::Types::Hash)
 
           def view_template
             div(class: "nt-doc") do
@@ -45,11 +48,7 @@ module Admin
           end
 
           def body
-            source = @note.body
-
-            div(class: "nt-prose") do
-              source.strip.empty? ? blank : MarkdownBody(source:, renderer: "tasks", class: "markdown-body")
-            end
+            div(class: "nt-prose") { @note.body.strip.empty? ? blank : Prose(source: @note.body, written: @written) }
           end
 
           def crumbs
@@ -66,11 +65,9 @@ module Admin
           end
 
           def delete
-            title = @note.title
-
             ButtonForm(
               action: path(:admin_delete_note, id: @note.id), label: t(".delete"), variant: :gh, icon: :trash,
-              confirm: t(".confirm_delete", title:),
+              confirm: t(".confirm_delete", title: @note.title, count: @backlinks.size),
             )
           end
 
@@ -94,6 +91,7 @@ module Admin
                 span { IconLabel(icon: "fa-solid fa-lock") { t(".private") } }
               end
             end
+            Links(note: @note, backlinks: @backlinks, links_out: @links_out)
             div { delete }
           end
 

@@ -27,6 +27,7 @@ module Notes
       def create(fields)
         note = note_mutations.create(**fields.except(:tags))
         note_mutations.replace_tags(note.id, fields.fetch(:tags))
+        note_mutations.store_links(note.id, note.body)
         note.id
       end
 

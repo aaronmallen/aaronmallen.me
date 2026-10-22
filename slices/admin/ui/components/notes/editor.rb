@@ -35,7 +35,7 @@ module Admin
           end
 
           def foot
-            p(class: "nt-tip") { t(".tip") }
+            tip
             div(class: "nt-save", data: { note_save: "" }) do
               Button(type: "submit", variant: :pri, small: true) do
                 t(".save")
@@ -60,6 +60,18 @@ module Admin
           end
 
           def tags = @note.tags.map(&:name).join(", ")
+
+          def tip
+            p(class: "nt-tip") do
+              plain t(".tip")
+              [["[[Title]]", ".tip_link"], ["[[Title|text]]", ".tip_text"]].each do |sample, key|
+                whitespace
+                code { sample }
+                whitespace
+                plain t(key)
+              end
+            end
+          end
 
           def title
             input(
