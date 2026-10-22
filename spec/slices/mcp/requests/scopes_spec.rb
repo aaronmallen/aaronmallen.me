@@ -45,9 +45,9 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "publish" => %w[
         add_shares_to_group add_work_entry approve_webmentions create_short_link delete_share delete_share_group
-        group_shares publish_post send_social_post ungroup_share_file update_post_edit_note update_share
-        update_share_group update_share_group_file update_short_link update_webmention_settings upload_share
-        upload_share_group
+        group_shares publish_post remove_share_group_file send_social_post ungroup_share_file update_post_edit_note
+        update_share update_share_group update_share_group_file update_short_link update_webmention_settings
+        upload_share upload_share_group
       ],
       "health" => %w[read_health_days],
       "mail" => %w[
@@ -64,7 +64,8 @@ RSpec.describe "MCP tool scopes", type: :request do
         delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_event
         delete_journal_entry delete_person delete_post delete_posts delete_saved_view delete_share delete_share_group
         delete_social_post delete_task delete_task_comment
-        delete_task_rule delete_tasks delete_work_entry delete_work_session remove_tag remove_trusted_author
+        delete_task_rule delete_tasks delete_work_entry delete_work_session remove_share_group_file remove_tag
+        remove_trusted_author
       ],
     }
   end
@@ -136,6 +137,12 @@ RSpec.describe "MCP tool scopes", type: :request do
       mcp_rpc("tools/call", { name: "delete_share", arguments: { id: 1 } })
 
       expect(mcp_reply.dig("error", "data")).to start_with("delete_share needs the publish permission,")
+    end
+
+    it "refuses remove_share_group_file, naming publish" do
+      mcp_rpc("tools/call", { name: "remove_share_group_file", arguments: { id: 1, file_id: 2 } })
+
+      expect(mcp_reply.dig("error", "data")).to start_with("remove_share_group_file needs the publish permission,")
     end
 
     it "refuses update_share, naming publish" do

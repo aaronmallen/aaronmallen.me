@@ -81,9 +81,10 @@ module API
 
     import keys: %w[
       operations.add_shares_to_group operations.delete_share operations.delete_share_group operations.group_shares
-      operations.name_share_group operations.rename_share_file operations.save_share operations.save_short_link
-      operations.shorten_link operations.ungroup_share_file operations.upload_share operations.upload_share_group
-      repos.share_group_queries repos.share_queries repos.short_link_queries
+      operations.name_share_group operations.remove_share_group_file operations.rename_share_file
+      operations.save_share operations.save_short_link operations.shorten_link operations.ungroup_share_file
+      operations.upload_share operations.upload_share_group repos.share_group_queries repos.share_queries
+      repos.short_link_queries
     ], from: :shares
 
     import keys: %w[

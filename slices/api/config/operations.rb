@@ -131,6 +131,7 @@ module API
       ["update_share_group", "patch", "/share_groups/{id}", OK, PUBLISH],
       ["delete_share_group", "delete", "/share_groups/{id}", OK, [PUBLISH, DELETE]],
       ["update_share_group_file", "patch", "/share_groups/{id}/files/{file_id}", OK, PUBLISH],
+      ["remove_share_group_file", "delete", "/share_groups/{id}/files/{file_id}", OK, [PUBLISH, DELETE]],
       ["add_shares_to_group", "post", "/share_groups/{id}/files", OK, PUBLISH],
       ["ungroup_share_file", "post", "/share_groups/{id}/files/{file_id}/ungroup", OK, PUBLISH],
       ["list_short_links", "get", "/short_links", OK, READ],

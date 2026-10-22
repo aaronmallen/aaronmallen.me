@@ -261,4 +261,43 @@ RSpec.describe "MCP share tools", type: :request do
       expect(answered).to include("id" => file.id, "url" => share_link(file.id))
     end
   end
+
+  describe "remove_share_group_file" do
+    let(:group) { make_group(share_upload("a", "a.txt", "text/plain"), share_upload("b", "b.txt", "text/plain")) }
+    let(:file) { group.share_group_files.first }
+    let(:remaining) { Shares::Slice["repos.share_group_queries"].find(group.id)&.share_group_files&.map(&:id) }
+
+    it "deletes one file and its stored file and keeps the rest of the group", :aggregate_failures do
+      removed = stub_request(:delete, share_store_url(file.key))
+
+      expect(answer("remove_share_group_file", id: group.id, file_id: file.id))
+        .to eq("id" => group.id, "file_id" => file.id, "deleted" => true)
+      expect(remaining).to eq([group.share_group_files.last.id])
+      expect(removed).to have_been_requested
+    end
+
+    it "deletes the group with its last file" do
+      lone = make_group(share_upload("a", "a.txt", "text/plain"))
+      stub_request(:delete, share_store_url(lone.share_group_files.first.key))
+      answer("remove_share_group_file", id: lone.id, file_id: lone.share_group_files.first.id)
+
+      expect(Shares::Slice["repos.share_group_queries"].find(lone.id)).to be_nil
+    end
+
+    it "keeps the file when the store fails", :aggregate_failures do
+      stub_request(:delete, share_store_url(file.key)).to_return(status: 500)
+
+      expect(refusal("remove_share_group_file", id: group.id, file_id: file.id))
+        .to eq([true, [{ "type" => "text", "text" => API::Helpers::Upload::STORE_DOWN }]])
+      expect(remaining.size).to eq(2)
+    end
+
+    it "refuses a file the group does not hold" do
+      expect(refusal("remove_share_group_file", id: group.id, file_id: 0).first).to be(true)
+    end
+
+    it "refuses an ID no group holds" do
+      expect(refusal("remove_share_group_file", id: 0, file_id: 1).first).to be(true)
+    end
+  end
 end

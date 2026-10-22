@@ -180,7 +180,6 @@ RSpec.describe "MCP reach", type: :app do
       "shares.operations.delete_short_link" => "the owner deletes short links in the admin; spec #1913 gives MCP none",
       "shares.operations.fetch_short_link_title" => "a background job fills a blank short link title",
       "shares.operations.queue_short_link_check" => "the owner checks a destination again from the admin's Links tab",
-      "shares.operations.remove_share_group_file" => "spec #1258 keeps group edits in the admin",
       "shares.operations.save_share_group" => "spec #1258 keeps group edits in the admin",
       "social.operations.check_author_scope" => "verify_webmention and the webmention repos check an author owns pages",
       "social.operations.count_network_lengths" => "counts characters as the admin types; compose checks the limits",

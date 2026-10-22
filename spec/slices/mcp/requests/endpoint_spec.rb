@@ -2401,6 +2401,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_work_entry" => { id: 1 },
         "reject_suggestion_edits" => { suggestion_id: 1 },
         "remove_memory_fact" => { id: 1, fact_id: 2, **author },
+        "remove_share_group_file" => { id: 1, file_id: 2 },
         "remove_tag" => { id: 1, scope: "public" },
         "remove_trusted_author" => { author_url: "https://ada.example/" },
         "reopen_decision" => { id: 1, reason: "Load grew" },
