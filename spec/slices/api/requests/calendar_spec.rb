@@ -212,4 +212,40 @@ RSpec.describe "API calendar", type: :request do
   it "answers the MCP tool with an error for a range over 366 days" do
     expect(mcp_call("list_calendar", from: first.iso8601, to: (first + 366).iso8601).fetch("isError")).to be(true)
   end
+
+  describe "event writes" do
+    let(:standup) { create(:calendar_event, calendar_id: mine.id, google_id: "abc", starts_on: last, ends_on: last) }
+    let(:mine) { create(:calendar, account: "me@example.com", google_id: "me@example.com") }
+
+    before do
+      connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES)
+      json = { body: "{}", headers: { "Content-Type" => "application/json" } }
+      stub_request(:any, %r{googleapis\.com/calendar}).to_return(json)
+    end
+
+    it "creates an event under write" do
+      call_api(:post, "/calendar/events", { calendar_id: mine.id, title: "Trip", date: last.iso8601, all_day: true })
+
+      expect([last_response.status, document]).to eq([201, { "calendar_id" => mine.id, "created" => true }])
+    end
+
+    it "refuses a write to a token without write" do
+      call_api(:patch, "/calendar/events/#{standup.id}", { title: "Retro" }, token: api_token(%w[read delete]))
+
+      expect(last_response.status).to eq(403)
+    end
+
+    it "refuses a delete to a token with write but not delete", :aggregate_failures do
+      call_api(:delete, "/calendar/events/#{standup.id}", nil, token: api_token(%w[read write]))
+
+      expect(last_response.status).to eq(403)
+      expect(a_request(:delete, /googleapis/)).not_to have_been_made
+    end
+
+    it "deletes an event under write and delete" do
+      call_api(:delete, "/calendar/events/#{standup.id}", nil, token: api_token(%w[read write delete]))
+
+      expect(document).to eq("id" => standup.id, "deleted" => true)
+    end
+  end
 end

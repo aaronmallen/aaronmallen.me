@@ -26,7 +26,10 @@ module API
       repos.analytics_rollup_queries repos.feed_fetch_queries repos.post_reader_queries
     ], from: :analytics
 
-    import keys: %w[repos.calendar_day_queries], from: :calendar
+    import keys: %w[
+      operations.create_event operations.delete_event operations.edit_event operations.move_event
+      repos.calendar_day_queries repos.calendar_queries
+    ], from: :calendar
 
     import keys: %w[
       operations.act_on_messages

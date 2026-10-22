@@ -23,11 +23,14 @@ RSpec.describe "MCP tool scopes", type: :request do
         archive_project cancel_task cancel_tasks capture_task
         clear_inbox
         complete_task complete_tasks
-        create_journal_entry create_post create_saved_view create_social_post drop_decision drop_sprint edit_decision
-        edit_decision_comment edit_decision_option edit_task_comment ignore_webmentions import_commits
+        create_event
+        create_journal_entry create_post create_saved_view create_social_post
+        delete_event
+        drop_decision drop_sprint edit_decision
+        edit_decision_comment edit_decision_option edit_event edit_task_comment ignore_webmentions import_commits
         link_records
         link_tasks mark_task_seen mark_webmentions_spam
-        moderate_webmention move_task move_tasks open_decision pause_task pause_task_series plan_sprint
+        moderate_webmention move_event move_task move_tasks open_decision pause_task pause_task_series plan_sprint
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project
         resume_task_series save_person
         save_project save_review_note save_tag save_task save_task_rule schedule_task set_task_total
@@ -56,8 +59,9 @@ RSpec.describe "MCP tool scopes", type: :request do
         update_artifact
       ],
       "delete" => %w[
-        delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_journal_entry
-        delete_person delete_post delete_posts delete_saved_view delete_social_post delete_task delete_task_comment
+        delete_artifact delete_decision_comment delete_memory_file delete_decision_option delete_event
+        delete_journal_entry delete_person delete_post delete_posts delete_saved_view delete_social_post delete_task
+        delete_task_comment
         delete_task_rule delete_tasks delete_work_entry delete_work_session remove_tag remove_trusted_author
       ],
     }

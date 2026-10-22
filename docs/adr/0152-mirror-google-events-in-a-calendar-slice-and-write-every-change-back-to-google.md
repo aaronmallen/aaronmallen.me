@@ -12,6 +12,8 @@ area:
   - record
   - services
 issue: "#1124"
+amended:
+  - "#1915"
 tags:
   - calendar
   - google
@@ -62,6 +64,13 @@ only that instance.
 
 **Events sit under `read`.** `list_calendar` and the API return them to any token with `read`.
 
+**MCP and the API write events too.** #1915 added `create_event`, `edit_event`, `move_event` and `delete_event`,
+which call the same operations the page does ([ADR 0088][0088]), so the work calendar refusal and the write to
+Google hold for them as well. Create, edit and move need `write`. Delete needs `write` and `delete`, as removals do
+under [ADR 0114][0114]. An edit, move or delete of a recurring instance takes `this` or `all`. Moving `all` shifts
+the whole series by as many days, the way an edit of `all` does, while a drag on the page still moves only that
+instance.
+
 ## Alternatives
 
 **Read-only events, or drag only.** Each is less code, but I would still open Google to make or fix an event, and
@@ -86,7 +95,9 @@ Event details land in the nightly backups ([ADR 0105][0105]).
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md
 [0047]: 0047-keep-every-syncs-state-in-records-sync-states-table-keyed-by-kind-sync-and-repo.md
 [0055]: 0055-make-every-admin-write-a-plain-form-post-that-scripts-only-add-to.md
+[0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
+[0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
