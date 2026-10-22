@@ -321,7 +321,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       2.times { agents(:record_read, session_id, hanami.id) }
       open_drawer
 
-      expect(reads.all(".agent-read").map(&:text)).to eq(["#{clock}global hanami.md"] * 2)
+      expect(reads.all(".agent-read").map(&:text)).to eq(["#{clock} global hanami.md"] * 2)
       expect(reads).to have_link("hanami.md", href: "/admin/agents/memories/#{hanami.id}", count: 2)
     end
 

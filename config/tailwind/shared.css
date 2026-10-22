@@ -2236,11 +2236,11 @@
 }
 
 @utility agent-read-scope {
-  @apply font-mono text-ink-muted;
+  @apply font-mono text-meta text-ink-muted;
 }
 
 @utility agent-read-time {
-  @apply w-11 shrink-0 font-mono text-ink-muted;
+  @apply shrink-0 font-mono text-meta text-ink-muted;
 }
 
 @utility agent-search {
@@ -5404,7 +5404,7 @@
 }
 
 @utility memory-description {
-  @apply my-0 mt-1 block font-serif text-li break-words text-ink-muted;
+  @apply my-0 mt-1 block font-serif text-li break-words whitespace-normal text-ink-muted;
 }
 
 @utility agent-mark {
