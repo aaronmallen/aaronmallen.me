@@ -6,7 +6,7 @@ module Admin
       class Edit < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
-          person_queries: "social.repos.person_queries",
+          person_queries: "contacts.repos.person_queries",
         ]
 
         def handle(request, response)

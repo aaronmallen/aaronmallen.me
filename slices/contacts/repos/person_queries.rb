@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Repos
     class PersonQueries < Blog::DB::Repo
       def all = people.in_name_order.to_a

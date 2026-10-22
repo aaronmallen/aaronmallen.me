@@ -285,7 +285,7 @@ RSpec.describe "Admin social mentions", type: :feature do
   end
 
   describe "adding someone new" do
-    let(:person_queries) { Social::Slice["repos.person_queries"] }
+    let(:person_queries) { Contacts::Slice["repos.person_queries"] }
 
     def add_new(text = "hi @Ada Lovelace") = type(text, :enter)
 

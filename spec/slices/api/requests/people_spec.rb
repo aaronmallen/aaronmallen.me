@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API people", type: :request do
-  let(:person_queries) { Social::Slice["repos.person_queries"] }
+  let(:person_queries) { Contacts::Slice["repos.person_queries"] }
 
   def add(fields) = call_api(:post, "/people", JSON.generate(fields))
 

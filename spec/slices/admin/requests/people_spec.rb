@@ -3,7 +3,7 @@
 RSpec.describe "Admin people", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:person_queries) { Social::Slice["repos.person_queries"] }
+  let(:person_queries) { Contacts::Slice["repos.person_queries"] }
 
   def add(**fields) = admin_post("/admin/people", person: { **blank, **fields })
 

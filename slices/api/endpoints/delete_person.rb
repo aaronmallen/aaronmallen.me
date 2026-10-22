@@ -6,7 +6,7 @@ module API
       SCHEMA = Helpers::Schema.by_id
       REPLY = Helpers::Schema.object({ id: Helpers::Schema::INTEGER, deleted: Helpers::Schema::BOOLEAN }).freeze
 
-      include Deps[delete_person: "social.operations.delete_person"]
+      include Deps[delete_person: "contacts.operations.delete_person"]
 
       def handle(id:)
         case delete_person.call(id)

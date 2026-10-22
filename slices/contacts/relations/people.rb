@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Relations
     class People < Blog::DB::Relation
       schema :people, infer: true

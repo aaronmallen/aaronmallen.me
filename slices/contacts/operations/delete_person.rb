@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Operations
     class DeletePerson < Blog::Operation
       include Deps[person_mutations: "repos.person_mutations", person_queries: "repos.person_queries"]

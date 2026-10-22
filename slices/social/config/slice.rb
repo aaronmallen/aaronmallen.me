@@ -17,22 +17,24 @@ module Social
       operations.compose_announcement operations.record_post_webmentions repos.post_queries
     ], from: :posts
 
+    import keys: %w[repos.person_queries], from: :contacts
+
     import keys: %w[repos.connection_queries], from: :services
 
     import keys: %w[operations.shorten_link repos.short_link_queries], from: :shares
 
     export %w[
       operations.act_on_webmentions operations.check_network_fit
-      operations.compose_social_post operations.count_network_lengths operations.delete_person
+      operations.compose_social_post operations.count_network_lengths
       operations.delete_social_post operations.find_over_limit_network
       operations.list_target_accounts operations.lock_editable_social_post
       operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention
       operations.move_social_post operations.receive_webmention operations.remove_trusted_author
       operations.replace_social_post_parts
-      operations.resolve_mentions operations.save_person operations.scan_links operations.scan_tags
+      operations.resolve_mentions operations.scan_links operations.scan_tags
       operations.search_accounts
       operations.snooze_webmentions operations.update_webmention_settings operations.wake_webmention
-      repos.person_queries repos.social_post_queries repos.webmention_queries
+      repos.social_post_queries repos.webmention_queries
     ]
   end
 end

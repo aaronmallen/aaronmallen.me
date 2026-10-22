@@ -40,6 +40,8 @@ module Admin
       repos.calendar_day_queries repos.calendar_queries
     ], from: :calendar
 
+    import keys: %w[operations.delete_person operations.save_person repos.person_queries], from: :contacts
+
     import keys: %w[
       operations.clear_inbox
       operations.mint_token operations.revoke_token
@@ -124,10 +126,10 @@ module Admin
 
     import keys: %w[
       operations.act_on_webmentions operations.compose_social_post operations.count_network_lengths
-      operations.delete_person operations.delete_social_post operations.find_over_limit_network
-      operations.list_target_accounts operations.moderate_webmention operations.move_social_post
-      operations.remove_trusted_author operations.resolve_mentions operations.save_person operations.search_accounts
-      operations.update_webmention_settings repos.person_queries repos.social_post_queries repos.webmention_queries
+      operations.delete_social_post operations.find_over_limit_network operations.list_target_accounts
+      operations.moderate_webmention operations.move_social_post operations.remove_trusted_author
+      operations.resolve_mentions operations.search_accounts operations.update_webmention_settings
+      repos.social_post_queries repos.webmention_queries
     ], from: :social
 
     import keys: %w[

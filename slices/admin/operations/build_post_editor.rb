@@ -11,7 +11,7 @@ module Admin
         check_post_links: "posts.operations.check_post_links",
         count_network_lengths: "social.operations.count_network_lengths",
         list_networks: "operations.list_networks",
-        person_queries: "social.repos.person_queries",
+        person_queries: "contacts.repos.person_queries",
         post_queries: "posts.repos.post_queries",
         preview_announcement: "operations.preview_announcement",
         resolve_mentions: "social.operations.resolve_mentions",

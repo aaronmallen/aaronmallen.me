@@ -12,7 +12,7 @@ module Admin
           mention_view: "ui.views.people.mention",
           new_view: "ui.views.people.new",
           resolve_mentions: "social.operations.resolve_mentions",
-          save_person: "social.operations.save_person",
+          save_person: "contacts.operations.save_person",
         ]
 
         def handle(request, response)

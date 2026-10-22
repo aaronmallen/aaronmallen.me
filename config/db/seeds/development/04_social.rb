@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-return if Social::Slice["repos.person_queries"].all.any?
+return if Contacts::Slice["repos.person_queries"].all.any?
 
-save_person = Social::Operations::SavePerson.new(networks: Seeds.networks)
+save_person = Contacts::Operations::SavePerson.new(networks: Seeds.networks)
 [
   { key: "ada", name: "Ada Example", bluesky_handle: "ada.example.com", mastodon_handle: "@ada@social.example.com" },
   { key: "grace", name: "Grace Example", bluesky_handle: "grace.example.org", mastodon_handle: nil },

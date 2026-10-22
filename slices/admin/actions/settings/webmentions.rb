@@ -8,7 +8,7 @@ module Admin
           build_person_editor: "operations.build_person_editor",
           build_settings_tabs: "operations.build_settings_tabs",
           networks: "social_networks.all",
-          person_queries: "social.repos.person_queries",
+          person_queries: "contacts.repos.person_queries",
           post_queries: "posts.repos.post_queries",
           webmention_queries: "social.repos.webmention_queries",
         ]

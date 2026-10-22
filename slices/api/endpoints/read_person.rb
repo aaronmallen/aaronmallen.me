@@ -6,7 +6,7 @@ module API
       SCHEMA = Helpers::Schema.by_id
       REPLY = Serializers::Person.reference
 
-      include Deps[person_queries: "social.repos.person_queries"]
+      include Deps[person_queries: "contacts.repos.person_queries"]
 
       def handle(id:)
         person = person_queries.by_id(id)

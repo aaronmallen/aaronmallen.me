@@ -20,7 +20,7 @@ module Admin
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
         list_target_accounts: "social.operations.list_target_accounts",
-        person_queries: "social.repos.person_queries",
+        person_queries: "contacts.repos.person_queries",
         resolve_mentions: "social.operations.resolve_mentions",
         review_social_edits: "operations.review_social_edits",
         settings: "settings",

@@ -246,7 +246,7 @@ RSpec.describe "Changes that show in public", type: :request do
 
       expect(response).to be_refused
       expect(JSON.parse(response.body).fetch("error_description")).to include("social post #{social_post.id}")
-      expect(Social::Slice["repos.person_queries"].by_id(jane.id).mastodon_handle).to eq(jane.mastodon_handle)
+      expect(Contacts::Slice["repos.person_queries"].by_id(jane.id).mastodon_handle).to eq(jane.mastodon_handle)
     end
 
     it "cannot rename a person to a key a scheduled social post mentions" do
@@ -261,7 +261,7 @@ RSpec.describe "Changes that show in public", type: :request do
 
       expect(response).to be_refused
       expect(JSON.parse(response.body).fetch("error_description")).to include("social post #{social_post.id}")
-      expect(Social::Slice["repos.person_queries"].by_keys(%w[joan])).to be_empty
+      expect(Contacts::Slice["repos.person_queries"].by_keys(%w[joan])).to be_empty
     end
 
     it "still adds a person whose key only a draft social post mentions" do

@@ -1197,7 +1197,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   end
 
   describe "a post that mentions people" do
-    let(:person_mutations) { Social::Slice["repos.person_mutations"] }
+    let(:person_mutations) { Contacts::Slice["repos.person_mutations"] }
 
     let!(:ada) do
       create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",

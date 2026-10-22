@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin people", type: :feature do
-  let(:person_queries) { Social::Slice["repos.person_queries"] }
+  let(:person_queries) { Contacts::Slice["repos.person_queries"] }
 
   before { sign_in_to_admin }
 

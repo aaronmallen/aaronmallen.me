@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Contracts
     class PersonContract < Blog::Contract
       BLUESKY_FORMAT = /\A(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]\z/

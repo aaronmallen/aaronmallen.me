@@ -12,8 +12,8 @@ module API
       REPLY = Serializers::Person.reference
 
       include Deps[
-        person_queries: "social.repos.person_queries",
-        save_person: "social.operations.save_person",
+        person_queries: "contacts.repos.person_queries",
+        save_person: "contacts.operations.save_person",
         social_post_queries: "social.repos.social_post_queries",
       ]
 

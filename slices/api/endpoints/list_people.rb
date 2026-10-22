@@ -6,7 +6,7 @@ module API
       SCHEMA = { additionalProperties: false, properties: {} }.freeze
       REPLY = Helpers::Schema.object({ people: Helpers::Schema.list(Serializers::Person.reference) }).freeze
 
-      include Deps[person_queries: "social.repos.person_queries"]
+      include Deps[person_queries: "contacts.repos.person_queries"]
 
       def handle = Success(people: serialized(Serializers::Person, person_queries.all))
     end

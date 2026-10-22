@@ -569,7 +569,7 @@ RSpec.describe "Admin social", type: :request do
       end
 
       it "rejects a mention of someone taken out of the directory" do
-        Social::Slice["repos.person_mutations"].delete(create(:person, key: "ada-lovelace").id)
+        Contacts::Slice["repos.person_mutations"].delete(create(:person, key: "ada-lovelace").id)
         compose(parts: ["hi @{ada-lovelace}"])
 
         expect(social_posts_in("queued")).to be_empty

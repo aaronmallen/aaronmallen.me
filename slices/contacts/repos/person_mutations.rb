@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Repos
     class PersonMutations < Blog::DB::Repo
       root :people

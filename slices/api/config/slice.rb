@@ -31,6 +31,8 @@ module API
       repos.calendar_day_queries repos.calendar_queries
     ], from: :calendar
 
+    import keys: %w[operations.delete_person operations.save_person repos.person_queries], from: :contacts
+
     import keys: %w[
       operations.act_on_messages
       operations.change_thread
@@ -84,11 +86,10 @@ module API
     ], from: :shares
 
     import keys: %w[
-      operations.act_on_webmentions operations.compose_social_post operations.delete_person
-      operations.delete_social_post operations.list_target_accounts operations.mark_webmention_seen
-      operations.measure_parts operations.moderate_webmention operations.remove_trusted_author operations.save_person
-      operations.search_accounts operations.snooze_webmentions operations.update_webmention_settings
-      operations.wake_webmention repos.person_queries
+      operations.act_on_webmentions operations.compose_social_post operations.delete_social_post
+      operations.list_target_accounts operations.mark_webmention_seen operations.measure_parts
+      operations.moderate_webmention operations.remove_trusted_author operations.search_accounts
+      operations.snooze_webmentions operations.update_webmention_settings operations.wake_webmention
       repos.social_post_queries repos.webmention_queries
     ], from: :social
 

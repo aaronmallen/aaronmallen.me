@@ -10,7 +10,7 @@ module Admin
 
         include Deps[
           message_queries: "mail.repos.message_queries",
-          person_queries: "social.repos.person_queries",
+          person_queries: "contacts.repos.person_queries",
           record_link_queries: "links.repos.record_link_queries",
           save_draft: "mail.operations.save_draft",
           thread_queries: "mail.repos.thread_queries",

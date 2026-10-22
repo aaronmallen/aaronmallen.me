@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Social
+module Contacts
   module Operations
     class SavePerson < Blog::Operation
       BLUESKY = Blog::Types::NetworkName["bluesky"]

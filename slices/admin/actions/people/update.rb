@@ -9,8 +9,8 @@ module Admin
         include Deps[
           build_person_editor: "operations.build_person_editor",
           edit_view: "ui.views.people.edit",
-          person_queries: "social.repos.person_queries",
-          save_person: "social.operations.save_person",
+          person_queries: "contacts.repos.person_queries",
+          save_person: "contacts.operations.save_person",
         ]
 
         def handle(request, response)

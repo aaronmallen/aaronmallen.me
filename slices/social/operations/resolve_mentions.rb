@@ -7,7 +7,7 @@ module Social
       MASTODON = Blog::Types::NetworkName["mastodon"]
       TOKEN = /@\{([^{}\p{White_Space}]+)\}/
 
-      include Deps[person_queries: "repos.person_queries"]
+      include Deps[person_queries: "contacts.repos.person_queries"]
 
       def call(texts, network)
         people = stored(texts)
