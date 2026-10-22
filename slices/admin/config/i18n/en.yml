@@ -966,6 +966,7 @@ en:
           meet: "Join Meet"
           read_only: "Read-only here"
           untitled: "(no title)"
+        event_meta:
           until: "until %{date}"
         field_error:
           date:
@@ -1016,6 +1017,30 @@ en:
         scope:
           all: "All events"
           this: "This event"
+        today_card:
+          at: "at %{time}."
+          clear: "clear"
+          done: "Done for the day."
+          earlier: "%{count} earlier"
+          empty: "Nothing on the calendar today."
+          first_tomorrow: "First tomorrow:"
+          left: "%{left} of %{total} left"
+          new_event: "New event"
+          soon:
+            both: "in %{hours}h %{minutes}m"
+            hours: "in %{hours}h"
+            minutes: "in %{minutes}m"
+          title: "Calendar"
+          untitled: "(no title)"
+          week: "week →"
+        today_event:
+          all_day: "all day"
+          google: "Google Calendar"
+          join: "Join %{title}"
+          meet: "Join Meet"
+          now: "now"
+          prep: "Prep task"
+          untitled: "(no title)"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"

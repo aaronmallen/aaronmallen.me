@@ -8,16 +8,17 @@ module Admin
           include Components::Tasks
 
           LIVE_TABLES = %w[
-            agent_sessions artifact_versions attention_snoozes commits health_days journal_entries journal_entry_tags
-            link_check_runs memory_events oauth_clients oauth_tokens post_link_checks posts projects
-            service_connections short_link_checks short_links social_post_deliveries social_posts sprints sync_states
-            task_comments task_contributors task_links task_series task_tags work_sessions
+            agent_sessions artifact_versions attention_snoozes calendar_events calendars commits health_days
+            journal_entries journal_entry_tags link_check_runs memory_events oauth_clients oauth_tokens post_link_checks
+            posts projects service_connections short_link_checks short_links social_post_deliveries social_posts sprints
+            sync_states task_comments task_contributors task_links task_series task_tags work_sessions
           ].freeze
           ORIGIN = Blog::Types::TaskOrigin["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
           prop :agents, Blog::Types::Hash
           prop :attention, Blog::Types::Hash
+          prop :calendar, Blog::Types::Hash
           prop :clients, Blog::Types::Integer
           prop :commits, Blog::Types::Hash
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
@@ -84,6 +85,7 @@ module Admin
 
           def side_cards
             AttentionCard(**@attention)
+            Components::Calendar::TodayCard(**@calendar)
             CommitsCard(**@commits, totals: @commit_totals)
             Components::Agents::TodayCard(**@agents)
             QuietCard(

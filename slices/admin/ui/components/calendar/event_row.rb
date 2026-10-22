@@ -71,7 +71,7 @@ module Admin
           def head
             summary(class: "cal-event-title") do
               span(class: "cal-event-name") { title }
-              span(class: "li-sub cal-event-meta") { meta }
+              EventMeta(event: @event)
             end
           end
 
@@ -93,13 +93,6 @@ module Admin
               link(@event.meet_url, MEET, t(".meet")) if @event.meet_url
               link(@event.link, :outbound, t(".google")) if @event.link
             end
-          end
-
-          def meta
-            span(class: "cal-event-calendar") { @event.calendar.name }
-            span { "#{clock(@event.starts_at)}–#{clock(@event.ends_at)}" } unless @event.all_day?
-            span { t(".until", date: l(@event.ends_on, format: :short)) } if @event.ends_on > @event.starts_on
-            span { IconLabel(icon: "fa-solid fa-location-dot") { @event.place } } if @event.place
           end
 
           def more

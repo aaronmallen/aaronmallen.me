@@ -3139,6 +3139,29 @@
   @apply mt-1 flex flex-wrap items-center gap-2;
 }
 
+@utility today-event {
+  &[data-state="past"] {
+    @apply opacity-60;
+  }
+
+  &[data-state="now"] {
+    @apply -ml-2.5 pl-2;
+    box-shadow: inset 2px 0 0 var(--tone);
+  }
+
+  &:has(> details[open]) > .today-event-join {
+    @apply hidden;
+  }
+}
+
+@utility today-event-head {
+  @apply flex items-baseline justify-between gap-2;
+}
+
+@utility today-event-soon {
+  @apply flex-none font-mono text-badge text-ink-muted;
+}
+
 @utility cal-new-event {
   @apply mb-3;
 
@@ -6496,7 +6519,7 @@
   @apply font-mono text-badge text-mk-green-text no-underline hover:underline admin-focus;
 
   @variant phone {
-    @apply inline-flex min-h-tap items-center;
+    @apply inline-flex min-h-tap min-w-tap items-center justify-center;
   }
 }
 

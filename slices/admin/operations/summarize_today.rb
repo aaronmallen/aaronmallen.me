@@ -15,6 +15,7 @@ module Admin
         "operations.summarize_sprint",
         agent_session_queries: "agents.repos.agent_session_queries",
         attention_queries: "activity.repos.attention_queries",
+        calendar_queries: "calendar.repos.calendar_queries",
         client: "github.client",
         client_queries: "api.repos.client_queries",
         commit_queries: "record.repos.commit_queries",
@@ -36,6 +37,7 @@ module Admin
           **counts(now),
           agents: agents(now),
           attention: attention(now, inbox),
+          calendar: calendar(now),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
@@ -72,6 +74,19 @@ module Admin
         { posts: post_queries.link_check_tally[:links], short: short_link_queries.count_listed(failing: true) }
       end
 
+      def calendar(now)
+        today = Blog::TimeZone.local_date(now)
+        calendars = calendar_queries.listed
+
+        {
+          events: events_on(today),
+          tomorrow: events_on(today + 1).find { !it.all_day? && it.starts_on > today },
+          tones: BuildCalendarPage.tones(calendars),
+          writable: calendars.any?(&:writable),
+          now:,
+        }
+      end
+
       def commits(now)
         {
           entries: commit_queries.today(now:, limit: COMMIT_LIMIT),
@@ -91,6 +106,8 @@ module Admin
       def counts(now)
         { clients: client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.local_date(now)) }
       end
+
+      def events_on(day) = calendar_queries.events_between(from: day, to: day, include_hidden: false)
 
       def failures
         sync_state_queries.failures + [countries_failure].compact

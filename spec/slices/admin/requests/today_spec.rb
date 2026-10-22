@@ -55,11 +55,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "puts the sprint on the left and Shipped today and Agents on the right", :aggregate_failures do
+    it "puts the sprint on the left and Calendar, Shipped today and Agents on the right", :aggregate_failures do
       get "/admin"
 
       expect(column("main")).to eq(["Today's sprint"])
-      expect(column("side")).to eq(["Shipped today", "Agents"])
+      expect(column("side")).to eq(["Calendar", "Shipped today", "Agents"])
     end
 
     it "reads the mail settings once" do

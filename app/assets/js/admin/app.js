@@ -37,6 +37,7 @@ import { setupTagFields } from "./tag_field.js";
 import { bootTaskOrder, setupTaskOrder } from "./task_order.js";
 import { bootTaskPanel, setupTaskPanel } from "./task_panel.js";
 import { setupToasts } from "./toast.js";
+import { bootTodayCalendar } from "./today_calendar.js";
 import { bootTracked } from "./tracked.js";
 import { setupWorkForms } from "./work_form.js";
 
@@ -92,6 +93,7 @@ const BOOT = [
   bootPostEditors,
   bootTaskOrder,
   bootTaskPanel,
+  bootTodayCalendar,
   bootTracked,
 ];
 

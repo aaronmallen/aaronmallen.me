@@ -7,6 +7,10 @@ module Admin
       MONTH_PATTERN = /\A(\d{4})-(\d{2})\z/
       WEEK = 7
 
+      def self.tones(calendars)
+        calendars.each_with_index.to_h { |calendar, at| [calendar.id, COLORS[at % COLORS.size]] }
+      end
+
       include Deps[
         calendar_day_queries: "calendar.repos.calendar_day_queries",
         calendar_queries: "calendar.repos.calendar_queries",
@@ -20,7 +24,7 @@ module Admin
         shown = days.find { it.date == (picked || chosen(first, today)) }
         calendars = calendar_queries.listed
 
-        { month: first, today:, days:, day: shown, tasks: tasks(shown), calendars:, tones: tones(calendars) }
+        { month: first, today:, days:, day: shown, tasks: tasks(shown), calendars:, tones: self.class.tones(calendars) }
       end
 
       private
@@ -48,8 +52,6 @@ module Admin
 
         sprint ? task_queries.in_sprint(sprint.id) : Blog::Constants::EMPTY_ARRAY
       end
-
-      def tones(calendars) = calendars.each_with_index.to_h { |calendar, at| [calendar.id, COLORS[at % COLORS.size]] }
     end
   end
 end
