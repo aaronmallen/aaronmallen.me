@@ -108,9 +108,9 @@ module Admin
               aria: { label: t(".results_label") }, data: { palette_list: true },
             ) do
               action_group
-              PaletteRecords()
               PaletteSavedViews()
               category_groups
+              PaletteRecords()
               search_group
             end
           end

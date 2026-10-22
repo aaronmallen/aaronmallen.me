@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727", "#1752", "#1750", "#1751", "#1748"]
+amended: ["#873", "#919", "#1102", "#1106", "#1742", "#1727", "#1752", "#1750", "#1751", "#1748", "#1890"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -42,8 +42,9 @@ item: the Settings page draws its own tab bar, so its screens show no sub-tabs. 
 screen they name opens without scripts. `live.js` morphs the top bar where it morphed the context bar
 ([ADR 0118][0118]).
 
-**The palette stays, regrouped.** It lists Actions, Records, Saved views, one group per category (Today, Inbox, Tasks,
-Journal, Publish, Agents since #1752, Insights and Settings) and Search, in that order. Each screen sits under its
+**The palette stays, regrouped.** It lists Actions, Saved views, one group per category (Today, Inbox, Tasks, Journal,
+Publish, Agents since #1752, Insights and Settings), Records and Search, in that order. #1890 moved Records below the
+categories, so records that load late never take the selection from a screen the query names. Each screen sits under its
 category's header and keeps its jump letter, and Settings holds every Settings tab. A search hides each header whose
 rows it filters out, and a category's name finds its screens. Records search works as it does today ([ADR 0096][0096]).
 The search page has no nav entry: it opens only from the palette's "See all results" row. Actions keep

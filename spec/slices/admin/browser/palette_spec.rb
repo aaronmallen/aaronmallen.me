@@ -76,12 +76,12 @@ RSpec.describe "Admin command palette", type: :feature do
       end
     end
 
-    it "orders the groups Actions, Records, Saved views, each category, then Search" do
+    it "orders the groups Actions, Saved views, each category, Records, then Search" do
       groups = page.all("#command-palette [data-palette-group]", visible: :all).map { it["aria-labelledby"] }
       names = groups.map { it.sub(/\Acommand-palette-(group-)?/, "").sub(/\Akind-.+/, "records") }
 
       expect(names.uniq).to eq(
-        %w[actions records saved-views today inbox tasks journal publish agents insights settings see-all],
+        %w[actions saved-views today inbox tasks journal publish agents insights settings records see-all],
       )
     end
 
@@ -307,6 +307,19 @@ RSpec.describe "Admin command palette", type: :feature do
 
     it "shows its label beside its kind" do
       expect(page).to have_css(".pal-r", text: "Email the accountant") { it.has_css?(".pal-r-sub", text: /task 1\z/i) }
+    end
+  end
+
+  describe "searching a section name that a record also holds" do
+    before do
+      create(:task, title: "Check the activity feed")
+      open_palette
+      query.send_keys(*"activity".chars)
+      find(".pal-r", text: "Check the activity feed")
+    end
+
+    it "keeps the section selected once records load" do
+      expect(active).to eq("command-palette-activity")
     end
   end
 
