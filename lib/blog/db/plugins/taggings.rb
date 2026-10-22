@@ -15,6 +15,7 @@ module Blog
           decision_tags: { owner_key: :decision_id, scope: PRIVATE, kind: :decisions },
           task_rule_tags: { owner_key: :task_rule_id, scope: PRIVATE, kind: :task_rules },
           mail_thread_tags: { owner_key: :mail_thread_id, scope: PRIVATE, kind: :messages },
+          note_tags: { owner_key: :note_id, scope: PRIVATE, kind: :notes },
         }.freeze
         SCOPES = TABLES.transform_values { it.fetch(:scope) }.freeze
 

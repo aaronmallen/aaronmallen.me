@@ -17,6 +17,7 @@ issue: "#76"
 amended:
   - "#284"
   - "#911"
+  - "#1926"
 tags:
   - tags
   - scope
@@ -56,7 +57,8 @@ every record that carries it, and `decision_tags` and `task_rule_tags` follow th
 
 `Blog::DB::Plugins::Tags#claim` and `#next_color` take a scope, so a new tag takes the least used color within its
 scope. Each slice's repo passes its own: `posts` and `projects` claim public tags, `record` and `tasks` claim private
-ones. As #911 records, `decisions` and `contact` claim private tags too.
+ones. As #911 records, `decisions` and `contact` claim private tags too, and since #1926
+`notes` does.
 
 New migrations split the data. A tag joined from both sides becomes a public row and a private row with the same
 color, and its joins move to match. A tag joined from one side takes that side's scope.

@@ -35,6 +35,7 @@ amended:
   - "#1743"
   - "#607"
   - "#1889"
+  - "#1926"
 tags:
   - postgres
   - constraints
@@ -76,7 +77,9 @@ One rule breaks this, as [ADR 0084][0084] records and #143 built. `Posts::Operat
 note when the body of a published post changes. It checks in Ruby, after it locks the post's row, so the race above
 cannot reach it, but the rule binds only callers that go through `SavePost`. Decisions follow it, as
 [ADR 0099][0099] records and #274 built: `EditDecision` and `EditDecisionOption` ask for a note on a closed
-decision under the decision's lock.
+decision under the decision's lock. Notes follow it too, since #1926: `Notes::Operations::EditNote` refuses an edit
+whose version is not the note's under the note's lock, with `version: changed`, so an edit made against an older read
+cannot overwrite a newer one. A trigger counts `notes.version` on with every write.
 
 Mentions break it too, as [ADR 0079][0079] records and #913 wrote down. `Social::Contracts::ComposeSocialPostContract`
 refuses a mention token that names nobody in the directory, and asks `Social::Operations::ResolveMentions#unknown`
@@ -100,6 +103,10 @@ raises again.
 | `memory_files_project_id_fkey` | foreign key | `Agents::Operations::CreateMemoryFile` | `project_id: missing` |
 | `memory_files_scope_path_index` | unique index | `Agents::Operations::CreateMemoryFile` | `path: taken` |
 | `memory_files_task_id_fkey` | foreign key | `Agents::Operations::CreateMemoryFile` | `task_id: missing` |
+| `note_folders_parent_id_fkey` | foreign key | `Notes::Operations::CreateNoteFolder`, `MoveNoteFolder` | `parent_id: missing` |
+| `note_folders_parent_loop` | trigger | `Notes::Operations::MoveNoteFolder` | `parent_id: inside` |
+| `notes_folder_id_fkey` | foreign key | `Notes::Operations::CreateNote`, `MoveNote` | `folder_id: missing` |
+| `notes_title_index` | unique index | `Notes::Operations::CreateNote`, `EditNote`, `RenameNote`, `DuplicateNote` | `title: taken` |
 | `people_key_index` | unique index | `Social::Operations::SavePerson` | `key: taken` |
 | `posts_slug_key` | unique | `Posts::Operations::SavePost` | `slug: taken` |
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |
@@ -128,7 +135,8 @@ Tags hold `tags_scope_name_key` since #77 split them into a public and a private
 `tags_name_key`.
 
 `posts_published_slug_locked` raises with `ERRCODE = 'check_violation'`, so ROM reports it as a
-`CheckConstraintError` and the operation reads it like any other name. `record_links_record_missing` raises with
+`CheckConstraintError` and the operation reads it like any other name. `note_folders_parent_loop` does the same when a
+folder would sit inside itself. `record_links_record_missing` raises with
 `ERRCODE = 'foreign_key_violation'`, so ROM reports it as a `ForeignKeyConstraintError` (ADR 0093).
 
 Two more shapes follow the same stance. `session_validity` and `webmention_settings` hold one row each, held there
@@ -154,9 +162,9 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the twenty names has a
-spec that would fail: the posts request spec, the operation specs for decisions, record links, shares, tags and task
-links, and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the names has a
+spec that would fail: the posts request spec, the operation specs for decisions, notes, record links, shares, tags and
+task links, and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped
 name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
