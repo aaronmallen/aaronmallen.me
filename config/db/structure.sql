@@ -222,7 +222,6 @@ CREATE TYPE public.memory_fact_type AS ENUM (
 
 CREATE TYPE public.memory_scope AS ENUM (
     'global',
-    'repo',
     'project',
     'task'
 );
@@ -3353,7 +3352,6 @@ CREATE TABLE public.memory_files (
     id integer NOT NULL,
     path text NOT NULL,
     scope public.memory_scope NOT NULL,
-    repo public.repo_name,
     project_id integer,
     task_id integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -3365,10 +3363,9 @@ CREATE TABLE public.memory_files (
     CONSTRAINT memory_files_path_check CHECK ((path ~ '^[\w./-]+\.md$'::text)),
     CONSTRAINT memory_files_scope_check CHECK (
 CASE scope
-    WHEN 'global'::public.memory_scope THEN (num_nonnulls(repo, project_id, task_id) = 0)
-    WHEN 'repo'::public.memory_scope THEN ((repo IS NOT NULL) AND (num_nonnulls(project_id, task_id) = 0))
-    WHEN 'project'::public.memory_scope THEN ((project_id IS NOT NULL) AND (num_nonnulls(repo, task_id) = 0))
-    WHEN 'task'::public.memory_scope THEN ((task_id IS NOT NULL) AND (num_nonnulls(repo, project_id) = 0))
+    WHEN 'global'::public.memory_scope THEN (num_nonnulls(project_id, task_id) = 0)
+    WHEN 'project'::public.memory_scope THEN ((project_id IS NOT NULL) AND (task_id IS NULL))
+    WHEN 'task'::public.memory_scope THEN ((task_id IS NOT NULL) AND (project_id IS NULL))
     ELSE false
 END)
 );
@@ -7175,7 +7172,7 @@ CREATE INDEX memory_files_project_id_index ON public.memory_files USING btree (p
 -- Name: memory_files_scope_path_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX memory_files_scope_path_index ON public.memory_files USING btree (scope, repo, project_id, task_id, path) NULLS NOT DISTINCT;
+CREATE UNIQUE INDEX memory_files_scope_path_index ON public.memory_files USING btree (scope, project_id, task_id, path) NULLS NOT DISTINCT;
 
 
 --
@@ -9914,4 +9911,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261021110000_drop_short_code_length.rb'),
 ('20261021120000_create_agent_session_searches.rb'),
 ('20261021140000_create_agent_session_reads.rb'),
-('20261021200000_add_project_id_to_agent_sessions.rb');
+('20261021200000_add_project_id_to_agent_sessions.rb'),
+('20261021210000_drop_repo_from_memory_scope.rb');

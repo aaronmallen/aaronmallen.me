@@ -242,7 +242,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
 
     def search(query, **filters)
       page = Blog::Structs::Page.new(number: 1, size: 25)
-      found = Agents::Slice["operations.search_memory"].call(page, text: query, **filters)
+      found = Agents::Slice["operations.search_memory"].call(page, text: query, **filters.except(:repo))
       agents(:record_search, session_id, { query:, **filters }, found.rows)
     end
 

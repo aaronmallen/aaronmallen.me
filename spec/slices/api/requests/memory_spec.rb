@@ -26,7 +26,7 @@ RSpec.describe "API memory", type: :request do
 
   it "returns an index of the files without their facts" do
     fact
-    indexed = { "id" => file, "path" => "hanami.md", "description" => "Notes", "scope" => "global", "repo" => nil }
+    indexed = { "id" => file, "path" => "hanami.md", "description" => "Notes", "scope" => "global" }
 
     expect(call_api(:get, "/memory")).to eq(
       "files" => [indexed.merge("project_id" => nil, "task_id" => nil, "fact_count" => 1)],
@@ -94,10 +94,11 @@ RSpec.describe "API memory", type: :request do
     expect(document.fetch("errors")).to eq("agent" => ["keep an agent to 64 characters"])
   end
 
-  it "refuses a repo file without a repo" do
+  it "refuses a repo scope" do
     call_api(:post, "/memory_files", { path: "hanami", description: "Notes", scope: "repo", **author })
 
-    expect(document.fetch("errors")).to eq("repo" => ["a repo file needs a repo"])
+    expect([last_response.status, document.fetch("message")])
+      .to eq([422, 'value at `/scope` is not one of: ["global", "project", "task"]'])
   end
 
   it "refuses a task file for a task that does not exist" do

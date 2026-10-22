@@ -25,7 +25,7 @@ module API
 
         project = Blog::Types::OptionalText[project]
         case resolve_project.call(project:, repo:)
-          in Success(id) then Success(Memory.loaded(load(repo, project_id || id, task_id)))
+          in Success(id) then Success(Memory.loaded(load(project_id || id, task_id)))
           in Failure[:invalid, errors] then rejected(errors, Memory::COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
@@ -33,7 +33,7 @@ module API
 
       private
 
-      def load(repo, project_id, task_id) = load_memory.call(repo:, project_id:, task_ids: [task_id].compact)
+      def load(project_id, task_id) = load_memory.call(project_id:, task_ids: [task_id].compact)
     end
   end
 end

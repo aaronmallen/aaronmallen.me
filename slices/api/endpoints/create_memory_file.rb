@@ -9,7 +9,6 @@ module API
           path: { type: "string", description: "such as hanami or rails/testing; .md is added when it is missing" },
           description: Memory::DESCRIPTION,
           scope: { type: "string", enum: Blog::Types::MemoryScope.values },
-          repo: Helpers::Schema::REPO.merge(description: "the repository of a repo file, as owner/name"),
           project_id: Memory::ID.merge(description: "the project of a project file"),
           task_id: Helpers::Schema::TASK.merge(description: "the task of a task file"),
           **Memory::AUTHOR,

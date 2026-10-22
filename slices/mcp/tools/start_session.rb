@@ -3,8 +3,8 @@
 module MCP
   module Tools
     class StartSession < Base
-      description "Open a session at the start of a run and list your memory: the global files, then those for the " \
-                  "repo, its project and each task. Name the project by its key in project, or give repo as " \
+      description "Open a session at the start of a run and list your memory: the global files, then those for its " \
+                  "project and each task. Name the project by its key in project, or give repo as " \
                   "owner/name to look up the project that holds it; a repo no project holds makes a new private " \
                   "project with a GitHub task rule. An unknown key is refused. files holds one entry per file with " \
                   "its ID, scope, path, description and fact count, and no facts. Read a file's facts with " \

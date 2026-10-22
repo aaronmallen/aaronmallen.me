@@ -21,12 +21,12 @@ RSpec.describe "MCP session tools", type: :request do
     before do
       create_file("task-notes", scope: "task", task_id: task.id)
       create_file("release", scope: "project", project_id: project.id)
-      create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
+      create_file("hanami", scope: "project", project_id: project.id)
       create_file("preferences")
-      create_file("elsewhere", scope: "repo", repo: "aaronmallen/other")
+      create_file("elsewhere", scope: "project", project_id: create(:project, repo: "aaronmallen/other").id)
     end
 
-    it "returns the global, repo, project and task files that match" do
+    it "returns the global, project and task files that match" do
       paths = started.fetch("files").map { it.fetch("path") }
 
       expect(paths).to eq(%w[preferences.md hanami.md release.md task-notes.md])
@@ -34,7 +34,7 @@ RSpec.describe "MCP session tools", type: :request do
 
     it "returns an index of the files without their facts" do
       expect([started.keys, started.fetch("files").map(&:keys).uniq])
-        .to eq([%w[session_id files], [%w[id path description scope repo project_id task_id fact_count]]])
+        .to eq([%w[session_id files], [%w[id path description scope project_id task_id fact_count]]])
     end
 
     it "loads and records a repo named in mixed case or with spaces around it as its lower case name" do
@@ -52,7 +52,7 @@ RSpec.describe "MCP session tools", type: :request do
     it "loads the files of the project its key names" do
       paths = start(project: project.key.downcase).fetch("files").map { it.fetch("path") }
 
-      expect(paths).to eq(%w[preferences.md release.md])
+      expect(paths).to eq(%w[preferences.md hanami.md release.md])
     end
 
     it "records the project its repo or key names" do
@@ -245,7 +245,7 @@ RSpec.describe "MCP session tools", type: :request do
     {
       "create_memory_file" => -> { { path: "other", description: "Notes", scope: "global" } },
       "describe_memory_file" => -> { { id: file, description: "When to read it" } },
-      "move_memory_file" => -> { { id: file, scope: "repo", repo: "aaronmallen/blog" } },
+      "move_memory_file" => -> { { id: file, scope: "project", project_id: create(:project).id } },
       "add_memory_fact" => -> { { id: file, type: "gotcha", text: "Mind the queue" } },
       "edit_memory_fact" => -> { { id: file, fact_id: fact, text: "Mind the queue" } },
       "remove_memory_fact" => -> { { id: file, fact_id: fact } },

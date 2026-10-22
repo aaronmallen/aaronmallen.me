@@ -42,7 +42,7 @@ module API
 
         project = Blog::Types::OptionalText[project]
         case resolve_project.call(project:, repo:)
-          in Success(id) then searched({ query: text, repo:, **where }, (id if project), page, session_id)
+          in Success(id) then searched({ query: text, repo:, **where }, id, (id if project), page, session_id)
           in Failure[:invalid, errors] then rejected(errors, COMPLAINTS)
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)
         end
@@ -56,9 +56,11 @@ module API
         { count: facts.length, facts:, **Helpers::Paging.fields(found) }
       end
 
-      def searched(filters, keyed, page, session_id)
-        filters = { **filters, project_id: filters[:project_id] || keyed }
-        found = search_memory.call(page_of(page), text: filters[:query], **filters.except(:query))
+      def searched(filters, id, keyed, page, session_id)
+        project_id = filters[:project_id]
+        where = { **filters.except(:query, :repo), project_id: project_id || id }
+        found = search_memory.call(page_of(page), text: filters[:query], **where)
+        filters = { **filters, project_id: project_id || keyed }
         recorded(record_search.call(session_id, filters, found.rows)) { hits(found) }
       end
     end

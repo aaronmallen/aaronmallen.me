@@ -15,11 +15,11 @@ module Agents
 
       def linkable = linkables(title: :path, day: self.class.site_day(:created_at))
 
-      def loading(repo:, project_ids:, task_ids:)
+      def loading(project_ids:, task_ids:)
         where(
           Sequel.|(
-            { scope: SCOPE["global"] }, { scope: SCOPE["repo"], repo: },
-            { scope: SCOPE["project"], project_id: project_ids }, { scope: SCOPE["task"], task_id: task_ids },
+            { scope: SCOPE["global"] }, { scope: SCOPE["project"], project_id: project_ids },
+            { scope: SCOPE["task"], task_id: task_ids },
           ),
         )
       end

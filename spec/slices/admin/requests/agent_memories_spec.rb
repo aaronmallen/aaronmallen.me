@@ -33,10 +33,11 @@ RSpec.describe "Admin agent memories", type: :request do
     before do
       global = agents(:create_memory_file, { path: "preferences", description: "Notes", scope: "global" })
       agents(:add_memory_fact, global.id, { type: "gotcha", text: "Run specs through mise", **author })
-      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" })
+      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "project", project_id: project.id })
       agents(:create_memory_file, { path: "deploys", description: "Notes", scope: "project", project_id: project.id })
       agents(:create_memory_file, { path: "index", description: "Notes", scope: "task", task_id: task.id })
-      agents(:create_memory_file, { path: "other", description: "Notes", scope: "repo", repo: "aaronmallen/other" })
+      other = create(:project, name: "Other", repo: "aaronmallen/other")
+      agents(:create_memory_file, { path: "other", description: "Notes", scope: "project", project_id: other.id })
     end
 
     def titles = page.all(".card-title").map(&:text)
@@ -58,20 +59,27 @@ RSpec.describe "Admin agent memories", type: :request do
     it "groups files by scope, global first" do
       get "/admin/agents/memories"
 
-      expect(titles.first(5).map { it.split(" · ").first }).to eq(%w[Global Repo Repo Project Task])
+      expect(titles.first(4).map { it.split(" · ").first }).to eq(%w[Global Project Project Task])
     end
 
     it "names each group by its target" do
       get "/admin/agents/memories"
 
-      expect(titles).to include("Repo · aaronmallen/blog", "Project · Blog", "Task · Index the activities table")
+      expect(titles).to include("Project · Blog", "Project · Other", "Task · Index the activities table")
     end
 
     it "filters by scope", :aggregate_failures do
-      get "/admin/agents/memories", { scope: "repo" }
+      get "/admin/agents/memories", { scope: "project" }
 
-      expect(page.all(".li-title").map(&:text)).to eq(%w[hanami.md other.md])
-      expect(page).to have_css(".search-kinds a.search-kind[aria-current='page']", exact_text: "Repos · 2")
+      expect(page.all(".li-title").map(&:text)).to eq(%w[deploys.md hanami.md other.md])
+      expect(page).to have_css(".search-kinds a.search-kind[aria-current='page']", exact_text: "Projects · 3")
+    end
+
+    it "offers no repo scope pill" do
+      get "/admin/agents/memories"
+
+      expect(page.all(".search-kinds a.search-kind").map(&:text))
+        .to eq(["All · 5", "Global · 1", "Projects · 3", "Tasks · 1"])
     end
 
     it "searches fact text and shows the facts it found", :aggregate_failures do
@@ -87,17 +95,17 @@ RSpec.describe "Admin agent memories", type: :request do
       expect(page).to have_css(".empty", text: t("ui.views.agents.memories.no_match", query: "zeppelin"))
     end
 
-    it "lists what the index of a session in the chosen repo lists, linked to each file" do
-      get "/admin/agents/memories", { repo: "aaronmallen/blog" }
+    it "lists what the index of a session on the chosen project lists, linked to each file" do
+      get "/admin/agents/memories", { project: project.id }
 
       card = page.find(".card", text: "What a session's index lists")
-      lines = ["global preferences.md", "repo hanami.md", "project deploys.md"]
+      lines = ["global preferences.md", "project deploys.md", "project hanami.md"]
 
       expect(card.all("a.memory-line .memory-line-path").map(&:text)).to eq(lines)
     end
 
     it "gives each index line its description and fact count", :aggregate_failures do
-      get "/admin/agents/memories", { repo: "aaronmallen/blog" }
+      get "/admin/agents/memories", { project: project.id }
       line = page.find(".card", text: "What a session's index lists").first("a.memory-line")
 
       expect(line).to have_css(".memory-line-head .meta", exact_text: "1 fact")
@@ -122,7 +130,6 @@ RSpec.describe "Admin agent memories", type: :request do
       get "/admin/agents/memories"
 
       expect(page.find(".card", text: "Global")).to have_css(".card-title i.fa-globe.memory-scope-icon")
-      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_css(".card-title i.fa-github")
       expect(page.find(".card", text: "Project · Blog")).to have_css(".card-title i.fa-cube")
       expect(page.find(".card", text: "Task · Index")).to have_css(".card-title i.fa-list-check")
     end
@@ -136,7 +143,7 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "names you when you made the last change" do
-      get "/admin/agents/memories", { scope: "repo" }
+      get "/admin/agents/memories", { scope: "project" }
 
       expect(page.find(".li", text: "hanami.md")).to have_css(".li-sub", text: /by you\z/)
     end
@@ -163,13 +170,14 @@ RSpec.describe "Admin agent memories", type: :request do
     it "notes which sessions list each group" do
       get "/admin/agents/memories"
 
-      expect(page.find(".card", text: "Repo · aaronmallen/blog")).to have_text("listed for sessions in this repo")
+      expect(page.find(".card", text: "Project · Blog"))
+        .to have_text("listed for sessions on this project or in its repo")
     end
 
-    it "picks the first repo when none is chosen" do
+    it "lists projects to work in and picks the first when none is chosen", :aggregate_failures do
       get "/admin/agents/memories"
 
-      expect(page).to have_select("Working in", selected: "aaronmallen/blog")
+      expect(page).to have_select("Working in", options: %w[Blog Other], selected: "Blog")
     end
   end
 
@@ -178,16 +186,14 @@ RSpec.describe "Admin agent memories", type: :request do
     let(:projects) { Projects::Slice["repos.project_queries"] }
 
     before do
-      allow(files).to receive(:repos).and_call_original
       allow(projects).to receive(:live_by_name).and_call_original
       %w[repos.memory_file_queries agents.repos.memory_file_queries].each { replace_component(it, files) }
       %w[repos.project_queries projects.repos.project_queries].each { replace_component(it, projects) }
     end
 
-    it "reads the repos and live projects once a load", :aggregate_failures do
+    it "reads the live projects once a load" do
       get "/admin/agents/memories"
 
-      expect(files).to have_received(:repos).once
       expect(projects).to have_received(:live_by_name).once
     end
   end
@@ -209,9 +215,9 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "keeps the scope and search when it cancels" do
-      get "/admin/agents/memories", { scope: "repo", query: "mise" }
+      get "/admin/agents/memories", { scope: "task", query: "mise" }
 
-      expect(page).to have_link("Cancel", href: "/admin/agents/memories?scope=repo&query=mise", visible: :all)
+      expect(page).to have_link("Cancel", href: "/admin/agents/memories?scope=task&query=mise", visible: :all)
     end
 
     it "creates it as the owner and opens it", :aggregate_failures do
@@ -308,12 +314,11 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "names the sessions that list it in the lede" do
-      moved = agents(
-        :create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" },
-      )
+      project_id = create(:project, name: "Blog").id
+      moved = agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "project", project_id: })
       get file_path(moved)
 
-      expect(page).to have_text(t("memories_page.listed_for.named.repo", name: "aaronmallen/blog"))
+      expect(page).to have_text(t("memories_page.listed_for.named.project", name: "Blog"))
     end
 
     it "shows the facts for the old as loaded view", :aggregate_failures do
@@ -566,10 +571,11 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "moves it to another scope and writes a scope entry", :aggregate_failures do
-      admin_post("#{file_path(file)}/scope", memory_file: { scope: "repo:aaronmallen/blog" })
+      project = create(:project)
+      admin_post("#{file_path(file)}/scope", memory_file: { scope: "project:#{project.id}" })
 
       expect(Agents::Slice["repos.memory_file_queries"].by_id(file.id))
-        .to have_attributes(scope: "repo", repo: "aaronmallen/blog")
+        .to have_attributes(scope: "project", project_id: project.id)
       expect(events(file).last).to include(op: "scope", agent: nil)
     end
 
@@ -580,8 +586,9 @@ RSpec.describe "Admin agent memories", type: :request do
     end
 
     it "refuses a scope that already holds the path" do
-      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "repo", repo: "aaronmallen/blog" })
-      admin_post("#{file_path(file)}/scope", memory_file: { scope: "repo:aaronmallen/blog" })
+      project = create(:project)
+      agents(:create_memory_file, { path: "hanami", description: "Notes", scope: "project", project_id: project.id })
+      admin_post("#{file_path(file)}/scope", memory_file: { scope: "project:#{project.id}" })
 
       expect(page).to have_css("#memory-scope-error", text: t("ui.components.agents.memory_field_error.scope.taken"))
     end

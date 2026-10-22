@@ -8,7 +8,6 @@ module API
         properties: {
           id: Helpers::Schema::ID,
           scope: { type: "string", enum: Blog::Types::MemoryScope.values, description: "where the file loads now" },
-          repo: Helpers::Schema::REPO.merge(description: "the repository of a repo file, as owner/name"),
           project_id: Memory::ID.merge(description: "the project of a project file"),
           task_id: Helpers::Schema::TASK.merge(description: "the task of a task file"),
           **Memory::AUTHOR,

@@ -44,11 +44,9 @@ module Agents
         found.in_load_order.to_a
       end
 
-      def loaded(repo:, project_ids:, task_ids:)
-        memory_files.combine(:memory_facts).loading(repo:, project_ids:, task_ids:).in_load_order.to_a
+      def loaded(project_ids:, task_ids:)
+        memory_files.combine(:memory_facts).loading(project_ids:, task_ids:).in_load_order.to_a
       end
-
-      def repos = memory_files.exclude(repo: nil).order(:repo).distinct.pluck(:repo)
 
       def scope_counts = memory_files.tally(:scope, Blog::Types::MemoryScope.values)
 

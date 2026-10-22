@@ -11,7 +11,7 @@ RSpec.describe API::Helpers::Wording do
     ids = "the schema takes one to #{Blog::Contract::MAX_IDS} IDs"
     integer = "the schema takes only an integer in range"
     listed = "the schema takes only a list of IDs"
-    scoped = "the scope rule fails repo, project_id or task_id, never scope"
+    scoped = "the scope rule fails project_id or task_id, never scope"
     unsent = "the endpoint never sends this field"
 
     {

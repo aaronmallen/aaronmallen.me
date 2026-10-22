@@ -4,8 +4,7 @@ module Admin
   module Helpers
     module MemoryScope
       ICONS = {
-        "global" => "fa-solid fa-globe", "repo" => "fa-brands fa-github", "project" => "fa-solid fa-cube",
-        "task" => "fa-solid fa-list-check",
+        "global" => "fa-solid fa-globe", "project" => "fa-solid fa-cube", "task" => "fa-solid fa-list-check",
       }.freeze
       KINDS = "memories_page.kinds"
       LABELS = "memories_page.scopes"

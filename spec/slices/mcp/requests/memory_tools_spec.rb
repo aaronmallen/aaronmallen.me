@@ -72,7 +72,7 @@ RSpec.describe "MCP memory tools", type: :request do
   describe "read_memory" do
     let(:project) { create(:project, repo: "aaronmallen/blog") }
     let(:task) { create(:task) }
-    let(:hanami) { create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id") }
+    let(:hanami) { create_file("hanami", scope: "project", project_id: project.id).fetch("id") }
     let(:preferences) { create_file("preferences").fetch("id") }
 
     before do
@@ -80,23 +80,23 @@ RSpec.describe "MCP memory tools", type: :request do
       add_fact(create_file("release", scope: "project", project_id: project.id).fetch("id"), "Tag with CalVer")
       add_fact(hanami, "Slices own tables")
       add_fact(preferences, "No emdash", type: "preference")
-      create_file("elsewhere", scope: "repo", repo: "aaronmallen/other")
+      create_file("elsewhere", scope: "project", project_id: create(:project, repo: "aaronmallen/other").id)
     end
 
-    it "loads global, repo, project and task files in that order, with a project's files for its repo" do
+    it "loads global, project and task files in that order, with the files of the repo's project" do
       loaded = mcp_answer("read_memory", repo: "aaronmallen/blog", task_id: task.id)
 
       expect(loaded.fetch("files").map { it.values_at("scope", "path") }).to eq(
-        [%w[global preferences.md], %w[repo hanami.md], %w[project release.md], %w[task task-notes.md]],
+        [%w[global preferences.md], %w[project hanami.md], %w[project release.md], %w[task task-notes.md]],
       )
     end
 
     it "indexes each file by its ID, scope, path, description and fact count, with no facts" do
       Agents::Slice["operations.describe_memory_file"].call(hanami, { description: "Ours" })
       index = mcp_answer("read_memory", repo: "aaronmallen/blog").fetch("files").first(2)
-      indexed = [preferences, "global", "preferences.md", marked("Notes"), 1], [hanami, "repo", "hanami.md", "Ours", 1]
+      lines = [preferences, "global", "preferences.md", marked("Notes"), 1], [hanami, "project", "hanami.md", "Ours", 1]
 
-      expect(index.map { it.values_at("id", "scope", "path", "description", "fact_count") }).to eq(indexed)
+      expect(index.map { it.values_at("id", "scope", "path", "description", "fact_count") }).to eq(lines)
     end
 
     it "leaves removed facts out of the count" do
@@ -125,7 +125,7 @@ RSpec.describe "MCP memory tools", type: :request do
 
     it "loads the files of the project its key names" do
       expect(mcp_answer("read_memory", project: project.key).fetch("files").map { it.fetch("path") })
-        .to eq(%w[preferences.md release.md])
+        .to eq(%w[preferences.md hanami.md release.md])
     end
 
     it "refuses a project key that names no project" do
@@ -142,7 +142,7 @@ RSpec.describe "MCP memory tools", type: :request do
   describe "search_memory" do
     let(:project) { create(:project, repo: "aaronmallen/blog") }
     let(:task) { create(:task) }
-    let(:hanami) { create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("id") }
+    let(:hanami) { create_file("hanami", scope: "project", project_id: project.id).fetch("id") }
     let(:preferences) { create_file("preferences").fetch("id") }
 
     def found(**) = mcp_answer("search_memory", **).fetch("facts")
@@ -154,7 +154,8 @@ RSpec.describe "MCP memory tools", type: :request do
       add_fact(create_file("release", scope: "project", project_id: project.id).fetch("id"), "Cache the tag")
       add_fact(hanami, "Slices cache their tables")
       add_fact(preferences, "No emdash in the cache docs", type: "preference")
-      add_fact(create_file("elsewhere", scope: "repo", repo: "aaronmallen/other").fetch("id"), "Cache nothing")
+      other = create(:project, repo: "aaronmallen/other")
+      add_fact(create_file("elsewhere", scope: "project", project_id: other.id).fetch("id"), "Cache nothing")
     end
 
     it "returns each live fact that holds the query with its file's ID and path" do
@@ -191,12 +192,12 @@ RSpec.describe "MCP memory tools", type: :request do
 
     it "searches the files read_memory lists for a project" do
       expect(texts(query: "cache", project_id: project.id))
-        .to contain_exactly("Cache the tag", "No emdash in the cache docs")
+        .to contain_exactly("Cache the tag", "Slices cache their tables", "No emdash in the cache docs")
     end
 
     it "searches the files read_memory lists for a project key" do
       expect(texts(query: "cache", project: project.key))
-        .to contain_exactly("Cache the tag", "No emdash in the cache docs")
+        .to contain_exactly("Cache the tag", "Slices cache their tables", "No emdash in the cache docs")
     end
 
     it "refuses a project key that names no project" do
@@ -210,7 +211,8 @@ RSpec.describe "MCP memory tools", type: :request do
     end
 
     it "keeps one scope" do
-      expect(texts(query: "cache", scope: "repo", repo: "aaronmallen/blog")).to eq(["Slices cache their tables"])
+      expect(texts(query: "cache", scope: "project", repo: "aaronmallen/blog"))
+        .to contain_exactly("Cache the tag", "Slices cache their tables")
     end
 
     it "pages the facts" do
@@ -311,19 +313,26 @@ RSpec.describe "MCP memory tools", type: :request do
   end
 
   it "refuses a second file with one path in one scope" do
-    create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
+    fields = { path: "hanami.md", description: "Notes", scope: "project", project_id: create(:project).id }
+    mcp_answer("create_memory_file", **fields, **author)
 
-    created = mcp_text(
-      "create_memory_file", path: "hanami.md", description: "Notes", scope: "repo", repo: "aaronmallen/blog", **author,
-    )
-
-    expect(created).to eq("path: a file in this scope already has this path")
+    expect(mcp_text("create_memory_file", **fields, **author))
+      .to eq("path: a file in this scope already has this path")
   end
 
   it "keeps one path in two scopes" do
     create_file("hanami")
 
-    expect(create_file("hanami", scope: "repo", repo: "aaronmallen/blog").fetch("scope")).to eq("repo")
+    expect(create_file("hanami", scope: "project", project_id: create(:project).id).fetch("scope")).to eq("project")
+  end
+
+  it "refuses a repo scope" do
+    expect(mcp_text("create_memory_file", path: "hanami", description: "Notes", scope: "repo", **author))
+      .to eq('Invalid arguments: value at `/scope` is not one of: ["global", "project", "task"]')
+  end
+
+  it "returns a file with no repo" do
+    expect(create_file.keys).not_to include("repo")
   end
 
   describe "descriptions" do
@@ -401,11 +410,12 @@ RSpec.describe "MCP memory tools", type: :request do
 
   describe "move_memory_file" do
     let(:file) { create_file.fetch("id") }
+    let(:project) { create(:project) }
 
-    def move(**) = mcp_answer("move_memory_file", id: file, scope: "repo", repo: "aaronmallen/blog", **author, **)
+    def move(**) = mcp_answer("move_memory_file", id: file, scope: "project", project_id: project.id, **author, **)
 
     it "moves a file to another scope" do
-      expect(move.values_at("scope", "repo")).to eq(%w[repo aaronmallen/blog])
+      expect(move.values_at("scope", "project_id")).to eq(["project", project.id])
     end
 
     it "adds a scope entry to its history with the agent and model" do
@@ -415,14 +425,20 @@ RSpec.describe "MCP memory tools", type: :request do
     end
 
     it "refuses a scope that already holds its path" do
-      create_file("hanami", scope: "repo", repo: "aaronmallen/blog")
+      create_file("hanami", scope: "project", project_id: project.id)
 
-      expect(mcp_text("move_memory_file", id: file, scope: "repo", repo: "aaronmallen/blog", **author))
+      expect(mcp_text("move_memory_file", id: file, scope: "project", project_id: project.id, **author))
         .to eq("scope: a file in that scope already has this path")
     end
 
-    it "refuses a repo file with no repo" do
-      expect(mcp_text("move_memory_file", id: file, scope: "repo", **author)).to eq("repo: a repo file needs a repo")
+    it "refuses a project file with no project" do
+      expect(mcp_text("move_memory_file", id: file, scope: "project", **author))
+        .to eq("project_id: a project file needs a project that exists")
+    end
+
+    it "refuses a repo scope" do
+      expect(mcp_text("move_memory_file", id: file, scope: "repo", **author))
+        .to eq('Invalid arguments: value at `/scope` is not one of: ["global", "project", "task"]')
     end
   end
 
@@ -446,9 +462,10 @@ RSpec.describe "MCP memory tools", type: :request do
     let(:files) { Agents::Slice["db.rom"].relations[:memory_files].dataset }
 
     it "refuses two files with one path in one scope" do
-      files.insert(description: "notes", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog")
+      project_id = create(:project).id
+      files.insert(description: "notes", path: "hanami.md", scope: "project", project_id:)
 
-      expect { files.insert(description: "notes", path: "hanami.md", scope: "repo", repo: "aaronmallen/blog") }
+      expect { files.insert(description: "notes", path: "hanami.md", scope: "project", project_id:) }
         .to raise_error(Sequel::UniqueConstraintViolation, /memory_files_scope_path_index/)
     end
 

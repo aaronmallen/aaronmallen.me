@@ -5,7 +5,7 @@ module API
     class LoadedMemoryFile < Serializer
       SCHEMA = Helpers::Schema.object(
         {
-          **MemoryFile::SCHEMA.fetch(:properties).slice(:id, :path, :description, :scope, :repo, :project_id, :task_id),
+          **MemoryFile::SCHEMA.fetch(:properties).slice(:id, :path, :description, :scope, :project_id, :task_id),
           fact_count: { type: "integer", description: "the live facts it holds" },
         },
       ).freeze

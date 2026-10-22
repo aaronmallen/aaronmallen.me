@@ -4,11 +4,10 @@ module Agents
   module Contracts
     class MemoryScopeContract < AuthorContract
       EXTRA = "extra"
-      TARGETS = { "repo" => :repo, "project" => :project_id, "task" => :task_id }.freeze
+      TARGETS = { "project" => :project_id, "task" => :task_id }.freeze
 
       SCOPE = Dry::Schema.Params do
         required(:scope).filled(:string, included_in?: Blog::Types::MemoryScope.values)
-        optional(:repo).maybe(Blog::Types::Nullable::Repo)
         optional(:project_id).maybe(:integer)
         optional(:task_id).maybe(:integer)
       end

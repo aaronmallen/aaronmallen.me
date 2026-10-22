@@ -14,8 +14,8 @@ module Admin
           prop :files, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :scope, Blog::Types::MemoryScope.optional
           prop :query, Blog::Types::String.optional
-          prop :repo, Blog::Types::String.optional
-          prop :repos, Blog::Types::Array.of(Blog::Types::String)
+          prop :project, Blog::Types::Integer.optional
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :index, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :latest, Blog::Types::Hash
           prop :changes, Blog::Types::Integer
@@ -31,7 +31,7 @@ module Admin
             div(class: "g-main") do
               div(class: "stack") { list }
               aside(class: "stack") do
-                MemoryIndex(repo: @repo, repos: @repos, files: @index, keep:)
+                MemoryIndex(project: @project, projects: @projects, files: @index, keep:)
               end
             end
           end

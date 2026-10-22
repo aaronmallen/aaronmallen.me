@@ -12,7 +12,6 @@ module API
               description: "what it covers and when to read it; marked untrusted when an agent set it" },
           ),
           scope: { type: "string", enum: Blog::Types::MemoryScope.values },
-          repo: Helpers::Schema.nullable(Helpers::Schema::REPO.merge(description: "the repository of a repo file")),
           project_id: Helpers::Schema.nullable({ type: "integer", description: "the project of a project file" }),
           task_id: Helpers::Schema.nullable({ type: "integer", description: "the task of a task file" }),
           facts: Helpers::Schema.list(MemoryFact.reference).merge(description: "the facts it holds, oldest first"),

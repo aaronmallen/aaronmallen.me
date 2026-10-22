@@ -16,28 +16,27 @@ module Admin
         task_queries: "tasks.repos.task_queries",
       ]
 
-      def call(scope: nil, query: nil, repo: nil, values: nil, errors: NO_ERRORS)
+      def call(scope: nil, query: nil, project: nil, values: nil, errors: NO_ERRORS)
         scope = Blog::Types::MemoryScope.optional.fallback(nil)[scope]
         query = Blog::Types::OptionalText[query]
         files = memory_file_queries.listed(scope:, query:)
         live = project_queries.live_by_name
-        repos = known_repos(live)
-        shown_repo = shown(repo, repos)
+        shown = shown(project, live)
 
         {
-          files:, scope:, query:, repos:, errors:,
+          files:, scope:, query:, errors:,
           **tallies(files),
-          index: load_memory.call(repo: shown_repo),
-          repo: shown_repo,
-          scopes: scopes(files, live:, repos:),
+          index: load_memory.call(project_id: shown&.id),
+          project: shown&.id,
+          projects: live,
+          scopes: scopes(files, live:),
           values: { path: "", scope: GLOBAL, **values.to_h },
         }
       end
 
-      def scopes(files, live: project_queries.live_by_name, repos: known_repos(live))
+      def scopes(files, live: project_queries.live_by_name)
         [
           choice(GLOBAL, nil, nil),
-          *repos.map { choice("repo", it, it) },
           *projects(files, live).map { choice("project", it.id, it.name) },
           *tasks(files).map { choice("task", it.id, Blog::Helpers::Truncation.fit(it.title, limit: NAME_LIMIT)) },
         ]
@@ -47,11 +46,9 @@ module Admin
 
       def choice(kind, target, name) = ScopeChoice.new(key: Helpers::MemoryScope.key_for(kind, target), kind:, name:)
 
-      def known_repos(live) = (memory_file_queries.repos + live.filter_map(&:repo)).uniq.sort
-
       def projects(files, live) = (live + project_queries.by_ids(targets(files, :project_id))).uniq(&:id)
 
-      def shown(repo, repos) = repos.include?(repo) ? repo : repos.first
+      def shown(project, live) = live.find { it.id.to_s == project.to_s } || live.first
 
       def tallies(files)
         {

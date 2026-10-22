@@ -112,7 +112,7 @@ module Blog
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MemoryEventOp = Types::String.enum("create", "add", "edit", "remove", "revert", "scope", "describe")
     MemoryFactType = Types::String.enum("preference", "convention", "gotcha", "context")
-    MemoryScope = Types::String.enum("global", "repo", "project", "task")
+    MemoryScope = Types::String.enum("global", "project", "task")
     MessageBulkAction = Types::String.enum(
       "read", "unread", "tag", "untag", "delete", "archive", "inbox", "star", "unstar", "spam", "trash", "move",
       "label",

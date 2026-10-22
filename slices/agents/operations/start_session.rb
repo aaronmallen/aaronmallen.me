@@ -23,7 +23,7 @@ module Agents
       def start(at:, task_ids:, project: nil, **fields)
         project_id = step resolve_project.call(project:, repo: fields[:repo])
         id = agent_session_mutations.start(**fields, project_id:, task_ids:, started_at: at, last_seen_at: at)
-        files = load_memory.call(repo: fields[:repo], project_id:, task_ids:)
+        files = load_memory.call(project_id:, task_ids:)
         agent_session_mutations.record_index(id, files)
         [id, files]
       end

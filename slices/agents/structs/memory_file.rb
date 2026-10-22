@@ -7,7 +7,7 @@ module Agents
 
       def facts = memory_facts
 
-      def target = repo || project_id || task_id
+      def target = project_id || task_id
     end
   end
 end

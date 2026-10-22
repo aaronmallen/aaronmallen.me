@@ -226,23 +226,19 @@ en:
     kinds:
       global: "global"
       project: "project"
-      repo: "repo"
       task: "task"
     listed_for:
       named:
         global: "Listed in the index for every session"
         project: "Listed in the index for sessions on %{name} or in its repo"
-        repo: "Listed in the index for sessions in %{name}"
         task: "Listed in the index for sessions on %{name}"
       unnamed:
         global: "listed for every session"
         project: "listed for sessions on this project or in its repo"
-        repo: "listed for sessions in this repo"
         task: "listed for sessions on this task"
     scopes:
       global: "Global"
       project: "Project · %{name}"
-      repo: "Repo · %{name}"
       task: "Task · %{name}"
     toasts:
       added: "Fact added"
@@ -3592,7 +3588,6 @@ en:
             all: "All · %{count}"
             global: "Global · %{count}"
             project: "Projects · %{count}"
-            repo: "Repos · %{count}"
             task: "Tasks · %{count}"
           heading: "Agents"
           lede:

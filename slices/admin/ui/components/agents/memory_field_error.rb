@@ -11,7 +11,7 @@ module Admin
             ::Agents::Contracts::MemoryScopeContract,
           ].freeze
           SCOPE = "memory"
-          UNSHOWN = %i[agent model session_id repo project_id task_id].freeze
+          UNSHOWN = %i[agent model session_id project_id task_id].freeze
         end
       end
     end

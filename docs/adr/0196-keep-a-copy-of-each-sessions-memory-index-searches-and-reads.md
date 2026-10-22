@@ -5,6 +5,7 @@ status: active
 created: 2026-10-20
 area: [db, agents, admin, mcp]
 issue: "#1869"
+amended: ["#1893"]
 tags: [agents, memory, sessions, mcp, index, search, admin]
 ---
 
@@ -59,9 +60,13 @@ The drawer shows what an agent got, even after its files change or go.
 Each session stores a copy of its index and every hit's text, so the tables grow with each run and each search, and
 a removed fact's text lives on in the hits that returned it. Nothing prunes them.
 
+Since #1893 a scope is global, a project or a task ([ADR 0199][0199]), so an index line or a search that named the
+old `repo` scope now names `project`. A search keeps the repo the agent sent.
+
 Loads and reads now record the same `read_memory_file` call twice. Code that counts reads has to pick one, and a
 session from before #1868 has loads and no reads.
 
 [0190]: 0190-open-and-close-agent-sessions-through-tools-and-close-idle-ones-from-a-job.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
+[0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -25,7 +25,7 @@ module API
       ).freeze
       LOADED = {
         files: Helpers::Schema.list(Serializers::LoadedMemoryFile.reference).merge(
-          description: "an index of the files in scope without their facts: global, then repo, project and task",
+          description: "an index of the files in scope without their facts: global, then project and task",
         ),
       }.freeze
       PROJECT = { type: "string", description: "the key of the project to load, such as POD" }.freeze
@@ -69,8 +69,6 @@ module API
         },
         repo: {
           Blog::Contract::FORMAT => "name the repository as owner/name",
-          Blog::Contract::MISSING => "a repo file needs a repo",
-          "extra" => format(SCOPED, "repo", "repo"),
         },
         task_id: {
           Blog::Contract::MISSING => "a task file needs a task that exists",
