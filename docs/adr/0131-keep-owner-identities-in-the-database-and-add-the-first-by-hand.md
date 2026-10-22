@@ -13,6 +13,7 @@ supersedes:
 issue: "#792"
 amended:
   - "#1155"
+  - "#1905"
 tags:
   - auth
   - oauth
@@ -52,6 +53,8 @@ change hands, the id cannot.
 - `owner.github_id` and `OWNER_GITHUB_ID` go. `owner.name` stays.
 
 Everything else ADR 0023 decided holds: the encrypted cookie, the 30 day session, and sign-out ending every session.
+[ADR 0202][0202] (#1905) added a sign-out for one device on the security tab. The Sign out button still ends every
+session.
 
 ## Alternatives
 
@@ -80,4 +83,5 @@ A sign-in that asks for no scopes gets a token that reads only public profile da
 
 The MCP consent screen (ADR 0056) builds on this sign-in, so it inherits these costs too.
 
+[0202]: 0202-tell-admin-browsers-apart-with-a-device-cookie-and-sign-each-one-out-on-its-own.md
 [status]: https://img.shields.io/badge/0158-black?style=for-the-badge&label=Superseded&labelColor=orange

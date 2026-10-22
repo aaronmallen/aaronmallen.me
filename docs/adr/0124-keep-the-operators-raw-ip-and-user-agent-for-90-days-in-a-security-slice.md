@@ -13,6 +13,7 @@ issue: "#701"
 amended:
   - "#911"
   - "#1759"
+  - "#1905"
 tags:
   - security
   - privacy
@@ -56,7 +57,8 @@ ADR 0010 has them. The address comes from `Blog::Operations::ReadVisitorAddress`
 
 **Raw rows last 90 days.** A scheduled job deletes every sign-in and every sighting older than that. What outlives
 it is the list of known devices and cities, so an old device does not alert as new. That list holds the browser, OS,
-city and country, and no IP or raw user agent.
+city and country, and no IP or raw user agent. The admin's device rows outlive it too (#1905, [ADR 0202][0202]),
+with a browser and OS and no address, until 400 days after their last sign-in.
 
 **Failed sign-ins stop at a throttle.** The callback is public, so a script can fail it as often as it likes. A
 failed sign-in records a row only while its sender has fewer than `sign_ins.throttle_limit` failures in the window,
@@ -100,4 +102,5 @@ which cities I have been in, for good.
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
+[0202]: 0202-tell-admin-browsers-apart-with-a-device-cookie-and-sign-each-one-out-on-its-own.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

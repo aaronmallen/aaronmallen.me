@@ -11,6 +11,7 @@ superseded-by: "0131"
 issue: AA-628
 amended:
   - "#792"
+  - "#1905"
 tags:
   - auth
   - oauth
@@ -69,7 +70,8 @@ an email.
 Sidekiq's queue and schedule, and the row sits in the database every admin request already reads.
 
 **A store with a row per session.** Sign-out could then end one device and leave the rest. AA-478 asked for sign-out
-on one device to end every device, which one instant does.
+on one device to end every device, which one instant does. #1905 added a device row beside the instant
+([ADR 0202][0202]), so the security tab can end one device while Sign out still ends them all.
 
 ## Consequences
 
@@ -92,4 +94,5 @@ Rotating `app_secret` signs every session out, since no cookie decrypts under th
 
 The MCP server (ADR 0056) builds its consent screen on this sign-in, so it inherits every cost above.
 
+[0202]: 0202-tell-admin-browsers-apart-with-a-device-cookie-and-sign-each-one-out-on-its-own.md
 [status]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange
