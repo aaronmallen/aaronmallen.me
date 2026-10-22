@@ -448,7 +448,20 @@ RSpec.describe "Admin sessions", type: :request do
 
     before { callback(code: "code", state:) }
 
-    it "refuses the second time" do
+    it "sends the second time to the admin" do
+      callback(code: "code", state:)
+
+      expect(last_response.location).to end_with("/admin")
+    end
+
+    it "asks GitHub for no second token" do
+      callback(code: "code", state:)
+
+      expect(token_request).to have_been_made.once
+    end
+
+    it "refuses the second time a minute or more later" do
+      allow(Time).to receive(:now).and_return(Time.now + 60)
       callback(code: "code", state:)
 
       expect(last_response.status).to eq(401)
@@ -476,11 +489,11 @@ RSpec.describe "Admin sessions", type: :request do
       expect(signed_out?).to be(false)
     end
 
-    it "refuses the other tab once one of them signed in" do
+    it "sends the other tab to the admin once one of them signed in" do
       callback(code: "code", state: tabs.first)
       callback(code: "code", state: tabs.last)
 
-      expect(last_response.status).to eq(401)
+      expect(last_response.location).to end_with("/admin")
     end
 
     it "stays signed in when the other tab comes back" do
@@ -518,10 +531,10 @@ RSpec.describe "Admin sessions", type: :request do
   describe "a stray callback while signed in" do
     before { sign_in }
 
-    it "renders an error page" do
+    it "sends the browser that just signed in to the admin" do
       callback(code: "code", state: "forged")
 
-      expect(last_response.status).to eq(401)
+      expect(last_response.location).to end_with("/admin")
     end
 
     it "asks GitHub for no further token" do

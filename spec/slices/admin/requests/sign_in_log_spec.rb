@@ -127,6 +127,50 @@ RSpec.describe "Admin sign-in log", type: :request do
     end
   end
 
+  describe "a callback with no matching state" do
+    def repeat = callback(code: "code", state: "taken")
+
+    it "writes no row from a device that signed in under a minute ago", :aggregate_failures do
+      sign_in
+      repeat
+
+      expect(last_response.location).to end_with("/admin")
+      expect(sign_ins.select_map(:outcome)).to eq(%w[signed_in])
+    end
+
+    it "records a denied sign-in from a device that signed in a minute ago or more", :aggregate_failures do
+      sign_in
+      devices.update(last_signed_in_at: Time.now - 61)
+      repeat
+
+      expect(last_response.status).to eq(401)
+      expect(sign_ins.order(:id).select_map(:outcome)).to eq(%w[signed_in denied])
+    end
+
+    it "records a denied sign-in from a browser with no device cookie", :aggregate_failures do
+      sign_in
+      clear_cookies
+      repeat
+
+      expect(last_response.status).to eq(401)
+      expect(sign_ins.order(:id).select_map(:outcome)).to eq(%w[signed_in denied])
+    end
+
+    it "records a denied sign-in from a device cookie that is no ID" do
+      set_cookie "#{Blog::DeviceCookie::KEY}=not-an-id; path=/admin"
+      repeat
+
+      expect(sign_ins.select_map(:outcome)).to eq(%w[denied])
+    end
+
+    it "still records a denied callback whose state matched from a device that just signed in" do
+      sign_in
+      callback(error: "access_denied", state: start_sign_in)
+
+      expect(sign_ins.order(:id).select_map(:outcome)).to eq(%w[signed_in denied])
+    end
+  end
+
   describe "signing in as another GitHub account" do
     let(:email) { "stranger@example.com" }
 
