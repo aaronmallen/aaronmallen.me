@@ -44,7 +44,7 @@ RSpec.describe "Admin project board list", :frozen_clock, type: :request do
 
     it "draws each link's icon" do
       expect(page.all(".kb-view a.seg-option i", visible: :all).map { it[:class] })
-        .to eq(["fa-solid table-columns", "fa-solid list"])
+        .to eq(["fa-solid fa-table-columns", "fa-solid fa-list"])
     end
 
     it "marks neither link until the browser picks" do

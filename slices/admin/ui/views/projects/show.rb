@@ -14,7 +14,7 @@ module Admin
           ].freeze
           NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
-          VIEWS = { "board" => ["table-columns", ".views.board"], "list" => ["list", ".views.list"] }.freeze
+          VIEWS = { "board" => ["fa-table-columns", ".views.board"], "list" => ["fa-list", ".views.list"] }.freeze
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
