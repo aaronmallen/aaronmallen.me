@@ -5,6 +5,7 @@ module Admin
     module Components
       module Mail
         class Compose < Component
+          CONTACTS = "mail-compose-contacts"
           ID = "mail-compose"
           SCOPE = "mail-compose"
           TIME = "{time}"
@@ -14,6 +15,7 @@ module Admin
           LABELS = { to: ".to", cc: ".cc", bcc: ".bcc" }.freeze
 
           prop :senders, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :contacts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :list, Blog::Types::Hash
           prop :draft, Blog::Types::Hash.optional
 
@@ -33,14 +35,17 @@ module Admin
             div(class: "mail-head-row", data: (to ? nil : { mail_extra: "" })) do
               label(for: FieldError.id_for(name, SCOPE)) { t(LABELS.fetch(name)) }
               input(**address_attributes(name), autofocus: (true if to))
+              suggestions if to
               reveals if to
               FieldError(field: name, errors:, scope: SCOPE)
             end
           end
 
           def address_attributes(name)
+            to = name == TO
             own = { class: "mail-head-input", type: "text", name: "mail[#{name}]", value: values[name],
-                    autocomplete: "email", required: (true if name == TO) }
+                    autocomplete: "email", required: (true if to), list: (CONTACTS if to),
+                    placeholder: (t(".to_placeholder") if to) }
             mix(own, FieldError.control_attributes(name, errors, SCOPE))
           end
 
@@ -112,6 +117,14 @@ module Admin
                 FieldError.control_attributes(:subject, errors, SCOPE),
               ))
               FieldError(field: :subject, errors:, scope: SCOPE)
+            end
+          end
+
+          def suggestions
+            datalist(id: CONTACTS) do
+              @contacts.each do |contact|
+                contact.emails.each { option(value: it.fetch("value")) { contact.name || contact.company } }
+              end
             end
           end
 

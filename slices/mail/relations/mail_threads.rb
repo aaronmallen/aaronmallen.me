@@ -109,11 +109,7 @@ module Mail
 
       def first_message = own_messages.order(:received_at, :id).limit(1)
 
-      def from_people
-        sender = first_message.select(Sequel.function(:lower, Sequel.function(:coalesce, :from_name, :reply_to)))
-
-        { sender => people.dataset.unordered.select(Sequel.function(:lower, :name)) }
-      end
+      def from_people = { first_message.select(Sequel.function(:lower, :reply_to)) => people.addresses }
 
       def holding(name)
         held = mail_thread_labels.join(:mail_label).where(Sequel[:mail_labels][:name] => name).dataset.unordered

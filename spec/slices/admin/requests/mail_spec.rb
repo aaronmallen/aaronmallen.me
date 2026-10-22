@@ -359,7 +359,9 @@ RSpec.describe "Admin mail", type: :request do
     end
 
     describe "opening a thread" do
-      let(:thread) { gmail(subject: "Hello", from_name: "Ada Lovelace", received_at: Time.now - 120) }
+      let(:thread) do
+        gmail(subject: "Hello", from_name: "Ada Lovelace", reply_to: "ada@example.com", received_at: Time.now - 120)
+      end
 
       before do
         create(:mail_message, mail_thread_id: thread.id, subject: "Re", body: "My reply", reply_to: work.address,
@@ -412,9 +414,10 @@ RSpec.describe "Admin mail", type: :request do
           expect(page).to have_css("#thread-#{thread.id}.on")
         end
 
-        it "says the sender isn't in People and offers to add them", :aggregate_failures do
-          expect(page).to have_css(".mail-who", text: "Ada Lovelace isn’t in People")
-          expect(page).to have_link("Add to People", href: "/admin/people/new")
+        it "says the sender isn't in Contacts and offers to add them", :aggregate_failures do
+          expect(page).to have_css(".mail-who", text: "Ada Lovelace isn’t in Contacts")
+          expect(page).to have_link("Add to Contacts",
+                                    href: "/admin/people/new?name=Ada%20Lovelace&email=ada@example.com")
         end
 
         it "offers Trash and links a Gmail thread out to Gmail, keeping spam and delete for the contact form" do
@@ -445,12 +448,19 @@ RSpec.describe "Admin mail", type: :request do
         end
       end
 
-      it "shows the person's card when the sender is in People", :aggregate_failures do
-        person = create(:person, name: "Ada Lovelace")
+      it "shows the person's card when the sender's email is in Contacts", :aggregate_failures do
+        person = create(:person, name: "Countess of Lovelace", emails: [{ value: "Ada@Example.com" }])
         get "/admin/mail", thread: thread.id
 
-        expect(page).to have_css(".mail-who .mail-who-name", text: "Ada Lovelace")
+        expect(page).to have_css(".mail-who .mail-who-name", text: "Countess of Lovelace")
         expect(page).to have_link("Open person", href: "/admin/people/#{person.id}/edit")
+      end
+
+      it "treats a contact with the sender's name but not their email as a stranger" do
+        create(:person, name: "Ada Lovelace", emails: [{ value: "other@example.com" }])
+        get "/admin/mail", thread: thread.id
+
+        expect(page).to have_css(".mail-who", text: "Ada Lovelace isn’t in Contacts")
       end
     end
 
@@ -480,7 +490,14 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, reply_to: "visitor@example.com")
         get "/admin/mail", thread: thread.id
 
-        expect(page).to have_css(".mail-who", text: "visitor@example.com isn’t in People · via the contact form")
+        expect(page).to have_css(".mail-who", text: "visitor@example.com isn’t in Contacts · via the contact form")
+      end
+
+      it "offers to add a stranger with no name by their email alone" do
+        thread = create(:message, reply_to: "visitor@example.com")
+        get "/admin/mail", thread: thread.id
+
+        expect(page).to have_link("Add to Contacts", href: "/admin/people/new?email=visitor@example.com")
       end
     end
 

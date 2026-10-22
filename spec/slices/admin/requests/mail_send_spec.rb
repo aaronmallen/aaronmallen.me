@@ -114,6 +114,25 @@ RSpec.describe "Admin mail sending", type: :request do
       expect(page).to have_css("#mail-compose[data-dialog-show]", visible: :all)
     end
 
+    describe "with contacts" do
+      let(:to) { page.find("#mail-compose input[name='mail[to]']", visible: :all) }
+
+      before do
+        create(:person, name: "Ada Lovelace", emails: [{ value: "ada@example.com" }, { value: "ada@work.example" }])
+        create(:person, name: "Charles Babbage")
+        get "/admin/mail"
+      end
+
+      it "says To autocompletes from Contacts" do
+        expect(to[:placeholder]).to eq("name or address · Contacts autocomplete")
+      end
+
+      it "suggests each contact's emails under their name in To" do
+        expect(page.all("datalist##{to[:list]} option", visible: :all).map { [it[:value], it.text] })
+          .to eq([["ada@example.com", "Ada Lovelace"], ["ada@work.example", "Ada Lovelace"]])
+      end
+    end
+
     it "shows the sender's signature with a way to remove it", :aggregate_failures do
       Mail::Slice["repos.gmail_mutations"].sign(work.id, "<b>Aaron</b>")
       get "/admin/mail"

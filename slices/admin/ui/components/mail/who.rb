@@ -7,6 +7,7 @@ module Admin
         class Who < Component
           prop :person, Blog::Types::Instance(ROM::Struct).optional
           prop :sender, Blog::Types::String.optional
+          prop :email, Blog::Types::String.optional
           prop :form, Blog::Types::Bool
           prop :spam, Blog::Types::Bool
 
@@ -15,6 +16,8 @@ module Admin
           end
 
           private
+
+          def add_path = path(:admin_new_person, name: (@sender unless @sender == @email), email: @email)
 
           def known
             name("fa-solid fa-user-group") { plain @person.name }
@@ -32,9 +35,7 @@ module Admin
             name("fa-regular fa-user", dim: true) { plain t(@form ? ".stranger_form" : ".stranger", name: @sender) }
             return if @spam
 
-            Button(variant: :gh, small: true, icon: :add, href: path(:admin_new_person)) do
-              t(".add_person")
-            end
+            Button(variant: :gh, small: true, icon: :add, href: add_path) { t(".add_person") }
           end
         end
       end

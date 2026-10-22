@@ -22,7 +22,7 @@ module Admin
             article(id: Helpers::MailList.anchor(@thread.id), class: "mail-reader") do
               meta
               h2(class: "mail-title") { @thread.subject }
-              Who(person: @person, sender: @thread.sender, form: @form, spam: spam?)
+              Who(person: @person, sender: @thread.sender, email: @thread.reply_to, form: @form, spam: spam?)
               earlier
               letter(messages.last)
               yield

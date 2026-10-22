@@ -143,8 +143,8 @@ RSpec.describe "Admin mail settings", type: :request do
         {
           contact_form: -> { create(:message, subject: "Hello") },
           people: lambda {
-            create(:person, name: "Ada Lovelace")
-            gmail(subject: "Hello", from_name: "Ada Lovelace")
+            create(:person, name: "Countess of Lovelace", emails: [{ value: "ada@example.com" }])
+            gmail(subject: "Hello", from_name: "Ada Lovelace", sender: "ADA@example.com")
           },
           needs_reply: -> { gmail(subject: "Hello").tap { labeled(it, "needs-reply") } },
           starred: -> { gmail(:read, subject: "Hello", starred: true) },
@@ -152,7 +152,7 @@ RSpec.describe "Admin mail settings", type: :request do
       end
 
       {
-        contact_form: "contact form", people: "from People", needs_reply: "label: needs-reply", starred: "starred",
+        contact_form: "contact form", people: "from Contacts", needs_reply: "label: needs-reply", starred: "starred",
       }.each do |rule, reason|
         it "puts a thread in Waiting by #{rule} and says why", :aggregate_failures do
           thread = matches.fetch(rule).call
@@ -183,6 +183,13 @@ RSpec.describe "Admin mail settings", type: :request do
 
         expect(inbox).to be_empty
         expect(mail).to eq(["Just mail"])
+      end
+
+      it "leaves out a sender who shares a contact's name but not an email" do
+        create(:person, name: "Ada Lovelace", emails: [{ value: "ada@example.com" }])
+        gmail(subject: "Hello", from_name: "Ada Lovelace", sender: "imposter@example.com")
+
+        expect(inbox).to be_empty
       end
 
       it "leaves an archived starred thread out" do

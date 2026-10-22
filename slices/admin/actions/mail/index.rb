@@ -39,6 +39,7 @@ module Admin
         end
 
         def show_compose(response, draft, resume)
+          response[:contacts] = person_queries.emailed
           response[:senders] = save_draft.senders(response[:accounts])
           drafted = save_draft.values(response[:open]) if resume && !draft
           response[:draft] = drafted ? { values: drafted, errors: Blog::Constants::EMPTY_HASH } : draft
@@ -55,7 +56,7 @@ module Admin
           thread = id && thread_queries.by_id(id)
 
           response[:open] = thread
-          response[:person] = thread&.sender && person_queries.by_name(thread.sender)
+          response[:person] = thread&.reply_to && person_queries.by_email(thread.reply_to)
         end
 
         def show_sources(response, account)

@@ -193,6 +193,26 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_css("form[method='post'][action='/admin/people'] input[name='person[key]']")
       end
 
+      it "fills a new person from a mail sender", :aggregate_failures do
+        get "/admin/people/new", name: "Ada Lovelace", email: "ada@example.com"
+
+        form = page.find("form[action='/admin/people']")
+        expect(form.find("input[name='person[name]']").value).to eq("Ada Lovelace")
+        expect(form.find("input[name='person[emails][][value]']", visible: :all).value).to eq("ada@example.com")
+      end
+
+      it "stores the sender's email with the new person" do
+        add(name: "Ada Lovelace", emails: [{ value: "ada@example.com" }])
+
+        expect(everyone.map { [it.name, it.emails] }).to eq([["Ada Lovelace", [{ "value" => "ada@example.com" }]]])
+      end
+
+      it "keeps the sender's email when the new person is refused" do
+        add(emails: [{ value: "ada@example.com" }])
+
+        expect(page.find("input[name='person[emails][][value]']", visible: :all).value).to eq("ada@example.com")
+      end
+
       it "stores a person with a Mastodon handle" do
         add(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
 

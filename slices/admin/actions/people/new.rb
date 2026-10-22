@@ -6,8 +6,10 @@ module Admin
       class New < Action
         include Deps[build_person_editor: "operations.build_person_editor"]
 
-        def handle(_request, response)
-          response.render(view, **build_person_editor.call)
+        def handle(request, response)
+          sender = { name: request.params[:name], emails: [{ value: request.params[:email] }] }
+
+          response.render(view, **build_person_editor.call(params: sender))
         end
       end
     end

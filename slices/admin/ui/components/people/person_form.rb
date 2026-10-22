@@ -56,6 +56,7 @@ module Admin
           def delete_form_id = self.class.delete_form(@scope)
 
           def fields
+            sender_email
             input_field(:name)
             input_field(:key) { Hint { t(".key_note", key: key_token) } }
             input_field(:mastodon_handle)
@@ -87,6 +88,12 @@ module Admin
           def network(name)
             net = NETWORKS[name]
             net ? { class: "field-net #{net}", icon: Blog::Constants::NETWORK_ICONS.fetch(net) } : Blog::Constants::EMPTY_HASH
+          end
+
+          def sender_email
+            return if @person || @values[:email].empty?
+
+            input(type: "hidden", name: "person[emails][][value]", value: @values[:email])
           end
         end
       end

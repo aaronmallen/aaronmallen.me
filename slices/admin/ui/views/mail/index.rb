@@ -14,6 +14,7 @@ module Admin
           TONES = %w[gr or bl vi].freeze
 
           prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :contacts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :draft, Blog::Types::Hash.optional
           prop :labels, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Array)
@@ -62,8 +63,7 @@ module Admin
           def empty
             return Empty { t(".no_match") } if @list[:search]
 
-            name = folder_name
-            Empty { t(@list[:show] == Helpers::MailList::UNREAD ? ".nothing_unread" : ".empty", name:) }
+            Empty { t(@list[:show] == Helpers::MailList::UNREAD ? ".nothing_unread" : ".empty", name: folder_name) }
           end
 
           def filter_form
@@ -133,7 +133,7 @@ module Admin
           def tools
             BulkToggle(form: Bulk::ID)
             Button(href: path(:admin_mail_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
-            Compose(senders: @senders, list: @list, draft: @draft)
+            Compose(senders: @senders, contacts: @contacts, list: @list, draft: @draft)
           end
         end
       end
