@@ -15,6 +15,7 @@ amended:
   - "#1182"
   - "#1315"
   - "#1657"
+  - "#1947"
 tags:
   - projects
   - tasks
@@ -55,7 +56,8 @@ private project, or one without the flag, reads "That board isn't public." at it
 done or canceled date. It shows no tags, notes, comments, time or issue links. Since #1182 each card links to a
 page for its task that shows its notes, comments, related tasks and issue link, but no tags or time, as
 [ADR 0160][0160] records. Since #1315 a task sits on one board at most, the one in `tasks.project_id`, and its
-card shows its `KEY-n` label ([ADR 0166][0166]).
+card shows its `KEY-n` label ([ADR 0166][0166]). Since #1947 a card shows its project tags too, which a published
+board makes public ([ADR 0205][0205]).
 
 ## Alternatives
 
@@ -70,7 +72,8 @@ shows no tags.
 Turning the flag on publishes every task ever linked to the project, past ones too, and every task linked later. A
 task linked to a published project shows in public whatever it says, so its title has to be fit to read.
 
-Cards show no tags, since every task tag is private.
+Cards showed no tags while every task tag was private. Since #1947 publishing a board publishes its project's
+tags as well.
 
 Cloudflare keeps the board for five minutes ([ADR 0090][0090]), so a card move or turning the flag off reaches
 visitors late.
@@ -80,4 +83,5 @@ visitors late.
 [0119]: 0119-mark-a-project-archived-by-its-archive-date-and-keep-visibility-in-its-own-enum.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

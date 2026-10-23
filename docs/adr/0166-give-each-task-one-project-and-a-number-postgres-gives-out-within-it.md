@@ -12,6 +12,8 @@ area:
   - public
   - tasks
 issue: "#1316"
+amended:
+  - "#1947"
 tags:
   - tasks
   - projects
@@ -61,7 +63,7 @@ in the project and writes no task row.
 scope: its project, or tasks with no project. Each scope keeps a counter in `task_number_counters` that only climbs,
 so a number freed by a deleted or moved task never goes to another. A unique index on the scope and the number holds
 it. A task that gains, loses or changes its project takes the next number in its new scope, and its old label stops
-working.
+working. Since #1947 its tags move with it by name ([ADR 0205][0205]).
 
 **Lookups take the label.** The public page reads `:number` within the project in its URL. MCP and API tools take
 an internal id, a `KEY-n` label, or a plain number for a task with no project.
@@ -103,4 +105,5 @@ off. #1315 leaves that open.
 [0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

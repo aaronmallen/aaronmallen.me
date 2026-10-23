@@ -11,6 +11,7 @@ issue: "#389"
 amended:
   - "#506"
   - "#660"
+  - "#1947"
 tags:
   - tasks
   - tags
@@ -41,8 +42,9 @@ provider's client. [ADR 0066][0066] keeps an imported task's origin, URL include
 **Rules live in their own table in the `tasks` slice.** A rule holds a pattern and its tags. A pattern names one
 repo (`owner/name`) or every repo of an owner (`owner/*`), and ignores case. Since #506 a rule also names a provider,
 and a Linear pattern names a team (`workspace/team`) or every team of a workspace, as [ADR 0112][0112] says. A rule's
-tags sit in a join table to private tags, the way `task_tags` holds a task's. Rules stack: an issue takes the tags of
-every rule it matches.
+tags sit in a join table to private tags, the way `task_tags` holds a task's. Since #1947 a rule that files into
+a project holds that project's tags instead, and saving it makes them there ([ADR 0205][0205]). Rules stack: an
+issue takes the tags of every rule it matches.
 
 **Each client hands over a neutral origin.** The GitHub client sets `origin` to the issue's `nameWithOwner`. The
 Linear client set none, so Linear issues matched no rule, until #506 gave the Linear client an `origin` of
@@ -97,4 +99,5 @@ needs a rule provider of its own, as [ADR 0112][0112] says.
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0112]: 0112-give-every-tag-rule-a-provider-and-match-linear-issues-by-workspace-and-team.md
 [0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -14,6 +14,8 @@ area:
   - public
   - search
 issue: "#646"
+amended:
+  - "#1947"
 tags:
   - projects
   - archive
@@ -54,7 +56,8 @@ existing project to `public` before it adds the constraint. `Blog::Types::Projec
 We do not reuse `tag_scope`, though it holds the same two values. `tag_scope` says which side of the `tags` table a
 tag lives on, and every tag join pins it through a `CHECK` and the `(tag_id, tag_scope)` foreign key
 ([ADR 0074][0074]). A value added to it for tags would turn up as a visibility for projects. The schema already keeps
-`post_status` and `social_post_status` apart for the same reason, though they share two values.
+`post_status` and `social_post_status` apart for the same reason, though they share two values. Since #1947
+`tag_scope` holds a third value, `project` ([ADR 0205][0205]), which `project_visibility` does not.
 
 ## Alternatives
 
@@ -84,8 +87,10 @@ Filtering archived projects means `archived_on IS NULL` or `IS NOT NULL`. `proje
 covers it.
 
 `project_visibility` and `tag_scope` hold the same two values in two places, and nothing keeps them alike. That is
-the point, but a reader who sees both may take one for a copy of the other.
+the point, but a reader who sees both may take one for a copy of the other. Since #1947 `tag_scope` also holds
+`project`.
 
 [0015]: 0015-type-a-closed-set-as-a-postgres-enum-and-a-format-as-a-domain.md
 [0074]: 0074-split-tags-into-a-public-and-a-private-scope.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -18,6 +18,7 @@ amended:
   - "#284"
   - "#911"
   - "#1926"
+  - "#1947"
 tags:
   - tags
   - scope
@@ -43,7 +44,8 @@ splits them.
 ## Decision
 
 A tag is **public** or **private**. Posts and projects take public tags. Tasks and journal entries take private
-tags.
+tags. Since #1947 a third scope, `project`, gives each project its own tags, and a record related to a
+project takes them in place of private tags (ADR 0205).
 
 `tags` gains a `scope` column of a new `tag_scope` enum, and `tags_scope_name_key UNIQUE (scope, name)` replaces
 `tags_name_key`. A name can exist once in each scope, and each row keeps its own color.

@@ -12,6 +12,7 @@ area:
 issue: "#273"
 amended:
   - "#911"
+  - "#1947"
 tags:
   - decisions
   - slices
@@ -70,6 +71,7 @@ option changed. The note lands on the `edited` or `option_edited` event.
 are ([ADR 0082][0082]).
 
 **`decision_tags`** joins decisions to private tags, held to that scope in Postgres as [ADR 0074][0074] lays out.
+Since #1947 a decision linked to a project takes that project's tags instead ([ADR 0205][0205]).
 
 **A `decision_timeline` view** unions events and comments, keyed by decision and stamped with the time each
 happened. A later migration replaces the `activities` view with a branch for each table ([ADR 0052][0052]).
@@ -118,4 +120,5 @@ ADR 0001 counts the feature slices, and ADR 0017 lists the mapped names. #274 up
 [0092]: 0092-keep-task-history-in-task-events-and-a-task-timeline-view.md
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

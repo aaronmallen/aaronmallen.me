@@ -202,6 +202,7 @@ one.
 | [0202][0202] | Tell admin browsers apart with a device cookie, and sign each one out on its own | ![Active][active] | 2026-10-22 |
 | [0203][0203] | Gate notes behind a notes scope that read does not cover | ![Active][active] | 2026-10-22 |
 | [0204][0204] | Gate private contact fields behind a contacts scope | ![Active][active] | 2026-10-22 |
+| [0205][0205] | Give each project its own tags through a project scope on tags | ![Active][active] | 2026-10-23 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -400,6 +401,7 @@ one.
 [0202]: 0202-tell-admin-browsers-apart-with-a-device-cookie-and-sign-each-one-out-on-its-own.md
 [0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [0204]: 0204-gate-private-contact-fields-behind-a-contacts-scope.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

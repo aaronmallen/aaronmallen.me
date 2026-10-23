@@ -9,6 +9,7 @@ issue: "#1182"
 amended:
   - "#1315"
   - "#1656"
+  - "#1947"
 tags:
   - projects
   - tasks
@@ -48,7 +49,8 @@ lacks ([ADR 0166][0166]).
 **The page shows everything but tags and time.** It shows the number, title, status, column, done or canceled
 date, notes cleaned as ADR 0072 cleans them, comments, related tasks named by how each relates, and a link to the
 source issue. Since #1656 the site serves visitors the photos the notes and comments show ([ADR 0080][0080]). It
-never shows tags, since every task tag is private, or time and work hours.
+never shows tags, since every task tag is private, or time and work hours. Since #1947 a published board's
+project tags are public and show on its cards ([ADR 0205][0205]), but this page still leaves them out.
 
 **A related task shows only when it sits on a published board of a public project.** The page leaves out every
 other link, so a private task's title never reaches the page through a relation.
@@ -83,4 +85,5 @@ or a project that goes private, stays readable that long.
 [0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0166]: 0166-give-each-task-one-project-and-a-number-postgres-gives-out-within-it.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

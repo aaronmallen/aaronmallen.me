@@ -15,6 +15,7 @@ amended:
   - "#1766"
   - "#1779"
   - "#1770"
+  - "#1947"
 tags:
   - mail
   - gmail
@@ -76,7 +77,7 @@ on its thread. Rows the site mirrored before the window was set stay until someo
 | --- | --- |
 | Read, starred, labels, spam, trash, archive | Gmail. An action here writes to Gmail, then to the mirror. |
 | Snooze | `snoozed_until` on the thread, as [ADR 0121][0121] keeps it on each record's table. |
-| Site tags | `mail_thread_tags`. A new tag on a Gmail thread is a private site tag and never reaches Gmail. |
+| Site tags | `mail_thread_tags`. A new tag on a Gmail thread is a private site tag, or since #1947 a tag of each project the thread links to ([ADR 0205][0205]), and never reaches Gmail. |
 | Every state of a contact form thread | Our tables, since no Gmail stands behind it. |
 
 ## Alternatives
@@ -115,4 +116,5 @@ how much of a mailbox they hold, and trash never lands from the backfill.
 [0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0146]: 0146-keep-health-data-in-a-health-slice-as-daily-summaries-and-workouts-polled-from-google.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

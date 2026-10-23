@@ -17,6 +17,7 @@ issue: "#626"
 amended:
   - "#1612"
   - "#1846"
+  - "#1947"
 tags:
   - tags
   - summary
@@ -51,7 +52,8 @@ none of the five imports from `tags`.
 
 **One query in the `tags` slice builds the summary.** It finds the tag rows that carry the name in either scope, and
 answers nothing when there are none, so the page and the tool can refuse an unknown name. It then counts each kind's
-records and asks each kind for one page of them, or one kind alone when the caller names it.
+records and asks each kind for one page of them, or one kind alone when the caller names it. Since #1947 it
+leaves out project tags, which have a page of their own in each project ([ADR 0205][0205]).
 
 **Each kind answers through a query its own slice exports.** `posts`, `projects`, `tasks`, `record` (for journal
 entries) and `decisions` each export `page_by_tag`, a paged query over their relation's `tagged` that keeps every
@@ -96,4 +98,5 @@ drafts or private records through it. Only `tags` imports them.
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0096]: 0096-search-every-kind-through-tsvector-columns-and-one-view-in-a-search-slice.md
 [0100]: 0100-build-the-review-in-one-activity-query-that-admin-and-api-share.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

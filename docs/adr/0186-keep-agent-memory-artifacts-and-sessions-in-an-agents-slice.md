@@ -17,6 +17,7 @@ amended:
   - "#1859"
   - "#1860"
   - "#1893"
+  - "#1947"
 tags:
   - agents
   - memory
@@ -64,7 +65,9 @@ read it through its exported read repos and operations and never write its table
 - **Artifact tags sit in a `text[]` column on `artifacts`**, with a CHECK that holds each one to the tag slug format,
   not in the shared `tags` table. A join to `tags` would put artifacts on the tag screens and in the tag counts,
   which the slice stays out of, as it stays out of search. A `tag_name[]` column would carry the domain, but
-  Sequel reads an array of a domain back as a plain string, so the CHECK stands in for it.
+  Sequel reads an array of a domain back as a plain string, so the CHECK stands in for it. Since #1947 an
+  artifact's tags move into a join to `tags`, and sessions and memory files gain joins too, so each can take its
+  project's tags and show on that project's tag pages ([ADR 0205][0205]).
 
 ## Alternatives
 
@@ -96,4 +99,5 @@ screens, the MCP tools or a record link.
 [0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [0195]: 0195-load-agent-memory-as-an-index-and-read-it-on-demand.md
 [0199]: 0199-attach-agent-memory-and-sessions-to-projects-and-treat-a-repo-as-a-lookup.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

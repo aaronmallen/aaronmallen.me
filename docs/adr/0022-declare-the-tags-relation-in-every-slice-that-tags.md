@@ -25,6 +25,7 @@ amended:
   - "#1200"
   - "#1693"
   - "#1926"
+  - "#1947"
 tags:
   - tags
   - rom
@@ -71,7 +72,8 @@ their tag and untag operations inherit `Blog::TagOperation`. Tasks and task rule
 missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope (ADR
 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones. Since #992 the join relation's
 `retag`, `tag` and `untag` claim and write the tags, and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's
-scope once, for the owner slice and for the tags slice's counts.
+scope once, for the owner slice and for the tags slice's counts. Since #1947 a record related to a project claims
+within that project, and its join admits the project scope beside its own (ADR 0205).
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.

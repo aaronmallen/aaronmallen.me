@@ -7,6 +7,8 @@ area:
   - db
   - public
 issue: "#1465"
+amended:
+  - "#1947"
 tags:
   - search
   - postgres
@@ -41,7 +43,8 @@ the text that page shows.**
 - Projects: public ones, archived public projects among them.
 - Tasks: on a published board of a public project ([ADR 0157][0157]), matched on title and notes. Never tags or
   time, which the task page leaves out ([ADR 0160][0160]).
-- Public tag names on posts and projects match. Task tags are private ([ADR 0074][0074]) and never match.
+- Public tag names on posts and projects match. Task tags are private ([ADR 0074][0074]) and never match. Since
+  #1947 project tags never match either, on a task or a post ([ADR 0205][0205]).
 
 **A new `public_search_documents` view holds only those rows and that text.** The public slice reads this view and
 no other for search. Hits, counts, ranking and paging all come from it, so a count cannot hint at a private record.
@@ -70,4 +73,5 @@ rebuilds both views.
 [0096]: 0096-search-every-kind-through-tsvector-columns-and-one-view-in-a-search-slice.md
 [0157]: 0157-publish-a-projects-tasks-through-its-board-flag.md
 [0160]: 0160-open-a-public-page-for-each-task-on-a-published-board-without-its-tags-or-time.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

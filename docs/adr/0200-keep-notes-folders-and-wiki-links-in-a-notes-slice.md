@@ -10,6 +10,8 @@ area:
   - mcp
   - links
 issue: "#1924"
+amended:
+  - "#1947"
 tags:
   - notes
   - folders
@@ -45,7 +47,8 @@ write its tables ([ADR 0123][0123]). No public page reads it.
 - **Wiki links are stored.** Each save reads the `[[...]]` links out of the body and replaces the note's stored
   links with one row per title it names. A row keeps the title as written, so a link to a note not written yet
   still counts. Backlinks, links out, the titles not written and the rename rewrite read these rows, not every body.
-- **Notes take private tags** through the shared tags table ([ADR 0022][0022], [ADR 0074][0074]).
+- **Notes take private tags** through the shared tags table ([ADR 0022][0022], [ADR 0074][0074]). Since #1947 a
+  note linked to a project takes that project's tags instead ([ADR 0205][0205]).
 
 ## Alternatives
 
@@ -81,4 +84,5 @@ A rename rewrites the body of every note that links to the old title, so one ren
 [0099]: 0099-keep-decision-logs-in-a-decisions-slice-with-decision-events-and-a-decision-timeline-view.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0186]: 0186-keep-agent-memory-artifacts-and-sessions-in-an-agents-slice.md
+[0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
