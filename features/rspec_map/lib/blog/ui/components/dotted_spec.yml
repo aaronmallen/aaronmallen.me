@@ -1,4 +1,8 @@
 - example: "Blog::UI::Components::Dotted escapes text parts"
+  drop: "unit spec of a view component; the pages that show dotted parts cover it"
 - example: "Blog::UI::Components::Dotted puts a dot between the parts and keeps their markup"
+  drop: "unit spec of a view component; the pages that show dotted parts cover it"
 - example: "Blog::UI::Components::Dotted puts no dot around parts that render nothing"
+  drop: "unit spec of a view component; the pages that show dotted parts cover it"
 - example: "Blog::UI::Components::Dotted renders nothing when no part renders"
+  drop: "unit spec of a view component; the pages that show dotted parts cover it"

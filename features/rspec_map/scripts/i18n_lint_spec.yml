@@ -1,3 +1,6 @@
 - example: "mise run lint:i18n fails on a key no code reads"
+  scenario: "scripts/i18n_lint.feature: lint:i18n fails on a key no code reads"
 - example: "mise run lint:i18n passes a key the allowed list names"
+  scenario: "scripts/i18n_lint.feature: lint:i18n passes a key the allowed list names"
 - example: "mise run lint:i18n passes when code reads every key, a subclass's relative keys and prefixes among them"
+  scenario: "scripts/i18n_lint.feature: lint:i18n passes when code reads every key, a subclass's relative keys and prefixes among them"

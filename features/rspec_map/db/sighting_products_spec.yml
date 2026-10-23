@@ -1,2 +1,4 @@
 - example: "Sightings keyed on the user agent product keeps the first time it saw any of the merged rows"
+  drop: "data step of migration 20261022140000, which tag 26.10.32 shipped"
 - example: "Sightings keyed on the user agent product merges one client's rows split by city into its latest city and address"
+  drop: "data step of migration 20261022140000, which tag 26.10.32 shipped"

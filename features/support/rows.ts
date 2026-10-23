@@ -1,11 +1,20 @@
 import type postgres from "postgres";
 
-type Post = { publishedAt: Date; status: "published" | "scheduled"; title: string; webmentions?: boolean };
+type Post = {
+  body?: string;
+  publishedAt: Date;
+  status: "published" | "scheduled";
+  title: string;
+  webmentions?: boolean;
+};
 
 export const slugFor = (title: string) => title.toLowerCase().replaceAll(/\W+/g, "-");
 
-export async function insertPost(sql: postgres.Sql, { publishedAt, status, title, webmentions = false }: Post) {
-  const body = `A post called ${title}.`;
+export async function insertPost(
+  sql: postgres.Sql,
+  { body = "", publishedAt, status, title, webmentions = false }: Post,
+) {
+  body ||= `A post called ${title}.`;
   await sql`
     INSERT INTO posts ${sql({
       body,

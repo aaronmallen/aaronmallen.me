@@ -1,2 +1,4 @@
 - example: "GraphQL queries checks every GitHub query against the github schema"
+  drop: "checks query files against vendored GitHub and Linear schemas; a stub cannot tell a query the real API would refuse, so this is a lint, not behaviour"
 - example: "GraphQL queries checks every Linear query against the linear schema"
+  drop: "checks query files against vendored GitHub and Linear schemas; a stub cannot tell a query the real API would refuse, so this is a lint, not behaviour"

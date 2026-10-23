@@ -1,1 +1,2 @@
 - example: "mise run dev:prune-workspaces drops and lists the test databases of workspaces with no directory"
+  scenario: "scripts/prune_workspaces.feature: dev:prune-workspaces drops and lists the test databases of workspaces with no directory"

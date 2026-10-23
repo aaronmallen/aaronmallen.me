@@ -1,4 +1,8 @@
 - example: "Blog::Operation passes the block's result through"
+  drop: "unit spec of Blog::Operation's constraint mapping; the form features that break each constraint show the failure"
 - example: "Blog::Operation raises an unknown constraint"
+  drop: "unit spec of Blog::Operation's constraint mapping; the form features that break each constraint show the failure"
 - example: "Blog::Operation turns a constraint mapped to a code into that failure"
+  drop: "unit spec of Blog::Operation's constraint mapping; the form features that break each constraint show the failure"
 - example: "Blog::Operation turns each known constraint into a one-field failure"
+  drop: "unit spec of Blog::Operation's constraint mapping; the form features that break each constraint show the failure"

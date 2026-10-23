@@ -1,3 +1,6 @@
 - example: "Schema twins drops the links of a deleted record of every kind"
+  scenario: "db/schema.feature: Deleting a record of any kind drops its links"
 - example: "Schema twins keeps every enum's values in its Blog::Types twin"
+  drop: "compares the schema's enums to the Blog::Types constants in Ruby, which a black-box step cannot read; the features that save each value through the app catch a twin that drifts"
 - example: "Schema twins names only enums the schema holds in the renamed list"
+  drop: "compares the schema's enums to the Blog::Types constants in Ruby, which a black-box step cannot read; the features that save each value through the app catch a twin that drifts"

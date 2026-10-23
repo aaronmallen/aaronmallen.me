@@ -1,4 +1,8 @@
 - example: "mise run test:map drops rows and files for examples RSpec no longer runs"
+  drop: "test:map runs RSpec to list its examples, so it and its spec go with RSpec in #1973"
 - example: "mise run test:map fails when a mapped scenario no longer exists"
+  drop: "test:map runs RSpec to list its examples, so it and its spec go with RSpec in #1973"
 - example: "mise run test:map lists each example with neither scenario nor drop reason, and fails"
+  drop: "test:map runs RSpec to list its examples, so it and its spec go with RSpec in #1973"
 - example: "mise run test:map passes once every example has a scenario or drop reason, keeping them"
+  drop: "test:map runs RSpec to list its examples, so it and its spec go with RSpec in #1973"

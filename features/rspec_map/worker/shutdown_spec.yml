@@ -1,1 +1,2 @@
 - example: "The worker shutting down stops the app's providers"
+  scenario: "worker/boot.feature: The worker stops cleanly when told to"

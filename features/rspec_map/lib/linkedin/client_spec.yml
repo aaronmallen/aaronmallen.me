@@ -1,1 +1,2 @@
 - example: "LinkedIn::Client pins a LinkedIn-Version no more than ten months old"
+  drop: "a reminder to bump LinkedIn-Version before LinkedIn retires it; the stub cannot tell one version from another"

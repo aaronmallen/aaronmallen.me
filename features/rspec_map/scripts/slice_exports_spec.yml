@@ -1,2 +1,4 @@
 - example: "Hanami/SliceExports fails on each forbidden key"
+  scenario: "scripts/slice_exports.feature: The slice exports cop fails on each forbidden key"
 - example: "Hanami/SliceExports passes read repos and operations"
+  scenario: "scripts/slice_exports.feature: The slice exports cop passes read repos and operations"

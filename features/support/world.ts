@@ -1,16 +1,21 @@
 import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdirSync, openSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdirSync, openSync, rmSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { type Cookie, expect } from "@playwright/test";
 import { test as base, createBdd } from "playwright-bdd";
 import postgres from "postgres";
 import { createClient } from "redis";
+import { root, type Shell } from "./shell.ts";
 import { ownerEmail, type Stub, startStub } from "./stub.ts";
 
 type App = {
+  env: NodeJS.ProcessEnv;
   pushJob: (job: string, ...args: unknown[]) => Promise<void>;
+  redis: { client: ReturnType<typeof createClient>; start: () => Promise<void>; stop: () => void };
   reset: () => Promise<void>;
   sql: postgres.Sql;
   stub: Stub;
@@ -19,7 +24,6 @@ type App = {
 
 type Owner = { cookies: Cookie[]; device: postgres.Row };
 
-const root = resolve(import.meta.dirname, "../..");
 const workspace = Number(process.env.WORKSPACE_ID ?? 0);
 const firstPort = 20000 + (workspace % 2000) * 20;
 
@@ -36,8 +40,8 @@ async function until(ready: () => Promise<unknown>, what: string) {
 }
 
 function start(name: string, command: string, args: string[], env: NodeJS.ProcessEnv) {
-  mkdirSync(resolve(root, "tmp"), { recursive: true });
-  const log = openSync(resolve(root, `tmp/features-ws${workspace}-${name}.log`), "w");
+  mkdirSync(join(root, "tmp"), { recursive: true });
+  const log = openSync(join(root, `tmp/features-ws${workspace}-${name}.log`), "w");
   return spawn(command, args, { cwd: root, detached: true, env, stdio: ["ignore", log, log] });
 }
 
@@ -49,7 +53,7 @@ async function stop(child: ChildProcess) {
 }
 
 export const test = base.extend<
-  { reset: undefined; stub: Stub; tokens: { api?: string; mcp?: string } },
+  { reset: undefined; shell: Shell; stub: Stub; tokens: { api?: string; mcp?: string } },
   { app: App; owner: Owner }
 >({
   app: [
@@ -66,6 +70,7 @@ export const test = base.extend<
         HANAMI_ENV: "test",
         HANAMI_HOST: "127.0.0.1",
         HANAMI_PORT: String(port),
+        MAINTENANCE_FLAG_PATH: join(root, `tmp/features-ws${workspace}-w${parallelIndex}-maintenance`),
         REDIS_PASSWORD: password,
         REDIS_PORT: String(redisPort),
         REDIS_USER: "default",
@@ -77,24 +82,29 @@ export const test = base.extend<
         TEST_ENV_NUMBER: String(parallelIndex + 1),
       };
 
-      execFileSync("docker", ["rm", "--force", redisContainer], { stdio: "ignore" });
-      execFileSync("docker", [
-        "run",
-        "--detach",
-        "--rm",
-        "--name",
-        redisContainer,
-        "--publish",
-        `127.0.0.1:${redisPort}:6379`,
-        "redis:8",
-        "redis-server",
-        "--requirepass",
-        password,
-        "--save",
-        "",
-      ]);
+      const stopRedis = () => execFileSync("docker", ["rm", "--force", redisContainer], { stdio: "ignore" });
+      const startRedis = async () => {
+        execFileSync("docker", [
+          "run",
+          "--detach",
+          "--rm",
+          "--name",
+          redisContainer,
+          "--publish",
+          `127.0.0.1:${redisPort}:6379`,
+          "redis:8",
+          "redis-server",
+          "--requirepass",
+          password,
+          "--save",
+          "",
+        ]);
+        await until(() => redis.isReady || redis.connect(), "Redis");
+        await until(() => redis.ping(), "Redis");
+      };
       const redis = createClient({ url: `redis://default:${password}@127.0.0.1:${redisPort}/2` });
       redis.on("error", () => {});
+      stopRedis();
       const children: ChildProcess[] = [];
       const sql = postgres({
         database: `blog_features_test${workspace ? `_${workspace}` : ""}_w${parallelIndex + 1}`,
@@ -105,7 +115,7 @@ export const test = base.extend<
       });
 
       try {
-        await until(() => redis.connect(), "Redis");
+        await startRedis();
         execFileSync("bundle", ["exec", "hanami", "db", "prepare"], {
           cwd: root,
           env: { ...env, HANAMI_CLI_DB_COMMAND_RE_RUN_IN_TEST: "true" },
@@ -127,13 +137,17 @@ export const test = base.extend<
         );
         await until(() => fetch(url, { method: "HEAD" }), "The server");
         await use({
+          env,
           pushJob: async (job, ...args) => {
             const now = Date.now();
             const payload = { args, class: job, created_at: now, enqueued_at: now, queue: "default", retry: false };
             await redis.sAdd("queues", "default");
             await redis.lPush("queue:default", JSON.stringify({ ...payload, jid: randomBytes(12).toString("hex") }));
           },
+          redis: { client: redis, start: startRedis, stop: stopRedis },
           reset: async () => {
+            if (!redis.isReady) await startRedis();
+            rmSync(env.MAINTENANCE_FLAG_PATH, { force: true });
             await sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`);
             await redis.flushDb();
           },
@@ -145,7 +159,7 @@ export const test = base.extend<
         await Promise.all(children.map(stop));
         await sql.end();
         if (redis.isOpen) redis.destroy();
-        execFileSync("docker", ["stop", redisContainer], { stdio: "ignore" });
+        stopRedis();
         await stub.stop();
       }
     },
@@ -168,6 +182,13 @@ export const test = base.extend<
   ],
   baseURL: async ({ app }, use) => use(app.url),
   reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
+  shell: async ({ app }, use) => {
+    const dir = await mkdtemp(join(tmpdir(), "features-"));
+    const shell: Shell = { children: [], dir, env: { ...app.env, ROOT: root, SCRATCH: dir }, output: "", status: null };
+    await use(shell);
+    await Promise.all(shell.children.map(stop));
+    await rm(dir, { force: true, recursive: true });
+  },
   stub: [
     async ({ app, context }, use) => {
       const away: string[] = [];
