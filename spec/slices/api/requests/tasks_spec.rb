@@ -237,6 +237,93 @@ RSpec.describe "API tasks", type: :request do
       expect(titles(list(query: "pod-1"))).to eq(["Record the intro", "Mow the lawn"])
     end
 
+    describe "a GitHub style query" do
+      def found(query) = titles(list(query:))
+
+      it "keeps the tasks holding any tag label: names" do
+        create(:task, title: "bug", tags: %w[bug])
+        create(:task, title: "docs", tags: %w[docs])
+        create(:task, title: "chore", tags: %w[chore])
+
+        expect([found("label:bug,docs"), found("l:Docs")]).to match([contain_exactly("bug", "docs"), %w[docs]])
+      end
+
+      it "leaves out the tasks holding a tag -label: names" do
+        create(:task, title: "bug", tags: %w[bug docs])
+        create(:task, title: "docs", tags: %w[docs])
+        create(:task, title: "untagged")
+
+        expect(found("-label:bug")).to contain_exactly("docs", "untagged")
+      end
+
+      it "keeps the untagged tasks with no:label" do
+        create(:task, title: "tagged", tags: %w[bug])
+        create(:task, title: "untagged")
+
+        expect([found("no:label"), found("-no:label")]).to eq([%w[untagged], %w[tagged]])
+      end
+
+      describe "is:" do
+        before do
+          blocker = create(:task, title: "blocker")
+          create(:task_link, from_task_id: blocker.id, to_task_id: create(:task, :in_progress, title: "blocked").id)
+          done = create(:task, :done, title: "done")
+          create(:task_link, from_task_id: done.id, to_task_id: create(:task, title: "freed").id)
+          create(:task, :canceled, title: "canceled")
+        end
+
+        {
+          "is:open" => %w[blocker blocked freed],
+          "is:closed" => %w[done canceled],
+          "is:doing" => %w[blocked],
+          "is:blocked" => %w[blocked],
+          "-is:blocked" => %w[blocker done freed canceled],
+        }.each do |query, expected|
+          it "keeps #{expected.join(', ')} for #{query}" do
+            expect(found(query)).to match_array(expected)
+          end
+        end
+      end
+
+      it "keeps the tasks in the board column column: or col: names" do
+        create(:task, title: "backlog")
+        create(:task, title: "ready", stage: "ready")
+        create(:task, :in_progress, title: "doing", stage: "ready")
+
+        expect([found("column:ready"), found('col:"in progress"'), found("-col:backlog").sort])
+          .to eq([%w[ready], %w[doing], %w[doing ready]])
+      end
+
+      it "finds a task by its number" do
+        project_id = create(:project, name: "Podcast").id
+        create(:task, title: "first", project_id:)
+        create(:task, title: "second", project_id:)
+
+        expect([found("#2"), found("2")]).to eq([%w[second], %w[second]])
+      end
+
+      it "joins every term with AND and finds a quoted phrase whole" do
+        create(:task, :in_progress, title: "Fix the feed", note: "today", tags: %w[bug])
+        create(:task, title: "Fix the feed again", note: "today", tags: %w[bug])
+        create(:task, :in_progress, title: "the feed, fix it", note: "today", tags: %w[bug])
+
+        expect(found('"fix the" today label:bug is:doing')).to eq(["Fix the feed"])
+      end
+
+      it "answers the terms it does not know as ignored and leaves them out" do
+        create(:task, title: "bug", tags: %w[bug])
+        create(:task, title: "docs", tags: %w[docs])
+        answer = list(query: "label:bug author:me -is:soon col:nowhere no:tags")
+
+        expect([titles(answer), answer.fetch("ignored")])
+          .to eq([%w[bug], %w[author:me -is:soon col:nowhere no:tags]])
+      end
+
+      it "answers ignored empty for a query it knows" do
+        expect(list(query: "is:open").fetch("ignored")).to eq([])
+      end
+    end
+
     describe "by contributor" do
       before do
         create(:task, title: "mine by default")
@@ -1215,7 +1302,7 @@ RSpec.describe "API tasks", type: :request do
     it "filter as list_tasks does" do
       create(:task, :someday, tags: %w[admin], note: "the feed")
       create(:task, :someday, :done, tags: %w[admin], note: "the feed", completed_at: at(today))
-      filters = { tag: "admin", query: "feed" }
+      filters = { tag: "admin", query: "feed label:admin is:closed nowhere:yet" }
 
       expect(list(lists: "someday", **filters))
         .to eq(trusted(mcp_answer("list_tasks", lists: %w[someday], **filters)))

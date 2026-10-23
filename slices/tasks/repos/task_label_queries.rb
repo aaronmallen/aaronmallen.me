@@ -26,9 +26,17 @@ module Tasks
         ids.empty? ? found : found.order_prepend(Sequel.case({ { id: ids } => 0 }, 1))
       end
 
-      def terms(projects: [], **search)
-        search = { **search, label_ids: ids_labelled(search[:text]) }
+      def terms(projects: [], query: nil, **search)
+        search = query ? queried(search, query) : { **search, label_ids: ids_labelled(search[:text]) }
         projects.empty? ? search : { **search, project_ids: project_queries.ids_by_slug(projects) }
+      end
+
+      private
+
+      def queried(search, query)
+        label_ids = query.texts.to_h { [it, ids_labelled(it)] }
+
+        { **search, label_ids: label_ids.values.flatten, conditions: query.conditions(tasks.dataset.db, label_ids) }
       end
     end
   end

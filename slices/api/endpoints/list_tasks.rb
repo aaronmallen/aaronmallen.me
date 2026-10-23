@@ -21,7 +21,12 @@ module API
           page: Helpers::Paging::PAGE,
           query: {
             type: "string",
-            description: "a label such as POD-23, which comes first, or words to find in the title or note",
+            description:
+              "terms that must all hold: words or a quoted phrase to find in the title or note, a label such " \
+              "as POD-23 or a number, which comes first, label:a,b or l: for a tag of those, -label:a without " \
+              "it, no:label, is:open, is:closed, is:doing, is:blocked, and column: or col: with backlog, " \
+              "ready, in_progress, done or canceled; a - before a qualifier turns it round, and ignored lists " \
+              "the terms it does not know",
           },
           sprint_on: { type: "string", description: "a sprint day, as YYYY-MM-DD; only the tasks planned into it" },
           statuses: {
@@ -41,6 +46,9 @@ module API
       REPLY = Helpers::Schema.paged(
         {
           count: Helpers::Schema::INTEGER,
+          ignored: Helpers::Schema.list(Helpers::Schema::STRING).merge(
+            description: "the terms of query it does not know and left out",
+          ),
           total: Helpers::Schema::INTEGER,
           tasks: Helpers::Schema.list(Serializers::Task.reference),
         },
@@ -70,6 +78,7 @@ module API
 
         {
           count: rows.length,
+          ignored: filters[:query].ignored,
           total: found.total,
           tasks: serialized(Serializers::Task, rows),
           **Helpers::Paging.fields(found.paged),
@@ -83,8 +92,8 @@ module API
         closed_in_window = window_by == "closed"
 
         {
-          closed_in_window:, lists:, sprint_on:, statuses: kept, tags: named(tag), text: query.to_s.strip,
-          **credits(**credited),
+          closed_in_window:, lists:, sprint_on:, statuses: kept, tags: named(tag),
+          query: ::Tasks::Structs::TaskQuery.parse(query), **credits(**credited),
         }
       end
     end

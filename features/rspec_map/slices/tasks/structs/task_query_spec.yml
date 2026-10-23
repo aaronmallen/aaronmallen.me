@@ -1,0 +1,7 @@
+- example: "Tasks::Structs::TaskQuery drops a NUL"
+- example: "Tasks::Structs::TaskQuery ignores an unknown qualifier or value, as written"
+- example: "Tasks::Structs::TaskQuery keeps the words as texts"
+- example: "Tasks::Structs::TaskQuery reads a - before a qualifier as negated"
+- example: "Tasks::Structs::TaskQuery reads a quoted value or phrase whole"
+- example: "Tasks::Structs::TaskQuery reads each alias as its qualifier, in any case"
+- example: "Tasks::Structs::TaskQuery reads nothing from nil"

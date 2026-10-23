@@ -130,8 +130,9 @@ module Tasks
 
       def project_key = dataset.db[:projects].where(Sequel[:projects][:id] => self[:project_id].qualified).select(:key)
 
-      def searched(tags: [], project_ids: nil, text: "", label_ids: [], **credits)
-        found = text.empty? ? credited(**credits) : credited(**credits).matching(text, label_ids)
+      def searched(tags: [], project_ids: nil, text: "", label_ids: [], conditions: [], **credits)
+        found = conditions.reduce(credited(**credits), :where)
+        found = found.matching(text, label_ids) unless text.empty?
         found = found.where(self[:project_id] => project_ids) if project_ids
         tags.empty? ? found : found.tagged(tags)
       end
