@@ -184,6 +184,7 @@ RSpec.describe "MCP reach", type: :app do
       "tasks.operations.settle_task" => "the issue sync runs it to replay and settle each issue's state",
       "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
+      "tasks.operations.sync_labels" => "the issue sync runs it to tag each task from its issue's labels",
       "tasks.operations.sync_links" => "the issue sync runs it to keep synced task links in step",
     }
   end

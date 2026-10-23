@@ -6,9 +6,9 @@ module Tasks
       include Deps[project_queries: "projects.repos.project_queries"]
 
       def followed_tasks(ids)
-        found = tasks.where(id: ids).select(:id, :title, :note, :status).to_a.to_h { [it.id, it] }
+        found = tasks.where(id: ids).select(:id, :title, :note, :status, :project_id).combine(:tags).to_a
 
-        found.values_at(*ids)
+        found.to_h { [it.id, it] }.values_at(*ids)
       end
 
       def for_provider(provider) = task_sources.where(provider:).to_a.to_h { [it.remote_id, it] }

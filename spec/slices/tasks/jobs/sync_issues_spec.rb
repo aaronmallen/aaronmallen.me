@@ -100,7 +100,9 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     it "loads only the task columns the sync reads" do
       tasks = counting { sync }.grep(/\ASELECT "tasks"."id", "tasks"."title"/)
 
-      expect(tasks.first).to start_with('SELECT "tasks"."id", "tasks"."title", "tasks"."note", "tasks"."status" FROM')
+      columns = %w[id title note status project_id].map { %("tasks"."#{it}") }.join(", ")
+
+      expect(tasks.first).to start_with("SELECT #{columns} FROM")
     end
   end
 

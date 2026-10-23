@@ -106,6 +106,64 @@ RSpec.shared_examples "an issue sync" do |provider:, sync_name:, body:, referenc
     end
   end
 
+  describe "a new issue with labels filed into a project" do
+    let(:project) { create(:project) }
+
+    before do
+      create(:tag, :private, name: "bug-fix")
+      Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", provider:, projects: [project.id] })
+    end
+
+    def events = Tasks::Slice["relations.task_events"].for_task(imported.id).to_a
+
+    def labeled(*names) = issue(labels: { nodes: names.map { { name: it } } })
+
+    def project_tags = imported.tags.map { [it.name, it.scope, it.project_id] }
+
+    it "imports with its labels as tags in the project, made there when missing" do
+      create(:tag, scope: "project", project_id: project.id, name: "needs-review")
+      stub_assigned(labeled("Bug Fix", "needs review"))
+      sync
+
+      expect(project_tags).to contain_exactly(["bug-fix", "project", project.id],
+                                              ["needs-review", "project", project.id])
+    end
+
+    it "takes a label added after import as a project tag on the next sync" do
+      stub_assigned(labeled)
+      sync
+      stub_assigned(labeled("Bug Fix"))
+      sync
+
+      expect(project_tags).to eq([["bug-fix", "project", project.id]])
+    end
+
+    it "records a tag a later sync adds in the task history" do
+      stub_assigned(labeled)
+      sync
+      stub_assigned(labeled("Bug Fix"))
+      sync
+
+      expect(events.map { [it[:kind], it[:tag_name]] }).to eq([%w[tagged bug-fix]])
+    end
+
+    it "keeps the tag once its label goes" do
+      stub_assigned(labeled("Bug Fix"))
+      sync
+      stub_assigned(labeled)
+      sync
+
+      expect(project_tags).to eq([["bug-fix", "project", project.id]])
+    end
+
+    it "makes no write to a task that holds every label" do
+      stub_assigned(labeled("Bug Fix"))
+      sync
+
+      expect(counting { sync }.grep(/\A(INSERT INTO|UPDATE|DELETE FROM) "(task|tag)/)).to be_empty
+    end
+  end
+
   describe "an issue whose title is blank once cleaned" do
     it "keeps that title while the issue's title stays blank" do
       stub_assigned(issue(title: "\u0000"))

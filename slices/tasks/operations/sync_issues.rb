@@ -9,7 +9,6 @@ module Tasks
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
       EMPTY_HASH = Blog::Constants::EMPTY_HASH
       EXTERNAL = Blog::Types::TaskList["external"]
-      LABEL_TAG = Blog::Types::Normalized::LabelTag
       OPEN = Blog::Types::TaskSourceState["open"]
       UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
       VISIBLE = SyncComments::VISIBLE
@@ -18,6 +17,7 @@ module Tasks
         reach_issues: "operations.reach_issues",
         settle_task: "operations.settle_task",
         sync_comments: "operations.sync_comments",
+        sync_labels: "operations.sync_labels",
         sync_links: "operations.sync_links",
         task_event_mutations: "repos.task_event_mutations",
         task_link_queries: "repos.task_link_queries",
@@ -69,19 +69,21 @@ module Tasks
       def file(run, issue)
         names, project_ids = task_rule_queries.targets(run.provider, issue[:origin])
         task = task_mutations.append(**copy(issue), list: EXTERNAL, project_id: project_ids.first)
-        task_event_mutations.track(task.id, run.now) { task_mutations.import_tags(task.id, labels(issue), names) }
+        task_event_mutations.track(task.id, run.now) { sync_labels.import(task.id, issue, names) }
         task
       end
 
       def follow(run, issues, history)
         sources = issues.map { run.known.fetch(it[:id]) }
         task_ids = sources.map(&:task_id)
-        tasks = task_source_queries.followed_tasks(task_ids)
+        tasks = followed(run, issues, task_ids)
         run.linked.concat(task_link_queries.synced_ids(task_ids))
         sync_comments.hold(run, task_ids, issues)
 
         issues.zip(sources, tasks) { |issue, source, task| task && refresh(run, source, task, issue, history:) }
       end
+
+      def followed(run, issues, ids) = task_source_queries.followed_tasks(ids).tap { sync_labels.call(run, issues, it) }
 
       def history(run, issues)
         return EMPTY_HASH unless run.client.respond_to?(:transitions)
@@ -92,8 +94,6 @@ module Tasks
       def import(run, issues, reached: false)
         issues.each { run.track(create_task(run, it, reached:)) }
       end
-
-      def labels(issue) = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
 
       def reach(run, assigned)
         remote(run.client, run.provider) { Success(reach_issues.call(run.client, assigned, run.known)) }

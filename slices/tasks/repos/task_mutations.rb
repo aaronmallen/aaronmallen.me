@@ -15,13 +15,6 @@ module Tasks
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def add_tags(id, names)
-        project_id = project_of(id)
-        scope = task_tags.scope_for(project_id)
-
-        task_tags.add(id, tags.in_scope(scope, project_id).by_names(names).pluck(:id), scope)
-      end
-
       def append(**fields)
         transaction do
           tasks.lock_until_commit
@@ -36,8 +29,11 @@ module Tasks
       def complete(id, at: Time.now) = update(id, status: DONE, completed_at: at)
 
       def import_tags(id, labels, names)
-        add_tags(id, labels)
-        task_tags.tag(id, names.uniq, tags, project_id: project_of(id))
+        project_id = project_of(id)
+        return tag_in_project(id, [*labels, *names], project_id) if project_id
+
+        task_tags.add(id, tags.in_scope(task_tags.tag_scope).by_names(labels).pluck(:id))
+        task_tags.tag(id, names.uniq, tags)
       end
 
       def join_sprint(id, sprint_id) = update(id, list: nil, sprint_id:)
@@ -72,6 +68,8 @@ module Tasks
       def return_to_list(id, at: Time.now) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT, at:)
 
       def source_from_decision(id, decision_id) = record_links.source_from_decision(id, decision_id)
+
+      def tag_in_project(id, names, project_id) = task_tags.tag(id, names.uniq, tags, project_id:)
 
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
