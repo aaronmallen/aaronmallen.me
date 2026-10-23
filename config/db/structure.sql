@@ -10582,4 +10582,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261024020000_leave_project_tags_out_of_task_rules_last_target.rb'),
 ('20261024030000_drop_project_tags_with_their_record_link.rb'),
 ('20261024040000_create_agent_tag_joins.rb'),
-('20261024040100_drop_artifact_project_tags_with_their_record_link.rb');
+('20261024040100_drop_artifact_project_tags_with_their_record_link.rb'),
+('20261024050000_move_private_tags_into_projects.rb');
