@@ -62,6 +62,25 @@ en:
           dark: "Dark"
           light: "Light"
         toggle_label: "Settings"
+      task_filter:
+        clear: "Clear filter"
+        clear_filter: "clear filter"
+        ignored: "ignored %{terms}"
+        label: "Filter %{name} tasks"
+        match:
+          one: "%{shown} of %{count} task match"
+          other: "%{shown} of %{count} tasks match"
+        placeholder: "Filter · label:bug -label:docs is:open"
+        qualifiers:
+          blocked: "blocked by an open task"
+          closed: "done or canceled"
+          column: "tasks in a column"
+          doing: "in progress"
+          label: "tasks with a tag"
+          no_label: "untagged tasks"
+          not_label: "tasks without a tag"
+          open: "to do or in progress"
+        suggestions: "Suggestions"
       wordmark:
         label: "%{owner}, home"
     field_error:

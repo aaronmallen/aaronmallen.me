@@ -1,0 +1,5 @@
+- example: "Admin project filter bar filters the board in place when it picks a tag, and keeps the query on reload"
+- example: "Admin project filter bar picks a suggestion with the arrow keys"
+- example: "Admin project filter bar suggests the columns after column:"
+- example: "Admin project filter bar suggests the project's tags after label:"
+- example: "Admin project filter bar suggests the qualifiers when it takes focus"

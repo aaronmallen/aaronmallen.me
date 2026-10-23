@@ -15,6 +15,7 @@ module Admin
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
           prop :board, Blog::Types::Instance(Blog::BoardSizes)
           prop :return_to, Blog::Types::String
+          prop :query, Blog::Types::Hash
 
           def view_template
             div(class: "kb-list", data: { board_shows: "list" }) do
@@ -33,6 +34,7 @@ module Admin
             div(data: { key_list: true }) { tasks.each { row(it) } }
             LoadMore(
               project_id: @project.id, board: @board, column: name, count: @counts.fetch(name), shown: tasks.size,
+              query: @query,
             )
           end
 

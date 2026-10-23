@@ -120,6 +120,16 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def filter_suggestions
+    {
+      "project filter suggestions" => lambda do
+        visit "/admin/projects/#{project.id}?q=label:site+is:soon+is:"
+        find_field("q").click
+        find_by_id("task-filter-list", visible: :visible)
+      end,
+    }
+  end
+
   def journal_editors
     {
       "journal edit" => lambda do
@@ -358,7 +368,7 @@ RSpec.describe "Admin screens", type: :feature do
         find("[data-tag-field-input]").send_keys("q", :enter, "q")
         find("[data-tag-field-results]", visible: :visible)
       end,
-    }
+    }.merge(filter_suggestions)
   end
 
   def recurring_screens

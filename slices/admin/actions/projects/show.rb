@@ -18,15 +18,21 @@ module Admin
 
           board = Blog::BoardSizes.from(request.params, settings.board[:column_size])
           tagging = tagging(request, project.id)
-          response.render(view, project:, board:, view: board_view(request), tagging:, **on_board(project.id, board))
+          response.render(view, project:, board:, view: board_view(request), tagging:,
+                                **filtered(request, project.id, board))
         end
 
         private
 
         def board_view(request) = request.params[:view].then { it if UI::Views::Projects::Show::VIEWS.key?(it) }
 
-        def on_board(id, board)
-          { counts: task_queries.board_counts(id), tasks: task_queries.on_board(id, board.sizes) }
+        def filtered(request, id, board)
+          text = Blog::Types::TrimmedText[request.params[:q].to_s]
+          query = ::Tasks::Structs::TaskQuery.parse(text) unless text.empty?
+          shown = { counts: task_queries.board_counts(id, query), tasks: task_queries.on_board(id, board.sizes, query) }
+          return { filter: { text: }, **shown } unless query
+
+          { filter: { text:, ignored: query.ignored, total: task_queries.board_counts(id).values.sum }, **shown }
         end
 
         def tagging(request, id)

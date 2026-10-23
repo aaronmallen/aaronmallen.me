@@ -19,8 +19,8 @@ module Tasks
         task_label_queries: "repos.task_label_queries",
       ]
 
-      def board_counts(project_id)
-        counted = on_project(tasks, project_id).unordered
+      def board_counts(project_id, query = nil)
+        counted = on_project(tasks, project_id, query).unordered
         counts = counted.select { COLUMNS.map { integer.count(id).filter(COLUMN => it).as(it.to_sym) } }.one
 
         counts.to_h.transform_keys(&:to_s)
@@ -93,8 +93,8 @@ module Tasks
         page.fill(found.in_order.ids_first(search[:label_ids]).paged(page).to_a)
       end
 
-      def on_board(project_id, sizes)
-        on_project(listed, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
+      def on_board(project_id, sizes, query = nil)
+        on_project(listed, project_id, query).where(id: shown(project_id, sizes, query)).order(*BOARD_ORDER).to_a
       end
 
       def on_public_board(project_id, sizes)
@@ -140,7 +140,7 @@ module Tasks
 
       def listed(found = tasks) = found.select(*found.schema.qualified.reject { it.name == :note }).detailed
 
-      def on_project(found, project_id) = recent(found.searched(project_ids: [project_id]))
+      def on_project(found, id, query = nil) = recent(found.searched(project_ids: [id], **by_project(query:)))
 
       def pool(found, filter, sprint) = (filter == TODAY ? found.for_sprint(sprint.id) : found.in_list(filter)).open
 
@@ -149,9 +149,9 @@ module Tasks
         found.where(Sequel.|({ completed_at: nil }, Sequel[:completed_at] > since))
       end
 
-      def shown(project_id, sizes)
+      def shown(project_id, sizes, query = nil)
         rank = Sequel.function(:row_number).over(partition: COLUMN, order: BOARD_ORDER)
-        ranked = on_project(tasks, project_id).dataset.unordered.select(:id, COLUMN.as(:column), rank.as(:rank))
+        ranked = on_project(tasks, project_id, query).dataset.unordered.select(:id, COLUMN.as(:column), rank.as(:rank))
 
         ranked.from_self.where(Sequel.|(*sizes.map { |column, size| { column:, rank: ..size } })).select(:id)
       end

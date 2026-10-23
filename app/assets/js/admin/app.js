@@ -1,4 +1,5 @@
 import "../../css/admin.css";
+import { setupTaskFilters } from "../task_filter.js";
 import { bootAutosubmit, setupAutosubmit } from "./autosubmit.js";
 import { bootBoardDrag } from "./board_drag.js";
 import { bootBoardView, setupBoardView } from "./board_view.js";
@@ -73,6 +74,7 @@ const SETUPS = [
   setupRecordKeys,
   setupSocialComposers,
   setupTagFields,
+  setupTaskFilters,
   setupTaskOrder,
   setupTaskPanel,
   setupToasts,

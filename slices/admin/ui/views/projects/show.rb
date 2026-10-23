@@ -13,7 +13,6 @@ module Admin
             project_tags projects sprints tags task_comments task_contributors task_links task_series task_tags
             work_sessions
           ].freeze
-          NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
           VIEWS = { "board" => ["fa-table-columns", ".views.board"], "list" => ["fa-list", ".views.list"] }.freeze
 
@@ -23,6 +22,7 @@ module Admin
           prop :board, Blog::Types::Instance(Blog::BoardSizes)
           prop :view, Blog::Types::String.enum(*VIEWS.keys).optional, default: nil
           prop :tagging, Blog::Types::Hash
+          prop :filter, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -31,6 +31,7 @@ module Admin
             end
             head
             facts
+            FilterBar(project: @project, filter: @filter, shown: @counts.values.sum, tagging: @tagging)
             views
           end
 
@@ -39,35 +40,16 @@ module Admin
           def board(columns)
             div(class: "kb-bulk", data: { board_shows: "board" }) do
               Bulk(project_id: @project.id)
-              div(class: "kb", aria: { label: t(".board", name: @project.name) }) do
+              div(class: "kb", role: "region", tabindex: 0, aria: { label: t(".board", name: @project.name) }) do
                 input(type: "hidden", name: "return_to", value: here, form: Bulk::ID)
-                COLUMNS.each { column(it, tasks_in(columns, it)) }
+                COLUMNS.each do |name|
+                  BoardColumn(
+                    project_id: @project.id, name:, tasks: tasks_in(columns, name), count: @counts.fetch(name),
+                    board: @board, return_to: here, query: filtered,
+                  )
+                end
               end
               Hint { t(".hint") }
-            end
-          end
-
-          def column(name, tasks)
-            label = t(NAMES.fetch(name))
-
-            section(class: ["kcol", "k-#{name}"], aria: { label: }, data: { board_column: name }) do
-              column_head(label, @counts.fetch(name))
-              div(class: "kcol-list", data: { key_list: true }) do
-                next p(class: "kcol-empty") { t(".empty") } if tasks.empty?
-
-                tasks.each { BoardCard(task: it, project_id: @project.id, return_to: here) }
-              end
-              LoadMore(
-                project_id: @project.id, board: @board, column: name, count: @counts.fetch(name), shown: tasks.size,
-              )
-            end
-          end
-
-          def column_head(label, count)
-            div(class: "kcol-head") do
-              span(class: "kcol-dot", aria: { hidden: true })
-              h2 { label }
-              span(class: "kcol-count") { count.to_s }
             end
           end
 
@@ -91,16 +73,17 @@ module Admin
             end
           end
 
+          def filtered = { q: @filter[:text] }.reject { |_, text| text.empty? }
+
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
-              TagManager(project: @project, **@tagging)
               create_task unless @project.archived_on
               Button(href: path(:admin_edit_project, id: @project.id), icon: :edit) { t(".edit") }
             end
           end
 
-          def here = path(:admin_project, id: @project.id, **@board.grown)
+          def here = path(:admin_project, id: @project.id, **@board.grown, **filtered)
 
           def link(href, text, icon)
             a(href:, target: "_blank", rel: "noopener") { IconLabel(icon:) { text } }
@@ -122,7 +105,7 @@ module Admin
 
           def toggle
             items = VIEWS.map do |view, (icon, text)|
-              { text: t(text), href: path(:admin_project, id: @project.id, **@board.grown, view:), icon:,
+              { text: t(text), href: path(:admin_project, id: @project.id, **@board.grown, **filtered, view:), icon:,
                 current: view == @view, data: { board_pick: view } }
             end
 
@@ -134,7 +117,7 @@ module Admin
 
             div(class: "kb-views", data: { board_views: true, board_view: @view }) do
               board(columns)
-              BoardList(project: @project, columns:, counts: @counts, board: @board, return_to: here)
+              BoardList(project: @project, columns:, counts: @counts, board: @board, return_to: here, query: filtered)
             end
           end
         end

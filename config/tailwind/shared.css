@@ -6100,6 +6100,82 @@
   }
 }
 
+@utility task-filter {
+  @apply mb-6;
+}
+
+@utility task-filter-row {
+  @apply flex items-stretch gap-2;
+
+  & > .bt {
+    @apply min-h-10.5 flex-none py-0;
+  }
+}
+
+@utility task-filter-box {
+  @apply relative flex min-w-0 flex-1 items-center;
+
+  & > i {
+    @apply pointer-events-none absolute left-4 text-badge text-ink-muted;
+  }
+
+  & > .bt {
+    @apply absolute right-1.5;
+  }
+}
+
+@utility task-filter-input {
+  @apply min-h-10.5 w-full rounded-full border border-line bg-ground-sunk py-2.5 pr-12 pl-10 font-mono text-input;
+  @apply text-ink placeholder:text-ink-muted focus:border-mk-blue focus:outline-1 focus:outline-mk-blue;
+
+  @variant phone {
+    @apply min-h-tap;
+  }
+}
+
+@utility task-filter-list {
+  @apply absolute inset-x-0 top-[calc(100%+6px)] z-30 flex flex-col overflow-auto rounded-card border border-line;
+  @apply bg-ground-sunk p-1.5 shadow-lg;
+  max-height: 320px;
+
+  &[hidden] {
+    @apply hidden;
+  }
+}
+
+@utility task-filter-option {
+  @apply flex cursor-pointer flex-col gap-0.5 rounded-btn px-2.5 py-2 text-ink;
+
+  &[aria-selected="true"] {
+    @apply bg-wash;
+  }
+
+  & > .tag,
+  & > .task-filter-term {
+    @apply self-start font-mono text-input;
+  }
+
+  & > .task-filter-hint {
+    @apply text-input text-ink-muted;
+  }
+}
+
+@utility task-filter-meta {
+  @apply mt-2 ml-4 flex flex-wrap items-center gap-x-3.5 gap-y-1 meta-badge;
+}
+
+@utility task-filter-ignored {
+  @apply inline-flex items-center gap-1.5 text-mk-orange-text;
+}
+
+@utility task-filter-clear {
+  @apply text-ink-muted underline hover:text-accent-text focus-ring;
+
+  @variant phone {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
 @utility kb-bulk {
   &:has(form[data-bulk-off]) {
     & .bulk-pick,
@@ -6110,7 +6186,7 @@
 }
 
 @utility kb {
-  @apply grid auto-cols-[minmax(17rem,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2;
+  @apply grid auto-cols-[minmax(17rem,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2 focus-ring;
   scroll-snap-type: x proximity;
 }
 
