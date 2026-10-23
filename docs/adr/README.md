@@ -143,7 +143,7 @@ one.
 | [0136][0136] | Run every public page full width with fluid sizes | ![Active][active] | 2026-10-09 |
 | [0137][0137] | Slug heading ids from their text with commonmarker's header ids | ![Active][active] | 2026-10-09 |
 | [0138][0138] | Read dead jobs from the Sidekiq dead set in an activity query | ![Active][active] | 2026-10-09 |
-| [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Active][active] | 2026-10-10 |
+| [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Superseded][superseded-0206] | 2026-10-10 |
 | [0140][0140] | Word a field error by its key, and keep a table only for the exceptions | ![Active][active] | 2026-10-10 |
 | [0145][0145] | Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs | ![Active][active] | 2026-10-10 |
 | [0144][0144] | Claim social post photos by row, and send them as native media | ![Active][active] | 2026-10-10 |
@@ -203,6 +203,7 @@ one.
 | [0203][0203] | Gate notes behind a notes scope that read does not cover | ![Active][active] | 2026-10-22 |
 | [0204][0204] | Gate private contact fields behind a contacts scope | ![Active][active] | 2026-10-22 |
 | [0205][0205] | Give each project its own tags through a project scope on tags | ![Active][active] | 2026-10-23 |
+| [0206][0206] | Replace the RSpec suite with black-box Gherkin features run by playwright-bdd | ![Active][active] | 2026-10-23 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -402,6 +403,7 @@ one.
 [0203]: 0203-gate-notes-behind-a-notes-scope-that-read-does-not-cover.md
 [0204]: 0204-gate-private-contact-fields-behind-a-contacts-scope.md
 [0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
+[0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -421,4 +423,5 @@ one.
 [superseded-0176]: https://img.shields.io/badge/0176-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0194]: https://img.shields.io/badge/0194-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0198]: https://img.shields.io/badge/0198-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0206]: https://img.shields.io/badge/0206-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

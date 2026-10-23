@@ -1,7 +1,7 @@
 ---
 id: "0139"
 title: Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside
-status: active
+status: superseded
 created: 2026-10-10
 area:
   - app
@@ -30,10 +30,12 @@ area:
   - tasks
 supersedes:
   - "0035"
+superseded-by: "0206"
 issue: "#916"
 amended:
   - "#1377"
   - "#1385"
+  - "#1960"
 tags:
   - testing
   - rspec
@@ -46,7 +48,7 @@ tags:
 
 # ADR 0139: Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -114,4 +116,4 @@ A relation, repo or parser that changes shape breaks its spec even when its beha
 A failing unit spec names the class that broke, so finding the fault in SQL or a parser takes less time.
 
 [0035]: 0035-test-the-app-only-through-requests-the-browser-jobs-and-mcp.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0206-black?style=for-the-badge&label=Superseded&labelColor=orange

@@ -17,6 +17,7 @@ amended:
   - "#745"
   - "#923"
   - "#1746"
+  - "#1960"
 tags:
   - admin
   - layout
@@ -55,7 +56,8 @@ task or a journal entry, are the moments a phone is the only screen to hand.
 Every admin screen works at 390x844, and no screen says it is desktop only. Each slice lists its screens in a
 `screens` table in its own `browser/readable_spec.rb`, and a new screen joins the table of the slice that draws
 it. The shared example in `spec/support/shared_examples/readable_screens.rb` measures every screen in public, admin
-and MCP at 390x844 and at 1280x800.
+and MCP at 390x844 and at 1280x800. Since #1960 these checks move to the Gherkin features [ADR 0206][0206] sets
+up, and the RSpec tables and shared example go with the final delete in #1959.
 
 Three rules hold:
 
@@ -127,4 +129,5 @@ count. Public controls answer to axe's 24px rule rather than to the 44px square.
 
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
 [0187]: 0187-fold-the-admin-pill-nav-into-a-popover-switcher-below-860px.md

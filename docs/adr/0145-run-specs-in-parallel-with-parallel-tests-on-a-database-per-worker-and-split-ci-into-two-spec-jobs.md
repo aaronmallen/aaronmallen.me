@@ -8,6 +8,7 @@ area:
 issue: "#1082"
 amended:
   - "#1393"
+  - "#1960"
 tags:
   - testing
   - rspec
@@ -55,6 +56,9 @@ the runner's four cores. A failure in either spec job fails the workflow.
 
 [ADR 0139][0139] still decides what we test. This record decides only how the suite runs.
 
+Since #1960, [ADR 0206][0206] replaces RSpec with Gherkin features that run one server, Sidekiq, database and
+Redis db per Playwright worker. The parallel RSpec setup here ends with the final delete in #1959.
+
 ## Alternatives
 
 **An N-shard CI matrix split by recorded times.** Each shard repeats the setup the one job pays today: the gems,
@@ -81,5 +85,6 @@ job alone, shows less than the suite covers.
 CI runs four jobs where it ran one, and each pays its own setup.
 
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
+[0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
 [0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

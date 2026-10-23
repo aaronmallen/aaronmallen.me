@@ -10,6 +10,7 @@ area:
 issue: AA-836
 amended:
   - "#1063"
+  - "#1960"
 tags:
   - accessibility
   - wcag
@@ -45,6 +46,9 @@ The `axe-core-api` gem supplies the axe script, pinned to its version. Its runne
 Cuprite, the driver the suite already uses, so the suite injects the script through Cuprite and calls `axe.run`
 itself.
 
+Since #1960, [ADR 0206][0206] moves the checks to the Gherkin features, where [`@axe-core/playwright`][axe-playwright]
+runs axe on every route in light and in dark. The gem and the Cuprite injection go with the final delete in #1959.
+
 axe has no rule for a font-size floor, so the size, tap and overflow check from `phone_spec.rb` stays ours. It
 becomes shared, runs beside axe on every route, and takes over the one thing axe does not measure.
 
@@ -66,4 +70,6 @@ The browser suite runs slower. Each route loads twice, once per theme, and axe w
 The accessibility checks live in two places: axe for the WCAG rules, and our own script for text size. A reader
 who wants to know why a page failed has to know which of the two raised it.
 
+[0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
+[axe-playwright]: https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
