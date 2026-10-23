@@ -1,4 +1,8 @@
 - example: "Posts::Jobs::RerenderPosts leaves updated_at alone, since the post did not change"
+  scenario: "post_api/jobs.feature: The rerender job rebuilds each stored value from the Markdown and leaves updated_at alone"
 - example: "Posts::Jobs::RerenderPosts rebuilds an edit note's html"
+  scenario: "post_api/jobs.feature: The rerender job rebuilds each stored value from the Markdown and leaves updated_at alone"
 - example: "Posts::Jobs::RerenderPosts rebuilds every stored value from the post's markdown"
+  scenario: "post_api/jobs.feature: The rerender job rebuilds each stored value from the Markdown and leaves updated_at alone"
 - example: "Posts::Jobs::RerenderPosts writes only the rows whose stored values went stale"
+  drop: "checks the count the job returns, which nothing outside Ruby sees"

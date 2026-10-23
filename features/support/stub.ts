@@ -20,10 +20,11 @@ export const services: Record<string, string> = {
   "LinkedIn OAuth": "/linkedin/oauth",
   Mastodon: "/mastodon",
   MaxMind: "/maxmind",
+  "the media store": "/s3/photos",
   "the web": "",
 };
 
-type Reply = { body: string | Buffer; headers?: Record<string, string>; status: number };
+type Reply = { body: string | Buffer; delay?: number; headers?: Record<string, string>; status: number };
 export type Sent = { body: Buffer; headers: IncomingHttpHeaders; method: string; url: URL };
 type Answer = Reply | ((sent: Sent) => Reply);
 type Stored = { body: Buffer; type: string };
@@ -89,12 +90,20 @@ function store(objects: Map<string, Stored>, method: string, url: URL, body: Buf
   }
 }
 
+const keyOf = ({ method, url }: Sent) => `${method} ${url.origin === "http://stub" ? "" : url.origin}${url.pathname}`;
+
 export async function startStub() {
-  const replies = new Map<string, Answer>();
+  const replies = new Map<string, Answer[]>();
   const log: Sent[] = [];
   const objects = new Map<string, Stored>();
   const misses: string[] = [];
-  const received: { body: string; key: string }[] = [];
+  const held = new Map<NodeJS.Timeout, ServerResponse>();
+
+  function next(key: string, search: string) {
+    const prefix = [...replies.keys()].find((path) => path.endsWith("*") && key.startsWith(path.slice(0, -1)));
+    const queue = [`${key}${search}`, key, prefix].map((path) => path && replies.get(path)).find(Boolean);
+    return queue && queue.length > 1 ? queue.shift() : queue?.[0];
+  }
 
   const server = createServer(async (request, response) => {
     const absolute = /^https?:\/\//.test(request.url ?? "");
@@ -104,15 +113,17 @@ export async function startStub() {
     for await (const chunk of request) chunks.push(chunk);
     const sent = { body: Buffer.concat(chunks), headers: request.headers, method: request.method ?? "GET", url };
     log.push(sent);
-    received.push({ body: sent.body.toString(), key });
 
-    const answer =
-      replies.get(key) ?? [...replies].find(([path]) => path.endsWith("*") && key.startsWith(path.slice(0, -1)))?.[1];
+    const answer = next(key, url.search);
     const reply = typeof answer === "function" ? answer(sent) : answer;
     if (reply) {
       const type =
         typeof reply.body === "string" && reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
-      response.writeHead(reply.status, { "Content-Type": type, ...reply.headers }).end(reply.body);
+      const send = () => response.writeHead(reply.status, { "Content-Type": type, ...reply.headers }).end(reply.body);
+      if (reply.delay) {
+        const timer = setTimeout(() => held.delete(timer) && send(), reply.delay);
+        held.set(timer, response);
+      } else send();
     } else if (!absolute && url.pathname.startsWith("/s3/")) {
       store(objects, sent.method, url, sent.body, response);
     } else if (standing[key]) {
@@ -132,17 +143,29 @@ export async function startStub() {
     misses: () => misses.splice(0),
     objects,
     received: (method: string, path: string) =>
-      received.filter(({ key }) => key === `${method} ${path}`).map(({ body }) => body),
-    reply: (method: string, path: string, reply: Answer) => replies.set(`${method} ${path}`, reply),
+      log.filter((sent) => keyOf(sent) === `${method} ${path}`).map(({ body }) => body.toString()),
+    reply: (method: string, path: string, reply: Answer) => replies.set(`${method} ${path}`, [reply]),
+    replyThen: (method: string, path: string, reply: Answer) => {
+      const key = `${method} ${path}`;
+      replies.set(key, [...(replies.get(key) ?? []), reply]);
+    },
     requests: () => [...log],
     reset: () => {
       replies.clear();
       objects.clear();
       log.length = 0;
       misses.length = 0;
-      received.length = 0;
+      for (const [timer, response] of held) {
+        clearTimeout(timer);
+        response.destroy();
+      }
+      held.clear();
     },
-    stop: () => new Promise((closed) => server.close(closed)),
+    stop: () =>
+      new Promise((closed) => {
+        server.close(closed);
+        server.closeAllConnections();
+      }),
     url: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
   };
 }

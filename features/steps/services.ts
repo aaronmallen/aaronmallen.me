@@ -41,7 +41,7 @@ When("the browser asks for {string}", async ({ page }, url: string) => {
 });
 
 Then("I see {string}", async ({ page }, text: string) => {
-  await expect(page.getByText(text).first()).toBeVisible();
+  await expect(page.getByText(text).filter({ visible: true }).first()).toBeVisible();
 });
 
 Then("{service} received {word} {string}", async ({ stub }, prefix: string, method: string, path: string) => {
@@ -56,5 +56,22 @@ Then(
   "{service} received {word} {string} holding {string}",
   async ({ stub }, prefix: string, method: string, path: string, text: string) => {
     await expect.poll(() => stub.received(method, `${prefix}${path}`).some((body) => body.includes(text))).toBe(true);
+  },
+);
+
+function parsed(body: string) {
+  try {
+    return JSON.parse(body);
+  } catch {
+    return Object.fromEntries(new URLSearchParams(body));
+  }
+}
+
+Then(
+  "{service} received {word} {string} with:",
+  async ({ stub }, prefix: string, method: string, path: string, body: string) => {
+    await expect
+      .poll(() => stub.received(method, `${prefix}${path}`).map(parsed))
+      .toContainEqual(expect.objectContaining(JSON.parse(body)));
   },
 );

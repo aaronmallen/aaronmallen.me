@@ -1,2 +1,4 @@
 - example: "Admin social counts counts each sample the way the server does"
+  scenario: "social/composer.feature: The counters count typed text as the server does"
 - example: "Admin social counts matches the fixture on the server"
+  scenario: "social/composer.feature: The counters count typed text as the server does"

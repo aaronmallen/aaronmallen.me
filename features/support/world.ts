@@ -156,7 +156,7 @@ export const test = base.extend<
           reset: async () => {
             if (!redis.isReady) await startRedis();
             rmSync(env.MAINTENANCE_FLAG_PATH, { force: true });
-            await sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`);
+            await until(() => sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`), "The truncate");
             await redis.flushDb();
           },
           sql,

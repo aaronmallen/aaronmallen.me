@@ -1,1 +1,2 @@
 - example: "Admin webmentions saves a setting turned off without a button"
+  scenario: "webmentions/settings.feature: Turning \"<label>\" off saves it without a button"

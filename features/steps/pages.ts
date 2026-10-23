@@ -64,8 +64,8 @@ When("I click {string}", async ({ page }, name: string) => {
 });
 
 When("I fill in {string} with {string}", async ({ page }, label: string, text: string) => {
-  const exact = page.getByLabel(label, { exact: true }).first();
-  await ((await exact.count()) ? exact : page.getByLabel(label).first()).fill(text);
+  const exact = page.getByLabel(label, { exact: true }).filter({ visible: true }).first();
+  await ((await exact.count()) ? exact : page.getByLabel(label).filter({ visible: true }).first()).fill(text);
 });
 
 When("I press {string}", async ({ page }, key: string) => {
@@ -73,7 +73,7 @@ When("I press {string}", async ({ page }, key: string) => {
 });
 
 Then("I do not see {string}", async ({ page }, text: string) => {
-  await expect(page.getByText(text)).toHaveCount(0);
+  await expect(page.getByText(text).filter({ visible: true })).toHaveCount(0);
 });
 
 Then("I am on {string}", async ({ page }, path: string) => {

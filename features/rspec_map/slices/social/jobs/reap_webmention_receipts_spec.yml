@@ -1,4 +1,8 @@
 - example: "Social::Jobs::ReapWebmentionReceipts deletes a receipt older than the window"
+  scenario: "webmentions/receiving.feature: A receipt older than the window is reaped, a newer one kept"
 - example: "Social::Jobs::ReapWebmentionReceipts deletes only the receipts older than the window"
+  scenario: "webmentions/receiving.feature: A receipt older than the window is reaped, a newer one kept"
 - example: "Social::Jobs::ReapWebmentionReceipts keeps a receipt the window is about to let go of"
+  scenario: "webmentions/receiving.feature: A receipt older than the window is reaped, a newer one kept"
 - example: "Social::Jobs::ReapWebmentionReceipts still throttles a sender for the receipts inside the window"
+  scenario: "webmentions/receiving.feature: A sender stays throttled for the receipts inside the window after a reap"
