@@ -49,8 +49,8 @@ nothing answers, so a Postgres that compose did not start still counts. Without 
 compose alone. AA-787 added the `pg_isready` check.
 
 mise pins every tool and Ruby. `.config/mise.toml` asks for Ruby `"4"` and every other tool `"latest"`, with
-`lockfile = true`, so the exact versions and checksums live in `.config/mise.lock`. The lock holds Ruby 4.0.7
-(#957) with `compile = "true"`, built from source by ruby-build. The lock keys each Ruby entry by that option, so
+`lockfile = true`, so the exact versions and checksums live in `.config/mise.lock`. The lock holds Ruby 4.0.8
+(#1974) with `compile = "true"`, built from source by ruby-build. The lock keys each Ruby entry by that option, so
 `.config/mise.toml` sets `ruby.compile = true` and every machine, CI included, finds the entry the lock holds.
 
 mise loads `.env` through `[env] _.file`. The Gemfile has no dotenv, so `Hanami::Env.load` returns at once.
