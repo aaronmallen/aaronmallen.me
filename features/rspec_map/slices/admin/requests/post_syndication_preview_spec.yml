@@ -1,0 +1,6 @@
+- example: "Admin post syndication preview signed in answers with nothing for a blank title"
+- example: "Admin post syndication preview signed in answers with nothing for no fields at all"
+- example: "Admin post syndication preview signed in answers with the cross-post text and no markup"
+- example: "Admin post syndication preview signed in rejects a preview without a CSRF token"
+- example: "Admin post syndication preview signed in saves no post"
+- example: "Admin post syndication preview signed in takes the slug the save would derive from the title"

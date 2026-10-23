@@ -1,0 +1,6 @@
+- example: "Health::Jobs::QueueHeldBackfills asking for a backfill while Redis is down holds one backfill when asked twice"
+- example: "Health::Jobs::QueueHeldBackfills asking for a backfill while Redis is down holds the backfill from today"
+- example: "Health::Jobs::QueueHeldBackfills asking for a backfill while Redis is down keeps what it holds while Redis stays down"
+- example: "Health::Jobs::QueueHeldBackfills asking for a backfill while Redis is down queues the backfill once Redis is back"
+- example: "Health::Jobs::QueueHeldBackfills asking for a backfill while Redis is down tells Honeybadger the queue could not be reached"
+- example: "Health::Jobs::QueueHeldBackfills queues nothing when nothing is held"

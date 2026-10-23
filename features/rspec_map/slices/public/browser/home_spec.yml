@@ -1,0 +1,5 @@
+- example: "Home sections pushes the link to the far edge of the section"
+- example: "Home sections runs the main the full width of the window"
+- example: "Home sections sets projects beside writing from 900px"
+- example: "Home sections sits the link on the kicker's row rather than under it"
+- example: "Home sections stacks projects under writing below 900px"

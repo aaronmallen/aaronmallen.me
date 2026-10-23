@@ -1,0 +1,4 @@
+- example: "Admin inbox when editing an issue keeps the issue when the drawer saves only a note"
+- example: "Admin inbox when editing an issue saves a tag change in the drawer, stays on the inbox and drops the issue"
+- example: "Admin inbox with a long title keeps the buttons to the right of a long title"
+- example: "Admin inbox with a long title stacks the buttons below the title on a phone"

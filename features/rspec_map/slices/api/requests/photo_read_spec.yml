@@ -1,0 +1,4 @@
+- example: "API reading a photo answers with a 503 when the store is not set up"
+- example: "API reading a photo with the store connected answers a key the site does not keep with a 404"
+- example: "API reading a photo with the store connected answers the photo's details and its bytes in base64 with a 200"
+- example: "API reading a photo with the store connected takes the photo's URL"

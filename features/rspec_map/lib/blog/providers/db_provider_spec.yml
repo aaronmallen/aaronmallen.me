@@ -1,0 +1,4 @@
+- example: "Blog::Providers::DBProvider.database_url hands libpq a blank user with the password, so libpq falls back to the OS user"
+- example: "Blog::Providers::DBProvider.database_url hands libpq no user or password when neither is set"
+- example: "Blog::Providers::DBProvider.database_url hands libpq the user alone"
+- example: "Blog::Providers::DBProvider.database_url hands libpq the user and password, escaped on the way"

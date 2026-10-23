@@ -1,0 +1,8 @@
+- example: "Admin project board a full column keeps the grown column through a live refresh"
+- example: "Admin project board a full column keeps the grown column through a reload"
+- example: "Admin project board a full column loads more cards in place"
+- example: "Admin project board drags a card to another column in place"
+- example: "Admin project board moves a card by its arrow in place"
+- example: "Admin project board moves a card from its menu in place"
+- example: "Admin project board opens the task drawer from a card"
+- example: "Admin project board starts a task dragged to in progress"

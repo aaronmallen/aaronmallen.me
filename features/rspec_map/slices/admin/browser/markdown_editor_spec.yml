@@ -1,0 +1,7 @@
+- example: "Admin Markdown editor after a first preview previews the body as it stands on the next switch"
+- example: "Admin Markdown editor inserts a snippet in its own editor only"
+- example: "Admin Markdown editor previewing both editors drops the HTML through the post renderer"
+- example: "Admin Markdown editor previewing both editors keeps the HTML the task renderer allows"
+- example: "Admin Markdown editor sets each editor's height"
+- example: "Admin Markdown editor strips a raw script from the task preview"
+- example: "Admin Markdown editor switches one editor to Preview and leaves the other on Write"

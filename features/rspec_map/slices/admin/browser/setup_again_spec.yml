@@ -1,0 +1,8 @@
+- example: "Admin scripts after new markup a dialog closes once from its new button"
+- example: "Admin scripts after new markup a dialog opens from its new trigger"
+- example: "Admin scripts after new markup counts the rows ticked in the new bulk form"
+- example: "Admin scripts after new markup moves one row per j"
+- example: "Admin scripts after new markup opens a task from the new list in the panel"
+- example: "Admin scripts after new markup opens the palette from its new trigger and moves one row per arrow"
+- example: "Admin scripts after new markup picks a theme from the new avatar menu"
+- example: "Admin scripts after new markup saves a drag once"

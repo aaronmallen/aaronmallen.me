@@ -1,0 +1,6 @@
+- example: "Analytics::Operations::FindPlace with a database on disk finds nothing for an address that isn't one"
+- example: "Analytics::Operations::FindPlace with a database on disk finds nothing for an address the database doesn't hold"
+- example: "Analytics::Operations::FindPlace with a database on disk finds the city and country of an address the database holds"
+- example: "Analytics::Operations::FindPlace with a database on disk finds the city with no country when the database names none"
+- example: "Analytics::Operations::FindPlace with a database on disk finds the country with no city when the database names none"
+- example: "Analytics::Operations::FindPlace with no MaxMind key, the way ADR 0009 allows finds nothing"

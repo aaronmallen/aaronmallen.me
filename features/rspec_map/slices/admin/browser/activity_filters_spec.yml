@@ -1,0 +1,6 @@
+- example: "Admin activity filters filters by the text typed in place"
+- example: "Admin activity filters going back after three filters leaves the page"
+- example: "Admin activity filters unchecking a type puts the unchecked type in the URL"
+- example: "Admin activity filters unchecking a type redraws the timeline without loading the page"
+- example: "Admin activity filters unchecking a type saves the filtered query in a view"
+- example: "Admin activity filters unchecking a type shows the same timeline on reload"

@@ -1,0 +1,6 @@
+- example: "Mail::Jobs::RecleanMailHtml leaves a thread Gmail no longer has as it is, and counts it"
+- example: "Mail::Jobs::RecleanMailHtml queues the same threads again in two minutes when Gmail rate limits it"
+- example: "Mail::Jobs::RecleanMailHtml queues the threads after the last one it cleaned, half a minute out"
+- example: "Mail::Jobs::RecleanMailHtml raises when Google fails, so Sidekiq tries again"
+- example: "Mail::Jobs::RecleanMailHtml rewrites each stored message's HTML under the current config"
+- example: "Mail::Jobs::RecleanMailHtml strips a transform from stored HTML"

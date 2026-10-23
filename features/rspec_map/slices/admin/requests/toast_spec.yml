@@ -1,0 +1,4 @@
+- example: "Admin toast after a save redirects"
+- example: "Admin toast after a save shows the toast on the next page"
+- example: "Admin toast after a save shows the toast only once"
+- example: "Admin toast shows no toast without a save"

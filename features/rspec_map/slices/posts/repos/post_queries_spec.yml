@@ -1,0 +1,4 @@
+- example: "Posts::Repos::PostQueries the lists keeps the tags"
+- example: "Posts::Repos::PostQueries the lists reads no bodies"
+- example: "Posts::Repos::PostQueries the pager reads only what it draws"
+- example: "Posts::Repos::PostQueries the sitemap reads only the columns it prints"

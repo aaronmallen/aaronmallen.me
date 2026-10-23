@@ -1,0 +1,6 @@
+- example: "API inbox snooze answers 404 for a row that isn't there"
+- example: "API inbox snooze answers the MCP tool the same way"
+- example: "API inbox snooze refuses a time in the past"
+- example: "API inbox snooze refuses what is not a time"
+- example: "API inbox snooze snoozes a row and drops it from the inbox"
+- example: "API inbox snooze snoozes each kind the inbox lists"

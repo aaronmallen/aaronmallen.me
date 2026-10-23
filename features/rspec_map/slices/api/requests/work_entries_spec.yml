@@ -1,0 +1,7 @@
+- example: "API work entries DELETE /api/v1/work_entries/:id answers an unknown ID with a 404"
+- example: "API work entries DELETE /api/v1/work_entries/:id removes the role for good"
+- example: "API work entries GET /api/v1/work_entries answers the same JSON as list_work_entries"
+- example: "API work entries GET /api/v1/work_entries lists the roles that overlap the range with a 200"
+- example: "API work entries GET /api/v1/work_entries refuses a from that comes after its to with a 422"
+- example: "API work entries POST /api/v1/work_entries adds the role with a 201"
+- example: "API work entries POST /api/v1/work_entries refuses an end year before the start year with a 422"

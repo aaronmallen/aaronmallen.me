@@ -1,0 +1,8 @@
+- example: "Admin post preview asks for nothing on switching to a Preview nothing has changed under"
+- example: "Admin post preview asks for nothing while Write is showing"
+- example: "Admin post preview asks for one preview for a burst of typing on Preview"
+- example: "Admin post preview asks for one preview on switching to Preview"
+- example: "Admin post preview for the same post as a published one sets the title and body in the public post's type"
+- example: "Admin post preview renders the body typed on Write"
+- example: "Admin post preview renders the title typed on Write"
+- example: "Admin post preview when an earlier preview answers after a later one keeps the later preview"

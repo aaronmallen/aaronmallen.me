@@ -1,0 +1,6 @@
+- example: "Notes::Operations::RemoveNoteFolder answers not found for a folder that does not exist"
+- example: "Notes::Operations::RemoveNoteFolder drops the folder's record links and keeps those of the notes it held"
+- example: "Notes::Operations::RemoveNoteFolder moves the notes of a top level folder to the top level"
+- example: "Notes::Operations::RemoveNoteFolder with a folder inside another moves its notes up one level"
+- example: "Notes::Operations::RemoveNoteFolder with a folder inside another moves its subfolders up one level and leaves their notes in them"
+- example: "Notes::Operations::RemoveNoteFolder with a folder inside another removes the folder"

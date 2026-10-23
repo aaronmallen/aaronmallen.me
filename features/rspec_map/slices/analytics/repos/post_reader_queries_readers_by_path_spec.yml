@@ -1,0 +1,1 @@
+- example: "Analytics::Repos::PostReaderQueries#readers_by_path counts a window the nightly job has yet to close as live"

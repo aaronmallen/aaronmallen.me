@@ -1,0 +1,4 @@
+- example: "Contacts::Operations::DeletePerson deletes a contact Google already deleted"
+- example: "Contacts::Operations::DeletePerson deletes a linked contact in Google too"
+- example: "Contacts::Operations::DeletePerson deletes a local contact without asking Google"
+- example: "Contacts::Operations::DeletePerson keeps the contact when Google refuses"

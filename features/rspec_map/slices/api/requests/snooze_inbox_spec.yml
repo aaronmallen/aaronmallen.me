@@ -1,0 +1,7 @@
+- example: "API snooze inbox answers the MCP tool with the same JSON"
+- example: "API snooze inbox changes nothing when one row is gone and names it under its kind"
+- example: "API snooze inbox leaves a row it was not given in the inbox"
+- example: "API snooze inbox names a gone task under tasks"
+- example: "API snooze inbox refuses a call with no rows"
+- example: "API snooze inbox refuses a time in the past"
+- example: "API snooze inbox snoozes every row it names until the time"

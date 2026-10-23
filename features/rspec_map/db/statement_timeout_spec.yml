@@ -1,0 +1,5 @@
+- example: "The web statement timeout cancels a request's query that runs past the limit"
+- example: "The web statement timeout leaves a new connection unlimited, as migrations open one"
+- example: "The web statement timeout limits a request's queries to 15 seconds by default"
+- example: "The web statement timeout when a Sidekiq job runs leaves the job's queries unlimited"
+- example: "The web statement timeout when a request runs past the limit still writes the request's timing row"

@@ -1,0 +1,4 @@
+- example: "Redis in the test suite fails a spec that rescues the refusal, naming the spec"
+- example: "Redis in the test suite fails the way CI does, so the outage rescues still catch it"
+- example: "Redis in the test suite passes a spec that rescues the refusal when it covers a Redis outage"
+- example: "Redis in the test suite refuses a connection, naming the spec and the fix"

@@ -1,0 +1,6 @@
+- example: "Security::Jobs::PruneAccessRecords deletes a device whose last sign-in is more than 400 days old and keeps a newer one"
+- example: "Security::Jobs::PruneAccessRecords deletes sightings last seen more than 90 days ago"
+- example: "Security::Jobs::PruneAccessRecords deletes sign-ins older than 90 days and keeps the rest"
+- example: "Security::Jobs::PruneAccessRecords keeps a dismissed failure until it is 90 days old"
+- example: "Security::Jobs::PruneAccessRecords keeps a sighting first seen long ago but still in use"
+- example: "Security::Jobs::PruneAccessRecords keeps known devices and cities whatever their age"

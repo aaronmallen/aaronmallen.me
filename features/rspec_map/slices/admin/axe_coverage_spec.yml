@@ -1,0 +1,4 @@
+- example: "Admin axe coverage checks every admin page in the readable or menus spec or says why not"
+- example: "Admin axe coverage exempts only pages the browser specs miss"
+- example: "Admin axe coverage finds the admin pages and the ones the browser specs check"
+- example: "Admin axe coverage names only routes that exist"

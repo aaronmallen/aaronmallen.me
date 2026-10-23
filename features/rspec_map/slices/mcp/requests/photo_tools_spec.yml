@@ -1,0 +1,8 @@
+- example: "MCP photo tools read_photo refuses when the store does not answer"
+- example: "MCP photo tools read_photo refuses when the store is not set up"
+- example: "MCP photo tools read_photo with the store connected answers one image block and one text block"
+- example: "MCP photo tools read_photo with the store connected answers the key, width, height and byte size in one text block"
+- example: "MCP photo tools read_photo with the store connected answers the stored bytes as one image block"
+- example: "MCP photo tools read_photo with the store connected refuses a key the site does not keep and names it"
+- example: "MCP photo tools read_photo with the store connected shows a photo no published post claims"
+- example: "MCP photo tools read_photo with the store connected takes the photo's URL"

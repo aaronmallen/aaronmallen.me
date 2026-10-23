@@ -1,0 +1,3 @@
+- example: "Notes::Operations::DuplicateNote answers not found for a note that does not exist"
+- example: "Notes::Operations::DuplicateNote copies the body and folder under a free title"
+- example: "Notes::Operations::DuplicateNote stores the copy's links, so the note it links counts it as a backlink"

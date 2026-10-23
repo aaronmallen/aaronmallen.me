@@ -1,0 +1,2 @@
+- example: "Notes::Operations::TagNote adds one private tag and counts the version on"
+- example: "Notes::Operations::TagNote answers not found for a note that does not exist"

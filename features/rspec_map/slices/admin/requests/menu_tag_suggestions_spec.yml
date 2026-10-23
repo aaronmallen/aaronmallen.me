@@ -1,0 +1,6 @@
+- example: "Admin menu tag suggestions leaves mail-only tags out of a decision menu"
+- example: "Admin menu tag suggestions leaves mail-only tags out of a journal menu"
+- example: "Admin menu tag suggestions leaves mail-only tags out of a task bulk menu"
+- example: "Admin menu tag suggestions leaves mail-only tags out of a task menu"
+- example: "Admin menu tag suggestions suggests every private tag in a mail menu, mail-only ones too, with their colors"
+- example: "Admin menu tag suggestions suggests public tags in a post menu"

@@ -1,0 +1,5 @@
+- example: "Admin decision edit notes editing an option asks for the note in a modal and saves nothing yet"
+- example: "Admin decision edit notes editing an option saves the option and the note on confirm"
+- example: "Admin decision edit notes editing the problem after the problem changes asks for the note in a modal and saves nothing yet"
+- example: "Admin decision edit notes editing the problem after the problem changes saves the problem and the note on confirm"
+- example: "Admin decision edit notes editing the problem saves a new title without asking"

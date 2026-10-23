@@ -1,0 +1,3 @@
+- example: "Development seeds adds nothing on a second run"
+- example: "Development seeds fails when a seed file raises"
+- example: "Development seeds fills every admin area"

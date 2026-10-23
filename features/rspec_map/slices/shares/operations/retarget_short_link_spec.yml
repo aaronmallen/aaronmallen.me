@@ -1,0 +1,2 @@
+- example: "Shares::Operations::RetargetShortLink answers not found for a missing link"
+- example: "Shares::Operations::RetargetShortLink leaves the stamp alone when the destination stays the same"

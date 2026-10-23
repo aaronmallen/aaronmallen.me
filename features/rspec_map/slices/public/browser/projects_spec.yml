@@ -1,0 +1,4 @@
+- example: "Project cards fills an active card and leaves a past one unfilled"
+- example: "Project cards lays the grid out in 1 columns at 390px"
+- example: "Project cards lays the grid out in 2 columns at 800px"
+- example: "Project cards lays the grid out in 4 columns at 1600px"

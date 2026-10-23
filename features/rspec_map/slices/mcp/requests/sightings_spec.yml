@@ -1,0 +1,8 @@
+- example: "MCP client sightings a client deleted after it authenticates answers 401"
+- example: "MCP client sightings a client deleted after it authenticates records nothing"
+- example: "MCP client sightings counts a repeat call from the same device and city on one row"
+- example: "MCP client sightings keeps one row with the latest city and address when the client calls from another city"
+- example: "MCP client sightings keeps the last address, user agent and time"
+- example: "MCP client sightings keys a client it can't read on the first product in its user agent"
+- example: "MCP client sightings records nothing for a token it refuses"
+- example: "MCP client sightings records where the client called from"

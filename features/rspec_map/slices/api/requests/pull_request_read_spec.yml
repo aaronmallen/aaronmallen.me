@@ -1,0 +1,3 @@
+- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the pull request with its state and times"
+- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the records linked to the pull request, grouped by kind"
+- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the same JSON as read_pull_request"

@@ -521,7 +521,7 @@ RSpec.describe "OAuth token", type: :request do
 
   describe "a code exchange carrying a field it cannot read" do
     {
-      code: ["short", "#{Blog::Types::NewSecret[]}\u0000", ""],
+      code: ["short", "fQeOyzc13iWZbKK6piRoLGRaNtdsEpQGgK5p7G9VIVU\u0000", ""],
       code_verifier: ["short", "a" * 129, "#{'a' * 42}/", ""],
       redirect_uri: ["https://claude.ai/\u0000", ""],
     }.each do |field, values|
@@ -553,7 +553,7 @@ RSpec.describe "OAuth token", type: :request do
   describe "a refresh carrying a field it cannot read" do
     before { exchange }
 
-    ["short", "#{Blog::Types::NewSecret[]}\n", ""].each do |value|
+    ["short", "wphZugY-nt2viw44vPHDmX1z_nIzf4j80ca6mhNmJYM\n", ""].each do |value|
       it "refuses #{value.inspect} for refresh_token" do
         refresh(value)
 

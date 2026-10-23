@@ -1,0 +1,8 @@
+- example: "Shares::Operations::ChangeCode answers not found when saving a missing share or link"
+- example: "Shares::Operations::ChangeCode changes a short link's code"
+- example: "Shares::Operations::ChangeCode changes the code and frees the old one"
+- example: "Shares::Operations::ChangeCode keeps a short code as I typed it"
+- example: "Shares::Operations::ChangeCode leaves the database to refuse a bad code no contract checked"
+- example: "Shares::Operations::ChangeCode refuses a blank code"
+- example: "Shares::Operations::ChangeCode refuses a code another share holds"
+- example: "Shares::Operations::ChangeCode refuses a code that breaks the format"

@@ -1,0 +1,6 @@
+- example: "Social::Operations::CheckNetworkFit measures a mention as it reads once expanded for the network"
+- example: "Social::Operations::CheckNetworkFit passes text that fits every network it targets"
+- example: "Social::Operations::CheckNetworkFit passes when there is no network to fit"
+- example: "Social::Operations::CheckNetworkFit refuses a LinkedIn thread whose parts each fit but whose joined text runs over"
+- example: "Social::Operations::CheckNetworkFit refuses text that fits Mastodon but not Bluesky"
+- example: "Social::Operations::CheckNetworkFit refuses when any one part runs over"

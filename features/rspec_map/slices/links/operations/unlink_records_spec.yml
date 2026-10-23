@@ -1,0 +1,2 @@
+- example: "Links::Operations::UnlinkRecords refuses an unknown kind as not found"
+- example: "Links::Operations::UnlinkRecords refuses an unknown kind on its own side as not found"

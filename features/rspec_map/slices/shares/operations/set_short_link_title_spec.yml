@@ -1,0 +1,3 @@
+- example: "Shares::Operations::SetShortLinkTitle answers not found for a missing link"
+- example: "Shares::Operations::SetShortLinkTitle refuses control characters"
+- example: "Shares::Operations::SetShortLinkTitle sets and clears the title"

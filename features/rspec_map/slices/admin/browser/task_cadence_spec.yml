@@ -1,0 +1,4 @@
+- example: "Admin task cadence picker fits a phone without scrolling sideways"
+- example: "Admin task cadence picker shows no field once it never repeats again"
+- example: "Admin task cadence picker shows only the fields a weekday each month needs"
+- example: "Admin task cadence picker shows only the fields every few weeks needs, under a label in weeks"

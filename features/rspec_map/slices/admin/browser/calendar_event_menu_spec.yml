@@ -1,0 +1,3 @@
+- example: "Admin calendar event menu deleting asks for a second click"
+- example: "Admin calendar event menu deleting deletes on the second click and stays on the page"
+- example: "Admin calendar event menu edits the event in a dialog and stays on the page"

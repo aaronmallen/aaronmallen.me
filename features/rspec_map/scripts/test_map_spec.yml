@@ -1,0 +1,4 @@
+- example: "mise run test:map drops rows and files for examples RSpec no longer runs"
+- example: "mise run test:map fails when a mapped scenario no longer exists"
+- example: "mise run test:map lists each example with neither scenario nor drop reason, and fails"
+- example: "mise run test:map passes once every example has a scenario or drop reason, keeping them"

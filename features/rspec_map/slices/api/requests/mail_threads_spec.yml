@@ -1,0 +1,8 @@
+- example: "API mail threads GET /api/v1/mail/threads answers what list_mail_threads answers, less the untrusted marks"
+- example: "API mail threads GET /api/v1/mail/threads lists the threads, newest first, with their reply address and no body"
+- example: "API mail threads GET /api/v1/mail/threads needs a token with the mail scope"
+- example: "API mail threads GET /api/v1/mail/threads reads no more of the first message's body than its preview"
+- example: "API mail threads GET /api/v1/mail/threads/:id answers what read_mail_thread answers, less the untrusted marks"
+- example: "API mail threads GET /api/v1/mail/threads/:id reads the thread with each message, oldest first"
+- example: "API mail threads POST /api/v1/mail/threads/:id/mark marks the thread"
+- example: "API mail threads POST /api/v1/mail/threads/:id/mark refuses a status it does not know with a 422"

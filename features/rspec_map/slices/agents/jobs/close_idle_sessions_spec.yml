@@ -1,0 +1,2 @@
+- example: "Agents::Jobs::CloseIdleSessions closes a session no call named for 2 hours"
+- example: "Agents::Jobs::CloseIdleSessions leaves a session seen within 2 hours open"

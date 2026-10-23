@@ -1,0 +1,4 @@
+- example: "Tags::Relations::Tags deletes the only tag on a task rule that holds a project"
+- example: "Tags::Relations::Tags names no rule that holds a project beside the tag"
+- example: "Tags::Relations::Tags refuses to delete the only project on a task rule with no tags"
+- example: "Tags::Relations::Tags refuses to delete the only tag on a task rule"

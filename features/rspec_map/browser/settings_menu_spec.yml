@@ -1,0 +1,3 @@
+- example: "The settings menu closes on Escape and hands focus back to the gear"
+- example: "The settings menu closes on a click outside it"
+- example: "The settings menu opens from the gear"

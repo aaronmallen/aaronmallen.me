@@ -1,0 +1,6 @@
+- example: "Structured data a page with no structured data of its own renders none"
+- example: "Structured data a post with its own card carries its image, canonical link and summary"
+- example: "Structured data a post with its own card keeps a title that looks like markup inside the script"
+- example: "Structured data a post with its own card leaves out keywords it does not have"
+- example: "Structured data a post with nothing of its own describes it as a blog post"
+- example: "Structured data the home page describes the site and its owner with their profiles"

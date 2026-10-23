@@ -1,0 +1,7 @@
+- example: "Media::Jobs::SweepPhotos a sweep and a save that meet on one photo keeps a photo a save claims while the sweep waits"
+- example: "Media::Jobs::SweepPhotos a sweep and a save that meet on one photo lets a save that waits on a sweep claim nothing"
+- example: "Media::Jobs::SweepPhotos deletes a photo unclaimed for a day from the table and the store"
+- example: "Media::Jobs::SweepPhotos deletes the smaller widths of a photo it sweeps from the store"
+- example: "Media::Jobs::SweepPhotos keeps a photo uploaded less than a day ago"
+- example: "Media::Jobs::SweepPhotos keeps a photo whose store delete fails, for the next run"
+- example: "Media::Jobs::SweepPhotos keeps an old photo something claims"

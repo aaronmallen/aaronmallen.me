@@ -1,0 +1,3 @@
+- example: "Admin MCP clients asks with the confirmation text"
+- example: "Admin MCP clients keeps the client listed when I don't confirm"
+- example: "Admin MCP clients revokes once I confirm"

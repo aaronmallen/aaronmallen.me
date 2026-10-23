@@ -1,0 +1,4 @@
+- example: "Posts::Jobs::RerenderPosts leaves updated_at alone, since the post did not change"
+- example: "Posts::Jobs::RerenderPosts rebuilds an edit note's html"
+- example: "Posts::Jobs::RerenderPosts rebuilds every stored value from the post's markdown"
+- example: "Posts::Jobs::RerenderPosts writes only the rows whose stored values went stale"

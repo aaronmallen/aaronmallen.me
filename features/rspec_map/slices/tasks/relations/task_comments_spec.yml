@@ -1,0 +1,5 @@
+- example: "Tasks::Relations::TaskComments refuses a blank body"
+- example: "Tasks::Relations::TaskComments refuses a second copy of the same remote comment"
+- example: "Tasks::Relations::TaskComments refuses a synced comment with no provider"
+- example: "Tasks::Relations::TaskComments refuses a synced comment with no remote_id"
+- example: "Tasks::Relations::TaskComments refuses a synced comment with no url"

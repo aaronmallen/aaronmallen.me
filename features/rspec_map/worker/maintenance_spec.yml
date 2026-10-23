@@ -1,0 +1,7 @@
+- example: "The worker during maintenance when the flag file exists puts a one-off job off for later"
+- example: "The worker during maintenance when the flag file exists runs a put off job once the file is gone"
+- example: "The worker during maintenance when the flag file exists runs jobs and reports again once the file is gone"
+- example: "The worker during maintenance when the flag file exists sends Honeybadger nothing"
+- example: "The worker during maintenance when the flag file exists skips a scheduled job and clears it from the queue"
+- example: "The worker during maintenance when the flag file is absent runs the job"
+- example: "The worker during maintenance when the flag file is absent tells Honeybadger"

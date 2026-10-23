@@ -1,0 +1,8 @@
+- example: "Shares::Jobs::QueueHeldTitleFetches clearing a link's title while Redis is down holds the title fetch"
+- example: "Shares::Jobs::QueueHeldTitleFetches queues nothing when nothing is held"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down fetches the title once Redis is back"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down holds the title fetch"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down keeps what it holds while Redis stays down"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down makes the link"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down queues the fetch only once when run twice"
+- example: "Shares::Jobs::QueueHeldTitleFetches shortening a link while Redis is down tells Honeybadger the queue could not be reached"

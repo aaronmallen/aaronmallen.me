@@ -1,0 +1,3 @@
+- example: "Admin API tokens asks with the confirmation text"
+- example: "Admin API tokens keeps the token listed when I don't confirm"
+- example: "Admin API tokens revokes once I confirm"

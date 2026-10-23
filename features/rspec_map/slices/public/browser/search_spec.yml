@@ -1,0 +1,3 @@
+- example: "Search page focuses the search box on the / key"
+- example: "Search page shows the header search link as a 44px icon button below 700px"
+- example: "Search page types a / into the box once it has focus"

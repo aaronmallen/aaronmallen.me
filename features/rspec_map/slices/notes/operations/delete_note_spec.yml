@@ -1,0 +1,3 @@
+- example: "Notes::Operations::DeleteNote answers not found for a note that does not exist"
+- example: "Notes::Operations::DeleteNote deletes the note and its tags"
+- example: "Notes::Operations::DeleteNote drops the note's record links"

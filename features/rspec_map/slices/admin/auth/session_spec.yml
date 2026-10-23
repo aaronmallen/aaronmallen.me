@@ -1,0 +1,7 @@
+- example: "Admin::Auth::Session answers signed in after signing in within the same request"
+- example: "Admin::Auth::Session answers signed out after signing out within the same request"
+- example: "Admin::Auth::Session keeps a session that began after its device was signed out"
+- example: "Admin::Auth::Session keeps the device in the session"
+- example: "Admin::Auth::Session refuses a session that began when its device was signed out"
+- example: "Admin::Auth::Session refuses a session that names no device"
+- example: "Admin::Auth::Session refuses a session whose device is gone"

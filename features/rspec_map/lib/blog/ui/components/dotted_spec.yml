@@ -1,0 +1,4 @@
+- example: "Blog::UI::Components::Dotted escapes text parts"
+- example: "Blog::UI::Components::Dotted puts a dot between the parts and keeps their markup"
+- example: "Blog::UI::Components::Dotted puts no dot around parts that render nothing"
+- example: "Blog::UI::Components::Dotted renders nothing when no part renders"

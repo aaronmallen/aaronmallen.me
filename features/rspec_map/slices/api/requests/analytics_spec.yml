@@ -1,0 +1,6 @@
+- example: "API analytics adds up the site's days inside the range with a 200"
+- example: "API analytics answers what read_analytics answers, less the untrusted marks"
+- example: "API analytics gives each top path its title unmarked"
+- example: "API analytics reads one page alone"
+- example: "API analytics refuses a range longer than a year with a 422"
+- example: "API analytics refuses a since it cannot read with a 422"

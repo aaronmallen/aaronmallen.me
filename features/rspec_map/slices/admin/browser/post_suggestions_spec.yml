@@ -1,0 +1,5 @@
+- example: "Admin post suggestions dialog closes after Accept all"
+- example: "Admin post suggestions dialog closes with the banner once the last suggestion is settled"
+- example: "Admin post suggestions dialog shows the toast above the open dialog"
+- example: "Admin post suggestions dialog stays open with one suggestion left after a Reject"
+- example: "Admin post suggestions dialog stays open with one suggestion left after an Accept"

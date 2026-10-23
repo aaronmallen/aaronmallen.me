@@ -1,0 +1,4 @@
+- example: "Blog::TimeZone.day_bounds ends the day the clocks spring forward 23 hours after it starts"
+- example: "Blog::TimeZone.day_bounds leaves an open end open"
+- example: "Blog::TimeZone.day_bounds runs from the first day's local midnight to the midnight after the last day"
+- example: "Blog::TimeZone.local_date returns the Chicago date of a time past midnight UTC"

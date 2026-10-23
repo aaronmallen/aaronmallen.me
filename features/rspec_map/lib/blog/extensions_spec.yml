@@ -1,0 +1,4 @@
+- example: "Blog::Extensions.apply prepends the extension when the gem is at the version it was written against"
+- example: "Blog::Extensions.apply raises naming the file to check when the gem is at another version"
+- example: "Blog::Extensions.pin passes when the gem is at the version it was written against"
+- example: "Blog::Extensions.pin raises naming the file to check when the gem is at another version"

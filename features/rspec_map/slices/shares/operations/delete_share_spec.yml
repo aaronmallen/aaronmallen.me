@@ -1,0 +1,4 @@
+- example: "Shares::Operations::DeleteShare answers not found for a missing share"
+- example: "Shares::Operations::DeleteShare keeps the share when the store fails"
+- example: "Shares::Operations::DeleteShare removes the image's preview from the bucket too"
+- example: "Shares::Operations::DeleteShare removes the row, its code and its object from the shares bucket"

@@ -1,0 +1,6 @@
+- example: "Admin maintenance mode the Settings button asks the confirm question first"
+- example: "Admin maintenance mode the Settings button takes the site down once I confirm"
+- example: "Admin maintenance mode the palette command asks again once I type"
+- example: "Admin maintenance mode the palette command asks the confirm question first"
+- example: "Admin maintenance mode the palette command changes nothing when I close it"
+- example: "Admin maintenance mode the palette command takes the site down once I confirm"

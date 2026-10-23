@@ -1,0 +1,3 @@
+- example: "Mail::Repos::GmailMutations#store_labels still refuses two labels with one name"
+- example: "Mail::Repos::GmailMutations#store_labels stores both names when a label takes the name another gave up"
+- example: "Mail::Repos::GmailMutations#store_labels stores both names when two labels swap them"

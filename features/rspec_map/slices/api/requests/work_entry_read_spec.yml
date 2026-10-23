@@ -1,0 +1,4 @@
+- example: "API reading a work entry GET /api/v1/work_entries/:id answers the records linked to the work entry, grouped by kind"
+- example: "API reading a work entry GET /api/v1/work_entries/:id answers the same JSON as read_work_entry"
+- example: "API reading a work entry GET /api/v1/work_entries/:id answers the work entry"
+- example: "API reading a work entry GET /api/v1/work_entries/:id calls a role with no last year current"

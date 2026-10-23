@@ -1,0 +1,3 @@
+- example: "Shares::Helpers::Code raises a code collision once the tries run out"
+- example: "Shares::Helpers::Code raises a collision on any other constraint"
+- example: "Shares::Helpers::Code retries a code collision until a try lands"

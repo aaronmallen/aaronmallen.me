@@ -1,0 +1,5 @@
+- example: "Admin journal modal a failed save shows its errors in the modal and keeps what was typed"
+- example: "Admin journal modal counts words and enables Save once there is text"
+- example: "Admin journal modal opens with the cursor in the entry"
+- example: "Admin journal modal saves what was typed in the editor on Ctrl+Enter"
+- example: "Admin journal modal saving saves today's entry with its tags and returns to the page"

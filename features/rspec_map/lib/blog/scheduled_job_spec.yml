@@ -1,0 +1,5 @@
+- example: "Blog::ScheduledJob checks in once the timer has stopped and the connection is back in the pool"
+- example: "Blog::ScheduledJob checks in under the job's name and its arguments"
+- example: "Blog::ScheduledJob checks in with Honeybadger after a run that finishes"
+- example: "Blog::ScheduledJob runs a job with no check-in set up and sends nothing"
+- example: "Blog::ScheduledJob sends no check-in after a run that raises"

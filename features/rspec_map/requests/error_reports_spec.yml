@@ -1,0 +1,3 @@
+- example: "An error raised in a request when a public action raises raises the error again"
+- example: "An error raised in a request when a public action raises tells Honeybadger what the action raised"
+- example: "An error raised in a request when the app answers tells Honeybadger nothing"

@@ -1,0 +1,3 @@
+- example: "Single shares and group files in one table keeps a group's files out of the single shares"
+- example: "Single shares and group files in one table refuses a file with both a code and a group"
+- example: "Single shares and group files in one table refuses a file with neither a code nor a group"

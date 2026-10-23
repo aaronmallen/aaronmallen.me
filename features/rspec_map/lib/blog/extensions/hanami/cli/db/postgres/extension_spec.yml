@@ -1,0 +1,2 @@
+- example: "Blog::Extensions::Hanami::CLI::DB::Postgres::Extension#exists? finds the database the settings name"
+- example: "Blog::Extensions::Hanami::CLI::DB::Postgres::Extension#exists? misses a database that is not there, quotes and all"

@@ -1,0 +1,3 @@
+- example: "Admin today pools switching the pool to someday copies a task's key from the new pool"
+- example: "Admin today pools switching the pool to someday marks someday as the current page"
+- example: "Admin today pools switching the pool to someday switches without loading the page"

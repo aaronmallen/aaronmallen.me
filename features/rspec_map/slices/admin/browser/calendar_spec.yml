@@ -1,0 +1,6 @@
+- example: "Admin calendar deleting an event on a day opened in place asks first"
+- example: "Admin calendar marks the day as picked"
+- example: "Admin calendar moves focus to the panel"
+- example: "Admin calendar opens the day's panel without loading the page"
+- example: "Admin calendar shows the day in the address"
+- example: "Admin calendar when an earlier day answers after a later one keeps the later day's panel"

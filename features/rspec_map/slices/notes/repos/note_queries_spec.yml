@@ -1,0 +1,4 @@
+- example: "Notes::Repos::NoteQueries counts the backlinks of each note it is asked about, leaving out a note's link to itself"
+- example: "Notes::Repos::NoteQueries lists a note's links out, naming the note each finds and none for a note not written"
+- example: "Notes::Repos::NoteQueries lists the other notes that link to a note, in title order, whatever case the link takes"
+- example: "Notes::Repos::NoteQueries lists the titles linked but not written, with the notes that link them and the first one's folder"

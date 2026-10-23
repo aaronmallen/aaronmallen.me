@@ -1,0 +1,2 @@
+- example: "Notes::Operations::DescribeNoteFolder answers not found for a folder that does not exist"
+- example: "Notes::Operations::DescribeNoteFolder changes the description and can clear it"

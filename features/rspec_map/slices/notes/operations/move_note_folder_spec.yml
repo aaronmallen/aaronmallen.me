@@ -1,0 +1,4 @@
+- example: "Notes::Operations::MoveNoteFolder moves a folder under another and back to the top level"
+- example: "Notes::Operations::MoveNoteFolder refuses a parent that does not exist"
+- example: "Notes::Operations::MoveNoteFolder with a folder inside a folder inside another refuses a move into a folder inside it"
+- example: "Notes::Operations::MoveNoteFolder with a folder inside a folder inside another refuses a move into itself"

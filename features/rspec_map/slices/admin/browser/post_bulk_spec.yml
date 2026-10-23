@@ -1,0 +1,6 @@
+- example: "Admin bulk post actions with scripts on deletes the ticked drafts after asking"
+- example: "Admin bulk post actions with scripts on hides the actions while nothing is ticked"
+- example: "Admin bulk post actions with scripts on keeps every post when a published one is ticked"
+- example: "Admin bulk post actions with scripts on shows the actions once a row is ticked"
+- example: "Admin bulk post actions with scripts on tags rather than deletes when Enter goes in the tag field"
+- example: "Admin bulk post actions with scripts on ticks every row on the page with select all"

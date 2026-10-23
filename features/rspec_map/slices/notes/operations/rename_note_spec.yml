@@ -1,0 +1,6 @@
+- example: "Notes::Operations::RenameNote a note other notes link keeps its backlinks under the new title"
+- example: "Notes::Operations::RenameNote a note other notes link rewrites the old title in every note that links it, its own body included, and keeps the rest"
+- example: "Notes::Operations::RenameNote answers not found for a note that does not exist"
+- example: "Notes::Operations::RenameNote changes the title"
+- example: "Notes::Operations::RenameNote refuses a title another note holds"
+- example: "Notes::Operations::RenameNote rewrites nothing when a refused title rolls the rename back"

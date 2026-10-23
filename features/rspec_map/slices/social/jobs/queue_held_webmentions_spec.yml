@@ -1,0 +1,8 @@
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down accepts the notification"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down holds the check"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down keeps what it holds while Redis stays down"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down lets go of what it queued"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down queues each held check only once when run twice"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down stores the mention once Redis is back"
+- example: "Social::Jobs::QueueHeldWebmentions a webmention received while Redis is down tells Honeybadger the queue could not be reached"
+- example: "Social::Jobs::QueueHeldWebmentions queues nothing when nothing is held"

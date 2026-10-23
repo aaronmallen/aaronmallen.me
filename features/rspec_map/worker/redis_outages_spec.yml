@@ -1,0 +1,4 @@
+- example: "Redis dropping under the worker when a job cannot reach Redis tells Honeybadger"
+- example: "Redis dropping under the worker when the scheduler cannot reach Redis builds the notice"
+- example: "Redis dropping under the worker when the scheduler cannot reach Redis sends Honeybadger nothing"
+- example: "Redis dropping under the worker when the scheduler raises something else tells Honeybadger"

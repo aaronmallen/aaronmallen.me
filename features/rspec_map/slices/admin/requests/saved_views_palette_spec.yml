@@ -1,0 +1,6 @@
+- example: "Admin saved views palette signed in with a filter its screen no longer knows leaves the filter out of the address"
+- example: "Admin saved views palette signed in with none saved lists none"
+- example: "Admin saved views palette signed in with saved views answers with JSON"
+- example: "Admin saved views palette signed in with saved views keeps the answer out of every cache"
+- example: "Admin saved views palette signed in with saved views lists each view by name, in list order, with its screen and the address that opens it"
+- example: "Admin saved views palette signed out answers 401 rather than sending me to sign in"

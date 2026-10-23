@@ -1,0 +1,2 @@
+- example: "Services::Operations::SaveApp keeps one app when another connect saves the same server first"
+- example: "Services::Operations::SaveApp replaces the app it already holds for the server"

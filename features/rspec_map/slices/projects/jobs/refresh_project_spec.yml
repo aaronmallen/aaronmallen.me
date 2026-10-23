@@ -1,0 +1,8 @@
+- example: "Projects::Jobs::RefreshProject running the fetch asks GitHub for nothing once the project has lost its repo"
+- example: "Projects::Jobs::RefreshProject running the fetch leaves the stored stars and the projects sync state alone when GitHub fails"
+- example: "Projects::Jobs::RefreshProject running the fetch stores the stars and latest release"
+- example: "Projects::Jobs::RefreshProject saving a project queues a fetch for a new project with a repo"
+- example: "Projects::Jobs::RefreshProject saving a project queues a fetch when an update changes the repo"
+- example: "Projects::Jobs::RefreshProject saving a project queues nothing for a project with no repo"
+- example: "Projects::Jobs::RefreshProject saving a project queues nothing when an update keeps the repo"
+- example: "Projects::Jobs::RefreshProject saving a project queues nothing when the save rolls back"

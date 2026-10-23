@@ -1,0 +1,3 @@
+- example: "Media::Operations::UploadPhoto removes the objects it stored when a later put fails"
+- example: "Media::Operations::UploadPhoto with a store that takes every put puts every object before it inserts the row"
+- example: "Media::Operations::UploadPhoto with a store that takes every put removes every object it stored when the insert fails"

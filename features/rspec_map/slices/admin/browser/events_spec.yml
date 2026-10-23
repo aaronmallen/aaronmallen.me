@@ -1,0 +1,7 @@
+- example: "Admin events answers a signed in admin with an event stream"
+- example: "Admin events answers a visitor who is not signed in with 401"
+- example: "Admin events reaches an event source in the browser"
+- example: "Admin events serves pages while more streams are open than the server has threads"
+- example: "Admin events tells every open stream about a new message"
+- example: "Admin events tells every open stream about a new webmention"
+- example: "Admin events tells every open stream when issues sync"

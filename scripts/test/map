@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+# MISE description="Sync features/rspec_map with the RSpec examples and list each one no scenario or reason covers"
+# MISE alias=["t:map"]
+# frozen_string_literal: true
+
+require "fileutils"
+require "json"
+require "open3"
+require "tmpdir"
+require "yaml"
+
+Dir.chdir(ARGV.first || File.expand_path("../..", __dir__))
+
+examples = Dir.mktmpdir do |dir|
+  out = File.join(dir, "examples.json")
+  command = %W[bundle exec rspec --require spec_helper --dry-run --format json --out #{out} spec]
+  output, status = Open3.capture2e(*command)
+  abort(output) unless status.success?
+  JSON.parse(File.read(out))["examples"]
+end
+
+maps = examples.group_by { it["id"][%r{\A\./spec/(.+)\.rb\[}, 1] }.sort.to_h do |spec, rows|
+  path = "features/rspec_map/#{spec}.yml"
+  old = ((File.exist?(path) && YAML.load_file(path)) || []).to_h { [it["example"], it] }
+  [path, rows.map { it["full_description"] }.uniq.sort.map { old[it] || { "example" => it } }]
+end
+
+(Dir["features/rspec_map/**/*.yml"] - maps.keys).each { File.delete(it) }
+maps.each do |path, rows|
+  lines = rows.map { |row| row.map { |key, value| "  #{key}: #{value.to_json}" }.join("\n").sub("  ", "- ") }
+  FileUtils.mkdir_p(File.dirname(path))
+  File.write(path, "#{lines.join("\n")}\n")
+end
+
+scenarios = Dir["features/**/*.feature"].reject { it.include?("/node_modules/") }.flat_map do |path|
+  name = path.delete_prefix("features/")
+  File.read(path).scan(/^\s*(?:Scenario(?: Outline| Template)?|Example):\s*(.+?)\s*$/).map { "#{name}: #{it.first}" }
+end
+
+rows = maps.flat_map { |path, entries| entries.map { [path, it] } }
+gaps = rows.filter_map do |path, row|
+  if row["scenario"] && !scenarios.include?(row["scenario"])
+    "#{path}: #{row['example']} maps to #{row['scenario']}, which no feature holds"
+  elsif row["scenario"].to_s.strip.empty? && row["drop"].to_s.strip.empty?
+    "#{path}: #{row['example']} has no scenario or drop reason"
+  end
+end
+
+gaps.each { warn it }
+warn "#{gaps.size} of #{rows.size} examples need a scenario or drop reason" unless gaps.empty?
+exit(gaps.empty?)

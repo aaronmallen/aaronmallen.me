@@ -1,0 +1,2 @@
+- example: "Tasks::Operations::CaptureTask two tasks placed at once gives a captured task and an imported one different positions"
+- example: "Tasks::Operations::CaptureTask two tasks placed at once gives two captured tasks different positions"

@@ -1,0 +1,2 @@
+- example: "Tasks::Operations::ClearTaskCadence clears a task's cadence"
+- example: "Tasks::Operations::ClearTaskCadence fails for a task with no cadence"

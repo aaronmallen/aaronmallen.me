@@ -1,0 +1,3 @@
+- example: "Schema twins drops the links of a deleted record of every kind"
+- example: "Schema twins keeps every enum's values in its Blog::Types twin"
+- example: "Schema twins names only enums the schema holds in the renamed list"

@@ -1,0 +1,5 @@
+- example: "Admin mail menus archives a thread from its menu in the inbox"
+- example: "Admin mail menus on the Mail screen acts on every picked thread from the bulk menu"
+- example: "Admin mail menus on the Mail screen deleting asks for a second click"
+- example: "Admin mail menus on the Mail screen deleting moves the thread to the trash on the second click"
+- example: "Admin mail menus on the Mail screen stars a thread from its menu in place with a toast"

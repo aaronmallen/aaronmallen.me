@@ -1,0 +1,8 @@
+- example: "Tasks::Relations::TaskContributors refuses a kind it does not know"
+- example: "Tasks::Relations::TaskContributors refuses a model longer than 64 characters"
+- example: "Tasks::Relations::TaskContributors refuses a second owner row on the same task"
+- example: "Tasks::Relations::TaskContributors refuses an agent that is not a lowercase slug"
+- example: "Tasks::Relations::TaskContributors refuses an agent with no agent name"
+- example: "Tasks::Relations::TaskContributors refuses an agent with no model"
+- example: "Tasks::Relations::TaskContributors refuses an owner with an agent"
+- example: "Tasks::Relations::TaskContributors refuses the same agent and model twice on a task"

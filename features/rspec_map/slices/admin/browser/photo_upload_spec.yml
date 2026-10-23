@@ -1,0 +1,8 @@
+- example: "Admin photo upload in the Markdown editor with a store holds a placeholder at the cursor while the photo uploads"
+- example: "Admin photo upload in the Markdown editor with a store leaves a paste that carries text to the browser"
+- example: "Admin photo upload in the Markdown editor with a store takes the placeholder out of a refused upload and says why"
+- example: "Admin photo upload in the Markdown editor with a store uploads a dropped photo and puts its link at the cursor"
+- example: "Admin photo upload in the Markdown editor with a store uploads a pasted photo"
+- example: "Admin photo upload in the Markdown editor with a store uploads a photo picked from the toolbar"
+- example: "Admin photo upload in the Markdown editor without a store ignores a dropped photo"
+- example: "Admin photo upload in the Markdown editor without a store shows no upload control"

@@ -1,0 +1,8 @@
+- example: "API token scopes asks each operation for the scopes its row names"
+- example: "API token scopes gives a token minted with no scopes named every scope"
+- example: "API token scopes gives a token stored before scopes every scope"
+- example: "API token scopes lets a read token read"
+- example: "API token scopes lets a token with the scope through"
+- example: "API token scopes refuses a scope it does not know"
+- example: "API token scopes refuses an empty set of scopes"
+- example: "API token scopes says which scope the token lacks"

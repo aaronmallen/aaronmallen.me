@@ -1,0 +1,8 @@
+- example: "MCP connection tools list_api_tokens answers each live token's id, name and times, newest first"
+- example: "MCP connection tools list_api_tokens leaves out a revoked token"
+- example: "MCP connection tools list_api_tokens never sends a token or its digest"
+- example: "MCP connection tools list_clients answers each connected client's id, name, granted scopes and times"
+- example: "MCP connection tools list_clients leaves out a revoked client and one holding no live token"
+- example: "MCP connection tools list_clients marks the calling client as current, with the time it last used the server"
+- example: "MCP connection tools list_clients names a client with no registered name by its redirect host"
+- example: "MCP connection tools list_clients never sends a token or its digest"

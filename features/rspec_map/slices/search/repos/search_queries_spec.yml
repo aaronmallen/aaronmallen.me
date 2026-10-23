@@ -1,0 +1,7 @@
+- example: "Search::Repos::SearchQueries a contact finds a contact with no name by its company, titled by it"
+- example: "Search::Repos::SearchQueries a contact finds a named contact by its company, titled by its name"
+- example: "Search::Repos::SearchQueries a note finds a note by its body"
+- example: "Search::Repos::SearchQueries a note finds a note by its title"
+- example: "Search::Repos::SearchQueries the query plan reads each table's index"
+- example: "Search::Repos::SearchQueries#search pages the ranked records"
+- example: "Search::Repos::SearchQueries#search ranks each record once, headlined from its best match"

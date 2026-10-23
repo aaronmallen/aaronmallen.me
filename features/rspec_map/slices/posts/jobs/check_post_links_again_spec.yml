@@ -1,0 +1,5 @@
+- example: "Posts::Jobs::CheckPostLinksAgain checks every link in one post"
+- example: "Posts::Jobs::CheckPostLinksAgain checks nothing for a link the post no longer names"
+- example: "Posts::Jobs::CheckPostLinksAgain checks nothing in a draft"
+- example: "Posts::Jobs::CheckPostLinksAgain checks one link in a post"
+- example: "Posts::Jobs::CheckPostLinksAgain counts on from the nightly run"

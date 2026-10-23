@@ -1,0 +1,6 @@
+- example: "Admin bulk webmention actions on the spam list approves the ticked webmentions"
+- example: "Admin bulk webmention actions with scripts on approves the ticked webmentions and leaves the rest"
+- example: "Admin bulk webmention actions with scripts on hides the actions while nothing is ticked"
+- example: "Admin bulk webmention actions with scripts on ignores every webmention on the page with select all"
+- example: "Admin bulk webmention actions with scripts on marks the ticked webmentions as spam"
+- example: "Admin bulk webmention actions with scripts on shows the actions once a row is ticked"

@@ -1,0 +1,4 @@
+- example: "Social::Jobs::ReapWebmentionReceipts deletes a receipt older than the window"
+- example: "Social::Jobs::ReapWebmentionReceipts deletes only the receipts older than the window"
+- example: "Social::Jobs::ReapWebmentionReceipts keeps a receipt the window is about to let go of"
+- example: "Social::Jobs::ReapWebmentionReceipts still throttles a sender for the receipts inside the window"

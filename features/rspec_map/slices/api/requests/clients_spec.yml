@@ -1,0 +1,3 @@
+- example: "API MCP clients leaves out a revoked client and one holding no live token"
+- example: "API MCP clients lists each connected client with its name, granted scopes and times"
+- example: "API MCP clients names a client with no registered name by its redirect host"

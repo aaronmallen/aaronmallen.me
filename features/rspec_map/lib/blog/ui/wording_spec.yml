@@ -1,0 +1,6 @@
+- example: "Blog::UI::Wording answers an empty string when every part is blank"
+- example: "Blog::UI::Wording counts a value as written when it holds a character that is not space"
+- example: "Blog::UI::Wording counts nil, empty and blank values as not written"
+- example: "Blog::UI::Wording drops nil, empty and blank parts"
+- example: "Blog::UI::Wording joins the parts with a middle dot"
+- example: "Blog::UI::Wording shows a url without its scheme or trailing slash"

@@ -1,0 +1,8 @@
+- example: "Project keys falls back to PRJ for a name with no letters in it"
+- example: "Project keys gives each project a key in id order when its key is cleared, as the migration does"
+- example: "Project keys refuses \"1POD\""
+- example: "Project keys refuses \"P\""
+- example: "Project keys refuses \"POD-1\""
+- example: "Project keys refuses \"PODCAST\""
+- example: "Project keys refuses \"pod\""
+- example: "Project keys refuses a key another project holds"

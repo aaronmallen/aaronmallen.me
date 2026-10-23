@@ -1,0 +1,8 @@
+- example: "Admin tasks in progress signed in among many open tasks asks for the started ones by status, not every open task"
+- example: "Admin tasks in progress signed in with none in progress lists none"
+- example: "Admin tasks in progress signed in with tasks in progress answers with JSON"
+- example: "Admin tasks in progress signed in with tasks in progress falls back to complete for an act it does not know"
+- example: "Admin tasks in progress signed in with tasks in progress keeps the answer out of every cache"
+- example: "Admin tasks in progress signed in with tasks in progress lists each one by title, in list order, with the complete it posts to"
+- example: "Admin tasks in progress signed in with tasks in progress points each one at the pause it posts to when asked to pause"
+- example: "Admin tasks in progress signed out answers 401 rather than sending me to sign in"

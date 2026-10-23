@@ -1,0 +1,2 @@
+- example: "Notes::Operations::MoveNote moves a note into a folder and back to the top level"
+- example: "Notes::Operations::MoveNote refuses a folder that does not exist"

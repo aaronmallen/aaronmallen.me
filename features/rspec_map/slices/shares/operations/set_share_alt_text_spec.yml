@@ -1,0 +1,4 @@
+- example: "Shares::Operations::SetShareAltText answers not found for a missing share"
+- example: "Shares::Operations::SetShareAltText clears the alt text when blank"
+- example: "Shares::Operations::SetShareAltText refuses control characters"
+- example: "Shares::Operations::SetShareAltText sets the alt text, trimmed"

@@ -1,0 +1,2 @@
+- example: "Tasks::Operations::DeleteWorkSession two deletes of one session at once answers the second delete with not found"
+- example: "Tasks::Operations::DeleteWorkSession two deletes of one session at once takes the session's length off the total once"

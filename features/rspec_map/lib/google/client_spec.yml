@@ -1,0 +1,6 @@
+- example: "Google::Client joins the rows from every page and keeps the last page's fields"
+- example: "Google::Client keeps the token it stopped at when the cap cuts the walk short"
+- example: "Google::Client leaves no token when it read every page"
+- example: "Google::Client sends the token under the name the API takes"
+- example: "Google::Client stops at the page cap when Google keeps sending tokens"
+- example: "Google::Client stops when Google sends the same token again"

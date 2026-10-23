@@ -1,0 +1,2 @@
+- example: "GraphQL queries checks every GitHub query against the github schema"
+- example: "GraphQL queries checks every Linear query against the linear schema"

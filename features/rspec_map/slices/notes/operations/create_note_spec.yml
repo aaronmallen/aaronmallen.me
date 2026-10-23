@@ -1,0 +1,7 @@
+- example: "Notes::Operations::CreateNote names an untitled note Untitled, counting past the ones taken"
+- example: "Notes::Operations::CreateNote refuses a folder that does not exist"
+- example: "Notes::Operations::CreateNote refuses a title another note holds in any case"
+- example: "Notes::Operations::CreateNote stores the links its body names"
+- example: "Notes::Operations::CreateNote stores the title, body and folder"
+- example: "Notes::Operations::CreateNote takes private tags"
+- example: "Notes::Operations::CreateNote with the database alone refuses two notes whose titles differ only in case"

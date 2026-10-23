@@ -1,0 +1,3 @@
+- example: "Tasks::Relations::WorkSessions refuses a negative total on the task"
+- example: "Tasks::Relations::WorkSessions refuses a second open session on one task"
+- example: "Tasks::Relations::WorkSessions refuses a session that ends before it starts"

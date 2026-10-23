@@ -1,0 +1,3 @@
+- example: "Tasks::Repos::TaskSourceMutations each provider's sync lock lets GitHub sync while Linear holds its lock"
+- example: "Tasks::Repos::TaskSourceMutations each provider's sync lock lets Linear sync while GitHub holds its lock"
+- example: "Tasks::Repos::TaskSourceMutations each provider's sync lock turns away a second sync of the same provider"

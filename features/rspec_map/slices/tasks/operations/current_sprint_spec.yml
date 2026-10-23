@@ -1,0 +1,6 @@
+- example: "Tasks::Operations::CurrentSprint when today's sprint does not exist carries an unfinished task into it"
+- example: "Tasks::Operations::CurrentSprint when today's sprint does not exist creates it under the lock"
+- example: "Tasks::Operations::CurrentSprint when today's sprint exists and nothing waits behind it leaves a finished task behind"
+- example: "Tasks::Operations::CurrentSprint when today's sprint exists and nothing waits behind it returns it"
+- example: "Tasks::Operations::CurrentSprint when today's sprint exists and nothing waits behind it takes no lock and writes nothing"
+- example: "Tasks::Operations::CurrentSprint when today's sprint was claimed ahead and a task waits behind it carries the task in under the lock"

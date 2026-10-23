@@ -1,0 +1,6 @@
+- example: "Web manifest GET /site.webmanifest answers as a web manifest"
+- example: "Web manifest GET /site.webmanifest lets caches keep it for five minutes"
+- example: "Web manifest GET /site.webmanifest lists the 192px and 512px icons by their fingerprinted URLs"
+- example: "Web manifest answers a browser that accepts anything"
+- example: "Web manifest keeps shared caches from holding it while the owner is signed in"
+- example: "Web manifest names the site after the owner the settings give"

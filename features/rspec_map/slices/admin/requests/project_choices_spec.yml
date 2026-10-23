@@ -1,0 +1,3 @@
+- example: "Admin project choices answers 401 when signed out"
+- example: "Admin project choices signed in forbids caching the list"
+- example: "Admin project choices signed in lists the live projects by name"

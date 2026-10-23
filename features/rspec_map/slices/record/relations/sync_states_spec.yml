@@ -1,0 +1,2 @@
+- example: "Record::Relations::SyncStates keeps the sync name's Ruby twin in the enum's order"
+- example: "Record::Relations::SyncStates keeps the sync state kind's Ruby twin in the enum's order"

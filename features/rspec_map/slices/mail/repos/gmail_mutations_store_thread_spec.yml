@@ -1,0 +1,6 @@
+- example: "Mail::Repos::GmailMutations#store_thread adds a message that arrived"
+- example: "Mail::Repos::GmailMutations#store_thread leaves every row alone when the thread has not changed"
+- example: "Mail::Repos::GmailMutations#store_thread replaces a label that changed"
+- example: "Mail::Repos::GmailMutations#store_thread replaces only the attachments that changed"
+- example: "Mail::Repos::GmailMutations#store_thread updates only the message that changed"
+- example: "Mail::Repos::GmailMutations#store_thread updates the thread when a flag changes"

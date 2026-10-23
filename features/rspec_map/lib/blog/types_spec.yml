@@ -1,0 +1,5 @@
+- example: "Blog::Types Checkbox reads JSON true and a ticked form box as true, and anything else as false"
+- example: "Blog::Types TagField writes an empty field for no tags"
+- example: "Blog::Types TagField writes names and tag structs as the field TagList reads back"
+- example: "Blog::Types TagList splits a form field and reads nothing as no tags"
+- example: "Blog::Types TagList takes an array as given, without splitting a name on commas"

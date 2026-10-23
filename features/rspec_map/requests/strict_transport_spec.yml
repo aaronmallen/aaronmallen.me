@@ -1,0 +1,5 @@
+- example: "Strict transport when the site runs in development leaves the header off"
+- example: "Strict transport when the site runs in production tells the browser on a request the site refuses"
+- example: "Strict transport when the site runs in production tells the browser on a static file"
+- example: "Strict transport when the site runs in production tells the browser on the MCP server"
+- example: "Strict transport when the site runs in production tells the browser to keep to HTTPS for a year on a page"

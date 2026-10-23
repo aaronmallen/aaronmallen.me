@@ -1,0 +1,7 @@
+- example: "The public header draws the theme a reader saved in the cookie past the content security policy"
+- example: "The public header fills the current page's pill and no other"
+- example: "The public header flips the theme from the toggle"
+- example: "The public header on a phone gives every control a 44px target"
+- example: "The public header on a phone wraps the pills to a full-width row"
+- example: "The public header shows no menu toggle"
+- example: "The public header shows one theme icon at a time"

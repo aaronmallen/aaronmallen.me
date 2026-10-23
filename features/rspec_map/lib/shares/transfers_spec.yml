@@ -1,0 +1,5 @@
+- example: "Shares::Transfers frees a place when the body closes"
+- example: "Shares::Transfers frees a place when the response raises"
+- example: "Shares::Transfers keeps one place when the threads leave none"
+- example: "Shares::Transfers leaves two threads free when unset"
+- example: "Shares::Transfers takes the setting when set"

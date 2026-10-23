@@ -1,0 +1,3 @@
+- example: "Analytics::Repos::AnalyticsRollupQueries counts a reader once a day but again the next day"
+- example: "Analytics::Repos::AnalyticsRollupQueries counts nothing for a day rolled up before the site counted read-throughs"
+- example: "Analytics::Repos::AnalyticsRollupQueries keeps the count once the prune takes the day's events"

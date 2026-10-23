@@ -1,0 +1,4 @@
+- example: "Robots answers a crawler that takes anything"
+- example: "Robots answers as plain text"
+- example: "Robots keeps every crawler off the private paths and allows the rest"
+- example: "Robots names the sitemap"

@@ -1,0 +1,7 @@
+- example: "Mail::Jobs::ReapSpamMessages counts from the mark, not from when the message arrived"
+- example: "Mail::Jobs::ReapSpamMessages deletes a message marked spam more than 30 days ago"
+- example: "Mail::Jobs::ReapSpamMessages deletes only the spam marked more than 30 days ago"
+- example: "Mail::Jobs::ReapSpamMessages keeps a message marked spam inside 30 days"
+- example: "Mail::Jobs::ReapSpamMessages keeps a message moved back out of spam"
+- example: "Mail::Jobs::ReapSpamMessages keeps the first mark when a spam message is marked spam again"
+- example: "Mail::Jobs::ReapSpamMessages keeps unread and read messages whatever their age"

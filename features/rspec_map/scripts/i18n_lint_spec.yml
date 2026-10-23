@@ -1,0 +1,3 @@
+- example: "mise run lint:i18n fails on a key no code reads"
+- example: "mise run lint:i18n passes a key the allowed list names"
+- example: "mise run lint:i18n passes when code reads every key, a subclass's relative keys and prefixes among them"

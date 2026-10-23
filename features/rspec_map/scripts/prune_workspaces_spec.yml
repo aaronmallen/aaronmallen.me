@@ -1,0 +1,1 @@
+- example: "mise run dev:prune-workspaces drops and lists the test databases of workspaces with no directory"

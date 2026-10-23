@@ -1,0 +1,4 @@
+- example: "Admin analytics chart choosing a longer range draws a bar for every day in it"
+- example: "Admin analytics chart choosing a longer range submits the range"
+- example: "Admin analytics chart hides every tooltip until a bar is hovered"
+- example: "Admin analytics chart hovering a bar shows that day's figures"

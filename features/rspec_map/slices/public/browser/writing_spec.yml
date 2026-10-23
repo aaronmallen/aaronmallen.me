@@ -1,0 +1,4 @@
+- example: "Writing list links nothing in the row but the title"
+- example: "Writing list reads the date, the tag and the reading time down the meta column"
+- example: "Writing list sets the meta column beside the title on a list 720px wide"
+- example: "Writing list stacks the meta over the title on a narrower list, whatever the window"

@@ -1,0 +1,3 @@
+- example: "Notes::Operations::CreateNoteFolder nests a described folder that holds no notes"
+- example: "Notes::Operations::CreateNoteFolder refuses a blank name"
+- example: "Notes::Operations::CreateNoteFolder refuses a parent that does not exist"

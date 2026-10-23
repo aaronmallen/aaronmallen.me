@@ -1,0 +1,4 @@
+- example: "SavedViews::Relations::SavedViews keeps the screen's Ruby twin in the enum's order"
+- example: "SavedViews::Relations::SavedViews refuses a blank name"
+- example: "SavedViews::Relations::SavedViews refuses a long name"
+- example: "SavedViews::Relations::SavedViews refuses filters that are not an object"

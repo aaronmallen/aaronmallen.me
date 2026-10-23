@@ -1,0 +1,4 @@
+- example: "MCP health days a client with only read gets no health data"
+- example: "MCP health days reads a range of 366 days"
+- example: "MCP health days reads the day rows, workouts and patterns for a client with health"
+- example: "MCP health days refuses a range longer than 366 days"

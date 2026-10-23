@@ -1,0 +1,8 @@
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days counts publish day as day one in Chicago time"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days gives no median with no posts"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median counts a newer post nobody read as zeros"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median leaves out a post published before the first rolled up day"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median leaves out a post published before the oldest raw event"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median leaves out drafts"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median reaches as far as the oldest post"
+- example: "Analytics::Repos::AnalyticsPageQueries#first_days the median takes the middle count of every post old enough for each day"

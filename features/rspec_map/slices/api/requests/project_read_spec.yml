@@ -1,0 +1,3 @@
+- example: "API reading a project GET /api/v1/projects/:id answers the project with its stamps"
+- example: "API reading a project GET /api/v1/projects/:id answers the records linked to the project, grouped by kind"
+- example: "API reading a project GET /api/v1/projects/:id answers the same JSON as read_project"

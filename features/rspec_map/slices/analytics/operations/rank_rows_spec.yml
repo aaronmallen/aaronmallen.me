@@ -1,0 +1,8 @@
+- example: "Analytics::Operations::RankRows keeps an unknown figure unknown and ranks it last"
+- example: "Analytics::Operations::RankRows merges on every column of a compound key"
+- example: "Analytics::Operations::RankRows names a merged row after its last named row"
+- example: "Analytics::Operations::RankRows ranks a missing key as an empty name"
+- example: "Analytics::Operations::RankRows ranks by most visitors, then most views, then key"
+- example: "Analytics::Operations::RankRows ranks by the figure it is given"
+- example: "Analytics::Operations::RankRows sums only the figures it is given"
+- example: "Analytics::Operations::RankRows sums the figures of every row that shares a key"

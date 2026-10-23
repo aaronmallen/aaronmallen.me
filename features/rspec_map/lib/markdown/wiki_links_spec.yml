@@ -1,0 +1,7 @@
+- example: "Markdown::WikiLinks.link keeps what the title holds inside the attribute and the text"
+- example: "Markdown::WikiLinks.link leaves links inside code alone"
+- example: "Markdown::WikiLinks.link swaps each link for the element the block names, with the link text inside"
+- example: "Markdown::WikiLinks.plain keeps each link's text and drops the Markdown marks around it"
+- example: "Markdown::WikiLinks.rewrite renames every link to the old title, whatever its case, and keeps the link text"
+- example: "Markdown::WikiLinks.titles reads each title once, trimmed, in the order written, whatever its case"
+- example: "Markdown::WikiLinks.titles skips a blank link and one split across lines"

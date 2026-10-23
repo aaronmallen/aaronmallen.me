@@ -1,0 +1,5 @@
+- example: "Shares::Operations::BackfillPreviews leaves an image libvips cannot read as it was"
+- example: "Shares::Operations::BackfillPreviews leaves an image the store cannot return for the next run"
+- example: "Shares::Operations::BackfillPreviews skips a file that is not an image"
+- example: "Shares::Operations::BackfillPreviews stores a preview for an older image and saves its key on the row"
+- example: "Shares::Operations::BackfillPreviews stores nothing new the second time"

@@ -1,0 +1,3 @@
+- example: "MCP authorization approves by keyboard alone, behind a focus ring"
+- example: "MCP authorization lands on the redirect URI once I approve"
+- example: "MCP authorization refuses by keyboard alone, behind a focus ring"

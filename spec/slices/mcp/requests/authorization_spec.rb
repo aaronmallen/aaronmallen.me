@@ -813,7 +813,7 @@ RSpec.describe "OAuth authorization", type: :request do
   end
 
   describe "a client_id that is not a UUID" do
-    ["\0", "not-a-uuid", "#{SecureRandom.uuid}\n"].each do |client_id|
+    ["\0", "not-a-uuid", "3198302d-9a26-4284-8a65-69a01897c10e\n"].each do |client_id|
       context "when #{client_id.inspect} comes in while I am signed out" do
         before { authorize(client_id:) }
 

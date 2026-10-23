@@ -1,0 +1,4 @@
+- example: "API reach exempts no operation an endpoint reaches"
+- example: "API reach exempts only journal, saved view and task operations"
+- example: "API reach gives every exempt operation a reason"
+- example: "API reach reaches every journal, saved view and task operation from an endpoint unless the operation is exempt"

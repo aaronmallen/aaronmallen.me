@@ -1,0 +1,4 @@
+- example: "MCP reach exempts no operation a tool reaches"
+- example: "MCP reach exempts only operations a slice holds"
+- example: "MCP reach gives every exempt operation a reason"
+- example: "MCP reach reaches every operation from a tool unless the operation is exempt"

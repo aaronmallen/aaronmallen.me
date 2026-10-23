@@ -1,0 +1,2 @@
+- example: "Notes::Operations::RenameNoteFolder answers not found for a folder that does not exist"
+- example: "Notes::Operations::RenameNoteFolder changes the name"

@@ -1,0 +1,4 @@
+- example: "Admin broken links queues a post link check and stays on the list"
+- example: "Admin broken links queues a short link check"
+- example: "Admin broken links updates the post row when a check lands"
+- example: "Admin broken links updates the short links card when a check lands"
