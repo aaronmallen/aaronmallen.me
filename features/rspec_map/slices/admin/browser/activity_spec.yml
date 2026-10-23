@@ -1,1 +1,2 @@
 - example: "Admin activity opens a comment's task in the panel over Activity"
+  scenario: "admin/activity_browser.feature: The activity opens a comment's task in the panel over Activity"

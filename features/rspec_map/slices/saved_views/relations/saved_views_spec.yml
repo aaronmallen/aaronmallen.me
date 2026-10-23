@@ -1,4 +1,8 @@
 - example: "SavedViews::Relations::SavedViews keeps the screen's Ruby twin in the enum's order"
+  drop: "Compares the Postgres saved_view_screen enum with the Ruby type Blog::Types::SavedViewScreen; a step cannot load Ruby. api/saved_views.feature: The list keeps every filter a <screen> view reads checks each of the four screens end to end"
 - example: "SavedViews::Relations::SavedViews refuses a blank name"
+  scenario: "api/saved_views.feature: The database refuses a blank name, a long name and filters that are not an object"
 - example: "SavedViews::Relations::SavedViews refuses a long name"
+  scenario: "api/saved_views.feature: The database refuses a blank name, a long name and filters that are not an object"
 - example: "SavedViews::Relations::SavedViews refuses filters that are not an object"
+  scenario: "api/saved_views.feature: The database refuses a blank name, a long name and filters that are not an object"

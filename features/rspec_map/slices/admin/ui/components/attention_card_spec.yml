@@ -1,1 +1,2 @@
 - example: "Admin::UI::Components::AttentionCard names a renderer for every attention kind"
+  scenario: "admin/attention.feature: The card draws a row for every kind of stalled work"

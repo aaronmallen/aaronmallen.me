@@ -447,3 +447,17 @@ Then("Tab from {string} reaches:", async ({ page }, selector: string, table: Dat
   }
   expect(reached).toEqual(table.raw().map(([id]) => id));
 });
+
+When("I click the link {string}", async ({ page }, name: string) => {
+  await page.getByRole("link", { exact: true, name }).click();
+});
+
+Then("I see the heading {string}", async ({ page }, name: string) => {
+  await expect(page.getByRole("heading", { name })).toBeVisible();
+});
+
+Then("visiting {string} answers {int}", async ({ page }, path: string, status: number) => {
+  const response = await page.goto(path);
+
+  expect(response?.status()).toBe(status);
+});

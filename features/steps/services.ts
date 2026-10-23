@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { defineParameterType } from "playwright-bdd";
+import { type DataTable, defineParameterType } from "playwright-bdd";
 import { services } from "../support/stub.ts";
 import { Given, Then, When } from "../support/world.ts";
 
@@ -46,6 +46,20 @@ Given(
 Given("{service} never answers {word} {string}", ({ stub }, prefix: string, method: string, path: string) => {
   stub.reply(method, `${prefix}${path}`, { body: "", delay: 600_000, status: 200 });
 });
+
+Given(
+  "{service} answers {word} {string} next with:",
+  ({ stub }, prefix: string, method: string, path: string, body: string) => {
+    stub.replyThen(method, `${prefix}${path}`, { body, status: 200 });
+  },
+);
+
+Given(
+  "{service} answers {word} {string} with status {int} and the headers:",
+  ({ stub }, prefix: string, method: string, path: string, status: number, table: DataTable) => {
+    stub.reply(method, `${prefix}${path}`, { body: "", headers: Object.fromEntries(table.raw()), status });
+  },
+);
 
 When("I connect Mastodon on {string}", async ({ page }, server: string) => {
   await page.goto("/admin/settings/services");

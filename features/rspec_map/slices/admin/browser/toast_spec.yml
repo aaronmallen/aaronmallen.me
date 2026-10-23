@@ -1,2 +1,4 @@
 - example: "Admin toast shows the toast after the redirect"
+  scenario: "admin/toast.feature: Saving a draft shows the toast once on the next page"
 - example: "Admin toast takes the toast away after it has shown"
+  scenario: "admin/toast.feature: The toast goes away after it has shown"

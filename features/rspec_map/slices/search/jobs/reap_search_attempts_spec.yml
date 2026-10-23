@@ -1,2 +1,4 @@
 - example: "Search::Jobs::ReapSearchAttempts deletes an attempt older than the window"
+  scenario: "search/reap_search_attempts.feature: The job deletes an attempt older than the window and keeps the ones inside it"
 - example: "Search::Jobs::ReapSearchAttempts keeps the attempts inside the window"
+  scenario: "search/reap_search_attempts.feature: The job deletes an attempt older than the window and keeps the ones inside it"

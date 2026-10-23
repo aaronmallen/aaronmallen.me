@@ -1,4 +1,8 @@
 - example: "Admin menus for the remaining rows with actions a task comment opens its edit form in place from Edit"
+  scenario: "admin/row_menus.feature: A task comment's menu opens its edit form in place from Edit"
 - example: "Admin menus for the remaining rows with actions a token revokes it in place on the second click"
+  scenario: "admin/row_menus.feature: A token's menu revokes it in place on the second click"
 - example: "Admin menus for the remaining rows with actions opens a menu on a row that is itself a link"
+  scenario: "admin/row_menus.feature: A menu opens on a row that is itself a link"
 - example: "Admin menus for the remaining rows with actions opens a task rule's editor from Edit"
+  scenario: "admin/row_menus.feature: A task rule's menu opens its editor from Edit"
