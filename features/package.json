@@ -1,0 +1,12 @@
+{
+  "name": "features",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@axe-core/playwright": "catalog:",
+    "@playwright/test": "catalog:",
+    "playwright-bdd": "catalog:",
+    "postgres": "catalog:",
+    "redis": "catalog:"
+  }
+}

@@ -3,4 +3,4 @@
 
 set -e
 
-exec biome check --config-path .config "$@" app/assets/js config/assets.js
+exec biome check --config-path .config "$@" app/assets/js config/assets.js features/playwright.config.ts features/steps features/support

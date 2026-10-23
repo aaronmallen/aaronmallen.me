@@ -119,6 +119,39 @@ jobs:
           name: coverage-browser
           path: coverage/.resultset.json
 
+  features:
+    name: Features
+    runs-on: ubuntu-latest
+    services: *services
+    steps:
+      - *checkout
+      - *install-tools
+      - *restore-gems
+      - *install-dependencies
+      - *install-postgres-client
+
+      - name: Restore the Playwright browser
+        uses: actions/cache@v6
+        with:
+          key: playwright-${{ runner.os }}-${{ hashFiles('aube-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+          restore-keys: playwright-${{ runner.os }}-
+
+      - name: Install the Playwright browser
+        run: aube --dir features exec playwright install --with-deps chromium
+
+      - name: Test
+        run: mise run test:features
+
+      - name: Keep the failure traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: features-results
+          path: |
+            features/test-results
+            tmp/features-*.log
+
   coverage:
     name: Coverage
     needs:

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#MISE description="Run the Gherkin features, each Playwright worker on its own server, Sidekiq, database and Redis"
+#MISE alias=["t:f", "test:f"]
+#USAGE arg "[filter]..." var=#true help="Feature files or Playwright options, such as --workers 2."
+
+set -e
+
+scripts/assets/build
+aube --dir features exec bddgen
+exec scripts/util/ensure_postgres aube --dir features exec playwright test "$@"

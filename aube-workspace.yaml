@@ -1,0 +1,9 @@
+packages:
+  - features
+
+catalog:
+  "@axe-core/playwright": ^4.14.0
+  "@playwright/test": ^1.64.1
+  playwright-bdd: ^9.2.1
+  postgres: ^3.4.9
+  redis: ^6.3.0

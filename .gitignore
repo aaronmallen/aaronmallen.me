@@ -12,3 +12,6 @@ public/*
 !public/503.html
 !public/favicon.ico
 tmp
+features/.features-gen
+features/playwright-report
+features/test-results
