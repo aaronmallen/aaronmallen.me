@@ -1,2 +1,4 @@
 - example: "Services::Operations::SaveApp keeps one app when another connect saves the same server first"
+  drop: "Needs two database transactions racing on the same row, which no black-box step can time"
 - example: "Services::Operations::SaveApp replaces the app it already holds for the server"
+  scenario: "connections/mastodon.feature: Connecting registers the site again when the app it holds asked for other scopes"

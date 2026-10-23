@@ -43,3 +43,18 @@ When("the browser asks for {string}", async ({ page }, url: string) => {
 Then("I see {string}", async ({ page }, text: string) => {
   await expect(page.getByText(text)).toBeVisible();
 });
+
+Then("{service} received {word} {string}", async ({ stub }, prefix: string, method: string, path: string) => {
+  await expect.poll(() => stub.received(method, `${prefix}${path}`).length).toBeGreaterThan(0);
+});
+
+Then("{service} received no {word} {string}", ({ stub }, prefix: string, method: string, path: string) => {
+  expect(stub.received(method, `${prefix}${path}`)).toEqual([]);
+});
+
+Then(
+  "{service} received {word} {string} holding {string}",
+  async ({ stub }, prefix: string, method: string, path: string, text: string) => {
+    await expect.poll(() => stub.received(method, `${prefix}${path}`).some((body) => body.includes(text))).toBe(true);
+  },
+);

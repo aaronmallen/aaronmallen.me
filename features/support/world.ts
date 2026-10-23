@@ -53,7 +53,13 @@ async function stop(child: ChildProcess) {
 }
 
 export const test = base.extend<
-  { reset: undefined; shell: Shell; stub: Stub; tokens: { api?: string; mcp?: string } },
+  {
+    answer: { body: string; status: number };
+    reset: undefined;
+    shell: Shell;
+    stub: Stub;
+    tokens: { api?: string; mcp?: string };
+  },
   { app: App; owner: Owner }
 >({
   app: [
@@ -180,6 +186,7 @@ export const test = base.extend<
     },
     { scope: "worker" },
   ],
+  answer: async ({}, use) => use({ body: "", status: 0 }),
   baseURL: async ({ app }, use) => use(app.url),
   reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
   shell: async ({ app }, use) => {
@@ -208,4 +215,4 @@ export const test = base.extend<
   tokens: async ({}, use) => use({}),
 });
 
-export const { Given, When, Then } = createBdd(test);
+export const { After, Before, Given, When, Then } = createBdd(test);

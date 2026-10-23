@@ -1,1 +1,2 @@
 - example: "Mail::Relations::MailThreads names a scope for every mail folder"
+  drop: "Compares a Ruby constant with a type's values; the admin mail scenarios open every folder"

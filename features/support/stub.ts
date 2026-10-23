@@ -50,12 +50,15 @@ const signIn: Record<string, Route> = {
 export async function startStub() {
   const replies = new Map<string, Reply>();
   const misses: string[] = [];
+  const received: { body: string; key: string }[] = [];
 
   const server = createServer((request, response) => {
     const absolute = /^https?:\/\//.test(request.url ?? "");
     const url = new URL(request.url ?? "/", "http://stub");
     const key = `${request.method} ${absolute ? url.origin : ""}${url.pathname}`;
-    request.resume();
+    const chunks: Buffer[] = [];
+    request.on("data", (chunk) => chunks.push(chunk));
+    request.on("end", () => received.push({ body: Buffer.concat(chunks).toString(), key }));
 
     const reply = replies.get(key);
     if (reply) {
@@ -76,10 +79,13 @@ export async function startStub() {
 
   return {
     misses: () => misses.splice(0),
+    received: (method: string, path: string) =>
+      received.filter(({ key }) => key === `${method} ${path}`).map(({ body }) => body),
     reply: (method: string, path: string, reply: Reply) => replies.set(`${method} ${path}`, reply),
     reset: () => {
       replies.clear();
       misses.length = 0;
+      received.length = 0;
     },
     stop: () => new Promise((closed) => server.close(closed)),
     url: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,

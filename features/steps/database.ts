@@ -144,10 +144,6 @@ Then("the home page answers {int}", async ({ page }, status: number) => {
   expect(response?.status()).toBe(status);
 });
 
-When("I visit {string}", async ({ page }, path: string) => {
-  await page.goto(path);
-});
-
 Then("the database soon answers {string} for:", async ({ app }, answer: string, query: string) => {
   await expect
     .poll(async () => (await app.sql.unsafe(query)).map((row) => Object.values(row).join(" ")).join("\n"))

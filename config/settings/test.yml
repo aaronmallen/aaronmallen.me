@@ -24,8 +24,8 @@ github:
 google:
   accounts_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/accounts".to_json %>
   calendar_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/calendar".to_json %>
-  client_id: null
-  client_secret: null
+  client_id: <%= (ENV["STUB_URL"] && "stub-google-id").to_json %>
+  client_secret: <%= (ENV["STUB_URL"] && "stub-google-secret").to_json %>
   gmail_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/gmail".to_json %>
   health_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/health".to_json %>
   oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/oauth".to_json %>
@@ -40,8 +40,8 @@ linear:
   api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linear".to_json %>
 linkedin:
   api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linkedin/api".to_json %>
-  client_id: null
-  client_secret: null
+  client_id: <%= (ENV["STUB_URL"] && "stub-linkedin-id").to_json %>
+  client_secret: <%= (ENV["STUB_URL"] && "stub-linkedin-secret").to_json %>
   oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linkedin/oauth".to_json %>
   profile_url: null
 mastodon:

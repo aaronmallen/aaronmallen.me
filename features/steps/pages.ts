@@ -23,3 +23,19 @@ Then("the page has no axe breaches in light or dark", async ({ page }) => {
     ).toEqual([]);
   }
 });
+
+When("I visit {string}", async ({ page }, path: string) => {
+  await page.goto(path);
+});
+
+When("I click {string}", async ({ page }, name: string) => {
+  await page.getByRole("button", { name }).or(page.getByRole("link", { name })).first().click();
+});
+
+When("I fill in {string} with {string}", async ({ page }, label: string, value: string) => {
+  await page.getByLabel(label).fill(value);
+});
+
+Then("I do not see {string}", async ({ page }, text: string) => {
+  await expect(page.getByText(text)).toHaveCount(0);
+});
