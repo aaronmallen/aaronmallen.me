@@ -8,9 +8,10 @@ module MCP
                   "entries and decisions have the private one, with a page of each kind. Drafts, archived " \
                   "projects and closed tasks come too, each with its status. Rows are short: read_task and the " \
                   "other read tools give the whole record. Each kind pages on its own: when one comes back " \
-                  "partial, send its kind and its next_page as page for the rest. A name neither scope holds " \
-                  "is refused. Each synced task's title may come from an issue tracker and comes marked untrusted. " \
-                  "#{Untrusted::WARNING}"
+                  "partial, send its kind and its next_page as page for the rest. Give a project's key in project " \
+                  "to read that project's own tag of the name instead, with what carries it but no projects. A " \
+                  "name neither scope holds, or the project lacks, is refused. Each synced task's title may come " \
+                  "from an issue tracker and comes marked untrusted. #{Untrusted::WARNING}"
       endpoint
     end
   end

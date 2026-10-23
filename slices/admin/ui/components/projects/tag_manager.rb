@@ -85,7 +85,7 @@ module Admin
           def summary_of(tag)
             div(class: "project-tags-body") do
               p(class: "project-tags-name") do
-                Tag(tag:, link: false)
+                Tag(tag:, project_key: @project.key)
                 span(class: "meta") { t(".uses", count: uses(tag)) }
               end
               p(class: ["project-tags-description", ("dim" unless tag.description)]) do

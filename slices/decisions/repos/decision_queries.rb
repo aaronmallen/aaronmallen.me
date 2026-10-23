@@ -32,7 +32,9 @@ module Decisions
         page.fill(decisions.combine(:comments, :options, :tags).with_status(status).newest_first.paged(page).to_a)
       end
 
-      def page_by_tag(tag, page) = page.fill(decisions.tagged(tag).newest_first.paged(page).to_a)
+      def page_by_tag(tag_ids, page)
+        page.fill(decisions.carrying(:decision_tags, tag_ids).newest_first.paged(page).to_a)
+      end
 
       def photo_texts(decision_id)
         [*decisions.by_pk(decision_id).pluck(:problem),

@@ -3,12 +3,15 @@
 module API
   module Serializers
     class TagOverview < Serializer
+      PROJECT = Blog::Types::TagScope["project"]
       SCOPES = Blog::Types::GlobalTagScope.values
 
       DESCRIPTION = Helpers::Schema.nullable(Helpers::Schema::STRING)
-      DESCRIPTIONS = Helpers::Schema.object(SCOPES.to_h { [it.to_sym, DESCRIPTION] })
-                                    .merge(description: "each scope's markdown description of the tag, or null")
-                                    .freeze
+      DESCRIPTIONS = Helpers::Schema.object(
+        Blog::Constants::EMPTY_HASH, optional: Blog::Types::TagScope.values.to_h { [it.to_sym, DESCRIPTION] },
+      ).merge(
+        description: "each scope's markdown description of the tag, or null; a project tag has only project",
+      ).freeze
 
       ROWS = {
         posts: Post.reference,
@@ -58,7 +61,12 @@ module API
 
       def decisions(overview) = paged(overview, :decisions) { { id: it.id, title: it.title, status: it.status } }
 
-      def descriptions(overview) = SCOPES.to_h { [it, overview.tag(it)&.description] }
+      def descriptions(overview)
+        project_tag = overview.tag(PROJECT)
+        return { PROJECT => project_tag.description } if project_tag
+
+        SCOPES.to_h { [it, overview.tag(it)&.description] }
+      end
 
       def journal_entries(overview)
         paged(overview, :journal_entries) { { id: it.id, date: day(it.entry_date), opening: it.body } }

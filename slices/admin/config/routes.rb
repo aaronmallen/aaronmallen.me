@@ -16,6 +16,7 @@ module Admin
     OAUTH_SERVICE = /github|google|linkedin|mastodon/
     SIGN_IN_PROVIDER = /github|google/
     PART = /[\d.]+/
+    PROJECT_KEY = /[A-Za-z][A-Za-z0-9]*/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
     SERVICE_KEY = /[a-z0-9_]+/
@@ -254,6 +255,7 @@ module Admin
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID
     post "/projects/:id/tags/delete", to: "projects.untag", as: :untag_project, id: ID
+    get "/projects/:key/tags/:name", to: "projects.show_tag", as: :project_tag, key: PROJECT_KEY, name: TAG
     post "/projects/:id/tasks/bulk", to: "projects.bulk", as: :bulk_project_tasks, id: ID
     post "/projects/:id/tasks/:task_id/move", to: "projects.move_task", as: :move_project_task, id: ID, task_id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry

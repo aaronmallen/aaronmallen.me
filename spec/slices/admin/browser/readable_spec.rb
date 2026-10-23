@@ -250,6 +250,7 @@ RSpec.describe "Admin screens", type: :feature do
       "project board as a board" => "/admin/projects/#{project.id}?view=board",
       "project board as a list" => "/admin/projects/#{project.id}?view=list",
       "project editor" => "/admin/projects/#{project.id}/edit",
+      "project tag summary" => "/admin/projects/TAG/tags/bug",
       "projects" => "/admin/projects",
       "review" => "/admin/review",
       "review month" => "/admin/review?period=month",
@@ -504,6 +505,11 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def seed_project_tag
+    tag = create(:tag, name: "bug", scope: "project", project_id: create(:project, name: "tagged", key: "TAG").id)
+    Tasks::Slice["relations.task_tags"].dataset.insert(task_id: task.id, tag_id: tag.id, tag_scope: "project")
+  end
+
   def seed_saved_views
     create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
     create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
@@ -533,6 +539,7 @@ RSpec.describe "Admin screens", type: :feature do
     create(:tag, :private, name: "site", color: "mk-blue")
     task
     seed_wrapped_task
+    seed_project_tag
     create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
     running = create(:task, :in_progress, title: "Ship the phone layout")
     create(:task_link, from_task_id: task.id, to_task_id: running.id)

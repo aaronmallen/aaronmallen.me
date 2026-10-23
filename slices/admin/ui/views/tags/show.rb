@@ -10,6 +10,7 @@ module Admin
             projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
           ].freeze
           PRIVATE = Blog::Types::TagScope["private"]
+          PROJECT = Blog::Types::TagScope["project"]
           PUBLIC = Blog::Types::TagScope["public"]
           PUBLISHED = Blog::Types::PostStatus["published"]
 
@@ -24,6 +25,7 @@ module Admin
 
           prop :overview, Blog::Types::Instance(::Tags::Structs::Overview)
           prop :kind, Blog::Types::TagKind.optional
+          prop :project, Blog::Types::Instance(ROM::Struct).optional, default: nil
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -39,16 +41,17 @@ module Admin
 
           def all_link(kind)
             div(class: "review-foot") do
-              a(class: "today-link", href: path(:admin_tag, name:, kind:)) do
+              a(class: "today-link", href: path(route, **params(kind))) do
                 t(".all", count: @overview.counts.fetch(kind))
               end
             end
           end
 
           def back
-            return BackLink(href: tags_path) { t(".back") } unless @kind
+            return BackLink(href: path(route, **params)) { heading } if @kind
+            return BackLink(href: path(:admin_project, id: @project.id)) { @project.name } if @project
 
-            BackLink(href: path(:admin_tag, name:)) { heading }
+            BackLink(href: tags_path) { t(".back") }
           end
 
           def decision(decision)
@@ -61,8 +64,8 @@ module Admin
             records = @overview.pages.fetch(kind)
             return if records.rows.empty?
 
-            Card(label: t(SCOPES.fetch(scope)), title: t(title), data: { key_list: true }) do |card|
-              card.side { Tag(tag: @overview.tag(scope)) }
+            Card(label: label(scope), title: t(title), data: { key_list: true }) do |card|
+              card.side { side_tag(scope) }
               records.rows.each { send(row, it) }
               all_link(kind) if records.more && !@kind
             end
@@ -70,7 +73,7 @@ module Admin
 
           def groups
             KINDS.slice(*@overview.pages.keys).each { |kind, (scope, row, title)| group(kind, scope, row, title) }
-            Pager(page: @overview.pages.values.first, route: :admin_tag, params: { name:, kind: @kind }) if @kind
+            Pager(page: @overview.pages.values.first, route:, params: params(@kind)) if @kind
           end
 
           def heading = Components::Tag::PREFIX + name
@@ -90,7 +93,11 @@ module Admin
             Helpers::Short.title(line.to_s)
           end
 
+          def label(scope) = @project ? @project.name : t(SCOPES.fetch(scope))
+
           def name = @overview.name
+
+          def params(kind = nil) = { key: @project&.key, name:, kind: }.compact
 
           def post(post)
             ListItem(title: post.title, href: path(:admin_edit_post, id: post.id)) do |item|
@@ -104,6 +111,10 @@ module Admin
               StatusPill(status: project.archived? ? :archived : :active)
             end
           end
+
+          def route = @project ? :admin_project_tag : :admin_tag
+
+          def side_tag(scope) = Tag(tag: @overview.tag(@project ? PROJECT : scope), project_key: @project&.key)
 
           def tags_path = "#{path(:admin_settings_tagging)}##{Helpers::TagList::TAGS}"
 

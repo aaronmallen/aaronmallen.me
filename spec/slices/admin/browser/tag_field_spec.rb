@@ -98,6 +98,8 @@ RSpec.describe "Admin tag field", type: :feature do
     let(:first_page) { Blog::Structs::Page.new(number: 1, size: 10) }
     let(:tasks) { Tasks::Slice["repos.task_queries"] }
 
+    def chores = Tags::Slice["repos.tag_queries"].named_in("private", "chores")
+
     def open_drawer_editor(task)
       visit "/admin/tasks?filter=next"
       find(".task-title", text: task.title).click
@@ -133,7 +135,7 @@ RSpec.describe "Admin tag field", type: :feature do
         modal.click_button "Create task"
         page.assert_selector(".task-title", text: "Sweep the porch")
 
-        expect(tasks.page_by_tag("chores", first_page).rows.map(&:title)).to eq(["Sweep the porch"])
+        expect(tasks.page_by_tag([chores.id], first_page).rows.map(&:title)).to eq(["Sweep the porch"])
       end
     end
 

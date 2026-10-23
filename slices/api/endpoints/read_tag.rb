@@ -6,7 +6,11 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          name: { type: "string", description: "the tag's name, in either scope" },
+          name: { type: "string", description: "the tag's name, in either scope or in the project" },
+          project: {
+            type: "string",
+            description: "the key of the project whose own tag to read, as POD; none for a public or private tag",
+          },
           kind: {
             type: "string",
             enum: Blog::Types::TagKind.values,
@@ -19,10 +23,13 @@ module API
 
       REPLY = Serializers::TagOverview::SCHEMA
 
-      include Deps[tag_queries: "tags.repos.tag_queries"]
+      include Deps[project_queries: "projects.repos.project_queries", tag_queries: "tags.repos.tag_queries"]
 
-      def handle(name:, kind: nil, page: 1)
-        overview = tag_queries.overview(name.strip.downcase, page_of(page), kind:)
+      def handle(name:, kind: nil, page: 1, project: nil)
+        project_id = project_queries.id_by_key(project.strip) if project
+        return missing("project", project, by: "key") if project && !project_id
+
+        overview = tag_queries.overview(name.strip.downcase, page_of(page), kind:, project_id:)
         return missing("tag", name, by: "name") if overview.nil?
 
         Success(serialized(Serializers::TagOverview, overview))

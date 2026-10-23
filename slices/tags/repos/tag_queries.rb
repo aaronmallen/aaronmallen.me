@@ -15,6 +15,8 @@ module Tags
         posts: :post_tag_queries, projects: :project_queries, tasks: :task_queries,
         journal_entries: :journal_entry_queries, decisions: :decision_queries,
       }.freeze
+      PROJECT = Blog::Types::TagScope["project"]
+      PUBLIC_ONLY = %i[projects].freeze
 
       def all_in(scope, mail: true, project_id: nil)
         found = tags.in_scope(scope, project_id)
@@ -41,14 +43,16 @@ module Tags
 
       def next_color(scope:, project_id: nil) = tags.next_color(scope:, project_id:)
 
-      def overview(name, page, kind: nil)
-        found = tags.global.by_names(name).to_a
+      def overview(name, page, kind: nil, project_id: nil)
+        found = (project_id ? tags.in_scope(PROJECT, project_id) : tags.global).by_names(name).to_a
         return if found.empty?
 
+        ids = found.map(&:id)
         kinds = kind ? [kind.to_sym] : KINDS.keys
-        pages = kinds.to_h { [it, public_send(KINDS.fetch(it)).page_by_tag(name, page)] }
+        kinds -= PUBLIC_ONLY if project_id
+        pages = kinds.to_h { [it, public_send(KINDS.fetch(it)).page_by_tag(ids, page)] }
 
-        Structs::Overview.new(name:, tags: found, counts: tags.counts_carrying(found.map(&:id)), pages:)
+        Structs::Overview.new(name:, tags: found, counts: tags.counts_carrying(ids), pages:)
       end
 
       def page_matching(scope, text, page, mail: true, project_id: nil)

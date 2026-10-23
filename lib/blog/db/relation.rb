@@ -47,6 +47,12 @@ module Blog
         end
       end
 
+      def carrying(join, tag_ids)
+        owner = Plugins::Taggings::TABLES.fetch(join).fetch(:owner_key)
+
+        where(self[:id].qualified => dataset.db[join].where(tag_id: tag_ids).select(owner))
+      end
+
       def changed(columns)
         Sequel.is_distinct_from(columns.map { self[it].qualified }, columns.map { Sequel[:excluded][it] })
       end

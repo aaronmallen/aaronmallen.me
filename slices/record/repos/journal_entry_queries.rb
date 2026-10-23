@@ -29,7 +29,9 @@ module Record
 
       def days_between(from, to) = journal_entries.between(from, to).days.pluck(:entry_date)
 
-      def page_by_tag(tag, page) = page.fill(journal_entries.tagged([tag]).newest_first.opening.paged(page).to_a)
+      def page_by_tag(tag_ids, page)
+        page.fill(journal_entries.carrying(:journal_entry_tags, tag_ids).newest_first.opening.paged(page).to_a)
+      end
 
       def summary(now: Time.now)
         today = Blog::TimeZone.local_date(now)

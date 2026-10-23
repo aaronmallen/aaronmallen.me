@@ -115,7 +115,9 @@ module Tasks
         tasks.open_counts(sprint.id, planned.map(&:id)).one.to_h.transform_keys(&:to_s)
       end
 
-      def page_by_tag(tag, page) = page.fill(tasks.tagged([tag]).open_first.select(*TAG_ROW).paged(page).to_a)
+      def page_by_tag(tag_ids, page)
+        page.fill(tasks.carrying(:task_tags, tag_ids).open_first.select(*TAG_ROW).paged(page).to_a)
+      end
 
       def planned(sprints, **search)
         search = by_project(**search)

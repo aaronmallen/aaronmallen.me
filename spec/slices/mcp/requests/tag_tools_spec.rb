@@ -340,6 +340,49 @@ RSpec.describe "MCP tag tools", type: :request do
 
       expect(mcp_message).to eq("no tag has the name bug")
     end
+
+    describe "read_tag with a project" do
+      let(:bug) { create(:tag, name: "bug", scope: "project", project_id: project.id, description: "it broke") }
+
+      def hold(table, owner_key, record, tag = bug)
+        row = { owner_key => record.id, tag_id: tag.id, tag_scope: "project" }
+        Tasks::Slice["relations.task_tags"].dataset.db[table].insert(row)
+      end
+
+      before do
+        hold(:task_tags, :task_id, create(:task, title: "Fix the feed"))
+        hold(:decision_tags, :decision_id, create(:decision, title: "Drop the feed"))
+        other = create(:tag, name: "bug", scope: "project", project_id: create(:project, name: "pod").id)
+        hold(:task_tags, :task_id, create(:task, title: "Another project's bug"), other)
+        create(:task, title: "A private bug", tags: %w[bug])
+      end
+
+      it "groups what carries the project's own tag by kind, with no projects", :aggregate_failures do
+        mcp_call("read_tag", name: "bug", project: "blog")
+
+        expect(mcp_content.dig("tasks", "records").map { it.fetch("title") }).to eq(["Fix the feed"])
+        expect(mcp_content.dig("decisions", "records").map { it.fetch("title") }).to eq(["Drop the feed"])
+        expect(mcp_content.keys).not_to include("projects")
+      end
+
+      it "gives the project tag's description" do
+        mcp_call("read_tag", name: "bug", project: "BLOG")
+
+        expect(mcp_content.fetch("descriptions")).to eq("project" => "it broke")
+      end
+
+      it "refuses a project no key names" do
+        mcp_call("read_tag", name: "bug", project: "NOPE")
+
+        expect(mcp_message).to eq("no project has the key NOPE")
+      end
+
+      it "refuses a name the project lacks" do
+        mcp_call("read_tag", name: "docs", project: "BLOG")
+
+        expect(mcp_message).to eq("no tag has the name docs")
+      end
+    end
   end
 
   describe "read_tag" do

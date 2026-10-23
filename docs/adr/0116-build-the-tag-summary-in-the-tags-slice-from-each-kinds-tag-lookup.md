@@ -18,6 +18,7 @@ amended:
   - "#1612"
   - "#1846"
   - "#1947"
+  - "#1950"
 tags:
   - tags
   - summary
@@ -53,12 +54,16 @@ none of the five imports from `tags`.
 **One query in the `tags` slice builds the summary.** It finds the tag rows that carry the name in either scope, and
 answers nothing when there are none, so the page and the tool can refuse an unknown name. It then counts each kind's
 records and asks each kind for one page of them, or one kind alone when the caller names it. Since #1947 it
-leaves out project tags, which have a page of their own in each project ([ADR 0205][0205]).
+leaves out project tags, unless the caller names a project: then it reads that project's tag of the name, for the
+project's own tag page and `read_tag` with a project, and leaves projects out, since no project carries a project
+tag ([ADR 0205][0205]).
 
 **Each kind answers through a query its own slice exports.** `posts`, `projects`, `tasks`, `record` (for journal
-entries) and `decisions` each export `page_by_tag`, a paged query over their relation's `tagged` that keeps every
-status. `tags` imports those five. The counts read the tag join tables, such as `post_tags`, through the `tags`
-relation. Past those joins, the query holds no SQL over another slice's tables.
+entries) and `decisions` each export `page_by_tag`, a paged query that keeps every status. Since #1950 it takes the
+ids of the tags the summary found rather than a name, and reads their join table through the relation's `carrying`,
+so a public, private or project tag of one name lists only what it carries. `tags` imports those five. The counts
+read the tag join tables, such as `post_tags`, through the `tags` relation. Past those joins, the query holds no SQL
+over another slice's tables.
 
 **`admin` and `api` import the summary query**, the way they import the review query under [ADR 0100][0100]. The
 admin page calls it, and the `read_tag` tool reaches it through an `api` endpoint ([ADR 0088][0088]). Both page each

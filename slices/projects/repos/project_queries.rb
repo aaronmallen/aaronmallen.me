@@ -25,7 +25,7 @@ module Projects
 
       def name_of(id) = (projects.where(id:).pluck(:name).first if id)
 
-      def page_by_tag(tag, page) = page.fill(projects.tagged(tag).in_order.paged(page).to_a)
+      def page_by_tag(tag_ids, page) = page.fill(projects.carrying(:project_tags, tag_ids).in_order.paged(page).to_a)
 
       def public_archived = with_tags.in_public.archived.by_stars.to_a
 
