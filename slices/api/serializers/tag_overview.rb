@@ -3,7 +3,7 @@
 module API
   module Serializers
     class TagOverview < Serializer
-      SCOPES = Blog::Types::TagScope.values
+      SCOPES = Blog::Types::GlobalTagScope.values
 
       DESCRIPTION = Helpers::Schema.nullable(Helpers::Schema::STRING)
       DESCRIPTIONS = Helpers::Schema.object(SCOPES.to_h { [it.to_sym, DESCRIPTION] })

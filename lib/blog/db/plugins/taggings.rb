@@ -6,6 +6,7 @@ module Blog
       module Taggings
         NAME = Sequel[:tags][:name]
         PRIVATE = Blog::Types::TagScope["private"]
+        PROJECT = Blog::Types::TagScope["project"]
         PUBLIC = Blog::Types::TagScope["public"]
         TABLES = {
           post_tags: { owner_key: :post_id, scope: PUBLIC, kind: :posts },
@@ -18,6 +19,7 @@ module Blog
           note_tags: { owner_key: :note_id, scope: PRIVATE, kind: :notes },
         }.freeze
         SCOPES = TABLES.transform_values { it.fetch(:scope) }.freeze
+        ADMITTED = SCOPES.to_h { |join, scope| [join, join == :project_tags ? [scope] : [scope, PROJECT]] }.freeze
 
         module Tagged
           def self.apply(relation, through:)

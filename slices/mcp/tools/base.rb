@@ -7,7 +7,8 @@ module MCP
   module Tools
     class Base < Tool
       TAG_KINDS = "Public tags go on posts and projects; private tags go on " \
-                  "#{API::Endpoints::TagEndpoint::PRIVATE_KINDS}".freeze
+                  "#{API::Endpoints::TagEndpoint::PRIVATE_KINDS}; project tags belong to the one project " \
+                  "whose key you give in project, and show in no other scope".freeze
       TEXT = "text"
 
       extend Dry::Monads[:result]

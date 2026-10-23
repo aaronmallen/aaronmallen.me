@@ -7,8 +7,8 @@ module Tags
 
       include Deps[tag_mutations: "repos.tag_mutations", tag_queries: "repos.tag_queries"]
 
-      def call(id, scope:)
-        tag = step find(id, scope)
+      def call(id, scope:, project_id: nil)
+        tag = step find(id, scope, project_id)
 
         step delete(tag)
       end
@@ -23,8 +23,8 @@ module Tags
         Failure([:last_tag_of_rules, tag_queries.last_tag_of_rules(tag.id)])
       end
 
-      def find(id, scope)
-        found(tag_queries.find_in(scope, id))
+      def find(id, scope, project_id)
+        found(tag_queries.find_in(scope, id, project_id:))
       end
     end
   end

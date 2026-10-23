@@ -16,8 +16,8 @@ module Tags
         journal_entries: :journal_entry_queries, decisions: :decision_queries,
       }.freeze
 
-      def all_in(scope, mail: true)
-        found = tags.in_scope(scope)
+      def all_in(scope, mail: true, project_id: nil)
+        found = tags.in_scope(scope, project_id)
         (mail ? found : found.outside_mail).in_name_order.to_a
       end
 
@@ -27,9 +27,9 @@ module Tags
         tags.in_scope(scope).by_names(names.uniq).to_a.to_h { [it.name, it.color] }
       end
 
-      def count_matching(scope, text, mail: true) = matching(scope, text, mail).count
+      def count_matching(scope, text, mail: true, project_id: nil) = matching(scope, text, mail, project_id).count
 
-      def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one
+      def find_in(scope, id, project_id: nil) = tags.in_scope(scope, project_id).by_pk(id).one
 
       def last_tag_of_rules(id) = tags.last_tag_of_rules(id)
 
@@ -39,10 +39,10 @@ module Tags
 
       def named_in(scope, name) = tags.in_scope(scope).by_names(name).one
 
-      def next_color(scope:) = tags.next_color(scope:)
+      def next_color(scope:, project_id: nil) = tags.next_color(scope:, project_id:)
 
       def overview(name, page, kind: nil)
-        found = tags.by_names(name).to_a
+        found = tags.global.by_names(name).to_a
         return if found.empty?
 
         kinds = kind ? [kind.to_sym] : KINDS.keys
@@ -51,8 +51,8 @@ module Tags
         Structs::Overview.new(name:, tags: found, counts: tags.counts_carrying(found.map(&:id)), pages:)
       end
 
-      def page_matching(scope, text, page, mail: true)
-        page.fill(matching(scope, text, mail).in_name_order.paged(page).to_a)
+      def page_matching(scope, text, page, mail: true, project_id: nil)
+        page.fill(matching(scope, text, mail, project_id).in_name_order.paged(page).to_a)
       end
 
       def usage(scope:, mail: true)
@@ -66,8 +66,8 @@ module Tags
 
       private
 
-      def matching(scope, text, mail)
-        found = tags.in_scope(scope).naming(text)
+      def matching(scope, text, mail, project_id)
+        found = tags.in_scope(scope, project_id).naming(text)
         mail ? found : found.outside_mail
       end
     end

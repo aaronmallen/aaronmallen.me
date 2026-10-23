@@ -579,7 +579,8 @@ CREATE DOMAIN public.tag_name AS text
 
 CREATE TYPE public.tag_scope AS ENUM (
     'public',
-    'private'
+    'private',
+    'project'
 );
 
 
@@ -2849,7 +2850,7 @@ CREATE TABLE public.decision_tags (
     decision_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT decision_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT decision_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -3106,7 +3107,7 @@ CREATE TABLE public.journal_entry_tags (
     journal_entry_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT journal_entry_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT journal_entry_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -3300,7 +3301,7 @@ CREATE TABLE public.mail_thread_tags (
     mail_thread_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT mail_thread_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT mail_thread_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -3514,7 +3515,7 @@ CREATE TABLE public.note_tags (
     note_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT note_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT note_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -4081,7 +4082,7 @@ CREATE TABLE public.post_tags (
     post_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'public'::public.tag_scope NOT NULL,
-    CONSTRAINT post_tags_tag_scope_check CHECK ((tag_scope = 'public'::public.tag_scope))
+    CONSTRAINT post_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['public'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -4136,7 +4137,9 @@ CREATE TABLE public.tags (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     scope public.tag_scope NOT NULL,
-    description text
+    description text,
+    project_id integer,
+    CONSTRAINT tags_project_id_check CHECK (((scope = 'project'::public.tag_scope) = (project_id IS NOT NULL)))
 );
 
 
@@ -5288,7 +5291,7 @@ CREATE TABLE public.task_rule_tags (
     task_rule_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT task_rule_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT task_rule_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -5409,7 +5412,7 @@ CREATE TABLE public.task_tags (
     task_id integer NOT NULL,
     tag_id integer NOT NULL,
     tag_scope public.tag_scope DEFAULT 'private'::public.tag_scope NOT NULL,
-    CONSTRAINT task_tags_tag_scope_check CHECK ((tag_scope = 'private'::public.tag_scope))
+    CONSTRAINT task_tags_tag_scope_check CHECK ((tag_scope = ANY (ARRAY['private'::public.tag_scope, 'project'::public.tag_scope])))
 );
 
 
@@ -6675,14 +6678,6 @@ ALTER TABLE ONLY public.tags
 
 ALTER TABLE ONLY public.tags
     ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
-
-
---
--- Name: tags tags_scope_name_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tags
-    ADD CONSTRAINT tags_scope_name_key UNIQUE (scope, name);
 
 
 --
@@ -8013,6 +8008,13 @@ CREATE INDEX suggestions_social_post_id_index ON public.suggestions USING btree 
 --
 
 CREATE UNIQUE INDEX sync_states_kind_sync_repo_index ON public.sync_states USING btree (kind, sync, repo) NULLS NOT DISTINCT;
+
+
+--
+-- Name: tags_project_id_scope_name_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX tags_project_id_scope_name_index ON public.tags USING btree (project_id, scope, name) NULLS NOT DISTINCT;
 
 
 --
@@ -9957,6 +9959,14 @@ ALTER TABLE ONLY public.suggestions
 
 
 --
+-- Name: tags tags_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
 -- Name: task_comments task_comments_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10383,4 +10393,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261023030000_add_notes_to_search_documents.rb'),
 ('20261023040000_add_notes_to_oauth_scope.rb'),
 ('20261023040100_add_written_by_agent_to_notes.rb'),
-('20261023050000_add_contacts_to_oauth_scope.rb');
+('20261023050000_add_contacts_to_oauth_scope.rb'),
+('20261024010000_add_project_to_tag_scope.rb'),
+('20261024010100_add_project_id_to_tags.rb');

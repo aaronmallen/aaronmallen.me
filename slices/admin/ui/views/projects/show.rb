@@ -10,7 +10,8 @@ module Admin
           CLOSED = Blog::Types::ClosedTaskStatus.values
           COLUMNS = Blog::Types::TaskColumn.values
           LIVE_TABLES = %w[
-            project_tags projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
+            project_tags projects sprints tags task_comments task_contributors task_links task_series task_tags
+            work_sessions
           ].freeze
           NAMES = Components::Projects::BoardCard::NAMES
           PUBLIC = Blog::Types::ProjectVisibility["public"]
@@ -21,6 +22,7 @@ module Admin
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
           prop :board, Blog::Types::Instance(Blog::BoardSizes)
           prop :view, Blog::Types::String.enum(*VIEWS.keys).optional, default: nil
+          prop :tagging, Blog::Types::Hash
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -92,10 +94,9 @@ module Admin
           def head
             PageHead(title: @project.name, sub: tagline) do
               BulkToggle(form: Bulk::ID)
+              TagManager(project: @project, **@tagging)
               create_task unless @project.archived_on
-              Button(href: path(:admin_edit_project, id: @project.id), icon: :edit) do
-                t(".edit")
-              end
+              Button(href: path(:admin_edit_project, id: @project.id), icon: :edit) { t(".edit") }
             end
           end
 

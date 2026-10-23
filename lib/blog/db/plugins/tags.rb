@@ -6,33 +6,33 @@ module Blog
       module Tags
         def by_names(names) = where(name: names)
 
-        def claim(names, scope:)
+        def claim(names, scope:, project_id: nil)
           return Blog::Constants::EMPTY_HASH if names.empty?
 
-          insert_missing(names, scope)
+          insert_missing(names, scope, project_id)
 
-          in_scope(scope).by_names(names).to_a.to_h { [it[:name], it[:id]] }
+          in_scope(scope, project_id).by_names(names).to_a.to_h { [it[:name], it[:id]] }
         end
 
         def in_name_order = order(self[:name].asc)
 
-        def in_scope(scope) = where(scope:)
+        def in_scope(scope, project_id = nil) = project_id ? where(scope:, project_id:) : where(scope:)
 
-        def next_color(scope:) = least_used(color_counts(scope))
+        def next_color(scope:, project_id: nil) = least_used(color_counts(scope, project_id))
 
         private
 
-        def color_counts(scope) = in_scope(scope).tally(:color, Blog::Types::TagColor.values)
+        def color_counts(scope, project_id) = in_scope(scope, project_id).tally(:color, Blog::Types::TagColor.values)
 
-        def insert_missing(names, scope)
+        def insert_missing(names, scope, project_id)
           now = Time.now
-          counts = color_counts(scope)
+          counts = color_counts(scope, project_id)
 
           names.each do |name|
             color = least_used(counts)
             counts[color] += 1
 
-            upsert(name:, scope:, color:, created_at: now, updated_at: now)
+            upsert(name:, scope:, project_id:, color:, created_at: now, updated_at: now)
           end
         end
 

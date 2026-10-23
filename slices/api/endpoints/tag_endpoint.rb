@@ -6,11 +6,21 @@ module API
     class TagEndpoint < Endpoint
       MAIL_TAG = "tag %s is on mail threads, so %s it needs the mail scope"
       PRIVATE_KINDS = "journal entries, tasks, decisions and task rules"
+      PROJECT = Blog::Types::TagScope["project"]
+      PROJECT_FIELD = {
+        type: "string",
+        description: "the key of the project that holds the tags, as POD; listing or adding them needs it",
+      }.freeze
       SCOPE = {
         type: "string",
         enum: Blog::Types::TagScope.values,
-        description: "public holds the tags on posts and projects; private holds those on #{PRIVATE_KINDS}",
+        description: [
+          "public holds the tags on posts and projects", "private holds those on #{PRIVATE_KINDS}",
+          "project holds one project's own tags, named by its key in project",
+        ].join("; "),
       }.freeze
+      STRAY = "only the project scope takes a project"
+      UNNAMED = "name the project that holds the tags"
 
       CONTRACTS = [::Tags::Contracts::TagContract].freeze
       COMPLAINTS = {
@@ -29,6 +39,7 @@ module API
           description: "what the tag covers, in markdown; a public tag's page shows it. An empty string clears it",
         },
         name: { type: "string", description: Helpers::Tags::FORMAT },
+        project: PROJECT_FIELD,
         scope: SCOPE,
       }.freeze
 
@@ -41,7 +52,17 @@ module API
         },
       ).freeze
 
+      include Deps[project_queries: "projects.repos.project_queries"]
+
       private
+
+      def project_id_for(scope, project)
+        return project ? invalid(project: [STRAY]) : Success(nil) unless scope == PROJECT
+        return invalid(project: [UNNAMED]) unless project
+
+        id = project_queries.id_by_key(project.strip)
+        id ? Success(id) : missing("project", project, by: "key")
+      end
 
       def saved(result, id = nil)
         case result

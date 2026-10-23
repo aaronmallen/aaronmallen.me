@@ -231,8 +231,9 @@ module Blog
     end
     TagKind = Types::String.enum("posts", "projects", "tasks", "journal_entries", "decisions")
     TagKindParam = TagKind.optional.fallback(nil)
-    TagScope = Types::String.enum("public", "private")
-    TagScopeParam = TagScope.fallback(TagScope.values.first)
+    GlobalTagScope = Types::String.enum("public", "private")
+    TagScope = Types::String.enum(*GlobalTagScope.values, "project")
+    TagScopeParam = GlobalTagScope.fallback(GlobalTagScope.values.first)
     TaskAct = Types::String.enum("complete", "pause")
     TaskActParam = TaskAct.fallback(TaskAct.values.first)
     TaskBulkAction = Types::String.enum("complete", "cancel", "move", "tag", "untag", "delete")

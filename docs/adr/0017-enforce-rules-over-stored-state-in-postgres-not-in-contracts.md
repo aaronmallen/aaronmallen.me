@@ -37,6 +37,7 @@ amended:
   - "#1889"
   - "#1926"
   - "#1938"
+  - "#1949"
 tags:
   - postgres
   - constraints
@@ -122,7 +123,7 @@ raises again.
 | `service_connections_provider_host_account_id_index` | unique index | `Services::Operations::AddConnection` | the `taken` refusal |
 | `short_codes_code_key` | unique | `Shares::Operations::ChangeCode` | `code: taken` |
 | `short_codes_code_key` | unique | `Shares::Operations::UploadShare` | the next id as its code, up to five tries |
-| `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
+| `tags_project_id_scope_name_index` | unique index | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
 | `task_links_pair_key` | unique index | `Tasks::Operations::LinkTasks` | `other_id: taken` |
@@ -134,8 +135,10 @@ raises again.
 `SaveTag`, `SaveTaskRule`, `SavePerson` and `AddConnection` mapped every error of a kind to one answer until #937
 gave them the lookup, so a new constraint on their tables raises until it gets a row here.
 
-Tags hold `tags_scope_name_key` since #77 split them into a public and a private scope (ADR 0074). It replaced
-`tags_name_key`.
+Tags held `tags_scope_name_key` since #77 split them into a public and a private scope (ADR 0074). It replaced
+`tags_name_key`. #1949 gave each project its own tags (ADR 0205) and replaced it with
+`tags_project_id_scope_name_index`, a unique index on `(project_id, scope, name)` with `NULLS NOT DISTINCT`, so a
+name stays unique within the public and the private scope and within each project.
 
 `posts_published_slug_locked` raises with `ERRCODE = 'check_violation'`, so ROM reports it as a
 `CheckConstraintError` and the operation reads it like any other name. `note_folders_parent_loop` does the same when a

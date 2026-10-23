@@ -349,6 +349,16 @@ en:
       role_added: "Role added to /projects"
       role_removed: "Role removed from /projects"
       saved: "Project saved"
+      tags:
+        added: "Tag added"
+        blank: "Nothing added · give the tag a name first"
+        format: "Nothing saved · a tag takes lowercase letters, numbers and dashes"
+        kept:
+          one: "Tag kept · it is the only tag on the rule %{rules}"
+          other: "Tag kept · it is the only tag on the rules %{rules}"
+        removed: "Tag removed"
+        saved: "Tag saved"
+        taken: "Nothing saved · this project already holds that tag"
   queue_unavailable: "Not queued · the job queue is down, so try again soon"
   record_links:
     toasts:
@@ -2718,6 +2728,31 @@ en:
           stars:
             one: "%{stars} star"
             other: "%{stars} stars"
+        tag_manager:
+          add: "Add tag"
+          color: "Colour"
+          confirm_remove:
+            zero: "Remove %{tag} from this project? You can't undo it."
+            one: "Remove %{tag} from this project? %{count} record loses it."
+            other: "Remove %{tag} from this project? %{count} records lose it."
+          count:
+            one: "%{count} tag · this project only"
+            other: "%{count} tags · this project only"
+          description: "Description"
+          description_placeholder: "Description · when to use it (optional)"
+          done: "Done"
+          edit: "Edit %{tag}"
+          empty: "No project tags yet."
+          name: "Name"
+          no_description: "No description."
+          placeholder: "Name a tag…"
+          remove: "Remove"
+          save: "Save"
+          tags: "Tags"
+          title: "%{name} · project tags"
+          uses:
+            one: "%{count} record"
+            other: "%{count} records"
       quiet_card:
         client_count:
           one: "%{count} connected"

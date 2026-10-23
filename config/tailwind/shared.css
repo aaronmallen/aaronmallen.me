@@ -6328,6 +6328,64 @@
   }
 }
 
+@utility project-tags-count {
+  @apply ml-1 meta;
+}
+
+@utility project-tags-new {
+  @apply flex flex-col items-start gap-2 pb-4;
+
+  & .inp {
+    @apply w-full;
+  }
+}
+
+@utility project-tags-list {
+  @apply flex flex-col border-t border-line;
+}
+
+@utility project-tags-row {
+  @apply flex flex-wrap items-start gap-2 border-b border-line py-3;
+}
+
+@utility project-tags-body {
+  @apply min-w-0 flex-1;
+}
+
+@utility project-tags-name {
+  @apply m-0 flex flex-wrap items-baseline gap-2.5;
+}
+
+@utility project-tags-description {
+  @apply mt-1 text-ink;
+
+  &.dim {
+    @apply text-ink-muted;
+  }
+}
+
+@utility project-tags-edit {
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &[open] {
+    @apply basis-full;
+  }
+
+  & > form {
+    @apply mt-2 flex flex-col items-start gap-1;
+
+    & .inp {
+      @apply w-full;
+    }
+  }
+}
+
 @utility project-editor {
   & > form {
     @apply contents;

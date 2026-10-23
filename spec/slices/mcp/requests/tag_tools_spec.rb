@@ -315,6 +315,33 @@ RSpec.describe "MCP tag tools", type: :request do
     end
   end
 
+  describe "project tags" do
+    let!(:project) { create(:project, name: "blog", key: "BLOG") }
+
+    it "adds a tag to the project save_tag names and lists it there", :aggregate_failures do
+      mcp_call("save_tag", scope: "project", project: "BLOG", name: "bug", description: "something broke")
+      mcp_call("list_tags", scope: "project", project: "BLOG")
+
+      expect(mcp_content.fetch("tags").map { it.values_at("name", "scope", "description") })
+        .to eq([["bug", "project", "something broke"]])
+      expect(tag_queries.all_in("project", project_id: project.id).map(&:name)).to eq(%w[bug])
+    end
+
+    it "refuses the project scope without a project", :aggregate_failures do
+      mcp_call("list_tags", scope: "project")
+
+      expect(mcp_refused?).to be(true)
+      expect(mcp_message).to eq("name the project that holds the tags")
+    end
+
+    it "leaves project tags out of read_tag" do
+      create(:tag, name: "bug", scope: "project", project_id: project.id)
+      mcp_call("read_tag", name: "bug")
+
+      expect(mcp_message).to eq("no tag has the name bug")
+    end
+  end
+
   describe "read_tag" do
     def statuses(kind)
       mcp_call("read_tag", name: "ruby")

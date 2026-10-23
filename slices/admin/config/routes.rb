@@ -246,6 +246,10 @@ module Admin
     get "/projects/:id/menu", to: "projects.menu", as: :project_menu, id: ID
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
     post "/projects/:id/archive", to: "projects.archive", as: :archive_project, id: ID
+    post "/projects/:id/project_tags", to: "projects.create_tag", as: :create_project_tag, id: ID
+    post "/projects/:id/project_tags/:tag_id", to: "projects.update_tag", as: :update_project_tag, id: ID, tag_id: ID
+    post "/projects/:id/project_tags/:tag_id/delete", to: "projects.destroy_tag", as: :delete_project_tag, id: ID,
+                                                      tag_id: ID
     post "/projects/:id/records", to: "projects.link_record", as: :link_project_record, id: ID
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID

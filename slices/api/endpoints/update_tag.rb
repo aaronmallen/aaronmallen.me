@@ -13,20 +13,25 @@ module API
 
       include Deps[
         post_queries: "posts.repos.post_queries",
-        project_queries: "projects.repos.project_queries",
         save_tag: "tags.operations.save_tag",
         tag_queries: "tags.repos.tag_queries",
       ]
 
-      def handle(id:, scope:, scopes:, name: nil, color: nil, **fields)
-        current = tag_queries.find_in(scope, id)
-        return missing("tag", id) if current.nil?
-        return invalid(id: [format(MAIL_TAG, id, "changing")]) if !mail?(scopes) && tag_queries.mail_only?(scope, id)
-
-        saved(save_tag.call({ name: name || current.name, color:, **fields }, scope:, id:), id)
+      def handle(id:, scope:, scopes:, project: nil, **fields)
+        owner = project ? project_id_for(scope, project) : Success(nil)
+        owner.bind { changed(id, scope, scopes, it, **fields) }
       end
 
       private
+
+      def changed(id, scope, scopes, project_id, name: nil, color: nil, **fields)
+        current = tag_queries.find_in(scope, id, project_id:)
+        return missing("tag", id) if current.nil?
+
+        return invalid(id: [format(MAIL_TAG, id, "changing")]) if !mail?(scopes) && tag_queries.mail_only?(scope, id)
+
+        saved(save_tag.call({ name: name || current.name, color:, **fields }, scope:, id:, project_id:), id)
+      end
 
       def going_public(fields)
         name = tag_queries.find_in(fields[:scope], fields[:id])&.name if fields[:scope] == PUBLIC

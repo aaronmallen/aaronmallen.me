@@ -157,4 +157,98 @@ RSpec.describe "API tags", type: :request do
       expect([status, tag_queries.find_in("private", id)]).to eq([200, nil])
     end
   end
+
+  describe "one project's tags" do
+    let!(:project) { create(:project, name: "blog", key: "BLOG") }
+    let(:other) { create(:project, name: "pod", key: "POD") }
+
+    def listed(**) = call_api(:get, "/tags", { scope: "project", project: "BLOG", ** }).fetch("tags").map { it["name"] }
+
+    def project_tag(name, owner = project) = create(:tag, name:, scope: "project", project_id: owner.id)
+
+    it "lists only the named project's tags" do
+      project_tag("bug")
+      project_tag("chore", other)
+      create(:tag, :private, name: "health")
+
+      expect(listed).to eq(%w[bug])
+    end
+
+    it "leaves project tags out of the public and private lists" do
+      project_tag("bug")
+
+      expect(%w[public private].flat_map { call_api(:get, "/tags", { scope: it }).fetch("tags") }).to be_empty
+    end
+
+    it "answers the same JSON as list_tags" do
+      project_tag("bug")
+
+      expect(call_api(:get, "/tags", { scope: "project", project: "BLOG" }))
+        .to eq(mcp_answer("list_tags", scope: "project", project: "BLOG"))
+    end
+
+    it "adds a tag to the project with a 201", :aggregate_failures do
+      project_tag("bug", other)
+      added = call_api(:post, "/tags", JSON.generate(scope: "project", project: "blog", name: "bug"))
+
+      expect([added.fetch("name"), status]).to eq(["bug", 201])
+      expect(tag_queries.all_in("project", project_id: project.id).map(&:name)).to eq(%w[bug])
+    end
+
+    it "refuses a name the project already holds with a 422" do
+      project_tag("bug")
+      call_api(:post, "/tags", JSON.generate(scope: "project", project: "BLOG", name: "bug"))
+
+      expect([JSON.parse(last_response.body).fetch("errors"), status])
+        .to eq([{ "name" => ["another tag already holds that name"] }, 422])
+    end
+
+    it "refuses the project scope without a project with a 422" do
+      call_api(:post, "/tags", JSON.generate(scope: "project", name: "bug"))
+
+      expect([JSON.parse(last_response.body).fetch("errors"), status])
+        .to eq([{ "project" => ["name the project that holds the tags"] }, 422])
+    end
+
+    it "refuses a project with another scope with a 422" do
+      call_api(:get, "/tags", { scope: "private", project: "BLOG" })
+
+      expect([JSON.parse(last_response.body).fetch("errors"), status])
+        .to eq([{ "project" => ["only the project scope takes a project"] }, 422])
+    end
+
+    it "answers a key no project has with a 404" do
+      call_api(:get, "/tags", { scope: "project", project: "NOPE" })
+
+      expect([JSON.parse(last_response.body).fetch("message"), status]).to eq(["no project has the key NOPE", 404])
+    end
+
+    it "renames and describes a project tag" do
+      tag = project_tag("bug")
+      changed = call_api(:patch, "/tags/project/#{tag.id}", JSON.generate(project: "BLOG", name: "defect",
+                                                                          description: "fix it"))
+
+      expect(changed.values_at("name", "description")).to eq(["defect", "fix it"])
+    end
+
+    it "answers another project's tag with a 404 when it names a project" do
+      tag = project_tag("bug", other)
+      call_api(:patch, "/tags/project/#{tag.id}", JSON.generate(project: "BLOG", name: "defect"))
+
+      expect(status).to eq(404)
+    end
+
+    it "finds a project tag by its ID alone" do
+      tag = project_tag("bug", other)
+
+      expect(call_api(:patch, "/tags/project/#{tag.id}", JSON.generate(name: "defect")).fetch("name")).to eq("defect")
+    end
+
+    it "removes a project tag for good", :aggregate_failures do
+      tag = project_tag("bug")
+
+      expect(call_api(:delete, "/tags/project/#{tag.id}")).to eq("id" => tag.id, "removed" => true)
+      expect(listed).to be_empty
+    end
+  end
 end

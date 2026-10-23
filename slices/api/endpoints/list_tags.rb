@@ -2,14 +2,16 @@
 
 module API
   module Endpoints
-    class ListTags < Endpoint
+    class ListTags < TagEndpoint
+      FINDS = true
       SCOPED = true
       SCHEMA = {
         additionalProperties: false,
         properties: {
           page: Helpers::Paging::PAGE,
+          project: PROJECT_FIELD,
           query: { type: "string", description: "part of a tag's name; only tags whose name holds it come back" },
-          scope: TagEndpoint::SCOPE,
+          scope: SCOPE,
         },
         required: ["scope"],
       }.freeze
@@ -39,20 +41,23 @@ module API
 
       include Deps[tag_queries: "tags.repos.tag_queries"]
 
-      def handle(scope:, scopes:, page: 1, query: nil)
-        text = Blog::Types::TrimmedText[query].downcase
-        mail = mail?(scopes)
-        usage = tag_queries.usage(scope:, mail:)
-        tags = tag_queries.page_matching(scope, text, page_of(page), mail:)
-
-        Success(
-          tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
-          count: tag_queries.count_matching(scope, text, mail:),
-          **Helpers::Paging.fields(tags),
-        )
+      def handle(scope:, scopes:, page: 1, project: nil, query: nil)
+        project_id_for(scope, project).fmap { listed(scope, it, Blog::Types::TrimmedText[query].downcase, page, scopes) }
       end
 
       private
+
+      def listed(scope, project_id, text, page, scopes)
+        mail = mail?(scopes)
+        usage = tag_queries.usage(scope:, mail:)
+        tags = tag_queries.page_matching(scope, text, page_of(page), mail:, project_id:)
+
+        {
+          tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
+          count: tag_queries.count_matching(scope, text, mail:, project_id:),
+          **Helpers::Paging.fields(tags),
+        }
+      end
 
       def summary(tag, held)
         {

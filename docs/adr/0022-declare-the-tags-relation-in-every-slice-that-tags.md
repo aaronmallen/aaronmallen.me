@@ -26,6 +26,7 @@ amended:
   - "#1693"
   - "#1926"
   - "#1947"
+  - "#1949"
 tags:
   - tags
   - rom
@@ -59,11 +60,12 @@ then has several definitions. AA-561 item 2 found that `tags` has five, and aske
 Each slice that tags declares its own `Relations::Tags` over the `tags` table: `contact`, `decisions`, `notes`,
 `posts`, `projects`, `record` and `tasks`, beside the one in `tags`. #957 added `contact` and `decisions` to this list,
 and #1926 added `notes`.
-Each is `schema :tags, infer: true` and includes `Blog::DB::Tags` (`lib/blog/db/tags.rb`), which holds what the
-relation does: `by_names`, `claim`, `next_color` and the rest. Each join relation includes `Blog::DB::Taggings`
-(`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins into ROM relation plugins that a
-relation opts into with `use` (ADR 0126). Since #1693 `Taggings::TABLES` names each join table's owner key, so a join
-relation says only `use :taggings`, and an owner relation gets `tagged` from `use :tagged, through:`.
+Each is `schema :tags, infer: true`, but for the one in `projects`, and includes `Blog::DB::Tags`
+(`lib/blog/db/tags.rb`), which holds what the relation does: `by_names`, `claim`, `next_color` and the rest. Each join
+relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins
+into ROM relation plugins that a relation opts into with `use` (ADR 0126). Since #1693 `Taggings::TABLES` names each
+join table's owner key, so a join relation says only `use :taggings`, and an owner relation gets `tagged` from
+`use :tagged, through:`.
 
 A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` does. Since #1200 the decisions, posts,
 projects and journal entry repos, and since #1926 the notes repo, name their join relation with `tagged_by`, which
@@ -72,8 +74,9 @@ their tag and untag operations inherit `Blog::TagOperation`. Tasks and task rule
 missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope (ADR
 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones. Since #992 the join relation's
 `retag`, `tag` and `untag` claim and write the tags, and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's
-scope once, for the owner slice and for the tags slice's counts. Since #1947 a record related to a project claims
-within that project, and its join admits the project scope beside its own (ADR 0205).
+scope once, for the owner slice and for the tags slice's counts. Since #1949 `Taggings::ADMITTED` names every scope each
+join takes, and the counts read it. Since #1947 a record related to a project claims within that project, and its join
+admits the project scope beside its own (ADR 0205).
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.
@@ -95,6 +98,10 @@ A new tagged kind needs a tags relation and a join relation in its own slice, a 
 and a `JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its
 join table holds a `tag_scope` column pinned to that scope (ADR 0074). Since #992 that scope goes in `Taggings::SCOPES`.
 Since #1693 the owner key, scope and kind go in one `Taggings::TABLES` row, which `SCOPES` and `JOINS` read.
+
+Since #1949 `tags` holds a `project_id` for a project tag (ADR 0205). A `combine` through `project_tags` matches each
+tag to its project by a `project_id` key, and the tag's own `project_id` would take its place, so the `projects`
+slice lists the `tags` columns by hand and leaves `project_id` out. A column added to `tags` needs a line there too.
 
 A tag that `claim` writes runs none of `Tags::Contracts::TagContract`. Its name passes only the tagged record's
 contract, through `Blog::Types::TagList` and the `tag_slugs` rule, and the `tag_name` domain in Postgres.

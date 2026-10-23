@@ -7,17 +7,19 @@ module Tags
 
       JOINS = Blog::DB::Plugins::Taggings::TABLES.to_h { |join, table| [table.fetch(:kind), join] }.freeze
       SUMMARY = Blog::Types::TagKind.values.map(&:to_sym).freeze
-      SCOPES = Blog::DB::Plugins::Taggings::SCOPES
+      ADMITTED = Blog::DB::Plugins::Taggings::ADMITTED
 
       schema :tags, infer: true
 
       def counts_by_kind(scope)
-        JOINS.select { |_, join| SCOPES.fetch(join) == scope }.transform_values do |join|
+        JOINS.select { |_, join| ADMITTED.fetch(join).include?(scope) }.transform_values do |join|
           dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)
         end
       end
 
       def counts_carrying(ids) = JOINS.slice(*SUMMARY).transform_values { dataset.db[it].where(tag_id: ids).count }
+
+      def global = where(project_id: nil)
 
       def last_tag_of_rules(id)
         held = rules.where(id: rule_tags.where(tag_id: id).select(:task_rule_id))
