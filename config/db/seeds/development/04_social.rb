@@ -2,11 +2,37 @@
 
 return if Contacts::Slice["repos.person_queries"].all.any?
 
-save_person = Contacts::Operations::SavePerson.new(networks: Seeds.networks)
+save_person = Contacts::Operations::SavePerson.new(networks: Seeds.networks, google: Seeds::Offline.new)
 [
-  { key: "ada", name: "Ada Example", bluesky_handle: "ada.example.com", mastodon_handle: "@ada@social.example.com" },
-  { key: "grace", name: "Grace Example", bluesky_handle: "grace.example.org", mastodon_handle: nil },
+  {
+    key: "ada", name: "Ada Example", given_name: "Ada", family_name: "Example", nickname: "Ada",
+    bluesky_handle: "ada.example.com", mastodon_handle: "@ada@social.example.com",
+    company: "Example Corp", job_title: "Staff Engineer", department: "Platform",
+    emails: [{ value: "ada@example.com", type: "work" }, { value: "ada.home@example.org", type: "home" }],
+    phones: [{ value: "+1 555 0100", type: "mobile" }], websites: [{ value: "https://ada.example.com", type: "blog" }],
+    addresses: [{ street: "1 Example Way", city: "Springfield", region: "IL", postal_code: "62701", country: "US",
+                  type: "work" }],
+    birthday: "--12-10", labels: %w[Friends Work], starred: true,
+    notes: "Pairs on the seeds most weeks.",
+  },
+  {
+    key: "grace", name: "Grace Example", given_name: "Grace", family_name: "Example",
+    bluesky_handle: "grace.example.org", mastodon_handle: nil,
+    emails: [{ value: "grace@example.org", type: "home" }],
+    dates: [{ value: "2019-06-01", type: "Met at" }], relations: [{ value: "Ada Example", type: "friend" }],
+    custom_fields: [{ key: "Talk", value: "Phlex at the meetup" }], labels: %w[Friends],
+  },
   { key: "linus", name: "Linus Example", bluesky_handle: nil, mastodon_handle: "@linus@toot.example.net" },
+  {
+    name: "Dale Example", given_name: "Dale", family_name: "Example", company: "Example Plumbing",
+    job_title: "Plumber", phones: [{ value: "+1 555 0142", type: "work" }], labels: %w[Home],
+    notes: "Fixed the main line.",
+  },
+  {
+    name: nil, company: "Example Dental", phones: [{ value: "+1 555 0177", type: "main" }],
+    emails: [{ value: "front-desk@dental.example.com", type: "work" }],
+    chats: [{ value: "dental-example", type: "Signal" }], labels: %w[Health],
+  },
 ].each { Seeds.unwrap(save_person.call(it)) }
 
 save_social_post = Social::Slice["operations.save_social_post"]

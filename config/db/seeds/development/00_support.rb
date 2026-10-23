@@ -42,6 +42,10 @@ module Seeds
     def within_limit?(_text) = true
   end
 
+  class Offline
+    def configured? = false
+  end
+
   class SourcePages
     OK = 200
 
@@ -59,6 +63,8 @@ module Seeds
   def ago(days, hour: 10, minute: 0) = Blog::TimeZone.local_time(*date_parts(today - days), hour, minute)
 
   def date_parts(date) = [date.year, date.month, date.day]
+
+  def input(days, hour:, minute: 0) = Blog::TimeZone.input_value(ago(days, hour:, minute:))
 
   def networks = Blog::Types::NetworkName.values.to_h { [it, Network.new(it)] }.freeze
 

@@ -50,6 +50,14 @@ capture.call("Read the Postgres release notes", list: "someday", tags: "reading"
 canceled = capture.call("Sell the old monitor", tags: "errands")
 Seeds.unwrap(cancel_task.call(canceled.id))
 
+add_work_session = Tasks::Slice["operations.add_work_session"]
+[
+  [shipped, 14, 9, 11], [shipped, 13, 14, 16], [carried, 12, 19, 20], [started, 1, 10, 12], [blocked, 2, 8, 9],
+].each do |task, days_ago, from, to|
+  times = { started_at: Seeds.input(days_ago, hour: from), ended_at: Seeds.input(days_ago, hour: to) }
+  Seeds.unwrap(add_work_session.call(task.id, times))
+end
+
 link_tasks = Tasks::Slice["operations.link_tasks"]
 Seeds.unwrap(link_tasks.call(blocked.id, { kind: "blocked_by", other_id: blocker.id }))
 Seeds.unwrap(link_tasks.call(blocked.id, { kind: "relates", other_id: related.id }))
