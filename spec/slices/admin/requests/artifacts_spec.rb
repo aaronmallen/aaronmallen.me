@@ -75,18 +75,21 @@ RSpec.describe "Admin artifacts", type: :request do
       expect(page).to have_css(".artifact-row-meta .tone-text.sand i.fa-note-sticky", count: 1)
     end
 
-    it "colours each tag from the private tag of its name" do
-      create(:tag, :private, name: "db", color: "mk-green")
+    it "colours each tag from the private tag it carries" do
+      Tags::Slice["relations.tags"].where(name: "db", scope: "private").update(color: "mk-green")
       create(:tag, name: "db", color: "mk-orange")
       get "/admin/agents/artifacts"
 
       expect(page).to have_css(".artifact-row-meta .tag.green", exact_text: "#db")
     end
 
-    it "colours a tag violet when no private tag has its name" do
+    it "links a project tag to its project's tag page" do
+      project = create(:project, key: "BLOG")
+      Links::Slice["operations.link_records"].call("artifact", plan.id, { other_kind: "project", other_id: project.id })
+      agents(:update_artifact, plan.id, { title: plan.title, type: "plan", tags: "db", body: "v2" })
       get "/admin/agents/artifacts"
 
-      expect(page).to have_css(".artifact-row-meta .tag.violet", exact_text: "#db")
+      expect(page).to have_link("#db", href: "/admin/projects/BLOG/tags/db")
     end
 
     it "counts the links on a row" do
@@ -187,7 +190,7 @@ RSpec.describe "Admin artifacts", type: :request do
       created = reload(Agents::Slice["relations.artifacts"].dataset.max(:id))
       expect(last_response.location).to end_with("/admin/agents/artifacts/#{created.id}")
       expect(versions(created.id).map { [it.number, it.agent] }).to eq([[1, nil]])
-      expect(created.tags).to eq(%w[site])
+      expect(created.tags.map(&:name)).to eq(%w[site])
     end
 
     it "refuses a blank body and keeps what was typed", :aggregate_failures do

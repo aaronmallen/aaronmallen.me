@@ -96,7 +96,7 @@ RSpec.describe "API linked project tags", type: :request do
     end
 
     it "answers the same JSON as read_tag" do
-      expect(trusted(mcp_answer("read_tag", name: "bug", project: "BLOG"))).to eq(read)
+      expect(trusted(mcp_answer("read_tag", name: "bug", project: "BLOG"))).to eq(read(token: api_token(mcp_scopes)))
     end
   end
 end

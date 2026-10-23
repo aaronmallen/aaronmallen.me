@@ -7,7 +7,7 @@ module Blog
     class Repo < Hanami::DB::Repo
       module Tagged
         def add_tag(id, name)
-          update(id, {}) unless taggings.tag(id, [name], tags).empty?
+          update(id, {}) unless taggings.tag(id, [name], tags, project_id: tag_project_id(id)).empty?
         end
 
         def by_id_for_update(id) = root.by_pk(id).lock.one
@@ -16,7 +16,11 @@ module Blog
           update(id, {}) if taggings.untag(id, [name], tags).positive?
         end
 
-        def replace_tags(id, names) = taggings.retag(id, names, tags)
+        def replace_tags(id, names) = taggings.retag(id, names, tags, project_id: tag_project_id(id))
+
+        private
+
+        def tag_project_id(_id) = nil
       end
       private_constant :Tagged
 

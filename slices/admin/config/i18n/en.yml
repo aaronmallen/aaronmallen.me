@@ -727,6 +727,13 @@ en:
             other: "%{count} facts"
           updated: "updated %{at} by %{who}"
           you: "you"
+        record_tags:
+          add: "add"
+          add_tags: "add tags"
+          label: "Tags"
+          new: "New tag"
+          placeholder: "ruby"
+          remove: "Remove tag %{tag}"
         session_drawer:
           before: "This session ran before the site recorded searches and reads."
           branch: "%{repo} @ %{branch}"
@@ -4774,8 +4781,11 @@ en:
           empty: "Nothing carries this tag yet."
           kicker: "Tag"
           kinds:
+            agent_sessions: "Agent sessions"
+            artifacts: "Artifacts"
             decisions: "Decisions"
             journal_entries: "Journal entries"
+            memory_files: "Memory files"
             messages: "Mail"
             notes: "Notes"
             posts: "Posts"

@@ -18,6 +18,8 @@ module API
       schema_attributes
       stamps :created_at, :updated_at
 
+      def tags(artifact) = artifact.tags.map(&:name)
+
       def title(artifact) = artifact.title_by_agent? ? untrusted(artifact.title) : artifact.title
     end
   end

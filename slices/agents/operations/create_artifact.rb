@@ -16,12 +16,19 @@ module Agents
         step touch(fields)
 
         transaction do
-          id = artifact_mutations.create(
-            **fields.slice(:title, :type, :tags), title_agent: fields[:agent], title_model: fields[:model],
-          ).id
+          id = store(fields)
           artifact_mutations.add_version(id, **fields.slice(:body, :note, :agent, :model, :session_id))
           artifact_queries.by_id(id)
         end
+      end
+
+      private
+
+      def store(fields)
+        author = { title_agent: fields[:agent], title_model: fields[:model] }
+        id = artifact_mutations.create(**fields.slice(:title, :type), **author).id
+        artifact_mutations.replace_tags(id, fields[:tags])
+        id
       end
     end
   end

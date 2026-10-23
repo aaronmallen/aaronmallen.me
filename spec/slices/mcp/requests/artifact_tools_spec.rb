@@ -41,7 +41,7 @@ RSpec.describe "MCP artifact tools", type: :request do
     changed = mcp_answer("update_artifact", id:, title: "Handoff", type: "handoff", tags: %w[site perf], **author)
 
     expect([trusted(changed.values_at("title", "type", "tags", "version")), versions(id).size])
-      .to eq([["Handoff", "handoff", %w[site perf], 1], 1])
+      .to eq([["Handoff", "handoff", %w[perf site], 1], 1])
   end
 
   it "adds no version when the body stays the same" do

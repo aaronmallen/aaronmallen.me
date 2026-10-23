@@ -12,6 +12,7 @@ area:
 issue: "#1924"
 amended:
   - "#1947"
+  - "#1953"
 tags:
   - notes
   - folders
@@ -52,9 +53,8 @@ write its tables ([ADR 0123][0123]). No public page reads it.
 
 ## Alternatives
 
-**Keep notes as artifacts.** Artifacts are numbered, versioned documents for agents, with their own type and tags
-kept out of the tag screens. A note has no number, version history or agent author, sits in a folder and takes
-private tags that belong on the tag screens.
+**Keep notes as artifacts.** Artifacts are numbered, versioned documents for agents, with their own type. A note has
+no number, version history or agent author, and sits in a folder.
 
 **Keep notes in the journal.** A journal entry hangs off a day. A note has no date and lives for good.
 

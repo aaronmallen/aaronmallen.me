@@ -31,7 +31,7 @@ module API
       private
 
       def current(artifact)
-        { title: artifact.title, type: artifact.type, tags: artifact.tags,
+        { title: artifact.title, type: artifact.type, tags: artifact.tags.map(&:name),
           body: artifact_queries.version_row(artifact.id, artifact.version).body }
       end
     end

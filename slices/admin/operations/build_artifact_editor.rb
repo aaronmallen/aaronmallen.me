@@ -7,14 +7,18 @@ module Admin
 
       FIELDS = %i[title type tags body note].freeze
       PLAN = Blog::Types::ArtifactType["plan"]
+      KIND = Blog::Types::RecordKind["artifact"]
 
-      include Deps[artifact_queries: "agents.repos.artifact_queries"]
+      include Deps[artifact_queries: "agents.repos.artifact_queries", tag_queries: "tags.repos.tag_queries"]
 
       def call(artifact: nil, params: nil, errors: EMPTY_HASH)
-        { artifact:, values: params ? from_params(params) : from_artifact(artifact), errors: }
+        { artifact:, values: params ? from_params(params) : from_artifact(artifact), errors:,
+          choices: choices(artifact) }
       end
 
       private
+
+      def choices(artifact) = (tag_queries.project_choices(KIND, artifact.id) if artifact)
 
       def from_artifact(artifact)
         return { **FIELDS.to_h { [it, EMPTY_STRING] }, type: PLAN } unless artifact

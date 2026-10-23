@@ -12,6 +12,8 @@ module Agents
           has_many :agent_session_reads, view: :with_files
           has_many :memory_events, foreign_key: :session_id, view: :session_listed
           has_many :artifact_versions, foreign_key: :session_id, view: :session_listed
+          has_many :agent_session_tags
+          has_many :tags, through: :agent_session_tags, view: :in_name_order
         end
       end
 

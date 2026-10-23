@@ -7,10 +7,9 @@ module Agents
 
       stamped_commands :create, :update
       commands delete: :by_pk
+      tagged_by :artifact_tags
 
       def add_version(artifact_id, **) = artifact_versions.command(:create).call(artifact_id:, **)
-
-      def by_id_for_update(id) = artifacts.by_pk(id).lock.one
     end
   end
 end

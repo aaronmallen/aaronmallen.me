@@ -20,6 +20,7 @@ module Admin
               h3(class: "agent-session-title") { @session.title }
               p(class: "task-meta agent-session-meta") { meta }
               lists
+              yield
             end
           end
 
@@ -79,7 +80,8 @@ module Admin
           def lists
             list(t(".tasks"), @tasks) { task(it) } unless @tasks.empty?
             reads
-            writes
+            list(t(".changed"), @memory_changes) { change(it) }
+            list(t(".written"), @artifacts) { artifact(it) }
           end
 
           def loaded(load) = a(class: "record-link-title", href: memory_file(load.memory_file_id)) { load.path }
@@ -130,11 +132,6 @@ module Admin
           end
 
           def title = t(".title", date: l(Blog::TimeZone.local_date(@session.started_at), format: :medium))
-
-          def writes
-            list(t(".changed"), @memory_changes) { change(it) }
-            list(t(".written"), @artifacts) { artifact(it) }
-          end
         end
       end
     end

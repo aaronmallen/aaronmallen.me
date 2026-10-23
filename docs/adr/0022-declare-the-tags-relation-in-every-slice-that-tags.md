@@ -4,6 +4,7 @@ title: Declare the tags relation in every slice that tags
 status: active
 created: 2026-09-28
 area:
+  - agents
   - contact
   - db
   - decisions
@@ -27,6 +28,7 @@ amended:
   - "#1926"
   - "#1947"
   - "#1949"
+  - "#1953"
 tags:
   - tags
   - rom
@@ -57,9 +59,9 @@ then has several definitions. AA-561 item 2 found that `tags` has five, and aske
 
 ## Decision
 
-Each slice that tags declares its own `Relations::Tags` over the `tags` table: `contact`, `decisions`, `notes`,
-`posts`, `projects`, `record` and `tasks`, beside the one in `tags`. #957 added `contact` and `decisions` to this list,
-and #1926 added `notes`.
+Each slice that tags declares its own `Relations::Tags` over the `tags` table: `agents`, `contact`, `decisions`,
+`notes`, `posts`, `projects`, `record` and `tasks`, beside the one in `tags`. #957 added `contact` and `decisions` to
+this list, #1926 added `notes` and #1953 added `agents`.
 Each is `schema :tags, infer: true`, but for the one in `projects`, and includes `Blog::DB::Tags`
 (`lib/blog/db/tags.rb`), which holds what the relation does: `by_names`, `claim`, `next_color` and the rest. Each join
 relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins
@@ -68,17 +70,19 @@ join table's owner key, so a join relation says only `use :taggings`, and an own
 `use :tagged, through:`.
 
 A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` does. Since #1200 the decisions, posts,
-projects and journal entry repos, and since #1926 the notes repo, name their join relation with `tagged_by`, which
-`Blog::DB::Repo` turns into one shared `add_tag`, `remove_tag`, `replace_tags` and a locking `by_id_for_update`, and
-their tag and untag operations inherit `Blog::TagOperation`. Tasks and task rules keep their own. `claim` inserts each
-missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope (ADR
+projects and journal entry repos, since #1926 the notes repo and since #1953 the memory file and artifact repos, name
+their join relation with `tagged_by`, which `Blog::DB::Repo` turns into one shared `add_tag`, `remove_tag`,
+`replace_tags` and a locking `by_id_for_update`, and their tag and untag operations inherit `Blog::TagOperation`.
+Tasks, task rules and agent sessions keep their own. `claim` inserts each missing name with the least used colour and
+does nothing for a name that exists. Since #76 it claims within a scope (ADR
 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones. Since #992 the join relation's
 `retag`, `tag` and `untag` claim and write the tags, and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's
 scope once, for the owner slice and for the tags slice's counts. Since #1949 `Taggings::ADMITTED` names every scope each
 join takes, and the counts read it. Since #1947 a record related to a project claims within that project, and its join
 admits the project scope beside its own (ADR 0205). Since #1951 `retag` and `tag` take that project, `untag` takes a
 name off in any scope the join admits, and `carry` moves a record's tags by name into a new project or back to its
-own scope, making a missing name with the old tag's colour and description.
+own scope, making a missing name with the old tag's colour and description. Since #1953 a repo names a record's own
+project through a private `tag_project_id`, which `tagged_by` passes to the join's `retag` and `tag`.
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.

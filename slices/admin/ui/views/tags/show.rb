@@ -6,8 +6,9 @@ module Admin
       module Tags
         class Show < View
           LIVE_TABLES = %w[
-            decision_options decision_tags decisions journal_entries journal_entry_tags mail_thread_tags mail_threads
-            note_tags notes post_tags posts project_tags projects sprints task_comments task_contributors task_links
+            agent_session_tags agent_sessions artifact_tags artifacts decision_options decision_tags decisions
+            journal_entries journal_entry_tags mail_thread_tags mail_threads memory_file_tags memory_files note_tags
+            notes post_tags posts project_tags projects sprints task_comments task_contributors task_links
             task_series task_tags work_sessions
           ].freeze
           MAIL_THREAD = Blog::Types::RecordKind["mail_thread"]
@@ -25,6 +26,9 @@ module Admin
             decisions: [PRIVATE, :decision, ".kinds.decisions"],
             notes: [PRIVATE, :note, ".kinds.notes"],
             messages: [PRIVATE, :message, ".kinds.messages"],
+            agent_sessions: [PRIVATE, :agent_session, ".kinds.agent_sessions"],
+            memory_files: [PRIVATE, :memory_file, ".kinds.memory_files"],
+            artifacts: [PRIVATE, :artifact, ".kinds.artifacts"],
           }.freeze
           SCOPES = { PUBLIC => ".scopes.public", PRIVATE => ".scopes.private" }.freeze
 
@@ -44,6 +48,10 @@ module Admin
 
           private
 
+          def agent_session(session)
+            ListItem(title: session.title, href: path(:admin_agent_sessions, session: session.id))
+          end
+
           def all_link(kind)
             div(class: "review-foot") do
               a(class: "today-link", href: path(route, **params(kind))) do
@@ -51,6 +59,8 @@ module Admin
               end
             end
           end
+
+          def artifact(artifact) = ListItem(title: artifact.title, href: path(:admin_artifact, id: artifact.id))
 
           def back
             return BackLink(href: path(route, **params)) { heading } if @kind
@@ -99,6 +109,8 @@ module Admin
           end
 
           def label(scope) = @project ? @project.name : t(SCOPES.fetch(scope))
+
+          def memory_file(file) = ListItem(title: file.path, href: path(:admin_memory_file, id: file.id))
 
           def message(thread)
             ListItem(title: thread.subject, href: record_path(MAIL_THREAD, thread.id)) do |item|

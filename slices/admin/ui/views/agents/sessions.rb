@@ -9,7 +9,8 @@ module Admin
 
           LIVE_TABLES = %w[
             agent_session_index_lines agent_session_reads agent_session_search_hits agent_session_searches
-            agent_sessions artifact_versions artifacts memory_events memory_facts memory_files projects
+            agent_session_tags agent_sessions artifact_versions artifacts memory_events memory_facts memory_files
+            projects tags
           ].freeze
 
           prop :sessions, Blog::Types::Instance(Blog::Structs::Paged)
@@ -26,7 +27,7 @@ module Admin
 
             Card(class: "agent-days", aria: { label: t(".label") }) { days }
             Pager(page: @sessions, route: :admin_agent_sessions, params: filter) unless @sessions.rows.empty?
-            SessionDrawer(**@open) if @open
+            SessionDrawer(**@open.except(:project_key)) { session_tags } if @open
           end
 
           private
@@ -64,6 +65,12 @@ module Admin
           end
 
           def row(session) = SessionRow(session:, project: @projects[session.project_id], place:)
+
+          def session_tags
+            session = @open.fetch(:session)
+
+            RecordTags(tags: session.tags, kind: :agent_session, id: session.id, project_key: @open[:project_key])
+          end
 
           def span = t(".lede.span", sessions: @span[:sessions], count: [(@today - @span[:first]).to_i + 1, 1].max)
         end

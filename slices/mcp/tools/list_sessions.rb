@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ListSessions < Base
       description "List agent sessions, newest first, or only those of one project, each with its agent, model, " \
-                  "client, project, repo, branch, tasks, the memory files it loaded, the memory changes and " \
+                  "client, project, repo, branch, tasks, tags, the memory files it loaded, the memory changes and " \
                   "artifact versions it wrote, and when it started, was last seen and ended, or null while it " \
                   "runs. #{API::Helpers::Paging::USAGE}. #{Untrusted::SESSIONS}"
       endpoint

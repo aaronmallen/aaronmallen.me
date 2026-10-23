@@ -3,10 +3,10 @@
 RSpec.describe "API reading a tag", type: :request do
   def ids(answer, kind) = records(answer, kind).map { it.fetch("id") }
 
-  def kinds = %w[posts projects tasks journal_entries decisions]
+  def kinds = %w[posts projects tasks journal_entries decisions agent_sessions memory_files artifacts]
 
-  def read(name, **query)
-    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
+  def read(name, token: api_token, **query)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{token}" }
     get "/api/v1/tags/#{name}", query, headers
     JSON.parse(last_response.body)
   end
@@ -44,7 +44,7 @@ RSpec.describe "API reading a tag", type: :request do
       end
 
       it "counts each kind" do
-        expect(read("ruby").fetch("counts")).to eq(records_by_kind.transform_values { 1 })
+        expect(read("ruby").fetch("counts")).to eq(kinds.to_h { [it, 0] }.merge(records_by_kind.transform_values { 1 }))
       end
 
       it "gives the opening of each journal entry" do
@@ -60,7 +60,7 @@ RSpec.describe "API reading a tag", type: :request do
       end
 
       it "answers the same JSON as read_tag" do
-        expect(trusted(mcp_answer("read_tag", name: "ruby"))).to eq(read("ruby"))
+        expect(trusted(mcp_answer("read_tag", name: "ruby"))).to eq(read("ruby", token: api_token(mcp_scopes)))
       end
     end
 

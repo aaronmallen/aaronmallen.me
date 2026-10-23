@@ -15,6 +15,7 @@ module Admin
           prop :errors, Blog::Types::Hash
           prop :heading, Blog::Types::String
           prop :back, Blog::Types::String
+          prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)).optional, default: nil
 
           def view_template
             PageHead(title: @heading, kicker: @artifact&.title) do
@@ -67,7 +68,10 @@ module Admin
 
           def tags_field
             field(:tags, t(".tags")) do |control|
-              Input(**control, name: "artifact[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"))
+              TagField(
+                control:, name: "artifact[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"),
+                tags: @choices,
+              )
             end
           end
 

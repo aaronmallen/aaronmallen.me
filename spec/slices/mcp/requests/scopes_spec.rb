@@ -59,7 +59,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         add_memory_fact create_artifact create_memory_file delete_artifact delete_memory_file describe_memory_file
         edit_memory_fact end_session list_artifacts list_sessions move_memory_file read_artifact read_memory
         read_memory_file remove_memory_fact restore_artifact_version revert_memory_event search_memory start_session
-        update_artifact
+        tag_memory_file tag_session untag_memory_file untag_session update_artifact
       ],
       "notes" => %w[
         create_note create_note_folder delete_note describe_note_folder duplicate_note edit_note list_note_folders

@@ -1,6 +1,6 @@
 - example: "API artifacts answers a version past the latest with a 404"
 - example: "API artifacts deletes an artifact for a token with agents and delete"
-- example: "API artifacts keeps the tags it is given, lowercased"
+- example: "API artifacts keeps the tags it is given, lowercased, in name order"
 - example: "API artifacts refuses a tag that is not a slug"
 - example: "API artifacts refuses a type it does not know"
 - example: "API artifacts refuses artifacts to a token without agents"

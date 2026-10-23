@@ -36,6 +36,7 @@ module Admin
 
           {
             session:, project: projects[session.project_id], tasks: tasks(session),
+            project_key: project_queries.keys([session.project_id])[session.project_id],
             memory_changes: agent_session_queries.memory_changes(id),
             artifacts: agent_session_queries.artifact_writes(id),
           }

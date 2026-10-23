@@ -2,6 +2,8 @@
 
 module Tags
   class Slice < Hanami::Slice
+    import keys: %w[repos.agent_session_queries repos.artifact_queries repos.memory_file_queries], from: :agents
+
     import keys: %w[repos.decision_queries], from: :decisions
 
     import keys: %w[repos.thread_queries], from: :mail

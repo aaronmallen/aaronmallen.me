@@ -9,7 +9,11 @@ module API
       TITLE_LIMIT = ::Agents::Contracts::ArtifactContract::TITLE_LIMIT
       BODY = { type: "string", description: "the body, in Markdown, #{BODY_LIMIT} characters at most" }.freeze
       NOTE = { type: "string", description: "what the change does, #{NOTE_LIMIT} characters at most" }.freeze
-      TAGS = Helpers::Schema::TAGS.merge(description: "its tags, #{Helpers::Tags::FORMAT}").freeze
+      TAGS = Helpers::Schema::TAGS.merge(
+        description:
+          "its tags, #{Helpers::Tags::FORMAT}; an artifact linked to a project takes that project's own tags, made " \
+          "there when missing, and one with no project link takes private tags",
+      ).freeze
       TITLE = { type: "string", description: "its title, #{TITLE_LIMIT} characters at most" }.freeze
       TYPE = { type: "string", enum: Blog::Types::ArtifactType.values }.freeze
 

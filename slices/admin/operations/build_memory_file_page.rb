@@ -11,6 +11,7 @@ module Admin
         build_memories_page: "operations.build_memories_page",
         list_record_links: "operations.list_record_links",
         memory_file_queries: "agents.repos.memory_file_queries",
+        project_queries: "projects.repos.project_queries",
       ]
 
       def call(id, page: first_page, form: EMPTY, records: EMPTY)
@@ -20,7 +21,7 @@ module Admin
         history = memory_file_queries.history(id, page)
 
         {
-          file:, form:, history:,
+          file:, form:, history:, project_key: project_queries.keys([file.project_id])[file.project_id],
           described_at: memory_file_queries.described_at(id) || file.created_at,
           history_count: memory_file_queries.history_count(id),
           history_marks: memory_file_queries.history_marks(history.rows),

@@ -17,7 +17,7 @@ module Agents
 
         transaction do
           artifact = step found(artifact_mutations.by_id_for_update(id))
-          artifact_mutations.update(id, { **fields.slice(:type, :tags), **retitled(artifact, **fields) })
+          rewrite(artifact, fields)
           revise(artifact, **fields.slice(:body, :note, :agent, :model, :session_id))
           artifact_queries.by_id(id)
         end
@@ -33,6 +33,11 @@ module Agents
         return if artifact_queries.version_row(artifact.id, artifact.version).body == body
 
         artifact_mutations.add_version(artifact.id, body:, **)
+      end
+
+      def rewrite(artifact, fields)
+        artifact_mutations.update(artifact.id, { type: fields[:type], **retitled(artifact, **fields) })
+        artifact_mutations.replace_tags(artifact.id, fields[:tags])
       end
     end
   end

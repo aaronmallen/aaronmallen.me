@@ -11,7 +11,8 @@ module Agents
       operations.edit_memory_fact operations.end_session operations.find_project operations.load_memory
       operations.record_loads operations.record_read operations.record_search operations.remove_memory_fact
       operations.restore_artifact_version operations.revert_memory_event operations.search_memory
-      operations.start_session operations.update_artifact repos.agent_session_queries repos.artifact_queries
+      operations.start_session operations.tag_memory_file operations.tag_session operations.untag_memory_file
+      operations.untag_session operations.update_artifact repos.agent_session_queries repos.artifact_queries
       repos.memory_file_queries
     ]
   end

@@ -17,6 +17,8 @@ module Projects
 
       def ids_by_slug(slugs) = projects.slugged(slugs)
 
+      def keys(ids) = projects.where(id: ids).pluck(:id, :key).to_h
+
       def live = with_tags.live.in_order.to_a
 
       def live_by_name = projects.live.in_name_order.to_a

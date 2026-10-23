@@ -3,9 +3,12 @@
 module Agents
   module Relations
     class Artifacts < Blog::DB::Relation
-      TAGS = Sequel.function(:array_to_string, :tags, " ")
-
-      schema :artifacts, infer: true
+      schema :artifacts, infer: true do
+        associations do
+          has_many :artifact_tags
+          has_many :tags, through: :artifact_tags, view: :in_name_order
+        end
+      end
 
       def latest_version_first
         current = { artifact_id: self[:id].qualified, number: self[:version].qualified }
@@ -22,10 +25,18 @@ module Agents
         pattern = like_pattern(text)
         bodies = artifact_versions.current.where(Sequel.ilike(:body, pattern)).dataset.unordered.select(:artifact_id)
 
-        where(Sequel.|(Sequel.ilike(:title, pattern), Sequel.ilike(TAGS, pattern), { id: bodies }))
+        where(Sequel.|(Sequel.ilike(:title, pattern), { id: tagged(pattern) }, { id: bodies }))
       end
 
       def recently_updated = order(self[:updated_at].desc, self[:id].desc)
+
+      private
+
+      def tagged(pattern)
+        named = Sequel.ilike(Blog::DB::Plugins::Taggings::NAME, pattern)
+
+        artifact_tags.dataset.unordered.join(:tags, id: :tag_id).where(named).select(:artifact_id)
+      end
     end
   end
 end

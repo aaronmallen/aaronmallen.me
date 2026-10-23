@@ -167,7 +167,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
 
     it "shows no index, searches or files read for a session from before reads" do
       expect(drawer.all(".field > .f").map(&:text))
-        .to eq(["Worked on", "Memory it read", "Memory it changed", "Artifacts it wrote"])
+        .to eq(["Worked on", "Memory it read", "Memory it changed", "Artifacts it wrote", "Tags"])
     end
 
     it "lists the memory it changed with the fact's text", :aggregate_failures do
@@ -349,7 +349,7 @@ RSpec.describe "Admin agent sessions", :frozen_clock, type: :request do
       open_drawer
 
       expect(drawer.all(".field > .f").map(&:text))
-        .to eq(["Index it started with", "Searches", "Files read", "Memory it changed", "Artifacts it wrote"])
+        .to eq(["Index it started with", "Searches", "Files read", "Memory it changed", "Artifacts it wrote", "Tags"])
     end
 
     it "shows each read's time, scope and path, repeats included", :aggregate_failures do

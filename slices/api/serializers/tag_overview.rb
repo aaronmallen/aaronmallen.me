@@ -55,6 +55,27 @@ module API
             received_at: Helpers::Schema::STAMP,
           },
         ),
+        agent_sessions: Helpers::Schema.object(
+          {
+            id: Helpers::Schema::INTEGER,
+            title: { type: "string", description: "what the session was for; marked untrusted" },
+            started_at: Helpers::Schema::STAMP,
+          },
+        ),
+        memory_files: Helpers::Schema.object(
+          {
+            id: Helpers::Schema::INTEGER,
+            path: Helpers::Schema::STRING,
+            scope: { type: "string", enum: Blog::Types::MemoryScope.values },
+          },
+        ),
+        artifacts: Helpers::Schema.object(
+          {
+            id: Helpers::Schema::INTEGER,
+            title: { type: "string", description: "its title; marked untrusted when an agent set it" },
+            type: { type: "string", enum: Blog::Types::ArtifactType.values },
+          },
+        ),
       }.freeze
 
       COUNTS = Helpers::Schema.object({}, optional: ROWS.transform_values { Helpers::Schema::INTEGER })
@@ -69,6 +90,18 @@ module API
       attributes :name, :descriptions, :counts
       ROWS.each_key { |kind| attributes kind, if: proc { it.pages.key?(kind) } }
 
+      def agent_sessions(overview)
+        paged(overview, :agent_sessions) { { id: it.id, title: untrusted(it.title), started_at: stamp(it.started_at) } }
+      end
+
+      def artifacts(overview)
+        paged(overview, :artifacts) do |artifact|
+          title = artifact.title_by_agent? ? untrusted(artifact.title) : artifact.title
+
+          { id: artifact.id, title:, type: artifact.type }
+        end
+      end
+
       def decisions(overview) = paged(overview, :decisions) { { id: it.id, title: it.title, status: it.status } }
 
       def descriptions(overview)
@@ -81,6 +114,8 @@ module API
       def journal_entries(overview)
         paged(overview, :journal_entries) { { id: it.id, date: day(it.entry_date), opening: it.body } }
       end
+
+      def memory_files(overview) = paged(overview, :memory_files) { { id: it.id, path: it.path, scope: it.scope } }
 
       def messages(overview)
         paged(overview, :messages) do |thread|

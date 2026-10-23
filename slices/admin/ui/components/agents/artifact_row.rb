@@ -10,7 +10,7 @@ module Admin
           prop :artifact, Blog::Types::Instance(ROM::Struct)
           prop :current, Blog::Types::Instance(ROM::Struct)
           prop :links, Blog::Types::Integer
-          prop :colors, Blog::Types::Hash
+          prop :keys, Blog::Types::Hash
 
           def view_template
             div(class: "artifact-row", data: { key_row: true }) do
@@ -43,7 +43,7 @@ module Admin
             span { t(".version", number: @current.number) }
             span { written }
             links
-            ArtifactTags(tags: @artifact.tags, colors: @colors)
+            ArtifactTags(tags: @artifact.tags, keys: @keys)
           end
 
           def written

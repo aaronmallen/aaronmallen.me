@@ -7,7 +7,7 @@ module Agents
         memory_events.where(created_at: Range.new(*Blog::TimeZone.day_bounds(on, on), true)).exclude(agent: nil).count
       end
 
-      def by_id(id) = memory_files.combine(:memory_facts).by_pk(id).one
+      def by_id(id) = memory_files.combine(:memory_facts, :tags).by_pk(id).one
 
       def described_at(memory_file_id) = memory_events.last_described_at(memory_file_id)
 
@@ -46,6 +46,10 @@ module Agents
 
       def loaded(project_ids:, task_ids:)
         memory_files.combine(:memory_facts).loading(project_ids:, task_ids:).in_load_order.to_a
+      end
+
+      def page_by_tag(tag_ids, page)
+        page.fill(memory_files.carrying(:memory_file_tags, tag_ids).in_load_order.paged(page).to_a)
       end
 
       def scope_counts = memory_files.tally(:scope, Blog::Types::MemoryScope.values)

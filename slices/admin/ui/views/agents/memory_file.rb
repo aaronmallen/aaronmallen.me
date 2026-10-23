@@ -7,7 +7,9 @@ module Admin
         class MemoryFile < View
           include Components::Agents
 
-          LIVE_TABLES = %w[agent_sessions memory_events memory_facts memory_files projects record_links tasks].freeze
+          LIVE_TABLES = %w[
+            agent_sessions memory_events memory_facts memory_file_tags memory_files projects record_links tags tasks
+          ].freeze
 
           prop :file, Blog::Types::Instance(ROM::Struct)
           prop :described_at, Blog::Types::Time
@@ -17,6 +19,7 @@ module Admin
           prop :scopes, Blog::Types::Array
           prop :form, Blog::Types::Hash
           prop :records, Blog::Types::Hash
+          prop :project_key, Blog::Types::String.optional
 
           def view_template
             content_for(:live_tables, LIVE_TABLES)
@@ -78,11 +81,14 @@ module Admin
           def side
             Card(class: "flat") do
               scope_form
+              tags
               linked
             end
             MemoryHistory(file: @file, events: @history, count: @history_count, **@history_marks)
             div { delete_form }
           end
+
+          def tags = RecordTags(tags: @file.tags, kind: :memory_file, id: @file.id, project_key: @project_key)
         end
       end
     end

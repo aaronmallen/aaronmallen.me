@@ -26,7 +26,8 @@ module Admin
       operations.add_memory_fact operations.change_memory_scope operations.create_artifact operations.create_memory_file
       operations.delete_artifact operations.delete_memory_file operations.describe_memory_file
       operations.edit_memory_fact operations.load_memory operations.remove_memory_fact
-      operations.restore_artifact_version operations.revert_memory_event operations.update_artifact
+      operations.restore_artifact_version operations.revert_memory_event operations.tag_memory_file
+      operations.tag_session operations.untag_memory_file operations.untag_session operations.update_artifact
       repos.agent_session_queries repos.artifact_queries repos.memory_file_queries
     ], from: :agents
 

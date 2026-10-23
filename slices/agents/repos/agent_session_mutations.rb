@@ -5,6 +5,8 @@ module Agents
     class AgentSessionMutations < Blog::DB::Repo
       root :agent_sessions
 
+      def add_tag(id, name) = agent_session_tags.tag(id, [name], tags, project_id: project_id(id))
+
       def by_id_for_update(id) = agent_sessions.by_pk(id).lock.one
 
       def close_idle(before) = agent_sessions.idle(before).update(ended_at: Sequel[:last_seen_at])
@@ -42,6 +44,8 @@ module Agents
         agent_session_search_hits.dataset.multi_insert(rows) unless rows.empty?
       end
 
+      def remove_tag(id, name) = agent_session_tags.untag(id, [name], tags)
+
       def start(task_ids:, **fields)
         id = agent_sessions.command(:create).call(fields).fetch(:id)
         agent_session_tasks.command(:create, result: :many).call(task_ids.map { { agent_session_id: id, task_id: it } })
@@ -49,6 +53,10 @@ module Agents
       end
 
       def touch(id, at) = agent_sessions.by_pk(id).running.update(last_seen_at: at)
+
+      private
+
+      def project_id(id) = agent_sessions.by_pk(id).pluck(:project_id).first
     end
   end
 end

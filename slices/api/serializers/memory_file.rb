@@ -15,6 +15,7 @@ module API
           project_id: Helpers::Schema.nullable({ type: "integer", description: "the project of a project file" }),
           task_id: Helpers::Schema.nullable({ type: "integer", description: "the task of a task file" }),
           facts: Helpers::Schema.list(MemoryFact.reference).merge(description: "the facts it holds, oldest first"),
+          tags: Helpers::Schema::TAGS.merge(description: "its tags; a project file's are its project's own tags"),
           created_at: Helpers::Schema::STAMP,
           updated_at: Helpers::Schema::STAMP,
         },
@@ -26,6 +27,8 @@ module API
       def description(file) = file.description_by_agent? ? untrusted(file.description) : file.description
 
       def facts(file) = MemoryFact.new(file.facts).serializable_hash
+
+      def tags(file) = file.tags.map(&:name)
     end
   end
 end

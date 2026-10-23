@@ -48,6 +48,8 @@ module Admin
     post "/agents/memories/:id/records", to: "agents.memories.link_record", as: :link_memory_file_record, id: ID
     post "/agents/memories/:id/description", to: "agents.memories.describe", as: :describe_memory_file, id: ID
     post "/agents/memories/:id/scope", to: "agents.memories.change_scope", as: :change_memory_file_scope, id: ID
+    post "/agents/memories/:id/tags", to: "agents.memories.tag", as: :tag_memory_file, id: ID
+    post "/agents/memories/:id/tags/delete", to: "agents.memories.untag", as: :untag_memory_file, id: ID
     post "/agents/memories/:id/facts", to: "agents.memories.add_fact", as: :add_memory_file_fact, id: ID
     post(
       "/agents/memories/:id/facts/:fact_id",
@@ -62,6 +64,8 @@ module Admin
       to: "agents.memories.revert_event", as: :revert_memory_file_event, id: ID, event_id: ID,
     )
     get "/agents/sessions", to: "agents.sessions", as: :agent_sessions
+    post "/agents/sessions/:id/tags", to: "agents.tag_session", as: :tag_agent_session, id: ID
+    post "/agents/sessions/:id/tags/delete", to: "agents.untag_session", as: :untag_agent_session, id: ID
     get "/analytics", to: "analytics.show", as: :analytics
     get "/attention/menu", to: "today.attention_menu", as: :attention_menu
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention

@@ -8,6 +8,8 @@ module Agents
       schema :memory_files, infer: true do
         associations do
           has_many :memory_facts, view: :live_in_order
+          has_many :memory_file_tags
+          has_many :tags, through: :memory_file_tags, view: :in_name_order
         end
       end
 

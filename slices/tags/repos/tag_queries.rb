@@ -4,7 +4,10 @@ module Tags
   module Repos
     class TagQueries < Blog::DB::Repo
       include Deps[
+        agent_session_queries: "agents.repos.agent_session_queries",
+        artifact_queries: "agents.repos.artifact_queries",
         decision_queries: "decisions.repos.decision_queries",
+        memory_file_queries: "agents.repos.memory_file_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         note_queries: "notes.repos.note_queries",
         post_tag_queries: "posts.repos.post_tag_queries",
@@ -16,7 +19,8 @@ module Tags
       KINDS = {
         posts: :post_tag_queries, projects: :project_queries, tasks: :task_queries,
         journal_entries: :journal_entry_queries, decisions: :decision_queries, notes: :note_queries,
-        messages: :thread_queries,
+        messages: :thread_queries, agent_sessions: :agent_session_queries, memory_files: :memory_file_queries,
+        artifacts: :artifact_queries,
       }.freeze
       PRIVATE = Blog::Types::TagScope["private"]
       PROJECT = Blog::Types::TagScope["project"]

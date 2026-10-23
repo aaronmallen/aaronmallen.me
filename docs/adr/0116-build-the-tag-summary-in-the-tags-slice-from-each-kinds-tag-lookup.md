@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area:
   - admin
+  - agents
   - api
   - mcp
   - decisions
@@ -22,6 +23,7 @@ amended:
   - "#1947"
   - "#1950"
   - "#1952"
+  - "#1953"
 tags:
   - tags
   - summary
@@ -66,7 +68,9 @@ entries) and `decisions` each export `page_by_tag`, a paged query that keeps eve
 ids of the tags the summary found rather than a name, and reads their join table through the relation's `carrying`,
 so a public, private or project tag of one name lists only what it carries. Since #1952 `notes` and `mail` export
 it too, and only a project's tag page lists notes and mail threads; `read_tag` leaves each out for a token without
-its scope. `tags` imports those seven. The counts
+its scope. Since #1953 `agents` exports it for agent sessions, memory files and artifacts, which both tag pages list,
+and `read_tag` leaves those three out for a token without the agents scope ([ADR 0188][0188]). `tags` imports those
+eight. The counts
 read the tag join tables, such as `post_tags`, through the `tags` relation. Past those joins, the query holds no SQL
 over another slice's tables.
 
@@ -93,7 +97,7 @@ tables lack.
 
 The summary needs no schema change, and each kind keeps the rule for what counts as tagged in its own slice.
 
-`tags` turns from a leaf into a slice that depends on seven others. None of them may import from `tags` now without
+`tags` turns from a leaf into a slice that depends on eight others. None of them may import from `tags` now without
 closing a cycle, which [ADR 0003][0003] bars.
 
 A summary costs a count and a page query per kind, plus the tag lookup. Paging keeps it cheap however many records
@@ -108,5 +112,6 @@ drafts or private records through it. Only `tags` imports them.
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0096]: 0096-search-every-kind-through-tsvector-columns-and-one-view-in-a-search-slice.md
 [0100]: 0100-build-the-review-in-one-activity-query-that-admin-and-api-share.md
+[0188]: 0188-gate-agent-memory-artifacts-and-sessions-behind-an-agents-scope.md
 [0205]: 0205-give-each-project-its-own-tags-through-a-project-scope-on-tags.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

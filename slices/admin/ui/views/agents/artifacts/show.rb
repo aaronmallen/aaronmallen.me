@@ -9,7 +9,7 @@ module Admin
             include Components::Agents
 
             KIND = Blog::Types::RecordKind["artifact"]
-            LIVE_TABLES = %w[artifact_versions artifacts record_links].freeze
+            LIVE_TABLES = %w[artifact_tags artifact_versions artifacts record_links tags].freeze
             RENDERER = Blog::Types::MarkdownRenderer["tasks"]
 
             prop :artifact, Blog::Types::Instance(ROM::Struct)
@@ -17,7 +17,7 @@ module Admin
             prop :first_version, Blog::Types::Instance(ROM::Struct)
             prop :versions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
             prop :records, Blog::Types::Hash
-            prop :colors, Blog::Types::Hash
+            prop :keys, Blog::Types::Hash
 
             def view_template
               content_for(:live_tables, LIVE_TABLES)
@@ -65,7 +65,7 @@ module Admin
               Card do
                 p(class: "read-meta") do
                   span { t(".created", when: written(@first_version)) }
-                  ArtifactTags(tags: @artifact.tags, colors: @colors)
+                  ArtifactTags(tags: @artifact.tags, keys: @keys)
                 end
               end
             end

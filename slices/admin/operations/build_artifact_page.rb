@@ -6,12 +6,11 @@ module Admin
       include Blog::Constants
 
       KIND = Blog::Types::RecordKind["artifact"]
-      TAG_SCOPE = Blog::Types::TagScope["private"]
 
       include Deps[
         artifact_queries: "agents.repos.artifact_queries",
         list_record_links: "operations.list_record_links",
-        tag_queries: "tags.repos.tag_queries",
+        project_queries: "projects.repos.project_queries",
       ]
 
       def call(id, number: nil, records: EMPTY_HASH)
@@ -25,7 +24,7 @@ module Admin
 
         { artifact:, shown:, first_version: versions.first, versions: versions.reverse,
           records: list_record_links.call(KIND, id, **records),
-          colors: tag_queries.colors_named(TAG_SCOPE, artifact.tags) }
+          keys: project_queries.keys(artifact.tags.filter_map(&:project_id)) }
       end
     end
   end

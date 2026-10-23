@@ -5,18 +5,10 @@ module Admin
     module Components
       module Agents
         class ArtifactTags < Component
-          FALLBACK = :violet
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :keys, Blog::Types::Hash
 
-          prop :tags, Blog::Types::Array.of(Blog::Types::String)
-          prop :colors, Blog::Types::Hash
-
-          def view_template
-            @tags.each do |tag|
-              span(class: ["tag", (Blog::UI::Components::Pill.for_tag_color(@colors[tag]) || FALLBACK).to_s]) do
-                "#{Tag::PREFIX}#{tag}"
-              end
-            end
-          end
+          def view_template = @tags.each { Tag(tag: it, project_key: @keys[it.project_id]) }
         end
       end
     end

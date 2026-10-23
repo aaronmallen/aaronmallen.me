@@ -19,6 +19,7 @@ module API
           repo: Helpers::Schema.nullable(Helpers::Schema::REPO),
           branch: Helpers::Schema.nullable(TEXT.merge(description: "the branch it worked on#{MARKED}")),
           task_ids: Helpers::Schema.list(Helpers::Schema::INTEGER).merge(description: "the tasks it worked on"),
+          tags: Helpers::Schema::TAGS.merge(description: "its tags; a session in a project has its project's own tags"),
           loaded: Helpers::Schema.list(
             Helpers::Schema.object({ memory_file_id: Helpers::Schema::INTEGER, path: Helpers::Schema::STRING }),
           ).merge(description: "the memory files start_session loaded, by path"),
@@ -61,6 +62,8 @@ module API
           { event_id: event.id, memory_file_id: event.memory_file_id, op: event.op, fact_id: event.memory_fact_id }
         end
       end
+
+      def tags(session) = session.tags.map(&:name)
 
       def task_ids(session) = session.agent_session_tasks.map(&:task_id)
 

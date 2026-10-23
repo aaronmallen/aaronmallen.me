@@ -3,7 +3,10 @@
 module API
   module Endpoints
     class ReadTag < Endpoint
-      GATED = { OperationTable::MAIL => :messages, OperationTable::NOTES => :notes }.freeze
+      GATED = {
+        OperationTable::AGENTS => %i[agent_sessions memory_files artifacts], OperationTable::MAIL => :messages,
+        OperationTable::NOTES => :notes,
+      }.freeze
       SCOPED = true
       SCHEMA = {
         additionalProperties: false,
@@ -18,7 +21,8 @@ module API
             enum: Blog::Types::TagKind.values,
             description: [
               "one kind to page through; every kind when you leave it out.",
-              "Only a project's own tag has notes and messages, and each needs its scope",
+              "Only a project's own tag has notes and messages, and each needs its scope; agent sessions, memory " \
+              "files and artifacts need the agents scope",
             ].join(" "),
           },
           page: Helpers::Paging::PAGE,
@@ -34,12 +38,15 @@ module API
         project_id = project_queries.id_by_key(project.strip) if project
         return missing("project", project, by: "key") if project && !project_id
 
-        hidden = GATED.except(*scopes).values
-        overview = tag_queries.overview(name.strip.downcase, page_of(page), kind:, project_id:, hidden:)
+        overview = tag_queries.overview(name.strip.downcase, page_of(page), kind:, project_id:, hidden: gated(scopes))
         return missing("tag", name, by: "name") if overview.nil?
 
         Success(serialized(Serializers::TagOverview, overview))
       end
+
+      private
+
+      def gated(scopes) = GATED.except(*scopes).values.flatten
     end
   end
 end

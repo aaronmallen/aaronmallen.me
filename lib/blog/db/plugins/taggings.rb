@@ -19,6 +19,9 @@ module Blog
           task_rule_tags: { owner_key: :task_rule_id, scope: PRIVATE, kind: :task_rules },
           mail_thread_tags: { owner_key: :mail_thread_id, scope: PRIVATE, kind: :messages, record: "mail_thread" },
           note_tags: { owner_key: :note_id, scope: PRIVATE, kind: :notes, record: "note" },
+          agent_session_tags: { owner_key: :agent_session_id, scope: PRIVATE, kind: :agent_sessions },
+          memory_file_tags: { owner_key: :memory_file_id, scope: PRIVATE, kind: :memory_files },
+          artifact_tags: { owner_key: :artifact_id, scope: PRIVATE, kind: :artifacts, record: "artifact" },
         }.freeze
         LINKED_PROJECT = "project"
         SCOPES = TABLES.transform_values { it.fetch(:scope) }.freeze

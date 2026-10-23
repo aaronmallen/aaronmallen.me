@@ -6,12 +6,11 @@ module Admin
       module Artifacts
         class Index < Action
           KIND = Blog::Types::RecordKind["artifact"]
-          TAG_SCOPE = Blog::Types::TagScope["private"]
           WEEK = 7 * 86_400
 
           include Deps[
-            artifact_queries: "agents.repos.artifact_queries", record_link_queries: "links.repos.record_link_queries",
-            tag_queries: "tags.repos.tag_queries",
+            artifact_queries: "agents.repos.artifact_queries", project_queries: "projects.repos.project_queries",
+            record_link_queries: "links.repos.record_link_queries",
           ]
 
           def handle(request, response)
@@ -32,7 +31,7 @@ module Admin
             ids = found.map(&:id)
 
             { current: artifact_queries.current_versions(ids), linked: record_link_queries.counts(KIND, ids),
-              colors: tag_queries.colors_named(TAG_SCOPE, found.flat_map(&:tags)) }
+              keys: project_queries.keys(found.flat_map(&:tags).filter_map(&:project_id)) }
           end
 
           def totals

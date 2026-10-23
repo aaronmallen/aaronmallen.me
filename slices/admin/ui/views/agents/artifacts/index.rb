@@ -8,7 +8,7 @@ module Admin
           class Index < View
             include Components::Agents
 
-            LIVE_TABLES = %w[artifact_versions artifacts record_links].freeze
+            LIVE_TABLES = %w[artifact_tags artifact_versions artifacts record_links tags].freeze
             SEARCH_ID = "artifacts-search"
 
             prop :artifacts, Blog::Types::Instance(Blog::Structs::Paged)
@@ -17,7 +17,7 @@ module Admin
             prop :week, Blog::Types::Integer
             prop :current, Blog::Types::Hash
             prop :linked, Blog::Types::Hash
-            prop :colors, Blog::Types::Hash
+            prop :keys, Blog::Types::Hash
 
             def view_template
               content_for(:live_tables, LIVE_TABLES)
@@ -41,8 +41,7 @@ module Admin
 
               @artifacts.rows.each do |artifact|
                 ArtifactRow(
-                  artifact:, current: @current.fetch(artifact.id), links: @linked.fetch(artifact.id,
-                                                                                        0), colors: @colors,
+                  artifact:, current: @current.fetch(artifact.id), links: @linked.fetch(artifact.id, 0), keys: @keys,
                 )
               end
             end

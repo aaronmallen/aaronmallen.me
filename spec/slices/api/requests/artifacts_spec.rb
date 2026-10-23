@@ -22,10 +22,10 @@ RSpec.describe "API artifacts", type: :request do
                               "versions" => [include("agent" => "claude-code", "model" => "claude-opus-5-5")])])
   end
 
-  it "keeps the tags it is given, lowercased" do
+  it "keeps the tags it is given, lowercased, in name order" do
     call_api(:patch, "/artifacts/#{artifact}", { tags: %w[Site perf], **author })
 
-    expect(document.fetch("tags")).to eq(%w[site perf])
+    expect(document.fetch("tags")).to eq(%w[perf site])
   end
 
   it "refuses a tag that is not a slug" do
