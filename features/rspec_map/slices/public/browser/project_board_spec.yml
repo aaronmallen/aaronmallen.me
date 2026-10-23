@@ -14,3 +14,5 @@
 - example: "Project board views shows board-list at 700px with script off"
 - example: "Project board views shows the board at 390px when the param asks"
 - example: "Project board views shows the list at 1200px when the param asks"
+- example: "Project board views the filter adds a tag to the filter when a card's tag is clicked"
+- example: "Project board views the filter suggests the project tags after label:"

@@ -96,6 +96,28 @@ RSpec.describe "Project board views", type: :feature do
     end
   end
 
+  describe "the filter" do
+    before do
+      create(:task, title: "Record the intro", project_id: Projects::Slice["repos.project_queries"].public_board("sai").id,
+                    tags: %w[audio])
+      at(1200)
+      visit_board("view=board")
+    end
+
+    it "adds a tag to the filter when a card's tag is clicked", :aggregate_failures do
+      find(".board .board-tags a.tag", text: "#audio").click
+
+      expect(page).to have_field("q", with: "label:audio")
+      expect(page.all(".board .board-title").map(&:text)).to eq(["Record the intro"])
+    end
+
+    it "suggests the project tags after label:" do
+      find_field("q").send_keys("label:")
+
+      expect(page).to have_css(".task-filter-list [role='option']", text: "#audio")
+    end
+  end
+
   it "keeps the list inside a phone with tap targets of 44px", :aggregate_failures do
     at(390)
     visit_board

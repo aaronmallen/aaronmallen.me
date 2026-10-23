@@ -97,8 +97,8 @@ module Tasks
         on_project(listed, project_id, query).where(id: shown(project_id, sizes, query)).order(*BOARD_ORDER).to_a
       end
 
-      def on_public_board(project_id, sizes)
-        on_project(tasks.labelled, project_id).where(id: shown(project_id, sizes)).order(*BOARD_ORDER).to_a
+      def on_public_board(id, sizes, query = nil)
+        on_project(tasks.labelled.combine(:tags), id, query).where(id: shown(id, sizes, query)).order(*BOARD_ORDER).to_a
       end
 
       def on_public_board_by_number(project_id, number)

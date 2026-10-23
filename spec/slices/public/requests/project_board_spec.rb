@@ -125,8 +125,8 @@ RSpec.describe "Project board", type: :request do
       expect(page).to have_css("a.board-card[href='/projects/doing-it/tasks/#{task.number}']", text: "Ship it")
     end
 
-    it "leaves the tags, note and time off a card", :aggregate_failures do
-      link(create(:task, note: "secret note", tags: %w[private-tag], worked_seconds: 3600), project)
+    it "leaves the note and time off a card", :aggregate_failures do
+      link(create(:task, note: "secret note", worked_seconds: 3600), project)
       get "/projects/doing-it"
 
       expect(column("backlog").find("li").all("*").map(&:tag_name)).to eq(%w[a span span])
@@ -179,12 +179,12 @@ RSpec.describe "Project board", type: :request do
         expect(row.all("span").map(&:text)).to eq(["DOI-1", "Ship it"])
       end
 
-      it "leaves the tags, note and time off a row", :aggregate_failures do
-        link(create(:task, note: "secret note", tags: %w[private-tag], worked_seconds: 3600), project)
+      it "leaves the note and time off a row", :aggregate_failures do
+        link(create(:task, note: "secret note", worked_seconds: 3600), project)
         get "/projects/doing-it"
 
         expect(group("backlog").find("li").all("*").map(&:tag_name)).to eq(%w[a span span])
-        expect(page).to have_no_text("private-tag")
+        expect(page).to have_no_text("secret note")
       end
     end
 
@@ -308,6 +308,90 @@ RSpec.describe "Project board", type: :request do
         get "/projects/doing-it"
 
         expect(titles("canceled")).to eq(%w[Newest Middle])
+      end
+    end
+
+    describe "its tags and filter" do
+      def choices = JSON.parse(page.find("[data-task-filter]")["data-task-filter"])
+
+      def tag_into(task, tag)
+        Tasks::Slice["relations.task_tags"].insert(task_id: task.id, tag_id: tag.id, tag_scope: tag.scope)
+      end
+
+      def task_in(project, *, **) = create(:task, *, project_id: project.id, **)
+
+      it "shows the project tags on a card and a row", :aggregate_failures do
+        task_in(project, tags: %w[audio])
+        get "/projects/doing-it"
+
+        expect(column("backlog")).to have_css("li > .board-tags > a.tag", exact_text: "#audio")
+        expect(group("backlog")).to have_css("li > .board-row-tags > a.tag", exact_text: "#audio", visible: :all)
+      end
+
+      it "links a tag to the board filtered by it" do
+        task_in(project, tags: %w[audio])
+        get "/projects/doing-it"
+
+        expect(column("backlog").find("a.tag")[:href]).to eq("/projects/doing-it?q=label:audio")
+      end
+
+      it "adds a tag to the filter already on" do
+        task_in(project, title: "Record the intro", tags: %w[audio])
+        get "/projects/doing-it", q: "intro"
+
+        expect(column("backlog").find("a.tag")[:href]).to eq("/projects/doing-it?q=intro%20label:audio")
+      end
+
+      it "leaves a tag link as it is when the filter holds the tag" do
+        task_in(project, tags: %w[audio])
+        get "/projects/doing-it", q: "label:audio"
+
+        expect(column("backlog").find("a.tag")[:href]).to eq("/projects/doing-it?q=label:audio")
+      end
+
+      it "leaves off a private tag and another project's tag" do
+        task = task_in(project, tags: %w[audio])
+        tag_into(task, create(:tag, :private, name: "secret"))
+        tag_into(task, create(:tag, scope: "project", project_id: create(:project, :private).id, name: "theirs"))
+        get "/projects/doing-it"
+
+        expect(page.all("a.tag", visible: :all).map(&:text)).to eq(["#audio", "#audio"])
+      end
+
+      it "offers the project tags in the filter bar", :aggregate_failures do
+        task_in(project, tags: %w[audio])
+        task_in(create(:project, :private), tags: %w[hidden])
+        get "/projects/doing-it"
+
+        expect(page).to have_css("form.task-filter-box[action='/projects/doing-it'][method='get'] input[name='q']")
+        expect(choices["tags"].map(&:first)).to eq(%w[audio])
+      end
+
+      it "filters the board and the list and counts the matches", :aggregate_failures do
+        task_in(project, title: "Record the intro", tags: %w[audio])
+        task_in(project, title: "Book a guest")
+        get "/projects/doing-it", q: "label:audio"
+
+        expect(page.all(".board-title, .board-row-title", visible: :all).map(&:text)).to eq(["Record the intro"] * 2)
+        expect(page.find(".task-filter-meta")).to have_text("1 of 2 tasks match")
+      end
+
+      it "keeps the filter in the field and in Load More", :aggregate_failures do
+        override_setting(:board, :column_size, to: 1)
+        2.times { task_in(project, tags: %w[audio]) }
+        get "/projects/doing-it", q: "label:audio"
+
+        expect(page).to have_field("q", with: "label:audio")
+        expect(column("backlog").find("a.board-more")[:href]).to end_with("?backlog=2&q=label:audio&view=board")
+      end
+
+      it "keeps the tags of a board that is not published off its page", :aggregate_failures do
+        hidden = create(:project, name: "unlisted")
+        task_in(hidden, tags: %w[unlisted-tag])
+        get "/projects/unlisted"
+
+        expect(page).to have_no_css("[data-task-filter]")
+        expect(last_response.body).not_to include("unlisted-tag")
       end
     end
 

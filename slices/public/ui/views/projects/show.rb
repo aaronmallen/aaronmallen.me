@@ -6,9 +6,11 @@ module Public
       module Projects
         class Show < View
           prop :project, Blog::Types::Instance(ROM::Struct).optional
-          prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
           prop :counts, Blog::Types::Hash.map(Blog::Types::TaskColumn, Blog::Types::Integer)
           prop :board, Blog::Types::Instance(Blog::BoardSizes)
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
+          prop :filter, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
             back_link
@@ -56,6 +58,8 @@ module Public
             span(class: "n") { @counts.fetch(key).to_s }
           end
 
+          def filtered = { q: @filter[:text] }.reject { |_, text| text.empty? }
+
           def group(key, tasks)
             details(class: ["board-group", key.tr("_", "-")], open: key != "canceled") do
               summary do
@@ -93,7 +97,7 @@ module Public
             left = @board.left(@counts.fetch(key), shown)
             return unless left.positive?
 
-            a(class: "board-more", href: path(:project, slug: @project.slug, **@board.more(key), view:)) do
+            a(class: "board-more", href: path(:project, slug: @project.slug, **@board.more(key), **filtered, view:)) do
               t("ui.board.load_more", count: left)
             end
           end
@@ -104,14 +108,13 @@ module Public
             span { line } unless line.empty?
           end
 
-          def task(task, kind)
-            BoardTask(task:, kind:, href: path(:project_task, slug: @project.slug, number: task.number))
-          end
+          def task(task, kind) = BoardTask(task:, kind:, project: @project, query: @filter[:text])
 
           def url?(repo) = written?(@project.url) && @project.url != repo
 
           def views
             columns = Blog::Types::TaskColumn.values.to_h { [it, []] }.merge(@tasks.group_by(&:board_column))
+            BoardFilter(project: @project, tags: @tags, filter: @filter, shown: @counts.values.sum)
             div(class: "board-views", data: { board_views: "" }) do
               BoardBar(counts: @counts)
               div(class: "board") { columns.each { |key, tasks| column(key, tasks) } }

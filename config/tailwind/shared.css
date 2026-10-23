@@ -844,14 +844,25 @@
     @apply m-0;
   }
 
+  & .board-item {
+    @apply flex flex-col rounded-field border border-line bg-ground transition-colors duration-150 hover:border-ink-muted;
+  }
+
+  &.in-progress .board-item {
+    box-shadow: inset 3px 0 0 var(--tone);
+  }
+
   & .board-card {
-    @apply flex flex-col gap-1.5 rounded-field border border-line bg-ground px-3.5 py-3 text-ink no-underline;
-    @apply transition-colors duration-150 hover:border-ink-muted hover:no-underline;
+    @apply flex flex-col gap-1.5 rounded-field px-3.5 py-3 text-ink no-underline hover:no-underline;
     @apply accent-focus;
   }
 
-  &.in-progress .board-card {
-    box-shadow: inset 3px 0 0 var(--tone);
+  & .board-tags {
+    @apply -mt-2 mb-0 flex flex-wrap gap-x-2.5 px-3.5 pb-2;
+
+    & .tag {
+      @apply inline-flex min-h-6 items-center;
+    }
   }
 
   & .board-num,
@@ -1017,6 +1028,14 @@
 
   & .board-row-meta {
     @apply justify-self-end;
+  }
+
+  & .board-row-tags {
+    @apply -mt-2 mb-0 flex flex-wrap gap-x-2.5 pb-2 pl-[calc(5.5rem+--spacing(4.5))];
+
+    & .tag {
+      @apply inline-flex min-h-6 items-center;
+    }
   }
 
   &:is(.done, .canceled) .board-row-title {
