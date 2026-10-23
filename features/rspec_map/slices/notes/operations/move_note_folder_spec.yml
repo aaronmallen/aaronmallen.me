@@ -1,4 +1,8 @@
 - example: "Notes::Operations::MoveNoteFolder moves a folder under another and back to the top level"
+  scenario: "notes/mcp.feature: The folder tools list, make, rename, move, describe and remove folders"
 - example: "Notes::Operations::MoveNoteFolder refuses a parent that does not exist"
+  drop: "move_note_folder and the admin both check the parent first, so the operation's own refusal is not reached from outside"
 - example: "Notes::Operations::MoveNoteFolder with a folder inside a folder inside another refuses a move into a folder inside it"
+  scenario: "notes/mcp.feature: The folder tools list, make, rename, move, describe and remove folders"
 - example: "Notes::Operations::MoveNoteFolder with a folder inside a folder inside another refuses a move into itself"
+  scenario: "notes/folders.feature: A folder cannot move inside itself"

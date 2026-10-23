@@ -12,7 +12,7 @@ Feature: Calendar MCP tools
 
   Scenario: create_event writes the event to Google and queues the sync
     Given Google Calendar takes writes to the calendar "Aaron"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "create_event" with:
       """
       { "calendar_id": <calendar Aaron>, "title": "Lunch", "date": "<today + 3>", "starts": "12:00", "ends": "13:00", "place": "Sawada" }
@@ -44,7 +44,7 @@ Feature: Calendar MCP tools
       """
 
   Scenario: create_event refuses what it cannot write
-    Given an MCP client connects with the scopes "read write" and I approve it
+    Given an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "create_event" with:
       """
       { "calendar_id": <calendar Work>, "title": "Lunch", "date": "<today + 3>", "starts": "12:00", "ends": "13:00" }
@@ -67,7 +67,7 @@ Feature: Calendar MCP tools
     And the calendar event "Standup" has:
       | place | Room 2 |
     And Google Calendar takes writes to the calendar "Aaron"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "edit_event" with:
       """
       { "id": <event Standup>, "title": "Retro" }
@@ -94,7 +94,7 @@ Feature: Calendar MCP tools
       | recurring_id | standup   |
     And Google Calendar takes writes to the calendar "Aaron"
     And Google Calendar holds the series "standup" in "Aaron" from "today - 27" at "09:00"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "edit_event" with:
       """
       { "id": <event Standup>, "title": "Retro", "scope": "this" }
@@ -114,7 +114,7 @@ Feature: Calendar MCP tools
   Scenario: move_event moves the event in Google and the mirror
     Given the calendar event "Standup" in "Aaron" on "today + 3" from "09:00" to "09:30"
     And Google Calendar takes writes to the calendar "Aaron"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "move_event" with:
       """
       { "id": <event Standup>, "to": "<today + 5>" }
@@ -140,7 +140,7 @@ Feature: Calendar MCP tools
       | recurring_id | standup   |
     And Google Calendar takes writes to the calendar "Aaron"
     And Google Calendar holds the series "standup" in "Aaron" from "today - 27" at "09:00"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "move_event" with:
       """
       { "id": <event Standup>, "to": "<today + 4>" }
@@ -160,7 +160,7 @@ Feature: Calendar MCP tools
 
   Scenario: move_event refuses a day before today
     Given the calendar event "Standup" in "Aaron" on "today + 3" from "09:00" to "09:30"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "move_event" with:
       """
       { "id": <event Standup>, "to": "<today - 1>" }
@@ -175,7 +175,7 @@ Feature: Calendar MCP tools
       | google_id    | retro_1 |
       | recurring_id | retro   |
     And Google Calendar takes writes to the calendar "Aaron"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the calendar MCP tool "delete_event" with:
       """
       { "id": <event Standup> }
@@ -195,7 +195,7 @@ Feature: Calendar MCP tools
   Scenario: delete_event says so when Google refuses it
     Given the calendar event "Standup" in "Aaron" on "today + 3" from "09:00" to "09:30"
     And Google Calendar turns away DELETE to the event "standup" in "Aaron"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the calendar MCP tool "delete_event" with:
       """
       { "id": <event Standup> }
@@ -204,7 +204,7 @@ Feature: Calendar MCP tools
 
   Scenario: Every event tool refuses an event on a work calendar
     Given the calendar event "Sync" in "Work" on "today + 3" from "09:00" to "09:30"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the calendar MCP tool "edit_event" with:
       """
       { "id": <event Sync>, "title": "Retro" }
@@ -224,7 +224,7 @@ Feature: Calendar MCP tools
 
   Scenario: delete_event needs the delete permission
     Given the calendar event "Standup" in "Aaron" on "today + 3" from "09:00" to "09:30"
-    And an MCP client connects with the scopes "read write" and I approve it
+    And an MCP client connected with the scopes "read write"
     When I call the calendar MCP tool "delete_event" with:
       """
       { "id": <event Standup> }
@@ -233,7 +233,7 @@ Feature: Calendar MCP tools
     And Google Calendar heard no event write
 
   Scenario: Every event write needs the write permission
-    Given an MCP client connects with the scopes "read delete" and I approve it
+    Given an MCP client connected with the scopes "read delete"
     When I call the calendar MCP tool "create_event" with:
       """
       {}
@@ -256,5 +256,5 @@ Feature: Calendar MCP tools
     Then the calendar MCP call fails with "delete_event needs the write permission,"
 
   Scenario: The MCP server tells the client what it may write to the calendar
-    Given an MCP client connects with the scopes "read" and I approve it
+    Given an MCP client connected with the scopes "read"
     Then the MCP server tells the client "work calendars take no change"

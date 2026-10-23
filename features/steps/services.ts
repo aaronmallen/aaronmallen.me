@@ -41,7 +41,7 @@ When("the browser asks for {string}", async ({ page }, url: string) => {
 });
 
 Then("I see {string}", async ({ page }, text: string) => {
-  await expect(page.getByText(text)).toBeVisible();
+  await expect(page.getByText(text).first()).toBeVisible();
 });
 
 Then("{service} received {word} {string}", async ({ stub }, prefix: string, method: string, path: string) => {

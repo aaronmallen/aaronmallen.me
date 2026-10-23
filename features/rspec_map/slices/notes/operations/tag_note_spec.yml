@@ -1,2 +1,4 @@
 - example: "Notes::Operations::TagNote adds one private tag and counts the version on"
+  scenario: "notes/mcp.feature: tag_note and untag_note add and take off tags"
 - example: "Notes::Operations::TagNote answers not found for a note that does not exist"
+  scenario: "notes/mcp.feature: tag_note and untag_note add and take off tags"

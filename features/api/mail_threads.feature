@@ -13,7 +13,7 @@ Feature: Mail threads in the API
     And the mail thread "Engines" arrived "2026-01-05T09:00:00Z"
     And the mail thread "Older" arrived "2026-01-04T09:00:00Z"
     When I call the mail API with GET "/mail/threads"
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer lists the mail threads "Engines, Older"
     And the API answer's "mail_threads.0" reads:
       """
@@ -28,7 +28,7 @@ Feature: Mail threads in the API
       | Engines | First |
     And the mail thread "Engines" has a later message saying "Second"
     When I call the mail API with GET "/mail/threads/#[Engines]"
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer's "messages.0.body" is "\"First\""
     And the API answer's "messages.1.body" is "\"Second\""
 
@@ -38,9 +38,9 @@ Feature: Mail threads in the API
       | Engines |
     And an API token with the scopes "read write delete"
     When I call the mail API with GET "/mail/threads"
-    Then the API answers with status 403
+    Then the API answers 403
     When I call the mail API with GET "/mail/threads/#[Engines]"
-    Then the API answers with status 403
+    Then the API answers 403
 
   Scenario Outline: A token without the mail scope may not <action> mail threads in bulk
     Given the mail threads:
@@ -51,7 +51,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[Engines]], "tag": "billing", "snoozed_until": "2099-01-02T03:00:00Z"}
       """
-    Then the API answers with status 403
+    Then the API answers 403
     And the API answer's "error" is "\"insufficient_scope\""
     And the mail thread "Engines" reads:
       | status        | unread |
@@ -75,7 +75,7 @@ Feature: Mail threads in the API
       """
       {"status": "spam"}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer reads:
       """
       {"id": #[Engines], "status": "spam"}
@@ -85,7 +85,7 @@ Feature: Mail threads in the API
       """
       {"status": "lost"}
       """
-    Then the API answers with status 422
+    Then the API answers 422
 
   Scenario Outline: Bulk <action> marks only the named threads and answers each one whole
     Given the mail threads:
@@ -99,7 +99,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]]}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer lists the mail threads "One, Two"
     And the API answer's "mail_threads.0" reads:
       """
@@ -124,7 +124,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two], 99]<extra>}
       """
-    Then the API answers with status 422
+    Then the API answers 422
     And the API answer reads:
       """
       {"error": "invalid", "message": "no mail thread has the ID 99", "errors": {"ids": ["no mail thread has the ID 99"]}}
@@ -153,7 +153,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]], "tag": "Urgent"}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer's "mail_threads.0.tags" is "[\"billing\",\"urgent\"]"
     And the API answer's "mail_threads.1.tags" is "[\"urgent\"]"
     When I call the mail API with POST "/mail/threads/bulk/tag" and:
@@ -166,7 +166,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[Two], 99], "tag": "later"}
       """
-    Then the API answers with status 422
+    Then the API answers 422
     And the API answer's "message" is "\"no mail thread has the ID 99\""
     And the mail thread "Two" has the tags "urgent"
 
@@ -178,7 +178,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One]], "tag": "two words"}
       """
-    Then the API answers with status 422
+    Then the API answers 422
     And the API answer's "errors" is "{\"tag\":[\"a tag is lowercase words joined by hyphens\"]}"
     When I call the mail API with POST "/mail/threads/bulk/tag" and:
       """
@@ -201,7 +201,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]], "tag": "billing"}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer's "mail_threads.0.tags" is "[\"urgent\"]"
     And the API answer's "mail_threads.1.tags" is "[]"
 
@@ -216,7 +216,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[Two], #[One]], "snoozed_until": "2099-01-02T03:00:00Z"}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer reads:
       """
       {"mail_threads": [
@@ -236,7 +236,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One]], "snoozed_until": "2000-01-01T00:00:00Z"}
       """
-    Then the API answers with status 422
+    Then the API answers 422
     And the API answer's "errors" is "{\"snoozed_until\":[\"snoozed_until must be in the future\"]}"
 
   Scenario: Bulk delete moves only the named threads to the trash
@@ -249,7 +249,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]]}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer reads:
       """
       {"mail_threads": [{"id": #[One], "subject": "One", "trashed": true}, {"id": #[Two], "subject": "Two", "trashed": true}]}
@@ -269,7 +269,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[Lunch]]}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And Gmail received POST "/users/me/threads/t1/trash"
     And Gmail received no DELETE "/users/me/threads/t1"
     And the mail thread "Lunch" is now trashed
@@ -286,7 +286,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]]}
       """
-    Then the API answers with status 200
+    Then the API answers 200
     And Gmail received POST "/users/me/threads/t1/modify" holding "UNREAD"
     And Gmail received POST "/users/me/threads/t2/modify" holding "UNREAD"
     And the mail thread "Two" is now read
@@ -304,7 +304,7 @@ Feature: Mail threads in the API
       """
       {"ids": [#[One], #[Two]]}
       """
-    Then the API answers with status 500
+    Then the API answers 500
     And the mail thread "One" is now unread
     And the mail thread "Two" is now unread
 
@@ -330,7 +330,7 @@ Feature: Mail threads in the API
       """
       <body>
       """
-    Then the API answers with status 422
+    Then the API answers 422
     And the API answer's "errors.ids" reads:
       """
       <errors>
@@ -348,7 +348,7 @@ Feature: Mail threads in the API
       | subject | tags            |
       | One     | billing, urgent |
     And I am signed in to the admin
-    And an MCP client connects with the scopes "read write delete mail" and I approve it
+    And an MCP client connected with the scopes "read write delete mail"
     Then the API GET "/mail/threads" and the MCP tool "list_mail_threads" answer alike with:
       """
       {}

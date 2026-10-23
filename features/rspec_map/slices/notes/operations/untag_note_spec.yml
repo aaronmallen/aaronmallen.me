@@ -1,1 +1,2 @@
 - example: "Notes::Operations::UntagNote takes off one tag"
+  scenario: "notes/mcp.feature: tag_note and untag_note add and take off tags"

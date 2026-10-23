@@ -61,7 +61,7 @@ Feature: Contact form messages
     And the mail threads:
       | subject  | reply to        |
       | Old note | Ada@Example.COM |
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "mark_mail_thread" with:
       """
       {"id": #[Old note], "status": "spam"}

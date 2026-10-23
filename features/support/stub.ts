@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { createServer, type ServerResponse } from "node:http";
+import { createServer, type IncomingHttpHeaders, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 
 export const ownerEmail = "owner@example.com";
@@ -23,14 +23,18 @@ export const services: Record<string, string> = {
   "the web": "",
 };
 
-type Reply = { body: string; status: number };
+type Reply = { body: string | Buffer; headers?: Record<string, string>; status: number };
+export type Sent = { body: Buffer; headers: IncomingHttpHeaders; method: string; url: URL };
+type Answer = Reply | ((sent: Sent) => Reply);
+type Stored = { body: Buffer; type: string };
 type Route = (url: URL, response: ServerResponse) => void;
 
 function json(response: ServerResponse, body: unknown) {
   response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(body));
 }
 
-const signIn: Record<string, Route> = {
+const standing: Record<string, Route> = {
+  "GET /maxmind/geoip/databases/GeoLite2-City/download": (_, response) => response.writeHead(503).end(),
   "GET /github/api/user/emails": (_, response) =>
     json(response, [{ email: ownerEmail, primary: true, verified: true }]),
   "GET /github/login/oauth/authorize": (url, response) => {
@@ -47,25 +51,72 @@ const signIn: Record<string, Route> = {
     }),
 };
 
+function store(objects: Map<string, Stored>, method: string, url: URL, body: Buffer, response: ServerResponse) {
+  const key = decodeURIComponent(url.pathname.slice("/s3/".length));
+  const object = objects.get(key);
+  if (method === "PUT") {
+    objects.set(key, { body, type: response.req.headers["content-type"] ?? "binary/octet-stream" });
+    response.writeHead(200, { ETag: '"stub"' }).end();
+  } else if (method === "DELETE") {
+    objects.delete(key);
+    response.writeHead(204).end();
+  } else if (method === "GET" && url.searchParams.get("list-type") === "2") {
+    const bucket = `${key.replace(/\/$/, "")}/`;
+    const prefix = bucket + (url.searchParams.get("prefix") ?? "");
+    const keys = [...objects.keys()].filter((name) => name.startsWith(prefix)).sort();
+    const contents = keys.map(
+      (name) =>
+        `<Contents><Key>${name.slice(bucket.length)}</Key><Size>${objects.get(name)?.body.length}</Size></Contents>`,
+    );
+    response
+      .writeHead(200, { "Content-Type": "application/xml" })
+      .end(
+        `<?xml version="1.0" encoding="UTF-8"?><ListBucketResult><KeyCount>${keys.length}</KeyCount><IsTruncated>false</IsTruncated>${contents.join("")}</ListBucketResult>`,
+      );
+  } else if (!object) {
+    response
+      .writeHead(404, { "Content-Type": "application/xml" })
+      .end(method === "HEAD" ? undefined : "<Error><Code>NoSuchKey</Code></Error>");
+  } else {
+    const range = /bytes=(\d*)-(\d*)/.exec(response.req.headers.range ?? "");
+    const size = object.body.length;
+    const first = range ? (range[1] ? Number(range[1]) : size - Number(range[2])) : 0;
+    const last = range?.[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+    const part = object.body.subarray(first, last + 1);
+    const headers = { "Content-Length": part.length, "Content-Type": object.type, ETag: '"stub"' };
+    if (range) Object.assign(headers, { "Content-Range": `bytes ${first}-${last}/${size}` });
+    response.writeHead(range ? 206 : 200, headers).end(method === "HEAD" ? undefined : part);
+  }
+}
+
 export async function startStub() {
-  const replies = new Map<string, Reply>();
+  const replies = new Map<string, Answer>();
+  const log: Sent[] = [];
+  const objects = new Map<string, Stored>();
   const misses: string[] = [];
   const received: { body: string; key: string }[] = [];
 
-  const server = createServer((request, response) => {
+  const server = createServer(async (request, response) => {
     const absolute = /^https?:\/\//.test(request.url ?? "");
     const url = new URL(request.url ?? "/", "http://stub");
     const key = `${request.method} ${absolute ? url.origin : ""}${url.pathname}`;
     const chunks: Buffer[] = [];
-    request.on("data", (chunk) => chunks.push(chunk));
-    request.on("end", () => received.push({ body: Buffer.concat(chunks).toString(), key }));
+    for await (const chunk of request) chunks.push(chunk);
+    const sent = { body: Buffer.concat(chunks), headers: request.headers, method: request.method ?? "GET", url };
+    log.push(sent);
+    received.push({ body: sent.body.toString(), key });
 
-    const reply = replies.get(key);
+    const answer =
+      replies.get(key) ?? [...replies].find(([path]) => path.endsWith("*") && key.startsWith(path.slice(0, -1)))?.[1];
+    const reply = typeof answer === "function" ? answer(sent) : answer;
     if (reply) {
-      const type = reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
-      response.writeHead(reply.status, { "Content-Type": type }).end(reply.body);
-    } else if (signIn[key]) {
-      signIn[key](url, response);
+      const type =
+        typeof reply.body === "string" && reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
+      response.writeHead(reply.status, { "Content-Type": type, ...reply.headers }).end(reply.body);
+    } else if (!absolute && url.pathname.startsWith("/s3/")) {
+      store(objects, sent.method, url, sent.body, response);
+    } else if (standing[key]) {
+      standing[key](url, response);
     } else {
       misses.push(`${request.method} ${request.url}`);
       response.writeHead(404).end();
@@ -79,11 +130,15 @@ export async function startStub() {
 
   return {
     misses: () => misses.splice(0),
+    objects,
     received: (method: string, path: string) =>
       received.filter(({ key }) => key === `${method} ${path}`).map(({ body }) => body),
-    reply: (method: string, path: string, reply: Reply) => replies.set(`${method} ${path}`, reply),
+    reply: (method: string, path: string, reply: Answer) => replies.set(`${method} ${path}`, reply),
+    requests: () => [...log],
     reset: () => {
       replies.clear();
+      objects.clear();
+      log.length = 0;
       misses.length = 0;
       received.length = 0;
     },

@@ -22,6 +22,8 @@ type App = {
   url: string;
 };
 
+type Answer = { body: string; content?: string; error?: boolean; headers?: Record<string, string>; status: number };
+
 type Owner = { cookies: Cookie[]; device: postgres.Row };
 
 const workspace = Number(process.env.WORKSPACE_ID ?? 0);
@@ -54,7 +56,7 @@ async function stop(child: ChildProcess) {
 
 export const test = base.extend<
   {
-    answer: { body: string; status: number };
+    answer: Answer;
     reset: undefined;
     shell: Shell;
     stub: Stub;
@@ -200,7 +202,7 @@ export const test = base.extend<
     async ({ app, context }, use) => {
       const away: string[] = [];
       await context.route(
-        (url) => !["127.0.0.1", "localhost"].includes(url.hostname),
+        (url) => !["127.0.0.1", "localhost"].includes(url.hostname) && !url.hostname.endsWith(".localhost"),
         (route) => {
           away.push(`${route.request().method()} ${route.request().url()}`);
           return route.abort();

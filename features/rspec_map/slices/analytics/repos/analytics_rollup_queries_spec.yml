@@ -1,3 +1,6 @@
 - example: "Analytics::Repos::AnalyticsRollupQueries counts a reader once a day but again the next day"
+  scenario: "analytics/read_analytics.feature: read_analytics counts a reader's read-through once a day and again the next"
 - example: "Analytics::Repos::AnalyticsRollupQueries counts nothing for a day rolled up before the site counted read-throughs"
+  scenario: "analytics/read_analytics.feature: read_analytics counts no read-throughs for a day rolled up before the site counted them"
 - example: "Analytics::Repos::AnalyticsRollupQueries keeps the count once the prune takes the day's events"
+  scenario: "analytics/roll_up.feature: The roll up sums a day before the prune deletes its visits"

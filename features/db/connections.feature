@@ -17,7 +17,7 @@ Feature: Database connections
     When I visit the home page
     Then the database soon answers "GET / 200" for:
       """
-      select verb, route, status from performance_requests
+      select verb, route, status from performance_requests where route <> '/pulse'
       """
 
   Scenario: A new database connection has no statement timeout, as migrations need

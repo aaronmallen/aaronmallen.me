@@ -63,7 +63,7 @@ Feature: Commits
       | deletions | 3                                |
     And the commit "feed fix" links to the task "Move the server"
     When I read the commit "feed fix" through the API
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer holds "the body runs on"
     And the API answer holds "\"sha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\""
     And the API answer holds "\"date\":\"2026-03-02\",\"time\":\"14:05\",\"additions\":12,\"deletions\":3"
@@ -73,7 +73,7 @@ Feature: Commits
   Scenario: The API and read_commit answer the same commit
     Given I am signed in to the admin
     And an API token
-    And an MCP client connects with the scopes "read" and I approve it
+    And an MCP client connected with the scopes "read"
     And a commit "feed fix" with:
       | message | fix the feed\n\nthe body runs on |
     And the commit "feed fix" links to the task "Move the server"

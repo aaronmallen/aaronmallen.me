@@ -359,7 +359,7 @@ Feature: Gmail sync
     Then the mail sync records the failure "gmail_failed" saying "Google answered 503"
     And the mail account "aaron@example.com" follows the history "150"
     Given I am signed in to the admin
-    And an MCP client connects with the scopes "read" and I approve it
+    And an MCP client connected with the scopes "read"
     When I call the MCP tool "read_sync_state"
     Then the MCP answer holds "Google answered 503"
     Given Gmail holds the thread "t1" with the messages:

@@ -1,10 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
-import { type APIRequestContext, expect, type Page } from "@playwright/test";
-import { Then, When } from "../support/world.ts";
+import { expect } from "@playwright/test";
+import { Given, Then, type test, When } from "../support/world.ts";
+import { signIn } from "./admin.ts";
+
+type World = Parameters<Parameters<typeof test>[2]>[0];
 
 const redirectUri = "http://127.0.0.1/callback";
 
-async function connect(page: Page, request: APIRequestContext, scope: string) {
+async function connect({ page, request, tokens }: Pick<World, "page" | "request" | "tokens">, scope: string) {
   const registered = await request.post("/oauth/register", {
     data: { client_name: "Features", redirect_uris: [redirectUri] },
   });
@@ -30,34 +33,54 @@ async function connect(page: Page, request: APIRequestContext, scope: string) {
     form: { client_id, code, code_verifier: verifier, grant_type: "authorization_code", redirect_uri: redirectUri },
   });
   expect(granted.status()).toBe(200);
-  return (await granted.json()).access_token as string;
+  tokens.mcp = (await granted.json()).access_token;
 }
 
-async function call(request: APIRequestContext, token: string | undefined, name: string, args: unknown) {
+async function rpc({ request, tokens }: Pick<World, "request" | "tokens">, method: string, params: object) {
   const response = await request.post("/mcp", {
-    data: { id: 1, jsonrpc: "2.0", method: "tools/call", params: { arguments: args, name } },
-    headers: { Accept: "application/json, text/event-stream", Authorization: `Bearer ${token}` },
+    data: { id: 1, jsonrpc: "2.0", method, params },
+    headers: { Accept: "application/json, text/event-stream", Authorization: `Bearer ${tokens.mcp}` },
   });
-  return { body: await response.text(), status: response.status() };
+  const body = await response.text();
+  return { body, result: response.ok() ? JSON.parse(body).result : undefined, status: response.status() };
 }
 
-When("an MCP client connects and I approve it", async ({ page, request, tokens }) => {
-  tokens.mcp = await connect(page, request, "read");
-});
+async function call(
+  { answer, request, tokens }: Pick<World, "answer" | "request" | "tokens">,
+  name: string,
+  args: string,
+) {
+  const { body, result, status } = await rpc({ request, tokens }, "tools/call", { arguments: JSON.parse(args), name });
+  answer.status = status;
+  answer.body = body;
+  answer.content = result?.content?.[0]?.text ?? body;
+  answer.error = result?.isError ?? false;
+}
 
-When(
-  "an MCP client connects with the scopes {string} and I approve it",
-  async ({ page, request, tokens }, scope: string) => {
-    tokens.mcp = await connect(page, request, scope);
+When("an MCP client connects and I approve it", ({ page, request, tokens }) =>
+  connect({ page, request, tokens }, "read"),
+);
+
+Given(
+  "an MCP client connected with the scopes {string}",
+  async ({ app, context, owner, page, request, tokens }, scope: string) => {
+    await signIn({ app, context, owner });
+    await connect({ page, request, tokens }, scope);
   },
 );
 
-When("I call the MCP tool {string}", async ({ answer, request, tokens }, name: string) => {
-  Object.assign(answer, await call(request, tokens.mcp, name, {}));
-});
+When("I call the MCP tool {string}", ({ answer, request, tokens }, name: string) =>
+  call({ answer, request, tokens }, name, "{}"),
+);
 
-When("I call the MCP tool {string} with:", async ({ answer, request, tokens }, name: string, args: string) => {
-  Object.assign(answer, await call(request, tokens.mcp, name, JSON.parse(args)));
+When("I call the MCP tool {string} with:", ({ answer, request, tokens }, name: string, args: string) =>
+  call({ answer, request, tokens }, name, args),
+);
+
+Then("the MCP tool {string} answers with {string}", async ({ answer, request, tokens }, tool: string, text: string) => {
+  await call({ answer, request, tokens }, tool, "{}");
+  expect(answer.status).toBe(200);
+  expect(answer.content).toContain(text);
 });
 
 Then("the MCP answer holds {string}", ({ answer }, text: string) => {
@@ -69,9 +92,29 @@ Then("the MCP answer does not hold {string}", ({ answer }, text: string) => {
   expect(answer.body).not.toContain(text);
 });
 
-Then("the MCP tool {string} answers with {string}", async ({ request, tokens }, name: string, text: string) => {
-  const { body, status } = await call(request, tokens.mcp, name, {});
+Then("the MCP answer holds:", ({ answer }, expected: string) => {
+  expect(answer.error, answer.content).toBe(false);
+  expect(JSON.parse(answer.content ?? "")).toMatchObject(JSON.parse(expected));
+});
 
-  expect(status).toBe(200);
-  expect(body).toContain(text);
+Then("the MCP tool refuses with {string}", ({ answer }, message: string) => {
+  expect(answer.content).toBe(message);
+});
+
+async function toolNames({ request, tokens }: Pick<World, "request" | "tokens">) {
+  const { result } = await rpc({ request, tokens }, "tools/list", {});
+  return result.tools.map((tool: { name: string }) => tool.name);
+}
+
+Then("the MCP tools hold {string}", async ({ request, tokens }, name: string) => {
+  expect(await toolNames({ request, tokens })).toContain(name);
+});
+
+Then("the MCP tools leave out {string}", async ({ request, tokens }, name: string) => {
+  expect(await toolNames({ request, tokens })).not.toContain(name);
+});
+
+Then("the MCP answer has no {string}", ({ answer }, path: string) => {
+  const found = path.split(".").reduce((value, key) => value?.[key], JSON.parse(answer.content ?? ""));
+  expect(found).toBeUndefined();
 });

@@ -2,14 +2,14 @@ analytics_salt: test-analytics-salt-not-a-real-secret-do-not-use-this-one-in-pro
 app_secret: test-app-secret-not-a-real-secret-do-not-use-this-one-in-production
 data_key: test-data-key-not-a-real-secret-do-not-use-this-one-in-production
 reader_salt: test-reader-salt-not-a-real-secret-do-not-use-this-one-in-production-either
-backup_store: &no_store
-  access_key: null
-  bucket: null
-  endpoint: null
-  path_style: null
+backup_store: &store
+  access_key: <%= (ENV["STUB_URL"] && "stub").to_json %>
+  bucket: <%= (ENV["STUB_URL"] && "backups").to_json %>
+  endpoint: <%= (ENV["STUB_URL"] && "#{ENV["STUB_URL"]}/s3").to_json %>
+  path_style: <%= (ENV["STUB_URL"] && true).to_json %>
   read_timeout: null
   region: null
-  secret_key: null
+  secret_key: <%= (ENV["STUB_URL"] && "stub").to_json %>
 database:
   host: localhost
   name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"], ("w#{ENV["TEST_ENV_NUMBER"]}" unless ENV["TEST_ENV_NUMBER"].to_s.empty?)].compact.join("_").to_json %>
@@ -47,17 +47,24 @@ linkedin:
 mastodon:
   instance_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/mastodon/%<host>s".to_json %>
 maxmind:
-  account_id: null
-  database_path: null
+  account_id: <%= (ENV["STUB_URL"] && "stub-account").to_json %>
+  database_path: <%= (ENV["STUB_URL"] && "tmp/features-ws#{ENV["WORKSPACE_ID"]}-w#{ENV["TEST_ENV_NUMBER"]}-maxmind/GeoLite2-City.mmdb").to_json %>
   download_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/maxmind".to_json %>
-  license_key: null
-media_store: *no_store
+  license_key: <%= (ENV["STUB_URL"] && "stub-license").to_json %>
+media_store:
+  !!merge <<: *store
+  bucket: <%= (ENV["STUB_URL"] && "photos").to_json %>
+proxy:
+  address_header: <%= (ENV["STUB_URL"] && "X-Forwarded-For").to_json %>
+  trusted_proxies: <%= ((ENV["STUB_URL"] && "127.0.0.0/8") || []).to_json %>
 redis:
   db: 2
   host: localhost
 share_site:
   transfers: null
   url: http://shares.localhost
-share_store: *no_store
+share_store:
+  !!merge <<: *store
+  bucket: <%= (ENV["STUB_URL"] && "shares").to_json %>
 site:
   url: <%= ENV.fetch("SITE_URL", "https://aaronmallen.me").to_json %>

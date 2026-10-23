@@ -68,7 +68,7 @@ Feature: Pull requests
       | merged_at | 2026-03-03T09:00:00Z |
     And the pull request "feed fix" links to the task "Move the server"
     When I read the pull request "feed fix" through the API
-    Then the API answers with status 200
+    Then the API answers 200
     And the API answer holds "\"repo\":\"aaronmallen/blog\",\"number\":4,\"title\":\"Fix the feed\",\"description\":\"It broke\""
     And the API answer holds "\"url\":\"https://github.com/aaronmallen/blog/pull/4\",\"state\":\"merged\""
     And the API answer holds "\"ready_at\":\"2026-03-02T14:05:00Z\",\"merged_at\":\"2026-03-03T09:00:00Z\",\"closed_at\":null"
@@ -78,7 +78,7 @@ Feature: Pull requests
   Scenario: The API and read_pull_request answer the same pull request
     Given I am signed in to the admin
     And an API token
-    And an MCP client connects with the scopes "read" and I approve it
+    And an MCP client connected with the scopes "read"
     And a pull request "feed fix" with:
       | body | It broke |
     And the pull request "feed fix" links to the task "Move the server"

@@ -11,7 +11,7 @@ Feature: People through MCP
       {"company": "Analytical Engines"}
       """
     And a contact "Grace"
-    When an MCP client connects with the scopes "read write delete contacts" and I approve it
+    When an MCP client connected with the scopes "read write delete contacts"
     And I call the MCP tool "list_people" with:
       """
       {"query": "analytical"}
@@ -71,7 +71,7 @@ Feature: People through MCP
       """
       {"resourceName": "people/c1", "etag": "e2", "names": [{"displayName": "Ada", "metadata": {"primary": true}}]}
       """
-    When an MCP client connects with the scopes "read write delete contacts" and I approve it
+    When an MCP client connected with the scopes "read write delete contacts"
     And I call the MCP tool "save_person" for the contact "Ada" with:
       """
       {"name": "Ada King"}
@@ -83,7 +83,7 @@ Feature: People through MCP
       """
       {"company": "Analytical Engines"}
       """
-    When an MCP client connects with the scopes "read write delete" and I approve it
+    When an MCP client connected with the scopes "read write delete"
     And I call the MCP tool "list_people"
     Then the MCP answer holds "Ada"
     And the MCP answer does not hold "Analytical Engines"
@@ -113,7 +113,7 @@ Feature: People through MCP
       """
       {"actors": [{"displayName": "Ada", "handle": "ada.bsky.social"}]}
       """
-    When an MCP client connects with the scopes "read" and I approve it
+    When an MCP client connected with the scopes "read"
     And I call the MCP tool "search_accounts" with:
       """
       {"network": "bluesky", "query": "ada"}
@@ -129,7 +129,7 @@ Feature: People through MCP
   Scenario: The MCP search_accounts tool refuses a network that rate limits
     Given the admin can search people on "Bluesky"
     And Bluesky's app view answers GET "/xrpc/app.bsky.actor.searchActorsTypeahead" with status 429
-    When an MCP client connects with the scopes "read" and I approve it
+    When an MCP client connected with the scopes "read"
     And I call the MCP tool "search_accounts" with:
       """
       {"network": "bluesky", "query": "ada"}

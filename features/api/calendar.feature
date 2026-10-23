@@ -4,8 +4,8 @@ Feature: Calendar API
 
   Scenario: The API calendar answers every day in the range, oldest first
     Given an API token
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-19"
-    Then the API answers with status 200
+    When I GET "/calendar?from=2026-07-13&to=2026-07-19" through the API
+    Then the API answers 200
     And the API calendar runs from "2026-07-13" to "2026-07-19"
     And the API calendar day "2026-07-13" is empty
 
@@ -19,7 +19,7 @@ Feature: Calendar API
     And the draft post "Draft post" lands on the calendar on "2026-07-13" at "12:00"
     And the draft social post "Draft note" lands on the calendar on "2026-07-13" at "12:00"
     And the published post "Late post" lands on the calendar on "2026-07-18" at "23:30"
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-19"
+    When I GET "/calendar?from=2026-07-13&to=2026-07-19" through the API
     Then the API calendar day "2026-07-14" holds:
       """
       { "sprint": { "id": <sprint 2026-07-14>, "task_count": 2 } }
@@ -54,7 +54,7 @@ Feature: Calendar API
     And the published post "Before" lands on the calendar on "2026-07-12" at "23:59"
     And the posted social post "After" lands on the calendar on "2026-07-20" at "00:01"
     And a journal entry lands on the calendar on "2026-07-12"
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-19"
+    When I GET "/calendar?from=2026-07-13&to=2026-07-19" through the API
     Then every API calendar day is empty
 
   Scenario: The API calendar lists the posts and social posts the calendar page shows
@@ -65,15 +65,15 @@ Feature: Calendar API
     And the draft post "Draft" lands on the calendar on "2026-07-14" at "12:00"
     And the posted social post "Sent note" lands on the calendar on "2026-07-14" at "09:00"
     And the scheduled social post "Late note" lands on the calendar on "2026-07-18" at "23:30"
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-19"
+    When I GET "/calendar?from=2026-07-13&to=2026-07-19" through the API
     Then the API calendar lists the posts and social posts the calendar page shows
 
   Scenario: The API calendar takes a range of up to 366 days
     Given an API token
-    When I call the API with GET "/calendar?from=2026-07-13&to=2027-07-13"
+    When I GET "/calendar?from=2026-07-13&to=2027-07-13" through the API
     Then the API calendar lists 366 days
-    When I call the API with GET "/calendar?from=2026-07-13&to=2027-07-14"
-    Then the API answers with status 422
+    When I GET "/calendar?from=2026-07-13&to=2027-07-14" through the API
+    Then the API answers 422
     And the calendar API answer holds:
       """
       { "errors": { "from": ["give a range of 366 days or fewer"], "to": ["give a range of 366 days or fewer"] } }
@@ -81,15 +81,15 @@ Feature: Calendar API
 
   Scenario: The API calendar refuses a range it cannot read
     Given an API token
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-12"
-    Then the API answers with status 422
+    When I GET "/calendar?from=2026-07-13&to=2026-07-12" through the API
+    Then the API answers 422
     And the calendar API answer holds:
       """
       { "errors": { "from": ["from comes after to"] } }
       """
-    When I call the API with GET "/calendar?from=July&to=2026-07-19"
-    Then the API answers with status 422
-    When I call the API with GET "/calendar"
+    When I GET "/calendar?from=July&to=2026-07-19" through the API
+    Then the API answers 422
+    When I GET "/calendar" through the API
     Then the calendar API answer names errors on "from, to"
 
   Scenario: The API calendar describes each Google event
@@ -104,7 +104,7 @@ Feature: Calendar API
       | link      | https://calendar.google.com/event?eid=1 |
     And the all-day calendar event "On-call" in "Work" from "2026-07-14" to "2026-07-16"
     And I hide every calendar
-    When I call the API with GET "/calendar?from=2026-07-13&to=2026-07-19"
+    When I GET "/calendar?from=2026-07-13&to=2026-07-19" through the API
     Then the API calendar titles the events per day:
       | 2026-07-14 | On-call, Platform sync |
       | 2026-07-16 | On-call                |
@@ -139,7 +139,7 @@ Feature: Calendar API
       | place | Room 4 |
       | notes | Agenda |
     And the all-day calendar event "On-call" in "Work" from "2026-07-14" to "2026-07-16"
-    When an MCP client connects with the scopes "read" and I approve it
+    When an MCP client connected with the scopes "read"
     Then the MCP tool list_calendar answers as the API does from "2026-07-13" to "2026-07-19"
     When I call the calendar MCP tool "list_calendar" with:
       """
@@ -157,21 +157,21 @@ Feature: Calendar API
       """
       { "calendar_id": <calendar Aaron>, "title": "Trip", "date": "2026-07-19", "all_day": true }
       """
-    Then the API answers with status 201
+    Then the API answers 201
     And the calendar API answer is:
       """
       { "calendar_id": <calendar Aaron>, "created": true }
       """
     And the calendar sync was queued
     When I call the calendar API with DELETE "/calendar/events/<event Standup>"
-    Then the API answers with status 403
+    Then the API answers 403
     And Google Calendar got no DELETE "standup" in "Aaron"
     Given an API token with the scopes "read delete"
     When I call the calendar API with PATCH "/calendar/events/<event Standup>" and:
       """
       { "title": "Retro" }
       """
-    Then the API answers with status 403
+    Then the API answers 403
     Given an API token with the scopes "read write delete"
     When I call the calendar API with DELETE "/calendar/events/<event Standup>"
     Then the calendar API answer is:

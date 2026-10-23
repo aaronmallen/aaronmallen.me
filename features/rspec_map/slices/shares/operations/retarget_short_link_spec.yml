@@ -1,2 +1,4 @@
 - example: "Shares::Operations::RetargetShortLink answers not found for a missing link"
+  scenario: "shares/api.feature: A share's code changes as typed, and a missing share or short link answers 404"
 - example: "Shares::Operations::RetargetShortLink leaves the stamp alone when the destination stays the same"
+  scenario: "shares/short_link_host.feature: A link keeps its retarget time empty when its destination stays the same"

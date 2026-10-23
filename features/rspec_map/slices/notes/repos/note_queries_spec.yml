@@ -1,4 +1,8 @@
 - example: "Notes::Repos::NoteQueries counts the backlinks of each note it is asked about, leaving out a note's link to itself"
+  scenario: "notes/folders.feature: The folder page shows what the folder holds"
 - example: "Notes::Repos::NoteQueries lists a note's links out, naming the note each finds and none for a note not written"
+  scenario: "notes/mcp.feature: read_note reads a note with its tags, version, links and linked records"
 - example: "Notes::Repos::NoteQueries lists the other notes that link to a note, in title order, whatever case the link takes"
+  scenario: "notes/wiki_links.feature: A note lists its backlinks and the links not written yet"
 - example: "Notes::Repos::NoteQueries lists the titles linked but not written, with the notes that link them and the first one's folder"
+  scenario: "notes/wiki_links.feature: The notes home lists titles linked but not written"

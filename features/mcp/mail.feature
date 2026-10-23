@@ -18,7 +18,7 @@ Feature: Mail tools over MCP
     And the mail thread "Late" arrived "yesterday at 23:59"
     And the mail thread "Just today" arrived "today at 00:00"
     And the mail thread "Too early" arrived "3 days ago at 23:59"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "list_mail_threads" with:
       """
       {"from": "<today-6>", "to": "<today>"}
@@ -36,7 +36,7 @@ Feature: Mail tools over MCP
       | Hello   | read   | someone@example.com  | urgent, billing |
     And the mail thread "Hello" arrived "2026-01-05T09:00:00Z"
     And the mail thread "Hello" snoozes until "2099-01-02T03:00:00Z"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "list_mail_threads" with:
       """
       {}
@@ -59,7 +59,7 @@ Feature: Mail tools over MCP
     And the mail thread "New spam" arrived "1 day ago at 09:00"
     And the mail thread "Old spam" arrived "30 days ago at 09:00"
     And the mail thread "Ancient" arrived "900 days ago at 09:00"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "list_mail_threads" with:
       """
       {"from": "<today-6>", "to": "<today>", "status": "spam"}
@@ -85,7 +85,7 @@ Feature: Mail tools over MCP
     And the mail threads:
       | subject |
       | Fresh   |
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "list_mail_threads" with:
       """
       {"status": "spam", "page": 1}
@@ -98,7 +98,7 @@ Feature: Mail tools over MCP
     Then the MCP answer lists the mail threads "Old spam 101, Old spam 102"
 
   Scenario: list_mail_threads refuses a status the admin lacks and a range that runs backwards
-    Given an MCP client connects with the scopes "read write mail" and I approve it
+    Given an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "list_mail_threads" with:
       """
       {"from": "<today>", "to": "<today>", "status": "archived"}
@@ -115,7 +115,7 @@ Feature: Mail tools over MCP
       | subject | body             | reply to      | tags    |
       | Hi      | I liked the post | a@example.com | billing |
     And the mail thread "Hi" snoozes until "2099-01-02T03:00:00Z"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "read_mail_thread" with:
       """
       {"id": #[Hi]}
@@ -137,7 +137,7 @@ Feature: Mail tools over MCP
       | subject | account            | body  |
       | Plans   | aaron@work.example | First |
     And the mail thread "Plans" has a later message saying "Second"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "read_mail_thread" with:
       """
       {"id": #[Plans]}
@@ -156,7 +156,7 @@ Feature: Mail tools over MCP
       | subject | status |
       | Hello   | unread |
       | Offer   | read   |
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "mark_mail_thread" with:
       """
       {"id": #[Hello], "status": "read"}
@@ -186,7 +186,7 @@ Feature: Mail tools over MCP
     Given the mail threads:
       | subject         |
       | Lunch on Friday |
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "make_mail_task" with:
       """
       {"id": #[Lunch on Friday], "title": "Book lunch", "list": "someday", "archive": false}
@@ -207,7 +207,7 @@ Feature: Mail tools over MCP
     Given the mail threads:
       | subject         |
       | Lunch on Friday |
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "make_mail_task" with:
       """
       {"id": #[Lunch on Friday], "title": " "}
@@ -234,7 +234,7 @@ Feature: Mail tools over MCP
       | subject | account            | gmail id |
       | Reply   | aaron@work.example | refused  |
     And Gmail refuses changes to the mail thread "refused"
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "make_mail_task" with:
       """
       {"id": #[Reply], "title": "Reply"}
@@ -258,7 +258,7 @@ Feature: Mail tools over MCP
       | id | labels | from               | subject |
       | d1 | DRAFT  | aaron@work.example | Plans   |
     And Gmail serves each message of the thread "t5" alone
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "save_mail_draft" with:
       """
       {"from": "aaron@work.example", "to": "ada@example.com", "subject": "Plans", "body": "Soon"}
@@ -283,7 +283,7 @@ Feature: Mail tools over MCP
     And the mail account "aaron@work.example"
     And the mail account "aaron@home.example"
     And Gmail answers POST "/users/me/drafts" with status 500
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "save_mail_draft" with:
       """
       {"from": "aaron@home.example", "to": "ada@example.com", "subject": "Plans", "body": "Soon"}
@@ -300,7 +300,7 @@ Feature: Mail tools over MCP
       | subject           | minutes ago |
       | Zeppelin sighting | 10          |
     And the task "Track the zeppelin"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the MCP mail tool "search" with:
       """
       {"query": "zeppelin"}
@@ -330,7 +330,7 @@ Feature: Mail tools over MCP
       | Zeppelin sighting | 10          |
     And a post "Engines" published an hour ago
     And a webmention on the post "Engines"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the MCP tool "list_inbox"
     Then the MCP answer's "inbox" lists the kinds "webmention"
     When I call the MCP mail tool "clear_inbox" with:
@@ -366,7 +366,7 @@ Feature: Mail tools over MCP
     And a post "Engines" published an hour ago
     And a post "Airships" published an hour ago
     And the post "Airships" is linked to the mail thread "Zeppelin sighting"
-    And an MCP client connects with the scopes "read write delete" and I approve it
+    And an MCP client connected with the scopes "read write delete"
     When I call the MCP mail tool "link_records" with:
       """
       {"kind": "post", "id": 1, "other_kind": "mail_thread", "other_id": #[Zeppelin sighting]}
@@ -384,7 +384,7 @@ Feature: Mail tools over MCP
       | Zeppelin sighting | 10          |
     And the task "Track the zeppelin"
     And a post "Engines" published an hour ago
-    And an MCP client connects with the scopes "read write mail" and I approve it
+    And an MCP client connected with the scopes "read write mail"
     When I call the MCP mail tool "search" with:
       """
       {"query": "zeppelin"}

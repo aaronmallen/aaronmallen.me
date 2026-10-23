@@ -1,3 +1,6 @@
 - example: "Shares::Operations::SetShortLinkTitle answers not found for a missing link"
+  scenario: "shares/api.feature: A share's code changes as typed, and a missing share or short link answers 404"
 - example: "Shares::Operations::SetShortLinkTitle refuses control characters"
+  scenario: "shares/api.feature: A short link's title sets, refuses control characters and clears"
 - example: "Shares::Operations::SetShortLinkTitle sets and clears the title"
+  scenario: "shares/api.feature: A short link's title sets, refuses control characters and clears"

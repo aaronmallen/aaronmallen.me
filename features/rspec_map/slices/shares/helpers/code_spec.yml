@@ -1,3 +1,6 @@
 - example: "Shares::Helpers::Code raises a code collision once the tries run out"
+  drop: "needs a database insert to fail midway, which nothing outside can cause"
 - example: "Shares::Helpers::Code raises a collision on any other constraint"
+  drop: "needs a database insert to fail midway, which nothing outside can cause"
 - example: "Shares::Helpers::Code retries a code collision until a try lands"
+  scenario: "shares/api.feature: A new <what> skips to the next number when the code it would take is taken"

@@ -1,3 +1,6 @@
 - example: "Media::Operations::UploadPhoto removes the objects it stored when a later put fails"
+  scenario: "photos/api.feature: The API takes back the photos it stored when a later write fails"
 - example: "Media::Operations::UploadPhoto with a store that takes every put puts every object before it inserts the row"
+  drop: "the order of the store writes and the row insert inside one call; nothing outside sees it"
 - example: "Media::Operations::UploadPhoto with a store that takes every put removes every object it stored when the insert fails"
+  drop: "needs a key generator that draws a bad key, which only a Ruby stub can make"

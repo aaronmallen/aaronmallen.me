@@ -93,7 +93,8 @@ Feature: Connected services settings
     And the service line "Country database refresh" reads "weekly"
     And the service row "MaxMind" is open
     And the service panel lists the environment keys "MAXMIND_ACCOUNT_ID MAXMIND_LICENSE_KEY"
-    And the service line "MAXMIND_LICENSE_KEY" shows "missing"
+    And the service line "MAXMIND_LICENSE_KEY" shows "set"
+    And I do not see "stub-license"
     And the service panel shows "Set in the server environment. Change them there, then redeploy."
     And the page has no axe breaches in light or dark
 
@@ -111,7 +112,7 @@ Feature: Connected services settings
     Given the API token "Laptop" was made on "2026-09-01T00:00:00Z" and last used on "2026-09-02T00:00:00Z"
     And the API token "Terminal" was made on "2026-09-03T00:00:00Z" and last used on ""
     And the API token "Retired" was revoked
-    When an MCP client connects with the scopes "read" and I approve it
+    When an MCP client connected with the scopes "read"
     And I call the MCP tool "list_api_tokens"
     Then the MCP answer lists "Terminal" before "Laptop"
     And the MCP answer holds "2026-09-03T00:00:00Z"
@@ -124,7 +125,7 @@ Feature: Connected services settings
     And an MCP client with no name that comes back to "https://cursor.example/callback"
     And an MCP client named "Gone" whose token was revoked
     And an MCP client named "Idle" holding no token
-    When an MCP client connects with the scopes "read" and I approve it
+    When an MCP client connected with the scopes "read"
     And I call the MCP tool "list_clients"
     Then the MCP client list shows "Cursor" with the scopes "read write"
     And the MCP client list shows "cursor.example" with the scopes "read"
