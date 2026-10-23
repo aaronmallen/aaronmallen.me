@@ -44,8 +44,10 @@ database:
   port: <%= ENV["DATABASE_PORT"].to_json %>
   user: <%= ENV["DATABASE_USER"].to_json %>
 github:
+  api_url: https://api.github.com
   client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["GITHUB_CLIENT_SECRET"].to_json %>
+  oauth_url: https://github.com
   profile_url: https://github.com/aaronmallen
 google:
   client_id: <%= ENV["GOOGLE_CLIENT_ID"].to_json %>

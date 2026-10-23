@@ -9,10 +9,10 @@ RSpec.describe "Admin sessions", type: :request do
   before do
     connect_github(client_id: "client-id", client_secret: "client-secret")
 
-    stub_request(:post, "https://github.com/login/oauth/access_token")
+    stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
 
-    stub_request(:get, "https://api.github.com/user/emails")
+    stub_request(:get, "http://stub.localhost/github/api/user/emails")
       .with(headers: { "Authorization" => "Bearer gho_token" })
       .to_return(
         headers: { "Content-Type" => "application/json" },
@@ -62,7 +62,7 @@ RSpec.describe "Admin sessions", type: :request do
   end
 
   def token_request
-    a_request(:post, "https://github.com/login/oauth/access_token")
+    a_request(:post, "http://stub.localhost/github/login/oauth/access_token")
   end
 
   def verifier_matches?(request, challenge)
@@ -89,7 +89,7 @@ RSpec.describe "Admin sessions", type: :request do
     it "sends the GitHub button on to GitHub" do
       start_admin_sign_in("github")
 
-      expect(last_response.location).to start_with("https://github.com/login/oauth/authorize?")
+      expect(last_response.location).to start_with("http://stub.localhost/github/login/oauth/authorize?")
     end
 
     it "asks GitHub for a code for the operator's OAuth app" do
@@ -227,9 +227,9 @@ RSpec.describe "Admin sessions", type: :request do
       start_sign_in
       challenge = authorize_query.fetch("code_challenge")
       state = start_sign_in
-      stub_request(:post, "https://github.com/login/oauth/access_token")
+      stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
         .to_return(status: 400, headers: { "Content-Type" => "application/json" }, body: { error: "bad" }.to_json)
-      stub_request(:post, "https://github.com/login/oauth/access_token")
+      stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
         .with { verifier_matches?(it, challenge) }
         .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
       callback(code: "code", state:)
@@ -291,7 +291,7 @@ RSpec.describe "Admin sessions", type: :request do
 
   describe "signing in as a GitHub account whose owner email is not its primary" do
     before do
-      stub_request(:get, "https://api.github.com/user/emails").to_return(
+      stub_request(:get, "http://stub.localhost/github/api/user/emails").to_return(
         headers: { "Content-Type" => "application/json" },
         body: [
           { email: "stranger@example.com", primary: true, verified: true }, { email:, primary: false, verified: true },
@@ -325,7 +325,7 @@ RSpec.describe "Admin sessions", type: :request do
 
   describe "signing in as a GitHub account with no emails" do
     before do
-      stub_request(:get, "https://api.github.com/user/emails")
+      stub_request(:get, "http://stub.localhost/github/api/user/emails")
         .to_return(headers: { "Content-Type" => "application/json" }, body: "[]")
       sign_in
     end
@@ -603,7 +603,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub calls the token JSON and sends something else" do
       before do
-        stub_request(:post, "https://github.com/login/oauth/access_token")
+        stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
           .to_return(headers: { "Content-Type" => "application/json" }, body: "<html>Our proxy is down</html>")
         sign_in
       end
@@ -620,7 +620,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub calls the token XML and sends something else" do
       before do
-        stub_request(:post, "https://github.com/login/oauth/access_token")
+        stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
           .to_return(headers: { "Content-Type" => "application/xml" }, body: token_response.to_json)
         sign_in
       end
@@ -632,7 +632,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub fails to return the emails" do
       before do
-        stub_request(:get, "https://api.github.com/user/emails").to_return(status: 503)
+        stub_request(:get, "http://stub.localhost/github/api/user/emails").to_return(status: 503)
         sign_in
       end
 
@@ -643,7 +643,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub answers the emails with a page instead of JSON" do
       before do
-        stub_request(:get, "https://api.github.com/user/emails")
+        stub_request(:get, "http://stub.localhost/github/api/user/emails")
           .to_return(headers: { "Content-Type" => "text/html" }, body: "<html>Our proxy is down</html>")
         sign_in
       end
@@ -660,7 +660,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub calls the emails JSON and sends something else" do
       before do
-        stub_request(:get, "https://api.github.com/user/emails")
+        stub_request(:get, "http://stub.localhost/github/api/user/emails")
           .to_return(headers: { "Content-Type" => "application/json" }, body: "<html>Our proxy is down</html>")
         sign_in
       end
@@ -672,7 +672,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when GitHub times out" do
       before do
-        stub_request(:post, "https://github.com/login/oauth/access_token").to_timeout
+        stub_request(:post, "http://stub.localhost/github/login/oauth/access_token").to_timeout
         sign_in
       end
 

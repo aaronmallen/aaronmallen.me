@@ -32,13 +32,13 @@ module AdminSignIn
   end
 
   def stub_github_emails(email, primary: true, verified: true)
-    stub_request(:get, "https://api.github.com/user/emails")
+    stub_request(:get, "http://stub.localhost/github/api/user/emails")
       .to_return(headers: { "Content-Type" => "application/json" }, body: [{ email:, primary:, verified: }].to_json)
   end
 
   def stub_github_sign_in
     connect_oauth_app
-    stub_request(:post, "https://github.com/login/oauth/access_token")
+    stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: { access_token: "gho_token" }.to_json)
     stub_github_emails(Spec::AdminSession::EMAIL)
   end

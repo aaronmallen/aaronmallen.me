@@ -6,17 +6,20 @@ module GitHub
   module Providers
     module ClientProvider
       API_URL = "https://api.github.com"
-      AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
       HEADERS = {
         "Accept" => "application/vnd.github+json",
         "X-GitHub-Api-Version" => "2022-11-28",
       }.freeze
       PROVIDER = Blog::Types::ServiceProvider["github"]
       SIGN_IN_TIMEOUT = 10
-      TOKEN_URL = "https://github.com/login/oauth/access_token"
 
       class << self
-        def auth(settings) = Auth.new(client: credentials(settings).then { it && sign_in(it) })
+        def auth(settings)
+          github = settings.github
+          client = credentials(settings)&.then { sign_in(it, github[:oauth_url]) }
+
+          Auth.new(client:, api_url: github[:api_url])
+        end
 
         def client(http)
           connect = ->(current) { { api: api(http, current), graphql: graphql(http, current) } }
@@ -47,13 +50,13 @@ module GitHub
 
         def services = Hanami.app.slices[:services]
 
-        def sign_in(credentials)
+        def sign_in(credentials, oauth_url)
           OAuth2::Client.new(
             *credentials,
             auth_scheme: :request_body,
-            authorize_url: AUTHORIZE_URL,
+            authorize_url: "#{oauth_url}/login/oauth/authorize",
             connection_opts: { request: { timeout: SIGN_IN_TIMEOUT } },
-            token_url: TOKEN_URL,
+            token_url: "#{oauth_url}/login/oauth/access_token",
           )
         end
 

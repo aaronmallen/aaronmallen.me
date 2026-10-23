@@ -14,7 +14,7 @@ RSpec.describe "Admin sign-in log", type: :request do
     allow(Hanami.app.settings).to receive(:proxy)
       .and_return(address_header: "CF-Connecting-IP", trusted_proxies: [IPAddr.new("127.0.0.0/8")])
 
-    stub_request(:post, "https://github.com/login/oauth/access_token")
+    stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: token_response.to_json)
     stub_github_emails(email)
   end

@@ -14,8 +14,10 @@ database:
   host: localhost
   name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"], ("w#{ENV["TEST_ENV_NUMBER"]}" unless ENV["TEST_ENV_NUMBER"].to_s.empty?)].compact.join("_").to_json %>
 github:
-  client_id: null
-  client_secret: null
+  api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/github/api".to_json %>
+  client_id: stub-client-id
+  client_secret: stub-client-secret
+  oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/github".to_json %>
 google:
   client_id: null
   client_secret: null
@@ -40,3 +42,5 @@ share_site:
   transfers: null
   url: http://shares.localhost
 share_store: *no_store
+site:
+  url: <%= ENV.fetch("SITE_URL", "https://aaronmallen.me").to_json %>

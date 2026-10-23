@@ -3,9 +3,11 @@ import { randomBytes } from "node:crypto";
 import { mkdirSync, openSync } from "node:fs";
 import { resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
+import type { Cookie } from "@playwright/test";
 import { test as base, createBdd } from "playwright-bdd";
 import postgres from "postgres";
 import { createClient } from "redis";
+import { ownerEmail, startStub } from "./stub.ts";
 
 type App = {
   pushJob: (job: string, ...args: unknown[]) => Promise<void>;
@@ -13,6 +15,8 @@ type App = {
   sql: postgres.Sql;
   url: string;
 };
+
+type Owner = { cookies: Cookie[]; device: postgres.Row };
 
 const root = resolve(import.meta.dirname, "../..");
 const workspace = Number(process.env.WORKSPACE_ID ?? 0);
@@ -43,13 +47,18 @@ async function stop(child: ChildProcess) {
   await exited;
 }
 
-export const test = base.extend<{ reset: undefined }, { app: App }>({
+export const test = base.extend<
+  { reset: undefined; tokens: { api?: string; mcp?: string } },
+  { app: App; owner: Owner }
+>({
   app: [
     async ({}, use, { parallelIndex }) => {
       const port = firstPort + parallelIndex * 2;
       const redisPort = port + 1;
       const redisContainer = `aaronmallen.me-features-ws${workspace}-w${parallelIndex}`;
       const password = randomBytes(16).toString("hex");
+      const stub = await startStub();
+      const url = `http://127.0.0.1:${port}`;
       const env = {
         ...process.env,
         DATABASE_NAME: "blog_features",
@@ -59,6 +68,8 @@ export const test = base.extend<{ reset: undefined }, { app: App }>({
         REDIS_PASSWORD: password,
         REDIS_PORT: String(redisPort),
         REDIS_USER: "default",
+        SITE_URL: url,
+        STUB_URL: stub.url,
         TEST_ENV_NUMBER: String(parallelIndex + 1),
       };
 
@@ -88,7 +99,6 @@ export const test = base.extend<{ reset: undefined }, { app: App }>({
         port: Number(process.env.DATABASE_PORT ?? 5432),
         username: process.env.DATABASE_USER ?? "postgres",
       });
-      const url = `http://127.0.0.1:${port}`;
 
       try {
         await until(() => redis.connect(), "Redis");
@@ -131,12 +141,29 @@ export const test = base.extend<{ reset: undefined }, { app: App }>({
         await sql.end();
         if (redis.isOpen) redis.destroy();
         execFileSync("docker", ["stop", redisContainer], { stdio: "ignore" });
+        await stub.stop();
       }
     },
     { scope: "worker", timeout: 180_000 },
   ],
+  owner: [
+    async ({ app, browser }, use) => {
+      await app.sql`INSERT INTO owner_identities ${app.sql({ email: ownerEmail })} ON CONFLICT DO NOTHING`;
+      const context = await browser.newContext({ baseURL: app.url, bypassCSP: true });
+      const page = await context.newPage();
+      await page.goto("/admin/sign-in");
+      await page.getByRole("button", { name: /GitHub/ }).click();
+      await page.waitForURL(/\/admin\/?$/);
+      const { cookies } = await context.storageState();
+      const [device] = await app.sql`SELECT * FROM devices`;
+      await context.close();
+      await use({ cookies, device });
+    },
+    { scope: "worker" },
+  ],
   baseURL: async ({ app }, use) => use(app.url),
   reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
+  tokens: async ({}, use) => use({}),
 });
 
 export const { Given, When, Then } = createBdd(test);

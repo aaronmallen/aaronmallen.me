@@ -5,7 +5,8 @@ module GitHubCredentials
 
   def connect_github(**credentials)
     @github_credentials = credentials
-    allow(Hanami.app.settings).to receive(:github).and_return(credentials)
+    urls = Hanami.app.settings.github.slice(:api_url, :oauth_url)
+    allow(Hanami.app.settings).to receive(:github).and_return(urls.merge(credentials))
     replace_github_components
   end
 

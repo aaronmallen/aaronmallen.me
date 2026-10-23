@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin GitHub connection", type: :request do
-  let(:revoke_url) { "https://api.github.com/applications/client-id/token" }
+  let(:revoke_url) { "http://stub.localhost/github/api/applications/client-id/token" }
   let(:revoke) do
     a_request(:delete, revoke_url).with(basic_auth: %w[client-id client-secret], body: { access_token: "ghp_token" })
   end
@@ -9,9 +9,9 @@ RSpec.describe "Admin GitHub connection", type: :request do
 
   before do
     sign_in_to_admin
-    stub_request(:post, "https://github.com/login/oauth/access_token")
+    stub_request(:post, "http://stub.localhost/github/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: token_body.to_json)
-    stub_request(:get, "https://api.github.com/user")
+    stub_request(:get, "http://stub.localhost/github/api/user")
       .with(headers: { "Authorization" => "Bearer gho_data" })
       .to_return(headers: { "Content-Type" => "application/json" }, body: { id: 931_094, login: "aaronmallen" }.to_json)
   end
@@ -43,7 +43,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
     before { start_connect }
 
     it "sends me to GitHub asking for the scopes the reads need", :aggregate_failures do
-      expect(last_response.location).to start_with("https://github.com/login/oauth/authorize?")
+      expect(last_response.location).to start_with("http://stub.localhost/github/login/oauth/authorize?")
       expect(authorize_query).to include("client_id" => "client-id", "scope" => "repo read:org")
     end
 
@@ -78,14 +78,15 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "sends the PKCE verifier with the code" do
-      verified = a_request(:post, "https://github.com/login/oauth/access_token").with(body: /code_verifier=[\w-]{64}/)
+      verifier = /code_verifier=[\w-]{64}/
+      verified = a_request(:post, "http://stub.localhost/github/login/oauth/access_token").with(body: verifier)
 
       expect(verified).to have_been_made
     end
 
     it "sends the sign-in callback with the code" do
       callback = /redirect_uri=[^&]*%2Fadmin%2Fauth%2Fgithub%2Fcallback(&|\z)/
-      sent = a_request(:post, "https://github.com/login/oauth/access_token").with(body: callback)
+      sent = a_request(:post, "http://stub.localhost/github/login/oauth/access_token").with(body: callback)
 
       expect(sent).to have_been_made
     end
@@ -195,7 +196,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "saves nothing when GitHub fails the exchange" do
-      stub_request(:post, "https://github.com/login/oauth/access_token").to_return(status: 500)
+      stub_request(:post, "http://stub.localhost/github/login/oauth/access_token").to_return(status: 500)
       callback(code: "code", state: start_connect)
 
       expect(connections).to be_empty
