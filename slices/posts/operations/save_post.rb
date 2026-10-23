@@ -39,9 +39,10 @@ module Posts
       end
 
       def create_or_update(post, attributes)
-        fields = attributes.except(:tags, NOTE)
+        fields = attributes.except(:tags, :project_tags, NOTE)
         saved = post ? post_mutations.update(post.id, fields) : post_mutations.create(fields)
         post_mutations.replace_tags(saved.id, attributes.fetch(:tags))
+        post_mutations.replace_project_tags(saved.id, attributes[:project_tags]) if attributes.key?(:project_tags)
         claim_post_photos.call(saved)
 
         post_queries.by_id(saved.id)
@@ -67,7 +68,7 @@ module Posts
       end
 
       def form(params)
-        given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD, NOTE))
+        given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD, NOTE, :project_tags))
 
         given.merge(slug: Blog::Helpers::PostSlug.derive(slug: given[:slug], title: given[:title]))
       end

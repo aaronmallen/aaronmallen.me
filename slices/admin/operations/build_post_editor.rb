@@ -3,7 +3,8 @@
 module Admin
   module Operations
     class BuildPostEditor
-      FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url edit_note].freeze
+      FIELDS = %i[title slug summary tags project_tags body publish_at og_title og_image_url canonical_url
+                  edit_note].freeze
 
       include Deps[
         announcement: "posts.operations.compose_announcement",
@@ -21,6 +22,7 @@ module Admin
       ]
 
       PUBLIC = Blog::Types::TagScope["public"]
+      RECORD = Blog::Types::RecordKind["post"]
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       def call(
@@ -43,7 +45,7 @@ module Admin
           preview:,
           suggestions: suggestions(post, review),
           syndication: syndication(values, form),
-          tags: tag_queries.all_in(PUBLIC),
+          **tag_choices(post),
           view:,
           webmentions: webmentions(post, form),
         }
@@ -77,6 +79,7 @@ module Admin
         end
 
         post.form.slice(*FIELDS).merge(
+          project_tags: Blog::Types::TagField[post.project_tags],
           edit_note: Blog::Constants::EMPTY_STRING,
           syndication_body: announcement.call(post),
           syndication_enabled: post.syndication_enabled,
@@ -115,6 +118,10 @@ module Admin
           networks: list_networks.call(selected: form[:syndication_targets]),
           preview:,
         }
+      end
+
+      def tag_choices(post)
+        { tags: tag_queries.all_in(PUBLIC), project_tags: (tag_queries.project_choices(RECORD, post.id) if post) }
       end
 
       def webmentions(post, form)

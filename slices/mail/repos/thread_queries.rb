@@ -47,6 +47,12 @@ module Mail
         found.with_account.newest_first.limit(limit).to_a
       end
 
+      def page_by_tag(tag_ids, page)
+        found = mail_threads.carrying(:mail_thread_tags, tag_ids).newest_first
+
+        page.fill(found.select(:id, :subject, :received_at).paged(page).to_a)
+      end
+
       def page_listed(page, **)
         page.fill(listed(**).with_summary.combine(:mail_labels, :tags).newest_first.paged(page).to_a)
       end

@@ -22,7 +22,7 @@ module Posts
 
       def by_filter(filter, page) = page.fill(filtered(filter).newest_first.paged(page).to_a)
 
-      def by_id(id) = with_tags.by_pk(id).one
+      def by_id(id) = with_tags.combine(:project_tags).by_pk(id).one
 
       def by_ids(ids) = posts.lean.with_ids(ids).newest_first.to_a
 
@@ -104,7 +104,7 @@ module Posts
       def published_tag_names
         tagged = post_tags.where(post_id: posts.published.select(:id).dataset).select(:tag_id)
 
-        tags.where(id: tagged.dataset).pluck(:name).sort
+        tags.where(id: tagged.dataset, scope: PUBLIC_TAG).pluck(:name).sort
       end
 
       def published_versions(page) = page.fill(versions.published.newest_first.paged(page).to_a)

@@ -38,7 +38,7 @@ module API
 
     def synced(task_id, title) = Helpers::Untrusted.synced(task_id, title)
 
-    def tag_names(record) = record.tags.map(&:name)
+    def tag_names(record) = record.tags.map(&:name).uniq
 
     def untrusted(text) = Helpers::Untrusted.call(text)
   end

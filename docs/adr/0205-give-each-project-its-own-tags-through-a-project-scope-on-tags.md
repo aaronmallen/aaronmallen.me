@@ -68,14 +68,16 @@ move into its join. Every join still points at `tags` by id, so `page_by_tag`, t
 **A record relates to a project through its own project, or else through its record links.** A task, a session and
 a project memory file relate to their `project_id`. Every other kind relates to each project it links to, so it can
 relate to several. A record related to a project carries only that project's tags, never private ones: any tag added
-to it in the admin, the API or the MCP becomes a project tag, made in the project when missing. The picker offers the
-tags of every project the record relates to. Posts keep their public tags beside any project tags.
+to it in the admin, the API or the MCP becomes a project tag, made in the project when missing. A record linked to
+several projects takes the name from each that holds it, and a name none of them holds is made in each. The picker
+offers the tags of every project the record relates to. Posts keep their public tags beside any project tags, in a
+field of their own, and no public page shows the project ones.
 
 **Tags follow the record when its project changes.** A task that moves to another project takes its tags there by
 name, and a name the new project lacks is made there with the old tag's tone and description. A task that leaves
 every project keeps its tags by name as private tags. Removing a record's last link to a project drops that
-project's tags from the record. A task rule that files into a project holds that project's tags, and a rule with no
-project keeps private tags.
+project's tags from the record, through a trigger on `record_links`. A task rule that files into a project holds that
+project's tags, and a rule with no project keeps private tags.
 
 **Labels on a synced issue become project tags.** When a synced task sits in a project, each label on its issue
 makes or uses a tag of that name in the project, at import and on every later sync. A label removed upstream leaves

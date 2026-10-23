@@ -26,6 +26,7 @@ amended:
   - "#1444"
   - "#1930"
   - "#1947"
+  - "#1952"
 tags:
   - postgres
   - schema
@@ -152,7 +153,8 @@ The `decision` kind needs the `decisions` table first, so #319 waits on it.
 ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 updates both when it adds the slice.
 
 Since #1947 a link to a project lets a record take that project's tags, and removing the last one drops them
-([ADR 0205][0205]).
+([ADR 0205][0205]). Since #1952 an `AFTER DELETE` trigger on `record_links` drops them from a post, journal entry,
+decision, mail thread or note, so every path that removes a link takes the tags with it.
 
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md

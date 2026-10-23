@@ -29,6 +29,8 @@ module Posts
 
       def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
 
+      def replace_project_tags(id, names) = post_tags.retag_projects(id, names, tags)
+
       def rerender
         rerender_rows(posts, :body, Helpers::Rendering::BODY) { Helpers::Rendering.body(it) } +
           rerender_rows(post_edits, :note, Helpers::Rendering::NOTE) { Helpers::Rendering.note(it) }

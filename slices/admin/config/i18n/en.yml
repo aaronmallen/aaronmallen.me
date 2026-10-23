@@ -2564,6 +2564,7 @@ en:
           heading: "Publishing"
           hint_later: "Publishing schedules it for this date."
           hint_now: "It goes live when you publish."
+          project_tags: "Project tags"
           publish_at: "Publish time (Chicago)"
           slug: "Slug"
           tags: "Tags"
@@ -4775,6 +4776,8 @@ en:
           kinds:
             decisions: "Decisions"
             journal_entries: "Journal entries"
+            messages: "Mail"
+            notes: "Notes"
             posts: "Posts"
             projects: "Projects"
             tasks: "Tasks"

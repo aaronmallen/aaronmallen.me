@@ -68,6 +68,8 @@ en:
       control: "Take out the control characters."
       invalid: "Check this field."
       skipped: "That time does not exist here: the clocks skip it."
+      project_tags:
+        format: "A tag is lowercase words joined by hyphens."
       tags:
         format: "A tag is lowercase words joined by hyphens."
       url:

@@ -4,6 +4,10 @@ module Tags
   class Slice < Hanami::Slice
     import keys: %w[repos.decision_queries], from: :decisions
 
+    import keys: %w[repos.thread_queries], from: :mail
+
+    import keys: %w[repos.note_queries], from: :notes
+
     import keys: %w[repos.post_tag_queries], from: :posts
 
     import keys: %w[repos.project_queries], from: :projects

@@ -12,7 +12,8 @@ module API
           ),
           title: Notes::TITLE.merge(description: "a new title; [[links]] to the old one in other notes follow it"),
           body: { type: "string", description: "the whole new body, in Markdown" },
-          tags: { type: "array", items: { type: "string" }, description: "every private tag the note keeps" },
+          tags: { type: "array", items: { type: "string" },
+                  description: "every tag the note keeps; #{Helpers::Tags::LINKED}" },
         },
         required: %w[id version],
       }.freeze

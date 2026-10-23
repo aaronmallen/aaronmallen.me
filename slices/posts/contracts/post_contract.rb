@@ -16,6 +16,7 @@ module Posts
         required(:title).value(Blog::Types::TrimmedText, :filled?)
         required(:slug).maybe(Blog::Types::Nullable::Slug)
         required(:tags).value(Blog::Types::TagList)
+        optional(:project_tags).value(Blog::Types::TagList)
         required(:summary).value(Blog::Types::TrimmedText)
         required(:body).value(Blog::Types::Normalized::Breaks)
         required(:publish_at).value(Blog::Types::LocalTime)
@@ -36,6 +37,7 @@ module Posts
       rule(:syndication_body).validate(:without_controls)
       rule(:edit_note).validate(:without_controls, :visible)
       rule(:tags).validate(:tag_slugs)
+      rule(:project_tags).validate(:tag_slugs)
 
       rule(:publish_at).validate(:moment)
       rule(:syndication_body).validate(:known_mentions)

@@ -41,6 +41,7 @@ module API
           Blog::Contract::TOO_LONG => "syndication_body runs over a network's limit",
         },
         tag: Helpers::Tags::COMPLAINTS,
+        project_tags: { Blog::Contract::FORMAT => "project tags are each #{Helpers::Tags::FORMAT}" },
         tags: { Blog::Contract::FORMAT => "tags are each #{Helpers::Tags::FORMAT}" },
       }.freeze
 

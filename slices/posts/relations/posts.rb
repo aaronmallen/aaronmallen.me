@@ -3,6 +3,7 @@
 module Posts
   module Relations
     class Posts < Blog::DB::Relation
+      PUBLIC_TAG = Blog::Types::TagScope["public"]
       PUBLISHED = Blog::Types::PostStatus["published"]
       ROW = %i[
         id title slug status published_at created_at updated_at summary first_paragraph read_time word_count
@@ -22,7 +23,8 @@ module Posts
       schema :posts, infer: true do
         associations do
           has_many :post_tags
-          has_many :tags, through: :post_tags, view: :in_name_order
+          has_many :tags, through: :post_tags, view: :public_in_name_order
+          has_many :tags, as: :project_tags, through: :post_tags, view: :project_in_name_order
         end
       end
 
@@ -66,12 +68,12 @@ module Posts
       def scheduled_or_published = with_status([SCHEDULED, PUBLISHED])
 
       def sharing_tags_with(post_id)
-        tag_ids = dataset.db[:post_tags].where(post_id:).select(:tag_id)
+        tag_ids = dataset.db[:post_tags].where(post_id:, tag_scope: PUBLIC_TAG).select(:tag_id)
 
         join(:post_tags).where(SHARED_TAG => tag_ids).group(self[:id]).order(MOST_SHARED, *newest_order)
       end
 
-      def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
+      def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag, Sequel[:tags][:scope] => PUBLIC_TAG)
 
       def top_terms(post_id, limit)
         lexemes = dataset.db.from(:posts, Sequel.function(:unnest, VECTOR)).where(Sequel[:posts][:id] => post_id)

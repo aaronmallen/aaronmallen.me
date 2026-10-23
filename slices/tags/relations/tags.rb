@@ -6,7 +6,6 @@ module Tags
       use :tags
 
       JOINS = Blog::DB::Plugins::Taggings::TABLES.to_h { |join, table| [table.fetch(:kind), join] }.freeze
-      SUMMARY = Blog::Types::TagKind.values.map(&:to_sym).freeze
       ADMITTED = Blog::DB::Plugins::Taggings::ADMITTED
 
       schema :tags, infer: true
@@ -17,7 +16,7 @@ module Tags
         end
       end
 
-      def counts_carrying(ids) = JOINS.slice(*SUMMARY).transform_values { dataset.db[it].where(tag_id: ids).count }
+      def counts_carrying(ids, kinds) = JOINS.slice(*kinds).transform_values { dataset.db[it].where(tag_id: ids).count }
 
       def global = where(project_id: nil)
 

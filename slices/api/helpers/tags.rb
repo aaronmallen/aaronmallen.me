@@ -4,6 +4,10 @@ module API
   module Helpers
     module Tags
       FORMAT = "lowercase words joined by hyphens"
+      LINKED = [
+        "a record linked to a project takes the tags of its projects in place of private ones,",
+        "and a name none of them holds is made in each",
+      ].join(" ").freeze
       REFUSAL = "a tag is #{FORMAT}".freeze
       COMPLAINTS = { "blank" => "name the tag first", Blog::Contract::FORMAT => REFUSAL }.freeze
 

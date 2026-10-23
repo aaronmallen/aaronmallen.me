@@ -45,9 +45,19 @@ module API
             status: { type: "string", enum: Blog::Types::DecisionStatus.values },
           },
         ),
+        notes: Helpers::Schema.object(
+          { id: Helpers::Schema::INTEGER, title: Helpers::Schema::STRING, updated_at: Helpers::Schema::STAMP },
+        ),
+        messages: Helpers::Schema.object(
+          {
+            id: Helpers::Schema::INTEGER,
+            subject: Helpers::Schema::STRING,
+            received_at: Helpers::Schema::STAMP,
+          },
+        ),
       }.freeze
 
-      COUNTS = Helpers::Schema.object(ROWS.transform_values { Helpers::Schema::INTEGER })
+      COUNTS = Helpers::Schema.object({}, optional: ROWS.transform_values { Helpers::Schema::INTEGER })
                               .merge(description: "how many records of each kind carry the tag")
                               .freeze
 
@@ -70,6 +80,16 @@ module API
 
       def journal_entries(overview)
         paged(overview, :journal_entries) { { id: it.id, date: day(it.entry_date), opening: it.body } }
+      end
+
+      def messages(overview)
+        paged(overview, :messages) do |thread|
+          { id: thread.id, subject: untrusted(thread.subject), received_at: stamp(thread.received_at) }
+        end
+      end
+
+      def notes(overview)
+        paged(overview, :notes) { { id: it.id, title: it.title, updated_at: stamp(it.updated_at) } }
       end
 
       def posts(overview) = paged(overview, :posts) { Post.new(it).serializable_hash }

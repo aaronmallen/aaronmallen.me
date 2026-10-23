@@ -11,6 +11,7 @@ module Admin
           prop :decision, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
+          prop :tag_choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)).optional, default: nil
 
           def view_template
             div(class: "g-main") do
@@ -65,6 +66,7 @@ module Admin
             Field(label: t(".tags"), name: :tags, errors: @errors, error: FieldError) do |control|
               TagField(
                 control:, name: "decision[tags]", value: @values[:tags].to_s, placeholder: t(".tags_placeholder"),
+                tags: @tag_choices,
               )
             end
           end

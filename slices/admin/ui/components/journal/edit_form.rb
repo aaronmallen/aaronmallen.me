@@ -15,11 +15,15 @@ module Admin
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :scope, Blog::Types::String, default: TEMPLATE
           prop :source, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
+          prop :tag_src, Blog::Types::String.optional, default: nil
 
           def view_template
             Form(action: @action, class: "journal-edit", data: { journal_edit_form: "", journal_source: @source }) do
               HiddenFields(values: @place)
-              EntryFields(body: @body, tags: @tags, errors: @errors, scope: @scope, height: HEIGHT, label: t(".body"))
+              EntryFields(
+                body: @body, tags: @tags, errors: @errors, scope: @scope, height: HEIGHT, label: t(".body"),
+                tag_src: @tag_src,
+              )
               div(class: "journal-edit-foot") do
                 Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }
                 SaveButton(body: @body) { t(".save") }

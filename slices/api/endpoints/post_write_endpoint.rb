@@ -8,7 +8,15 @@ module API
         title: { type: "string" },
         slug: { type: "string", description: "lowercase letters, numbers and single dashes; empty takes the title" },
         summary: { type: "string", description: "one line; empty uses the first paragraph of the body" },
-        tags: { type: "array", items: { type: "string" }, description: "tag names, such as ruby" },
+        tags: { type: "array", items: { type: "string" }, description: "public tag names, such as ruby" },
+        project_tags: {
+          type: "array",
+          items: { type: "string" },
+          description: [
+            "the whole set of tags from the projects the post links to; a name none of them holds is made in each.",
+            "They show on no public page, and a post that links to no project takes none",
+          ].join(" "),
+        },
         body: { type: "string", description: "the whole post, in markdown" },
         publish_at: {
           type: "string",

@@ -918,6 +918,40 @@ $$;
 
 
 --
+-- Name: record_links_drop_project_tags(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.record_links_drop_project_tags() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  kind record_kind := OLD.left_kind;
+  record_id integer := OLD.left_id;
+  project integer := OLD.right_id;
+BEGIN
+  IF OLD.left_kind = 'project' THEN
+    kind := OLD.right_kind;
+    record_id := OLD.right_id;
+    project := OLD.left_id;
+  ELSIF OLD.right_kind <> 'project' THEN
+    RETURN OLD;
+  END IF;
+
+  CASE kind
+    WHEN 'post' THEN DELETE FROM post_tags WHERE post_id = record_id AND tag_id IN (SELECT id FROM tags WHERE project_id = project);
+    WHEN 'journal_entry' THEN DELETE FROM journal_entry_tags WHERE journal_entry_id = record_id AND tag_id IN (SELECT id FROM tags WHERE project_id = project);
+    WHEN 'decision' THEN DELETE FROM decision_tags WHERE decision_id = record_id AND tag_id IN (SELECT id FROM tags WHERE project_id = project);
+    WHEN 'mail_thread' THEN DELETE FROM mail_thread_tags WHERE mail_thread_id = record_id AND tag_id IN (SELECT id FROM tags WHERE project_id = project);
+    WHEN 'note' THEN DELETE FROM note_tags WHERE note_id = record_id AND tag_id IN (SELECT id FROM tags WHERE project_id = project);
+    ELSE NULL;
+  END CASE;
+
+  RETURN OLD;
+END;
+$$;
+
+
+--
 -- Name: record_links_drop_record(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -8879,6 +8913,13 @@ CREATE TRIGGER pull_requests_notify_admin_change AFTER INSERT OR DELETE OR UPDAT
 
 
 --
+-- Name: record_links record_links_drop_project_tags; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER record_links_drop_project_tags AFTER DELETE ON public.record_links FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_project_tags();
+
+
+--
 -- Name: record_links record_links_find_records; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -10396,4 +10437,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261023050000_add_contacts_to_oauth_scope.rb'),
 ('20261024010000_add_project_to_tag_scope.rb'),
 ('20261024010100_add_project_id_to_tags.rb'),
-('20261024020000_leave_project_tags_out_of_task_rules_last_target.rb');
+('20261024020000_leave_project_tags_out_of_task_rules_last_target.rb'),
+('20261024030000_drop_project_tags_with_their_record_link.rb');

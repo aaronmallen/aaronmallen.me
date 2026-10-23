@@ -49,6 +49,12 @@ module Notes
         listing.order(Sequel.function(:lower, :title)).to_a
       end
 
+      def page_by_tag(tag_ids, page)
+        found = notes.carrying(:note_tags, tag_ids).order(Sequel.desc(:updated_at), Sequel.desc(:id))
+
+        page.fill(found.select(:id, :title, :updated_at).paged(page).to_a)
+      end
+
       def recent(limit) = notes.combine(:tags).order(Sequel.desc(:updated_at), Sequel.desc(:id)).limit(limit).to_a
 
       def relinks(id, title)

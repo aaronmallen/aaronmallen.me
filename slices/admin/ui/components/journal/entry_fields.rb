@@ -14,6 +14,7 @@ module Admin
           prop :placeholder, Blog::Types::String.optional, default: nil
           prop :autofocus, Blog::Types::Bool, default: false
           prop :only, Blog::Types::Symbol.enum(:body, :tags).optional, default: nil
+          prop :tag_src, Blog::Types::String.optional, default: nil
 
           def self.blank?(body) = !body.match?(/\S/)
 
@@ -44,6 +45,7 @@ module Admin
               name: "entry[tags]",
               value: @tags,
               placeholder: t(".tags_placeholder"),
+              src: @tag_src,
             )
             FieldError(field: :tags, errors: @errors, scope: @scope)
           end

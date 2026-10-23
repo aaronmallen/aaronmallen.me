@@ -21,9 +21,10 @@ module Admin
         def classes = ["tag", Blog::UI::Components::Pill.for_tag_color(@tag.color)&.to_s]
 
         def href
-          return path(:admin_tag, name: @tag.name) unless @project_key
+          key = @project_key || @tag.to_h[:project_key]
+          return path(:admin_tag, name: @tag.name) unless key
 
-          path(:admin_project_tag, key: @project_key, name: @tag.name)
+          path(:admin_project_tag, key:, name: @tag.name)
         end
       end
     end

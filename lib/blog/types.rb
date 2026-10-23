@@ -229,7 +229,7 @@ module Blog
       names = tags.is_a?(::Array) ? tags.map(&:to_s) : tags.to_s.split(",")
       names.map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end
-    TagKind = Types::String.enum("posts", "projects", "tasks", "journal_entries", "decisions")
+    TagKind = Types::String.enum("posts", "projects", "tasks", "journal_entries", "decisions", "notes", "messages")
     TagKindParam = TagKind.optional.fallback(nil)
     GlobalTagScope = Types::String.enum("public", "private")
     TagScope = Types::String.enum(*GlobalTagScope.values, "project")

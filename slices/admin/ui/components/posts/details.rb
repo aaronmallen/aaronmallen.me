@@ -5,7 +5,7 @@ module Admin
     module Components
       module Posts
         class Details < Component
-          FIELDS = %i[slug tags publish_at og_title og_image_url canonical_url syndication_body].freeze
+          FIELDS = %i[slug tags project_tags publish_at og_title og_image_url canonical_url syndication_body].freeze
           ID = "post-details"
 
           prop :post, Blog::Types::Instance(ROM::Struct).optional
@@ -16,13 +16,17 @@ module Admin
           prop :scheduling, Blog::Types::Bool
           prop :syndication, Blog::Types::Hash
           prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :project_tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)).optional
           prop :webmentions, Blog::Types::Hash
 
           def view_template
             Dialog(**dialog_attributes) do |dialog|
               dialog.foot { foot }
 
-              Publishing(values: @values, errors: @errors, published: @published, scheduling: @scheduling, tags: @tags)
+              Publishing(
+                values: @values, errors: @errors, published: @published, scheduling: @scheduling, tags: @tags,
+                project_tags: @project_tags,
+              )
               Seo(values: @values, errors: @errors)
               Syndication(errors: @errors, **@syndication)
               Webmentions(**@webmentions)

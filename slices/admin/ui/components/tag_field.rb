@@ -12,6 +12,7 @@ module Admin
         prop :placeholder, Blog::Types::String
         prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)).optional, default: nil
         prop :project, Blog::Types::Integer.optional, default: nil
+        prop :src, Blog::Types::String.optional, default: nil
 
         def self.choices(tags)
           tags.map { { name: it.name, color: Blog::UI::Components::Pill.for_tag_color(it.color)&.to_s } }
@@ -37,7 +38,7 @@ module Admin
         def pick_data
           {
             tag_field: @tags ? JSON.generate(self.class.choices(@tags)) : "",
-            tag_field_src: (path(:admin_private_tag_choices, **{ project: @project }.compact) unless @tags),
+            tag_field_src: (@src || path(:admin_private_tag_choices, **{ project: @project }.compact) unless @tags),
             tag_field_add: t(".add", name: NAME),
             tag_field_none: t(".no_match"),
             tag_field_remove: t(".remove", name: NAME),

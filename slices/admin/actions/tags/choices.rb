@@ -15,14 +15,23 @@ module Admin
 
         def handle(request, response)
           response.format = :json
-          response.body = JSON.generate(tags: UI::Components::TagField.choices(choices(request.params[:project])))
+          response.body = JSON.generate(tags: UI::Components::TagField.choices(choices(request.params)))
         end
 
         private
 
-        def choices(project)
+        def choices(params)
+          return project_choices(params[:project]) unless params[:project].nil?
+
+          record = params[:record]
+          id = Blog::Types::IdParam[params[:id]]
+          return tag_queries.choices_for(record, id) if id && Blog::Types::RecordKind.valid?(record)
+
+          tag_queries.all_in(PRIVATE, mail: false)
+        end
+
+        def project_choices(project)
           project_id = Blog::Types::IdParam[project]
-          return tag_queries.all_in(PRIVATE, mail: false) if project.nil?
 
           project_id ? tag_queries.all_in(PROJECT, project_id:) : Blog::Constants::EMPTY_ARRAY
         end

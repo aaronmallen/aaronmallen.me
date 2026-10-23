@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Notes
       class Menu < Action
-        PRIVATE = Blog::Types::TagScope["private"]
+        RECORD = Blog::Types::RecordKind["note"]
 
         include Deps[
           build_notes_page: "operations.build_notes_page",
@@ -16,7 +16,7 @@ module Admin
           note = note_queries.by_id(record_id(request)) || halt(:not_found)
           tree = build_notes_page.tree
 
-          response.render(view, note:, tree:, tags: tag_queries.all_in(PRIVATE, mail: false),
+          response.render(view, note:, tree:, tags: tag_queries.choices_for(RECORD, note.id),
                                 return_to: back_here(request))
         end
       end

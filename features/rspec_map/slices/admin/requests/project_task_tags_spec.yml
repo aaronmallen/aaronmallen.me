@@ -1,0 +1,5 @@
+- example: "Admin tags on project tasks links a project tag on a board card to the project's tag page"
+- example: "Admin tags on project tasks links a project tag on the task page to the project's tag page"
+- example: "Admin tags on project tasks makes a project tag when the task editor saves a tag"
+- example: "Admin tags on project tasks names the project on the tags field of a project task and offers its tags"
+- example: "Admin tags on project tasks offers a project's tags and no global ones as choices for it"

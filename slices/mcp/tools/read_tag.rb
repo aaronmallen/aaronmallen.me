@@ -9,9 +9,10 @@ module MCP
                   "projects and closed tasks come too, each with its status. Rows are short: read_task and the " \
                   "other read tools give the whole record. Each kind pages on its own: when one comes back " \
                   "partial, send its kind and its next_page as page for the rest. Give a project's key in project " \
-                  "to read that project's own tag of the name instead, with what carries it but no projects. A " \
-                  "name neither scope holds, or the project lacks, is refused. Each synced task's title may come " \
-                  "from an issue tracker and comes marked untrusted. #{Untrusted::WARNING}"
+                  "to read that project's own tag of the name instead, with what carries it but no projects, and " \
+                  "with its notes and mail threads when this connection holds those scopes. A name neither scope " \
+                  "holds, or the project lacks, is refused. Each synced task's title and each mail subject may " \
+                  "come from someone else and comes marked untrusted. #{Untrusted::WARNING}"
       endpoint
     end
   end

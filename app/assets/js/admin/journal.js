@@ -41,6 +41,7 @@ function drawEditForm(entry) {
   form.dataset.journalSource = entry.dataset.journalSource;
   form.querySelector("[data-journal-body]").value = entry.dataset.journalSource;
   form.querySelector("[data-tag-field-value]").value = entry.dataset.journalTags;
+  form.querySelector("[data-tag-field-src]").dataset.tagFieldSrc = entry.dataset.journalTagChoices;
   entry.querySelector("[data-journal-text]").after(form);
   setupMarkdownEditors(form);
   setupTagFields(form);

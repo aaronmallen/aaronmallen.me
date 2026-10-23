@@ -9,6 +9,8 @@ module MCP
       TAG_KINDS = "Public tags go on posts and projects; private tags go on " \
                   "#{API::Endpoints::TagEndpoint::PRIVATE_KINDS}; project tags belong to the one project " \
                   "whose key you give in project, and show in no other scope".freeze
+      LINKED_TAGS = "A record linked to a project takes the tags of its projects in place of private ones, and a " \
+                    "name none of them holds is made in each"
       TEXT = "text"
 
       extend Dry::Monads[:result]

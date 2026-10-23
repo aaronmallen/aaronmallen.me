@@ -6,9 +6,12 @@ module Admin
       module Tags
         class Show < View
           LIVE_TABLES = %w[
-            decision_options decision_tags decisions journal_entries journal_entry_tags post_tags posts project_tags
-            projects sprints task_comments task_contributors task_links task_series task_tags work_sessions
+            decision_options decision_tags decisions journal_entries journal_entry_tags mail_thread_tags mail_threads
+            note_tags notes post_tags posts project_tags projects sprints task_comments task_contributors task_links
+            task_series task_tags work_sessions
           ].freeze
+          MAIL_THREAD = Blog::Types::RecordKind["mail_thread"]
+          NOTE = Blog::Types::RecordKind["note"]
           PRIVATE = Blog::Types::TagScope["private"]
           PROJECT = Blog::Types::TagScope["project"]
           PUBLIC = Blog::Types::TagScope["public"]
@@ -20,6 +23,8 @@ module Admin
             tasks: [PRIVATE, :task, ".kinds.tasks"],
             journal_entries: [PRIVATE, :journal_entry, ".kinds.journal_entries"],
             decisions: [PRIVATE, :decision, ".kinds.decisions"],
+            notes: [PRIVATE, :note, ".kinds.notes"],
+            messages: [PRIVATE, :message, ".kinds.messages"],
           }.freeze
           SCOPES = { PUBLIC => ".scopes.public", PRIVATE => ".scopes.private" }.freeze
 
@@ -95,7 +100,19 @@ module Admin
 
           def label(scope) = @project ? @project.name : t(SCOPES.fetch(scope))
 
+          def message(thread)
+            ListItem(title: thread.subject, href: record_path(MAIL_THREAD, thread.id)) do |item|
+              item.sub { Moment(at: thread.received_at) }
+            end
+          end
+
           def name = @overview.name
+
+          def note(note)
+            ListItem(title: note.title, href: record_path(NOTE, note.id)) do |item|
+              item.sub { Moment(at: note.updated_at) }
+            end
+          end
 
           def params(kind = nil) = { key: @project&.key, name:, kind: }.compact
 
@@ -111,6 +128,8 @@ module Admin
               StatusPill(status: project.archived? ? :archived : :active)
             end
           end
+
+          def record_path(kind, id) = Blog::Helpers::RecordKinds.path(routes, kind, id:, day: nil)
 
           def route = @project ? :admin_project_tag : :admin_tag
 

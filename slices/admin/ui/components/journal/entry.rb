@@ -5,6 +5,8 @@ module Admin
     module Components
       module Journal
         class Entry < Component
+          RECORD = Blog::Types::RecordKind["journal_entry"]
+
           prop :entry, Blog::Types::Instance(ROM::Struct)
           prop :date, Blog::Types::Date
           prop :editing, Blog::Types::Hash.optional, default: nil
@@ -37,7 +39,7 @@ module Admin
           def data
             {
               journal_item: "", menu:, journal_source: @entry.body, journal_tags: saved_tags, journal_scope: scope,
-              journal_update: update_path,
+              journal_update: update_path, journal_tag_choices: tag_choices_path,
             }
           end
 
@@ -51,7 +53,7 @@ module Admin
           def edit_form
             EditForm(
               action: update_path, body: @editing[:body], tags: @editing[:tags], errors: @editing[:errors], scope:,
-              source: @entry.body, place: @place,
+              source: @entry.body, place: @place, tag_src: tag_choices_path,
             )
           end
 
@@ -103,6 +105,8 @@ module Admin
           def saved_tags = Blog::Types::TagField[@entry.tags]
 
           def scope = "journal-edit-#{@entry.id}"
+
+          def tag_choices_path = path(:admin_private_tag_choices, record: RECORD, id: @entry.id)
 
           def update_path = path(:admin_update_journal_entry, id: @entry.id)
         end

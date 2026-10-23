@@ -8,6 +8,8 @@ area:
   - api
   - mcp
   - decisions
+  - mail
+  - notes
   - posts
   - projects
   - record
@@ -19,6 +21,7 @@ amended:
   - "#1846"
   - "#1947"
   - "#1950"
+  - "#1952"
 tags:
   - tags
   - summary
@@ -61,7 +64,9 @@ tag ([ADR 0205][0205]).
 **Each kind answers through a query its own slice exports.** `posts`, `projects`, `tasks`, `record` (for journal
 entries) and `decisions` each export `page_by_tag`, a paged query that keeps every status. Since #1950 it takes the
 ids of the tags the summary found rather than a name, and reads their join table through the relation's `carrying`,
-so a public, private or project tag of one name lists only what it carries. `tags` imports those five. The counts
+so a public, private or project tag of one name lists only what it carries. Since #1952 `notes` and `mail` export
+it too, and only a project's tag page lists notes and mail threads; `read_tag` leaves each out for a token without
+its scope. `tags` imports those seven. The counts
 read the tag join tables, such as `post_tags`, through the `tags` relation. Past those joins, the query holds no SQL
 over another slice's tables.
 
@@ -88,7 +93,7 @@ tables lack.
 
 The summary needs no schema change, and each kind keeps the rule for what counts as tagged in its own slice.
 
-`tags` turns from a leaf into a slice that depends on five others. None of them may import from `tags` now without
+`tags` turns from a leaf into a slice that depends on seven others. None of them may import from `tags` now without
 closing a cycle, which [ADR 0003][0003] bars.
 
 A summary costs a count and a page query per kind, plus the tag lookup. Paging keeps it cheap however many records

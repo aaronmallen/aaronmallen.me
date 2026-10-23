@@ -5,6 +5,7 @@ module API
     class PostDetail < Serializer
       CARD = "for the social card; null when the post falls back to its own"
       SUMMARY = "the summary the author wrote; empty when the post falls back to its first paragraph"
+      PROJECT_TAGS = "the tags of the projects the post links to, which show on no public page"
       SYNDICATION = "the announcement the post sends when it goes out; empty sends its title and link"
 
       SCHEMA = Helpers::Schema.object(
@@ -15,6 +16,7 @@ module API
           status: { type: "string", enum: Blog::Types::PostStatus.values },
           summary: { type: "string", description: SUMMARY },
           tags: Helpers::Schema::TAGS,
+          project_tags: Helpers::Schema::TAGS.merge(description: PROJECT_TAGS),
           body: { type: "string", description: "the post, in Markdown" },
           published_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
           created_at: Helpers::Schema::STAMP,
@@ -36,6 +38,8 @@ module API
       schema_attributes
       stamps :created_at, :published_at, :updated_at
       tag_names
+
+      def project_tags(post) = post.project_tags.map(&:name).uniq
 
       def summary(post) = post.written_summary.to_s
 

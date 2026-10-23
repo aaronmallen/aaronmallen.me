@@ -19,7 +19,7 @@ module API
       TAGS = {
         type: "array",
         items: { type: "string" },
-        description: "tag names, such as ruby or health, in #{Helpers::Tags::FORMAT}",
+        description: "tag names, such as ruby or health, in #{Helpers::Tags::FORMAT}; #{Helpers::Tags::LINKED}",
       }.freeze
     end
   end

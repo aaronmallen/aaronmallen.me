@@ -5,7 +5,6 @@ module Admin
     module Mail
       class Menu < Action
         INBOX = Blog::Types::TaskOrigin["inbox"]
-        PRIVATE = Blog::Types::TagScope["private"]
         TASK = Blog::Types::RecordKind["task"]
         THREAD = Blog::Types::RecordKind["mail_thread"]
 
@@ -29,7 +28,7 @@ module Admin
           {
             account: thread_queries.every_account.find { it.id == id },
             labels: thread_queries.labels.fetch(id, []).map(&:first),
-            tags: tag_queries.all_in(PRIVATE),
+            tags: tag_queries.choices_for(THREAD, thread.id, mail: true),
             task: record_link_queries.partner_ids(THREAD, [thread.id], TASK)[thread.id],
           }
         end

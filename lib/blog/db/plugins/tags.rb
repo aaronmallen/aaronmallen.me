@@ -14,7 +14,7 @@ module Blog
           in_scope(scope, project_id).by_names(names).to_a.to_h { [it[:name], it[:id]] }
         end
 
-        def in_name_order = order(self[:name].asc)
+        def in_name_order = select_append(project_key).order(self[:name].asc)
 
         def in_scope(scope, project_id = nil) = project_id ? where(scope:, project_id:) : where(scope:)
 
@@ -41,6 +41,12 @@ module Blog
           fewest = counts.values.min
 
           counts.select { |_, used| used == fewest }.keys.sample
+        end
+
+        def project_key
+          key = dataset.db[:projects].where(id: Sequel[:tags][:project_id]).select(:key)
+
+          ROM::SQL::Attribute[ROM::SQL::Types::String.optional].meta(sql_expr: key).as(:project_key)
         end
       end
     end

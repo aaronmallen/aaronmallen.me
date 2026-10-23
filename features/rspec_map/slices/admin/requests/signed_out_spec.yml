@@ -63,6 +63,7 @@
 - example: "Admin signed out turns away GET /admin/projects/:id and writes nothing"
 - example: "Admin signed out turns away GET /admin/projects/:id/edit and writes nothing"
 - example: "Admin signed out turns away GET /admin/projects/:id/menu and writes nothing"
+- example: "Admin signed out turns away GET /admin/projects/:key/tags/:name and writes nothing"
 - example: "Admin signed out turns away GET /admin/projects/choices and writes nothing"
 - example: "Admin signed out turns away GET /admin/projects/new and writes nothing"
 - example: "Admin signed out turns away GET /admin/pull-requests/:id and writes nothing"
