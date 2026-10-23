@@ -5,7 +5,7 @@ RSpec.describe Contacts::Operations::DeletePerson do
   let(:person_mutations) { Contacts::Slice["repos.person_mutations"] }
   let(:person_queries) { Contacts::Slice["repos.person_queries"] }
   let(:connection) { connect_contacts }
-  let(:url) { "#{Contacts::Helpers::GooglePerson::API}/people/c1:deleteContact" }
+  let(:url) { "#{Hanami.app.settings.google[:people_url]}/people/c1:deleteContact" }
 
   def linked = person_mutations.create(name: "Ada", google_connection_id: connection.id, google_id: "c1")
 

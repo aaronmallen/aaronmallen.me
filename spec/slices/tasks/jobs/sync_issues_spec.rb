@@ -5,7 +5,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   let(:url) { "https://github.com/aaronmallen/aaronmallen.me/issues/7" }
 
   def another_issue = github_issue("I_eight", number: 8)
-  def api = "https://api.github.com"
+  def api = "http://stub.localhost/github/api"
   def comment(id, **) = github_comment("IC_#{id}", **)
   def comments(task = imported) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
 

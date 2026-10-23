@@ -14,7 +14,7 @@ RSpec.shared_examples "a sync that steps aside while it runs" do
     it "leaves the run to the one holding the lock" do
       run
 
-      expect(a_request(:any, /googleapis\.com/)).not_to have_been_made
+      expect(a_request(:any, %r{stub\.localhost/google/})).not_to have_been_made
     end
 
     it "reports nothing about a run it never made" do

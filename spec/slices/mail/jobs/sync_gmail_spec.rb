@@ -8,7 +8,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
   def account = rows("mail_accounts").where(address:).one
 
   def asked_history_from(start)
-    a_request(:get, %r{/gmail/v1/users/me/history\?}).with(query: hash_including("startHistoryId" => start))
+    a_request(:get, %r{/google/gmail/users/me/history\?}).with(query: hash_including("startHistoryId" => start))
   end
 
   def backfills = Mail::Jobs::BackfillGmail.jobs.map { it["args"] }
@@ -562,7 +562,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
     connect(revoked_at: Time.now)
     run
 
-    expect(a_request(:any, /gmail\.googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/gmail})).not_to have_been_made
     expect(failure).to be_nil
   end
 
@@ -599,7 +599,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
   it "asks Google nothing and records nothing while no account granted Gmail", :aggregate_failures do
     run
 
-    expect(a_request(:any, /gmail\.googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/gmail})).not_to have_been_made
     expect(failure).to be_nil
   end
 

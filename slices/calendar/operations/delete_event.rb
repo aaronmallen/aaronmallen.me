@@ -10,7 +10,7 @@ module Calendar
         calendar = step writable(event.calendar)
         target = series(event, scope) || event.google_id
 
-        url = Helpers::GoogleEvent.url(calendar, target)
+        url = Helpers::GoogleEvent.url(google, calendar, target)
 
         step(written(calendar) { google.delete(url, account: calendar.account) })
       end

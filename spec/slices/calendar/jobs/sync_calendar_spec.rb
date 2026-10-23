@@ -7,7 +7,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
     { id:, summary: "On-call", start: { date: first.iso8601 }, end: { date: (last + 1).iso8601 }, ** }
   end
 
-  def api = Calendar::Operations::SyncCalendar::API
+  def api = Hanami.app.settings.google[:calendar_url]
 
   def calendars = queries.listed
 
@@ -392,7 +392,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
     connect_google(account_id: "health@example.com", token: "ya29.health")
     run
 
-    expect(a_request(:any, /googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/})).not_to have_been_made
     expect(calendars).to be_empty
   end
 

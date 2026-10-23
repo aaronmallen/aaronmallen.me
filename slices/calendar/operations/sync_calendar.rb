@@ -6,7 +6,6 @@ module Calendar
   module Operations
     class SyncCalendar < Blog::Operation
       AHEAD_DAYS = 365
-      API = "https://www.googleapis.com/calendar/v3"
       BEHIND_DAYS = 90
       BUSY_ONLY = "freeBusyReader"
       CANCELLED = "cancelled"
@@ -35,7 +34,7 @@ module Calendar
       end
 
       def calendars(account, from, to)
-        listed = account.pages("#{API}/users/me/calendarList", rows: "items").fetch("items")
+        listed = account.pages(google.url(:calendar, "users/me/calendarList"), rows: "items").fetch("items")
         tokens = calendar_queries.sync_tokens(account.id, from)
 
         listed.reject { it["accessRole"] == BUSY_ONLY }.map { calendar(account, it, tokens[it["id"]], from, to) }
@@ -54,7 +53,7 @@ module Calendar
       end
 
       def events(account, id, token, from, to)
-        url = "#{API}/calendars/#{ERB::Util.url_encode(id)}/events"
+        url = google.url(:calendar, "calendars/#{ERB::Util.url_encode(id)}/events")
         found = account.pages(
           url, rows: "items", singleEvents: true, maxResults: PAGE_SIZE, **since(token, from, to),
         )

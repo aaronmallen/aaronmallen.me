@@ -3,16 +3,17 @@ import { randomBytes } from "node:crypto";
 import { mkdirSync, openSync } from "node:fs";
 import { resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { Cookie } from "@playwright/test";
+import { type Cookie, expect } from "@playwright/test";
 import { test as base, createBdd } from "playwright-bdd";
 import postgres from "postgres";
 import { createClient } from "redis";
-import { ownerEmail, startStub } from "./stub.ts";
+import { ownerEmail, type Stub, startStub } from "./stub.ts";
 
 type App = {
   pushJob: (job: string, ...args: unknown[]) => Promise<void>;
   reset: () => Promise<void>;
   sql: postgres.Sql;
+  stub: Stub;
   url: string;
 };
 
@@ -48,7 +49,7 @@ async function stop(child: ChildProcess) {
 }
 
 export const test = base.extend<
-  { reset: undefined; tokens: { api?: string; mcp?: string } },
+  { reset: undefined; stub: Stub; tokens: { api?: string; mcp?: string } },
   { app: App; owner: Owner }
 >({
   app: [
@@ -70,6 +71,9 @@ export const test = base.extend<
         REDIS_USER: "default",
         SITE_URL: url,
         STUB_URL: stub.url,
+        http_proxy: stub.url,
+        https_proxy: stub.url,
+        no_proxy: "127.0.0.1,localhost",
         TEST_ENV_NUMBER: String(parallelIndex + 1),
       };
 
@@ -134,6 +138,7 @@ export const test = base.extend<
             await redis.flushDb();
           },
           sql,
+          stub,
           url,
         });
       } finally {
@@ -163,6 +168,22 @@ export const test = base.extend<
   ],
   baseURL: async ({ app }, use) => use(app.url),
   reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
+  stub: [
+    async ({ app, context }, use) => {
+      const away: string[] = [];
+      await context.route(
+        (url) => !["127.0.0.1", "localhost"].includes(url.hostname),
+        (route) => {
+          away.push(`${route.request().method()} ${route.request().url()}`);
+          return route.abort();
+        },
+      );
+      app.stub.reset();
+      await use(app.stub);
+      expect([...app.stub.misses(), ...away], "requests no Given step set a reply for").toEqual([]);
+    },
+    { auto: true },
+  ],
   tokens: async ({}, use) => use({}),
 });
 

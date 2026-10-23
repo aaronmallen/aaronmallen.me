@@ -220,7 +220,7 @@ RSpec.describe "API calendar", type: :request do
     before do
       connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES)
       json = { body: "{}", headers: { "Content-Type" => "application/json" } }
-      stub_request(:any, %r{googleapis\.com/calendar}).to_return(json)
+      stub_request(:any, %r{stub\.localhost/google/calendar}).to_return(json)
     end
 
     it "creates an event under write" do

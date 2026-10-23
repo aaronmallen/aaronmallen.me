@@ -519,7 +519,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       def refresh_projects_answered(response)
         connect_github_token
         create(:project, repo: "aaronmallen/blog")
-        stub_request(:get, "https://api.github.com/repos/aaronmallen/blog").to_return(response)
+        stub_request(:get, "http://stub.localhost/github/api/repos/aaronmallen/blog").to_return(response)
         Projects::Jobs::RefreshProjects.new.perform
       end
 

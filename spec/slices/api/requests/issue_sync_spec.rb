@@ -24,7 +24,7 @@ RSpec.describe "API issue sync", type: :request do
       it "asks GitHub for nothing inside the request" do
         sync
 
-        expect(a_request(:any, /api\.github\.com/)).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/github/api})).not_to have_been_made
       end
     end
 

@@ -77,7 +77,7 @@ module Mastodon
 
     def account(found)
       acct = found["acct"].to_s
-      handle = acct.include?("@") ? acct : "#{acct}@#{connection.url_prefix.host}"
+      handle = acct.include?("@") ? acct : "#{acct}@#{@connection.fetch(:account).first}"
 
       Social::Structs::Account.new(
         avatar: found["avatar"], handle: "@#{handle}", name: found["display_name"].to_s.strip,

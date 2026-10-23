@@ -12,7 +12,7 @@ module Contacts
     def account(connection) = Google::Account.new(google, connection.account_id)
 
     def api_url(path, **params)
-      url = "#{Helpers::GooglePerson::API}/#{path}"
+      url = google.url(:people, path)
 
       params.empty? ? url : "#{url}?#{URI.encode_www_form(params)}"
     end

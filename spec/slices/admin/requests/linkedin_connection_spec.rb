@@ -29,9 +29,9 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
     authorize_query.fetch("state")
   end
 
-  def token_url = "https://www.linkedin.com/oauth/v2/accessToken"
+  def token_url = "http://stub.localhost/linkedin/oauth/accessToken"
 
-  def userinfo_url = "https://api.linkedin.com/v2/userinfo"
+  def userinfo_url = "http://stub.localhost/linkedin/api/v2/userinfo"
 
   describe "without an app in settings" do
     before { set_up_linkedin_client({}) }
@@ -72,7 +72,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
     it "sends me to LinkedIn for my name and the right to post, back to the LinkedIn callback", :aggregate_failures do
       start_connect
 
-      expect(last_response.location).to start_with("https://www.linkedin.com/oauth/v2/authorization?")
+      expect(last_response.location).to start_with("http://stub.localhost/linkedin/oauth/authorization?")
       expect(authorize_query).to include("client_id" => "li-id", "scope" => "openid profile w_member_social")
       expect(authorize_query.fetch("redirect_uri")).to end_with("/admin/auth/linkedin/callback")
     end
@@ -241,7 +241,7 @@ RSpec.describe "Admin LinkedIn connection", type: :request do
 
     describe "disconnecting a profile" do
       let(:revoke) do
-        stub_request(:post, "https://www.linkedin.com/oauth/v2/revoke")
+        stub_request(:post, "http://stub.localhost/linkedin/oauth/revoke")
           .with(body: { client_id: "li-id", client_secret: "li-secret", token: "li-token" })
       end
       let!(:held) { connect_linkedin }

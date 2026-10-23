@@ -2,14 +2,14 @@
 
 module Spec
   module GoogleAccounts
-    DATA_TYPES = "https://health.googleapis.com/v4/users/me/dataTypes"
-    GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
+    DATA_TYPES = "http://stub.localhost/google/health/users/me/dataTypes"
+    GMAIL = "http://stub.localhost/google/gmail/users/me"
     GMAIL_SCOPES = %w[openid https://www.googleapis.com/auth/gmail.modify].freeze
     HEALTH_SCOPES = %w[sleep activity_and_fitness health_metrics_and_measurements]
                     .map { "https://www.googleapis.com/auth/googlehealth.#{it}.readonly" }.freeze
     LISTS = %w[sleep daily-resting-heart-rate daily-heart-rate-variability exercise].freeze
     ROLLUPS = %w[steps active-zone-minutes].freeze
-    TOKEN_URL = "https://oauth2.googleapis.com/token"
+    TOKEN_URL = "http://stub.localhost/google/oauth/token"
 
     def connect_contacts(account_id: "me@example.com", token: "ya29.me")
       connect_google(
@@ -73,13 +73,14 @@ module Spec
     def google_time(time) = time.utc.iso8601
 
     def set_up_google_client(credentials = { client_id: "google-id", client_secret: "google-secret" })
-      allow(Hanami.app.settings).to receive(:google).and_return(credentials)
+      google = Hanami.app.settings.google.except(:client_id, :client_secret).merge(credentials)
+      allow(Hanami.app.settings).to receive(:google).and_return(google)
       replace_component("google.auth", ::Google::Providers::ClientProvider.auth(Hanami.app.settings))
       replace_component("google.client", ::Google::Providers::ClientProvider.client(Hanami.app.settings))
     end
 
     def stub_contact_groups(*groups)
-      stub_request(:get, %r{\A#{Contacts::Helpers::GooglePerson::API}/contactGroups\?}o)
+      stub_request(:get, %r{\A#{Hanami.app.settings.google[:people_url]}/contactGroups\?}o)
         .to_return(google_health_json({ contactGroups: groups }))
     end
 

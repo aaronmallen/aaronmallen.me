@@ -31,7 +31,6 @@ module Analytics
 
       CONNECT_TIMEOUT = 10
       DOWNLOAD_TIMEOUT = 120
-      DOWNLOAD_URL = "https://download.maxmind.com"
 
       class << self
         def countries(root, settings, databases)
@@ -41,7 +40,7 @@ module Analytics
         def geo_lite2(settings, http)
           account_id, license_key = credentials(settings)
 
-          GeoLite2::Client.new(connection: account_id && download(http, account_id, license_key))
+          GeoLite2::Client.new(connection: account_id && download(settings, http, account_id, license_key))
         end
 
         private
@@ -52,8 +51,9 @@ module Analytics
           found.all? ? found : Array.new(found.size)
         end
 
-        def download(http, account_id, license_key)
-          http.call(url: DOWNLOAD_URL, open_timeout: CONNECT_TIMEOUT, timeout: DOWNLOAD_TIMEOUT) do |faraday|
+        def download(settings, http, account_id, license_key)
+          http.call(url: settings.maxmind[:download_url], open_timeout: CONNECT_TIMEOUT,
+                    timeout: DOWNLOAD_TIMEOUT) do |faraday|
             faraday.request :authorization, :basic, account_id, license_key
           end
         end

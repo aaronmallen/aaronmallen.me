@@ -149,7 +149,7 @@ module Blog
 
     setting :board, constructor: Schema.schema(closed_days: BoardDays, column_size: PageSize)
 
-    setting :bluesky, default: {}, constructor: Schema.schema(profile_url?: Value)
+    setting :bluesky, default: {}, constructor: Schema.schema(pds_url?: Value, profile_url?: Value, public_url?: Value)
 
     setting :client_registration, default: {}, constructor: throttle(
       DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT,
@@ -180,7 +180,17 @@ module Blog
       profile_url?: Value,
     )
 
-    setting :google, default: {}, constructor: Schema.schema(client_id?: Value, client_secret?: Value)
+    setting :google, default: {}, constructor: Schema.schema(
+      accounts_url?: Value,
+      calendar_url?: Value,
+      client_id?: Value,
+      client_secret?: Value,
+      gmail_url?: Value,
+      health_url?: Value,
+      oauth_url?: Value,
+      openid_url?: Value,
+      people_url?: Value,
+    )
 
     setting :honeybadger, default: {}, constructor: Schema.schema(
       api_key?: Value,
@@ -189,9 +199,13 @@ module Blog
       report_data?: Types::Params::Bool.optional,
     )
 
+    setting :linear, default: {}, constructor: Schema.schema(api_url?: Value)
+
     setting :linkedin, default: {}, constructor: Schema.schema(
+      api_url?: Value,
       client_id?: Value,
       client_secret?: Value,
+      oauth_url?: Value,
       profile_url?: Value,
     )
 
@@ -201,11 +215,12 @@ module Blog
       flag_path?: unless_set(Types::String, "tmp/maintenance"),
     )
 
-    setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
+    setting :mastodon, default: {}, constructor: Schema.schema(instance_url?: Value, profile_url?: Value)
 
     setting :maxmind, default: {}, constructor: Schema.schema(
       account_id?: Value,
       database_path?: unless_set(Types::String, "tmp/maxmind/GeoLite2-City.mmdb"),
+      download_url?: Value,
       license_key?: Value,
     )
 

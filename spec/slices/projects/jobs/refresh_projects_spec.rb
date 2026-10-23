@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Projects::Jobs::RefreshProjects do
-  let(:api) { "https://api.github.com" }
+  let(:api) { "http://stub.localhost/github/api" }
   let(:project) { create(:project, repo:, stars: 3, release: "v1.0.0") }
   let(:project_queries) { Projects::Slice["repos.project_queries"] }
   let(:repo) { "aaronmallen/aaronmallen.me" }

@@ -261,7 +261,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         stub_request(:post, SocialNetworks::MASTODON_MEDIA).to_return(**json_response(status: 202, id: "m9", url: nil))
       end
 
-      def media_status = "https://ruby.social/api/v1/media/m9"
+      def media_status = "http://stub.localhost/mastodon/ruby.social/api/v1/media/m9"
 
       context "when it finishes" do
         before do
@@ -1421,7 +1421,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
   describe "two accounts on one network" do
     let(:other) { connect_another_mastodon }
-    let(:other_statuses) { "https://hachyderm.io/api/v1/statuses" }
+    let(:other_statuses) { "http://stub.localhost/mastodon/hachyderm.io/api/v1/statuses" }
     let(:social_post) { queued }
 
     before do

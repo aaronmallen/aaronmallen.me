@@ -11,9 +11,9 @@ RSpec.describe "MCP calendar tools", :frozen_clock, type: :request do
     create(:calendar_event, calendar_id: calendar.id, title: "Standup", starts_on: day, ends_on: day, **times, **)
   end
 
-  def events_url = "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events"
+  def events_url = "#{Hanami.app.settings.google[:calendar_url]}/calendars/me%40example.com/events"
 
-  def google_calls = a_request(:any, %r{googleapis\.com/calendar})
+  def google_calls = a_request(:any, %r{stub\.localhost/google/calendar})
 
   def google_json(body = {}) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
 
@@ -35,7 +35,7 @@ RSpec.describe "MCP calendar tools", :frozen_clock, type: :request do
     scopes = Calendar::Operations::SyncCalendar::SCOPES
     connect_google(account_id: "me@example.com", scopes:, token: "ya29.me")
     connect_google(account_id: "work@example.com", scopes:, token: "ya29.work", work: true)
-    stub_request(:any, %r{googleapis\.com/calendar}).to_return(google_json)
+    stub_request(:any, %r{stub\.localhost/google/calendar}).to_return(google_json)
   end
 
   describe "create_event" do

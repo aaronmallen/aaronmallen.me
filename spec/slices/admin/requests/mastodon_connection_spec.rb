@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin Mastodon connection", type: :request do
-  let(:apps_url) { "https://ruby.social/api/v1/apps" }
-  let(:revoke_url) { "https://ruby.social/oauth/revoke" }
+  let(:apps_url) { "http://stub.localhost/mastodon/ruby.social/api/v1/apps" }
+  let(:revoke_url) { "http://stub.localhost/mastodon/ruby.social/oauth/revoke" }
   let(:scope) { "write:statuses write:media read:accounts read:search read:statuses" }
 
   before do
     sign_in_to_admin
     resolves_publicly("ruby.social")
     stub_request(:post, apps_url).to_return(**json_response(client_id: "app-id", client_secret: "app-secret"))
-    stub_request(:post, "https://ruby.social/oauth/token")
+    stub_request(:post, token_url)
       .to_return(**json_response(access_token: "masto-token", scope:, token_type: "Bearer"))
-    stub_request(:get, "https://ruby.social/api/v1/accounts/verify_credentials")
+    stub_request(:get, "http://stub.localhost/mastodon/ruby.social/api/v1/accounts/verify_credentials")
       .with(headers: { "Authorization" => "Bearer masto-token" })
       .to_return(**json_response(id: "109", username: "aaronmallen", acct: "aaronmallen"))
   end
@@ -26,6 +26,8 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     post "/admin/services/mastodon/connect", server:, _csrf_token: admin_csrf_token
     authorize_query["state"]
   end
+
+  def token_url = "http://stub.localhost/mastodon/ruby.social/oauth/token"
 
   it "asks for my server in the picker" do
     get "/admin/settings/services"
@@ -46,7 +48,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     before { start_connect("https://Ruby.Social/@aaronmallen") }
 
     it "sends me to my server asking for the scopes the site needs", :aggregate_failures do
-      expect(last_response.location).to start_with("https://ruby.social/oauth/authorize?")
+      expect(last_response.location).to start_with("http://stub.localhost/mastodon/ruby.social/oauth/authorize?")
       expect(authorize_query).to include("client_id" => "app-id", "scope" => scope, "code_challenge_method" => "S256")
       expect(authorize_query.fetch("redirect_uri")).to end_with("/admin/auth/mastodon/callback")
     end
@@ -127,7 +129,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     end
 
     it "sends the PKCE verifier with the code" do
-      verified = a_request(:post, "https://ruby.social/oauth/token").with(body: /code_verifier=[\w-]{64}/)
+      verified = a_request(:post, token_url).with(body: /code_verifier=[\w-]{64}/)
 
       expect(verified).to have_been_made
     end
@@ -213,7 +215,7 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     end
 
     it "saves nothing when the server fails the exchange", :aggregate_failures do
-      stub_request(:post, "https://ruby.social/oauth/token").to_return(status: 500)
+      stub_request(:post, token_url).to_return(status: 500)
       callback(code: "code", state: start_connect)
       follow_redirect!
 

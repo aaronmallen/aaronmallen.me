@@ -56,9 +56,9 @@ module SocialCredentials
     pages = Hanami.app["page_fetcher.link_preview"]
 
     replace_component("social_networks.all", {
-      "bluesky" => Bluesky::Providers::ClientProvider.client(Hanami.app["http"], pages),
+      "bluesky" => Bluesky::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"], pages),
       "linkedin" => LinkedIn::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"]),
-      "mastodon" => Mastodon::Providers::ClientProvider.client(Hanami.app["http"]),
+      "mastodon" => Mastodon::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"]),
     }.freeze)
   end
 end

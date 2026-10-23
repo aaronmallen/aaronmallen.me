@@ -3,7 +3,7 @@
 RSpec.describe Contacts::Jobs::SyncContacts do
   let(:scope) { Contacts::Operations::SyncContacts::SCOPE }
 
-  def api = Contacts::Helpers::GooglePerson::API
+  def api = Hanami.app.settings.google[:people_url]
 
   def connect(account, token, sync_contacts: true, scopes: [scope])
     connect_google(account_id: account, scopes:, token:, sync_contacts:)
@@ -293,7 +293,7 @@ RSpec.describe Contacts::Jobs::SyncContacts do
     connect("me@example.com", "ya29.me", sync_contacts: false)
     run
 
-    expect(a_request(:any, /googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/})).not_to have_been_made
     expect(people).to be_empty
   end
 
@@ -301,7 +301,7 @@ RSpec.describe Contacts::Jobs::SyncContacts do
     connect("me@example.com", "ya29.me", scopes: Spec::GoogleAccounts::HEALTH_SCOPES)
     run
 
-    expect(a_request(:any, /googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/})).not_to have_been_made
   end
 
   describe "with two accounts that sync contacts" do

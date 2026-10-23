@@ -204,7 +204,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
   end
 
   describe "connecting with a personal access token" do
-    let(:user_url) { "https://api.github.com/user" }
+    let(:user_url) { "http://stub.localhost/github/api/user" }
 
     def connect_token(token)
       post("/admin/services/github", connection: { access_token: token }, _csrf_token: admin_csrf_token)
@@ -246,7 +246,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
       end
 
       it "lets the record client call GitHub with the token with no restart" do
-        stub_request(:get, "https://api.github.com/repos/aaronmallen/blog")
+        stub_request(:get, "http://stub.localhost/github/api/repos/aaronmallen/blog")
           .with(headers: { "Authorization" => "Bearer ghp_new" })
           .to_return(headers: { "Content-Type" => "application/json" }, body: { stargazers_count: 3 }.to_json)
 

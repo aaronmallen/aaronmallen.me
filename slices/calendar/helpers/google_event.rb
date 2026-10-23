@@ -32,8 +32,8 @@ module Calendar
         { start: whole(date), end: whole(date + span + 1) }
       end
 
-      def url(calendar, id = nil)
-        events = "#{Operations::SyncCalendar::API}/calendars/#{ERB::Util.url_encode(calendar.google_id)}/events"
+      def url(google, calendar, id = nil)
+        events = google.url(:calendar, "calendars/#{ERB::Util.url_encode(calendar.google_id)}/events")
 
         id ? "#{events}/#{ERB::Util.url_encode(id)}" : events
       end

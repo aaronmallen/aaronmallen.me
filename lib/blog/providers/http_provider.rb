@@ -6,6 +6,14 @@ require "faraday/follow_redirects"
 module Blog
   module Providers
     module HTTPProvider
+      module BasePath
+        ROOTED = %r{\A/(?!/)}
+
+        def build_exclusive_url(url = nil, *)
+          super(url.is_a?(String) && ROOTED.match?(url) ? ".#{url}" : url, *)
+        end
+      end
+
       class Connections
         MAX_REDIRECTS = 3
         TIMEOUT = 10
@@ -25,7 +33,7 @@ module Blog
             faraday.options.timeout = timeout
             yield faraday
             faraday.response(:follow_redirects, limit: redirects) if redirects.positive?
-          end
+          end.extend(BasePath)
         end
 
         private

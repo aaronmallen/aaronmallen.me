@@ -972,7 +972,7 @@ RSpec.describe "Admin sessions", type: :request do
   describe "signing in with Google" do
     before do
       set_up_google_client
-      stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+      stub_request(:post, "http://stub.localhost/google/oauth/token").to_return(
         headers: { "Content-Type" => "application/json" },
         body: { access_token: "ya29.sign-in", expires_in: 3599, token_type: "Bearer" }.to_json,
       )
@@ -989,7 +989,7 @@ RSpec.describe "Admin sessions", type: :request do
     end
 
     def stub_userinfo(**userinfo)
-      stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo")
+      stub_request(:get, "http://stub.localhost/google/openid/userinfo")
         .with(headers: { "Authorization" => "Bearer ya29.sign-in" })
         .to_return(headers: { "Content-Type" => "application/json" }, body: userinfo.to_json)
     end
@@ -997,7 +997,7 @@ RSpec.describe "Admin sessions", type: :request do
     it "sends the Google button on to Google" do
       start_admin_sign_in("google")
 
-      expect(last_response.location).to start_with("https://accounts.google.com/o/oauth2/v2/auth?")
+      expect(last_response.location).to start_with("http://stub.localhost/google/accounts/o/oauth2/v2/auth?")
     end
 
     it "asks Google for openid and email and nothing more" do
@@ -1018,7 +1018,7 @@ RSpec.describe "Admin sessions", type: :request do
       challenge = authorize_query.fetch("code_challenge")
       google_callback(code: "code", state:)
 
-      expect(a_request(:post, "https://oauth2.googleapis.com/token").with { verifier_matches?(it, challenge) })
+      expect(a_request(:post, "http://stub.localhost/google/oauth/token").with { verifier_matches?(it, challenge) })
         .to have_been_made
     end
 
@@ -1079,7 +1079,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when Google rejects the code" do
       before do
-        stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+        stub_request(:post, "http://stub.localhost/google/oauth/token").to_return(
           status: 400, headers: { "Content-Type" => "application/json" }, body: { error: "invalid_grant" }.to_json,
         )
         google_sign_in
@@ -1093,7 +1093,7 @@ RSpec.describe "Admin sessions", type: :request do
 
     context "when Google answers the user with a page instead of JSON" do
       it "renders an error page" do
-        stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo")
+        stub_request(:get, "http://stub.localhost/google/openid/userinfo")
           .to_return(headers: { "Content-Type" => "text/html" }, body: "<html>down</html>")
         google_sign_in
 

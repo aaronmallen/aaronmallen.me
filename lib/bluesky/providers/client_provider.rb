@@ -6,12 +6,12 @@ module Bluesky
   module Providers
     module ClientProvider
       HEADERS = { "Accept" => "application/json" }.freeze
-      PDS_URL = "https://bsky.social"
-      PUBLIC_URL = "https://public.api.bsky.app"
 
       class << self
-        def client(http, pages)
-          Client.new(pages:, pds: json(http, PDS_URL), public_api: json(http, PUBLIC_URL))
+        def client(settings, http, pages)
+          bluesky = settings.bluesky
+
+          Client.new(pages:, pds: json(http, bluesky[:pds_url]), public_api: json(http, bluesky[:public_url]))
         end
 
         private

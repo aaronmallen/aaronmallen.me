@@ -2,9 +2,9 @@
 
 module Spec
   module LinkedInAccounts
-    ANALYTICS = "https://api.linkedin.com/rest/memberCreatorPostAnalytics"
-    IMAGES = "https://api.linkedin.com/rest/images?action=initializeUpload"
-    POSTS = "https://api.linkedin.com/rest/posts"
+    ANALYTICS = "http://stub.localhost/linkedin/api/rest/memberCreatorPostAnalytics"
+    IMAGES = "http://stub.localhost/linkedin/api/rest/images?action=initializeUpload"
+    POSTS = "http://stub.localhost/linkedin/api/rest/posts"
     SCOPES = %w[openid profile w_member_social].freeze
 
     def connect_linkedin(
@@ -26,11 +26,11 @@ module Spec
     def linkedin_upload_url(index) = "https://www.linkedin.com/dms-uploads/img-#{index}/uploaded-image/0?ut=up"
 
     def set_up_linkedin_client(credentials = { client_id: "li-id", client_secret: "li-secret" })
-      allow(Hanami.app.settings).to receive(:linkedin).and_return(credentials)
-      replace_component("linkedin.auth", LinkedIn::Providers::ClientProvider.auth(Hanami.app.settings))
-      networks = Hanami.app["social_networks.all"]
-      client = LinkedIn::Providers::ClientProvider.client(Hanami.app.settings, Hanami.app["http"])
-      replace_component("social_networks.all", networks.merge(Blog::Types::NetworkName["linkedin"] => client).freeze)
+      settings = Hanami.app.settings
+      linkedin = settings.linkedin.except(:client_id, :client_secret).merge(credentials)
+      allow(settings).to receive(:linkedin).and_return(linkedin)
+      replace_component("linkedin.auth", LinkedIn::Providers::ClientProvider.auth(settings))
+      replace_linkedin_client(LinkedIn::Providers::ClientProvider.client(settings, Hanami.app["http"]))
     end
 
     def stub_linkedin(*ids)
@@ -57,6 +57,13 @@ module Spec
       elements = commentaries.each_with_index.map { |commentary, index| { id: "urn:li:share:#{index}", commentary: } }
 
       stub_request(:get, POSTS).with(query: hash_including("q" => "author")).to_return(**json_response(elements:))
+    end
+
+    private
+
+    def replace_linkedin_client(client)
+      networks = Hanami.app["social_networks.all"]
+      replace_component("social_networks.all", networks.merge(Blog::Types::NetworkName["linkedin"] => client).freeze)
     end
   end
 end

@@ -25,8 +25,9 @@ module GitHubCredentials
   private
 
   def replace_github_components
-    replace_component("github.auth", GitHub::Providers::ClientProvider.auth(Hanami.app["settings"]))
-    replace_component("github.client", GitHub::Providers::ClientProvider.client(Hanami.app["http"]))
+    settings = Hanami.app["settings"]
+    replace_component("github.auth", GitHub::Providers::ClientProvider.auth(settings))
+    replace_component("github.client", GitHub::Providers::ClientProvider.client(settings, Hanami.app["http"]))
   end
 end
 

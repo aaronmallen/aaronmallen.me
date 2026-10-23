@@ -23,7 +23,8 @@ module Calendar
       end
 
       def change(calendar, event, times)
-        google.patch(Helpers::GoogleEvent.url(calendar, event.google_id), body(times), account: calendar.account)
+        url = Helpers::GoogleEvent.url(google, calendar, event.google_id)
+        google.patch(url, body(times), account: calendar.account)
         calendar_mutations.move_event(event.id, times)
       end
 

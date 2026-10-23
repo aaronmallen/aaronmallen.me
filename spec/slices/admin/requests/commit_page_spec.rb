@@ -116,7 +116,7 @@ RSpec.describe "Admin commit page", :frozen_clock, type: :request do
     it "reads the commit out of the database, asking GitHub nothing about it" do
       record = commit_record(repo: "aaronmallen/sai", message: "subject\n\nbody")
       visit_commit(record)
-      asked = a_request(:get, "https://api.github.com/repos/aaronmallen/sai/commits/#{record.sha}")
+      asked = a_request(:get, "http://stub.localhost/github/api/repos/aaronmallen/sai/commits/#{record.sha}")
 
       expect(asked).not_to have_been_made
     end

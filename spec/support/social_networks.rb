@@ -2,12 +2,12 @@
 
 module SocialNetworks
   BLUESKY_DID = "did:plc:ada"
-  BLUESKY_PDS = "https://bsky.social/xrpc"
-  BLUESKY_PUBLIC = "https://public.api.bsky.app/xrpc"
-  MASTODON_INSTANCE = "https://ruby.social/api/v2/instance"
-  MASTODON_MEDIA = "https://ruby.social/api/v2/media"
-  MASTODON_SEARCH = "https://ruby.social/api/v2/search"
-  MASTODON_STATUSES = "https://ruby.social/api/v1/statuses"
+  BLUESKY_PDS = "http://stub.localhost/bluesky/pds/xrpc"
+  BLUESKY_PUBLIC = "http://stub.localhost/bluesky/public/xrpc"
+  MASTODON_INSTANCE = "http://stub.localhost/mastodon/ruby.social/api/v2/instance"
+  MASTODON_MEDIA = "http://stub.localhost/mastodon/ruby.social/api/v2/media"
+  MASTODON_SEARCH = "http://stub.localhost/mastodon/ruby.social/api/v2/search"
+  MASTODON_STATUSES = "http://stub.localhost/mastodon/ruby.social/api/v1/statuses"
 
   def bluesky_uri(rkey) = "at://#{BLUESKY_DID}/app.bsky.feed.post/#{rkey}"
 

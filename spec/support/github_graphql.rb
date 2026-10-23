@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module GitHubGraphQL
-  URL = "https://api.github.com/graphql"
+  URL = "http://stub.localhost/github/api/graphql"
   ASSIGNED_QUERY = "search(query:"
   HISTORY_QUERY = "ref(qualifiedName:"
   ISSUES_QUERY = "nodes(ids:"

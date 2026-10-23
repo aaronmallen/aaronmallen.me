@@ -6,12 +6,13 @@ module Mastodon
       HEADERS = { "Accept" => "application/json" }.freeze
 
       class << self
-        def auth(settings) = Auth.new(website: settings.site_url)
+        def auth(settings) = Auth.new(website: settings.site_url, instance_url: settings.mastodon[:instance_url])
 
-        def client(http)
+        def client(settings, http)
+          instance_url = settings.mastodon[:instance_url]
           connect = lambda do |host, token|
             headers = HEADERS.merge("Authorization" => "Bearer #{token}")
-            http.call(url: "https://#{host}", headers:, redirects: 0) do |faraday|
+            http.call(url: format(instance_url, host:), headers:, redirects: 0) do |faraday|
               faraday.request :json
               faraday.response :json
             end

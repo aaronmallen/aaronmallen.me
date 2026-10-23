@@ -19,7 +19,7 @@ module Calendar
         target, date = series ? [series, shifted(calendar, event, fields)] : [event.google_id, fields[:date]]
         body = Helpers::GoogleEvent.body(fields, date:, span: new_span(event, fields))
 
-        google.patch(Helpers::GoogleEvent.url(calendar, target), body, account: calendar.account)
+        google.patch(Helpers::GoogleEvent.url(google, calendar, target), body, account: calendar.account)
       end
 
       def clock(time) = Blog::TimeZone.local(time).strftime("%H:%M")
@@ -34,7 +34,7 @@ module Calendar
       end
 
       def shifted(calendar, event, fields)
-        series = google.get(Helpers::GoogleEvent.url(calendar, event.recurring_id), account: calendar.account)
+        series = google.get(Helpers::GoogleEvent.url(google, calendar, event.recurring_id), account: calendar.account)
 
         Helpers::GoogleEvent.first_day(series) + (fields[:date] - event.starts_on)
       end

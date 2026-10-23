@@ -4,11 +4,33 @@ import type { AddressInfo } from "node:net";
 
 export const ownerEmail = "owner@example.com";
 
+export const services: Record<string, string> = {
+  Bluesky: "/bluesky/pds",
+  "Bluesky's app view": "/bluesky/public",
+  GitHub: "/github/api",
+  Gmail: "/google/gmail",
+  "Google Calendar": "/google/calendar",
+  "Google Health": "/google/health",
+  "Google OAuth": "/google/oauth",
+  "Google OpenID": "/google/openid",
+  "Google People": "/google/people",
+  "Google sign-in": "/google/accounts",
+  Linear: "/linear",
+  LinkedIn: "/linkedin/api",
+  "LinkedIn OAuth": "/linkedin/oauth",
+  Mastodon: "/mastodon",
+  MaxMind: "/maxmind",
+  "the web": "",
+};
+
+type Reply = { body: string; status: number };
+type Route = (url: URL, response: ServerResponse) => void;
+
 function json(response: ServerResponse, body: unknown) {
   response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(body));
 }
 
-const routes: Record<string, (url: URL, response: ServerResponse) => void> = {
+const signIn: Record<string, Route> = {
   "GET /github/api/user/emails": (_, response) =>
     json(response, [{ email: ownerEmail, primary: true, verified: true }]),
   "GET /github/login/oauth/authorize": (url, response) => {
@@ -26,17 +48,42 @@ const routes: Record<string, (url: URL, response: ServerResponse) => void> = {
 };
 
 export async function startStub() {
+  const replies = new Map<string, Reply>();
+  const misses: string[] = [];
+
   const server = createServer((request, response) => {
+    const absolute = /^https?:\/\//.test(request.url ?? "");
     const url = new URL(request.url ?? "/", "http://stub");
+    const key = `${request.method} ${absolute ? url.origin : ""}${url.pathname}`;
     request.resume();
-    const route = routes[`${request.method} ${url.pathname}`];
-    if (route) route(url, response);
-    else response.writeHead(404).end();
+
+    const reply = replies.get(key);
+    if (reply) {
+      const type = reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
+      response.writeHead(reply.status, { "Content-Type": type }).end(reply.body);
+    } else if (signIn[key]) {
+      signIn[key](url, response);
+    } else {
+      misses.push(`${request.method} ${request.url}`);
+      response.writeHead(404).end();
+    }
+  });
+  server.on("connect", (request, socket) => {
+    misses.push(`CONNECT ${request.url}`);
+    socket.end("HTTP/1.1 403 Forbidden\r\n\r\n");
   });
   await new Promise<void>((listening) => server.listen(0, "127.0.0.1", listening));
 
   return {
+    misses: () => misses.splice(0),
+    reply: (method: string, path: string, reply: Reply) => replies.set(`${method} ${path}`, reply),
+    reset: () => {
+      replies.clear();
+      misses.length = 0;
+    },
     stop: () => new Promise((closed) => server.close(closed)),
     url: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
   };
 }
+
+export type Stub = Awaited<ReturnType<typeof startStub>>;

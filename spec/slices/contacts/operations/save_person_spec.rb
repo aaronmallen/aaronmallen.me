@@ -112,7 +112,7 @@ RSpec.describe Contacts::Operations::SavePerson do
   describe "with a Google account that saves new contacts" do
     let!(:connection) { connect_contacts }
 
-    def api = Contacts::Helpers::GooglePerson::API
+    def api = Hanami.app.settings.google[:people_url]
 
     def creates(contact, **body)
       stub_request(:post, %r{\A#{api}/people:createContact\?})

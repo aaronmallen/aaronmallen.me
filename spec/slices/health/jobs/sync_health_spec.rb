@@ -251,8 +251,8 @@ RSpec.describe Health::Jobs::SyncHealth do
       run
 
       expect(narrowed.with(body: hash_including("scope" => health_scopes.join(" ")))).to have_been_made.once
-      expect(a_request(:any, /health\.googleapis\.com/).with(headers: { "Authorization" => "Bearer ya29.token" }))
-        .not_to have_been_made
+      health = a_request(:any, %r{stub\.localhost/google/health})
+      expect(health.with(headers: { "Authorization" => "Bearer ya29.token" })).not_to have_been_made
     end
 
     it "keeps the stored token, which mail and calendar still need" do
@@ -281,7 +281,7 @@ RSpec.describe Health::Jobs::SyncHealth do
     connect_google(revoked_at: Time.now)
     run
 
-    expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/health})).not_to have_been_made
     expect(failure).to be_nil
   end
 
@@ -290,7 +290,7 @@ RSpec.describe Health::Jobs::SyncHealth do
     connect_google
     stub_google_health.then { run }
 
-    expect(a_request(:any, /health\.googleapis\.com/).with(headers: { "Authorization" => "Bearer ya29.work" }))
+    expect(a_request(:any, %r{stub\.localhost/google/health}).with(headers: { "Authorization" => "Bearer ya29.work" }))
       .not_to have_been_made
   end
 
@@ -298,13 +298,13 @@ RSpec.describe Health::Jobs::SyncHealth do
     connect_google(scopes: %w[openid])
     run
 
-    expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/health})).not_to have_been_made
   end
 
   it "asks Google nothing and records nothing while Google Health is not connected", :aggregate_failures do
     run
 
-    expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
+    expect(a_request(:any, %r{stub\.localhost/google/health})).not_to have_been_made
     expect(failure).to be_nil
   end
 

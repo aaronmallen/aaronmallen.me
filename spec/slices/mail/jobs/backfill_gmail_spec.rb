@@ -16,7 +16,7 @@ RSpec.describe Mail::Jobs::BackfillGmail do
   end
 
   def stub_page(ids, next_page: nil)
-    stub_request(:get, %r{/gmail/v1/users/me/threads\?})
+    stub_request(:get, %r{/google/gmail/users/me/threads\?})
       .to_return(google_health_json({ threads: ids.map { { id: it } }, nextPageToken: next_page }.compact))
   end
 

@@ -22,13 +22,12 @@ module Google
     RATE_LIMIT = /"(?:user)?rateLimitExceeded"/i
     RECONNECT = "%s needs a reconnect"
     REFUSALS = { NOT_FOUND => NotFound, GONE => Gone }.freeze
-    REVOKE_URL = "https://oauth2.googleapis.com/revoke"
     TOO_MANY_REQUESTS = 429
     UNAUTHORIZED = 401
-    USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
-    def initialize(oauth:, connections: nil, tokens: nil)
+    def initialize(oauth:, urls:, connections: nil, tokens: nil)
       @oauth = oauth
+      @urls = urls
       @connections = connections
       @tokens = tokens || Tokens.new(oauth:, change_connection: method(:change_connection))
     end
@@ -74,7 +73,7 @@ module Google
 
     def holding(scope) = holders(scope).first
 
-    def loaded = self.class.new(oauth:, connections:, tokens: @tokens.remembering)
+    def loaded = self.class.new(oauth:, urls:, connections:, tokens: @tokens.remembering)
 
     def patch(url, body, account:) = request(account, :patch, url, **json(body))
 
@@ -83,14 +82,17 @@ module Google
     def put(url, body, account:) = request(account, :put, url, **json(body))
 
     def revoke(credentials)
-      oauth.request(:post, REVOKE_URL, body: { token: credentials[:refresh_token] || credentials[:access_token] })
+      oauth.request(:post, url(:oauth, "revoke"),
+                    body: { token: credentials[:refresh_token] || credentials[:access_token] })
     end
+
+    def url(api, path) = "#{urls.fetch(:"#{api}_url")}/#{path}"
 
     def work?(account) = connections.any? { it.account_id == account && it.work }
 
     private
 
-    attr_reader :oauth
+    attr_reader :oauth, :urls
 
     def change_connection(...) = services["operations.change_connection"].call(...)
 
@@ -122,7 +124,7 @@ module Google
     def json(body) = { body: body.to_json, headers: JSON_HEADERS.dup }
 
     def named(token)
-      email = Hash.try_convert(token.get(USERINFO_URL).parsed).to_h.fetch("email")
+      email = Hash.try_convert(token.get(url(:openid, "userinfo")).parsed).to_h.fetch("email")
 
       { account_id: email, label: email }
     end

@@ -12,8 +12,9 @@ module Mastodon
     TOKEN_PATH = "/oauth/token"
     VERIFY_PATH = "/api/v1/accounts/verify_credentials"
 
-    def initialize(website:)
+    def initialize(website:, instance_url:)
       @website = website
+      @instance_url = instance_url
     end
 
     def connect_url(host, app, redirect_uri:, scope:, state:, code_challenge:)
@@ -24,7 +25,7 @@ module Mastodon
 
     def grant(host, app, code:, redirect_uri:, code_verifier:)
       token = client(host, app).auth_code.get_token(code, redirect_uri:, code_verifier:)
-      account = body(token.get(VERIFY_PATH))
+      account = body(token.get(url(host, VERIFY_PATH)))
 
       { access_token: token.token, account_id: account.fetch("id").to_s,
         label: "@#{account.fetch('username')}@#{host}", scopes: token.params["scope"].to_s.split }
@@ -37,7 +38,7 @@ module Mastodon
         client_name: Blog::Types::Normalized::Host.call(@website), redirect_uris: redirect_uri, scopes: scope,
         website: @website,
       }
-      found = body(client(host).request(:post, APPS_PATH, body: app))
+      found = body(client(host).request(:post, url(host, APPS_PATH), body: app))
 
       { client_id: found.fetch("client_id"), client_secret: found.fetch("client_secret") }
     rescue *Blog::ServiceError::OAUTH_FAILURES => e
@@ -45,7 +46,8 @@ module Mastodon
     end
 
     def revoke(host, app, token)
-      client(host, app).request(:post, REVOKE_PATH, body: { **app.slice(:client_id, :client_secret), token: })
+      client(host, app).request(:post, url(host, REVOKE_PATH),
+                                body: { **app.slice(:client_id, :client_secret), token: })
     end
 
     private
@@ -60,9 +62,12 @@ module Mastodon
     def client(host, app = Blog::Constants::EMPTY_HASH)
       OAuth2::Client.new(
         app[:client_id], app[:client_secret],
-        auth_scheme: :request_body, authorize_url: AUTHORIZE_PATH, site: "https://#{host}", token_url: TOKEN_PATH,
+        auth_scheme: :request_body, authorize_url: url(host, AUTHORIZE_PATH), site: url(host),
+        token_url: url(host, TOKEN_PATH),
         connection_opts: { request: { timeout: TIMEOUT } }, max_redirects: 0,
       )
     end
+
+    def url(host, path = nil) = "#{format(@instance_url, host:)}#{path}"
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module LinearGraphQL
-  URL = "https://api.linear.app/graphql"
+  URL = "http://stub.localhost/linear/graphql"
   ASSIGNED_QUERY = "assignedIssues("
   HISTORY_QUERY = "history(first:"
   ISSUES_QUERY = "issues(first:"

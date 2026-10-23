@@ -3,7 +3,7 @@
 RSpec.describe "Admin calendar event menu", type: :feature do
   let(:day) { Blog::TimeZone.today }
   let(:calendar) { create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron") }
-  let(:url) { "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events/abc" }
+  let(:url) { "#{Hanami.app.settings.google[:calendar_url]}/calendars/me%40example.com/events/abc" }
 
   def edit_title(to)
     item("Edit").click

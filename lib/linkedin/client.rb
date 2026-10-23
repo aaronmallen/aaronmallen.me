@@ -7,7 +7,6 @@ module LinkedIn
   class Client
     Account = Data.define(:author, :expires_at, :reads_analytics, :reads_posts, :token)
 
-    API_URL = "https://api.linkedin.com"
     HASHTAG = /\{hashtag\|\\#\|([^{}]*)\}/
     HEADERS = { "Accept" => "application/json", "X-Restli-Protocol-Version" => "2.0.0" }.freeze
     JOINER = "\n\n"
@@ -23,8 +22,9 @@ module LinkedIn
     UNAUTHORIZED = 401
     VERSION = "202609"
 
-    def initialize(auth:, http:, account: nil, retrying: false)
+    def initialize(auth:, http:, api_url:, account: nil, retrying: false)
       @account = account
+      @api_url = api_url
       @auth = auth
       @http = http
       @retrying = retrying
@@ -52,7 +52,7 @@ module LinkedIn
         reads_posts: connection.scopes.to_a.include?(READ_POSTS), token: credentials.fetch(:access_token),
       )
 
-      self.class.new(account:, auth: @auth, http: @http)
+      self.class.new(account:, auth: @auth, http: @http, api_url: @api_url)
     end
 
     def inspect = "#<#{self.class.name} configured=#{configured?}>"
@@ -77,7 +77,7 @@ module LinkedIn
 
     def reserved_per_url = nil
 
-    def retrying = self.class.new(account:, auth: @auth, http: @http, retrying: true)
+    def retrying = self.class.new(account:, auth: @auth, http: @http, api_url: @api_url, retrying: true)
 
     def within_limit?(text) = count(text) <= LIMIT
 
@@ -108,7 +108,7 @@ module LinkedIn
 
     def connection
       check_expiry
-      @connection ||= @http.call(url: API_URL, headers: headers) do |faraday|
+      @connection ||= @http.call(url: @api_url, headers: headers) do |faraday|
         faraday.request :json
         faraday.response :json
       end

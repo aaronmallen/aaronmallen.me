@@ -203,14 +203,14 @@ RSpec.describe "Admin sign-in log", type: :request do
   describe "signing in with Google" do
     before do
       set_up_google_client
-      stub_request(:post, "https://oauth2.googleapis.com/token").to_return(
+      stub_request(:post, "http://stub.localhost/google/oauth/token").to_return(
         headers: { "Content-Type" => "application/json" },
         body: { access_token: "ya29.sign-in", expires_in: 3599, token_type: "Bearer" }.to_json,
       )
     end
 
     def google_sign_in(google_email)
-      stub_request(:get, "https://openidconnect.googleapis.com/v1/userinfo").to_return(
+      stub_request(:get, "http://stub.localhost/google/openid/userinfo").to_return(
         headers: { "Content-Type" => "application/json" }, body: { email: google_email, email_verified: true }.to_json,
       )
       get "/admin/auth/google/callback", { code: "code", state: start_admin_sign_in("google") }, headers(agent)

@@ -7,9 +7,9 @@ RSpec.describe "Admin Google connection", type: :request do
     ["openid", mail_scope, *names]
   end
   let(:sleep_scope) { "https://www.googleapis.com/auth/googlehealth.sleep.readonly" }
-  let(:steps_url) { "https://health.googleapis.com/v4/users/me/dataTypes/steps/dataPoints?page_size=1" }
-  let(:token_url) { "https://oauth2.googleapis.com/token" }
-  let(:userinfo_url) { "https://openidconnect.googleapis.com/v1/userinfo" }
+  let(:steps_url) { "http://stub.localhost/google/health/users/me/dataTypes/steps/dataPoints?page_size=1" }
+  let(:token_url) { "http://stub.localhost/google/oauth/token" }
+  let(:userinfo_url) { "http://stub.localhost/google/openid/userinfo" }
 
   before { sign_in_to_admin }
 
@@ -145,7 +145,7 @@ RSpec.describe "Admin Google connection", type: :request do
       before { start_connect }
 
       it "sends me to Google asking offline and letting me pick the account", :aggregate_failures do
-        expect(last_response.location).to start_with("https://accounts.google.com/o/oauth2/v2/auth?")
+        expect(last_response.location).to start_with("http://stub.localhost/google/accounts/o/oauth2/v2/auth?")
         expect(authorize_query).to include(
           "client_id" => "google-id", "access_type" => "offline", "prompt" => "select_account consent",
         )
@@ -505,7 +505,7 @@ RSpec.describe "Admin Google connection", type: :request do
       end
 
       it "revokes one account on Google when I disconnect it and leaves the others", :aggregate_failures do
-        revoke = stub_request(:post, "https://oauth2.googleapis.com/revoke").with(body: { token: "1//refresh" })
+        revoke = stub_request(:post, "http://stub.localhost/google/oauth/revoke").with(body: { token: "1//refresh" })
         post "/admin/services/#{account('me').id}/disconnect", _csrf_token: admin_csrf_token
 
         expect(revoke).to have_been_made.once

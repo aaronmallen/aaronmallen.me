@@ -13,7 +13,7 @@ module Contacts
 
       def contacts(account, token)
         found = account.pages(
-          "#{Helpers::GooglePerson::API}/people/me/connections",
+          google.url(:people, "people/me/connections"),
           rows: "connections", personFields: Helpers::GooglePerson::FIELDS, pageSize: PAGE_SIZE, requestSyncToken: true,
           **({ syncToken: token } if token),
         )

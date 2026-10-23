@@ -16,6 +16,6 @@ module Mail
 
     private
 
-    def url(path) = "https://gmail.googleapis.com/gmail/v1/users/me/#{path}"
+    def url(path) = google.url(:gmail, "users/me/#{path}")
   end
 end

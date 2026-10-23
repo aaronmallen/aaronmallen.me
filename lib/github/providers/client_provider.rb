@@ -5,7 +5,6 @@ require "oauth2"
 module GitHub
   module Providers
     module ClientProvider
-      API_URL = "https://api.github.com"
       HEADERS = {
         "Accept" => "application/vnd.github+json",
         "X-GitHub-Api-Version" => "2022-11-28",
@@ -21,16 +20,17 @@ module GitHub
           Auth.new(client:, api_url: github[:api_url])
         end
 
-        def client(http)
-          connect = ->(current) { { api: api(http, current), graphql: graphql(http, current) } }
+        def client(settings, http)
+          url = settings.github[:api_url]
+          connect = ->(current) { { api: api(http, url, current), graphql: graphql(http, url, current) } }
 
           Client.new(transport: Transport.new(token: method(:token), connect:))
         end
 
         private
 
-        def api(http, token)
-          http.call(url: API_URL, headers: HEADERS.merge("Authorization" => "Bearer #{token}")) do |faraday|
+        def api(http, url, token)
+          http.call(url:, headers: HEADERS.merge("Authorization" => "Bearer #{token}")) do |faraday|
             faraday.response :json
           end
         end
@@ -41,8 +41,8 @@ module GitHub
           found if found.all?
         end
 
-        def graphql(http, token)
-          http.call(url: API_URL, headers: { "Authorization" => "bearer #{token}" }) do |faraday|
+        def graphql(http, url, token)
+          http.call(url:, headers: { "Authorization" => "bearer #{token}" }) do |faraday|
             faraday.request :json
             faraday.response :json
           end

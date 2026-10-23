@@ -24,7 +24,9 @@ board:
   closed_days: 14
   column_size: 20
 bluesky:
+  pds_url: https://bsky.social
   profile_url: https://bsky.app/profile/aaronmallen.dev
+  public_url: https://public.api.bsky.app
 client_registration:
   throttle_limit: <%= ENV["CLIENT_REGISTRATION_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["CLIENT_REGISTRATION_THROTTLE_WINDOW_MINUTES"].to_json %>
@@ -50,8 +52,15 @@ github:
   oauth_url: https://github.com
   profile_url: https://github.com/aaronmallen
 google:
+  accounts_url: https://accounts.google.com
+  calendar_url: https://www.googleapis.com/calendar/v3
   client_id: <%= ENV["GOOGLE_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["GOOGLE_CLIENT_SECRET"].to_json %>
+  gmail_url: https://gmail.googleapis.com/gmail/v1
+  health_url: https://health.googleapis.com/v4
+  oauth_url: https://oauth2.googleapis.com
+  openid_url: https://openidconnect.googleapis.com/v1
+  people_url: https://people.googleapis.com/v1
 honeybadger:
   api_key: <%= ENV["HONEYBADGER_API_KEY"].to_json %>
   check_ins:
@@ -88,19 +97,25 @@ honeybadger:
     sync_issues_linear: <%= ENV["HONEYBADGER_CHECK_IN_SYNC_ISSUES_LINEAR"].to_json %>
   project_url: <%= ENV["HONEYBADGER_PROJECT_URL"].to_json %>
   report_data: <%= ENV["HONEYBADGER_REPORT_DATA"].to_json %>
+linear:
+  api_url: https://api.linear.app
 linkedin:
+  api_url: https://api.linkedin.com
   client_id: <%= ENV["LINKEDIN_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["LINKEDIN_CLIENT_SECRET"].to_json %>
+  oauth_url: https://www.linkedin.com/oauth/v2
   profile_url: https://www.linkedin.com/in/aaronmallen/
 mail:
   backfill_days: <%= ENV["MAIL_BACKFILL_DAYS"].to_json %>
 maintenance:
   flag_path: <%= ENV["MAINTENANCE_FLAG_PATH"].to_json %>
 mastodon:
+  instance_url: https://%<host>s
   profile_url: https://ruby.social/@aaronmallen
 maxmind:
   account_id: <%= ENV["MAXMIND_ACCOUNT_ID"].to_json %>
   database_path: <%= ENV["MAXMIND_DATABASE_PATH"].to_json %>
+  download_url: https://download.maxmind.com
   license_key: <%= ENV["MAXMIND_LICENSE_KEY"].to_json %>
 media_store:
   access_key: <%= ENV["MEDIA_STORE_ACCESS_KEY"].to_json %>

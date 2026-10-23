@@ -9,7 +9,7 @@ module GeoLite2Database
   COUNTRIES = { "1.2.3.0/24" => "US", "81.2.69.0/24" => "GB", "2001:db8::/32" => "DE" }.freeze
   COUNTRY_NAMES = { "DE" => "Germany", "GB" => "United Kingdom", "US" => "United States" }.freeze
   CREDENTIALS = { account_id: "123456", license_key: "license" }.freeze
-  DOWNLOAD_URL = "https://download.maxmind.com/geoip/databases/GeoLite2-City/download"
+  DOWNLOAD_URL = "http://stub.localhost/maxmind/geoip/databases/GeoLite2-City/download"
   ENTRY = "GeoLite2-City_20260928/GeoLite2-City.mmdb"
   MODE = 0o644
 

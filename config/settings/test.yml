@@ -13,26 +13,43 @@ backup_store: &no_store
 database:
   host: localhost
   name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"], ("w#{ENV["TEST_ENV_NUMBER"]}" unless ENV["TEST_ENV_NUMBER"].to_s.empty?)].compact.join("_").to_json %>
+bluesky:
+  pds_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/bluesky/pds".to_json %>
+  public_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/bluesky/public".to_json %>
 github:
   api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/github/api".to_json %>
   client_id: stub-client-id
   client_secret: stub-client-secret
   oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/github".to_json %>
 google:
+  accounts_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/accounts".to_json %>
+  calendar_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/calendar".to_json %>
   client_id: null
   client_secret: null
+  gmail_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/gmail".to_json %>
+  health_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/health".to_json %>
+  oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/oauth".to_json %>
+  openid_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/openid".to_json %>
+  people_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/google/people".to_json %>
 honeybadger:
   api_key: null
   check_ins: null
   project_url: null
   report_data: null
+linear:
+  api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linear".to_json %>
 linkedin:
+  api_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linkedin/api".to_json %>
   client_id: null
   client_secret: null
+  oauth_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/linkedin/oauth".to_json %>
   profile_url: null
+mastodon:
+  instance_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/mastodon/%<host>s".to_json %>
 maxmind:
   account_id: null
   database_path: null
+  download_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/maxmind".to_json %>
   license_key: null
 media_store: *no_store
 redis:

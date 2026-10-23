@@ -161,7 +161,8 @@ RSpec.describe Social::Jobs::RefreshSocialEngagement do
     let(:social_post) { posted(remote_ids: {}) }
 
     before do
-      stub_request(:get, "https://hachyderm.io/api/v1/statuses/220").to_return(**json_response(favourites_count: 6))
+      stub_request(:get, "http://stub.localhost/mastodon/hachyderm.io/api/v1/statuses/220")
+        .to_return(**json_response(favourites_count: 6))
       create(:social_post_delivery, social_post_id: social_post.id, connection_id: connect_another_mastodon.id,
                                     remote_ids: %w[220])
     end

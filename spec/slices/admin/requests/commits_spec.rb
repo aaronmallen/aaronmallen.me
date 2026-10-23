@@ -5,7 +5,7 @@ RSpec.describe "Admin commits import", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
-  def api = "https://api.github.com"
+  def api = "http://stub.localhost/github/api"
 
   def commit_queries = Record::Slice["repos.commit_queries"]
 

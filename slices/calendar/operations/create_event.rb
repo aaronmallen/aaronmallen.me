@@ -11,7 +11,7 @@ module Calendar
 
         step(written(calendar) do
           body = Helpers::GoogleEvent.body(fields, date: fields[:date])
-          google.post(Helpers::GoogleEvent.url(calendar), body, account: calendar.account)
+          google.post(Helpers::GoogleEvent.url(google, calendar), body, account: calendar.account)
         end)
       end
     end

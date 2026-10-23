@@ -14,7 +14,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
     create(:calendar_event, calendar_id: calendar.id, title:, starts_on: day, ends_on: day, **times, **)
   end
 
-  def events_url = "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events"
+  def events_url = "#{Hanami.app.settings.google[:calendar_url]}/calendars/me%40example.com/events"
 
   def fields(**) = { title: "Lunch", date: day.iso8601, starts: "12:00", ends: "13:00", all_day: "0", place: "", ** }
 
@@ -48,7 +48,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
 
   before do
     connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES, token: "ya29.me")
-    stub_request(:any, %r{googleapis\.com/calendar}).to_return(google_json)
+    stub_request(:any, %r{stub\.localhost/google/calendar}).to_return(google_json)
   end
 
   it "writes nothing to Google for anybody who has not signed in" do
@@ -125,7 +125,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       it "refuses a work calendar", :aggregate_failures do
         send_form("/admin/calendar/events", calendar: work.id, **fields)
 
-        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
         expect(toast).to eq("That calendar is read-only")
       end
 
@@ -137,7 +137,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         end
 
         it "adds nothing to it or to a work calendar" do
-          expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+          expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
         end
 
         it "says work calendars and ones I can only view take no new events" do
@@ -381,14 +381,14 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       it "refuses an event on a work calendar", :aggregate_failures do
         move(event(work, "Sync", starts_on: ahead, ends_on: ahead))
 
-        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
         expect(toast).to eq("That calendar is read-only")
       end
 
       it "refuses a day before today", :aggregate_failures do
         move(placed(ahead), Blog::TimeZone.today - 1)
 
-        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
         expect(toast).to eq("A move lands on today or a day after it")
       end
 
@@ -470,7 +470,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       it "refuses a new event on a calendar Google lets me write", :aggregate_failures do
         send_form("/admin/calendar/events", calendar: mine.id, **fields)
 
-        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
         expect(toast).to eq("That calendar is read-only")
       end
 
@@ -479,7 +479,7 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
         expect(toast).to eq("That calendar is read-only")
 
         send_form("/admin/calendar/events/#{lunch.id}/delete")
-        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(a_request(:any, %r{stub\.localhost/google/calendar})).not_to have_been_made
       end
     end
 

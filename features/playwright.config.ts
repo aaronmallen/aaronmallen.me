@@ -6,5 +6,5 @@ export default defineConfig({
   fullyParallel: true,
   reporter: process.env.CI ? "github" : "list",
   testDir: defineBddConfig({ features: "**/*.feature", steps: ["steps/*.ts", "support/world.ts"] }),
-  use: { trace: "retain-on-failure" },
+  use: { bypassCSP: true, trace: "retain-on-failure" },
 });

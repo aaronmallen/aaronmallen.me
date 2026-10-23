@@ -3,7 +3,6 @@
 module Contacts
   module Helpers
     module GooglePerson
-      API = "https://people.googleapis.com/v1"
       FIELDS = %w[
         addresses biographies birthdays emailAddresses events fileAses imClients memberships names nicknames
         organizations phoneNumbers relations urls userDefined

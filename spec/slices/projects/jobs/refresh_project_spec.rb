@@ -62,7 +62,7 @@ RSpec.describe Projects::Jobs::RefreshProject do
 
     it "leaves the stored stars and the projects sync state alone when GitHub fails", :aggregate_failures do
       sync_state_mutations.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
-      stub_request(:get, "https://api.github.com/repos/#{repo}").to_return(status: 502)
+      stub_request(:get, "http://stub.localhost/github/api/repos/#{repo}").to_return(status: 502)
       fetch
 
       expect(stored.stars).to eq(0)
@@ -73,7 +73,7 @@ RSpec.describe Projects::Jobs::RefreshProject do
       loose = create(:project, repo: nil, url: nil)
       described_class.new.perform(loose.id)
 
-      expect(a_request(:get, /api\.github\.com/)).not_to have_been_made
+      expect(a_request(:get, %r{stub\.localhost/github/api})).not_to have_been_made
     end
   end
 end

@@ -36,7 +36,7 @@ module Health
       end
 
       def older_points?(account, type, filter)
-        url = "#{Operations::SyncHealth::DATA_TYPES}/#{type}/dataPoints"
+        url = google.url(:health, "users/me/dataTypes/#{type}/dataPoints")
 
         account.get(url, narrow: Operations::SyncHealth::SCOPE, filter:, page_size: 1).fetch("dataPoints", []).any?
       end

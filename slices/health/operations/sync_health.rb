@@ -5,7 +5,6 @@ module Health
     class SyncHealth < Blog::Operation
       CHUNK_DAYS = 90
       CIVIL_DATE_OFF_CHICAGO_DAYS = 1
-      DATA_TYPES = "https://health.googleapis.com/v4/users/me/dataTypes"
       EMPTY_DAY = {
         minutes_asleep: nil, bed_at: nil, woke_at: nil, resting_heart_rate: nil, hrv: nil, steps: nil,
         active_zone_minutes: nil,
@@ -64,7 +63,7 @@ module Health
       end
 
       def points(account, type, filter)
-        url = "#{DATA_TYPES}/#{type}/dataPoints"
+        url = google.url(:health, "users/me/dataTypes/#{type}/dataPoints")
         found = account.pages(url, rows: "dataPoints", narrow: SCOPE, token_param: :page_token, filter:)
         found.fetch("dataPoints")
       end
@@ -77,7 +76,8 @@ module Health
 
       def rollup(account, type, first, last)
         body = { range: { start: civil(first), end: civil(last + 1) }, windowSizeDays: 1 }
-        page = account.post("#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp", body, narrow: SCOPE)
+        page = account.post(google.url(:health, "users/me/dataTypes/#{type}/dataPoints:dailyRollUp"), body,
+                            narrow: SCOPE)
         rows = page.fetch("rollupDataPoints", [])
 
         rows.to_h { [date(it.dig("civilStartTime", "date")), yield(it)] }

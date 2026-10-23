@@ -118,7 +118,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
 
   describe "an event on a writable calendar" do
     let(:calendar) { create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron") }
-    let(:patched) { "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events/abc" }
+    let(:patched) { "#{Hanami.app.settings.google[:calendar_url]}/calendars/me%40example.com/events/abc" }
 
     before do
       connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES, token: "ya29.me")

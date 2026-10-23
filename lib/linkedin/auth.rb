@@ -2,12 +2,12 @@
 
 module LinkedIn
   class Auth
-    REVOKE_URL = "https://www.linkedin.com/oauth/v2/revoke"
     SCOPES = /[\s,]+/
-    USERINFO_URL = "https://api.linkedin.com/v2/userinfo"
 
-    def initialize(client:)
+    def initialize(client:, oauth_url:, api_url:)
       @client = client
+      @oauth_url = oauth_url
+      @api_url = api_url
     end
 
     def configured? = !client.nil?
@@ -29,15 +29,15 @@ module LinkedIn
 
     def revoke(access_token)
       body = { client_id: client.id, client_secret: client.secret, token: access_token }
-      client.request(:post, REVOKE_URL, body:)
+      client.request(:post, "#{oauth_url}/revoke", body:)
     end
 
     private
 
-    attr_reader :client
+    attr_reader :api_url, :client, :oauth_url
 
     def member(token)
-      member = token.get(USERINFO_URL).parsed
+      member = token.get("#{api_url}/v2/userinfo").parsed
       raise Error, "LinkedIn answered the member with no JSON profile" unless member.is_a?(Hash)
 
       member

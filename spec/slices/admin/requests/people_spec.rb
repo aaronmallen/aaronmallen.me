@@ -799,7 +799,7 @@ RSpec.describe "Admin people", type: :request do
     end
 
     describe "a contact linked to Google" do
-      let(:api) { Contacts::Helpers::GooglePerson::API }
+      let(:api) { Hanami.app.settings.google[:people_url] }
       let(:person) do
         linked = { google_connection_id: connect_contacts.id, google_id: "c1", google_etag: "e1" }
         create(:person, name: "Ada", given_name: "Ada", key: "ada", mastodon_handle: nil, **linked)
