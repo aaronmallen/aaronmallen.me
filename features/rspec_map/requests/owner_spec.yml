@@ -1,5 +1,6 @@
 - example: "The owner leaves a one word name whole"
   drop: "The owner's name comes from a committed setting that no feature can change on a running server; the two-word split covers the wordmark"
+- example: "The owner names the initials a phone shows"
 - example: "The owner names the site in the navigation"
   scenario: "requests/owner.feature: The home page names the owner in the title, the navigation and the wordmark"
 - example: "The owner signs the feed with the name the settings give"

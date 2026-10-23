@@ -1,22 +1,19 @@
 import { createHash, randomBytes } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
-import { join } from "node:path";
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { root } from "../support/shell.ts";
 import { Given, Then, test, When } from "../support/world.ts";
 import { ask } from "./http.ts";
 
 const { After, Before } = createBdd(test);
 
-const log = join(root, "log/test.log");
 let mark = 0;
 let noted: string[] = [];
 
 const secret = () => randomBytes(12).toString("hex");
 
-async function since() {
-  const text = (await readFile(log)).subarray(mark).toString("utf8");
+async function since({ app }: { app: { log: string } }) {
+  const text = (await readFile(app.log)).subarray(mark).toString("utf8");
   return text
     .split("\n")
     .filter((line) => !line.includes("[DEBUG]"))
@@ -31,28 +28,28 @@ const hiddenFields = (body: string, action: string) => {
   ]);
 };
 
-When("I note where the app log ends", async () => {
-  mark = (await stat(log)).size;
+When("I note where the app log ends", async ({ app }) => {
+  mark = (await stat(app.log)).size;
 });
 
-Then("the app log since then includes {string}", async ({}, text: string) => {
-  await expect.poll(since).toContain(text);
+Then("the app log since then includes {string}", async ({ app }, text: string) => {
+  await expect.poll(() => since({ app })).toContain(text);
 });
 
-Then("the app log since then includes {string} at least {int} times", async ({}, text: string, count: number) => {
-  await expect.poll(async () => (await since()).split(text).length - 1).toBeGreaterThanOrEqual(count);
+Then("the app log since then includes {string} at least {int} times", async ({ app }, text: string, count: number) => {
+  await expect.poll(async () => (await since({ app })).split(text).length - 1).toBeGreaterThanOrEqual(count);
 });
 
-Then("the app log since then matches {string}", async ({}, pattern: string) => {
-  await expect.poll(since).toMatch(new RegExp(pattern));
+Then("the app log since then matches {string}", async ({ app }, pattern: string) => {
+  await expect.poll(() => since({ app })).toMatch(new RegExp(pattern));
 });
 
-Then("the app log since then does not include {string}", async ({}, text: string) => {
-  expect(await since()).not.toContain(text);
+Then("the app log since then does not include {string}", async ({ app }, text: string) => {
+  expect(await since({ app })).not.toContain(text);
 });
 
-Then("the app log since then leaves out what I noted", async () => {
-  const text = await since();
+Then("the app log since then leaves out what I noted", async ({ app }) => {
+  const text = await since({ app });
   expect(noted.length).toBeGreaterThan(0);
   expect(noted.filter((value) => text.includes(value))).toEqual([]);
 });

@@ -1,2 +1,4 @@
 - example: "Agents::Jobs::CloseIdleSessions closes a session no call named for 2 hours"
+  scenario: "agents/close_idle_sessions.feature: A session no call named for two hours closes"
 - example: "Agents::Jobs::CloseIdleSessions leaves a session seen within 2 hours open"
+  scenario: "agents/close_idle_sessions.feature: A session seen within two hours stays open"

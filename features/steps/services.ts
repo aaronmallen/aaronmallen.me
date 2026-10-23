@@ -27,6 +27,26 @@ Given(
   },
 );
 
+const types: Record<string, string> = { HTML: "text/html", JSON: "application/json", XML: "application/xml" };
+
+Given(
+  "{service} answers {word} {string} with {string}",
+  ({ stub }, prefix: string, method: string, path: string, body: string) => {
+    stub.reply(method, `${prefix}${path}`, { body, status: 200 });
+  },
+);
+
+Given(
+  "{service} answers {word} {string} as {word} with {string}",
+  ({ stub }, prefix: string, method: string, path: string, type: string, body: string) => {
+    stub.reply(method, `${prefix}${path}`, { body, headers: { "Content-Type": types[type] }, status: 200 });
+  },
+);
+
+Given("{service} never answers {word} {string}", ({ stub }, prefix: string, method: string, path: string) => {
+  stub.reply(method, `${prefix}${path}`, { body: "", delay: 600_000, status: 200 });
+});
+
 When("I connect Mastodon on {string}", async ({ page }, server: string) => {
   await page.goto("/admin/settings/services");
   await page.getByRole("button", { name: "Connect a service" }).click();

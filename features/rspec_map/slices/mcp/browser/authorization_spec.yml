@@ -1,3 +1,6 @@
 - example: "MCP authorization approves by keyboard alone, behind a focus ring"
+  scenario: "mcp/authorization_screens.feature: <button> by keyboard alone, behind a focus ring, lands on the redirect URI with <param>"
 - example: "MCP authorization lands on the redirect URI once I approve"
+  scenario: "mcp/authorization_screens.feature: Approving lands on the redirect URI with a code"
 - example: "MCP authorization refuses by keyboard alone, behind a focus ring"
+  scenario: "mcp/authorization_screens.feature: <button> by keyboard alone, behind a focus ring, lands on the redirect URI with <param>"

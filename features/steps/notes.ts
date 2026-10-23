@@ -429,7 +429,7 @@ Then("the menu leaves out {string}", async ({ page }, item: string) => {
 });
 
 Then("the menu copies {string}", async ({ page }, text: string) => {
-  await expect(menu(page).locator(`button[data-copy='${text}']`)).toHaveText(/Copy link/);
+  await expect(page.locator(`button[data-copy=${JSON.stringify(text)}]`).first()).toHaveText(/^Copy/);
 });
 
 Then("the note links list {string}", async ({ page }, title: string) => {

@@ -42,6 +42,7 @@ module Blog
     config.actions.method_override = false
     config.actions.view_name_inference_base = "ui.views"
 
+    config.logger.stream = $stdout.tap { it.sync = true } if ENV["LOG_TO_STDOUT"]
     config.logger.filters |= %w[\w*_key \w*_secret \w*_token code_challenge code_verifier ip]
     config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS | Providers::HoneybadgerProvider::WHOLE_KEYS
 

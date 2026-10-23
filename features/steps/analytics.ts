@@ -429,14 +429,8 @@ Then(
   },
 );
 
-Then("the server log mentions {string}", async ({}, text: string) => {
-  const logs = resolve(import.meta.dirname, "../../log");
-  const read = () =>
-    readdirSync(logs)
-      .filter((name) => name.startsWith("test.log"))
-      .map((name) => readFileSync(resolve(logs, name), "utf8"))
-      .join("");
-  await expect.poll(read).toContain(text);
+Then("the server log mentions {string}", async ({ app }, text: string) => {
+  await expect.poll(() => readFileSync(app.log, "utf8")).toContain(text);
 });
 
 Then("the page title is {string}", async ({ page }, title: string) => {

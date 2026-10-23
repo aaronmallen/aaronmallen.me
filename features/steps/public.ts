@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import type postgres from "postgres";
+import { fill } from "../support/api.ts";
 import { slugFor } from "../support/rows.ts";
 import { Given, Then, When } from "../support/world.ts";
 import { assetPaths } from "./http.ts";
@@ -172,12 +173,12 @@ When("the posts are rendered again", async ({ app }) => {
   await rendered(app.sql, app.pushJob);
 });
 
-Then("the page has {string}", async ({ app, page }, selector: string) => {
-  await expect(page.locator(await assetPaths(app.url, selector)).first()).toBeAttached();
+Then("the page has {string}", async ({ app, http, page }, selector: string) => {
+  await expect(page.locator(await assetPaths(app.url, fill(http, selector))).first()).toBeAttached();
 });
 
-Then("the page has no {string}", async ({ app, page }, selector: string) => {
-  await expect(page.locator(await assetPaths(app.url, selector))).toHaveCount(0);
+Then("the page has no {string}", async ({ app, http, page }, selector: string) => {
+  await expect(page.locator(await assetPaths(app.url, fill(http, selector)))).toHaveCount(0);
 });
 
 Then("the page has {int} of {string}", async ({ page }, count: number, selector: string) => {
@@ -196,9 +197,11 @@ Then("{string} does not include {string}", async ({ page }, selector: string, te
   await expect(page.locator(selector).first()).not.toContainText(text);
 });
 
-Then("the texts of {string} are:", async ({ page }, selector: string, table: DataTable) => {
-  const texts = (await page.locator(selector).allTextContents()).map((text) => text.trim().replace(/\s+/g, " "));
-  expect(texts).toEqual(table.raw().map(([text]) => text));
+Then("the texts of {string} are:", async ({ http, page }, selector: string, table: DataTable) => {
+  const texts = (await page.locator(fill(http, selector)).allTextContents()).map((text) =>
+    text.trim().replace(/\s+/g, " "),
+  );
+  expect(texts).toEqual(table.raw().map(([text]) => fill(http, text)));
 });
 
 Then("{string} has the attribute {string} set to {string}", async ({ app, page }, selector, name, value) => {

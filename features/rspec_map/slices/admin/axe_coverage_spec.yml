@@ -1,4 +1,8 @@
 - example: "Admin axe coverage checks every admin page in the readable or menus spec or says why not"
+  scenario: "admin/axe.feature: Every admin page answers and passes axe in light and dark"
 - example: "Admin axe coverage exempts only pages the browser specs miss"
+  scenario: "admin/axe.feature: Every admin page answers and passes axe in light and dark"
 - example: "Admin axe coverage finds the admin pages and the ones the browser specs check"
+  scenario: "admin/axe.feature: Every admin page answers and passes axe in light and dark"
 - example: "Admin axe coverage names only routes that exist"
+  scenario: "admin/axe.feature: Every admin page answers and passes axe in light and dark"

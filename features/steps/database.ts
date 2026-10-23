@@ -2,6 +2,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import type postgres from "postgres";
+import { fill } from "../support/api.ts";
 import { run } from "../support/shell.ts";
 import { Given, Then, When } from "../support/world.ts";
 
@@ -28,10 +29,12 @@ Then("the admin hears of {string}", ({ shell }, heard: string) => {
   expect(shell.output).toBe(heard);
 });
 
-Then("the database answers {string} for:", async ({ app }, answer: string, query: string) => {
-  const rows = await app.sql.unsafe(query);
+Then("the database answers {string} for:", async ({ app, http }, answer: string, query: string) => {
+  const rows = await app.sql.unsafe(fill(http, query));
 
-  expect(rows.map((row) => Object.values(row).join(", ")).join("\n")).toBe(answer);
+  expect(rows.map((row) => Object.values(row).join(", ")).join("\n")).toBe(
+    fill(http, answer).replaceAll("SITE", app.url),
+  );
 });
 
 Then("the database refuses, breaking a {word} constraint:", async ({ app }, kind: string, statement: string) => {
@@ -168,4 +171,10 @@ When("I count the rows in every table", async ({ app }) => {
 
 Then("every table holds the rows it did", async ({ app }) => {
   expect(await rowCounts(app.sql)).toEqual(counts);
+});
+
+Then("every table but the request timings holds the rows it did", async ({ app }) => {
+  const timed = (all: Record<string, number>) =>
+    Object.fromEntries(Object.entries(all).filter(([table]) => !table.startsWith("performance_")));
+  expect(timed(await rowCounts(app.sql))).toEqual(timed(counts));
 });

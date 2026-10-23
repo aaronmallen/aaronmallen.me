@@ -1,4 +1,8 @@
 - example: "MCP reach exempts no operation a tool reaches"
+  drop: "walks the dependency graph of the MCP handler's Ruby endpoints and operations, which only Ruby can load; it guards code, not behaviour, so it belongs in a lint script like those #1975 adds"
 - example: "MCP reach exempts only operations a slice holds"
+  drop: "walks the dependency graph of the MCP handler's Ruby endpoints and operations, which only Ruby can load; it guards code, not behaviour, so it belongs in a lint script like those #1975 adds"
 - example: "MCP reach gives every exempt operation a reason"
+  drop: "walks the dependency graph of the MCP handler's Ruby endpoints and operations, which only Ruby can load; it guards code, not behaviour, so it belongs in a lint script like those #1975 adds"
 - example: "MCP reach reaches every operation from a tool unless the operation is exempt"
+  drop: "walks the dependency graph of the MCP handler's Ruby endpoints and operations, which only Ruby can load; it guards code, not behaviour, so it belongs in a lint script like those #1975 adds"

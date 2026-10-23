@@ -9,6 +9,7 @@ import { type Cookie, expect } from "@playwright/test";
 import { test as base, createBdd } from "playwright-bdd";
 import postgres from "postgres";
 import { createClient } from "redis";
+import { type Http, http } from "./http.ts";
 import { root, type Shell } from "./shell.ts";
 import { ownerEmail, type Stub, startStub } from "./stub.ts";
 
@@ -20,6 +21,7 @@ type App = {
   sql: postgres.Sql;
   stub: Stub;
   url: string;
+  log: string;
 };
 
 type Answer = { body: string; content?: string; error?: boolean; headers?: Record<string, string>; status: number };
@@ -41,10 +43,17 @@ async function until(ready: () => Promise<unknown>, what: string) {
   }
 }
 
+const logPath = (name: string) => join(root, `tmp/features-ws${workspace}-${name}.log`);
+
 function start(name: string, command: string, args: string[], env: NodeJS.ProcessEnv) {
   mkdirSync(join(root, "tmp"), { recursive: true });
-  const log = openSync(join(root, `tmp/features-ws${workspace}-${name}.log`), "w");
-  return spawn(command, args, { cwd: root, detached: true, env, stdio: ["ignore", log, log] });
+  const log = openSync(logPath(name), "w");
+  return spawn(command, args, {
+    cwd: root,
+    detached: true,
+    env: { ...env, LOG_TO_STDOUT: "true" },
+    stdio: ["ignore", log, log],
+  });
 }
 
 async function stop(child: ChildProcess) {
@@ -57,6 +66,7 @@ async function stop(child: ChildProcess) {
 export const test = base.extend<
   {
     answer: Answer;
+    http: Http;
     reset: undefined;
     shell: Shell;
     stub: Stub;
@@ -155,11 +165,12 @@ export const test = base.extend<
           redis: { client: redis, start: startRedis, stop: stopRedis },
           reset: async () => {
             if (!redis.isReady) await startRedis();
-            rmSync(env.MAINTENANCE_FLAG_PATH, { force: true });
+            rmSync(env.MAINTENANCE_FLAG_PATH, { force: true, recursive: true });
             await until(() => sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`), "The truncate");
             await redis.flushDb();
           },
           sql,
+          log: logPath(`w${parallelIndex}-server`),
           stub,
           url,
         });
@@ -190,6 +201,15 @@ export const test = base.extend<
   ],
   answer: async ({}, use) => use({ body: "", status: 0 }),
   baseURL: async ({ app }, use) => use(app.url),
+  http: async ({ answer, app, page, playwright }, use) => {
+    const { dispose, state } = http(
+      page,
+      (userAgent) => playwright.request.newContext({ baseURL: app.url, userAgent }),
+      answer,
+    );
+    await use(state);
+    await dispose();
+  },
   reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
   shell: async ({ app }, use) => {
     const dir = await mkdtemp(join(tmpdir(), "features-"));

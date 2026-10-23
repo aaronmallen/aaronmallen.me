@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { type BrowserContext, expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import { createBdd, defineParameterType } from "playwright-bdd";
+import { fill } from "../support/api.ts";
+import { formValue } from "../support/http.ts";
 import { root } from "../support/shell.ts";
 import { Given, Then, test, When } from "../support/world.ts";
 
@@ -550,4 +552,110 @@ When("I load the body I kept into the page after keeping it", async ({ page }) =
   kept = reply.body;
   await page.route("**/contact-kept", (route) => route.fulfill({ body: kept, contentType: "text/html" }));
   await page.goto("/contact-kept");
+});
+
+When("I send {word} {string}", async ({ http }, method: string, path: string) => {
+  await http.send(method, fill(http, path));
+});
+
+When("I send {word} {string} as {string}", async ({ http }, method: string, path: string, as: string) => {
+  await http.send(method, path, { as });
+});
+
+When("I post to {string}", async ({ http }, path: string) => {
+  await http.send("POST", fill(http, path), { form: { _csrf_token: await http.csrf() } });
+});
+
+When("I post to {string} with:", async ({ http }, path: string, table: DataTable) => {
+  const fields = Object.entries(table.rowsHash()).map(([name, value]) => [name, formValue(fill(http, value))]);
+  await http.send("POST", fill(http, path), {
+    form: { _csrf_token: await http.csrf(), ...Object.fromEntries(fields) },
+  });
+});
+
+When("I post to {string} without a CSRF token", async ({ http }, path: string) => {
+  await http.send("POST", path);
+});
+
+Then("the answer is {int}", ({ http }, status: number) => {
+  expect(http.last?.status(), http.body.slice(0, 500)).toBe(status);
+});
+
+Then("the answer does not say {string}", ({ http }, text: string) => {
+  expect(http.body).not.toContain(text);
+});
+
+Then("the answer sends me to {string}", ({ http }, path: string) => {
+  expect(http.last?.status(), http.body.slice(0, 2000)).toBeLessThan(400);
+  expect(http.last?.headers().location).toMatch(new RegExp(`(^|//[^/]+)${RegExp.escape(fill(http, path))}$`));
+});
+
+Then("the answer has the header {string} set to {string}", ({ app, http }, name: string, value: string) => {
+  expect(http.last?.headers()[name.toLowerCase()]).toBe(value.replaceAll("SITE", app.url));
+});
+
+Then("the answer has no header {string}", ({ http }, name: string) => {
+  expect(http.last?.headers()[name.toLowerCase()]).toBeUndefined();
+});
+
+Then("the answer has the header {string} holding {string}", ({ app, http }, name: string, value: string) => {
+  expect(http.last?.headers()[name.toLowerCase()]).toContain(value.replaceAll("SITE", app.url));
+});
+
+When("I send {word} {string} with a CSRF token", async ({ http }, method: string, path: string) => {
+  const form = method === "GET" ? undefined : { _csrf_token: await http.csrf() };
+  await http.send(method, path, { form });
+});
+
+Then("I am turned away to sign in", ({ http }) => {
+  const location = http.last?.headers().location ?? "";
+  expect(http.last?.status() === 401 || location.endsWith("/admin/sign-in"), `${http.last?.status()} ${location}`).toBe(
+    true,
+  );
+});
+
+When("I follow the answer", async ({ http, page }) => {
+  await page.goto(http.last?.headers().location ?? "");
+});
+
+Then("the page's toast reads {string}", async ({ page }, text: string) => {
+  await expect(page.locator("[data-toast] .toast").first()).toHaveText(text, { useInnerText: false });
+});
+
+Then("the page's toast starts with {string}", async ({ page }, text: string) => {
+  await expect(page.locator("[data-toast] .toast").first()).toContainText(text);
+  expect((await page.locator("[data-toast] .toast").first().textContent())?.trim()).toMatch(
+    new RegExp(`^${RegExp.escape(text)}`),
+  );
+});
+
+Then("the menu reads {string}", async ({ page }, items: string) => {
+  expect((await page.locator(".ctx-label").allTextContents()).map((item) => item.trim()).join(", ")).toBe(items);
+});
+
+When("I post to {string} with the fields {string}", async ({ http }, path: string, fields: string) => {
+  const form = Object.fromEntries(new URLSearchParams(fields));
+  await http.send("POST", fill(http, path), { form: { _csrf_token: await http.csrf(), ...form } });
+});
+
+When("I send GET {string} with the forwarded host {string}", async ({ http }, path: string, host: string) => {
+  await http.send("GET", path, { headers: { "X-Forwarded-Host": host } });
+});
+
+When("a browser on another site asks before it posts to {string}", async ({ http }, path: string) => {
+  await http.send("OPTIONS", path, {
+    headers: {
+      "Access-Control-Request-Headers": "authorization, content-type, mcp-protocol-version",
+      "Access-Control-Request-Method": "POST",
+      Origin: "https://client.example",
+    },
+  });
+});
+
+Then("the answer has no body", ({ http }) => {
+  expect(http.body).toBe("");
+});
+
+Then("the answer's header {string} does not hold {string}", ({ http }, name: string, text: string) => {
+  expect(http.last?.headers()[name.toLowerCase()] ?? "").not.toContain(text);
 });

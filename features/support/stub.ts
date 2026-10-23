@@ -8,6 +8,7 @@ export const services: Record<string, string> = {
   Bluesky: "/bluesky/pds",
   "Bluesky's app view": "/bluesky/public",
   GitHub: "/github/api",
+  "GitHub sign-in": "/github",
   Gmail: "/google/gmail",
   "Google Calendar": "/google/calendar",
   "Google Health": "/google/health",
