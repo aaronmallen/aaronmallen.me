@@ -5,6 +5,61 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.32] - 2026-10-23
+
+### Added
+
+- Notes in the admin, under Journal: a folder tree, Markdown notes with tags, an editor that saves as you type and
+  refuses a save when the note changed elsewhere, and a page for each folder with its description, subfolders and
+  notes. Clicking a folder's name in the tree opens its page, and its chevron folds it.
+- `[[Title]]` and `[[Title|text]]` links between notes. A note lists its backlinks and links out, the notes home lists
+  titles linked but not written yet, renaming a note rewrites the links to it in every other note, and deleting one
+  says how many notes link to it.
+- Notes and folders join record links, and a folder's links show on every note inside it under "From folders". Admin
+  search and the palette find notes, and the notes sidebar has a search that takes `#tag`. Public search never returns
+  a note.
+- A `notes` scope for MCP clients, which `read` and `write` do not cover, with tools to list, read, search, create,
+  edit, rename, move, pin, tag, duplicate and delete notes and to list, create, rename, move, describe and remove
+  folders. Deleting a note or removing a folder also needs `delete`. A note an agent wrote comes back marked untrusted.
+- Contacts in the Inbox group. People hold every Google Contacts field, and a contact page shows them with the
+  contact's last six mail threads. People left settings, and `/people` links go to Contacts.
+- Contacts sync both ways with Google. Each Google connection can turn on "Sync contacts", and one takes new contacts.
+  An hourly pull brings contacts, labels and stars, and saves, edits and deletes here reach Google. When Google changed
+  a contact first, the editor loads Google's version and asks you to redo the edit. The first sync links existing
+  people by email, profile link or exact name. Handles go to Google as profile links and are never read back.
+- Mail matches a sender to a contact by email, compose suggests contacts' addresses, and a sender who is not a contact
+  gets an "Add to Contacts" button.
+- A `contacts` scope for MCP clients. Without it a token sees only a contact's name, key and handles and cannot write
+  any other field. The people tools take every contact field, `list_people` filters as the Contacts tab does, and
+  `sync_people` runs a sync.
+- A Calendar card on Today lists today's events, marks the one running now and counts down to the next.
+- MCP tools to create, edit, move and delete calendar events, save and edit mail drafts, list, create and edit short
+  links, delete shares and share groups, remove one file from a share group, run the short link and post link checks,
+  and turn a mail thread into a task. `update_share` also sets alt text and changes a share's code. No MCP tool sends
+  mail.
+- The security tab lists each browser as one device, and a button signs out that device alone. A sign-in from a device
+  the site knows raises no new-device alert.
+- `mise run db:seed` fills every admin screen, notes, contacts and devices among them, and a second run adds nothing.
+
+### Changed
+
+- The settings tabs read tagging, webmentions, connected services, jobs and security, and `/settings` opens tagging.
+  Webmention settings have their own tab, and `/settings/socials` links land there.
+- Row facts that are not a state, such as an artifact's type, a post's failing links, mentions and suggestions, and the
+  stale and over limit marks, show as coloured text, not pills. Note tags show as `#word` in the tag's colour.
+- The security tab counts failed sign-ins from the last 7 days and lists only those, each with a button to dismiss it.
+- The connected clients card counts MCP clients that called in the last hour, shows registrations with the same name
+  and redirect host as one group, and lists the rest as "authorized, idle".
+- An MCP sighting takes its title from the client, such as `claude-code 1.2`, and one client calling from two cities
+  shows as one row with its last city.
+- A repeat sign-in callback from a device that signed in under a minute ago goes to the admin and records no failed
+  sign-in.
+- Each admin session now carries its device, so every browser has to sign in once more after this release.
+
+### Fixed
+
+- The board and list switch on an admin project showed no icons.
+
 ## [26.10.31] - 2026-10-22
 
 ### Changed
@@ -1599,7 +1654,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...HEAD
+[26.10.32]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...26.10.32
 [26.10.31]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...26.10.31
 [26.10.30]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...26.10.30
 [26.10.29]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.28...26.10.29
