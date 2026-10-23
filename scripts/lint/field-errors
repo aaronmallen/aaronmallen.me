@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+# MISE description="Lint the form field errors for contract error codes they have no wording for"
+# MISE alias=["l:field-errors"]
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "hanami/prepare"
+require "contract_codes"
+
+Dir[Hanami.app.root.join("slices/*/**/*.rb").to_s].each do |path|
+  next unless File.read(path).include?("< Blog::UI::FieldError")
+
+  Object.const_get(Hanami.app.slices[path[%r{slices/(\w+)/}, 1].to_sym].autoloader.cpath_expected_at(path))
+end
+
+def missing(error, codes)
+  view = error.allocate
+  i18n = error.slice["i18n"]
+  shared = Blog::UI::FieldError::CODES
+  codes.except(*error::UNSHOWN).flat_map do |field, field_codes|
+    field_codes.filter_map do |code|
+      keys = [error::OVERRIDES.dig(field, code) || ".#{field}.#{code}", "#{shared}#{field}.#{code}", "#{shared}#{code}"]
+      ".#{field}.#{code}" if keys.none? { i18n.exists?(view.send(:_resolve_i18n_key, it)) }
+    end
+  end
+end
+
+errors = ObjectSpace.each_object(Class).select { it < Blog::UI::FieldError }.sort_by(&:name)
+problems = errors.flat_map do |error|
+  next ["#{error} names no CONTRACTS it words"] unless error.const_defined?(:CONTRACTS, false)
+
+  error::CONTRACTS.flat_map do |contract|
+    missing(error, ContractCodes.call(contract)).map { "#{error} has no wording for #{it}, which #{contract} returns" }
+  end
+end
+
+services = Admin::UI::Components::Services::FieldError
+fields = Services::Slice["repos.definition_queries"].all.flat_map(&:fields).uniq
+codes = fields.to_h { [it.to_sym, [Admin::Operations::ConnectService::BLANK]] }
+problems += missing(services, codes).map { "#{services} has no wording for #{it}, which connecting a service returns" }
+
+problems.each { warn it }
+exit(problems.empty?)

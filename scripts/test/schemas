@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
-#MISE description="Fetch the GitHub and Linear GraphQL schemas the query specs check against"
+#MISE description="Fetch the GitHub and Linear GraphQL schemas mise run lint:graphql checks against"
 
 set -e
 
-dir=spec/fixtures/graphql
+dir=.config/graphql
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 

@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+# MISE description="Lint the Sidekiq schedule in config/sidekiq.yml.erb against the job classes"
+# MISE alias=["l:sidekiq"]
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "hanami/prepare"
+require "fugit"
+
+DAY = 24 * 60 * 60
+
+config = Blog::SidekiqConfig.load.then { it.merge(it.delete(:development) || {}) }
+schedule = config.dig(:scheduler, :schedule)
+problems = []
+
+scheduled = ->(job) { Object.const_defined?(job) && Object.const_get(job) < Blog::ScheduledJob }
+known, unknown = schedule.partition { |_, entry| scheduled.call(entry.fetch("class")) }
+problems += unknown.map { |name, entry| "#{name} names #{entry.fetch('class')}, which is not a Blog::ScheduledJob" }
+
+known.each do |name, entry|
+  job = Object.const_get(entry.fetch("class"))
+  problems << "#{name} has no description for the jobs tab" unless entry["description"].to_s.match?(/\S/)
+  problems << "#{job} retries, though its next run tries again" unless job.get_sidekiq_options["retry"] == false
+end
+
+if unknown.empty?
+  settings = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml").to_s)
+  check_ins = settings.fetch("honeybadger").fetch("check_ins").keys
+  names = schedule.values.map { Object.const_get(it.fetch("class")).check_in_name(*it["args"]) }
+  (names - check_ins).each { problems << "honeybadger.check_ins in default.yml has no #{it}" }
+  (check_ins - names).each { problems << "honeybadger.check_ins in default.yml names #{it}, which no job uses" }
+  names.tally.select { _2 > 1 }.each_key { problems << "two schedule entries share the check-in #{it}" }
+end
+
+jobs = Hanami.app.slices.to_a.flat_map do |slice|
+  Dir[slice.root.join("jobs", "*.rb")].map do |path|
+    slice.namespace.const_get(slice.inflector.camelize("jobs/#{File.basename(path, '.rb')}"))
+  end
+end
+problems << "no job classes found under slices/*/jobs" if jobs.empty?
+jobs.each do |job|
+  queue = job.get_sidekiq_options["queue"]
+  problems << "#{job} runs on #{queue}, a queue the worker does not read" unless config[:queues].include?(queue)
+end
+
+cron = ->(name) { Fugit::Cron.parse(schedule.fetch(name).fetch("cron")) }
+quarter_hourly = schedule.keys.select { cron.call(it).rough_frequency == 15 * 60 }
+minutes = quarter_hourly.flat_map { cron.call(it).minutes }
+minutes.tally.select { _2 > 1 }.each_key { problems << "two fifteen minute jobs share minute #{it}" }
+gmail = cron.call("sync_gmail").minutes
+(gmail & minutes).each { problems << "sync_gmail shares minute #{it} with a fifteen minute job" }
+
+{ "roll_over_sprint" => "2026-09-18T00:00:00-05:00",
+  "check_post_links" => "2026-09-18T03:00:00-05:00" }.each do |name, at|
+  run = cron.call(name).next_time(Time.utc(2026, 9, 17, 12))
+  problems << "#{name} should run once a day at #{at[11, 5]} Chicago" unless
+    Blog::TimeZone.local(run.to_t).iso8601 == at && cron.call(name).next_time(run).to_t - run.to_t == DAY
+end
+
+problems.each { warn it }
+exit(problems.empty?)

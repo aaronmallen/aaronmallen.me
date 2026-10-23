@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# MISE description="Lint the GitHub and Linear GraphQL queries against their schemas in .config/graphql"
+# MISE alias=["l:graphql"]
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "hanami/prepare"
+require "graphql"
+require "zlib"
+
+def queries(namespace)
+  modules = namespace.constants(false).map { namespace.const_get(it) }
+  holders = modules.select { it.is_a?(Module) && it.const_defined?(:Queries, false) }.map { it.const_get(:Queries) }
+  holders.flat_map do |holder|
+    texts = holder.constants(false).map { ["#{holder}::#{it}", holder.const_get(it)] }
+    texts.select { |_, text| text.to_s.match?(/\A\s*(query|mutation)\b/) }
+  end
+end
+
+problems = { GitHub => "github", Linear => "linear" }.flat_map do |namespace, name|
+  path = Hanami.app.root.join(".config/graphql/#{name}.graphql.gz")
+  schema = GraphQL::Schema.from_definition(Zlib::GzipReader.open(path, &:read))
+  found = queries(namespace)
+  next ["#{namespace} has no queries to check"] if found.empty?
+
+  found.flat_map { |query, text| schema.validate(text).map { "#{query}: #{it.message}" } }
+end
+
+problems.each { warn it }
+exit(problems.empty?)

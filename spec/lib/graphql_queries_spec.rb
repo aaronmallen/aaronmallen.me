@@ -18,7 +18,7 @@ RSpec.describe "GraphQL queries", type: :app do
 
   def schema(name)
     GraphQL::Schema.from_definition(
-      Zlib::GzipReader.open(Hanami.app.root.join("spec/fixtures/graphql/#{name}.graphql.gz"), &:read),
+      Zlib::GzipReader.open(Hanami.app.root.join(".config/graphql/#{name}.graphql.gz"), &:read),
     )
   end
 

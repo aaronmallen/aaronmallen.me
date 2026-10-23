@@ -59,6 +59,7 @@ end
 
 group :lint do
   gem "bundler-audit"
+  gem "graphql"
   gem "rubocop"
   gem "rubocop-capybara"
   gem "rubocop-hanami", ">= 0.2.1"
@@ -74,7 +75,6 @@ group :test do
   gem "cuprite"
   gem "database_cleaner-sequel"
   gem "faker"
-  gem "graphql"
   gem "parallel_tests"
   gem "rack-test"
   gem "rom-factory"
