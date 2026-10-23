@@ -30,7 +30,7 @@ module Tasks
       def unseen = tasks.open.where(id: task_sources.unseen.awake.task_ids)
 
       def unseen_tasks(limit)
-        unseen.latest_first(:created_at, snoozed_until).limit(limit).combine(:source, :tags).to_a
+        unseen.labelled.latest_first(:created_at, snoozed_until).limit(limit).combine(:source, :tags).to_a
       end
 
       private

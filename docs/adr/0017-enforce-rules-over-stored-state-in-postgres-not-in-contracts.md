@@ -154,7 +154,8 @@ One join breaks that, since #415. A task tag rule must hold a tag, so `task_tag_
 tag that is the only tag on a rule, before the cascade runs. #661 renamed it `task_rules_last_target`, as #957
 records: a rule may hold projects as well as tags, and the trigger now refuses to delete a tag or a project that is
 the last target on a rule. It raises with `ERRCODE = 'check_violation'`, and
-`RemoveTag` answers with the patterns of the rules that tag would empty, read after the refusal.
+`RemoveTag` answers with the patterns of the rules that tag would empty, read after the refusal. Since #1951 a
+project's own tags go when it does, so the trigger leaves them out when it weighs deleting that project.
 
 ## Alternatives
 

@@ -69,7 +69,7 @@ module Tasks
       def file(run, issue)
         names, project_ids = task_rule_queries.targets(run.provider, issue[:origin])
         task = task_mutations.append(**copy(issue), list: EXTERNAL, project_id: project_ids.first)
-        task_event_mutations.track(task.id, run.now) { task_mutations.add_tags(task.id, [*labels(issue), *names].uniq) }
+        task_event_mutations.track(task.id, run.now) { task_mutations.import_tags(task.id, labels(issue), names) }
         task
       end
 

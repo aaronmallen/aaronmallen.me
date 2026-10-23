@@ -3,7 +3,9 @@
 module Tasks
   module Structs
     class Task < Blog::DB::Struct
+      KEY = /\A(.+)-\d+\z/
       OWNER = { kind: Blog::Types::ContributorKind["owner"] }.freeze
+      PROJECT_TAG = Blog::Types::TagScope["project"]
 
       def ahead?(today) = in_sprint? && sprint.sprint_date > today
 
@@ -32,6 +34,12 @@ module Tasks
       def listed? = !list.nil?
 
       def place = list || Blog::Types::TaskFilter["today"]
+
+      def project_key = label[KEY, 1]
+
+      def project_key_for(tag)
+        project_key if tag.scope == PROJECT_TAG
+      end
 
       def recurs_after(today) = ahead?(today) ? sprint.sprint_date : today
 

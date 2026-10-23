@@ -15,7 +15,12 @@ module Tasks
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def add_tags(id, names) = task_tags.add(id, tags.in_scope(task_tags.tag_scope).by_names(names).pluck(:id))
+      def add_tags(id, names)
+        project_id = project_of(id)
+        scope = task_tags.scope_for(project_id)
+
+        task_tags.add(id, tags.in_scope(scope, project_id).by_names(names).pluck(:id), scope)
+      end
 
       def append(**fields)
         transaction do
@@ -26,7 +31,14 @@ module Tasks
 
       def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
+      def carry_tags(ids, project_id) = task_tags.carry(ids, tags, project_id:)
+
       def complete(id, at: Time.now) = update(id, status: DONE, completed_at: at)
+
+      def import_tags(id, labels, names)
+        add_tags(id, labels)
+        task_tags.tag(id, names.uniq, tags, project_id: project_of(id))
+      end
 
       def join_sprint(id, sprint_id) = update(id, list: nil, sprint_id:)
 
@@ -55,7 +67,7 @@ module Tasks
         end
       end
 
-      def replace_tags(id, names) = task_tags.retag(id, names, tags)
+      def replace_tags(id, names) = task_tags.retag(id, names, tags, project_id: project_of(id))
 
       def return_to_list(id, at: Time.now) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT, at:)
 
@@ -64,6 +76,8 @@ module Tasks
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
       private
+
+      def project_of(id) = tasks.by_pk(id).pluck(:project_id).first
 
       def reposition(moves)
         moved = Sequel.as(tasks.dataset.db.values(moves), :moves, %i[id position])

@@ -18,6 +18,12 @@ module Tasks
 
         found.order(name).select(:task_id, name).to_hash_groups(:task_id, :name)
       end
+
+      def tag_in_projects(task_ids, names, tags)
+        by_project = tasks.where(id: task_ids).pluck(:id, :project_id).group_by(&:last)
+
+        by_project.each { |project_id, held| tag(held.map(&:first), names, tags, project_id:) }
+      end
     end
   end
 end

@@ -4,7 +4,7 @@ RSpec.describe Tags::Relations::Tags do
   let(:tag_mutations) { Tags::Slice["repos.tag_mutations"] }
   let(:tag_queries) { Tags::Slice["repos.tag_queries"] }
 
-  def ruby = tag_queries.all_in("private").find { it.name == "ruby" }
+  def ruby = %w[private project].filter_map { tag_queries.named_in(it, "ruby") }.first
 
   def save_rule(**) = Tasks::Slice["operations.save_task_rule"].call({ pattern: "aaronmallen/*", ** }).value!
 
@@ -33,5 +33,20 @@ RSpec.describe Tags::Relations::Tags do
 
     expect { Projects::Slice["relations.projects"].by_pk(project.id).delete }
       .to raise_error(Sequel::CheckConstraintViolation, /would leave a task rule with no tags or projects/)
+  end
+
+  it "refuses to delete the project of a task rule that holds only that project's tags" do
+    project = create(:project)
+    save_rule(tags: "ruby", projects: [project.id])
+
+    expect { Projects::Slice["relations.projects"].by_pk(project.id).delete }
+      .to raise_error(Sequel::CheckConstraintViolation, /would leave a task rule with no tags or projects/)
+  end
+
+  it "holds the project's own tags on a task rule that files into it" do
+    project = create(:project)
+    save_rule(tags: "ruby", projects: [project.id])
+
+    expect(ruby).to have_attributes(scope: "project", project_id: project.id)
   end
 end

@@ -76,7 +76,9 @@ missing name with the least used colour and does nothing for a name that exists.
 `retag`, `tag` and `untag` claim and write the tags, and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's
 scope once, for the owner slice and for the tags slice's counts. Since #1949 `Taggings::ADMITTED` names every scope each
 join takes, and the counts read it. Since #1947 a record related to a project claims within that project, and its join
-admits the project scope beside its own (ADR 0205).
+admits the project scope beside its own (ADR 0205). Since #1951 `retag` and `tag` take that project, `untag` takes a
+name off in any scope the join admits, and `carry` moves a record's tags by name into a new project or back to its
+own scope, making a missing name with the old tag's colour and description.
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.

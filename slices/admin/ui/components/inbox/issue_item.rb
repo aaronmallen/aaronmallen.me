@@ -38,7 +38,7 @@ module Admin
           def meta
             Moment(at: @task.created_at)
             Tasks::SourceLink(source: @task.source)
-            @task.tags.each { Tag(tag: it) }
+            @task.tags.each { Tag(tag: it, project_key: @task.project_key_for(it)) }
           end
 
           def move(filter)

@@ -116,9 +116,19 @@ module Admin
           def scheduled = Blog::TimeZone.parse_day(@values[:sprint_on])
 
           def tags_field
-            Field(label: t(".tags"), **error_props(:tags)) do |control|
-              TagField(control:, name: "task[tags]", value: @values[:tags].to_s, placeholder: t(".tags_placeholder"))
+            project = @task&.project_id
+
+            Field(label: tags_label, **error_props(:tags)) do |control|
+              TagField(
+                control:, name: "task[tags]", value: @values[:tags].to_s, placeholder: t(".tags_placeholder"), project:,
+              )
             end
+          end
+
+          def tags_label
+            key = @task&.project_key
+
+            key ? t(".project_tags", project: key) : t(".tags")
           end
 
           def title_field

@@ -16,10 +16,7 @@ module Admin
             div(class: "rule-row", data:) do
               input(type: "checkbox", class: "sr-only rule-toggle", id: toggle_id, checked: editing?)
               head
-              p(class: "rule-tags") do
-                @rule.tags.each { Tag(tag: it) }
-                @rule.projects.each { |project| span(class: "rule-project") { project.name } }
-              end
+              targets
               acts
               editor
             end
@@ -84,6 +81,13 @@ module Admin
           end
 
           def scope = "rule-#{@rule.id}"
+
+          def targets
+            p(class: "rule-tags") do
+              @rule.tags.each { Tag(tag: it, project_key: @rule.project_key_for(it)) }
+              @rule.projects.each { |project| span(class: "rule-project") { project.name } }
+            end
+          end
 
           def toggle_id = self.class.toggle_id(@rule.id)
 

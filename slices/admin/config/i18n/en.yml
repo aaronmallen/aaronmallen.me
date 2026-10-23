@@ -3753,6 +3753,7 @@ en:
           no_project: "No project"
           note_placeholder: "What done looks like."
           project: "Project"
+          project_tags: "%{project} tags"
           save: "Create task"
           tags: "Tags"
           tags_placeholder: "ruby, admin"

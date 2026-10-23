@@ -1005,7 +1005,7 @@ BEGIN
     SELECT 1 FROM unnest(held) AS rule(id)
       WHERE NOT EXISTS (
         SELECT 1 FROM task_rule_tags other
-          WHERE other.task_rule_id = rule.id AND (TG_TABLE_NAME <> 'tags' OR other.tag_id <> OLD.id)
+          WHERE other.task_rule_id = rule.id AND (TG_TABLE_NAME <> 'tags' OR other.tag_id <> OLD.id) AND (TG_TABLE_NAME <> 'projects' OR other.tag_id NOT IN (SELECT id FROM tags WHERE project_id = OLD.id))
       )
       AND NOT EXISTS (
         SELECT 1 FROM task_rule_projects other
@@ -10395,4 +10395,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261023040100_add_written_by_agent_to_notes.rb'),
 ('20261023050000_add_contacts_to_oauth_scope.rb'),
 ('20261024010000_add_project_to_tag_scope.rb'),
-('20261024010100_add_project_id_to_tags.rb');
+('20261024010100_add_project_id_to_tags.rb'),
+('20261024020000_leave_project_tags_out_of_task_rules_last_target.rb');

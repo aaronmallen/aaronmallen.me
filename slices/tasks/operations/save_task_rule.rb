@@ -28,17 +28,18 @@ module Tasks
 
       def create(fields, now)
         rule = task_rule_mutations.create(pattern: fields[:pattern], provider: fields[:provider] || GITHUB)
-        tag_ids = task_rule_mutations.replace_tags(rule.id, fields[:tags])
         project_ids = projects(fields)
+        task_rule_mutations.replace_tags(rule.id, fields[:tags], project_ids.first)
         task_rule_mutations.replace_projects(rule.id, project_ids)
-        reach(rule, tag_ids, project_ids, now)
+        reach(rule, fields[:tags], project_ids, now)
         rule.id
       end
 
       def edit(id, fields)
         task_rule_mutations.update(id, **fields.slice(:pattern, :provider).compact)
-        task_rule_mutations.replace_tags(id, fields[:tags])
-        task_rule_mutations.replace_projects(id, projects(fields))
+        project_ids = projects(fields)
+        task_rule_mutations.replace_tags(id, fields[:tags], project_ids.first)
+        task_rule_mutations.replace_projects(id, project_ids)
         id
       end
 
@@ -56,10 +57,13 @@ module Tasks
 
       def projects(fields) = fields[:projects] || Blog::Constants::EMPTY_ARRAY
 
-      def reach(rule, tag_ids, project_ids, now)
+      def reach(rule, names, project_ids, now)
         task_ids = task_rule_queries.matching_task_ids(rule)
-        task_event_mutations.track(task_ids, now, seen: false) { task_rule_mutations.tag_tasks(task_ids, tag_ids) }
-        task_rule_mutations.fill_project(task_ids, project_ids.first)
+
+        task_event_mutations.track(task_ids, now, seen: false) do
+          task_rule_mutations.fill_project(task_ids, project_ids.first)
+          task_rule_mutations.tag_tasks(task_ids, names)
+        end
       end
     end
   end

@@ -13,7 +13,7 @@ module Admin
               in_progress if @task.in_progress?
               marks
               SourceLink(source: @task.source)
-              @task.tags.each { Tag(tag: it) }
+              @task.tags.each { Tag(tag: it, project_key: @task.project_key_for(it)) }
               worked if worked?
               comments
               blocking

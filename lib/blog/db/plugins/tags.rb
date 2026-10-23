@@ -6,10 +6,10 @@ module Blog
       module Tags
         def by_names(names) = where(name: names)
 
-        def claim(names, scope:, project_id: nil)
+        def claim(names, scope:, project_id: nil, like: Blog::Constants::EMPTY_HASH)
           return Blog::Constants::EMPTY_HASH if names.empty?
 
-          insert_missing(names, scope, project_id)
+          insert_missing(names, scope, project_id, like)
 
           in_scope(scope, project_id).by_names(names).to_a.to_h { [it[:name], it[:id]] }
         end
@@ -24,15 +24,16 @@ module Blog
 
         def color_counts(scope, project_id) = in_scope(scope, project_id).tally(:color, Blog::Types::TagColor.values)
 
-        def insert_missing(names, scope, project_id)
+        def insert_missing(names, scope, project_id, like)
           now = Time.now
           counts = color_counts(scope, project_id)
 
           names.each do |name|
-            color = least_used(counts)
+            color, description = like.fetch(name, Blog::Constants::EMPTY_HASH).values_at(:color, :description)
+            color ||= least_used(counts)
             counts[color] += 1
 
-            upsert(name:, scope:, project_id:, color:, created_at: now, updated_at: now)
+            upsert(name:, scope:, project_id:, color:, description:, created_at: now, updated_at: now)
           end
         end
 
