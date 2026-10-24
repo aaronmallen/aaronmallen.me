@@ -13,6 +13,7 @@ import {
   unwrap,
 } from "../support/mail_sync.ts";
 import { Given, Then, When } from "../support/world.ts";
+import { waiters } from "./database.ts";
 
 type Row = Record<string, string>;
 
@@ -170,14 +171,7 @@ When("two visitors send the contact form while the mail lock is held", async ({ 
   let sent: Promise<{ status: number }>[] = [];
   try {
     sent = [sendContact(request, contact), sendContact(request, contact)];
-    await expect
-      .poll(async () => {
-        const [{ count }] = await app.sql`
-          SELECT count(*)::int AS count FROM pg_locks WHERE locktype = 'advisory' AND NOT granted
-        `;
-        return count;
-      })
-      .toBe(2);
+    await expect.poll(() => waiters(app.sql)).toBe(2);
   } finally {
     await held`SELECT pg_advisory_unlock(hashtext('mail_messages'))`;
     held.release();

@@ -59,7 +59,7 @@ Then("the task numbers are {string} in some order", async ({ app }, numbers: str
   expect(rows.map(({ number }) => number).join(", ")).toBe(numbers);
 });
 
-const waiters = async (sql: postgres.Sql) => {
+export const waiters = async (sql: postgres.Sql) => {
   const [{ count }] = await sql`
     SELECT count(*)::int AS count FROM pg_locks
     WHERE locktype = 'advisory' AND NOT granted AND database = (SELECT oid FROM pg_database WHERE datname = current_database())
