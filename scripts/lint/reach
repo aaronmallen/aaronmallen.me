@@ -1,0 +1,261 @@
+#!/usr/bin/env ruby
+# MISE description="Lint the operations for any the API or the MCP cannot reach and does not exempt"
+# MISE alias=["l:reach"]
+# MISE depends=["test:prepare"]
+# MISE env={HANAMI_ENV="test"}
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "hanami/prepare"
+
+MCP_EXEMPT = {
+  "activity.operations.act_on_set_job" => "the owner acts on a job from the card and jobs tab; specs #865, #1721",
+  "activity.operations.run_cron_entry" => "the owner runs a cron entry from the jobs tab; spec #1722 keeps it",
+  "activity.operations.switch_cron_entry" => "the owner pauses a cron entry on the jobs tab; spec #1722 keeps it",
+  "admin.operations.activate_maintenance" => "turns maintenance on from Settings; spec #1720 keeps it in a browser",
+  "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
+  "admin.operations.build_artifact_editor" => "builds the admin's artifact editor; update_artifact covers one",
+  "admin.operations.build_artifact_page" => "builds the admin's artifact page; read_artifact reads it",
+  "admin.operations.build_calendar_page" => "builds the admin's calendar screen; list_calendar reads the same days",
+  "admin.operations.build_commit_page" => "builds the admin's commit page; read_commit reads the same commit",
+  "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",
+  "admin.operations.build_contact_page" => "builds the admin's contact page; read_person reads the contact",
+  "admin.operations.build_contacts_page" => "builds the admin's contacts list; list_people lists the same people",
+  "admin.operations.build_decision_page" => "builds the admin's decision page; read_decision reads it",
+  "admin.operations.build_links_page" => "builds the admin's links screen; list_short_links reads the same",
+  "admin.operations.build_memories_page" => "builds the admin's memories screen; read_memory reads the same",
+  "admin.operations.build_memory_file_page" => "builds the admin's memory file page; read_memory_file reads it",
+  "admin.operations.build_navigation" => "builds the admin's menu",
+  "admin.operations.build_notes_page" => "builds the admin's notes screen; list_notes and read_note read it",
+  "admin.operations.build_person_editor" => "builds the admin's people editor; save_person covers a person",
+  "admin.operations.build_post_analytics" => "builds the admin's post analytics page; read_analytics reads a path",
+  "admin.operations.build_post_editor" => "builds the admin's post editor; read_post and update_post cover a post",
+  "admin.operations.build_post_preview" => "renders the admin editor's preview; read_post sends the body",
+  "admin.operations.build_posts_page" => "builds the admin's posts screen; list_posts reads the same posts",
+  "admin.operations.build_project_editor" => "builds the admin's project editor; save_project covers a project",
+  "admin.operations.build_projects_page" => "builds the admin's projects screen; list_projects reads the same",
+  "admin.operations.build_pull_request_page" => "builds the admin's pull request page; read_pull_request reads it",
+  "admin.operations.build_review_page" => "builds the admin's review screen; read_review reads the same review",
+  "admin.operations.build_search_page" => "builds the admin's search screen; the search tool runs the same search",
+  "admin.operations.build_services_page" => "builds the admin's connected services tab; list_api_tokens reads it",
+  "admin.operations.build_settings_tabs" => "builds the Settings tab counts; each tab's list has its own tool",
+  "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",
+  "admin.operations.build_tagging_page" => "builds the admin's tagging tab; list_tags and list_task_rules read it",
+  "admin.operations.build_tags_page" => "builds the admin's tags screen; list_tags reads the same tags",
+  "admin.operations.build_task_page" => "builds the admin's task page; read_task reads the same task",
+  "admin.operations.build_time_page" => "builds the admin's time screen; read_time_report reads the same",
+  "admin.operations.build_tasks_page" => "builds the admin's tasks screen; list_tasks reads the same tasks",
+  "admin.operations.check_service" => "checks a connected service's credentials; no tool reads credentials",
+  "admin.operations.connect_github" => "connects GitHub through the owner's browser; no tool handles credentials",
+  "admin.operations.connect_google" => "connects Google accounts in the owner's browser; no tool takes tokens",
+  "admin.operations.connect_linkedin" => "connects LinkedIn profiles in the owner's browser; no tool takes tokens",
+  "admin.operations.connect_mastodon" => "connects Mastodon through the owner's browser; no tool takes tokens",
+  "admin.operations.connect_service" => "the owner connects a service in the admin; no tool takes credentials",
+  "admin.operations.count_tasks" => "the admin bulk bar counts a tab to find its landing page",
+  "admin.operations.describe_post_save" => "words a post save for the admin's toast",
+  "admin.operations.describe_social_post" => "words a social post for the admin's list",
+  "admin.operations.disconnect_service" => "disconnects a service from the admin; no tool handles credentials",
+  "admin.operations.end_sessions" => "signs the admin out everywhere; sign in stays out of the MCP",
+  "admin.operations.link_search_hit" => "links a search hit to its admin screen; MCP tools answer with ids",
+  "admin.operations.list_actions" => "lists the admin palette's actions",
+  "admin.operations.list_activity_events" => "words the admin's activity screen; read_activity reads the feed",
+  "admin.operations.list_networks" => "lists networks for the admin's pickers",
+  "admin.operations.list_palette_saved_views" => "lists views for the admin palette; list_saved_views reads them",
+  "admin.operations.list_record_links" => "fills the admin's Linked section; list_links reads the same links",
+  "admin.operations.list_saved_views" => "lists a screen's saved views in the admin; list_saved_views reads them",
+  "admin.operations.list_sections" => "lists the admin menu's sections",
+  "admin.operations.list_services" => "builds the admin's connected services tab; no tool reads credentials",
+  "admin.operations.list_social_accounts" => "lists the admin's accounts for its social screen",
+  "admin.operations.open_journal_entry" => "opens an entry on the admin's journal; read_journal_entry reads it",
+  "admin.operations.preview_announcement" => "previews the admin's announcement; compose_announcement writes one",
+  "admin.operations.register_mastodon_app" => "registers the site on a Mastodon server as the admin connects it",
+  "admin.operations.search_palette" => "groups search hits for the admin palette; the search tool finds them",
+  "admin.operations.review_social_edits" => "lays out edits for the admin; list_suggestions reads them",
+  "admin.operations.sign_in" => "signs the admin in through GitHub; sign in stays out of the MCP",
+  "admin.operations.summarize_analytics" => "builds the admin's analytics screen; read_analytics reads the same",
+  "admin.operations.summarize_journal" => "builds the admin's journal tile; list_journal_entries reads the same",
+  "admin.operations.summarize_sprint" => "builds the admin's sprint tile; read_current_sprint reads the same",
+  "admin.operations.summarize_today" => "builds the admin's today screen; summarize_activity reads the same",
+  "agents.operations.close_idle_sessions" => "a background job closes each session no call names for 2 hours",
+  "analytics.operations.check_visit" => "checks a beacon the site does not count as record_visit checks one",
+  "analytics.operations.classify_device" => "sorts a visit's device as record_visit stores it",
+  "analytics.operations.find_place" => "places an address for the security log as a request comes in",
+  "analytics.operations.find_reader_window_start" => "opens the reader window as a post reader repo counts",
+  "analytics.operations.hash_reader" => "hashes a post's reader as a view comes in",
+  "analytics.operations.hash_visitor" => "hashes a visitor as a request comes in",
+  "analytics.operations.parse_aggregator" => "reads a feed aggregator's subscribers as record_feed_fetch counts",
+  "analytics.operations.prune_analytics_events" => "a background job prunes old visits after the roll up",
+  "analytics.operations.queue_country_database" => "the worker queues the country database refresh at boot",
+  "analytics.operations.rank_rows" => "ranks rows as the analytics repos read them; read_analytics reads it",
+  "analytics.operations.record_feed_fetch" => "counts a feed fetch as a feed reader polls",
+  "analytics.operations.record_visit" => "records a visit as a reader's browser reports it",
+  "analytics.operations.refresh_country_database" => "a background job refreshes the country database",
+  "analytics.operations.roll_up_analytics" => "a background job rolls up the day's visits",
+  "analytics.operations.save_reader_counts" => "a background job saves each post's final reader count",
+  "api.operations.authenticate" => "checks the API token on each API request",
+  "api.operations.build_document" => "builds the OpenAPI document the API serves to its clients",
+  "api.operations.mint_token" => "the owner mints an API token in the admin, which no client should do",
+  "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
+  "backups.operations.back_up_database" => "a background job dumps the database each night",
+  "backups.operations.restore_database" => "the db:restore mise task runs it",
+  "calendar.operations.show_calendars" => "the owner picks the calendars the admin page shows; tools list them all",
+  "calendar.operations.sync_calendar" => "a background job mirrors Google events every 15 minutes",
+  "contacts.operations.sync_contacts" => "a background job pulls Google contacts every hour",
+  "decisions.operations.tag_decision" => "the admin's decision rows tag it; the tag_decision tool covers it",
+  "decisions.operations.untag_decision" => "the admin's decision rows untag it; the untag_decision tool covers it",
+  "mail.operations.create_message" => "a reader sends a message through the public form",
+  "mail.operations.download_attachment" => "the owner downloads an attachment from the admin's mail reader",
+  "mail.operations.reclean_mail_html" => "the owner queues a job that cleans stored mail HTML again",
+  "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",
+  "mail.operations.send_mail" => "the owner sends mail from the admin; spec #1119 gives agents no send tool",
+  "mail.operations.sync_gmail" => "background jobs sync Gmail into the mail tables",
+  "mail.operations.update_mail_settings" => "the owner picks the accounts and Waiting rules in the admin",
+  "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",
+  "health.operations.sync_health" => "background jobs sync health days and workouts from Google",
+  "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
+  "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",
+  "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",
+  "mcp.operations.derive_code_challenge" => "OAuth: issue_token checks a code verifier against its challenge",
+  "mcp.operations.describe_authorization_server" => "OAuth: a client reads the authorization server metadata",
+  "mcp.operations.describe_protected_resource" => "OAuth: a client reads the protected resource metadata",
+  "mcp.operations.issue_token" => "OAuth: a client trades a code or a refresh token",
+  "mcp.operations.issue_tokens" => "OAuth: mints the tokens issue_token hands out",
+  "mcp.operations.match_resource" => "OAuth: checks the resource a request or token names",
+  "mcp.operations.reap_expired_credentials" => "a background job reaps spent OAuth codes, tokens and idle clients",
+  "mcp.operations.register_client" => "OAuth: a client registers itself",
+  "mcp.operations.revoke_client" => "OAuth: the owner cuts off a client in the admin, which no client should do",
+  "performance.operations.prune_timing" => "the nightly rollup job runs it",
+  "performance.operations.record_page_timing" => "the browser sends a page's timing through the beacon",
+  "performance.operations.record_timing" => "each request and job stores its own timing as it finishes",
+  "performance.operations.roll_up_timing" => "the nightly rollup job runs it",
+  "posts.operations.check_post_links" => "the nightly link check job checks every published post's links",
+  "posts.operations.move_post" => "the admin's calendar moves a post a day; update_post sets any time",
+  "posts.operations.record_post_webmentions" => "the webmention delivery job records what it sent",
+  "projects.operations.refresh_project" => "a background job fetches one project's stars after its repo is set",
+  "projects.operations.refresh_projects" => "a background job refreshes projects from GitHub",
+  "projects.operations.tag_project" => "the admin's project rows tag it; save_project sets a project's tags",
+  "projects.operations.untag_project" => "the admin's project rows untag it; save_project sets a project's tags",
+  "public.operations.check_contact_stamp" => "checks the contact form's stamp as a reader sends it",
+  "public.operations.find_page" => "checks that a visit names a real page as a reader's browser reports it",
+  "public.operations.issue_contact_stamp" => "stamps the contact form as a reader loads it",
+  "public.operations.render_atom_feed" => "renders the public Atom feed",
+  "public.operations.version_atom_feed" => "dates and tags the public Atom feed for a reader polling again",
+  "record.operations.backfill_repo_commits" => "a background job walks a repository's history",
+  "record.operations.import_commits" => "the import job runs it; import_commits queues that job",
+  "record.operations.import_pull_requests" => "a background job imports the pull requests I author",
+  "record.operations.parse_commit_credits" => "store_commits reads the agents and issues an imported commit names",
+  "record.operations.plan_commit_walk" => "the backfill job plans the next step of a repository's walk",
+  "record.operations.reap_sync_states" => "a background job reaps old sync states",
+  "record.operations.record_sync_outcome" => "each sync job records how it went; read_sync_state reads it",
+  "record.operations.store_commits" => "the backfill job stores the commits it fetches",
+  "record.operations.tag_journal_entry" => "the admin's journal rows tag it; update_journal_entry sets tags",
+  "record.operations.untag_journal_entry" => "the admin's journal rows untag it; update_journal_entry sets tags",
+  "search.operations.claim_search_attempt" => "counts a reader's search against the public search throttle",
+  "search.operations.reap_search_attempts" => "a background job reaps old public search attempts",
+  "security.operations.dismiss_sign_in" => "hides one failed admin sign-in; sign in stays out of the MCP",
+  "security.operations.prune_access_records" => "a background job prunes old sign-ins, sightings and devices",
+  "security.operations.read_access" => "reads where a request came from as the security log stores it",
+  "security.operations.read_device" => "reads a request's browser and system as read_access reads the request",
+  "security.operations.record_sighting" => "records where an API token or MCP client called from as it calls",
+  "security.operations.record_sign_in" => "records an admin sign-in as GitHub calls back",
+  "security.operations.sign_out_device" => "signs one admin browser out; sign in stays out of the MCP",
+  "services.operations.add_connection" => "saves a connection the admin's connect flow checked; no tool does",
+  "services.operations.change_connection" => "stores a refreshed or revoked token for a client; no tool does",
+  "services.operations.remove_connection" => "deletes a connection the admin disconnects; no tool does",
+  "services.operations.reseal_credentials" => "the db:reseal mise task runs it; no tool handles credentials",
+  "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
+  "shares.operations.backfill_previews" => "the owner runs it once after a deploy to store older images' previews",
+  "shares.operations.check_short_links" => "the nightly link check job checks every short link's destination",
+  "shares.operations.delete_short_link" => "the owner deletes short links in the admin; spec #1913 gives MCP none",
+  "shares.operations.fetch_short_link_title" => "a background job fills a blank short link title",
+  "shares.operations.save_share_group" => "spec #1258 keeps group edits in the admin",
+  "social.operations.check_author_scope" => "verify_webmention and the webmention repos check an author owns pages",
+  "social.operations.count_network_lengths" => "counts characters as the admin types; compose checks the limits",
+  "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",
+  "social.operations.find_over_limit_network" => "warns the admin; accept_suggestion_edits checks the limits",
+  "social.operations.move_social_post" => "the admin's calendar moves one a day; send_social_post sets any time",
+  "social.operations.queue_syndication" => "the syndication job runs it after publish_post publishes a post",
+  "social.operations.reap_webmention_receipts" => "a background job reaps old webmention receipts",
+  "social.operations.receive_webmention" => "another site sends a webmention to the public endpoint",
+  "social.operations.refresh_social_engagement" => "a background job refreshes likes and replies",
+  "social.operations.scan_tags" => "the Bluesky client tags hashtags as it posts what send_social_post queues",
+  "social.operations.send_webmentions" => "a background job sends a post's webmentions after it saves",
+  "social.operations.verify_webmention" => "a background job checks a received webmention's source",
+  "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
+  "tasks.operations.diff_task_history" => "task repos run it to record what each change did",
+  "tasks.operations.order_task_positions" => "task repos run it to place a task among its list",
+  "tasks.operations.reach_issues" => "the issue sync runs it to import the other end of a relation",
+  "tasks.operations.set_task_column" => "the admin board moves cards; stage_task and the status tools cover it",
+  "tasks.operations.set_tasks_column" => "the admin board moves ticked cards; the status tools cover it",
+  "tasks.operations.settle_task" => "the issue sync runs it to replay and settle each issue's state",
+  "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
+  "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
+  "tasks.operations.sync_labels" => "the issue sync runs it to tag each task from its issue's labels",
+  "tasks.operations.sync_links" => "the issue sync runs it to keep synced task links in step",
+}.freeze
+
+API_EXEMPT = {
+  "record.operations.tag_journal_entry" => "the admin's journal rows tag it; update_journal_entry sets tags",
+  "record.operations.untag_journal_entry" => "the admin's journal rows untag it; update_journal_entry sets tags",
+  "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
+  "tasks.operations.diff_task_history" => "task repos run it to record what each change did",
+  "tasks.operations.order_task_positions" => "task repos run it to place a task among its list",
+  "tasks.operations.reach_issues" => "the issue sync runs it to import the other end of a relation",
+  "tasks.operations.set_task_column" => "the admin board moves cards; stage_task and the status tools cover it",
+  "tasks.operations.set_tasks_column" => "the admin board moves ticked cards; the status tools cover it",
+  "tasks.operations.settle_task" => "the issue sync runs it to replay and settle each issue's state",
+  "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
+  "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
+  "tasks.operations.sync_labels" => "the issue sync runs it to tag each task from its issue's labels",
+  "tasks.operations.sync_links" => "the issue sync runs it to keep synced task links in step",
+}.freeze
+
+def operations(slices)
+  slices.flat_map do |slice, pattern|
+    names = Dir[slice.root.join("operations", "**", "*.rb")].map { File.basename(it, ".rb") }
+    names.grep(pattern).map { "#{slice.slice_name}.operations.#{it}" }
+  end
+end
+
+def problems(name, operations, reached, exempt)
+  list = "#{name}_EXEMPT"
+  {
+    "no #{name} route reaches %s, and #{list} does not list it" => operations - reached - exempt.keys,
+    "#{list} lists %s, which the #{name} check does not cover" => exempt.keys - operations,
+    "#{list} lists %s, though an #{name} route reaches it" => exempt.keys & reached,
+    "#{list} gives %s no reason" => exempt.select { _2.strip.empty? }.keys,
+  }.flat_map { |message, keys| keys.map { format(message, it) } }
+end
+
+def reached(object, seen)
+  object.instance_variables.map { object.instance_variable_get(it) }.each do |dependency|
+    next unless dependency.class.name.to_s.match?(/::(Endpoints|Operations)::/) && seen.add?(dependency.class)
+
+    reached(dependency, seen)
+  end
+  seen
+end
+
+def reached_keys(roots, operations)
+  classes = roots.each_with_object(Set.new) { |root, seen| reached(root, seen) }
+  operations.select { classes.include?(resolve(it).class) }
+end
+
+def resolve(key)
+  slice, local = key.split(".", 2)
+  Hanami.app.slices[slice.to_sym][local]
+end
+
+API::Slice.routes
+actions = API::Routes.definitions.map { |*, kwargs, _| kwargs.fetch(:to) }.grep(String)
+forwards = API::OperationTable::ENDPOINTS.map { API::Actions::Forward.new(operation: it) }
+api_roots = actions.map { API::Slice["actions.#{it}"] } + forwards
+api_operations = operations({ record: /journal/, saved_views: //, tasks: // }.transform_keys { Hanami.app.slices[it] })
+mcp_operations = operations(Hanami.app.slices.to_a.to_h { [it, //] })
+
+mcp = reached_keys([MCP::Slice["protocol.handler"]], mcp_operations)
+api = reached_keys(api_roots, api_operations)
+found = problems("MCP", mcp_operations, mcp, MCP_EXEMPT) + problems("API", api_operations, api, API_EXEMPT)
+
+found.each { warn it }
+exit(found.empty?)

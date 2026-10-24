@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+# MISE description="Lint the MCP tools that answer with tasks or links against the ones the untrusted text checks cover"
+# MISE alias=["l:untrusted"]
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "hanami/prepare"
+
+TASK_TOOLS = %w[
+  add_task_comment add_work_session cancel_task cancel_tasks capture_task complete_task complete_tasks
+  delete_work_session edit_task_comment link_tasks list_tasks make_mail_task mark_task_seen move_task move_tasks
+  pause_task read_current_sprint read_saved_view read_task reopen_task reorder_task save_task schedule_task
+  set_task_total stage_task start_task tag_tasks unlink_task untag_tasks update_work_session
+].freeze
+
+LINK_TOOLS = %w[
+  link_records list_links read_commit read_decision read_journal_entry read_note read_post read_project
+  read_pull_request read_social_post read_work_entry unlink_records
+].freeze
+
+def drift(name, expected, found)
+  (found - expected).map { "#{it} answers with #{name}, which the untrusted text checks do not cover" } +
+    (expected - found).map { "the untrusted text checks cover #{it}, which answers with no #{name}" }
+end
+
+def tools_replying_with(*serializers)
+  shapes = serializers.map { JSON.generate(it.reference) }
+
+  MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
+    endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
+    reply = JSON.generate(endpoint::REPLY)
+    tool.name_value if (block_given? && yield(endpoint)) || shapes.any? { reply.include?(it) }
+  end
+end
+
+task_tools = tools_replying_with(API::Serializers::Task, API::Serializers::TaskComment) { it <= API::Endpoints::TaskEndpoint }
+link_tools = tools_replying_with(API::Serializers::Link) - task_tools
+
+problems = drift("a task or a task comment", TASK_TOOLS, task_tools) + drift("linked records", LINK_TOOLS, link_tools)
+
+problems.each { warn it }
+exit(problems.empty?)
