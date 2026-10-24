@@ -53,9 +53,9 @@ Each agent that runs beside others gets a workspace of its own, `.claude/worktre
 mise run dev:create-workspace <n> <base>
 ```
 
-It adds jj workspace `ws<n>` on `<base>`, `@-` when left out, copies `.env`, `tmp` and the spec runtime log into
-it, gives it a test database of its own and sets it up so both test tasks work there from the first command. A
-workspace has no `.git`, so `gh` there needs `-R aaronmallen/aaronmallen.me`.
+It adds jj workspace `ws<n>` on `<base>`, `@-` when left out, copies `.env` and `tmp` into it, gives it a test database
+of its own and sets it up so `mise run test` works there from the first command. A workspace has no `.git`, so `gh`
+there needs `-R aaronmallen/aaronmallen.me`.
 
 ## Linearize workspaces
 

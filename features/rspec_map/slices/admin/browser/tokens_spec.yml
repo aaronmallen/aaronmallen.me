@@ -1,6 +1,0 @@
-- example: "Admin API tokens asks with the confirmation text"
-  scenario: "admin/tokens.feature: Revoking asks first and keeps the token when I decline"
-- example: "Admin API tokens keeps the token listed when I don't confirm"
-  scenario: "admin/tokens.feature: Revoking asks first and keeps the token when I decline"
-- example: "Admin API tokens revokes once I confirm"
-  scenario: "admin/tokens.feature: Revoking cuts the token off, stamps it and says so"

@@ -24,6 +24,7 @@ amended:
   - "#711"
   - "#957"
   - "#1824"
+  - "#1973"
 tags:
   - database
   - settings
@@ -66,8 +67,8 @@ We build the connection from the `database` settings, never from `DATABASE_URL`.
   `web_threads` setting, which `HANAMI_MAX_THREADS` sets, in the web process (#957).
 - `config/settings/test.yml` adds `_test` to `DATABASE_NAME` itself. #711 adds `_<id>` after it when
   `WORKSPACE_ID` is set, so each agent workspace tests against a database of its own ([ADR 0125][0125]). It adds
-  `_w<n>` last when `parallel_tests` sets `TEST_ENV_NUMBER`, so each spec worker gets a database too
-  ([ADR 0145][0145]).
+  `_w<n>` last when a Playwright worker sets `TEST_ENV_NUMBER` (`features/support/world.ts`, #1973), so each
+  worker gets a database too ([ADR 0206][0206]).
 
 ## Alternatives
 
@@ -94,5 +95,5 @@ names both: the name and the name with `_test`. A workspace sets `WORKSPACE_ID` 
 database (#711).
 
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
-[0145]: 0145-run-specs-in-parallel-with-parallel-tests-on-a-database-per-worker-and-split-ci-into-two-spec-jobs.md
+[0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

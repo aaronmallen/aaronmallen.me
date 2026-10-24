@@ -1,6 +1,0 @@
-- example: "Tasks::Relations::WorkSessions refuses a negative total on the task"
-  scenario: "time/session_lines.feature: The database refuses a second open session, a session that ends before it starts and a negative total"
-- example: "Tasks::Relations::WorkSessions refuses a second open session on one task"
-  scenario: "time/session_lines.feature: The database refuses a second open session, a session that ends before it starts and a negative total"
-- example: "Tasks::Relations::WorkSessions refuses a session that ends before it starts"
-  scenario: "time/session_lines.feature: The database refuses a second open session, a session that ends before it starts and a negative total"

@@ -14,6 +14,7 @@ amended:
   - "#1823"
   - "#1925"
   - "#1937"
+  - "#1973"
 tags:
   - mcp
   - oauth
@@ -76,8 +77,8 @@ against.
 
 **A check inside each tool.** Every new tool would have to remember it, and one that forgot would run for every
 token. With the scope on the class and one check that reads it, a tool with no scope matches no token and is
-withheld from all of them. `spec/slices/mcp/requests/scopes_spec.rb` fails when a tool names a scope the server
-does not know, since a token holding every scope would not see that tool in `tools/list`.
+withheld from all of them. `features/mcp/scopes.feature` fails when a tool names a scope the server does not
+know (#1973), since a token holding every scope would not see that tool in `tools/list`.
 
 **A check in `MCP::Actions::Messages::Create`.** The action holds the raw request body. It would have to parse the
 JSON-RPC ahead of the SDK to find the tool, and it could not take a tool out of `tools/list`.
@@ -94,7 +95,7 @@ set, but a client that reads neither finds out late.
 
 **The reconnect message rests on a private SDK method.** If a release renames or reshapes `MCP::Server#call_tool`,
 the override stops running. A withheld tool is still missing from the server and still refused, but the client
-hears `Tool not found` again. `spec/slices/mcp/requests/endpoint_spec.rb` pins the message, so an SDK bump that
+hears `Tool not found` again. `features/mcp/endpoint.feature` pins the message, so an SDK bump that
 breaks it fails the suite.
 
 **Filtering the list is not the check.** A client that calls a tool it never saw listed gets the same refusal, so

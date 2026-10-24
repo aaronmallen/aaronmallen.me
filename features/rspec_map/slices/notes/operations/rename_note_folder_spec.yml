@@ -1,4 +1,0 @@
-- example: "Notes::Operations::RenameNoteFolder answers not found for a folder that does not exist"
-  scenario: "notes/mcp.feature: The folder tools list, make, rename, move, describe and remove folders"
-- example: "Notes::Operations::RenameNoteFolder changes the name"
-  scenario: "notes/folders.feature: I rename a folder from its menu"

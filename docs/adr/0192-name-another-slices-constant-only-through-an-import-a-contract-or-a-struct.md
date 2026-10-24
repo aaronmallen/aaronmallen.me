@@ -18,6 +18,8 @@ area:
   - record
   - social
 issue: "#1797"
+amended:
+  - "#1973"
 tags:
   - slices
   - exports
@@ -44,7 +46,7 @@ the cap on read seconds, the `ref` parameter, the days raw timing lasts, the nam
 constant, so a rename breaks when the page or job runs, not at boot.
 
 A field error needs the contract class itself. It quotes the contract's limits in its message, and its `CONTRACTS`
-list lets `spec/lib/blog/ui/field_error_codes_spec.rb` check that every code the contract raises has wording. An
+list lets `scripts/lint/field-errors` check that every code the contract raises has wording. An
 exported key hands over an instance, not the class, so moving the reads behind one would cost that wording and the
 check. [ADR 0016][0016] already moves a value no slice owns into `Blog::Constants`, as #1179 did for the mail,
 media and suggestion limits.

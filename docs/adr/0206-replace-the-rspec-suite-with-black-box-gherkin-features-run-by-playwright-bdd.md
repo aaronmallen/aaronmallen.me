@@ -40,7 +40,10 @@ area:
   - tasks
 supersedes:
   - "0139"
+  - "0145"
 issue: "#1960"
+amended:
+  - "#1973"
 tags:
   - testing
   - bdd
@@ -98,7 +101,8 @@ the Playwright browser.
 We write every feature before we delete anything, so both suites run in CI until the end. A map lists each RSpec
 example with the scenario that covers it, or the reason we drop it, such as "tests a gem" or "restates config". Once
 the map has no gaps, one change deletes RSpec, Capybara, Cuprite, rom-factory, WebMock, parallel_tests, SimpleCov
-and the coverage floor, with the tasks, CI jobs and records that name them.
+and the coverage floor, with the tasks, CI jobs and records that name them. #1973 made that delete, which ends
+[ADR 0145][0145]'s parallel RSpec runs.
 
 ## Alternatives
 
@@ -133,6 +137,7 @@ features the real service would fail.
 [0036]: 0036-check-every-route-with-axe-core-in-the-browser-suite.md
 [0054]: 0054-run-every-admin-screen-on-a-phone.md
 [0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
+[0145]: 0145-run-specs-in-parallel-with-parallel-tests-on-a-database-per-worker-and-split-ci-into-two-spec-jobs.md
 [axe]: https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright
 [playwright-bdd]: https://vitalets.github.io/playwright-bdd
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

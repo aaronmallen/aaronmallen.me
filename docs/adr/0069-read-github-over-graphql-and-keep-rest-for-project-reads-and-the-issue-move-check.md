@@ -13,6 +13,7 @@ supersedes:
 issue: "#33"
 amended:
   - "#941"
+  - "#1973"
 tags:
   - github
   - graphql
@@ -97,8 +98,8 @@ The project refresh and the move check learn they hit REST's limit only when a 4
 move check spends one REST request per missing issue, so a run where many issues vanish at once spends many.
 
 A 404 cannot tell a deleted issue from one the token lost access to, so an issue in a repo the operator left reads as
-deleted and cancels its task. Any other failure raises, so the sync records it rather than cancel the task. The spec
-for the issue queries, under `spec/slices/record/github`, pins both.
+deleted and cancels its task. Any other failure raises, so the sync records it rather than cancel the task. The sync
+features, in `features/sync/github_more.feature`, pin both (#1973).
 
 For the task, a move and a delete come out alike: the sync cancels the old task, and a moved issue still assigned
 to the operator imports on its own through the search. The check decides what `task_sources` records (ADR 0068).
@@ -108,7 +109,7 @@ first page of history. The next chunk reads on from the oldest commit it read (A
 unread.
 
 Skipping `FORBIDDEN` and `NOT_FOUND` keeps partial data on purpose, which a reader will take for a swallowed error.
-The spec for the commit job, under `spec/slices/record/jobs`, pins it.
+`features/record/commit_walk.feature` pins it (#1973).
 
 Drop `ownerAffiliations` and GitHub says nothing: the import runs on and skips every org repo.
 

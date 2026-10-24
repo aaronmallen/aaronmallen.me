@@ -1,8 +1,0 @@
-- example: "Admin toast after a save redirects"
-  scenario: "admin/toast.feature: Saving a draft shows the toast once on the next page"
-- example: "Admin toast after a save shows the toast on the next page"
-  scenario: "admin/toast.feature: Saving a draft shows the toast once on the next page"
-- example: "Admin toast after a save shows the toast only once"
-  scenario: "admin/toast.feature: Saving a draft shows the toast once on the next page"
-- example: "Admin toast shows no toast without a save"
-  scenario: "admin/toast.feature: A page with no save before it shows no toast"

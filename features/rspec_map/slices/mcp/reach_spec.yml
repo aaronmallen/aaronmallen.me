@@ -1,8 +1,0 @@
-- example: "MCP reach exempts no operation a tool reaches"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "MCP reach exempts only operations a slice holds"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "MCP reach gives every exempt operation a reason"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "MCP reach reaches every operation from a tool unless the operation is exempt"
-  drop: "scripts/lint/reach checks this in mise run lint"

@@ -1,8 +1,0 @@
-- example: "Shares::Operations::DeleteShare answers not found for a missing share"
-  scenario: "shares/api.feature: Deleting a share takes its row, code and stored file, an image's preview too, and a missing one answers 404"
-- example: "Shares::Operations::DeleteShare keeps the share when the store fails"
-  scenario: "shares/api.feature: Deleting a share the store will not let go of keeps it"
-- example: "Shares::Operations::DeleteShare removes the image's preview from the bucket too"
-  scenario: "shares/api.feature: Deleting a share takes its row, code and stored file, an image's preview too, and a missing one answers 404"
-- example: "Shares::Operations::DeleteShare removes the row, its code and its object from the shares bucket"
-  scenario: "shares/api.feature: Deleting a share takes its row, code and stored file, an image's preview too, and a missing one answers 404"

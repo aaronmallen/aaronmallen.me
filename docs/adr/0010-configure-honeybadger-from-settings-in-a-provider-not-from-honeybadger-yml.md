@@ -18,6 +18,7 @@ amended:
   - "#1805"
   - "#1803"
   - "#1501"
+  - "#1973"
 tags:
   - honeybadger
   - errors
@@ -91,18 +92,18 @@ off. A hand-written handler would copy that code.
 
 ## Consequences
 
-Settings are the one source, and a spec can stub them and read the config the agent holds. #1012 dropped the
-options hash the provider built first, so the agent sets each value straight onto the gem's config.
+Settings are the one source. #1012 dropped the options hash the provider built first, so the agent sets each value
+straight onto the gem's config.
 
-`config/sidekiq.rb` must boot, not prepare. The Hanami guides point a worker at `hanami/prepare`. Under it the
-provider never starts, the plugin never registers, and every job error goes unreported. No spec would notice:
-the suite runs jobs in its own process, never through `config/sidekiq.rb` (AA-819). The record on the Sidekiq
+`config/sidekiq.rb` must boot, not prepare. The Hanami guides point a worker at `hanami/prepare`. Under it the provider
+never starts, the plugin never registers, and every job error goes unreported. No feature would notice: each worker
+boots through `config/sidekiq.rb`, but Honeybadger has no API key in test (AA-819, #1973). The record on the Sidekiq
 worker (AA-649) covers why it boots the whole app.
 
-`FILTER_KEYS` can drift from what the app handles. `spec/requests/secrets_spec.rb` sends the GitHub callback, the
-MCP token exchange, the MCP authorize request, a task, a decision and a visit to the home page, and fails when a
-secret, a note or the visitor address they carry reaches the log or an error report. Nothing checks a setting that
-holds a secret, or a request that parameter list does not name. A secret passed to a job as a positional argument is
-not filtered either. Every job takes ids today.
+`FILTER_KEYS` can drift from what the app handles. `features/requests/secrets.feature` sends the GitHub callback, the
+MCP token exchange, the MCP authorize request, a task, a decision and a visit to the home page, and fails when a secret,
+a note or the visitor address they carry reaches the log. Since #1973 nothing checks the error report. Nothing checks a
+setting that holds a secret, or a request that parameter list does not name. A secret passed to a job as a positional
+argument is not filtered either. Every job takes ids today.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

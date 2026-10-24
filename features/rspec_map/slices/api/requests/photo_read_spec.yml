@@ -1,8 +1,0 @@
-- example: "API reading a photo answers with a 503 when the store is not set up"
-  drop: "Every feature worker runs with the photo store set up, so the features cannot stage a server without one"
-- example: "API reading a photo with the store connected answers a key the site does not keep with a 404"
-  scenario: "photos/api.feature: The API answers 404 for a key the site does not keep"
-- example: "API reading a photo with the store connected answers the photo's details and its bytes in base64 with a 200"
-  scenario: "photos/api.feature: The API reads a photo with its bytes in base64"
-- example: "API reading a photo with the store connected takes the photo's URL"
-  scenario: "photos/api.feature: The API reads a photo with its bytes in base64"

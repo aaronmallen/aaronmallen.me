@@ -1,4 +1,0 @@
-- example: "Dropped database connections answers the next request"
-  scenario: "db/connections.feature: The site answers the next request after the database drops its connections"
-- example: "Dropped database connections runs the next job"
-  scenario: "db/connections.feature: The worker runs the next job after the database drops its connections"

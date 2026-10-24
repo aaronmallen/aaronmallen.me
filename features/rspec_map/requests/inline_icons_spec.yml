@@ -1,4 +1,0 @@
-- example: "Inline icons draws every public icon as inline SVG"
-  scenario: "requests/inline_icons.feature: Every public icon is inline SVG"
-- example: "Inline icons keeps admin icons on the icon font"
-  scenario: "requests/inline_icons.feature: The admin keeps its icons on the icon font"

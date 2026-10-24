@@ -9,6 +9,8 @@ area:
 supersedes:
   - "0055"
 issue: "#1126"
+amended:
+  - "#1973"
 tags:
   - admin
   - forms
@@ -71,8 +73,8 @@ redirect lands on needs neither, and keeps one way to render a page.
 ## Consequences
 
 A row action or a filter no longer reloads the page, so scroll, focus and open dialogs survive it. The actions keep
-their redirects, so the request specs still drive them with rack-test, but the update in place shows only in browser
-specs.
+their redirects, so a feature can still drive them over plain HTTP, but the update in place shows only in the
+browser (#1973).
 
 With scripts off a filter has no button to apply it.
 

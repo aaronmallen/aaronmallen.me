@@ -1,6 +1,0 @@
-- example: "Artifact tags moved into their join joins each artifact to the private tag of each name, making the ones missing"
-  drop: "runs the data step of migration 20261024040000 down and up over rows of the old shape; features run on the migrated schema, and rolling one migration back would break the worker database for every other scenario"
-- example: "Artifact tags moved into their join keeps the tone of a private tag that already had the name"
-  drop: "runs the data step of migration 20261024040000 down and up over rows of the old shape; features run on the migrated schema, and rolling one migration back would break the worker database for every other scenario"
-- example: "Artifact tags moved into their join puts the tags back in the column on the way down"
-  drop: "runs the data step of migration 20261024040000 down and up over rows of the old shape; features run on the migrated schema, and rolling one migration back would break the worker database for every other scenario"

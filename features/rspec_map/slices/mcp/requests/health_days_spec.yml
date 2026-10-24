@@ -1,8 +1,0 @@
-- example: "MCP health days a client with only read gets no health data"
-  scenario: "health/days.feature: MCP gives a client with only read no health data"
-- example: "MCP health days reads a range of 366 days"
-  scenario: "health/days.feature: MCP reads the day rows, workouts and patterns for a client with health"
-- example: "MCP health days reads the day rows, workouts and patterns for a client with health"
-  scenario: "health/days.feature: MCP reads the day rows, workouts and patterns for a client with health"
-- example: "MCP health days refuses a range longer than 366 days"
-  scenario: "health/days.feature: MCP reads the day rows, workouts and patterns for a client with health"

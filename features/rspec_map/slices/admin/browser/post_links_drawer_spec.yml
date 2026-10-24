@@ -1,4 +1,0 @@
-- example: "Admin post links drawer moves to the link in the body on Find in post"
-  scenario: "post_admin/links_drawer.feature: Find in post closes the drawer and picks the link in the body"
-- example: "Admin post links drawer updates the open drawer when a check lands"
-  scenario: "post_admin/links_drawer.feature: Checking one link again records what it answers and updates the open drawer"

@@ -1,2 +1,0 @@
-- example: "Tasks::Relations::TaskLinks refuses a second parent on a task"
-  scenario: "tasks/constraints.feature: A task has one parent at most"

@@ -1,6 +1,0 @@
-- example: "Admin calendar event menu deleting asks for a second click"
-  scenario: "calendar/event_menu.feature: The menu deletes an event on a second click and stays on the page"
-- example: "Admin calendar event menu deleting deletes on the second click and stays on the page"
-  scenario: "calendar/event_menu.feature: The menu deletes an event on a second click and stays on the page"
-- example: "Admin calendar event menu edits the event in a dialog and stays on the page"
-  scenario: "calendar/event_menu.feature: The menu edits an event in a dialog and stays on the page"

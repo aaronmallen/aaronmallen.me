@@ -1,4 +1,0 @@
-- example: "Analytics::Repos::AnalyticsPageQueries keeps the clicks once the prune takes the day's events"
-  scenario: "analytics/roll_up.feature: The roll up sums a day before the prune deletes its visits"
-- example: "Analytics::Repos::AnalyticsPageQueries ranks each page list from a rollup and the summary field the roll up fills it from"
-  drop: "checks that two Ruby constant tables agree, which no request can see"

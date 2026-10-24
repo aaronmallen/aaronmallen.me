@@ -1,8 +1,0 @@
-- example: "Post layout grows the title with the viewport"
-  scenario: "public/layout.feature: A post's title grows with the viewport"
-- example: "Post layout the table of contents hides the list below 1100px"
-  scenario: "public/layout.feature: The table of contents marks the heading in view, stays in view, and hides below 1100px"
-- example: "Post layout the table of contents marks the first heading before any scrolling"
-  scenario: "public/layout.feature: The table of contents marks the heading in view, stays in view, and hides below 1100px"
-- example: "Post layout the table of contents marks the heading scrolled into view and keeps the list in view"
-  scenario: "public/layout.feature: The table of contents marks the heading in view, stays in view, and hides below 1100px"

@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 #MISE description="Run tests for the project"
 #MISE alias=["t"]
+#USAGE arg "[filter]..." var=#true help="Feature files or Playwright options, such as --workers 2."
 
 set -e
 
@@ -9,5 +10,4 @@ if ! scripts/util/check_libvips; then
   exit 1
 fi
 
-scripts/assets/build
-exec scripts/test/ruby "$@"
+exec scripts/test/features "$@"

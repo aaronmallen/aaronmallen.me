@@ -1,6 +1,0 @@
-- example: "API MCP clients leaves out a revoked client and one holding no live token"
-  scenario: "api/clients.feature: A revoked client and one holding no live token stay out"
-- example: "API MCP clients lists each connected client with its name, granted scopes and times"
-  scenario: "api/clients.feature: Each connected client shows its name, granted scopes and times"
-- example: "API MCP clients names a client with no registered name by its redirect host"
-  scenario: "api/clients.feature: A client with no name goes by its redirect host"

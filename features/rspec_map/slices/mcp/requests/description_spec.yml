@@ -1,8 +1,0 @@
-- example: "MCP tool descriptions names the photo size limit the contract checks"
-  scenario: "mcp/descriptions.feature: upload_photo names the size limit the contract checks"
-- example: "MCP tool descriptions states the capped range in the same words"
-  scenario: "mcp/descriptions.feature: The open and capped ranges read the same in every tool that takes them"
-- example: "MCP tool descriptions states the open range in the same words"
-  scenario: "mcp/descriptions.feature: The open and capped ranges read the same in every tool that takes them"
-- example: "MCP tool descriptions states the untrusted text of webmentions and deliveries in the same words"
-  scenario: "mcp/descriptions.feature: The untrusted text of webmentions and deliveries reads the same in every tool that shows it"

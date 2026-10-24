@@ -1,9 +1,0 @@
-#!/usr/bin/env sh
-#MISE description="Profile spec files with test-prof in one process"
-#MISE alias=["t:prof", "test:prof"]
-#USAGE arg "<filter>..." var=#true help="Spec files or file:line pairs to profile. Pick a profiler with its variable, such as RD_PROF=1 for setup time or TAG_PROF=type."
-
-set -e
-
-scripts/test/prepare
-exec scripts/util/ensure_postgres bundle exec rspec --require spec_helper "$@"

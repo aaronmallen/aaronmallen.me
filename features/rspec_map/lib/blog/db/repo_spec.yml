@@ -1,4 +1,0 @@
-- example: "Blog::DB::Repo stamps both columns on create"
-  drop: "unit spec of Blog::DB::Repo stamping timestamps; the features that save records through the app cover it"
-- example: "Blog::DB::Repo stamps only updated_at on update"
-  drop: "unit spec of Blog::DB::Repo stamping timestamps; the features that save records through the app cover it"

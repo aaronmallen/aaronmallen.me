@@ -12,6 +12,7 @@ issue: "#43"
 amended:
   - "#631"
   - "#1658"
+  - "#1973"
 tags:
   - tasks
   - imports
@@ -91,7 +92,8 @@ A new provider brings a client that works out `remote_state`, a value in `task_s
 lock and a job. The rule itself does not change. Each enum value takes a migration of its own (ADR 0015).
 
 The mapping lives in each client, so the clients can disagree about what a state means, and nothing checks them
-against each other. The client specs, under `spec/slices/record`, are the only place that pins each mapping.
+against each other. The sync features, `features/sync/github_more.feature` and
+`features/sync/linear.feature`, are the only place that pins each mapping (#1973).
 
 The two syncs run apart, so one can hold its lock while the other runs, and a Linear failure leaves GitHub's
 tasks current. Today shows the two failures apart.

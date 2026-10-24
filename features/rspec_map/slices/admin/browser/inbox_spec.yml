@@ -1,8 +1,0 @@
-- example: "Admin inbox when editing an issue keeps the issue when the drawer saves only a note"
-  scenario: "admin/inbox.feature: Editing only an issue's note in the drawer keeps the issue"
-- example: "Admin inbox when editing an issue saves a tag change in the drawer, stays on the inbox and drops the issue"
-  scenario: "admin/inbox.feature: Editing an issue's tags in the drawer stays on the inbox and drops the issue"
-- example: "Admin inbox with a long title keeps the buttons to the right of a long title"
-  scenario: "admin/inbox.feature: A long issue title keeps its buttons to its right, and below it on a phone"
-- example: "Admin inbox with a long title stacks the buttons below the title on a phone"
-  scenario: "admin/inbox.feature: A long issue title keeps its buttons to its right, and below it on a phone"

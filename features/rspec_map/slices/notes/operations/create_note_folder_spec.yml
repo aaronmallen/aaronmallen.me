@@ -1,6 +1,0 @@
-- example: "Notes::Operations::CreateNoteFolder nests a described folder that holds no notes"
-  scenario: "notes/folders.feature: I make a subfolder from a folder's menu"
-- example: "Notes::Operations::CreateNoteFolder refuses a blank name"
-  scenario: "notes/mcp.feature: The folder tools list, make, rename, move, describe and remove folders"
-- example: "Notes::Operations::CreateNoteFolder refuses a parent that does not exist"
-  drop: "The admin and MCP make folders from a path, never from a parent ID, so no request names a parent that is gone"

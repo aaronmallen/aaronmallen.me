@@ -1,8 +1,0 @@
-- example: "Redis dropping under the worker when a job cannot reach Redis tells Honeybadger"
-  drop: "Honeybadger has no API key in test, so whether it builds, halts or sends a notice never leaves the process; worker/redis.feature checks the worker runs jobs again once Redis comes back"
-- example: "Redis dropping under the worker when the scheduler cannot reach Redis builds the notice"
-  drop: "Honeybadger has no API key in test, so whether it builds, halts or sends a notice never leaves the process; worker/redis.feature checks the worker runs jobs again once Redis comes back"
-- example: "Redis dropping under the worker when the scheduler cannot reach Redis sends Honeybadger nothing"
-  drop: "Honeybadger has no API key in test, so whether it builds, halts or sends a notice never leaves the process; worker/redis.feature checks the worker runs jobs again once Redis comes back"
-- example: "Redis dropping under the worker when the scheduler raises something else tells Honeybadger"
-  drop: "Honeybadger has no API key in test, so whether it builds, halts or sends a notice never leaves the process; worker/redis.feature checks the worker runs jobs again once Redis comes back"

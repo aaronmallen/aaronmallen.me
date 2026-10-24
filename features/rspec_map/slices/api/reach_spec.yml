@@ -1,8 +1,0 @@
-- example: "API reach exempts no operation an endpoint reaches"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "API reach exempts only journal, saved view and task operations"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "API reach gives every exempt operation a reason"
-  drop: "scripts/lint/reach checks this in mise run lint"
-- example: "API reach reaches every journal, saved view and task operation from an endpoint unless the operation is exempt"
-  drop: "scripts/lint/reach checks this in mise run lint"

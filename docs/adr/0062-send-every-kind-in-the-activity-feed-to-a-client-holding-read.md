@@ -16,6 +16,7 @@ amended:
   - "#1123"
   - "#1421"
   - "#897"
+  - "#1973"
 tags:
   - mcp
   - oauth
@@ -49,7 +50,7 @@ The feed crosses to a client holding `read`. There is no `activity` scope. ADR 0
 hold, and #935 points there now that `Blog::Types::OAuthScope` holds five. The consent page spells out under
 `read` that it sends the journal and every commit whole (`slices/mcp/config/i18n/en.yml`).
 
-Two tools carry the feed, and `spec/slices/mcp/requests/scopes_spec.rb` pins the pair. `read_activity` sends rows.
+Two tools carry the feed, and `features/mcp/scopes.feature` pins the pair (#1973). `read_activity` sends rows.
 `summarize_activity` (AA-434) sends counts by kind, by month and per repository, and no message, entry or title.
 `MCP::Protocol::ScopedServer` leaves out of the list every tool a token's scopes do not cover and refuses a call
 to one.

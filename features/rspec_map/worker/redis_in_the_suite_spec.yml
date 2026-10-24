@@ -1,8 +1,0 @@
-- example: "Redis in the test suite fails a spec that rescues the refusal, naming the spec"
-  drop: "tests the RSpec suite's own Redis guard, which goes with RSpec in #1973"
-- example: "Redis in the test suite fails the way CI does, so the outage rescues still catch it"
-  drop: "tests the RSpec suite's own Redis guard, which goes with RSpec in #1973"
-- example: "Redis in the test suite passes a spec that rescues the refusal when it covers a Redis outage"
-  drop: "tests the RSpec suite's own Redis guard, which goes with RSpec in #1973"
-- example: "Redis in the test suite refuses a connection, naming the spec and the fix"
-  drop: "tests the RSpec suite's own Redis guard, which goes with RSpec in #1973"

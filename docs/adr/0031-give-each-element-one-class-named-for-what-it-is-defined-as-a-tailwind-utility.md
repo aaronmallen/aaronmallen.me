@@ -13,6 +13,7 @@ issue: AA-667
 amended:
   - "#1304"
   - "#1824"
+  - "#1973"
 tags:
   - css
   - tailwind
@@ -76,8 +77,9 @@ and `dark`, so moving a breakpoint takes one edit, and a search for `phone` or `
 Rules for the wider side use `not-phone` or `not-wide`.
 
 Nothing checks a class name. Tailwind emits a utility only when it finds the name in the source, and a misspelt
-class matches nothing and renders unstyled with every request spec passing. Only a browser spec that reads the
-computed style, such as `spec/slices/public/browser/home_spec.rb`, would notice.
+class matches nothing and renders unstyled with every scenario that reads only the HTML passing. Only a
+scenario that reads the computed style, such as the home sections in `features/public/layout.feature`, would notice
+(#1973).
 
 The stylesheet grows with every element, and is among the longest files in the tree.
 

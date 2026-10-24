@@ -12,6 +12,7 @@ amended:
   - "#1343"
   - "#1756"
   - "#1793"
+  - "#1973"
 tags:
   - mcp
   - transport
@@ -79,8 +80,8 @@ weigh the transport, and no record or issue since has. What the code shows of it
 
 ## Consequences
 
-The endpoint is plain request and response, which the request specs in `spec/slices/mcp/requests/endpoint_spec.rb`
-drive with rack-test, `GET /mcp` included, which answers 405.
+The endpoint is plain request and response, which `features/mcp/endpoint.feature` drives over plain HTTP,
+`GET /mcp` included, which answers 405 (#1973).
 
 With no session, `handle_json` drops every progress and log message a tool sends. No tool can report progress, the
 server cannot push anything to a client, and it can never tell a client its tool list changed. A client that

@@ -1,4 +1,0 @@
-- example: "Tasks::Operations::DeleteWorkSession two deletes of one session at once answers the second delete with not found"
-  scenario: "time/session_lines.feature: Two deletes of one session at once take its length off once"
-- example: "Tasks::Operations::DeleteWorkSession two deletes of one session at once takes the session's length off the total once"
-  scenario: "time/session_lines.feature: Two deletes of one session at once take its length off once"

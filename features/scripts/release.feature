@@ -136,23 +136,6 @@ Feature: Release
         COMMENTED
       """
 
-  Scenario: release refuses, dry run too, while a spec names a migration a tag holds
-    Given a git repo with specs that name two migrations
-    And the tag "26.9.4" on the commit that adds the first migration
-    Then the release refuses, saying "spec/db/tasks_spec.rb"
-    When I release with "--dry-run 2026-10-14"
-    Then it fails
-    And the output ends with:
-      """
-      These specs name a migration a tag already shipped. Take it out of each, or delete the spec:
-      spec/db/tasks_spec.rb
-      """
-
-  Scenario: release goes on while no tag holds a migration a spec names
-    Given a git repo with specs that name two migrations
-    When I release with "--dry-run 2026-10-14"
-    Then it succeeds
-
   Scenario: release in a jj repo skips the empty commits on top
     Given a jj repo with the changelog for "26.10.0" under an empty commit
     When I release with "2026-10-14"

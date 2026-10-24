@@ -16,6 +16,7 @@ amended:
   - AA-822
   - "#791"
   - "#1702"
+  - "#1973"
 tags:
   - providers
   - clients
@@ -88,9 +89,9 @@ it as a success, so a MaxMind key left out of the environment looks the same as 
 Every client checks for `nil` in each method that calls out, and fourteen call sites in `slices` ask `configured?`
 first. A new client and its callers take the same shape.
 
-A provider reads its settings once, at boot, so stubbing the settings in a spec changes nothing. A spec that
-changes credentials has to start the provider, stub the settings and replace the registered component, as
-`spec/support/github_credentials.rb` does for GitHub and `spec/support/social_credentials.rb` for the networks.
+A provider reads its settings once, at boot, so a running server never sees a changed setting. A feature that
+needs credentials seals them into `service_connections` instead, as `features/steps/record_jobs.ts` does for GitHub
+and `features/support/social.ts` for the networks (#1973).
 
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

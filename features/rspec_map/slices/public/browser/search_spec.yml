@@ -1,6 +1,0 @@
-- example: "Search page focuses the search box on the / key"
-  scenario: "public/search.feature: The / key focuses the search box, and a second / types into it"
-- example: "Search page shows the header search link as a 44px icon button below 700px"
-  scenario: "public/search.feature: Below 700px the header search link is a 44px icon button"
-- example: "Search page types a / into the box once it has focus"
-  scenario: "public/search.feature: The / key focuses the search box, and a second / types into it"

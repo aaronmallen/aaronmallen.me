@@ -49,15 +49,15 @@ mise run test
 
 All three pass before you go on. Run the whole lint, not one language.
 
-Under `/orchestrate`, run only the spec files you added or changed, and the ones that test the files you changed,
-in place of `mise run test`:
+Under `/orchestrate`, run only the features you added or changed, and the ones that cover the files you changed,
+on two workers:
 
 ```sh
-mise run test:ruby <paths>
+mise run test <paths> --workers 2
 ```
 
-Name each file. Never pass a whole directory such as `spec/slices/public`. Leave browser specs to the orchestrator
-unless you added or changed one; then run `mise run assets:build` first, since `test:ruby` does not build the CSS.
+Name each feature by its path under `features/`, such as `notes/note.feature`. Never pass a whole directory such
+as `public`.
 
 The orchestrator runs the whole suite from the root after each wave.
 

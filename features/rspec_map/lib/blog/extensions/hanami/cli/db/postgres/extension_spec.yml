@@ -1,4 +1,0 @@
-- example: "Blog::Extensions::Hanami::CLI::DB::Postgres::Extension#exists? finds the database the settings name"
-  drop: "the harness runs hanami db prepare on each worker's database, which goes through this check"
-- example: "Blog::Extensions::Hanami::CLI::DB::Postgres::Extension#exists? misses a database that is not there, quotes and all"
-  drop: "the harness runs hanami db prepare on each worker's database, which goes through this check"

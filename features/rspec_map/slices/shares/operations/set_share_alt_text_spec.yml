@@ -1,8 +1,0 @@
-- example: "Shares::Operations::SetShareAltText answers not found for a missing share"
-  scenario: "shares/mcp.feature: update_share renames a share and sets, trims and clears its alt text, keeping its code"
-- example: "Shares::Operations::SetShareAltText clears the alt text when blank"
-  scenario: "shares/mcp.feature: update_share renames a share and sets, trims and clears its alt text, keeping its code"
-- example: "Shares::Operations::SetShareAltText refuses control characters"
-  scenario: "shares/mcp.feature: update_share renames a share and sets, trims and clears its alt text, keeping its code"
-- example: "Shares::Operations::SetShareAltText sets the alt text, trimmed"
-  scenario: "shares/mcp.feature: update_share renames a share and sets, trims and clears its alt text, keeping its code"

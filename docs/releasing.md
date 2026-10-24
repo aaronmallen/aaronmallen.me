@@ -13,7 +13,3 @@ A new tag deploys within five minutes, so releases stay manual. Work down this l
 5. Run `mise run release`. It checks the changelog and CI, tags the newest non-empty commit and prints the push command.
 
 In an emergency, `mise run release --skip-ci` tags without the CI check and says it skipped it.
-
-A shipped migration never changes, and its spec rolls the database back past every later migration. One later
-`down` that cannot run would break it. So `mise run release`, `--dry-run` too, refuses while a file under `spec/` names
-a migration a tag already holds, and lists each one. Delete the spec, or take the migration out of it.

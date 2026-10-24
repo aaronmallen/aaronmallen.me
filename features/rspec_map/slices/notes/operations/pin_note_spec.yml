@@ -1,2 +1,0 @@
-- example: "Notes::Operations::PinNote pins and unpins a note"
-  scenario: "notes/mcp.feature: pin_note pins and unpins a note"

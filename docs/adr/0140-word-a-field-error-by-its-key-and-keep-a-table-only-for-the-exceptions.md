@@ -18,6 +18,7 @@ amended:
   - "#1670"
   - "#1817"
   - "#1390"
+  - "#1973"
 tags:
   - contracts
   - validation
@@ -87,17 +88,17 @@ code and the form finds it.
 A key that matches by accident now shows. A stray `.<field>.<code>` left in a locale file is live copy, not dead
 weight, so delete a key when its code goes.
 
-A missing key still shows "Check this field." at run time, but `spec/lib/blog/ui/field_error_codes_spec.rb` fails
-first (#1390). It reads the codes each contract can return, from its schema, `config/errors.yml` and the `failure`
-calls in its rules and macros, and wants a key for each field the form shows, or a shared
-`ui.field_error.<field>.<code>` or `ui.field_error.<code>` key. `mise run lint` fails on a locale key no code reads;
-`.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
+A missing key still shows "Check this field." at run time, but `scripts/lint/field-errors`
+(`mise run lint:field-errors`) fails first (#1390, #1973). It reads the codes each contract can return, from its schema,
+`config/errors.yml` and the `failure` calls in its rules and macros, and wants a key for each field the form shows, or a
+shared `ui.field_error.<field>.<code>` or `ui.field_error.<code>` key. `mise run lint` fails on a locale key no code
+reads; `.config/i18n/allowed.yml` lists the keys built at run time, field error keys among them.
 
 An API endpoint or module that words contract codes names those contracts in `CONTRACTS`, and words them through
 a `COMPLAINTS` table or, as `UploadPhoto` does, through the i18n scope in its `ERRORS`.
-`spec/slices/api/helpers/wording_codes_spec.rb` reads their codes the same way and fails on a code with no words,
-so an agent never gets a bare "is not valid" (#1817). A list in the spec, each row with its reason, skips codes the
-endpoint never sees, most of them ruled out by the JSON schema, and the spec fails on a row no contract can return.
+`scripts/lint/api-wording` reads their codes the same way and fails on a code with no words, so an agent never gets
+a bare "is not valid" (#1817, #1973). A list in the script, each row with its reason, skips codes the endpoint never
+sees, most of them ruled out by the JSON schema, and the script fails on a row no contract can return.
 
 `Public::UI::Components::ContactFieldError` words its codes the same way. It also hands the browser the copy for
 `blank` and `format` before any code arrives, and finds those by the same `.<field>.<code>` key, so a field with no

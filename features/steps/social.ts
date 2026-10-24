@@ -741,7 +741,7 @@ When("I accept the suggestions on social post {int} from the admin", async ({ pa
   await submitForm(page, `/admin/social/${id}/suggestions/accept`, []);
 });
 
-const png = () => readFileSync(resolve(import.meta.dirname, "../../spec/fixtures/photos/small.png")).toString("base64");
+const png = () => readFileSync(resolve(import.meta.dirname, "../fixtures/photos/small.png")).toString("base64");
 
 async function handOver(page: import("@playwright/test").Page, how: string, index: number) {
   const before = await page.locator("[data-social-photo]").count();
@@ -750,7 +750,7 @@ async function handOver(page: import("@playwright/test").Page, how: string, inde
       .locator("[data-social-part]")
       .nth(index - 1)
       .locator("[data-social-photo-file]")
-      .setInputFiles(resolve(import.meta.dirname, "../../spec/fixtures/photos/small.png"));
+      .setInputFiles(resolve(import.meta.dirname, "../fixtures/photos/small.png"));
   } else {
     await page.evaluate(
       ([event, at, data]) => {

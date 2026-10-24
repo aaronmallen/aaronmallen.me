@@ -1,6 +1,0 @@
-- example: "API guarded rows drops workout, mail and note rows from an endpoint that does not drop them itself"
-  scenario: "api/guarded_rows.feature: No operation shows a workout, mail or note row to a token with only read"
-- example: "API guarded rows keeps workout, mail and note rows for a token with health, mail and notes"
-  scenario: "api/guarded_rows.feature: A token with health, mail and notes sees those rows"
-- example: "API guarded rows shows no workout, mail or note row from any endpoint to a token with only read"
-  scenario: "api/guarded_rows.feature: No operation shows a workout, mail or note row to a token with only read"

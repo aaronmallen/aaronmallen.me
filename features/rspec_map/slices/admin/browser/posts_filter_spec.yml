@@ -1,4 +1,0 @@
-- example: "Admin posts filter redraws the list without loading the page"
-  scenario: "post_admin/post_list.feature: Choosing a filter redraws the list without loading the page"
-- example: "Admin posts filter submits the filter once drafts is chosen"
-  scenario: "post_admin/post_list.feature: Choosing a filter redraws the list without loading the page"

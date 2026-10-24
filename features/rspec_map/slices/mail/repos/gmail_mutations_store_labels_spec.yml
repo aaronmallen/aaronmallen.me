@@ -1,6 +1,0 @@
-- example: "Mail::Repos::GmailMutations#store_labels still refuses two labels with one name"
-  scenario: "mail/gmail_sync.feature: The sync still refuses two labels with one name"
-- example: "Mail::Repos::GmailMutations#store_labels stores both names when a label takes the name another gave up"
-  scenario: "mail/gmail_sync.feature: The sync stores both names when labels swap or take a name another gave up"
-- example: "Mail::Repos::GmailMutations#store_labels stores both names when two labels swap them"
-  scenario: "mail/gmail_sync.feature: The sync stores both names when labels swap or take a name another gave up"

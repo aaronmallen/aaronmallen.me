@@ -145,7 +145,7 @@ one.
 | [0138][0138] | Read dead jobs from the Sidekiq dead set in an activity query | ![Active][active] | 2026-10-09 |
 | [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Superseded][superseded-0206] | 2026-10-10 |
 | [0140][0140] | Word a field error by its key, and keep a table only for the exceptions | ![Active][active] | 2026-10-10 |
-| [0145][0145] | Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs | ![Active][active] | 2026-10-10 |
+| [0145][0145] | Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs | ![Superseded][superseded-0206] | 2026-10-10 |
 | [0144][0144] | Claim social post photos by row, and send them as native media | ![Active][active] | 2026-10-10 |
 | [0143][0143] | Send outside links in social posts through aa.cool short links | ![Active][active] | 2026-10-10 |
 | [0141][0141] | Keep file shares in a shares slice with their own bucket | ![Active][active] | 2026-10-10 |

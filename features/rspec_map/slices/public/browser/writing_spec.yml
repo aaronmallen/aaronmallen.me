@@ -1,8 +1,0 @@
-- example: "Writing list links nothing in the row but the title"
-  scenario: "public/layout.feature: The writing list sets the meta beside the title at 720px, stacks it narrower, and links only the title"
-- example: "Writing list reads the date, the tag and the reading time down the meta column"
-  scenario: "public/layout.feature: The writing list sets the meta beside the title at 720px, stacks it narrower, and links only the title"
-- example: "Writing list sets the meta column beside the title on a list 720px wide"
-  scenario: "public/layout.feature: The writing list sets the meta beside the title at 720px, stacks it narrower, and links only the title"
-- example: "Writing list stacks the meta over the title on a narrower list, whatever the window"
-  scenario: "public/layout.feature: The writing list sets the meta beside the title at 720px, stacks it narrower, and links only the title"

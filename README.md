@@ -37,9 +37,8 @@ mise run lint
 mise run format
 ```
 
-`mise run test` builds the assets, starts Postgres if it is down, then runs the suite.
-`mise run test:browser` runs the browser specs alone. `mise run test:features` runs the Gherkin features in
-`features/`, giving each Playwright worker its own server, Sidekiq, database and Redis in Docker.
+`mise run test` builds the assets, starts Postgres if it is down, then runs the Gherkin features in `features/`,
+giving each Playwright worker its own server, Sidekiq, database and Redis in Docker.
 
 ## Docs
 

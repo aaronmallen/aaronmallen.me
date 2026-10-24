@@ -12,6 +12,7 @@ issue: AA-671
 amended:
   - AA-818
   - "#996"
+  - "#1973"
 tags:
   - suggestions
   - edits
@@ -57,8 +58,9 @@ The lock crosses slices only because every slice's `db` provider opens the same 
 `config/providers/db.rb` configures the app's through `Blog::Providers::DBProvider`, each slice takes that config
 from the app, and Hanami reuses a gateway for slices whose config matches (`prepare_gateways` in Hanami's
 `providers/db.rb`).
-`spec/slices/suggestions/requests/accepting_edits_spec.rb` accepts edits through the admin and checks that the
-post stays held from the read to the save, and that an edit whose text appears twice turns stale.
+`features/suggestions/post_suggestions.feature` accepts edits through the admin and checks that an edit whose text
+appears twice turns stale. Since #1973 nothing checks that the post stays held from the read to the save: no HTTP
+client can see the row lock.
 
 ## Alternatives
 

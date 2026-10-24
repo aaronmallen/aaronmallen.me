@@ -12,6 +12,7 @@ area:
 issue: AA-664
 amended:
   - AA-809
+  - "#1973"
 tags:
   - sessions
   - cookies
@@ -72,14 +73,14 @@ no-cookie rule forbids.
 
 ## Consequences
 
-The public site sets no cookie, and `spec/slices/public/requests/pages_spec.rb` checks the five main pages for a
-`set-cookie` header.
+The public site sets no cookie, and `features/public/pages.feature` checks the five main pages for a `set-cookie`
+header (#1973).
 
 `SessionReader` copies what the middleware does. It reads the key, `serialize_json` and `secrets` from the
 admin's session options, which `Blog::SessionCookie.store` sets, but it builds `Rack::Session::Encryptor` itself.
 A change to the store that Rack's middleware reads and the reader does not, such as a new coder, leaves every
-public page treating the operator as a stranger. Only the request specs that sign in and then load a public
-page, such as `spec/requests/cache_headers_spec.rb`, would notice.
+public page treating the operator as a stranger. Only the features that sign in and then load a public
+page, such as `features/requests/cache_headers.feature`, would notice (#1973).
 
 Every public response varies on `Cookie`, so a shared cache has to key each copy on the whole cookie header a
 visitor sends.

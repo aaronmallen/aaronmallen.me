@@ -1,6 +1,0 @@
-- example: "Development seeds adds nothing on a second run"
-  scenario: "db/seeds.feature: A second run of the development seeds adds nothing"
-- example: "Development seeds fails when a seed file raises"
-  drop: "tests that Ruby's load raises; db:seed fails on a seed that raises as it does on any Ruby error, and a feature cannot add a broken seed without writing into config/db/seeds"
-- example: "Development seeds fills every admin area"
-  scenario: "db/seeds.feature: The development seeds fill every admin area"

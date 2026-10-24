@@ -1,2 +1,0 @@
-- example: "Analytics::Repos::PostReaderQueries gives each post its readers by id in one call, new, saved and uncounted alike"
-  scenario: "analytics/read_analytics.feature: read_analytics gives an old post's saved unique readers as final"

@@ -77,48 +77,6 @@ jobs:
       - name: Lint
         run: mise run lint
 
-  ruby:
-    name: Ruby specs
-    runs-on: ubuntu-latest
-    services: *services
-    steps:
-      - *checkout
-      - *install-tools
-      - *restore-gems
-      - *install-dependencies
-      - *install-postgres-client
-
-      - name: Test
-        run: mise run test --tag '~browser'
-
-      - name: Keep the coverage results
-        uses: actions/upload-artifact@v7
-        with:
-          include-hidden-files: true
-          name: coverage-ruby
-          path: coverage/.resultset.json
-
-  browser:
-    name: Browser specs
-    runs-on: ubuntu-latest
-    services: *services
-    steps:
-      - *checkout
-      - *install-tools
-      - *restore-gems
-      - *install-dependencies
-      - *install-postgres-client
-
-      - name: Test
-        run: mise run test:browser
-
-      - name: Keep the coverage results
-        uses: actions/upload-artifact@v7
-        with:
-          include-hidden-files: true
-          name: coverage-browser
-          path: coverage/.resultset.json
-
   features:
     name: Features
     runs-on: ubuntu-latest
@@ -140,41 +98,17 @@ jobs:
       - name: Install the Playwright browser
         run: aube --dir features exec playwright install --with-deps chromium
 
+      - name: Install xmllint
+        run: sudo apt-get install --no-install-recommends --yes libxml2-utils
+
       - name: Test
-        run: mise run test:features
+        run: mise run test
 
       - name: Keep the failure traces
         if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: features-results
-          path: |
+          path: |-
             features/test-results
             tmp/features-*.log
-
-  coverage:
-    name: Coverage
-    needs:
-      - browser
-      - ruby
-    runs-on: ubuntu-latest
-    steps:
-      - *checkout
-      - *install-tools
-      - *restore-gems
-      - *install-dependencies
-
-      - name: Fetch the coverage results
-        uses: actions/download-artifact@v8
-        with:
-          path: tmp/coverage
-          pattern: coverage-*
-
-      - name: Merge the coverage results
-        run: mise run test:coverage tmp/coverage/*/.resultset.json
-
-      - name: Keep the coverage report
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage
-          path: coverage

@@ -11,13 +11,13 @@ issue: AA-836
 amended:
   - "#1063"
   - "#1960"
+  - "#1973"
 tags:
   - accessibility
   - wcag
   - axe-core
   - testing
-  - capybara
-  - cuprite
+  - playwright
   - browser
 ---
 
@@ -37,20 +37,19 @@ A new faint color or an unnamed button would ship without a failing spec.
 ## Decision
 
 The browser suite runs axe-core against every route in public, admin and MCP, once in light mode and once in dark
-mode, and fails on any WCAG 2.2 AA breach. It runs as part of `mise run test:browser`.
+mode, and fails on any WCAG 2.2 AA breach. It runs as part of `mise run test`, which since #1973 runs the
+Gherkin features.
 
 Issue #1063 turned off axe's `color-contrast` rule, so the site's colors can match the design, whose light text
 hues read below 4.5. Contrast is now a design choice, and no spec checks it.
 
-The `axe-core-api` gem supplies the axe script, pinned to its version. Its runner drives Selenium and breaks under
-Cuprite, the driver the suite already uses, so the suite injects the script through Cuprite and calls `axe.run`
-itself.
-
 Since #1960, [ADR 0206][0206] moves the checks to the Gherkin features, where [`@axe-core/playwright`][axe-playwright]
-runs axe on every route in light and in dark. The gem and the Cuprite injection go with the final delete in #1959.
+runs axe on every route in light and in dark, from `features/steps/pages.ts`. #1973 deleted the old suite and its
+gem.
 
 axe has no rule for a font-size floor, so the size, tap and overflow check from `phone_spec.rb` stays ours. It
-becomes shared, runs beside axe on every route, and takes over the one thing axe does not measure.
+becomes shared, runs beside axe on every route, and takes over the one thing axe does not measure. Since #1973 it
+lives in `features/steps/screens.ts`.
 
 ## Alternatives
 
@@ -63,7 +62,8 @@ next faint color or unnamed control.
 
 ## Consequences
 
-The suite takes a new gem, `axe-core-api`, and it reaches every browser spec.
+The suite takes a new dependency, `@axe-core/playwright` since #1973, and it reaches every feature that checks a
+page.
 
 The browser suite runs slower. Each route loads twice, once per theme, and axe walks the whole page each time.
 

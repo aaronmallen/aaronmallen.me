@@ -1,4 +1,0 @@
-- example: "Admin live table triggers finds the lists of the layout and the views"
-  drop: "checks that the Ruby LIVE_TABLES constants exist in the layout and the calendar view, which only loading the app's code can read; the scenario \"Every live page names the tasks and mail tables\" reads the same lists from each page's markup"
-- example: "Admin live table triggers names only tables with an admin change trigger"
-  scenario: "admin/live_tables.feature: Every live page names the tasks and mail tables"

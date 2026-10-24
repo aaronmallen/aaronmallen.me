@@ -1,2 +1,0 @@
-- example: "Analytics::Repos::PostReaderQueries#readers_by_path counts a window the nightly job has yet to close as live"
-  scenario: "analytics/read_analytics.feature: read_analytics counts a young post's unique readers"

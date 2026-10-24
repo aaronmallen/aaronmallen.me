@@ -90,25 +90,6 @@ Given("a jj repo with the changelog for {string} under an empty commit", async (
   shell.env.TARGET = await sh(shell, "jj log --no-graph -r @-- -T commit_id");
 });
 
-Given("a git repo with specs that name two migrations", async ({ shell }) => {
-  await initGit(shell);
-  await changelog(shell, "26.10.0");
-  const repo = join(shell.dir, "repo");
-  await mkdir(join(repo, "config/db/migrate"), { recursive: true });
-  await mkdir(join(repo, "spec/db"), { recursive: true });
-  await writeFile(join(repo, "config/db/migrate/20261001000000_add_tasks.rb"), "Add a migration");
-  shell.env.MIGRATION = await commit(shell, "Add a migration");
-  await writeFile(join(repo, "config/db/migrate/20261002000000_add_tags.rb"), "Add another");
-  await commit(shell, "Add another");
-  await writeFile(join(repo, "spec/db/tasks_spec.rb"), "config/db/migrate/20261001000000_add_tasks.rb");
-  await writeFile(join(repo, "spec/db/tags_spec.rb"), "20261002000000");
-  await commit(shell, "Add the specs");
-});
-
-Given("the tag {string} on the commit that adds the first migration", async ({ shell }, name: string) => {
-  await git(shell, `tag --annotate ${name} --message ${name} ${shell.env.MIGRATION}`);
-});
-
 Given("the changelog for {string}", async ({ shell }, version: string) => {
   await changelog(shell, version);
 });

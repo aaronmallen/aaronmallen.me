@@ -1,4 +1,0 @@
-- example: "Record::Relations::SyncStates keeps the sync name's Ruby twin in the enum's order"
-  drop: "Compares the Postgres enum with its Ruby twin in Blog::Types. The Ruby side is a constant that no step can read without loading Ruby. The guard is real: a feature can list the enum's labels but not the constant they must match."
-- example: "Record::Relations::SyncStates keeps the sync state kind's Ruby twin in the enum's order"
-  drop: "Compares the Postgres enum with its Ruby twin in Blog::Types. The Ruby side is a constant that no step can read without loading Ruby. The guard is real: a feature can list the enum's labels but not the constant they must match."

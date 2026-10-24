@@ -1,2 +1,0 @@
-- example: "Suggestions::Relations::SuggestionEdits keeps the status's Ruby twin in the enum's order"
-  drop: "checks a Ruby constant against the database enum; the enum's order shows nowhere outside the app"

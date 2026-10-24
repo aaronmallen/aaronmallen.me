@@ -37,8 +37,7 @@ This writes code and commits it, for hours, without checking back. Do not start 
 
 ## 4. Run a wave
 
-Before the first wave, start Postgres, so no agent's test run starts or stops it. The suite refuses Redis, so leave
-it off:
+Before the first wave, start Postgres, so no agent's test run starts or stops it:
 
 ```sh
 mise run db:start

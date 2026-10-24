@@ -15,6 +15,7 @@ amended:
   - "#1761"
   - "#1762"
   - "#1597"
+  - "#1973"
 tags:
   - mcp
   - oauth
@@ -98,8 +99,8 @@ board, and has to connect again asking for `publish` to get that back. Nor can i
 issues while a published board sits in the sync's reach.
 
 A new tool that removes a record or shows something in public has to name the right scope, or check its target.
-Nothing checks that it does beyond `spec/slices/mcp/requests/scopes_spec.rb`, which lists each tool under the scope it
-expects, and `spec/slices/api/requests/publish_scope_spec.rb`, which tries each public target without `publish`.
+Nothing checks that it does beyond `features/mcp/scopes.feature`, which lists each tool under the scope it expects,
+and `features/api/publish_scope.feature`, which tries each public target without `publish` (#1973).
 
 [0050]: 0050-derive-today-from-sprint-membership.md
 [0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md

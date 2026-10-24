@@ -1,4 +1,0 @@
-- example: "Post edit notes puts the date above the note on a phone"
-  scenario: "public/layout.feature: An edit note's date sits beside the note on a wide screen and above it on a phone"
-- example: "Post edit notes sets the date in a column beside the note on a wide screen"
-  scenario: "public/layout.feature: An edit note's date sits beside the note on a wide screen and above it on a phone"

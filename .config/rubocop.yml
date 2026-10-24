@@ -1,10 +1,8 @@
 plugins:
-  - rubocop-capybara
   - rubocop-hanami
   - rubocop-i18n
   - rubocop-ordered_methods
   - rubocop-performance
-  - rubocop-rspec
 
 inherit_mode:
   merge:
@@ -104,38 +102,12 @@ Naming/ConstantName:
   Exclude:
     - lib/**/types.rb
 
-RSpec/DescribeClass:
-  IgnoredMetadata:
-    type:
-      - app
-      - feature
-      - request
-      - script
-
-RSpec/ExampleLength:
-  CountAsOne:
-    - heredoc
-
-RSpec/NestedGroups:
-  AllowedGroups:
-    - describe
-
-RSpec/SpecFilePathFormat:
-  CustomTransform:
-    GitHub: github
-    LinkedIn: linkedin
-    OAuth: oauth
-
 Style/Documentation:
   Enabled: false
 
 Style/NumericPredicate:
   Exclude:
     - config/db/migrate/**/*.rb
-
-Style/RescueModifier:
-  Exclude:
-    - spec/**/*.rb
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

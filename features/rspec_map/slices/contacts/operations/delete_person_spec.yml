@@ -1,8 +1,0 @@
-- example: "Contacts::Operations::DeletePerson deletes a contact Google already deleted"
-  scenario: "people/google.feature: Deleting a contact Google already deleted deletes it here"
-- example: "Contacts::Operations::DeletePerson deletes a linked contact in Google too"
-  scenario: "people/google.feature: Deleting a contact linked to Google deletes it there too"
-- example: "Contacts::Operations::DeletePerson deletes a local contact without asking Google"
-  scenario: "people/google.feature: Deleting a contact Google does not hold asks Google nothing"
-- example: "Contacts::Operations::DeletePerson keeps the contact when Google refuses"
-  scenario: "people/google.feature: Deleting a contact keeps it and says so when Google refuses"

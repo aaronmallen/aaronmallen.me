@@ -1,4 +1,0 @@
-- example: "Notes::Operations::MoveNote moves a note into a folder and back to the top level"
-  scenario: "notes/mcp.feature: move_note files a note in a folder and back at the top level"
-- example: "Notes::Operations::MoveNote refuses a folder that does not exist"
-  scenario: "notes/mcp.feature: move_note files a note in a folder and back at the top level"

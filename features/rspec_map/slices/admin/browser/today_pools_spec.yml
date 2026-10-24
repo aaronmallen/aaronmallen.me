@@ -1,6 +1,0 @@
-- example: "Admin today pools switching the pool to someday copies a task's key from the new pool"
-  scenario: "admin/today_pools.feature: Switching the pool lets the owner copy a key from the new pool"
-- example: "Admin today pools switching the pool to someday marks someday as the current page"
-  scenario: "admin/today_pools.feature: Switching the pool swaps it in without loading the page"
-- example: "Admin today pools switching the pool to someday switches without loading the page"
-  scenario: "admin/today_pools.feature: Switching the pool swaps it in without loading the page"

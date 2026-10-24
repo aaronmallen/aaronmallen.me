@@ -1,4 +1,0 @@
-- example: "Tasks::Operations::CaptureTask two tasks placed at once gives a captured task and an imported one different positions"
-  scenario: "sync/linear.feature: A captured task and an imported one land on different positions"
-- example: "Tasks::Operations::CaptureTask two tasks placed at once gives two captured tasks different positions"
-  scenario: "tasks/at_once.feature: Two tasks captured at once get different positions"

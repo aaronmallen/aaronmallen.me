@@ -8,6 +8,8 @@ area:
   - assets
   - tasks
 issue: "#149"
+amended:
+  - "#1973"
 tags:
   - tasks
   - order
@@ -65,7 +67,8 @@ A task moves any number of places in one drop and one request, and the grip can 
 With scripts off, task order cannot change in the admin. Only the MCP `reorder_task` tool can still move a task.
 
 The server gains another write that answers with no page, the cost ADR 0055 names for writes through `fetch`.
-The request specs can post to the endpoint with rack-test, but only a browser spec covers the drag and the keys.
+A feature can post to the endpoint over plain HTTP, but only the browser scenarios in
+`features/tasks/admin/order.feature` cover the drag and the keys (#1973).
 
 A drag reaches only the rows on screen. With a search filter active the rows are not a task's real neighbours, so
 the grips hide and the keys do nothing. On a paged list a task moves within its page.

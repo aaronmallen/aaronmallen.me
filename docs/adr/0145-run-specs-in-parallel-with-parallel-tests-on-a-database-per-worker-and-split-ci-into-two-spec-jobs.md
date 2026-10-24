@@ -1,14 +1,16 @@
 ---
 id: "0145"
 title: Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs
-status: active
+status: superseded
 created: 2026-10-10
 area:
   - config
+superseded-by: "0206"
 issue: "#1082"
 amended:
   - "#1393"
   - "#1960"
+  - "#1973"
 tags:
   - testing
   - rspec
@@ -22,7 +24,7 @@ tags:
 
 # ADR 0145: Run specs in parallel with parallel_tests on a database per worker, and split CI into two spec jobs
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -87,4 +89,4 @@ CI runs four jobs where it ran one, and each pays its own setup.
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
 [0206]: 0206-replace-the-rspec-suite-with-black-box-gherkin-features-run-by-playwright-bdd.md
 [0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0206-black?style=for-the-badge&label=Superseded&labelColor=orange

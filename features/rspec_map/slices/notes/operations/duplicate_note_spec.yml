@@ -1,6 +1,0 @@
-- example: "Notes::Operations::DuplicateNote answers not found for a note that does not exist"
-  scenario: "notes/mcp.feature: duplicate_note copies a note under a free title and keeps an agent's mark"
-- example: "Notes::Operations::DuplicateNote copies the body and folder under a free title"
-  scenario: "notes/mcp.feature: duplicate_note copies a note under a free title and keeps an agent's mark"
-- example: "Notes::Operations::DuplicateNote stores the copy's links, so the note it links counts it as a backlink"
-  scenario: "notes/note.feature: I duplicate a note and the copy opens"

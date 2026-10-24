@@ -14,6 +14,7 @@ amended:
   - "#1102"
   - "#1106"
   - "#1395"
+  - "#1973"
 tags:
   - admin
   - tasks
@@ -86,14 +87,15 @@ the modal.
 
 ## Consequences
 
-One page per task serves the panel, the modal, a pasted link and a browser with no script. The request specs
-drive those pages with rack-test like any other.
+One page per task serves the panel, the modal, a pasted link and a browser with no script. The features
+request those pages over plain HTTP like any other (#1973).
 
 Opening a task costs a round trip, and the panel stays empty until the reply lands. Each reply carries the whole
 admin layout, which the script throws away.
 
 The script and the pages must agree on which part of the page to swap. A change to the page's markup can break
-the panel while the page itself still works, and only a browser spec will catch it.
+the panel while the page itself still works, and only a scenario that opens the panel in the browser, such as those in
+`features/tasks/admin/drawer.feature`, will catch it.
 
 The setup functions in `app.js` bind once, to what the page held at load. Controls inside swapped HTML, such as
 the copying task key and `confirm.js` on a delete, do nothing until the script binds them again or they listen on

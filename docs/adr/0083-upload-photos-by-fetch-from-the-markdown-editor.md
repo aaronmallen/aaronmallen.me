@@ -7,6 +7,8 @@ area:
   - admin
   - assets
 issue: "#135"
+amended:
+  - "#1973"
 tags:
   - media
   - photos
@@ -58,9 +60,9 @@ Photos go in where the writer is typing, and the draft never leaves the page.
 
 With scripts off, the editor takes no photo. The writer can still link by hand to one hosted somewhere else.
 
-The server gains a second way to answer a write, the cost ADR 0055 names for writes through `fetch`. The request
-specs can still post to the endpoint with rack-test, but only a browser spec covers the drop, the paste and the
-insert at the cursor.
+The server gains a second way to answer a write, the cost ADR 0055 names for writes through `fetch`. A feature
+can still post to the endpoint over plain HTTP, but only the browser scenarios in `features/photos/editor.feature`
+cover the drop, the paste and the insert at the cursor (#1973).
 
 [0055]: 0055-make-every-admin-write-a-plain-form-post-that-scripts-only-add-to.md
 [0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md

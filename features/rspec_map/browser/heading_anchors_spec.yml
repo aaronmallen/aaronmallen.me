@@ -1,2 +1,0 @@
-- example: "Heading anchors scrolls the heading to just below the top of the window"
-  scenario: "browser/heading_anchors.feature: A heading anchor scrolls the heading to just below the top of the window"

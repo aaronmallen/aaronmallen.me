@@ -38,6 +38,7 @@ amended:
   - "#1926"
   - "#1938"
   - "#1949"
+  - "#1973"
 tags:
   - postgres
   - constraints
@@ -161,18 +162,17 @@ project's own tags go when it does, so the trigger leaves them out when it weigh
 
 **A contract rule with an injected repo, or the loaded row as context.** It would put every rule in one place and
 return the field error with no rescue. It loses the race the context names: the check reads the row before the
-write, so a post that goes live between the two passes a check that saw it scheduled.
-`spec/slices/posts/requests/posts_spec.rb` pins that case: it saves from the admin editor while the locked read
-hands back a stale status, and expects `slug: locked` from the trigger. A check in Ruby also binds only the callers
-that run it, where the database binds every write.
+write, so a post that goes live between the two passes a check that saw it scheduled. #1973 dropped the spec that
+staged that case, since a feature cannot swap in a repo that reads a stale status. A check in Ruby also binds only
+the callers that run it, where the database binds every write.
 
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the names has a
-spec that would fail: the posts request spec, the operation specs for decisions, notes, record links, shares, tags and
-task links, and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped
-name needs one too.
+and the mapping misses, the error raises, and the form answers 500 instead of 422. A feature that trips a
+constraint and expects the field error would fail, such as the duplicate slug scenario in
+`features/post_admin/edit_post.feature`, but since #1973 nothing confirms that each name has one. A new mapped name
+needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

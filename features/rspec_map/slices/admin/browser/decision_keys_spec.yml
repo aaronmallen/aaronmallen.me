@@ -1,4 +1,0 @@
-- example: "Admin decision keys clicking the key in the list copies the key"
-  scenario: "admin/decision_keys.feature: Clicking the key in the list copies it"
-- example: "Admin decision keys clicking the key on the decision page copies the key"
-  scenario: "admin/decision_keys.feature: Clicking the key on the decision page copies it"

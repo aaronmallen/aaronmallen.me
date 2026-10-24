@@ -1,6 +1,0 @@
-- example: "API reading a commit GET /api/v1/commits/:id answers the commit with its whole message"
-  scenario: "record/commits.feature: The API reads a commit with its whole message and links"
-- example: "API reading a commit GET /api/v1/commits/:id answers the records linked to the commit, grouped by kind"
-  scenario: "record/commits.feature: The API reads a commit with its whole message and links"
-- example: "API reading a commit GET /api/v1/commits/:id answers what read_commit answers, less the untrusted marks"
-  scenario: "record/commits.feature: The API and read_commit answer the same commit"

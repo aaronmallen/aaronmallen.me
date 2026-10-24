@@ -1,6 +1,0 @@
-- example: "Notes::Operations::DeleteNote answers not found for a note that does not exist"
-  scenario: "notes/mcp.feature: delete_note deletes a note for good"
-- example: "Notes::Operations::DeleteNote deletes the note and its tags"
-  scenario: "notes/mcp.feature: delete_note deletes a note for good"
-- example: "Notes::Operations::DeleteNote drops the note's record links"
-  scenario: "notes/note.feature: I delete a note from its page"

@@ -16,6 +16,7 @@ amended:
   - AA-819
   - "#957"
   - "#1816"
+  - "#1973"
 tags:
   - urls
   - settings
@@ -90,9 +91,9 @@ joins, so the setting still holds the address and Hanami's builder agrees with i
 ## Consequences
 
 The feed, the canonical link, an announcement, a webmention source and the OAuth metadata name the same host for
-the same page however the request arrived. `spec/slices/public/requests/feeds_spec.rb` and `webmentions_spec.rb`
-send another `HTTP_HOST`, and `spec/slices/mcp/requests/metadata_spec.rb` sends `X-Forwarded-Host`, and each
-expects the setting's host.
+the same page however the request arrived. `features/public/feeds.feature` and `webmentions.feature` send
+another `Host`, and `features/mcp/metadata.feature` sends `X-Forwarded-Host`, and each expects the setting's host
+(#1973).
 
 The app will not boot without the setting. `config/settings.rb` requires `site.url` to be an absolute `http` or
 `https` URL with no path (AA-624), and `config.base_url` reads it while the app class loads.
@@ -100,11 +101,10 @@ The app will not boot without the setting. `config/settings.rb` requires `site.u
 A webmention that names the site by its tunnel or LAN address is refused as a foreign target. A real sender
 arrives on the public host, so this costs nothing yet.
 
-Test keeps the production URL, `https://aaronmallen.me`, from `config/settings/default.yml`, so specs assert the
-links the live site gives out, as the public request specs do when they read a page's canonical link. The cost is
-that a test run cannot tell its links from production's, and a spec that needs another host has to stub
-`Blog::Settings#site_url` (#957). Development sets `http://localhost:2300`, so a link built there works on the
-machine that built it.
+Test keeps the production URL, `https://aaronmallen.me`, from `config/settings/default.yml`, but each Playwright
+worker sets `SITE_URL` to its own server (`features/support/world.ts`, #1973), so a link a feature reads works on
+the machine that ran it. A feature names that host `{site}`. Development sets `http://localhost:2300`, so a link built
+there works on the machine that built it.
 
 The analytics referrer check is the one place the asking host still counts. A new caller that reads
 `request.base_url` has to show the same reason, or build on the setting.

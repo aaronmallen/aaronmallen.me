@@ -1,4 +1,0 @@
-- example: "Admin slug preview matches the fixture on the server"
-  scenario: "post_admin/editor_script.feature: The server slugs each title as the slug preview does"
-- example: "Admin slug preview slugs each title the way the server does"
-  scenario: "post_admin/editor_script.feature: The slug preview turns titles into slugs the way the server does"

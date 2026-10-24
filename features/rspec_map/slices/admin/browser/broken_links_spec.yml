@@ -1,8 +1,0 @@
-- example: "Admin broken links queues a post link check and stays on the list"
-  scenario: "short_links/broken_links.feature: Check again on a post link checks it, says so and stays on the list"
-- example: "Admin broken links queues a short link check"
-  scenario: "short_links/broken_links.feature: Check again on a short link checks it and the card clears once the check lands"
-- example: "Admin broken links updates the post row when a check lands"
-  scenario: "short_links/broken_links.feature: A check landing updates the open list"
-- example: "Admin broken links updates the short links card when a check lands"
-  scenario: "short_links/broken_links.feature: A check landing updates the open list"

@@ -1,4 +1,0 @@
-- example: "Notes::Operations::DescribeNoteFolder answers not found for a folder that does not exist"
-  scenario: "notes/mcp.feature: The folder tools list, make, rename, move, describe and remove folders"
-- example: "Notes::Operations::DescribeNoteFolder changes the description and can clear it"
-  scenario: "notes/folders.feature: The settings edit the description but refuse one past the limit"

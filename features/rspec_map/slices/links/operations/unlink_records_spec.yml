@@ -1,4 +1,0 @@
-- example: "Links::Operations::UnlinkRecords refuses an unknown kind as not found"
-  scenario: "record_links/record_links.feature: Unlinking a kind no record has is refused"
-- example: "Links::Operations::UnlinkRecords refuses an unknown kind on its own side as not found"
-  scenario: "record_links/record_links.feature: Unlinking a kind no record has is refused"

@@ -1,4 +1,0 @@
-- example: "Admin tracked time adds a minute as each minute passes"
-  scenario: "time/sessions.feature: The running figure adds a minute as each minute passes, even when drawn again"
-- example: "Admin tracked time keeps counting on a figure the page draws again"
-  scenario: "time/sessions.feature: The running figure adds a minute as each minute passes, even when drawn again"

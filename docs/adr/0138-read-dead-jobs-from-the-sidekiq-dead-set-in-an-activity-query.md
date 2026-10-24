@@ -15,6 +15,7 @@ amended:
   - "#1734"
   - "#1776"
   - "#1819"
+  - "#1973"
 tags:
   - activity
   - attention
@@ -78,13 +79,10 @@ Sidekiq whenever a job leaves the set some other way: Sidekiq prunes it, or some
 ## Consequences
 
 The attention list and the jobs tab now read Redis as well as Postgres, through the client the `:sidekiq` provider
-configures. The card and `list_attention` need Redis up, and a spec that covers dead jobs has to put them in the dead
-set. CI runs no Redis, so `spec/support/sidekiq.rb` fakes every read for each spec: the stats, the processes, the
-dead, retry and scheduled sets, the set and queue pages, and the scheduler's states and next run times. A spec that
-needs jobs in them overrides the fake. #1819 made the suite refuse every Redis connection with the error CI raises,
-so a read left unstubbed fails on a laptop as it does in CI. #1850 fails the spec when the app rescues that refusal
-too, since the spec would then pass on the Redis-down path and not test the code it names. A spec that covers a
-Redis outage tags itself `redis_outage: true`.
+configures. The card and `list_attention` need Redis up, and a feature that covers dead jobs has to put them in the
+dead set. Since #1973 each Playwright worker runs a Redis of its own (`features/support/world.ts`), and the steps in
+`features/steps/jobs.ts` write the jobs, the processes and the scheduler's states and next run times a scenario
+needs straight into it. A scenario that covers a Redis outage stops that Redis with the step `Redis is down`.
 
 Dead jobs stay out of the `attention` view, so `listed?` never finds them and they cannot be snoozed. Retry and
 discard take that place.

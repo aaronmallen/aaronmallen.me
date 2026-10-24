@@ -1,8 +1,0 @@
-- example: "Blog::Extensions.apply prepends the extension when the gem is at the version it was written against"
-  drop: "tests the guard on gem patches; a gem at another version fails boot, which every feature run would show"
-- example: "Blog::Extensions.apply raises naming the file to check when the gem is at another version"
-  drop: "tests the guard on gem patches; a gem at another version fails boot, which every feature run would show"
-- example: "Blog::Extensions.pin passes when the gem is at the version it was written against"
-  drop: "tests the guard on gem patches; a gem at another version fails boot, which every feature run would show"
-- example: "Blog::Extensions.pin raises naming the file to check when the gem is at another version"
-  drop: "tests the guard on gem patches; a gem at another version fails boot, which every feature run would show"

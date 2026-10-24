@@ -1,2 +1,0 @@
-- example: "Social::Operations::QueueSyndication two queues of one post at once stores one social post and turns the other away"
-  drop: "races two threads on one advisory lock inside the app; no HTTP client can time two queues of one post at once"

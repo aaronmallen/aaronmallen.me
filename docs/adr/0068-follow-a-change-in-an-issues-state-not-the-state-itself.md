@@ -10,6 +10,7 @@ issue: "#33"
 amended:
   - "#43"
   - "#735"
+  - "#1973"
 tags:
   - tasks
   - imports
@@ -60,9 +61,9 @@ task the operator closed by hand every 15 minutes while the issue stays open, so
 
 ## Consequences
 
-The operator can close, reopen or start an imported task, and it holds until GitHub reports something new. The job
-spec, under `spec/slices/tasks/jobs`, pins it: a task closed by hand stays closed, and one in progress stays in
-progress, while the issue stays open.
+The operator can close, reopen or start an imported task, and it holds until GitHub reports something new. The job's
+features, in `features/sync/github_more.feature`, pin it (#1973): a task closed by hand stays closed, and one in
+progress stays in progress, while the issue stays open.
 
 A task and its issue can then disagree for as long as GitHub stays quiet. A task the operator reopens under a closed
 issue stays open, and nothing marks the gap.

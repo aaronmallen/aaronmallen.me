@@ -1,8 +1,0 @@
-- example: "Admin analytics chart choosing a longer range draws a bar for every day in it"
-  scenario: "analytics/chart.feature: The analytics chart loads the range the owner picks"
-- example: "Admin analytics chart choosing a longer range submits the range"
-  scenario: "analytics/chart.feature: The analytics chart loads the range the owner picks"
-- example: "Admin analytics chart hides every tooltip until a bar is hovered"
-  scenario: "analytics/chart.feature: The analytics chart shows a day's figures only while its bar is hovered"
-- example: "Admin analytics chart hovering a bar shows that day's figures"
-  scenario: "analytics/chart.feature: The analytics chart shows a day's figures only while its bar is hovered"

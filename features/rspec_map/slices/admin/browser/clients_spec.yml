@@ -1,6 +1,0 @@
-- example: "Admin MCP clients asks with the confirmation text"
-  scenario: "admin/clients.feature: Revoking asks first and keeps the client when I decline"
-- example: "Admin MCP clients keeps the client listed when I don't confirm"
-  scenario: "admin/clients.feature: Revoking asks first and keeps the client when I decline"
-- example: "Admin MCP clients revokes once I confirm"
-  scenario: "admin/clients.feature: Revoking deletes the client's tokens and codes, keeps it registered and says so"

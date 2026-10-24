@@ -1,6 +1,0 @@
-- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the pull request with its state and times"
-  scenario: "record/pull_requests.feature: The API reads a pull request with its state, times and links"
-- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the records linked to the pull request, grouped by kind"
-  scenario: "record/pull_requests.feature: The API reads a pull request with its state, times and links"
-- example: "API reading a pull request GET /api/v1/pull_requests/:id answers the same JSON as read_pull_request"
-  scenario: "record/pull_requests.feature: The API and read_pull_request answer the same pull request"

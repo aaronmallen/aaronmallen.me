@@ -58,15 +58,6 @@ ci_state() {
     2>/dev/null || echo "unknown"
 }
 
-shipped=$(git tag --list | while read -r t; do git ls-tree --name-only "$t" config/db/migrate/; done |
-  sed -n 's|^config/db/migrate/\([0-9]\{14\}\)_.*|\1|p' | sort -u)
-stale=$([ -z "$shipped" ] || echo "$shipped" | git grep -l -F -f - "$target" -- spec | sed "s|^$target:||")
-if [ -n "$stale" ]; then
-  echo "These specs name a migration a tag already shipped. Take it out of each, or delete the spec:" >&2
-  echo "$stale" >&2
-  exit 1
-fi
-
 if [ -n "$dry_run" ]; then
   echo "$version"
   echo "$target"

@@ -49,10 +49,6 @@ group :cli, :development do
   gem "hanami-reloader", "~> 3", source: "https://gem.coop/@hanami"
 end
 
-group :cli, :development, :test do
-  gem "hanami-rspec", "~> 3", source: "https://gem.coop/@hanami"
-end
-
 group :development do
   gem "hanami-webconsole", "~> 3", source: "https://gem.coop/@hanami"
 end
@@ -61,25 +57,8 @@ group :lint do
   gem "bundler-audit"
   gem "graphql"
   gem "rubocop"
-  gem "rubocop-capybara"
   gem "rubocop-hanami", ">= 0.2.1"
   gem "rubocop-i18n"
   gem "rubocop-ordered_methods"
   gem "rubocop-performance"
-  gem "rubocop-rspec"
-end
-
-group :test do
-  gem "axe-core-api", "~> 4.14"
-  gem "capybara"
-  gem "cuprite"
-  gem "database_cleaner-sequel"
-  gem "faker"
-  gem "parallel_tests"
-  gem "rack-test"
-  gem "rom-factory"
-  gem "rspec-collection_matchers"
-  gem "simplecov"
-  gem "test-prof"
-  gem "webmock"
 end

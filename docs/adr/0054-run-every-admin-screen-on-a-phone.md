@@ -18,6 +18,7 @@ amended:
   - "#923"
   - "#1746"
   - "#1960"
+  - "#1973"
 tags:
   - admin
   - layout
@@ -36,7 +37,7 @@ The design handoff drew the admin for a desk. `tmp/design/assets/admin.css` fold
 900px and 860px, and below that it changes one thing: at 700px the palette button shrinks to 34px and the page
 keeps a 46px rail for it. Everything between 390px and 860px was never drawn, and the app inherited the gap.
 
-A pass at 390x844, driven through Capybara so the numbers came off the page rather than off a guess, found three
+A pass at 390x844, driven through a browser so the numbers came off the page rather than off a guess, found three
 kinds of failure:
 
 - **The page scrolled sideways.** The top pages table on analytics pushed it to 441px, and the add form on task
@@ -53,11 +54,11 @@ task or a journal entry, are the moments a phone is the only screen to hand.
 
 ## Decision
 
-Every admin screen works at 390x844, and no screen says it is desktop only. Each slice lists its screens in a
-`screens` table in its own `browser/readable_spec.rb`, and a new screen joins the table of the slice that draws
-it. The shared example in `spec/support/shared_examples/readable_screens.rb` measures every screen in public, admin
-and MCP at 390x844 and at 1280x800. Since #1960 these checks move to the Gherkin features [ADR 0206][0206] sets
-up, and the RSpec tables and shared example go with the final delete in #1959.
+Every admin screen works at 390x844, and no screen says it is desktop only. Since #1973 each part of the site lists its
+screens in the examples of a feature, `readable.feature` in `features/admin` and `features/public` and
+`authorization_screens.feature` in `features/mcp`, and a new screen joins the table of the part that draws it. The steps
+in `features/steps/screens.ts` measure every screen in public, admin and MCP at 390x844 and at 1280x800, in the Gherkin
+features [ADR 0206][0206] sets up.
 
 Three rules hold:
 

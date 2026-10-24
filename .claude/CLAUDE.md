@@ -17,18 +17,18 @@ artifacts, and agent memory and sessions. Schema changes need a new migration; n
 - Settings come from `config/settings/<env>.yml` merged key by key over `default.yml` (`Blog::SettingsFiles`), then
   the environment, through `hanami-settings-stores`.
 - Tailwind CSS and esbuild for assets (`app/assets`, @config/assets.js). aube manages the node packages.
-- RSpec with Capybara, rack-test and rom-factory for tests (`spec`).
+- Gherkin features with steps in TypeScript, run by playwright-bdd, for tests (`features`).
 
 ## Tooling
 
 - [mise] manages tools and tasks (@.config/mise.toml). Run `mise tasks` to see them.
 
-Always run the work through a mise task rather than calling `rspec`, `rubocop`, `markdownlint-cli2` or **any** other
-tool yourself. The tasks in `scripts/` carry the flags, config paths and database checks this project depends on, and
-they are what I run, so a bare `rubocop` reads no config at all.
+Always run the work through a mise task rather than calling `playwright`, `rubocop`, `markdownlint-cli2` or **any**
+other tool yourself. The tasks in `scripts/` carry the flags, config paths and database checks this project depends on,
+and they are what I run, so a bare `rubocop` reads no config at all.
 
 - `mise run format` and `mise run lint` cover every language.
-- `mise run test` starts Postgres when it has to, then runs the suite.
+- `mise run test` starts Postgres when it has to, then runs the features.
 - `mise run db:*` creates, migrates, rolls back and seeds the database.
 - `mise run dev` runs the server, the worker and the asset watchers.
 
