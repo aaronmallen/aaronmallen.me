@@ -35,6 +35,8 @@ Read `.claude/CLAUDE.md`, the README and the records in `docs/adr` that cover th
 - **Follow what is already there.** A new file looks like the files beside it.
 - **Change only what the issue names.** Anything else you spot goes to the user, not into the diff.
 - **Fix a bug in the commit that brought it in** while that commit is unpushed, not in a fix commit on top.
+- **Do the work yourself.** Start a helper agent only when the issue spans areas that do not touch each other, at most
+  two, each on `sonnet` or `haiku`. Helpers share one workspace, so give each its own files.
 
 When the issue is the record for a decision, invoke `/write-adr` and stop there. The record lands in its own
 commit, under the code that carries it out. That commit says `See #<issue>`, and the code on top closes it.

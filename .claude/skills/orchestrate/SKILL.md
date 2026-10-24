@@ -52,10 +52,25 @@ Invoke /implement <number> under /orchestrate. Follow the skill as written, incl
 
 Work only in <workspace>. Never touch the main repo directory or another workspace, and never run a jj command
 that rewrites a commit outside your own working copy. Never print .env. Pass -R aaronmallen/aaronmallen.me to
-every gh command. End with your change described and an empty `jj new` on top.
+every gh command. End with your change described and an empty `jj new` on top. Start at most two helpers of your
+own, and none for a small issue.
 
 Report which acceptance criteria hold and which do not.
 ```
+
+Pass each agent a `model` that fits its issue. The weekly usage limit is shared, so the strongest model goes only
+where it pays:
+
+| Issue | Model |
+| --- | --- |
+| A record (`/write-adr`), a lockfile or config bump, a port, map rows, a merge of conflicting step or list files | `haiku` |
+| Most `enhancement`, `bug` and `chore` issues | `sonnet` |
+| A schema change, a migration that moves data, auth or security, or an issue other issues build on | `opus` |
+
+When an agent on a cheaper model fails its issue or comes back unsure, resume it once with SendMessage, then start a
+new agent on the next model up. Keep the orchestrator itself on the session's model.
+
+Run at most four agents at once on a large issue, such as a port of a whole area, and at most seven in all.
 
 One agent per issue, and a new one each time. A single context that implements a whole spec has forgotten the
 first issue by the time it reaches the last.
