@@ -659,3 +659,7 @@ Then("the answer has no body", ({ http }) => {
 Then("the answer's header {string} does not hold {string}", ({ http }, name: string, text: string) => {
   expect(http.last?.headers()[name.toLowerCase()] ?? "").not.toContain(text);
 });
+
+When("I look at the answer as a page", async ({ answer, page }) => {
+  await page.setContent(answer.body);
+});

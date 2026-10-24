@@ -15,7 +15,7 @@
 - example: "Tasks::Jobs::SyncIssues a failed run records a check Linear fails rather than cancel the task"
   scenario: "sync/linear.feature: A run that meets <case> is recorded under linear_issues as <reason>"
 - example: "Tasks::Jobs::SyncIssues a failed run records a connection that fails"
-  drop: "The stub answers every request it gets and cannot drop or stall a connection; #1976 adds that"
+  scenario: "sync/linear.feature: A run that meets <case> is recorded under linear_issues as <reason>"
 - example: "Tasks::Jobs::SyncIssues a failed run records the error Linear names"
   scenario: "sync/linear.feature: A run that meets <case> is recorded under linear_issues as <reason>"
 - example: "Tasks::Jobs::SyncIssues a failure in one provider leaves GitHub to run when Linear fails"

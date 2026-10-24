@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import { insertPost, slugFor } from "../support/rows.ts";
 import { Given, Then, When } from "../support/world.ts";
+import { assetPaths } from "./http.ts";
 
 Given("a published post {string} whose Markdown body is:", async ({ app }, title: string, body: string) => {
   await insertPost(app.sql, { body, publishedAt: new Date(Date.now() - 60_000), status: "published", title });
@@ -43,4 +44,11 @@ Then("the contents list {string}", async ({ page }, items: string) => {
 
 Then("the post shows no contents list", async ({ page }) => {
   await expect(page.locator(".toc")).toHaveCount(0);
+});
+
+When("I preview through the {string} Markdown renderer:", async ({ app, http }, renderer: string, markdown: string) => {
+  await http.send("POST", `/admin/markdown/preview/${renderer}`, {
+    form: { markdown: await assetPaths(app.url, markdown) },
+    headers: { "X-CSRF-Token": await http.csrf() },
+  });
 });

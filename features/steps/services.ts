@@ -55,6 +55,13 @@ Given(
 );
 
 Given(
+  "{service} answers {word} {string} next with status {int}",
+  ({ stub }, prefix: string, method: string, path: string, status: number) => {
+    stub.replyThen(method, `${prefix}${path}`, { body: "", status });
+  },
+);
+
+Given(
   "{service} answers {word} {string} with status {int} and the headers:",
   ({ stub }, prefix: string, method: string, path: string, status: number, table: DataTable) => {
     stub.reply(method, `${prefix}${path}`, { body: "", headers: Object.fromEntries(table.raw()), status });
@@ -107,5 +114,23 @@ Then(
     await expect
       .poll(() => stub.received(method, `${prefix}${path}`).map(parsed))
       .toContainEqual(expect.objectContaining(JSON.parse(body)));
+  },
+);
+
+Then(
+  "{service} received {word} {string} with the headers:",
+  async ({ stub }, prefix: string, method: string, path: string, table: DataTable) => {
+    const wanted = Object.fromEntries(table.raw().map(([name, value]) => [name.toLowerCase(), value]));
+    await expect
+      .poll(() =>
+        stub
+          .requests()
+          .filter((sent) => {
+            const sentPath = path.includes("?") ? `${sent.url.pathname}${sent.url.search}` : sent.url.pathname;
+            return sent.method === method && sentPath === `${prefix}${path}`;
+          })
+          .map((sent) => sent.headers),
+      )
+      .toContainEqual(expect.objectContaining(wanted));
   },
 );

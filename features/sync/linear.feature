@@ -22,6 +22,8 @@ Feature: The Linear issue sync
     And Linear was sent a query holding "{state: {type: {nin: [\"completed\", \"canceled\"]}}}"
     And Linear was sent a query holding "first: 25"
     And Linear was sent a query holding "assignedIssues(" with the key "lin_api_one"
+    And Linear received POST "/graphql" with the headers:
+      | Authorization | lin_api_one |
     And the Linear issue sync records no failure
 
   Scenario: A run clears the failure the last run left, and a failure leaves GitHub alone
@@ -712,6 +714,7 @@ Feature: The Linear issue sync
       | a 429              | Linear answers the next assigned query with status 429                                              | rate_limited  |                         |
       | an auth error      | Linear refuses the next assigned query with "AUTHENTICATION_ERROR" saying "Authentication required" | linear_failed | Authentication required |
       | a failed check     | Linear answers the next lookup query with status 500                                                | linear_failed |                         |
+      | a dropped link     | Linear drops the next assigned query                                                                | linear_failed | request failed          |
 
   Scenario: A check Linear answers with no viewer is recorded rather than cancel the task
     Given the tasks tracking issues:

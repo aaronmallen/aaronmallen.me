@@ -461,3 +461,11 @@ Then("visiting {string} answers {int}", async ({ page }, path: string, status: n
 
   expect(response?.status()).toBe(status);
 });
+
+When("I fill the field {string} with:", async ({ page }, selector: string, text: string) => {
+  await page.locator(selector).first().fill(text);
+});
+
+Then("the window's {string} is not set", async ({ page }, name: string) => {
+  expect(await page.evaluate((key) => key in window, name)).toBe(false);
+});

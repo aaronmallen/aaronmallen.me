@@ -255,7 +255,7 @@
 - example: "Admin today signed in the sync failures drops the streak once the sync recovers and fails again"
   scenario: "admin/today_sync_failures.feature: A sync that recovers drops its line, and fails again without its old streak"
 - example: "Admin today signed in the sync failures keeps one repository's failure while another imports cleanly"
-  drop: "needs one commit import to answer several different GraphQL replies on the one POST /graphql path; #1976 teaches the stub to and turns this into a scenario"
+  scenario: "admin/today_sync_failures.feature: Today keeps one repository's failure while another imports cleanly"
 - example: "Admin today signed in the sync failures keeps the message last on a sync that has been failing a while"
   scenario: "admin/today_sync_failures.feature: A sync failure reads as one line on the card"
 - example: "Admin today signed in the sync failures leaves a repository the page limit stopped unreported"

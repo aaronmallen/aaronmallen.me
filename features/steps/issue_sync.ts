@@ -203,6 +203,10 @@ When("the GitHub issue sync runs", async ({ app }) => {
   await settle(app);
 });
 
+When("the queued issue syncs run", async ({ app }) => {
+  await settle(app);
+});
+
 When("the GitHub issue sync runs twice", async ({ app }) => {
   for (const _ of [1, 2]) {
     await app.pushJob("Tasks::Jobs::SyncIssues", "github");
@@ -471,6 +475,11 @@ Given("Linear answers the next {word} query with status {int}", ({ answer, app }
 Given("Linear answers the next {word} query with:", ({ answer, app }, kind: string, json: string) => {
   const fake = linear(app.stub, answer);
   (kind === "assigned" ? fake.assignedReplies : fake.lookupReplies).push({ body: json, status: 200 });
+});
+
+Given("Linear drops the next {word} query", ({ answer, app }, kind: string) => {
+  const fake = linear(app.stub, answer);
+  (kind === "assigned" ? fake.assignedReplies : fake.lookupReplies).push({ body: "", drop: true, status: 0 });
 });
 
 Given(

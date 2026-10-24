@@ -188,3 +188,11 @@ Then(
     expect([...new Set(bounds)]).toEqual([JSON.stringify({ maximum: largest, minimum: 1 })]);
   },
 );
+
+Then(
+  "the API document lists the status {int} for {word} {string}",
+  async ({ app, request }, status: number, verb: string, path: string) => {
+    const document = await documentFrom(request, app.sql);
+    expect(Object.keys(document.paths[path]?.[verb.toLowerCase()]?.responses ?? {})).toContain(String(status));
+  },
+);

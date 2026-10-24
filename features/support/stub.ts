@@ -25,7 +25,13 @@ export const services: Record<string, string> = {
   "the web": "",
 };
 
-type Reply = { body: string | Buffer; delay?: number; headers?: Record<string, string>; status: number };
+type Reply = {
+  body: string | Buffer;
+  delay?: number;
+  drop?: boolean;
+  headers?: Record<string, string>;
+  status: number;
+};
 export type Sent = { body: Buffer; headers: IncomingHttpHeaders; method: string; url: URL };
 type Answer = Reply | ((sent: Sent) => Reply | Promise<Reply>);
 type Stored = { body: Buffer; type: string };
@@ -117,7 +123,9 @@ export async function startStub() {
 
     const answer = next(key, url.search);
     const reply = typeof answer === "function" ? await answer(sent) : answer;
-    if (reply) {
+    if (reply?.drop) {
+      response.socket?.destroy();
+    } else if (reply) {
       const type =
         typeof reply.body === "string" && reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
       const send = () =>

@@ -52,6 +52,45 @@ Feature: Sync failures on the Today page
     And the Today page never names "aaronmallen/big"
     And the Today page has no link to a backfill
 
+  Scenario: Today keeps one repository's failure while another imports cleanly
+    Given the record jobs have a GitHub token
+    And the commit import stored a commit "10 minutes ago"
+    And these sync failures:
+      | sync    | repo            | reason        |
+      | commits | aaronmallen/one | rate_limited  |
+      | commits | aaronmallen/two | github_failed |
+    And GitHub answers POST "/graphql" with:
+      """
+      {"data": {"rateLimit": {"limit": 5000, "remaining": 4999, "resetAt": "2099-01-01T00:00:00Z"},
+        "viewer": {"id": "MDQ6VXNlcjkzMTA5NA==", "repositories": {"pageInfo": {"hasNextPage": false, "endCursor": null},
+          "nodes": [{"nameWithOwner": "aaronmallen/one", "pushedAt": "2026-01-01T00:00:00Z", "viewerPermission": "ADMIN"},
+            {"nameWithOwner": "aaronmallen/two", "pushedAt": "2026-01-01T00:00:00Z", "viewerPermission": "ADMIN"}]}},
+        "repository": {"createdAt": null, "defaultBranchRef": {"name": "main"},
+          "refs": {"pageInfo": {"hasNextPage": false, "endCursor": null}, "nodes": [
+            {"name": "main", "target": {"history": {"pageInfo": {"hasNextPage": false, "endCursor": null}, "nodes": [
+              {"oid": "aaaaaaa", "message": "lib: a commit", "authoredDate": "2026-07-31T12:00:00Z",
+                "committedDate": "2026-07-31T12:00:00Z", "additions": 1, "deletions": 0}]}}}]}}}}
+      """
+    And GitHub answers POST "/graphql" next with status 502
+    And GitHub answers POST "/graphql" next with:
+      """
+      {"data": {"rateLimit": {"limit": 5000, "remaining": 4999, "resetAt": "2099-01-01T00:00:00Z"},
+        "viewer": {"id": "MDQ6VXNlcjkzMTA5NA==", "repositories": {"pageInfo": {"hasNextPage": false, "endCursor": null},
+          "nodes": [{"nameWithOwner": "aaronmallen/one", "pushedAt": "2026-01-01T00:00:00Z", "viewerPermission": "ADMIN"},
+            {"nameWithOwner": "aaronmallen/two", "pushedAt": "2026-01-01T00:00:00Z", "viewerPermission": "ADMIN"}]}},
+        "repository": {"createdAt": null, "defaultBranchRef": {"name": "main"},
+          "refs": {"pageInfo": {"hasNextPage": false, "endCursor": null}, "nodes": [
+            {"name": "main", "target": {"history": {"pageInfo": {"hasNextPage": false, "endCursor": null}, "nodes": [
+              {"oid": "aaaaaaa", "message": "lib: a commit", "authoredDate": "2026-07-31T12:00:00Z",
+                "committedDate": "2026-07-31T12:00:00Z", "additions": 1, "deletions": 0}]}}}]}}}}
+      """
+    When the commit import runs
+    And I visit "/admin"
+    Then the sync failures match:
+      """
+      Commit import failed for aaronmallen/one at <any> · GitHub didn't answer<any>
+      """
+
   Scenario: Today lists both syncs when both failed
     Given these sync failures:
       | sync     | reason        |

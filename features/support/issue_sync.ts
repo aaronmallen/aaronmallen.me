@@ -4,7 +4,7 @@ export const viewer = "MDQ6VXNlcjkzMTA5NA==";
 export const someoneElse = "MDQ6VXNlcjE=";
 
 type Json = Record<string, unknown>;
-type Reply = { body: string; headers?: Record<string, string>; status: number };
+type Reply = { body: string; drop?: boolean; headers?: Record<string, string>; status: number };
 
 // A GitHub that holds issues: the search answers the assigned ones a page at a time, the lookup by ID answers the
 // known ones (assigned or not), and REST answers the paths set in rest. A reply set in searchReplies or
