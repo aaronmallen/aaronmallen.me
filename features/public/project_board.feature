@@ -56,7 +56,6 @@ Feature: Project board
       | done 2        |
       | canceled 1    |
     And ".board-bar > .meta" reads "3 open · 6 total"
-    And the page has no axe breaches in light or dark
 
   Scenario: An empty column and group are marked, every group opens but canceled, and the view switch starts unpressed
     When I visit "/projects/doing-it"
@@ -68,6 +67,7 @@ Feature: Project board
       | true  |
       | true  |
       | false |
+    And the page has no axe breaches in light or dark
     When I request "/projects/doing-it"
     Then the body matches "<div class=\"board-switch\" role=\"group\" aria-label=\"View\">"
     And the body includes "data-board-view=\"board\" aria-pressed=\"false\""

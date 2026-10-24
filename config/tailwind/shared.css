@@ -798,7 +798,7 @@
 }
 
 @utility board {
-  @apply grid snap-x snap-proximity items-start gap-[clamp(10px,1vw,18px)] overflow-x-auto pb-2.5;
+  @apply grid snap-x snap-proximity items-start gap-[clamp(10px,1vw,18px)] overflow-x-auto pb-2.5 focus-ring;
   grid-auto-columns: minmax(260px, 1fr);
   grid-auto-flow: column;
 }

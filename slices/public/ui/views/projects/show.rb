@@ -34,6 +34,12 @@ module Public
             views
           end
 
+          def board_columns(columns)
+            div(class: "board", role: "region", tabindex: 0, aria: { label: t(".title", name: @project.name) }) do
+              columns.each { |key, tasks| column(key, tasks) }
+            end
+          end
+
           def board_head
             header(class: "hd") do
               span(class: "kicker") { t(".kicker") }
@@ -117,7 +123,7 @@ module Public
             BoardFilter(project: @project, tags: @tags, filter: @filter, shown: @counts.values.sum)
             div(class: "board-views", data: { board_views: "" }) do
               BoardBar(counts: @counts)
-              div(class: "board") { columns.each { |key, tasks| column(key, tasks) } }
+              board_columns(columns)
               div(class: "board-list") { columns.each { |key, tasks| group(key, tasks) } }
             end
           end
