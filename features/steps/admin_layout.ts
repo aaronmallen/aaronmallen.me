@@ -708,6 +708,9 @@ Then("the screen holds to the size it is read on", async ({ page }) => {
 
 Then("Tab reaches every control in order behind a ring", async ({ page }) => {
   const stops = await page.evaluate(() => {
+    // Keep each label in a map, not on the element: a live morph strips unknown attributes mid-walk.
+    const names = new WeakMap<Element, string>();
+    (window as unknown as { tabStops: WeakMap<Element, string> }).tabStops = names;
     const modal = document.querySelector("dialog:modal");
     const scope = modal ?? document;
     const marked = [
@@ -726,8 +729,9 @@ Then("Tab reaches every control in order behind a ring", async ({ page }) => {
         return radio === (group.find((other) => other.checked) ?? group[0]);
       })
       .map((el, index) => {
-        el.dataset.tabStop = `${index}: ${el.outerHTML.slice(0, 60)}`;
-        return el.dataset.tabStop;
+        const stop = `${index}: ${el.outerHTML.slice(0, 60)}`;
+        names.set(el, stop);
+        return stop;
       });
     const top = document.createElement("span");
     top.tabIndex = -1;
@@ -741,7 +745,8 @@ Then("Tab reaches every control in order behind a ring", async ({ page }) => {
       const active = document.activeElement as HTMLElement;
       const style = getComputedStyle(active);
       const outline = style.outlineStyle !== "none" && Number.parseFloat(style.outlineWidth) > 0;
-      return { ring: outline || style.boxShadow !== "none", stop: active.dataset.tabStop };
+      const names = (window as unknown as { tabStops: WeakMap<Element, string> }).tabStops;
+      return { ring: outline || style.boxShadow !== "none", stop: names.get(active) };
     });
   };
   const walked: { ring: boolean; stop?: string }[] = [];
