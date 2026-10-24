@@ -1,6 +1,6 @@
 import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdirSync, openSync, rmSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, openSync, rmSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -30,6 +30,29 @@ type Owner = { cookies: Cookie[]; device: postgres.Row };
 
 const workspace = Number(process.env.WORKSPACE_ID ?? 0);
 const firstPort = 20000 + (workspace % 2000) * 20;
+
+export const countryFolder = (parallelIndex: number) =>
+  join(root, `tmp/features-ws${workspace}-w${parallelIndex + 1}-maxmind`);
+
+export function removeCountryFolder(parallelIndex: number) {
+  const folder = countryFolder(parallelIndex);
+  if (!existsSync(folder)) return;
+  chmodSync(folder, 0o700);
+  rmSync(folder, { force: true, recursive: true });
+}
+
+async function settle(redis: ReturnType<typeof createClient>) {
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    const processed = Number((await redis.get("stat:processed")) ?? 0);
+    const queued = await redis.lLen("queue:default");
+    const workers = await redis.sMembers("processes");
+    const busy = await Promise.all(workers.map(async (name) => Number((await redis.hGet(name, "busy")) ?? 0)));
+    if (processed > 0 && queued === 0 && workers.length > 0 && busy.every((count) => count === 0)) return;
+    await sleep(250);
+  }
+  console.warn("Sidekiq did not settle after its startup jobs; going on");
+}
 
 async function until(ready: () => Promise<unknown>, what: string) {
   const deadline = Date.now() + 60_000;
@@ -133,6 +156,7 @@ export const test = base.extend<
       });
 
       try {
+        removeCountryFolder(parallelIndex);
         await startRedis();
         execFileSync("bundle", ["exec", "hanami", "db", "prepare"], {
           cwd: root,
@@ -143,6 +167,8 @@ export const test = base.extend<
           FROM pg_tables
           WHERE schemaname = 'public' AND tablename <> 'schema_migrations'
         `;
+        const truncate = () => until(() => sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`), "The truncate");
+        await truncate();
 
         children.push(
           start(`w${parallelIndex}-server`, "bundle", ["exec", "puma", "--config", "config/puma.rb"], env),
@@ -154,6 +180,7 @@ export const test = base.extend<
           ),
         );
         await until(() => fetch(url, { method: "HEAD" }), "The server");
+        await settle(redis);
         await use({
           env,
           pushJob: async (job, ...args) => {
@@ -166,7 +193,7 @@ export const test = base.extend<
           reset: async () => {
             if (!redis.isReady) await startRedis();
             rmSync(env.MAINTENANCE_FLAG_PATH, { force: true, recursive: true });
-            await until(() => sql.unsafe(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`), "The truncate");
+            await truncate();
             await redis.flushDb();
           },
           sql,

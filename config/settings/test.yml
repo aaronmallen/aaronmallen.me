@@ -48,7 +48,7 @@ mastodon:
   instance_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/mastodon/%<host>s".to_json %>
 maxmind:
   account_id: <%= (ENV["STUB_URL"] && "stub-account").to_json %>
-  database_path: <%= (ENV["STUB_URL"] && "tmp/features-ws#{ENV["WORKSPACE_ID"]}-w#{ENV["TEST_ENV_NUMBER"]}-maxmind/GeoLite2-City.mmdb").to_json %>
+  database_path: <%= (ENV["STUB_URL"] && "tmp/features-ws#{ENV["WORKSPACE_ID"].to_i}-w#{ENV["TEST_ENV_NUMBER"]}-maxmind/GeoLite2-City.mmdb").to_json %>
   download_url: <%= "#{ENV.fetch("STUB_URL", "http://stub.localhost")}/maxmind".to_json %>
   license_key: <%= (ENV["STUB_URL"] && "stub-license").to_json %>
 media_store:

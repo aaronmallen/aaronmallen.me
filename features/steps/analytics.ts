@@ -1,20 +1,11 @@
-import {
-  chmodSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { chmodSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect } from "@playwright/test";
 import { createBdd, type DataTable } from "playwright-bdd";
 import type postgres from "postgres";
 import { chicago, countryDatabase, dayOf, fill, iso, sha, tarball, today, unique, when } from "../support/analytics.ts";
 import { ownerEmail } from "../support/stub.ts";
-import { Given, Then, test, When } from "../support/world.ts";
+import { countryFolder, Given, removeCountryFolder, Then, test, When } from "../support/world.ts";
 
 type Row = Record<string, unknown>;
 
@@ -605,9 +596,6 @@ When("{string} sends {int} view beacons for {string}", async ({ page }, agent: s
   }
 });
 
-const countryFolder = (parallelIndex: number) =>
-  resolve(import.meta.dirname, `../../tmp/features-ws${process.env.WORKSPACE_ID ?? 0}-w${parallelIndex + 1}-maxmind`);
-
 const countryFile = (parallelIndex: number) => resolve(countryFolder(parallelIndex), "GeoLite2-City.mmdb");
 
 function writeCountries(parallelIndex: number, bytes: Buffer) {
@@ -619,13 +607,7 @@ function writeCountries(parallelIndex: number, bytes: Buffer) {
 
 const download = "/maxmind/geoip/databases/GeoLite2-City/download";
 
-After(({ $testInfo }) => {
-  const folder = countryFolder($testInfo.parallelIndex);
-  if (existsSync(folder)) {
-    chmodSync(folder, 0o700);
-    rmSync(folder, { force: true, recursive: true });
-  }
-});
+After(({ $testInfo }) => removeCountryFolder($testInfo.parallelIndex));
 
 Given("the country database holds the test networks", ({ $testInfo }) => {
   writeCountries($testInfo.parallelIndex, countryDatabase());
