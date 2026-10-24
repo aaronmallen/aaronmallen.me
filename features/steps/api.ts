@@ -1,7 +1,9 @@
 import { createHash, randomBytes } from "node:crypto";
 import { expect } from "@playwright/test";
-import { answer, callApi, dig, fill, keep, recall } from "../support/api.ts";
-import { Given, Then, When } from "../support/world.ts";
+import { answer, callApi, dig, fill, filled, keep, recall } from "../support/api.ts";
+import { Given, Then, type test, When } from "../support/world.ts";
+
+type World = Parameters<Parameters<typeof test>[2]>[0];
 
 const mint = async (sql: import("postgres").Sql, scopes?: string[]) => {
   const value = randomBytes(32).toString("base64url");
@@ -25,15 +27,25 @@ Then("the API lists the post {string}", async ({ request, tokens }, title: strin
   expect(await response.text()).toContain(title);
 });
 
-When("I {word} {string} through the API", async ({ http, request, tokens }, method: string, path: string) => {
-  await callApi(request, http, tokens.api, method, path.replace(/^\//, ""));
-});
+// Calls the API with the API token, its path and body filled first; other steps send their calls through it.
+export async function send(
+  { app, http, request, tokens }: Pick<World, "app" | "http" | "request" | "tokens">,
+  method: string,
+  path: string,
+  body?: string,
+) {
+  const target = (await filled(app.sql, path, http)).replace(/^\//, "");
+  return callApi(request, http, tokens.api, method, target, body && (await filled(app.sql, body, http)));
+}
+
+When("I {word} {string} through the API", ({ app, http, request, tokens }, method: string, path: string) =>
+  send({ app, http, request, tokens }, method, path),
+);
 
 When(
   "I {word} {string} through the API with:",
-  async ({ http, request, tokens }, method: string, path: string, body: string) => {
-    await callApi(request, http, tokens.api, method, path.replace(/^\//, ""), body);
-  },
+  ({ app, http, request, tokens }, method: string, path: string, body: string) =>
+    send({ app, http, request, tokens }, method, path, body),
 );
 
 When("I call the API {word} {string} with no token", async ({ http, request }, method: string, path: string) => {
@@ -63,8 +75,10 @@ Then("the API answer does not hold {string}", ({ answer }, text: string) => {
   expect(answer.body).not.toContain(text);
 });
 
-Then("the API answer holds:", ({ app, http }, expected: string) => {
-  expect(answer(http)).toMatchObject(JSON.parse(fill(http, expected).replaceAll("SITE", app.url)));
+Then("the API answer holds:", async ({ app, http }, expected: string) => {
+  expect(answer(http), http.body).toMatchObject(
+    JSON.parse((await filled(app.sql, expected, http)).replaceAll("SITE", app.url)),
+  );
 });
 
 Then("the API answer is:", ({ http }, expected: string) => {

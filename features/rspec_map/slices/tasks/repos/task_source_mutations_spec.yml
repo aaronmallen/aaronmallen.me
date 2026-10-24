@@ -1,3 +1,6 @@
 - example: "Tasks::Repos::TaskSourceMutations each provider's sync lock lets GitHub sync while Linear holds its lock"
+  scenario: "sync/locks.feature: Each provider's sync takes a lock of its own"
 - example: "Tasks::Repos::TaskSourceMutations each provider's sync lock lets Linear sync while GitHub holds its lock"
+  scenario: "sync/locks.feature: Each provider's sync takes a lock of its own"
 - example: "Tasks::Repos::TaskSourceMutations each provider's sync lock turns away a second sync of the same provider"
+  scenario: "sync/locks.feature: Each provider's sync takes a lock of its own"

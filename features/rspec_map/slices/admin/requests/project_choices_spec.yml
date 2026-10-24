@@ -1,3 +1,6 @@
 - example: "Admin project choices answers 401 when signed out"
+  scenario: "projects/signed_out.feature: The project choices answer 401 when signed out"
 - example: "Admin project choices signed in forbids caching the list"
+  scenario: "projects/editor.feature: The project choices list the live projects by name, uncached, and only when signed in"
 - example: "Admin project choices signed in lists the live projects by name"
+  scenario: "projects/editor.feature: The project choices list the live projects by name, uncached, and only when signed in"

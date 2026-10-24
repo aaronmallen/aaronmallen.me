@@ -1,4 +1,8 @@
 - example: "API reading a work entry GET /api/v1/work_entries/:id answers the records linked to the work entry, grouped by kind"
+  scenario: "projects/work_api.feature: The API reads a role with its linked records, as read_work_entry does"
 - example: "API reading a work entry GET /api/v1/work_entries/:id answers the same JSON as read_work_entry"
+  scenario: "projects/work_api.feature: The API reads a role with its linked records, as read_work_entry does"
 - example: "API reading a work entry GET /api/v1/work_entries/:id answers the work entry"
+  scenario: "projects/work_api.feature: The API reads a role with its linked records, as read_work_entry does"
 - example: "API reading a work entry GET /api/v1/work_entries/:id calls a role with no last year current"
+  scenario: "projects/work_api.feature: The API reads a role with its linked records, as read_work_entry does"

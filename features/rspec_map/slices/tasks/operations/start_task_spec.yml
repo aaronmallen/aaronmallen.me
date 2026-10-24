@@ -1,1 +1,2 @@
 - example: "Tasks::Operations::StartTask two starts of one task at once lets both succeed and leaves one open session"
+  scenario: "tasks/at_once.feature: Two starts of one task at once both succeed and leave one open session"

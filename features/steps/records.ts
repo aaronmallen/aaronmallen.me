@@ -15,6 +15,11 @@ const kinds = ["task", "post", "social_post", "journal_entry", "commit", "projec
 
 async function recordId(sql: postgres.Sql, kind: string, name: string) {
   if (kind === "note_folder") return folderAt(sql, name);
+  if (kind === "work_entry") {
+    const [entry] = await sql`SELECT id FROM work_entries WHERE role = ${name}`;
+    expect(entry, `the work entry ${name}`).toBeTruthy();
+    return entry.id as number;
+  }
   const column = kind === "note" || kind === "task" || kind === "post" ? "title" : "name";
   const [row] = await sql`SELECT id FROM ${sql(`${kind}s`)} WHERE ${sql(column)} = ${name}`;
   expect(row, `the ${kind} ${name}`).toBeTruthy();

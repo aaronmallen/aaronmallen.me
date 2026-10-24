@@ -1,3 +1,6 @@
 - example: "API reading a project GET /api/v1/projects/:id answers the project with its stamps"
+  scenario: "projects/api.feature: Reading a project answers it whole with its stamps and linked records, as read_project does"
 - example: "API reading a project GET /api/v1/projects/:id answers the records linked to the project, grouped by kind"
+  scenario: "projects/api.feature: Reading a project answers it whole with its stamps and linked records, as read_project does"
 - example: "API reading a project GET /api/v1/projects/:id answers the same JSON as read_project"
+  scenario: "projects/api.feature: Reading a project answers it whole with its stamps and linked records, as read_project does"

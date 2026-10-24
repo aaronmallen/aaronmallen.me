@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
-import { dig, fill, keep, recall } from "../support/api.ts";
+import { dig, fill, filled, keep, recall } from "../support/api.ts";
 import type { Http } from "../support/http.ts";
 import { authorize, type Connection, redirectUri as claudeRedirect, connect, rpc } from "../support/mcp.ts";
 import { root } from "../support/shell.ts";
@@ -58,7 +58,7 @@ async function rpcResult({ request, tokens }: Pick<World, "request" | "tokens">,
   return { body, result: response.ok() ? JSON.parse(body).result : undefined, status: response.status() };
 }
 
-async function call(
+export async function call(
   { answer, http, request, tokens }: Pick<World, "answer" | "http" | "request" | "tokens">,
   name: string,
   args: string,
@@ -78,8 +78,8 @@ When("I call the MCP tool {string}", ({ answer, http, request, tokens }, name: s
   call({ answer, http, request, tokens }, name, "{}"),
 );
 
-When("I call the MCP tool {string} with:", ({ answer, http, request, tokens }, name: string, args: string) =>
-  call({ answer, http, request, tokens }, name, args),
+When("I call the MCP tool {string} with:", async ({ answer, app, http, request, tokens }, name: string, args: string) =>
+  call({ answer, http, request, tokens }, name, await filled(app.sql, args, http)),
 );
 
 Then(
@@ -100,9 +100,9 @@ Then("the MCP answer does not hold {string}", ({ answer }, text: string) => {
   expect(answer.body).not.toContain(text);
 });
 
-Then("the MCP answer holds:", ({ answer, http }, expected: string) => {
+Then("the MCP answer holds:", async ({ answer, app, http }, expected: string) => {
   expect(answer.error ?? toolResult(http).isError ?? false, http.body).toBe(false);
-  expect(JSON.parse(toolText(answer, http))).toMatchObject(JSON.parse(fill(http, expected)));
+  expect(JSON.parse(toolText(answer, http))).toMatchObject(JSON.parse(await filled(app.sql, expected, http)));
 });
 
 Then("the MCP tool refuses with {string}", ({ answer, http }, message: string) => {

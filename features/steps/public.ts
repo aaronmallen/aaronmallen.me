@@ -1,8 +1,9 @@
 import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import type postgres from "postgres";
-import { fill } from "../support/api.ts";
+import { fill, filled } from "../support/api.ts";
 import { slugFor } from "../support/rows.ts";
+import { insertProject } from "../support/tasks.ts";
 import { Given, Then, When } from "../support/world.ts";
 import { assetPaths } from "./http.ts";
 
@@ -116,31 +117,7 @@ Given("{int} published posts", async ({ app }, count: number) => {
 });
 
 async function insertProjects(sql: postgres.Sql, rows: Record<string, string>[]) {
-  const app = { sql };
-  for (const row of rows) {
-    await app.sql`
-      INSERT INTO projects ${app.sql({
-        archived_on: row.archived || null,
-        board_published: row.board === "published",
-        key: row.key || null,
-        name: row.name,
-        og_image_url: row.image || null,
-        release: row.release || null,
-        repo: row.repo || null,
-        stars: Number(row.stars || 0),
-        updated_at: row.updated ? when(row.updated) : new Date(),
-        started_on: row.started || "2024-01-01",
-        tagline: row.tagline || null,
-        url: row.url || null,
-        visibility: row.visibility || "public",
-      })}
-      RETURNING id
-    `.then(async ([project]) => {
-      for (const tag of await tagIds(app.sql, row.tags ?? "")) {
-        await app.sql`INSERT INTO project_tags ${app.sql({ project_id: project.id, tag_id: tag })}`;
-      }
-    });
-  }
+  for (const row of rows) await insertProject(sql, { ...row, updated: row.updated && when(row.updated).toISOString() });
 }
 
 Given("the projects:", async ({ app }, table: DataTable) => {
@@ -174,15 +151,15 @@ When("the posts are rendered again", async ({ app }) => {
 });
 
 Then("the page has {string}", async ({ app, http, page }, selector: string) => {
-  await expect(page.locator(await assetPaths(app.url, fill(http, selector))).first()).toBeAttached();
+  await expect(page.locator(await assetPaths(app.url, await filled(app.sql, selector, http))).first()).toBeAttached();
 });
 
 Then("the page has no {string}", async ({ app, http, page }, selector: string) => {
-  await expect(page.locator(await assetPaths(app.url, fill(http, selector)))).toHaveCount(0);
+  await expect(page.locator(await assetPaths(app.url, await filled(app.sql, selector, http)))).toHaveCount(0);
 });
 
-Then("the page has {int} of {string}", async ({ page }, count: number, selector: string) => {
-  await expect(page.locator(selector)).toHaveCount(count);
+Then("the page has {int} of {string}", async ({ app, http, page }, count: number, selector: string) => {
+  await expect(page.locator(await filled(app.sql, selector, http))).toHaveCount(count);
 });
 
 Then("{string} reads {string}", async ({ page }, selector: string, text: string) => {

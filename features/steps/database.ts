@@ -2,14 +2,14 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { expect } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
 import type postgres from "postgres";
-import { fill } from "../support/api.ts";
+import { fill, filled } from "../support/api.ts";
 import { run } from "../support/shell.ts";
 import { Given, Then, When } from "../support/world.ts";
 
 const codes: Record<string, string> = { check: "23514", unique: "23505" };
 
 Given("the database runs:", async ({ app }, statement: string) => {
-  await app.sql.unsafe(statement).simple();
+  await app.sql.unsafe(await filled(app.sql, statement)).simple();
 });
 
 Given("the database runs {string}", async ({ app }, statement: string) => {

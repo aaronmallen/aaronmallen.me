@@ -1,5 +1,7 @@
 import type { APIRequestContext } from "@playwright/test";
+import type postgres from "postgres";
 import { chicagoDay, type Http } from "./http.ts";
+import { withIds } from "./tasks.ts";
 
 const kept = new WeakMap<Http, Record<string, unknown>>();
 
@@ -7,7 +9,7 @@ export const keep = (http: Http, name: string, value: unknown) => {
   kept.set(http, { ...kept.get(http), [name]: value });
 };
 
-export const recall = (http: Http, name: string) => kept.get(http)?.[name];
+export const recall = (http: Http | undefined, name: string) => (http ? kept.get(http)?.[name] : undefined);
 
 const clock = (at = new Date()) =>
   new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "America/Chicago" }).format(at);
@@ -18,7 +20,7 @@ const chicagoTime = (hours: number) => {
   return `${day}T${clock(at)}`;
 };
 
-export const fill = (http: Http, text: string) =>
+export const fill = (http: Http | undefined, text: string) =>
   text.replaceAll(/\{([\w:]+)\}/g, (whole, name) => {
     if (name === "clock") return clock();
     if (name === "today") return chicagoDay(0);
@@ -29,6 +31,10 @@ export const fill = (http: Http, text: string) =>
     const value = recall(http, name);
     return value === undefined ? whole : String(value);
   });
+
+// The one way a step fills its text: fill() swaps {today}, {days_ago:3} and kept values, then withIds() swaps
+// record and day marks such as {task:Write docs}, {day:today + 1} or {local:today 09:00}.
+export const filled = async (sql: postgres.Sql, text: string, http?: Http) => withIds(sql, fill(http, text));
 
 export const dig = (value: unknown, path: string) =>
   path

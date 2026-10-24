@@ -3,7 +3,7 @@ import { join } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import type { DataTable } from "playwright-bdd";
-import { fill } from "../support/api.ts";
+import { filled } from "../support/api.ts";
 import { root } from "../support/shell.ts";
 import { Given, Then, When } from "../support/world.ts";
 
@@ -72,13 +72,13 @@ Then("the page has a {string} button", async ({ page }, name: string) => {
   await expect(page.getByRole("button", { name })).toBeVisible();
 });
 
-When("I visit {string}", async ({ answer, http, page }, path: string) => {
-  answer.status = (await page.goto(fill(http, path)))?.status() ?? 0;
+When("I visit {string}", async ({ answer, app, http, page }, path: string) => {
+  answer.status = (await page.goto(await filled(app.sql, path, http)))?.status() ?? 0;
 });
 
-When("I post to {string} from the page with:", async ({ answer, page }, path: string, table: DataTable) => {
+When("I post to {string} from the page with:", async ({ answer, app, page }, path: string, table: DataTable) => {
   const token = await page.locator("input[name='_csrf_token']").first().inputValue();
-  const response = await page.request.post(path, {
+  const response = await page.request.post(await filled(app.sql, path), {
     form: { _csrf_token: token, ...table.rowsHash() },
     maxRedirects: 0,
   });

@@ -1,2 +1,4 @@
 - example: "Admin task cadence picker in the task panel saves the cadence"
+  scenario: "tasks/cadence.feature: The task panel's editor saves every few weeks"
 - example: "Admin task cadence picker in the task panel shows the fields every few weeks needs"
+  scenario: "tasks/cadence.feature: The task panel's editor saves every few weeks"

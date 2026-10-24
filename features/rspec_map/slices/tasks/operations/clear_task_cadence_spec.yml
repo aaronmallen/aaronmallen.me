@@ -1,2 +1,4 @@
 - example: "Tasks::Operations::ClearTaskCadence clears a task's cadence"
+  scenario: "tasks/series.feature: The API starts a weekly cadence today, keeps one a save leaves out and clears one with null"
 - example: "Tasks::Operations::ClearTaskCadence fails for a task with no cadence"
+  scenario: "tasks/series.feature: The API starts a weekly cadence today, keeps one a save leaves out and clears one with null"
