@@ -983,13 +983,13 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "finds the task by its key" do
-      find_task("##{other.id}")
+      find_task("##{key(other)}")
 
       expect(page).to have_css(".task-link-target", text: "Learn Elixir")
     end
 
     it "leaves the task itself out of the matches" do
-      find_task(task.id.to_s)
+      find_task(key(task))
 
       expect(page).to have_css(".task-link-editor", text: finder(:no_match))
     end
