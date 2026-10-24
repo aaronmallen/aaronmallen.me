@@ -164,7 +164,12 @@ Given(
   async ({ app }, subject: string, table: { hashes: () => Row[] }) => {
     const id = await mailThreadId(app.sql, subject);
     for (const row of table.hashes()) {
-      await insertMailMessage(app.sql, id, { ...message(row), subject: row.subject || undefined });
+      const added = message(row);
+      await insertMailMessage(app.sql, id, {
+        ...added,
+        receivedAt: added.receivedAt ?? new Date(),
+        subject: row.subject || undefined,
+      });
     }
   },
 );
