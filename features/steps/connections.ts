@@ -57,8 +57,7 @@ async function comeBack(page: Page, answer: Record<string, string>) {
 async function follow(page: Page, act: () => Promise<void>) {
   const before = page.url();
   await act();
-  await page.waitForURL((url) => url.href !== before);
-  await page.waitForLoadState();
+  await page.waitForURL((url) => url.href !== before, { waitUntil: "domcontentloaded" });
   if (authorizePath.test(new URL(page.url()).pathname)) asked = new URL(page.url());
 }
 
