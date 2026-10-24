@@ -1,3 +1,6 @@
 - example: "An error raised in a request when a public action raises raises the error again"
+  drop: "Forces a crash by swapping a repo inside the app; no outside input makes a public action raise. The 500 page a crash gets is not reachable from a feature either"
 - example: "An error raised in a request when a public action raises tells Honeybadger what the action raised"
+  drop: "Honeybadger has no API key in test, so no notice ever leaves the app for a stub to catch; forcing the crash also needs a repo swapped inside the app"
 - example: "An error raised in a request when the app answers tells Honeybadger nothing"
+  drop: "Honeybadger has no API key in test, so no notice ever leaves the app for a stub to see, sent or not"

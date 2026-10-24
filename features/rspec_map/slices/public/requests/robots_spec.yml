@@ -1,4 +1,8 @@
 - example: "Robots answers a crawler that takes anything"
+  scenario: "public/robots.feature: robots.txt answers as plain text to <accept>"
 - example: "Robots answers as plain text"
+  scenario: "public/robots.feature: robots.txt answers as plain text to <accept>"
 - example: "Robots keeps every crawler off the private paths and allows the rest"
+  scenario: "public/robots.feature: robots.txt keeps crawlers off the private paths and names the sitemap"
 - example: "Robots names the sitemap"
+  scenario: "public/robots.feature: robots.txt keeps crawlers off the private paths and names the sitemap"

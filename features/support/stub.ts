@@ -119,7 +119,10 @@ export async function startStub() {
     if (reply) {
       const type =
         typeof reply.body === "string" && reply.body.trimStart().startsWith("<") ? "text/html" : "application/json";
-      const send = () => response.writeHead(reply.status, { "Content-Type": type, ...reply.headers }).end(reply.body);
+      const send = () =>
+        response
+          .writeHead(reply.status, { "Content-Type": type, ...reply.headers })
+          .end(sent.method === "HEAD" ? undefined : reply.body);
       if (reply.delay) {
         const timer = setTimeout(() => held.delete(timer) && send(), reply.delay);
         held.set(timer, response);

@@ -1,3 +1,6 @@
 - example: "The settings menu closes on Escape and hands focus back to the gear"
+  scenario: "browser/settings_menu.feature: The menu closes on Escape and hands focus back to the gear"
 - example: "The settings menu closes on a click outside it"
+  scenario: "browser/settings_menu.feature: The menu closes on a click outside it"
 - example: "The settings menu opens from the gear"
+  scenario: "browser/settings_menu.feature: The menu opens from the gear"

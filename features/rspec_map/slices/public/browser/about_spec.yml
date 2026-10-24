@@ -1,2 +1,4 @@
 - example: "About layout sets the sidebar after the prose below 900px"
+  scenario: "public/layout.feature: The about sidebar sticks beside the prose from 900px and follows it below"
 - example: "About layout sticks the sidebar beside the prose from 900px"
+  scenario: "public/layout.feature: The about sidebar sticks beside the prose from 900px and follows it below"
