@@ -237,7 +237,7 @@ export const test = base.extend<
     await use(state);
     await dispose();
   },
-  reset: [async ({ app }, use) => use(await app.reset()), { auto: true }],
+  reset: [async ({ app, owner: _owner }, use) => use(await app.reset()), { auto: true }],
   shell: async ({ app }, use) => {
     const dir = await mkdtemp(join(tmpdir(), "features-"));
     const shell: Shell = { children: [], dir, env: { ...app.env, ROOT: root, SCRATCH: dir }, output: "", status: null };
