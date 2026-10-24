@@ -113,6 +113,13 @@ RSpec.describe "API agent tags", type: :request do
       expect(held(:artifact_tags, :artifact_id, id).map(&:last)).to contain_exactly(project.id, other.id)
     end
 
+    it "copies its tags into a project linked after it was tagged" do
+      other = create(:project, key: "POD")
+      [project, other].each { link(id, it.id).then { retag("perf") } }
+
+      expect(held(:artifact_tags, :artifact_id, id).map(&:last)).to contain_exactly(project.id, other.id)
+    end
+
     it "drops a project's tags when its link to that project goes" do
       other = create(:project, key: "POD")
       [project, other].each { link(id, it.id) }

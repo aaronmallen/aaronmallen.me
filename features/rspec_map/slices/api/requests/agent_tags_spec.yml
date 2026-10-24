@@ -16,6 +16,8 @@
   scenario: "api/agent_tags.feature: A session in a project takes the project's own tag, made there when missing, and drops it"
 - example: "API agent tags a session takes its project's own tag, made there when missing"
   scenario: "api/agent_tags.feature: A session in a project takes the project's own tag, made there when missing, and drops it"
+- example: "API agent tags an artifact copies its tags into a project linked after it was tagged"
+  scenario: "api/agent_tags.feature: An artifact tagged in one project takes the tag in a project it links to later"
 - example: "API agent tags an artifact drops a project's tags when its link to that project goes"
   scenario: "api/agent_tags.feature: An artifact takes a copy of each tag in every project it links to, and drops a project's when its link goes"
 - example: "API agent tags an artifact takes a copy of each tag in every project it links to"

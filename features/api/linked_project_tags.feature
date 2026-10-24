@@ -54,6 +54,70 @@ Feature: API linked project tags
       """
     Then the tagged mail_thread "Feed broke" holds "bug in BLOG"
 
+  Scenario: A decision tagged before its second project link takes the tag in the new project
+    Given the tagging records:
+      | id | kind     | title       |
+      | 7  | decision | Pick a host |
+    And the tagging decision "Pick a host" links to the project "BLOG"
+    When I call the API with "POST /api/v1/decisions/7/tags" and:
+      """
+      {"tags": ["bug"]}
+      """
+    And the tagging decision "Pick a host" links to the project "POD"
+    And I call the API with "POST /api/v1/decisions/7/tags" and:
+      """
+      {"tags": ["bug"]}
+      """
+    Then the tagged decision "Pick a host" holds "bug in BLOG, bug in POD"
+
+  Scenario: A journal entry tagged before its second project link takes the tag in the new project
+    Given the tagging records:
+      | id | kind          | title          |
+      | 7  | journal_entry | Wrote the feed |
+    And the tagging journal_entry "Wrote the feed" links to the project "BLOG"
+    When I call the API with "PATCH /api/v1/journal_entries/7" and:
+      """
+      {"tags": ["bug"]}
+      """
+    And the tagging journal_entry "Wrote the feed" links to the project "POD"
+    And I call the API with "PATCH /api/v1/journal_entries/7" and:
+      """
+      {"tags": ["bug"]}
+      """
+    Then the tagged journal_entry "Wrote the feed" holds "bug in BLOG, bug in POD"
+
+  Scenario: A note tagged before its second project link takes the tag in the new project
+    Given the tagging records:
+      | id | kind | title      |
+      | 7  | note | Feed notes |
+    And the tagging note "Feed notes" links to the project "BLOG"
+    When I call the MCP tool "tag_note" with:
+      """
+      {"id": 7, "tag": "bug"}
+      """
+    And the tagging note "Feed notes" links to the project "POD"
+    And I call the MCP tool "tag_note" with:
+      """
+      {"id": 7, "tag": "bug"}
+      """
+    Then the tagged note "Feed notes" holds "bug in BLOG, bug in POD"
+
+  Scenario: A mail thread tagged before its second project link takes the tag in the new project
+    Given the tagging records:
+      | id | kind        | title      |
+      | 7  | mail_thread | Feed broke |
+    And the tagging mail_thread "Feed broke" links to the project "BLOG"
+    When I call the MCP tool "tag_mail_threads" with:
+      """
+      {"ids": [7], "tag": "bug"}
+      """
+    And the tagging mail_thread "Feed broke" links to the project "POD"
+    And I call the MCP tool "tag_mail_threads" with:
+      """
+      {"ids": [7], "tag": "bug"}
+      """
+    Then the tagged mail_thread "Feed broke" holds "bug in BLOG, bug in POD"
+
   Rule: A post linked to a project
 
     Background:

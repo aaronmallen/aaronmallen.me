@@ -106,7 +106,7 @@ Feature: Admin linked project tags
         | decision[note] |         |
       Then the tagged decision "Pick a host" holds "hosting in BLOG, hosting in POD"
 
-    Scenario: Saving a name only some linked projects hold uses only those projects
+    Scenario: Saving a name one linked project holds uses its tag and makes the name in the other
       Given the tagging decision "Pick a host" links to the project "POD"
       And the tagging tags:
         | name | scope       |
@@ -114,7 +114,7 @@ Feature: Admin linked project tags
       When I save the decision editor for "Pick a host" with:
         | decision[tags] | bug |
         | decision[note] |     |
-      Then the tagged decision "Pick a host" holds "bug in POD"
+      Then the tagged decision "Pick a host" holds "bug in BLOG, bug in POD"
 
     Scenario: The tag menu adds a project tag and takes it off
       When I tag the decision "Pick a host" with "bug"

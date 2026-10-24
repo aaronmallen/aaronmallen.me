@@ -47,6 +47,47 @@ RSpec.describe "API linked project tags", type: :request do
     expect(held(:mail_thread_tags, :mail_thread_id, thread.id)).to eq([["bug", "project", blog.id]])
   end
 
+  describe "a record tagged before its second project link" do
+    let(:pod) { create(:project, name: "pod", key: "POD") }
+
+    def link_both(kind, id)
+      link(kind, id)
+      yield
+      Links::Slice["operations.link_records"].call(kind, id, { other_kind: "project", other_id: pod.id }).value!
+      yield
+    end
+
+    def projects(join, owner_key, id) = held(join, owner_key, id).map(&:last)
+
+    it "copies a decision's tags into the new project" do
+      decision = create(:decision)
+      link_both("decision", decision.id) { call_api(:post, "/decisions/#{decision.id}/tags", { tags: %w[bug] }) }
+
+      expect(projects(:decision_tags, :decision_id, decision.id)).to contain_exactly(blog.id, pod.id)
+    end
+
+    it "copies a journal entry's tags into the new project" do
+      entry = create(:journal_entry)
+      link_both("journal_entry", entry.id) { call_api(:patch, "/journal_entries/#{entry.id}", { tags: %w[bug] }) }
+
+      expect(projects(:journal_entry_tags, :journal_entry_id, entry.id)).to contain_exactly(blog.id, pod.id)
+    end
+
+    it "copies a note's tags into the new project" do
+      note = create(:note)
+      link_both("note", note.id) { mcp_call("tag_note", id: note.id, tag: "bug") }
+
+      expect(projects(:note_tags, :note_id, note.id)).to contain_exactly(blog.id, pod.id)
+    end
+
+    it "copies a mail thread's tags into the new project" do
+      thread = create(:message)
+      link_both("mail_thread", thread.id) { mcp_call("tag_mail_threads", ids: [thread.id], tag: "bug") }
+
+      expect(projects(:mail_thread_tags, :mail_thread_id, thread.id)).to contain_exactly(blog.id, pod.id)
+    end
+  end
+
   describe "a post linked to a project" do
     let(:post_record) { create(:post, tags: %w[ruby]) }
 

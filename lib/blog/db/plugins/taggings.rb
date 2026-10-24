@@ -130,10 +130,7 @@ module Blog
         def linked_projects(id) = tag_scope == PRIVATE ? projects_of(id) : Blog::Constants::EMPTY_ARRAY
 
         def project_tag_ids(names, tags, projects)
-          held = tags.where(scope: PROJECT, project_id: projects).by_names(names).to_a
-          missing = names - held.map { it[:name] }
-
-          held.map { it[:id] } + projects.flat_map { tags.claim(missing, scope: PROJECT, project_id: it).values }
+          projects.flat_map { tags.claim(names, scope: PROJECT, project_id: it).values }
         end
 
         def projects_of(id)

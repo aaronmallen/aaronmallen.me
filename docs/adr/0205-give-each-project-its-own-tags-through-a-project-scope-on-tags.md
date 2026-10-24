@@ -21,6 +21,8 @@ area:
   - tags
   - tasks
 issue: "#1948"
+amended:
+  - "#1980"
 tags:
   - tags
   - scope
@@ -65,13 +67,13 @@ project's own tags. Agent sessions, memory files and artifacts gain joins to `ta
 move into its join. Every join still points at `tags` by id, so `page_by_tag`, the tag summary
 ([ADR 0116][0116]) and the MCP tag tools keep working by tag id.
 
-**A record relates to a project through its own project, or else through its record links.** A task, a session and
-a project memory file relate to their `project_id`. Every other kind relates to each project it links to, so it can
-relate to several. A record related to a project carries only that project's tags, never private ones: any tag added
-to it in the admin, the API or the MCP becomes a project tag, made in the project when missing. A record linked to
-several projects takes the name from each that holds it, and a name none of them holds is made in each. The picker
-offers the tags of every project the record relates to. Posts keep their public tags beside any project tags, in a
-field of their own, and no public page shows the project ones.
+**A record relates to a project through its own project, or else through its record links.** A task, a session and a
+project memory file relate to their `project_id`. Every other kind relates to each project it links to, so it can relate
+to several. A record related to a project carries only that project's tags, never private ones: any tag added to it in
+the admin, the API or the MCP becomes a project tag, made in the project when missing. A record linked to several
+projects takes each tag in every one: a project that already holds the name keeps its own tag, and one that lacks it
+gets the name made there (#1980). The picker offers the tags of every project the record relates to. Posts keep their
+public tags beside any project tags, in a field of their own, and no public page shows the project ones.
 
 **Tags follow the record when its project changes.** A task that moves to another project takes its tags there by
 name, and a name the new project lacks is made there with the old tag's tone and description. A task that leaves

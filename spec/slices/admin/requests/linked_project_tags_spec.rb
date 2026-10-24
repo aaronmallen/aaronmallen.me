@@ -63,12 +63,13 @@ RSpec.describe "Admin linked project tags", type: :request do
         .to eq([["hosting", "project", blog.id], ["hosting", "project", pod.id]])
     end
 
-    it "uses only the projects that hold a name when one does" do
+    it "uses a project's tag where it holds the name and makes it in the others" do
       link("decision", decision.id, pod)
       project_tag("bug", pod)
       save("bug")
 
-      expect(held(:decision_tags, :decision_id, decision.id)).to eq([["bug", "project", pod.id]])
+      expect(held(:decision_tags, :decision_id, decision.id))
+        .to eq([["bug", "project", blog.id], ["bug", "project", pod.id]])
     end
 
     it "adds a project tag from the tag menu" do

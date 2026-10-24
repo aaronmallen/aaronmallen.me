@@ -114,6 +114,30 @@ Feature: API agent tags
     When I DELETE "/links/artifact/{artifact}/project/{project1}" through the API
     Then the tags artifact_tags holds for {artifact} are "perf project {project2}"
 
+  Scenario: An artifact tagged in one project takes the tag in a project it links to later
+    When I POST "/artifacts" through the API with:
+      """
+      { "title": "Plan", "type": "plan", "body": "Steps", "agent": "claude-code", "model": "claude-opus-5-5" }
+      """
+    And I keep the answer's "id" as "artifact"
+    And I POST "/links/artifact/{artifact}" through the API with:
+      """
+      { "other_kind": "project", "other_id": {project1} }
+      """
+    And I PATCH "/artifacts/{artifact}" through the API with:
+      """
+      { "tags": ["perf"], "agent": "claude-code", "model": "claude-opus-5-5" }
+      """
+    And I POST "/links/artifact/{artifact}" through the API with:
+      """
+      { "other_kind": "project", "other_id": {project2} }
+      """
+    And I PATCH "/artifacts/{artifact}" through the API with:
+      """
+      { "tags": ["perf"], "agent": "claude-code", "model": "claude-opus-5-5" }
+      """
+    Then the tags artifact_tags holds for {artifact} are "perf project {project1}, perf project {project2}"
+
   Scenario: The project tag lists each agent record that carries it, and none to a token without agents
     When I POST "/agent_sessions" through the API with:
       """
