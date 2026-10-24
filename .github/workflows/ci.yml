@@ -98,8 +98,8 @@ jobs:
       - name: Install the Playwright browser
         run: aube --dir features exec playwright install --with-deps chromium
 
-      - name: Install xmllint
-        run: sudo apt-get install --no-install-recommends --yes libxml2-utils
+      - name: Install xmllint and the vips tools
+        run: sudo apt-get install --no-install-recommends --yes libxml2-utils libvips-tools
 
       - name: Test
         run: mise run test
