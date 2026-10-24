@@ -5,6 +5,53 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.33] - 2026-10-24
+
+### Added
+
+- Each project has tags of its own. A Tags button on the project page adds, renames, describes, colours and removes
+  them, and `list_tags`, `create_tag`, `save_tag`, `update_tag` and `remove_tag` take `scope: "project"` in the API and
+  the MCP. Project tags stay out of the global tag list and its picker.
+- A page for each project tag at `/projects/:key/tags/:name` lists every record that holds it, grouped by kind as
+  `/tags/:name` is. `read_tag` takes a `project` key to read one.
+- A record that belongs to a project takes that project's tags. Tasks and task rules use their own project, agent
+  sessions and project memory files use theirs, and decisions, notes, journal entries, mail threads, posts and
+  artifacts use the projects they link to, tagged in each of them. Posts keep their public tags beside a new project
+  tags field.
+- MCP tools `tag_session`, `untag_session`, `tag_memory_file` and `untag_memory_file`, and a tags field in the admin
+  session drawer and on memory file pages.
+- Labels on GitHub and Linear issues become project tags on the task they sync into, made in its project when missing,
+  at import and on every later sync. A label removed upstream leaves the tag in place.
+- A filter bar on the admin project board takes GitHub style terms: `label:a,b` or `l:`, `-label:a`, `no:label`,
+  `is:open`, `is:closed`, `is:doing`, `is:blocked`, `column:` or `col:`, and free text for a title or task number. It
+  suggests terms and tags as you type, counts the matches, lists the terms it ignored and keeps the query in the URL.
+  `list_tasks` takes the same query in the API and the MCP and returns the terms it ignored.
+- A published board shows its project's tags on each card and has the same filter bar. Clicking a tag adds `label:` to
+  the filter. An unpublished board's tags never reach a public page.
+
+### Changed
+
+- Every private tag on a record that belongs to a project moves into that project's tags, with a copy in each project
+  when a record belongs to several. Task rules that file into a project move their tags with them, and a private tag
+  left holding nothing is deleted.
+- Moving a task to another project carries its tags over by name, made there with the same colour and description when
+  missing. A task that leaves every project keeps them as private tags, and removing a record's last link to a project
+  drops that project's tags from it.
+- The site runs on Ruby 4.0.8.
+- `mise run test` runs a black-box suite of Gherkin features in `features/`, which drives a real server, Sidekiq,
+  Postgres and Redis for each worker. `mise run lint` gains checks for field error wording, the Sidekiq schedule, the
+  GraphQL queries, API wording, API and MCP reach, and untrusted text. `mise run deps:schemas` fetches the GraphQL
+  schemas.
+
+### Removed
+
+- The RSpec suite and its `test:ruby`, `test:browser`, `test:coverage` and `test:profile` tasks.
+
+### Fixed
+
+- On a phone, the admin wordmark's name now starts with the initials it shows, so speech input can follow it.
+- An empty public project board's scroller takes keyboard focus and shows a ring, as the admin board does.
+
 ## [26.10.32] - 2026-10-23
 
 ### Added
@@ -1654,7 +1701,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.33...HEAD
+[26.10.33]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...26.10.33
 [26.10.32]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...26.10.32
 [26.10.31]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...26.10.31
 [26.10.30]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.29...26.10.30
