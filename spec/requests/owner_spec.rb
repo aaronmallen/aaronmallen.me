@@ -15,6 +15,12 @@ RSpec.describe "The owner", type: :request do
     expect(last_response.body).to include("Ada Lovelace, home")
   end
 
+  it "names the initials a phone shows" do
+    get "/"
+
+    expect(last_response.body).to include('aria-label="A L, Ada Lovelace, home"')
+  end
+
   it "splits the name across the brand mark" do
     get "/"
 

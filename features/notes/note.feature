@@ -26,6 +26,7 @@ Feature: A note
     When I open the note "Plan"
     Then the note page heads with "Plan"
     And the notes tree is hidden
+    And the page has no axe breaches in light or dark
     When I click "Files"
     Then the notes tree shows
 

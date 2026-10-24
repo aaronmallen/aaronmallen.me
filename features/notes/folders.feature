@@ -29,6 +29,7 @@ Feature: Note folders
     Given I use a phone
     When I open the note folder "work/clients"
     Then the notes tree is hidden
+    And the page has no axe breaches in light or dark
     When I click "Files"
     Then the notes tree shows
 

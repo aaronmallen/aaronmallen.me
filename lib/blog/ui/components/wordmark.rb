@@ -12,8 +12,9 @@ module Blog
         def view_template
           href = path(:root)
           owner = settings.owner_name
+          initials = owner.split(SPLIT, 2).map { it[0] }.join(SPLIT)
 
-          a(class: "wordmark", href:, aria: { label: t(".label", owner:), current: current(href) }) do
+          a(class: "wordmark", href:, aria: { label: t(".label", owner:, initials:), current: current(href) }) do
             name(owner)
           end
         end

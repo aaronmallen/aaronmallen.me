@@ -82,7 +82,7 @@ en:
           open: "to do or in progress"
         suggestions: "Suggestions"
       wordmark:
-        label: "%{owner}, home"
+        label: "%{initials}, %{owner}, home"
     field_error:
       control: "Take out the control characters."
       invalid: "Check this field."
