@@ -23,7 +23,7 @@ Feature: API memory
       """
       { "agent": "claude-code", "model": "claude-opus-5-5" }
       """
-    And I GET "/memory_files/{file}" through the API
+    And I GET "/memory_files/{file}?history=true" through the API
     And I keep the answer's "history.0.id" as "removed"
     And I POST "/memory_files/{file}/history/{removed}/revert" through the API with:
       """
@@ -95,7 +95,7 @@ Feature: API memory
       """
       { "agent": "claude-code", "model": "claude-opus-5-5" }
       """
-    And I GET "/memory_files/{file}" through the API
+    And I GET "/memory_files/{file}?history=true" through the API
     And I keep the answer's "history.0.id" as "removed"
     And I POST "/memory_files/{file}/history/{removed}/revert" through the API with:
       """
@@ -129,7 +129,7 @@ Feature: API memory
       """
 
   Scenario: Reverting the file's creation is refused
-    When I GET "/memory_files/{file}" through the API
+    When I GET "/memory_files/{file}?history=true" through the API
     And I keep the answer's "history.1.id" as "created"
     And I POST "/memory_files/{file}/history/{created}/revert" through the API with:
       """

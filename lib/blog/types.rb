@@ -55,6 +55,7 @@ module Blog
     )
     ArtifactTypeParam = ArtifactType.optional.fallback(nil)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link", "lapsing")
+    BooleanParam = Types::Params::Bool | Types::Any
     Checkbox = Types::Bool.constructor { |value| [true, Blog::Constants::CHECKED].include?(value) }
     ClosedTaskSourceState = Types::String.enum("completed", "not_planned", "unassigned")
     ClosedTaskStatus = Types::String.enum("done", "canceled")

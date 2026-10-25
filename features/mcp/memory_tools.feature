@@ -12,10 +12,20 @@ Feature: MCP memory tools
       And the agent calls 'edit_memory_fact {"id": 1, "fact_id": 1, "text": "Run every check through mise"}'
       And the agent calls 'remove_memory_fact {"id": 1, "fact_id": 1, "agent": "codex", "model": "gpt-5"}'
 
-    Scenario: Each change shows in the file's history, newest first, with its agent and model
+    Scenario: A read leaves out the history unless it asks for it
       When I call the MCP tool "read_memory_file" with:
         """
         { "id": 1 }
+        """
+      Then the MCP answer has no "history"
+      And the MCP answer has no "partial"
+      And the MCP answer has no "next_page"
+      And the MCP tool answer at "path" is "\"hanami.md\""
+
+    Scenario: Each change shows in the file's history, newest first, with its agent and model
+      When I call the MCP tool "read_memory_file" with:
+        """
+        { "id": 1, "history": true }
         """
       Then the "op, text, was_text, agent, model" of each row at "history" in the MCP tool answer, read as text, are:
         """
@@ -31,7 +41,7 @@ Feature: MCP memory tools
       Given the agent adds 97 gotchas to "hanami"
       When I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1, "page": 1 }
+        { "id": 1, "history": true, "page": 1 }
         """
       Then the MCP tool answer at "history.length" is "100"
       And the MCP answer holds:
@@ -40,7 +50,7 @@ Feature: MCP memory tools
         """
       When I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1, "page": 2 }
+        { "id": 1, "history": true, "page": 2 }
         """
       Then the "op" of each row at "history" in the MCP tool answer, read as text, are:
         """
@@ -376,7 +386,7 @@ Feature: MCP memory tools
       And I revert the latest change to "hanami"
       And I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "facts.0" matches:
         """
@@ -394,7 +404,7 @@ Feature: MCP memory tools
       And the agent calls 'revert_memory_event {"id": 1, "event_id": {edit}}'
       And I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "facts.0" matches:
         """
@@ -435,7 +445,7 @@ Feature: MCP memory tools
       When the agent calls 'describe_memory_file {"id": 1, "description": "When to run which specs"}'
       And I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "description" is marked "When to run which specs"
       And the MCP tool answer at "history.0", read as text, matches:
@@ -453,7 +463,7 @@ Feature: MCP memory tools
       When the agent calls 'describe_memory_file {"id": 1, "description": "How we test"}'
       And I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the "op" of each row at "history" in the MCP tool answer, read as text, are:
         """
@@ -478,7 +488,7 @@ Feature: MCP memory tools
       And the agent calls 'revert_memory_event {"id": 1, "event_id": {describe}}'
       And I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "description" is marked "How we test"
       And the MCP tool answer at "history.0", read as text, matches:
@@ -514,7 +524,7 @@ Feature: MCP memory tools
         """
       When I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "history.0" matches:
         """

@@ -276,7 +276,10 @@ Then("the keys of each row at {string} in the MCP tool answer are {string}", ({ 
 When(
   "I keep the id of the newest {word} entry in the history of the memory file {int} as {string}",
   async ({ http, request, tokens }, op: string, id: number, name: string) => {
-    const reply = await rpc(request, tokens.mcp, "tools/call", { arguments: { id }, name: "read_memory_file" });
+    const reply = await rpc(request, tokens.mcp, "tools/call", {
+      arguments: { history: true, id },
+      name: "read_memory_file",
+    });
     const read = JSON.parse(JSON.parse(await reply.text()).result.content[0].text);
     const entry = (read.history as { id: number; op: string }[]).find((row) => row.op === op);
     expect(entry, `${op} in ${JSON.stringify(read.history)}`).toBeTruthy();

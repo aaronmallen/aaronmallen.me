@@ -6,6 +6,7 @@ module API
     class Forward < Action
       PARAMS = {
         "array" => Blog::Types::ListParam,
+        "boolean" => Blog::Types::BooleanParam,
         "integer" => Blog::Types::IntegerParam,
         Helpers::Schema::TASK[:type] => Blog::Types::IntegerParam,
       }.freeze

@@ -50,7 +50,8 @@ An agent loads an index at the start of a run and reads facts when the work call
 - **Reads.** `read_memory_file` still returns one file whole. A new `search_memory` tool, an API endpoint under the
   `agents` scope ([ADR 0188][0188]), matches the text of live facts, filters by project, task and scope, and
   returns each fact with its file's ID and path. It filtered by repo until #1893, which made a repo a lookup for
-  the project. Text an agent wrote keeps its untrusted marker.
+  the project. Text an agent wrote keeps its untrusted marker. Since #1983 `read_memory_file` leaves out the
+  file's history unless the call passes `history: true`.
 - **Loads.** A session records the files the agent read, not the files the index listed. `read_memory_file` and
   `search_memory` take an optional `session_id`. A read records its file, and a search records each file it hit.
   `start_session` records none, and the admin session drawer lists only what the session read. Since #1868

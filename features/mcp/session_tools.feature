@@ -224,7 +224,7 @@ Feature: MCP session tools
         """
       When I call the MCP tool "read_memory_file" with:
         """
-        { "id": 1 }
+        { "id": 1, "history": true }
         """
       Then the MCP tool answer at "history.0.session_id" is "1"
       When I call the MCP tool "read_artifact" with:
