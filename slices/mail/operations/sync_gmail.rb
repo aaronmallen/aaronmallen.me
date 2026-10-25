@@ -9,7 +9,6 @@ module Mail
       PAGE_SIZE = 25
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
       SETTINGS_EVERY = 3600
-      USER_LABEL = "user"
 
       include Deps[
         "settings",
@@ -42,9 +41,7 @@ module Mail
         records, history_id = changes(mailbox, account.history_id)
         history = Structs::GmailHistory.new(records)
         refresh(mailbox, account.id) if stale?(account, history)
-        ids = history.thread_ids
-        labeled = history.label_only_thread_ids
-        ids.each { store(mailbox, account.id, it, labels_only: labeled.include?(it)) }
+        ids = store_all(mailbox, account, history)
         gmail_mutations.follow(account.id, history_id) unless history_id == account.history_id
         ids.size
       rescue Google::NotFound
@@ -59,8 +56,8 @@ module Mail
       def mailbox(address, client = google.loaded) = Mailbox.new(client, address)
 
       def refresh(mailbox, account_id)
-        store_labels(mailbox, account_id)
-        store_signature(mailbox, account_id)
+        gmail_mutations.store_labels(account_id, mailbox.user_labels)
+        gmail_mutations.sign(account_id, Sanitize.fragment(mailbox.signature, ParseGmailThread::SANITIZE).strip)
       end
 
       def relabeled?(mailbox, account_id, gmail_id)
@@ -97,16 +94,16 @@ module Mail
         honeybadger.notify(e, context: { mail_account_id: account_id, gmail_thread_id: gmail_id })
       end
 
-      def store_labels(mailbox, account_id)
-        labels = mailbox.get("labels").fetch("labels", []).select { it["type"] == USER_LABEL }
-
-        gmail_mutations.store_labels(account_id, labels.map { { gmail_id: it.fetch("id"), name: it.fetch("name") } })
-      end
-
-      def store_signature(mailbox, account_id)
-        signature = mailbox.get("settings/sendAs/#{mailbox.address}")["signature"].to_s
-
-        gmail_mutations.sign(account_id, Sanitize.fragment(signature, ParseGmailThread::SANITIZE).strip)
+      def store_all(mailbox, account, history)
+        labeled = history.label_only_thread_ids
+        history.thread_ids.each_with_object([]) do |id, stored|
+          store(mailbox, account.id, id, labels_only: labeled.include?(id))
+          stored << id
+        rescue Google::RateLimited
+          settled = history.settled_id(stored)
+          gmail_mutations.follow(account.id, settled) if settled
+          raise
+        end
       end
 
       def sync(mailbox)

@@ -12,7 +12,15 @@ module Mail
 
     def put(path, body) = google.put(url(path), body, account: address)
 
+    def signature = get("settings/sendAs/#{address}")["signature"].to_s
+
     def thread(gmail_id, format: "full") = get("threads/#{gmail_id}", format:)
+
+    def user_labels
+      labels = get("labels").fetch("labels", []).select { it["type"] == "user" }
+
+      labels.map { { gmail_id: it.fetch("id"), name: it.fetch("name") } }
+    end
 
     private
 

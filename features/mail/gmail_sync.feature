@@ -379,6 +379,31 @@ Feature: Gmail sync
     Then the mail account "aaron@example.com" follows the history "150"
     And the mail sync records the failure "gmail_failed" saying "Google answered 403"
 
+  Scenario: A catch-up Gmail rate limits partway keeps what it stored and a second run finishes it
+    Given the Gmail account "aaron@example.com" has synced to history "150"
+    And Gmail holds the thread "t1" with the messages:
+      | id |
+      | m1 |
+    And Gmail holds the thread "t2" with the messages:
+      | id |
+      | m2 |
+    And Gmail holds the thread "t3" with the messages:
+      | id |
+      | m3 |
+    And Gmail history moves to "250" with the threads "t1, t2, t3"
+    And Gmail rate limits GET "/users/me/threads/t2" with status 403
+    When the Gmail sync runs
+    Then the Gmail threads are "t1"
+    And the mail account "aaron@example.com" follows the history "248"
+    And the mail sync records the failure "gmail_failed" saying "Google answered 403"
+    Given Gmail holds the thread "t2" with the messages:
+      | id |
+      | m2 |
+    When the Gmail sync runs
+    Then the Gmail threads are "t1, t2, t3"
+    And the mail account "aaron@example.com" follows the history "250"
+    And the mail sync records no failure
+
   Scenario: The sync sends the admin no notice when Gmail has nothing new
     Given the Gmail account "aaron@example.com" has synced to history "100"
     And Gmail history moves to "300" with the threads ""

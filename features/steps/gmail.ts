@@ -119,7 +119,9 @@ Given(
   "Gmail history moves to {string} with the threads {string}",
   ({ answer, stub }, historyId: string, ids: string) => {
     const { threads } = mailbox(answer);
-    const records = listed(ids).map((threadId) => ({
+    const threadIds = listed(ids);
+    const records = threadIds.map((threadId, index) => ({
+      id: String(Number(historyId) - threadIds.length + 1 + index),
       messages: [{ threadId }],
       messagesAdded: (threads.get(threadId) ?? []).map(({ id, labelIds }) => ({ message: { id, labelIds, threadId } })),
     }));

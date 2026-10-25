@@ -22,6 +22,11 @@ module Mail
         thread_ids(labeled) - thread_ids(changed)
       end
 
+      def settled_id(stored)
+        done = records.take_while { (thread_ids([it]) - stored).empty? }
+        done.reverse_each.filter_map { it["id"] }.first
+      end
+
       def thread_ids(of = records) = of.flat_map { it.fetch("messages", []) }.map { it.fetch("threadId") }.uniq
 
       private
