@@ -16,6 +16,11 @@ Feature: Work sessions through the API and MCP
     Then the API answers 200
     And the API answer holds:
       """
+      {"status": "open"}
+      """
+    When I GET "/tasks/{task:Running}" through the API
+    Then the API answer holds:
+      """
       {"status": "open", "sprint_on": "{day:today}"}
       """
     And the database soon holds "true, 0" for:

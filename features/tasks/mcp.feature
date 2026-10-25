@@ -120,6 +120,31 @@ Feature: The MCP task tools
     Then the MCP call is refused
     And the database holds 2 tasks rows
 
+  Scenario: The task state tools reply with the task's id, status and what they changed
+    Given the tasks:
+      | title | status |
+      | Plain | open   |
+    When I call the MCP tool "start_task" with:
+      """
+      { "id": {task:Plain} }
+      """
+    Then the MCP answer's "" has the keys "id, label, sprint_on, status"
+    When I call the MCP tool "pause_task" with:
+      """
+      { "id": {task:Plain} }
+      """
+    Then the MCP answer's "" has the keys "id, label, status, worked_seconds"
+    When I call the MCP tool "complete_task" with:
+      """
+      { "id": {task:Plain} }
+      """
+    Then the MCP answer's "" has the keys "completed_at, id, label, status, worked_seconds"
+    When I call the MCP tool "save_task" with:
+      """
+      { "id": {task:Plain}, "title": "Renamed", "tags": ["home"] }
+      """
+    Then the MCP answer's "" has the keys "id, label, status, tags, title"
+
   Scenario Outline: <tool> refuses a task that is not there
     When I call the MCP tool "<tool>" with:
       """

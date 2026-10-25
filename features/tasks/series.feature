@@ -125,7 +125,7 @@ Feature: Recurring tasks
     Then the API calls answer:
       | call                               | body                                                        | status | holds |
       | POST /tasks                         | {"title": "Review", "recur": {"cadence": "weeks", "every": 1, "weekday": 4}} | 201 | {"recur": {"starts_on": "{day:today}"}} |
-      | PATCH /tasks/{task:Water the plants} | {"title": "Renamed"}                                       | 200    | {"recur": {"cadence": "days", "every": 3}} |
+      | PATCH /tasks/{task:Water the plants} | {"title": "Renamed"}                                       | 200    | {"title": "Renamed"} |
       | GET /tasks/{task:Renamed}            |                                                            | 200    | {"recur": {"cadence": "days", "every": 3}} |
       | GET /tasks?query=Renamed             |                                                            | 200    | {"tasks": [{"recur": {"cadence": "days", "every": 3}}]} |
       | PATCH /tasks/{task:Renamed}          | {"recur": null}                                            | 200    | {"recur": null} |

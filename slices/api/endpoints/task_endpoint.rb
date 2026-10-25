@@ -13,6 +13,8 @@ module API
         record_links: Serializers::Link::GROUPS,
       ).freeze
 
+      BRIEF = Serializers::Task::SCHEMA.fetch(:properties).slice(:id, :label, :status).freeze
+
       include Deps[
         record_link_queries: "links.repos.record_link_queries",
         task_comment_queries: "tasks.repos.task_comment_queries",
@@ -23,17 +25,25 @@ module API
 
       def answered(id, **) = task_reply(task_queries.detailed(id), **)
 
-      def placed(result, id)
+      def brief(id, shown)
+        task = task_queries.detailed(id)
+        fields = serialized(Serializers::Task, task).transform_keys(&:to_sym).slice(:id, :label, :status, *shown)
+        note = ({ note: Helpers::Untrusted.call(task.note) } if shown.include?(:note))
+
+        Success(fields.merge(note || {}))
+      end
+
+      def placed(result, id, shown = nil)
         case result
           in Failure(:past) then sprint_past
           in Failure(:invalid) then sprint_unread
-          else settled(result, id)
+          else settled(result, id, shown)
         end
       end
 
-      def settled(result, id)
+      def settled(result, id, shown = nil)
         case result
-          in Success(*) then answered(id)
+          in Success(*) then shown ? brief(id, shown) : answered(id)
           in Failure(:not_found) then missing("task", id)
           in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
           in unmatched then unhandled(unmatched, Helpers::Wording::UNSAVED)

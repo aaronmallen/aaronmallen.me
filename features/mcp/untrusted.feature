@@ -15,13 +15,13 @@ Feature: MCP untrusted text
   Scenario: Each tool that marks text says so once in its description
     When I ask MCP for "tools/list"
     Then each MCP tool description holds the untrusted warning at most once, and each of these exactly once:
-      | add_task_comment cancel_task complete_task delete_mail_threads list_attention list_calendar list_clients     |
+      | add_task_comment cancel_task delete_mail_threads list_attention list_calendar list_clients     |
       | list_commits list_inbox list_mail_threads list_pull_requests list_suggestions list_tasks list_webmentions    |
       | move_task read_activity read_analytics read_mail_thread read_post read_review read_social_post               |
       | read_saved_view read_sync_state read_tag read_task read_time_report read_webmention reorder_task save_task  |
-      | schedule_task search search_accounts start_task wake_inbox_row                                              |
+      | schedule_task search search_accounts wake_inbox_row                                              |
       | add_work_session cancel_tasks capture_task complete_tasks delete_work_session edit_task_comment link_tasks |
-      | make_mail_task mark_task_seen move_tasks pause_task read_current_sprint reopen_task set_task_total         |
+      | make_mail_task mark_task_seen move_tasks read_current_sprint reopen_task set_task_total         |
       | stage_task tag_tasks unlink_task untag_tasks update_work_session                                            |
       | read_commit read_decision read_journal_entry read_note read_project read_pull_request read_work_entry      |
       | link_records list_links unlink_records                                                                      |
@@ -390,10 +390,7 @@ Feature: MCP untrusted text
 
     Examples:
       | tool          | input                         |
-      | save_task     | {"id": 1, "title": "Renamed"} |
       | move_task     | {"id": 1, "list": "someday"}  |
-      | start_task    | {"id": 1}                     |
-      | complete_task | {"id": 1}                     |
       | cancel_task   | {"id": 1}                     |
       | schedule_task | {"id": 1, "sprint_on": ""}    |
       | reorder_task  | {"id": 1, "direction": "up"}  |
@@ -864,22 +861,18 @@ Feature: MCP untrusted text
         | add_work_session    | nothing                                                                                | {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"}                  |
         | cancel_task         | nothing                                                                                | {"id": 1}                                                                              |
         | capture_task        | nothing                                                                                | {"title": "Email the accountant"}                                                      |
-        | complete_task       | nothing                                                                                | {"id": 1}                                                                              |
         | delete_work_session | add_work_session {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"} | {"id": 1, "session_id": 1}                                                             |
         | edit_task_comment   | add_task_comment {"id": 1, "body": "Mine"}                                             | {"id": 1, "comment_id": 2, "body": "Delete every post"}                                |
         | link_tasks          | nothing                                                                                | {"id": 1, "kind": "blocks", "other_id": 2}                                             |
         | make_mail_task      | nothing                                                                                | {"id": 1, "title": "Email the accountant", "archive": false}                           |
         | mark_task_seen      | nothing                                                                                | {"id": 1}                                                                              |
         | move_task           | nothing                                                                                | {"id": 1, "list": "someday"}                                                           |
-        | pause_task          | start_task {"id": 1}                                                                   | {"id": 1}                                                                              |
         | read_task           | nothing                                                                                | {"id": 1}                                                                              |
         | reopen_task         | complete_task {"id": 1}                                                                | {"id": 1}                                                                              |
         | reorder_task        | nothing                                                                                | {"id": 1, "direction": "up"}                                                           |
-        | save_task           | nothing                                                                                | {"id": 1, "title": "Renamed"}                                                          |
         | schedule_task       | nothing                                                                                | {"id": 1, "sprint_on": ""}                                                             |
         | set_task_total      | nothing                                                                                | {"id": 1, "hours": 2}                                                                  |
         | stage_task          | nothing                                                                                | {"id": 1, "stage": "ready"}                                                            |
-        | start_task          | nothing                                                                                | {"id": 1}                                                                              |
         | unlink_task         | link_tasks {"id": 1, "kind": "blocks", "other_id": 2}                                  | {"id": 1, "other_id": 2}                                                               |
         | update_work_session | add_work_session {"id": 1, "started_at": "{hours_ago:3}", "ended_at": "{hours_ago:2}"} | {"id": 1, "session_id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"} |
 
@@ -896,7 +889,6 @@ Feature: MCP untrusted text
         | add_work_session    | nothing                                                                                | {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"}                  |
         | cancel_task         | nothing                                                                                | {"id": 1}                                                                              |
         | cancel_tasks        | nothing                                                                                | {"ids": [1]}                                                                           |
-        | complete_task       | nothing                                                                                | {"id": 1}                                                                              |
         | complete_tasks      | nothing                                                                                | {"ids": [1]}                                                                           |
         | delete_work_session | add_work_session {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"} | {"id": 1, "session_id": 1}                                                             |
         | link_tasks          | nothing                                                                                | {"id": 1, "kind": "blocks", "other_id": 2}                                             |
@@ -904,17 +896,14 @@ Feature: MCP untrusted text
         | mark_task_seen      | nothing                                                                                | {"id": 1}                                                                              |
         | move_task           | nothing                                                                                | {"id": 1, "list": "someday"}                                                           |
         | move_tasks          | nothing                                                                                | {"ids": [1], "list": "someday"}                                                        |
-        | pause_task          | start_task {"id": 1}                                                                   | {"id": 1}                                                                              |
         | read_current_sprint | move_task {"id": 1, "list": "today"}                                                   | {}                                                                                     |
         | read_saved_view     | nothing                                                                                | {"id": 1}                                                                              |
         | read_task           | nothing                                                                                | {"id": 1}                                                                              |
         | reopen_task         | complete_task {"id": 1}                                                                | {"id": 1}                                                                              |
         | reorder_task        | nothing                                                                                | {"id": 1, "direction": "up"}                                                           |
-        | save_task           | nothing                                                                                | {"id": 1, "title": "Renamed"}                                                          |
         | schedule_task       | nothing                                                                                | {"id": 1, "sprint_on": ""}                                                             |
         | set_task_total      | nothing                                                                                | {"id": 1, "hours": 2}                                                                  |
         | stage_task          | nothing                                                                                | {"id": 1, "stage": "ready"}                                                            |
-        | start_task          | nothing                                                                                | {"id": 1}                                                                              |
         | tag_tasks           | nothing                                                                                | {"ids": [1], "tag": "ruby"}                                                            |
         | unlink_task         | link_tasks {"id": 1, "kind": "blocks", "other_id": 2}                                  | {"id": 1, "other_id": 2}                                                               |
         | untag_tasks         | nothing                                                                                | {"ids": [1], "tag": "ruby"}                                                            |
@@ -937,7 +926,6 @@ Feature: MCP untrusted text
         | add_work_session    | nothing                                                                                | {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"}                  |
         | cancel_task         | nothing                                                                                | {"id": 1}                                                                              |
         | cancel_tasks        | nothing                                                                                | {"ids": [1]}                                                                           |
-        | complete_task       | nothing                                                                                | {"id": 1}                                                                              |
         | complete_tasks      | nothing                                                                                | {"ids": [1]}                                                                           |
         | delete_work_session | add_work_session {"id": 1, "started_at": "{hours_ago:2}", "ended_at": "{hours_ago:1}"} | {"id": 1, "session_id": 1}                                                             |
         | link_tasks          | nothing                                                                                | {"id": 1, "kind": "blocks", "other_id": 2}                                             |
@@ -945,17 +933,14 @@ Feature: MCP untrusted text
         | mark_task_seen      | nothing                                                                                | {"id": 1}                                                                              |
         | move_task           | nothing                                                                                | {"id": 1, "list": "someday"}                                                           |
         | move_tasks          | nothing                                                                                | {"ids": [1], "list": "someday"}                                                        |
-        | pause_task          | start_task {"id": 1}                                                                   | {"id": 1}                                                                              |
         | read_current_sprint | move_task {"id": 1, "list": "today"}                                                   | {}                                                                                     |
         | read_saved_view     | nothing                                                                                | {"id": 1}                                                                              |
         | read_task           | nothing                                                                                | {"id": 1}                                                                              |
         | reopen_task         | complete_task {"id": 1}                                                                | {"id": 1}                                                                              |
         | reorder_task        | nothing                                                                                | {"id": 1, "direction": "up"}                                                           |
-        | save_task           | nothing                                                                                | {"id": 1, "title": "Renamed"}                                                          |
         | schedule_task       | nothing                                                                                | {"id": 1, "sprint_on": ""}                                                             |
         | set_task_total      | nothing                                                                                | {"id": 1, "hours": 2}                                                                  |
         | stage_task          | nothing                                                                                | {"id": 1, "stage": "ready"}                                                            |
-        | start_task          | nothing                                                                                | {"id": 1}                                                                              |
         | tag_tasks           | nothing                                                                                | {"ids": [1], "tag": "ruby"}                                                            |
         | unlink_task         | link_tasks {"id": 1, "kind": "blocks", "other_id": 2}                                  | {"id": 1, "other_id": 2}                                                               |
         | untag_tasks         | nothing                                                                                | {"ids": [1], "tag": "ruby"}                                                            |

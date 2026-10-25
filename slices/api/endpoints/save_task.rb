@@ -5,6 +5,7 @@ module API
     class SaveTask < TaskEndpoint
       RECUR = "#{Tasks::RECUR.fetch(:description)}; a new cadence replaces the old one and keeps a paused series " \
               "paused; null stops it".freeze
+      SHOWN = %i[contributors list note recur sprint_on tags title].freeze
       SHOWS_TASKS = true
 
       SCHEMA = {
@@ -26,6 +27,11 @@ module API
         required: ["id"],
       }.freeze
 
+      REPLY = Helpers::Schema.object(
+        BRIEF,
+        optional: Serializers::Task::SCHEMA.fetch(:properties).slice(*SHOWN).merge(note: Helpers::Schema::STRING),
+      ).freeze
+
       include Deps[save_task: "tasks.operations.save_task"]
 
       def handle(id:, **fields)
@@ -35,7 +41,7 @@ module API
         case save_task.call(id, form(task, fields))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
           in Failure(:imported) then invalid(recur: [Tasks::IMPORTED])
-          in result then placed(result, id)
+          in result then placed(result, id, shown(fields))
         end
       end
 
@@ -52,6 +58,8 @@ module API
           **({ recur: Tasks.recur(fields[:recur]) } if fields.key?(:recur)),
         }
       end
+
+      def shown(fields) = SHOWN & [*fields.keys, *(:sprint_on if fields.key?(:list))]
     end
   end
 end

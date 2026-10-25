@@ -67,7 +67,8 @@ Feature: Writing tasks through the API
       | Pulled | today + 2 |
     Then the API calls answer:
       | call                      | body                                                     | status | holds |
-      | PATCH /tasks/{task:Draft}  | {"title": "Final"}                                      | 200    | {"title": "Final", "note": "the plan", "tags": ["admin"]} |
+      | PATCH /tasks/{task:Draft}  | {"title": "Final"}                                      | 200    | {"id": 1, "status": "open", "title": "Final"} |
+      | GET /tasks/{task:Final}    |                                                         | 200    | {"title": "Final", "note": "the plan", "tags": ["admin"]} |
       | PATCH /tasks/{task:Final}  | {"tags": ["site", "ruby"]}                              | 200    | {"tags": ["ruby", "site"]} |
       | PATCH /tasks/{task:Final}  | {"list": "someday"}                                     | 200    | {"list": "someday"} |
       | PATCH /tasks/{task:Final}  | {"sprint_on": "{day:today + 2}"}                        | 200    | {"sprint_on": "{day:today + 2}"} |
@@ -102,7 +103,8 @@ Feature: Writing tasks through the API
       | GET /tasks/{task:Draft}    |      | 200    | {"contributors": [{"kind": "owner"}]} |
       | PATCH /tasks/{task:Draft}  | {"contributors": [{"kind": "agent", "agent": "claude-code", "model": "claude-opus-5-5"}]} | 200 | {"contributors": [{"kind": "agent", "agent": "claude-code", "model": "claude-opus-5-5"}]} |
       | GET /tasks/{task:Draft}    |      | 200    | {"contributors": [{"kind": "agent", "agent": "claude-code", "model": "claude-opus-5-5"}]} |
-      | PATCH /tasks/{task:Draft}  | {"title": "Final"}                                     | 200 | {"contributors": [{"kind": "agent"}]} |
+      | PATCH /tasks/{task:Draft}  | {"title": "Final"}                                     | 200 | {"title": "Final"} |
+      | GET /tasks/{task:Final}    |      | 200    | {"contributors": [{"kind": "agent"}]} |
       | PATCH /tasks/{task:Final}  | {"contributors": [{"kind": "agent", "agent": "claude-code"}]} | 422 | "contributors" |
       | PATCH /tasks/{task:Final}  | {"contributors": [{"kind": "owner", "model": "claude-opus-5-5"}]} | 422 | |
       | PATCH /tasks/{task:Final}  | {"contributors": [{"kind": "agent", "agent": "Claude Code", "model": "claude-opus-5-5"}]} | 422 | |
