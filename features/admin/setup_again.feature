@@ -33,6 +33,7 @@ Feature: Admin scripts after new markup
 
   Scenario: The palette opens from its new trigger and moves one row per arrow
     When I click the element ".top-bar-search"
+    And the admin markup lacks "[data-palette-list][aria-busy]"
     And I press "ArrowDown" in "[data-palette-query]"
     Then the palette picks its second shown row
 
