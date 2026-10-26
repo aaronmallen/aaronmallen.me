@@ -5,6 +5,20 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.34] - 2026-10-25
+
+### Changed
+
+- `read_memory_file` leaves out a file's change history unless you pass `history: true`, in the API and the MCP. The
+  API takes it as `?history=true`. `revert_memory_event` needs an entry ID from that history.
+- `start_task`, `pause_task`, `complete_task` and `save_task` reply with the task's ID, label and status and the fields
+  the call changed, not the whole task. `read_task` gives the full record.
+
+### Fixed
+
+- A Gmail sync that Google rate limits partway through keeps the threads it stored and moves past them. Before, the
+  account fetched the same threads on every run and failed each time.
+
 ## [26.10.33] - 2026-10-24
 
 ### Added
@@ -1701,7 +1715,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.33...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.34...HEAD
+[26.10.34]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.33...26.10.34
 [26.10.33]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...26.10.33
 [26.10.32]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...26.10.32
 [26.10.31]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.30...26.10.31
