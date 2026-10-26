@@ -5,7 +5,7 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
-## [26.10.34] - 2026-10-25
+## [26.10.34] - 2026-10-26
 
 ### Changed
 
