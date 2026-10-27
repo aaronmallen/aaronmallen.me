@@ -9,6 +9,7 @@ module Markdown
     BREAK_NODES = %i[linebreak softbreak].freeze
     CAPTION = '<div class="cf"><span class="cf-n"><i aria-hidden="true">' \
               "#{Blog::UI::Components::Icon::SVGS.fetch('regular/file-code')}</i>%s</span>%s</div>".freeze
+    CODE = %r{(?<=<code>).*(?=</code>)}m
     FIGURE = '<figure class="fig">\\1 /><figcaption>\\2</figcaption></figure>'
     H2 = %r{<h2 id="([^"]*)">(.*?)</h2>}m
     HIGHLIGHTED_BLOCK = %r{<pre class="syntax-highlighting">.*?</pre>}m
@@ -18,11 +19,15 @@ module Markdown
       code emph escaped_tag image link spoiler_text strikethrough strong subscript superscript text underline
     ].freeze
     LAZY_IMAGE = '<img loading="lazy" decoding="async" '
+    LINE = '<span class="hl-ln">'
+    LINE_END = "</span>"
     LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
     MEDIA_IMAGE = /<img (?=[^>]*src="[^"]*#{Blog::Constants::MEDIA_REFERENCE}")/
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/
+    TOKEN = /<[^>]*>|[^<]+/
+    TRAILING_LINE = /\n<span class="hl-ln">(?:<[^>]*>)*\z/
     SIZED_IMAGE = '<img width="%d" height="%d" '
     SIZES = "(min-width: 44em) 44em, 100vw"
     SRCSET_IMAGE = '<img width="%d" height="%d" srcset="%s" sizes="%s" '
@@ -77,7 +82,7 @@ module Markdown
     def caption_code(html)
       names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
       html.gsub(HIGHLIGHTED_BLOCK) do |block|
-        block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
+        block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }.sub(CODE) { number_lines(it) }
         name = names.shift
         name ? format(CAPTION, CGI.escapeHTML(name), block) : block
       end
@@ -92,6 +97,18 @@ module Markdown
     def lazy_load(html)
       count = 0
       html.gsub(IMAGE) { (count += 1) > 1 ? LAZY_IMAGE : IMAGE }
+    end
+
+    def number_lines(code)
+      open = []
+      lines = code.scan(TOKEN).map do |token|
+        if token == LINE_END then open.pop
+        elsif token.start_with?("<") then open << token
+        else next token.gsub("\n") { "#{LINE_END * (open.size + 1)}\n#{LINE}#{open.join}" }
+        end
+        token
+      end
+      "#{LINE}#{lines.join}#{LINE_END}".sub(TRAILING_LINE, Blog::Constants::EMPTY_STRING)
     end
 
     def plain_text

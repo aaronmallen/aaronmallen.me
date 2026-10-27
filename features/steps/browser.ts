@@ -131,6 +131,29 @@ Then("the code block draws {int} lines", async ({ page }, count: number) => {
   expect(lines).toBe(count);
 });
 
+Then("the code block numbers {int} lines", async ({ page }, count: number) => {
+  const numbers = await page
+    .locator("pre.syntax-highlighting code")
+    .first()
+    .evaluate((code) =>
+      [...code.querySelectorAll(":scope > .hl-ln")].map((line) => getComputedStyle(line, "::before").content),
+    );
+  expect(numbers).toEqual(Array(count).fill("counter(hl-ln)"));
+});
+
+When("I copy the code block", async ({ page }) => {
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page
+    .locator("pre.syntax-highlighting code")
+    .first()
+    .evaluate((code) => getSelection()?.selectAllChildren(code));
+  await page.keyboard.press("ControlOrMeta+c");
+});
+
+Then("the clipboard holds:", async ({ page }, text: string) => {
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(text);
+});
+
 Then("nothing inside the code block has a border", async ({ page }) => {
   const bordered = await page.evaluate(
     () =>

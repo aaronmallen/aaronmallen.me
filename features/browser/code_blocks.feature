@@ -1,6 +1,6 @@
 Feature: Code blocks
-  A fenced block renders highlighted, one line per source line, with no border inside, in the site's colors. A
-  fence that names its file gets a caption with a file icon.
+  A fenced block renders highlighted, one numbered line per source line, with no border inside, in the site's
+  colors. A fence that names its file gets a caption with a file icon.
 
   Scenario Outline: A code block on the public post page renders highlighted in <scheme> mode
     Given the posts:
@@ -10,6 +10,7 @@ Feature: Code blocks
     When I visit "/writing/hello"
     Then every highlighter class starts with hl-
     And the code block draws 6 lines
+    And the code block numbers 6 lines
     And nothing inside the code block has a border
     And the colors of these code parts are:
       | part                           | color     |
@@ -23,6 +24,20 @@ Feature: Code blocks
       | scheme | keyword | string  | class   | function | comment |
       | light  | #e14775 | #cc7a0a | #269d69 | #1c8ca8  | #918c8e |
       | dark   | #fc618d | #fce566 | #7bd88f | #5ad4e6  | #69676c |
+
+  Scenario: Copying a code block leaves out its line numbers
+    Given the posts:
+      | title | body                                                          |
+      | Hello | ```ruby\nclass Create < Base\n\n  NAME = "create"\nend\n``` |
+    When I visit "/writing/hello"
+    And I copy the code block
+    Then the clipboard holds:
+      """
+      class Create < Base
+
+        NAME = "create"
+      end
+      """
 
   Scenario: A fence that names its file gets a caption on the public post page
     Given the posts:
@@ -53,6 +68,7 @@ Feature: Code blocks
     Then the page has ".preview pre.syntax-highlighting"
     And every highlighter class starts with hl-
     And the code block draws 6 lines
+    And the code block numbers 6 lines
     And nothing inside the code block has a border
     And the colors of these code parts are:
       | part                           | color     |

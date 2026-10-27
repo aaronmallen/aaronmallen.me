@@ -9955,6 +9955,16 @@
   .syntax-highlighting .hl-string { color: var(--color-mk-sand-text); }
   .syntax-highlighting :is(.hl-entity.hl-name.hl-function, .hl-support.hl-function) { color: var(--color-mk-blue-text); }
   .syntax-highlighting :is(.hl-comment, .hl-comment *) { color: var(--color-mk-comment); }
+  .syntax-highlighting code { counter-reset: hl-ln; }
+  .syntax-highlighting .hl-ln::before {
+    counter-increment: hl-ln;
+    content: counter(hl-ln);
+    display: inline-block;
+    min-width: 2ch;
+    margin-right: 1.25rem;
+    color: var(--color-ink-muted);
+    text-align: right;
+  }
 }
 
 @layer components {
