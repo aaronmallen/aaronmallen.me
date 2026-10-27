@@ -5,6 +5,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.36] - 2026-10-27
+
 ### Added
 
 - A `mermaid` code fence draws a diagram in artifacts, decisions, comments, notes and task notes, in the admin and on
@@ -1736,7 +1738,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.35...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.36...HEAD
+[26.10.36]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.35...26.10.36
 [26.10.35]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.34...26.10.35
 [26.10.34]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.33...26.10.34
 [26.10.33]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...26.10.33
