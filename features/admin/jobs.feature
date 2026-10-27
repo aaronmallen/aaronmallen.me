@@ -84,7 +84,7 @@ Feature: Admin jobs tab
       | dead      | unknown |
     And the jobs tab reads "jobs !"
     And the cron entry "sync_gmail" says "next run unknown"
-    And the cron filter reads "all 31, failed 0, paused"
+    And the cron filter reads "all 32, failed 0, paused"
     When I visit "/admin/settings/jobs?cron=paused"
     Then the cron schedule says "Redis isn't answering, so what is paused is unknown."
     When I visit "/admin/settings/security"
@@ -165,7 +165,7 @@ Feature: Admin jobs tab
       | job                           | schedule_key     | outcome | duration | query_count | query_time |
       | Backups::Jobs::BackUpDatabase | back_up_database | failed  | 1500     | 0           | 0          |
     When I visit "/admin/settings/jobs"
-    Then the cron filter reads "all 31, failed 1, paused 1"
+    Then the cron filter reads "all 32, failed 1, paused 1"
     When I visit "/admin/settings/jobs?cron=failed"
     Then the cron entries are only "back_up_database"
     When I visit "/admin/settings/jobs?cron=paused"

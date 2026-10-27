@@ -82,6 +82,10 @@ production:
       description: "every 4 hours"
       cron: "0 */4 * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::RefreshSocialEngagement
+    rerender_journal_entries:
+      description: "daily at 03:45"
+      cron: "45 3 * * * <%= Blog::TimeZone::NAME %>"
+      class: Record::Jobs::RerenderJournalEntries
     rerender_posts:
       description: "daily at 03:30"
       cron: "30 3 * * * <%= Blog::TimeZone::NAME %>"

@@ -83,6 +83,7 @@ honeybadger:
     refresh_country_database: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_COUNTRY_DATABASE"].to_json %>
     refresh_projects: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_PROJECTS"].to_json %>
     refresh_social_engagement: <%= ENV["HONEYBADGER_CHECK_IN_REFRESH_SOCIAL_ENGAGEMENT"].to_json %>
+    rerender_journal_entries: <%= ENV["HONEYBADGER_CHECK_IN_RERENDER_JOURNAL_ENTRIES"].to_json %>
     rerender_posts: <%= ENV["HONEYBADGER_CHECK_IN_RERENDER_POSTS"].to_json %>
     roll_over_sprint: <%= ENV["HONEYBADGER_CHECK_IN_ROLL_OVER_SPRINT"].to_json %>
     roll_up_analytics: <%= ENV["HONEYBADGER_CHECK_IN_ROLL_UP_ANALYTICS"].to_json %>

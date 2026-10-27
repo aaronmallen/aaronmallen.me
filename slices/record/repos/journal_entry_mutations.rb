@@ -20,6 +20,15 @@ module Record
       stamped_commands :create, :update
       tagged_by :journal_entry_tags
       commands delete: :by_pk
+
+      def rerender
+        journal_entries.select(:id, :body, :body_html).to_a.count do |row|
+          fresh = ::Markdown.to_html(row.body)
+          next false if fresh == row.body_html
+
+          journal_entries.by_pk(row.id).where(body: row.body).update(body_html: fresh).positive?
+        end
+      end
     end
   end
 end
