@@ -5,6 +5,22 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.35] - 2026-10-27
+
+### Added
+
+- A `mermaid` code fence draws a diagram on post and journal pages and in the admin preview, and redraws it when the
+  site switches between light and dark mode. Pages with no diagram load no mermaid code. Feeds show the diagram's
+  source as a code block.
+- A daily job at 03:45 rebuilds the stored HTML of every journal entry, as one at 03:30 does for posts, so entries
+  written before a change to the markdown pick it up with no edit.
+
+### Changed
+
+- Code blocks on posts, journal entries and the admin preview number each line. Copying a block leaves the numbers
+  out.
+- Code blocks lose their orange left border and keep the grey box.
+
 ## [26.10.34] - 2026-10-26
 
 ### Changed
@@ -1715,7 +1731,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.34...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.35...HEAD
+[26.10.35]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.34...26.10.35
 [26.10.34]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.33...26.10.34
 [26.10.33]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.32...26.10.33
 [26.10.32]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.31...26.10.32
