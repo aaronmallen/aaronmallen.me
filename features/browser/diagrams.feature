@@ -70,3 +70,11 @@ Feature: Diagrams
     And the diagram draws in the light theme
     Given I see the page in dark mode
     Then the diagram draws in the dark theme
+
+  Scenario: A mermaid fence in an artifact draws a diagram
+    Given I am signed in to the admin
+    And the agent writes the notes "Schema" with the body "```mermaid\ngraph TD\n  A-->B\n```"
+    And I see the page in light mode
+    When I visit "/admin/agents/artifacts/{artifact}"
+    Then the diagram draws in the light theme
+    And the page has 2 of "pre.mermaid svg .node"

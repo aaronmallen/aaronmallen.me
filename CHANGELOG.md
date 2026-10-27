@@ -5,6 +5,11 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+### Added
+
+- A `mermaid` code fence draws a diagram in artifacts, decisions, comments, notes and task notes, in the admin and on
+  public task pages. Before, these showed the diagram's source.
+
 ## [26.10.35] - 2026-10-27
 
 ### Added

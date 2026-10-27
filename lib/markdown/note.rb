@@ -15,6 +15,7 @@ module Markdown
     INPUT = "input"
     OPTIONS = { extension: { header_ids: nil, tagfilter: false }, render: { hardbreaks: false, unsafe: true } }.freeze
     ITEM_TEXT = "node()[not(self::ul or self::ol)]"
+    MERMAID = "pre[lang='mermaid']"
     PLUGINS = { syntax_highlighter: nil }.freeze
     RELAXED = Sanitize::Config::RELAXED
 
@@ -54,7 +55,8 @@ module Markdown
         fragment = Nokogiri::HTML5.fragment(html)
         boxes = fragment.css(BOX)
         images = RemoteImages.find(fragment, origin:)
-        return html if boxes.empty? && images.empty?
+        diagrams = draw(fragment.css(MERMAID))
+        return html if boxes.empty? && images.empty? && diagrams.empty?
 
         label(boxes)
         RemoteImages.swap(images)
@@ -62,6 +64,15 @@ module Markdown
       end
 
       private
+
+      def draw(diagrams)
+        diagrams.each do |pre|
+          source = pre.text
+          pre.delete("lang")
+          pre["class"] = "mermaid"
+          pre.content = source
+        end
+      end
 
       def item_text(box) = box.parent.xpath(ITEM_TEXT).map(&:text).join.split.join(" ")
 
