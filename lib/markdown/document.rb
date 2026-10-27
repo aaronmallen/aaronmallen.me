@@ -23,6 +23,7 @@ module Markdown
     LINE_END = "</span>"
     LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
     MEDIA_IMAGE = /<img (?=[^>]*src="[^"]*#{Blog::Constants::MEDIA_REFERENCE}")/
+    MERMAID = '<pre class="mermaid">%s</pre>'
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/
@@ -80,12 +81,16 @@ module Markdown
     private
 
     def caption_code(html)
-      names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
-      html.gsub(HIGHLIGHTED_BLOCK) do |block|
-        block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }.sub(CODE) { number_lines(it) }
-        name = names.shift
-        name ? format(CAPTION, CGI.escapeHTML(name), block) : block
-      end
+      nodes = @root.walk.select { it.type == :code_block }
+      html.gsub(HIGHLIGHTED_BLOCK) { code_block(nodes.shift, it) }
+    end
+
+    def code_block(node, block)
+      language, name = node.fence_info.split(" ", 2)
+      return format(MERMAID, CGI.escapeHTML(node.string_content)) if language == "mermaid"
+
+      block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }.sub(CODE) { number_lines(it) }
+      name ? format(CAPTION, CGI.escapeHTML(name), block) : block
     end
 
     def inline_text(node)

@@ -80,6 +80,13 @@ Feature: Feeds
     When I request "/writing.atom"
     Then the XML answer's "/feed/entry/content" include "<h2 id=\"the-setup\">The Setup</h2>\n"
 
+  Scenario: An entry's body shows a mermaid fence as its source text
+    Given the posts:
+      | title   | body                              |
+      | Charted | ```mermaid\ngraph TD\n  A-->B\n``` |
+    When I request "/writing.atom"
+    Then the XML answer's "/feed/entry/content" is "<pre class=\"mermaid\">graph TD\n  A--&gt;B\n</pre>\n"
+
   Scenario: An entry carries the summary the post has, and leaves it out when the body has no paragraph
     Given the posts:
       | title   | summary          | body              | published     |

@@ -492,3 +492,47 @@ When("I fill the field {string} with:", async ({ page }, selector: string, text:
 Then("the window's {string} is not set", async ({ page }, name: string) => {
   expect(await page.evaluate((key) => key in window, name)).toBe(false);
 });
+
+const DIAGRAM_FILLS: Record<string, string> = { dark: "rgb(31, 32, 32)", light: "rgb(236, 236, 255)" };
+
+Then("the diagram draws in the {word} theme", async ({ page }, theme: string) => {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const node = document.querySelector("pre.mermaid svg .node rect");
+        return node && getComputedStyle(node).fill;
+      }),
+    )
+    .toBe(DIAGRAM_FILLS[theme]);
+});
+
+Then("the page loads no mermaid code", async ({ page }) => {
+  await page.waitForLoadState("load");
+  const loaded = await page.evaluate(() => performance.getEntriesByType("resource").map(({ name }) => name));
+  expect(loaded.length).toBeGreaterThan(0);
+  expect(loaded.filter((name) => name.includes("mermaid"))).toEqual([]);
+});
+
+Then(
+  "a browser that keeps to the content security policy draws the diagram on {string} from the site alone",
+  async ({ app, browser }, path: string) => {
+    const context = await browser.newContext({ baseURL: app.url, bypassCSP: false });
+    try {
+      const page = await context.newPage();
+      const origins = new Set<string>();
+      const errors: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().startsWith("http")) origins.add(new URL(request.url()).origin);
+      });
+      page.on("console", (message) => {
+        if (message.type() === "error") errors.push(message.text());
+      });
+      await page.goto(path);
+      await expect(page.locator("pre.mermaid svg .node").first()).toBeAttached();
+      expect(errors).toEqual([]);
+      expect([...origins]).toEqual([new URL(app.url).origin]);
+    } finally {
+      await context.close();
+    }
+  },
+);

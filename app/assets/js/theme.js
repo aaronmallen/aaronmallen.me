@@ -2,7 +2,7 @@ const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
 const root = document.documentElement;
 const systemDark = matchMedia("(prefers-color-scheme: dark)");
-const currentTheme = () => root.dataset.siteTheme ?? (systemDark.matches ? "dark" : "light");
+export const currentTheme = () => root.dataset.siteTheme ?? (systemDark.matches ? "dark" : "light");
 
 function saveTheme(theme) {
   root.dataset.siteTheme = theme;

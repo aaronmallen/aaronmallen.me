@@ -1,4 +1,5 @@
 import "../../css/admin.css";
+import { setupDiagrams } from "../diagrams.js";
 import { setupTaskFilters } from "../task_filter.js";
 import { bootAutosubmit, setupAutosubmit } from "./autosubmit.js";
 import { bootBoardDrag } from "./board_drag.js";
@@ -53,6 +54,7 @@ const SETUPS = [
   setupCommentAdds,
   setupCommitImports,
   setupConfirms,
+  setupDiagrams,
   setupDialogs,
   setupEditNotes,
   setupFileDrops,

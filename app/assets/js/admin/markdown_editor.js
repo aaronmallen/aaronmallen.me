@@ -1,3 +1,4 @@
+import { setupDiagrams } from "../diagrams.js";
 import { setupFetch } from "./fetching.js";
 import { fresh } from "./fresh.js";
 import { formToken, uploadPhoto } from "./photo_upload.js";
@@ -31,6 +32,7 @@ function setupMarkdownEditor(editor) {
     request: () => ({ url: preview.dataset.editorPreview, method: "POST", body: payload(), redirect: "manual" }),
     done: (html) => {
       preview.innerHTML = html;
+      setupDiagrams(preview);
       stale = false;
     },
   });

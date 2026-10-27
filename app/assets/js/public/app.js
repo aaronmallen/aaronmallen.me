@@ -1,4 +1,5 @@
 import "../../css/public.css";
+import { setupDiagrams } from "../diagrams.js";
 import { setupTaskFilters } from "../task_filter.js";
 import { setupBeacon } from "./beacon.js";
 import { setupBoardView } from "./board_view.js";
@@ -12,6 +13,7 @@ setupBeacon();
 setupBoardView();
 setupClock();
 setupContactErrors();
+setupDiagrams();
 setupMessageCount();
 setupSearchKey();
 setupTaskFilters();

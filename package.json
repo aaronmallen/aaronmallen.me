@@ -6,7 +6,8 @@
     "@fortawesome/fontawesome-free": "^7.3.1",
     "esbuild": "^0.28.2",
     "hanami-assets": "^3.0.0",
-    "idiomorph": "^0.8.0"
+    "idiomorph": "^0.8.0",
+    "mermaid": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
